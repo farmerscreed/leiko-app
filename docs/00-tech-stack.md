@@ -34,7 +34,7 @@ Canonical version pins and service locks. Sourced from D7 §2 (final lock) and D
 | Concern | Locked choice |
 | --- | --- |
 | Platform | Supabase self-hosted on Hetzner (Frankfurt primary, Helsinki replica) |
-| Database | PostgreSQL 15 |
+| Database | PostgreSQL 17 (see ADR-0003) |
 | Auth | Supabase Auth (GoTrue) — email magic-link + Apple + Google. PKCE on mobile. |
 | Realtime | Supabase Realtime |
 | File storage | Supabase Storage (S3-compatible on Hetzner volume) |

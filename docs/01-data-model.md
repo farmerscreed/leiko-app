@@ -256,7 +256,7 @@ create table public.invitations (
   invitee_email   text,
   invitee_phone   text,
   pairing_code    text unique,                       -- 6-digit code for parent_pairing
-  url_token       text not null unique default encode(gen_random_bytes(24),'base64url'),
+  url_token       text not null unique default encode(gen_random_bytes(24),'base64'),  -- PG encode() doesn't accept 'base64url'; URL-safety enforced at the Edge Function that generates invite links
   expires_at      timestamptz not null,
   accepted_at     timestamptz,
   accepted_by     uuid references public.users(id),
@@ -296,7 +296,7 @@ create index ai_messages_conversation_idx on public.ai_messages (conversation_id
 ### audit_log
 ```sql
 create table public.audit_log (
-  id              bigserial primary key,
+  id              bigint generated always as identity,
   occurred_at     timestamptz not null default now(),
   actor_user_id   uuid references public.users(id),
   family_id       uuid references public.families(id),
@@ -305,9 +305,12 @@ create table public.audit_log (
   target_id       uuid,
   metadata        jsonb not null default '{}',
   ip_inet         inet,
-  user_agent      text
+  user_agent      text,
+  primary key (id, occurred_at)                     -- partition column must be in the PK
 ) partition by range (occurred_at);
--- monthly partitions; rolled by a cron Edge Function
+-- Sprint 0 ships with a single default partition (`audit_log_default`).
+-- Sprint 17's partition-rolling cron Edge Function creates explicit monthly
+-- partitions and drops expired ones past the 7-year retention window.
 create index audit_actor_idx  on public.audit_log (actor_user_id, occurred_at desc);
 create index audit_family_idx on public.audit_log (family_id, occurred_at desc);
 ```
@@ -388,11 +391,14 @@ create policy "service inserts" on public.readings
   for insert with check (auth.role() = 'service_role');
 create policy "members soft-hide" on public.readings
   for update using (public.is_family_member(family_id))
-  with check (
-    (old.systolic, old.diastolic, old.pulse, old.measured_at)
-      = (new.systolic, new.diastolic, new.pulse, new.measured_at)
-    and new.hidden_by_user_id = auth.uid()
-  );
+  with check (hidden_by_user_id = auth.uid());
+
+-- Physiological-value immutability (systolic/diastolic/pulse/measured_at,
+-- plus device_id/family_id/source) is enforced by a BEFORE UPDATE trigger
+-- (`readings_immutable_columns_trigger`) rather than the WITH CHECK clause,
+-- because PostgreSQL does not expose OLD/NEW inside CREATE POLICY. See
+-- supabase/migrations/0001_initial.sql.
+
 -- HARD DELETE FORBIDDEN for watch readings
 create policy "manual delete only" on public.readings
   for delete using (public.is_family_member(family_id) and source = 'manual');
