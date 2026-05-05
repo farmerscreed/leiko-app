@@ -1,0 +1,101 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+.yarn/
+
+# Build output
+dist/
+build/
+.next/
+out/
+
+# Expo
+.expo/
+.expo-shared/
+web-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# React Native — iOS
+apps/mobile/ios/Pods/
+apps/mobile/ios/build/
+apps/mobile/ios/DerivedData/
+apps/mobile/ios/*.xcworkspace/xcuserdata/
+apps/mobile/ios/*.xcodeproj/xcuserdata/
+apps/mobile/ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# React Native — Android
+apps/mobile/android/.gradle/
+apps/mobile/android/build/
+apps/mobile/android/app/build/
+apps/mobile/android/.idea/
+apps/mobile/android/local.properties
+apps/mobile/android/captures/
+
+# Metro
+.metro-health-check*
+metro-cache/
+
+# Native debug
+*.hprof
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+
+# Test
+coverage/
+*.lcov
+.nyc_output/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.shared.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Claude Code (per-session state)
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Detox / E2E
+artifacts/
+
+# EAS
+.easignore
+
+# Lock files we keep
+# (package-lock.json IS committed per D10 §2.3 step 7)
+
+# Source specs (originals; canonical extracts live in docs/_reference/)
+_specs/
+
+# Misc
+*.tgz
+.eslintcache

@@ -1,0 +1,506 @@
+# 01 — Data Model
+
+Canonical from D7 §3. Every Supabase table, RLS policy, soft-delete rule. Schemas are the source of truth — when this file diverges from `supabase/migrations/`, the migration is the bug. The full DDL is reproduced in `supabase/migrations/0001_initial.sql`.
+
+---
+
+## Entity map
+
+```
+auth.users (Supabase managed)
+        │ one-to-one
+        ▼
+public.users  ─────────────┐
+   │                       │ created_by
+   │  belongs to (M:N)     ▼
+   ├──► public.family_members  ──── role  ───────┐
+   │       │                                     │
+   │       └──► public.families ◄── parent ──────┘
+   │              │
+   │              ├──► public.devices ──► public.readings ──► public.reading_notes
+   │              │                                       └──► public.reading_comments
+   │              ├──► public.subscriptions
+   │              └──► public.invitations
+   │
+   ├──► public.ai_conversations ──► public.ai_messages
+   └──► public.audit_log
+```
+
+---
+
+## Tables
+
+### users
+Public-schema profile mirroring `auth.users`. Created on first sign-in via a Postgres trigger.
+
+```sql
+create table public.users (
+  id              uuid primary key references auth.users(id) on delete cascade,
+  email           text,
+  display_name    text not null,
+  photo_url       text,
+  preferred_language text not null default 'en',
+  timezone        text not null,                       -- IANA, e.g. 'America/New_York'
+  year_of_birth   smallint check (year_of_birth between 1900 and 2100),
+  account_type    text not null check (account_type in ('caregiver','parent','self_buyer')),
+  marketing_opt_in boolean not null default false,
+  deleted_at      timestamptz,                          -- soft delete; 30-day grace
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+create index users_email_idx  on public.users (lower(email)) where deleted_at is null;
+create index users_active_idx on public.users (id) where deleted_at is null;
+```
+
+**`account_type` is IMMUTABLE after onboarding** (D8a §1.3 + §14.1). There is no migration path between `caregiver` / `parent` / `self_buyer`. If a user wants to switch, they start a new account (support intervention required to delete the old one). The fork screen (Sprint 2) is the single moment this gets set.
+
+### Hybrid mode (D8a §1.3)
+A self-buyer who later invites family caregivers does **NOT** become `account_type = 'caregiver'`. They remain `account_type = 'self_buyer'`. The change is at the family level: the family record gains additional `family_members` rows with `role = 'caregiver'`. The self-buyer's own UI continues to show "Your readings"; the invited caregivers see a Family Circle with one member (the self-buyer-now-watched). Each user sees the metaphor that fits their role.
+
+Engineering implication: **the runtime selects the screen tree by the viewer's `account_type`**, not by family composition. Two parallel React Navigation root stacks — caregiver per D8, self-buyer per D8a — selected by the logged-in user's `account_type`.
+
+### families
+A family circle — one wearer (`parent_owner`) and 0..N caregivers. The `created_by` user becomes the `family_owner`.
+
+```sql
+create table public.families (
+  id                  uuid primary key default gen_random_uuid(),
+  parent_user_id      uuid references public.users(id) on delete restrict,
+  parent_display_name text not null,                  -- 'Mom', 'Mama Linda', 'Dad'
+  parent_relationship text not null,                  -- 'mother','father','aunt','other:godmother'
+  parent_year_of_birth smallint,
+  parent_residence    text,                           -- 'Lagos, Nigeria'
+  subscription_status text not null default 'free'
+    check (subscription_status in ('free','plus','plus_trial','plus_grace','past_due')),
+  subscription_renewal_date timestamptz,
+  created_by          uuid not null references public.users(id) on delete restrict,
+  created_at          timestamptz not null default now(),
+  updated_at          timestamptz not null default now()
+);
+create index families_created_by_idx  on public.families (created_by);
+create index families_parent_user_idx on public.families (parent_user_id);
+```
+
+### family_members
+Membership table. Joins users to families with a role.
+
+For a **self-buyer** family, a single row exists where the user is BOTH `family_owner` AND `parent_owner` (D8a §4 data-model implication). RLS resolves at the membership level, not the user level, so this is supported without new policies. In hybrid mode, additional `caregiver` rows are added to that family.
+
+```sql
+create type public.family_role as enum ('family_owner','caregiver','parent_owner','parent_viewer');
+
+create table public.family_members (
+  family_id     uuid not null references public.families(id) on delete cascade,
+  user_id       uuid not null references public.users(id) on delete cascade,
+  role          public.family_role not null,
+  invited_by    uuid references public.users(id) on delete set null,
+  joined_at     timestamptz not null default now(),
+  removed_at    timestamptz,                          -- soft removal
+  removed_reason text,
+  primary key (family_id, user_id)
+);
+create index family_members_user_idx on public.family_members (user_id) where removed_at is null;
+
+-- exactly one family_owner per family
+create unique index family_members_one_owner
+  on public.family_members (family_id) where role = 'family_owner' and removed_at is null;
+
+-- exactly one parent_owner per family
+create unique index family_members_one_parent_owner
+  on public.family_members (family_id) where role = 'parent_owner' and removed_at is null;
+```
+
+### devices
+```sql
+create table public.devices (
+  id                  uuid primary key default gen_random_uuid(),
+  family_id           uuid not null references public.families(id) on delete restrict,
+  serial_number       text not null unique,           -- last-4-of-MAC visible to user
+  mac_address         text not null,
+  model               text not null check (model in ('U16H','U19M')),
+  firmware_version    text,
+  paired_at           timestamptz not null default now(),
+  paired_by_user_id   uuid not null references public.users(id),
+  unpaired_at         timestamptz,                    -- soft unbind
+  last_sync_at        timestamptz,
+  last_battery_pct    smallint check (last_battery_pct between 0 and 100),
+  created_at          timestamptz not null default now()
+);
+create index devices_family_idx on public.devices (family_id) where unpaired_at is null;
+create unique index devices_active_mac on public.devices (mac_address) where unpaired_at is null;
+```
+
+### readings
+Core data table. **NEVER hard-deleted** for `source = 'watch'`. Soft delete via `hidden` + `hidden_reason`.
+
+```sql
+create type public.reading_source as enum ('watch','manual','clinic','pharmacy','other');
+create type public.quality_score  as enum ('good','fair','suspect');
+create type public.hidden_reason  as enum (
+  'cuff_slipped','measured_someone_else','duplicate_reading',
+  'parent_request','caregiver_correction','other'
+);
+
+create table public.readings (
+  id                  uuid primary key default gen_random_uuid(),
+  family_id           uuid not null references public.families(id) on delete restrict,
+  device_id           uuid references public.devices(id) on delete set null,
+  source              public.reading_source not null default 'watch',
+  measured_at         timestamptz not null,           -- parent local time, stored UTC
+  measured_at_local   text,                           -- ISO with offset, for display
+  systolic            smallint not null check (systolic between 30 and 300),
+  diastolic           smallint not null check (diastolic between 20 and 200),
+  pulse               smallint check (pulse between 30 and 240),
+  quality_score       public.quality_score,
+  quality_flags       jsonb not null default '{}',     -- raw bits from BLE 0x14
+  motion_detected     boolean,
+  hidden              boolean not null default false,
+  hidden_reason       public.hidden_reason,
+  hidden_by_user_id   uuid references public.users(id),
+  hidden_at           timestamptz,
+  created_at          timestamptz not null default now()
+);
+
+-- one row per (device, measured_at) pair; defends against BLE retries
+create unique index readings_dedupe on public.readings (device_id, measured_at)
+  where device_id is not null;
+create index readings_family_time on public.readings (family_id, measured_at desc);
+create index readings_visible      on public.readings (family_id, measured_at desc) where hidden = false;
+-- baseline-eligibility for the anomaly engine
+create index readings_for_baseline on public.readings (family_id, measured_at)
+  where hidden = false and source = 'watch' and quality_score in ('good','fair');
+```
+
+### reading_notes / reading_comments
+
+**Self-buyer / hybrid-mode privacy boundary** (D8a §7.3 + §10.4): `reading_notes` carries a `visibility` field so the self-buyer can keep "My notes" private even after inviting caregivers. RLS enforces:
+- `visibility = 'private'` rows: SELECT only by `author_id = auth.uid()`.
+- `visibility = 'family'` rows: SELECT by any family_member.
+
+In caregiver mode, all notes are `visibility = 'family'` by default.
+
+```sql
+create type public.note_visibility as enum ('private','family');
+
+create table public.reading_notes (
+  id            uuid primary key default gen_random_uuid(),
+  reading_id    uuid not null references public.readings(id) on delete cascade,
+  family_id     uuid not null references public.families(id) on delete cascade,
+  author_id     uuid not null references public.users(id) on delete restrict,
+  body          text not null check (length(body) <= 500),
+  visibility    public.note_visibility not null default 'family',
+  created_at    timestamptz not null default now()
+);
+
+create table public.reading_comments (
+  id            uuid primary key default gen_random_uuid(),
+  reading_id    uuid not null references public.readings(id) on delete cascade,
+  family_id     uuid not null references public.families(id) on delete cascade,
+  author_id     uuid not null references public.users(id) on delete restrict,
+  body          text not null check (length(body) <= 280),
+  emoji         text check (length(emoji) <= 8),
+  created_at    timestamptz not null default now()
+);
+```
+
+### vitals_other (HR, SpO2, sleep, steps)
+```sql
+create type public.vital_type as enum ('hr','spo2','sleep_session','steps_day','calories_day');
+
+create table public.vitals_other (
+  id            uuid primary key default gen_random_uuid(),
+  family_id     uuid not null references public.families(id) on delete restrict,
+  device_id     uuid references public.devices(id),
+  vital_type    public.vital_type not null,
+  measured_at   timestamptz not null,
+  value_int     integer,                             -- HR bpm; steps; calories
+  value_int_2   integer,                             -- SpO2 max for sample window
+  value_int_3   integer,                             -- SpO2 min, sleep deep min, etc.
+  value_jsonb   jsonb,                               -- sleep stages, transitions
+  hidden        boolean not null default false,
+  hidden_reason text,
+  created_at    timestamptz not null default now()
+);
+create unique index vitals_dedupe on public.vitals_other (device_id, vital_type, measured_at) where device_id is not null;
+create index vitals_family_time   on public.vitals_other (family_id, vital_type, measured_at desc);
+```
+
+### subscriptions (denormalised RevenueCat state)
+```sql
+create table public.subscriptions (
+  user_id              uuid primary key references public.users(id) on delete cascade,
+  rc_app_user_id       text not null,
+  product_id           text,                         -- com.lawonecloud.kena.plus.monthly
+  entitlement          text not null default 'plus',
+  status               text not null check (status in ('active','trialing','grace','past_due','cancelled','expired')),
+  trial_ends_at        timestamptz,
+  current_period_end   timestamptz,
+  cancelled_at         timestamptz,
+  last_event_at        timestamptz not null default now(),
+  raw_event            jsonb
+);
+```
+
+### invitations
+**Family invites use email + 6-digit code, never URL tokens** (D8a §10 — already in CLAUDE.md). The `url_token` column exists for the parent-pairing handshake, not for caregiver invites.
+
+```sql
+create type public.invitation_kind as enum ('caregiver','parent_pairing');
+
+create table public.invitations (
+  id              uuid primary key default gen_random_uuid(),
+  family_id       uuid not null references public.families(id) on delete cascade,
+  invited_by      uuid not null references public.users(id),
+  kind            public.invitation_kind not null,
+  invitee_label   text,
+  invitee_email   text,
+  invitee_phone   text,
+  pairing_code    text unique,                       -- 6-digit code for parent_pairing
+  url_token       text not null unique default encode(gen_random_bytes(24),'base64url'),
+  expires_at      timestamptz not null,
+  accepted_at     timestamptz,
+  accepted_by     uuid references public.users(id),
+  cancelled_at    timestamptz,
+  created_at      timestamptz not null default now()
+);
+create index invitations_family_active
+  on public.invitations (family_id) where accepted_at is null and cancelled_at is null;
+```
+
+### ai_conversations / ai_messages
+```sql
+create table public.ai_conversations (
+  id              uuid primary key default gen_random_uuid(),
+  user_id         uuid not null references public.users(id) on delete cascade,
+  family_id       uuid not null references public.families(id) on delete cascade,
+  context         text not null check (context in ('home','reading_detail','weekly_summary','onboarding')),
+  created_at      timestamptz not null default now()
+);
+
+create table public.ai_messages (
+  id              uuid primary key default gen_random_uuid(),
+  conversation_id uuid not null references public.ai_conversations(id) on delete cascade,
+  role            text not null check (role in ('system','user','assistant')),
+  body            text not null,
+  tier            text check (tier in ('A','B','C')),
+  model           text,                              -- 'claude-haiku-4-5-20251001'
+  prompt_tokens   int,
+  completion_tokens int,
+  flagged         boolean not null default false,    -- forbidden-claims classifier hit
+  user_thumb      smallint check (user_thumb in (-1,0,1)),
+  created_at      timestamptz not null default now()
+);
+create index ai_messages_conversation_idx on public.ai_messages (conversation_id, created_at);
+```
+
+### audit_log
+```sql
+create table public.audit_log (
+  id              bigserial primary key,
+  occurred_at     timestamptz not null default now(),
+  actor_user_id   uuid references public.users(id),
+  family_id       uuid references public.families(id),
+  action          text not null,                    -- e.g. 'reading.read', 'family.role_change'
+  target_type     text,
+  target_id       uuid,
+  metadata        jsonb not null default '{}',
+  ip_inet         inet,
+  user_agent      text
+) partition by range (occurred_at);
+-- monthly partitions; rolled by a cron Edge Function
+create index audit_actor_idx  on public.audit_log (actor_user_id, occurred_at desc);
+create index audit_family_idx on public.audit_log (family_id, occurred_at desc);
+```
+
+### push_tokens
+```sql
+create table public.push_tokens (
+  user_id         uuid not null references public.users(id) on delete cascade,
+  device_id       text not null,
+  expo_token      text not null,
+  apns_token      text,
+  fcm_token       text,
+  platform        text not null check (platform in ('ios','android','web')),
+  app_version     text,
+  os_version      text,
+  last_seen_at    timestamptz not null default now(),
+  primary key (user_id, device_id)
+);
+```
+
+### shopify_orders
+```sql
+create table public.shopify_orders (
+  id                  bigserial primary key,
+  user_id             uuid references public.users(id),
+  family_id           uuid references public.families(id),
+  shopify_order_id    bigint not null unique,
+  order_number        text,
+  fulfilment_status   text,
+  carrier             text,
+  tracking_number     text,
+  tracking_url        text,
+  ship_date           timestamptz,
+  estimated_delivery  date,
+  delivered_at        timestamptz,
+  raw_event           jsonb,
+  updated_at          timestamptz not null default now()
+);
+create index shopify_orders_user_idx on public.shopify_orders (user_id);
+```
+
+---
+
+## Row-Level Security
+
+All tables have RLS enabled. The `/sync`, `/check-alerts`, `/generate-doctor-report`, `/revenuecat-webhook`, and `/shopify-webhook` Edge Functions run with the `service_role` key and bypass RLS by design — every other path goes through user-context RLS.
+
+### Helpers
+```sql
+create or replace function public.is_family_member(_family_id uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.family_members
+    where family_id = _family_id
+      and user_id = auth.uid()
+      and removed_at is null
+  );
+$$;
+
+create or replace function public.is_family_owner(_family_id uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.family_members
+    where family_id = _family_id
+      and user_id = auth.uid()
+      and role = 'family_owner'
+      and removed_at is null
+  );
+$$;
+```
+
+### Reading policies
+```sql
+alter table public.readings enable row level security;
+create policy "members read" on public.readings
+  for select using (public.is_family_member(family_id));
+create policy "service inserts" on public.readings
+  for insert with check (auth.role() = 'service_role');
+create policy "members soft-hide" on public.readings
+  for update using (public.is_family_member(family_id))
+  with check (
+    (old.systolic, old.diastolic, old.pulse, old.measured_at)
+      = (new.systolic, new.diastolic, new.pulse, new.measured_at)
+    and new.hidden_by_user_id = auth.uid()
+  );
+-- HARD DELETE FORBIDDEN for watch readings
+create policy "manual delete only" on public.readings
+  for delete using (public.is_family_member(family_id) and source = 'manual');
+```
+
+### Family / membership policies
+```sql
+alter table public.families enable row level security;
+create policy "members read family"  on public.families for select using (public.is_family_member(id));
+create policy "owner update family"   on public.families for update using (public.is_family_owner(id));
+-- inserts via /create-family Edge Function (service_role)
+
+alter table public.family_members enable row level security;
+create policy "members see members"   on public.family_members for select using (public.is_family_member(family_id));
+create policy "owner edits members"   on public.family_members for update using (public.is_family_owner(family_id));
+create policy "self-leave"            on public.family_members
+  for update using (user_id = auth.uid()) with check (removed_at is not null);
+```
+
+### Reading-related child tables
+`reading_comments`, `vitals_other` follow the family-scoped pattern: members read, members write own, author edits own.
+
+`reading_notes` adds the visibility filter (D8a §7.3):
+```sql
+alter table public.reading_notes enable row level security;
+
+create policy "members read family notes" on public.reading_notes
+  for select using (
+    public.is_family_member(family_id) and visibility = 'family'
+  );
+
+create policy "author reads own private notes" on public.reading_notes
+  for select using (
+    author_id = auth.uid() and visibility = 'private'
+  );
+
+create policy "members write own notes" on public.reading_notes
+  for insert with check (
+    public.is_family_member(family_id) and author_id = auth.uid()
+  );
+
+create policy "author edits own notes" on public.reading_notes
+  for update using (author_id = auth.uid());
+```
+
+### Audit log
+```sql
+alter table public.audit_log enable row level security;
+create policy "owner reads family audit" on public.audit_log
+  for select using (family_id is not null and public.is_family_owner(family_id));
+create policy "self reads own audit"     on public.audit_log
+  for select using (actor_user_id = auth.uid());
+create policy "service inserts audit"    on public.audit_log
+  for insert with check (auth.role() = 'service_role');
+```
+
+---
+
+## Soft-delete strategy (canonical)
+
+| Entity | Soft-delete column(s) | Hard delete? | Retention |
+| --- | --- | --- | --- |
+| users (account) | `deleted_at` | After 30-day grace | 30 days grace, then anonymised; 7 years for required audit trail |
+| readings (watch) | `hidden`, `hidden_reason`, `hidden_at` | **Never** (forbidden by RLS) | Until family_owner deletes account |
+| readings (manual) | `hidden` / direct delete | Allowed (own author) | Same |
+| family_members | `removed_at`, `removed_reason` | Never | Persisted for audit even after removal |
+| devices | `unpaired_at` | Never | Persisted; same row may re-pair after factory reset |
+| invitations | `cancelled_at` | Allowed after 90 days expiry | 90 days then purged by `/retention` cron |
+| ai_messages | n/a (immutable) | Bulk delete on user request | 90 days unless user opts longer |
+| audit_log | n/a | Partitions dropped after 7 years | 90 days hot, 7 years archive |
+
+---
+
+## Local storage on device
+
+Two local layers, mirroring the rules in CLAUDE.md ("offline-first: every reading is saved to MMKV before any sync attempt").
+
+### MMKV (encrypted KV)
+Used for:
+- Auth tokens (Supabase access + refresh, both via platform Keychain/Keystore)
+- User preferences (theme override, large-text mode, locale, quiet-hours config)
+- Pending readings buffer (raw BLE payloads not yet synced — flushed on connection regain)
+- Feature flags / rollout state
+- **Never**: full reading history (use WatermelonDB for queryable data)
+
+Per CLAUDE.md: **no `localStorage` or `sessionStorage`** — MMKV only.
+
+### WatermelonDB (encrypted relational)
+Used for:
+- Last 30 days of readings (queryable for trends, anomaly look-back)
+- Family circle membership snapshot
+- Latest device pairing state
+- Sync conflict markers
+
+Schema mirrors a subset of the Supabase tables. Sync is best-effort, conflict resolution is documented in D7 §9.3 (server wins for reading values; client wins for local-only fields like UI state).
+
+### Sync strategy
+1. Reading captured on device → write to MMKV pending buffer **synchronously** before any UI confirmation.
+2. Best-effort POST to `/sync` Edge Function. On success: insert into WatermelonDB, drop from MMKV pending buffer.
+3. On failure: keep in MMKV pending buffer; retry on next connectivity event (background fetch, app foreground, BLE reconnect).
+4. Reads come from WatermelonDB first, then optionally refresh from `/sync` GET in the background (TanStack Query).
+
+The app must function with no network. If `/sync` has been failing for >24h, show a calm reassurance banner ("Your readings are saved. They'll sync when you're back online.") — never a fear-language alert.
+
+---
+
+## Open data-model questions tracked
+- Q1 (vitals_other partitioning by metric_type) — defer until table > 50M rows
+- Q3 (audit_log archive cron implementation) — Sprint 17 work
+
+See `plans/backlog.md`.

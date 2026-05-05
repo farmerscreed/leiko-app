@@ -1,0 +1,28 @@
+{
+  "name": "kena-app",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Kena — caregiver-mode blood pressure monitoring app. Monorepo root.",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "lint": "npm run lint --workspace=apps/mobile",
+    "typecheck": "npm run typecheck --workspace=apps/mobile",
+    "test": "npm run test --workspace=apps/mobile",
+    "format": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
+  },
+  "engines": {
+    "node": ">=22.0.0 <23.0.0",
+    "npm": ">=10.0.0"
+  },
+  "devDependencies": {
+    "prettier": "3.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/farmerscreed/kena-app.git"
+  },
+  "license": "UNLICENSED"
+}
