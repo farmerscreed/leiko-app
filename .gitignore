@@ -84,8 +84,9 @@ yarn-error.log*
 Thumbs.db
 desktop.ini
 
-# Detox / E2E
+# Maestro / E2E (see ADR pending: docs/13-testing-standard.md)
 artifacts/
+.maestro/
 
 # EAS
 .easignore

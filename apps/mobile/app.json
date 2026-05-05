@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "Kena",
+    "slug": "kena",
+    "version": "0.0.0",
+    "scheme": "kena",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "com.kena.app",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.kena.app"
+    }
+  }
+}
