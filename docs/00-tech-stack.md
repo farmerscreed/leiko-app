@@ -12,7 +12,7 @@ Canonical version pins and service locks. Sourced from D7 §2 (final lock) and D
 | --- | --- | --- |
 | Framework | React Native + Expo bare workflow (EAS Development Build) | Expo SDK 52 |
 | Language | TypeScript strict | 5.5.x |
-| Node runtime | Node.js LTS | **22.x** (Node 20 hit EOL 2026-04-30; 22 is current Active LTS) |
+| Node runtime | Node.js LTS | **24.x** (Node 22 entered Maintenance Oct 2025; 24 is current Active LTS — see ADR-0001) |
 | Package manager | npm | 10.x |
 | BLE | react-native-ble-plx | 3.x |
 | State (client) | Zustand | 4.x |

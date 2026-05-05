@@ -52,8 +52,8 @@ Things deferred from sprints, plus the open technical questions from D7 §14. Tr
 
 ## Discrepancies to reconcile
 
-### CLAUDE.md vs D7 §12.2 — E2E tool
-CLAUDE.md (founder-drafted) says **"Detox for E2E (Sprint 17 only)"**. D7 §12.2 LOCKS Maestro and rejects Detox. `docs/13-testing-standard.md` follows D7 (Maestro). CLAUDE.md should be updated unless the founder wants to override D7. Raised in Session 0a; awaiting decision.
+### ~~CLAUDE.md vs D7 §12.2 — E2E tool~~ — RESOLVED 2026-05-05
+Reconciled to **Maestro** in Session 0b. CLAUDE.md updated; tech-stack lock and `docs/13-testing-standard.md` already aligned. Decision: D7 §12.2 wins (canonical pin), Maestro is lighter for an app this size, Sprint 17 is the only consumer.
 
 ### `_specs/` folder fate
 The original spec markdowns in `_specs/` are now duplicated in `docs/_reference/`. `_specs/` is currently in the repo as untracked. Decision needed: delete it, `.gitignore` it, or keep both. Default proposal: `.gitignore _specs/` so the founder retains the originals locally without shipping them to Git history.

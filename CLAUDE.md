@@ -42,7 +42,7 @@ mode). All three live in one codebase, switched by an immutable
 - AI: LiteLLM proxy, Haiku 4.5 for most queries, Sonnet 4.6 for complex
 - Payments: RevenueCat (iOS + Android in-app purchases)
 - Analytics: PostHog (privacy-respecting, self-hosted option for HIPAA later)
-- Test: Jest + React Native Testing Library; Detox for E2E (Sprint 17 only)
+- Test: Jest + React Native Testing Library; Maestro for E2E (Sprint 17 only)
 - CI: GitHub Actions
  
 Versions are pinned in docs/00-tech-stack.md. If a version doesn't match,
