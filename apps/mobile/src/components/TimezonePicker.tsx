@@ -1,71 +1,117 @@
-// Reusable timezone picker for onboarding flows. Sprint 4 (extracted from
-// the caregiver FamilyParent screen so the self-buyer You screen can
-// reuse it).
+// Reusable timezone picker for onboarding flows. Sprint 4 (extracted
+// from caregiver FamilyParent) → enhanced post-Sprint-4 with full IANA
+// coverage + search.
 //
-// Sprint scope: a curated short-list covering Nigeria + US + common
-// diaspora destinations. Sprint 17 (or earlier if needed) replaces this
-// with a full searchable IANA list. The auto-detected device zone is
-// the default; tapping the field opens a BottomSheet with the curated
-// list. The custom zone passed in is shown as the current selection
-// even if it's not in the curated list (renders the raw IANA string).
+// Sections in the bottom sheet:
+//   1. Search box (always visible)
+//   2. "Your device" — the auto-detected zone, pinned at the very top
+//      so users in non-curated regions land on it immediately. Hidden
+//      when the device zone matches a curated entry (it would already
+//      appear in section 3).
+//   3. "Common" — the hand-curated short-list (Lagos, NYC, etc.).
+//      Hidden when search is active, since search filters across
+//      everything.
+//   4. "All locations" — the full IANA list, alphabetised. Filtered
+//      by search.
+//
+// The catalogue + label formatting come from src/utils/timezones.ts so
+// this component stays presentation-only.
 
-import { useState } from 'react';
-import { Pressable, ScrollView, Text } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { BottomSheet } from './BottomSheet';
 import { ListRow } from './ListRow';
 import { useTheme } from '../theme';
+import {
+  filterZones,
+  formatZoneLabel,
+  getCuratedZones,
+  getZoneOptions,
+} from '../utils/timezones';
 
-export interface ZoneOption {
-  iana: string;
-  label: string;
-}
-
-export const COMMON_ZONES: ZoneOption[] = [
-  { iana: 'Africa/Lagos', label: 'Lagos, Nigeria' },
-  { iana: 'Africa/Accra', label: 'Accra, Ghana' },
-  { iana: 'Europe/London', label: 'London, UK' },
-  { iana: 'America/New_York', label: 'New York, USA' },
-  { iana: 'America/Chicago', label: 'Chicago, USA' },
-  { iana: 'America/Denver', label: 'Denver, USA' },
-  { iana: 'America/Los_Angeles', label: 'Los Angeles, USA' },
-  { iana: 'America/Phoenix', label: 'Phoenix, USA' },
-  { iana: 'America/Anchorage', label: 'Anchorage, USA' },
-  { iana: 'Pacific/Honolulu', label: 'Honolulu, USA' },
-];
-
-export function labelForZone(iana: string): string {
-  return COMMON_ZONES.find((z) => z.iana === iana)?.label ?? iana;
-}
+// Re-exports kept so existing imports in other files (and tests) can
+// still pull these from the picker module if they want.
+export { formatZoneLabel as labelForZone };
+export { getCuratedZones as COMMON_ZONES };
 
 interface TimezonePickerProps {
   value: string;                            // current IANA zone
   onChange: (iana: string) => void;
   /**
-   * The accessibility role / wording for the trigger field. Defaults to
-   * "Their timezone" (caregiver framing). Self-buyer screens override
-   * to "Your timezone."
+   * Auto-detected device zone. Pinned at the top of the sheet when
+   * it isn't already in the curated list. If omitted, the picker
+   * falls back to Intl.DateTimeFormat().resolvedOptions().timeZone.
+   */
+  deviceZone?: string;
+  /**
+   * Accessibility prefix on the trigger field. "Their timezone" for
+   * caregivers, "Your timezone" for self-buyers.
    */
   fieldA11yPrefix?: string;
   sheetTitle?: string;
   testID?: string;
 }
 
+function detectDeviceZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+}
+
 export function TimezonePicker({
   value,
   onChange,
+  deviceZone: deviceZoneProp,
   fieldA11yPrefix = 'Their timezone',
   sheetTitle = 'Choose timezone',
   testID,
 }: TimezonePickerProps) {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
   const body = theme.type('bodyL');
+  const label = theme.type('label');
+
+  const allOptions = useMemo(() => getZoneOptions(), []);
+  const curated = useMemo(() => getCuratedZones(), []);
+  const deviceZone = deviceZoneProp ?? detectDeviceZone();
+  const deviceZoneIsCurated = useMemo(
+    () => curated.some((z) => z.iana === deviceZone),
+    [curated, deviceZone],
+  );
+
+  // When there's no search query, the "All locations" section shows
+  // only non-curated zones (curated already appear in the Common
+  // section above; rendering them twice creates duplicate testIDs and
+  // wastes screen space). When a search query is active, we filter
+  // across everything so the user can find any zone whether it's
+  // curated or not.
+  const filtered = useMemo(() => {
+    const trimmed = search.trim();
+    if (trimmed.length === 0) {
+      return allOptions.filter((z) => !z.curated);
+    }
+    return filterZones(allOptions, trimmed);
+  }, [allOptions, search]);
+
+  const handlePick = (iana: string) => {
+    onChange(iana);
+    setOpen(false);
+    setSearch('');
+  };
+
+  const handleDismiss = () => {
+    setOpen(false);
+    setSearch('');
+  };
 
   return (
     <>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`${fieldA11yPrefix}: ${labelForZone(value)}. Tap to change.`}
+        accessibilityLabel={`${fieldA11yPrefix}: ${formatZoneLabel(value)}. Tap to change.`}
         onPress={() => setOpen(true)}
         testID={testID}
         style={({ pressed }) => [
@@ -91,7 +137,7 @@ export function TimezonePicker({
             fontFamily: body.family,
           }}
         >
-          {labelForZone(value)}
+          {formatZoneLabel(value)}
         </Text>
         <Text
           style={{
@@ -106,29 +152,141 @@ export function TimezonePicker({
 
       <BottomSheet
         visible={open}
-        onDismiss={() => setOpen(false)}
+        onDismiss={handleDismiss}
         size="tall"
         title={sheetTitle}
         testID={testID ? `${testID}-sheet` : undefined}
       >
+        <View style={{ marginBottom: theme.spacing.s }}>
+          <TextInput
+            value={search}
+            onChangeText={setSearch}
+            placeholder="Search city or country"
+            placeholderTextColor={theme.colors.text.secondary}
+            autoCapitalize="none"
+            autoCorrect={false}
+            testID={testID ? `${testID}-search` : undefined}
+            accessibilityLabel="Search for a timezone"
+            style={{
+              backgroundColor: theme.colors.surface.subtle,
+              borderRadius: theme.radii.m,
+              paddingHorizontal: theme.spacing.l,
+              paddingVertical: theme.spacing.s,
+              fontSize: body.size,
+              fontFamily: body.family,
+              color: theme.colors.text.primary,
+              borderWidth: 1,
+              borderColor: theme.colors.border.default,
+              minHeight: theme.minTapTarget,
+            }}
+          />
+        </View>
+
         <ScrollView keyboardShouldPersistTaps="handled">
-          {COMMON_ZONES.map((z) => (
-            <ListRow
-              key={z.iana}
-              variant="select"
-              title={z.label}
-              subtitle={z.iana}
-              selected={z.iana === value}
-              onPress={() => {
-                onChange(z.iana);
-                setOpen(false);
+          {/* Device zone — pinned at top when it's NOT in the curated list. */}
+          {!deviceZoneIsCurated && search.trim().length === 0 ? (
+            <>
+              <SectionHeader theme={theme} labelStyle={label}>
+                Your device
+              </SectionHeader>
+              <ListRow
+                variant="select"
+                title={formatZoneLabel(deviceZone)}
+                subtitle={deviceZone}
+                selected={deviceZone === value}
+                onPress={() => handlePick(deviceZone)}
+                accessibilityLabel={`${formatZoneLabel(deviceZone)}, your device timezone`}
+                testID={testID ? `${testID}-device` : undefined}
+              />
+            </>
+          ) : null}
+
+          {/* Common shortlist — only when no search query. */}
+          {search.trim().length === 0 ? (
+            <>
+              <SectionHeader theme={theme} labelStyle={label}>
+                Common
+              </SectionHeader>
+              {curated.map((z) => (
+                <ListRow
+                  key={z.iana}
+                  variant="select"
+                  title={z.label}
+                  subtitle={z.iana}
+                  selected={z.iana === value}
+                  onPress={() => handlePick(z.iana)}
+                  accessibilityLabel={`${z.label}${z.iana === value ? ', current selection' : ''}`}
+                  testID={testID ? `${testID}-${z.iana}` : undefined}
+                />
+              ))}
+            </>
+          ) : null}
+
+          {/* Full list (all zones), filtered by search. */}
+          <SectionHeader theme={theme} labelStyle={label}>
+            {search.trim().length > 0 ? 'Results' : 'All locations'}
+          </SectionHeader>
+          {filtered.length === 0 ? (
+            <Text
+              style={{
+                color: theme.colors.text.secondary,
+                fontSize: body.size,
+                fontFamily: body.family,
+                paddingHorizontal: theme.spacing.l,
+                paddingVertical: theme.spacing.l,
               }}
-              accessibilityLabel={`${z.label}${z.iana === value ? ', current selection' : ''}`}
-              testID={testID ? `${testID}-${z.iana}` : undefined}
-            />
-          ))}
+              testID={testID ? `${testID}-empty` : undefined}
+            >
+              No matches. Try a city or country name.
+            </Text>
+          ) : (
+            filtered.map((z) => (
+              <ListRow
+                key={z.iana}
+                variant="select"
+                title={z.label}
+                subtitle={z.iana}
+                selected={z.iana === value}
+                onPress={() => handlePick(z.iana)}
+                accessibilityLabel={`${z.label}${z.iana === value ? ', current selection' : ''}`}
+                testID={testID ? `${testID}-${z.iana}` : undefined}
+              />
+            ))
+          )}
         </ScrollView>
       </BottomSheet>
     </>
   );
 }
+
+interface SectionHeaderProps {
+  theme: ReturnType<typeof useTheme>;
+  labelStyle: ReturnType<ReturnType<typeof useTheme>['type']>;
+  children: string;
+}
+
+function SectionHeader({ theme, labelStyle, children }: SectionHeaderProps) {
+  return (
+    <Text
+      style={[
+        styles.sectionHeader,
+        {
+          color: theme.colors.text.secondary,
+          fontSize: labelStyle.size,
+          fontFamily: labelStyle.family,
+          fontWeight: labelStyle.weight as '500',
+          paddingHorizontal: theme.spacing.l,
+          paddingTop: theme.spacing.l,
+          paddingBottom: theme.spacing.xs,
+        },
+      ]}
+      accessibilityRole="header"
+    >
+      {children}
+    </Text>
+  );
+}
+
+const styles = StyleSheet.create({
+  sectionHeader: { textTransform: 'uppercase', letterSpacing: 0.6 },
+});
