@@ -33,9 +33,12 @@ import { SelfBuyerYouScreen } from '../screens/Onboarding/SelfBuyer/You';
 import { SelfBuyerWatchScreen } from '../screens/Onboarding/SelfBuyer/Watch';
 import { CaregiverHomePlaceholder } from '../screens/Placeholders/CaregiverHomePlaceholder';
 import { SelfBuyerHomePlaceholder } from '../screens/Placeholders/SelfBuyerHomePlaceholder';
+import { PairingScreen } from '../screens/Pairing/PairingScreen';
+import { SettingsScreen } from '../screens/Settings/SettingsScreen';
 import { useTheme } from '../theme';
 import { useAuth } from '../state/auth';
 import { useOnboarding } from '../state/onboarding';
+import { usePairing } from '../state/pairing';
 import type {
   AuthStackParamList,
   CaregiverOnboardingStackParamList,
@@ -95,6 +98,8 @@ function CaregiverHomeNavigator() {
         name="CaregiverHomePlaceholder"
         component={CaregiverHomePlaceholder}
       />
+      <CaregiverStack.Screen name="Pairing" component={PairingScreen} />
+      <CaregiverStack.Screen name="Settings" component={SettingsScreen} />
     </CaregiverStack.Navigator>
   );
 }
@@ -126,6 +131,8 @@ function SelfBuyerHomeNavigator() {
         name="SelfBuyerHomePlaceholder"
         component={SelfBuyerHomePlaceholder}
       />
+      <SelfBuyerStack.Screen name="Pairing" component={PairingScreen} />
+      <SelfBuyerStack.Screen name="Settings" component={SettingsScreen} />
     </SelfBuyerStack.Navigator>
   );
 }
@@ -148,10 +155,12 @@ export function RootNavigator() {
   const status = useAuth((s) => s.status);
   const accountType = useAuth((s) => s.profile?.account_type);
   const hydrate = useAuth((s) => s.hydrate);
+  const hydratePairing = usePairing((s) => s.hydrate);
 
   useEffect(() => {
     void hydrate();
-  }, [hydrate]);
+    hydratePairing();
+  }, [hydrate, hydratePairing]);
 
   let content: React.ReactNode;
   if (status === 'loading') {

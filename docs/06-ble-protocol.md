@@ -8,9 +8,12 @@ CANONICAL for Sprint 5. Sourced from D7 §5 (BLE Implementation) and D4 Block 4 
 
 | Role | UUID | Direction |
 | --- | --- | --- |
-| Service | `6E40FFF0-B5A3-F393-E0A9-E50E24DCCA9E` | — |
+| Advertising service (scan filter only) | `0000FEE7-0000-1000-8000-00805F9B34FB` (16-bit SIG short `0xFEE7`) | — |
+| GATT service (post-connect) | `6E40FFF0-B5A3-F393-E0A9-E50E24DCCA9E` | — |
 | Write characteristic | `6E400002-B5A3-F393-E0A9-E50E24DCCA9E` | Phone → Watch |
 | Notify characteristic | `6E400003-B5A3-F393-E0A9-E50E24DCCA9E` | Watch → Phone |
+
+**Two UUIDs, two purposes.** The Urion firmware advertises with the 16-bit SIG short `0xFEE7` and exposes the custom `6E40FFF0…` service only after the central connects. The `U16PRO_protocol_en.pdf` (vendor reference, in `docs/_reference/`) only specifies the GATT side; the advertising UUID was confirmed empirically against U19M_013C on 2026-05-06. Scan filters that use only the GATT UUID will never match — see `apps/mobile/src/services/ble/io.ts` for the split constants.
 
 Packets are **16 bytes fixed length**:
 - `byte[0]` = command
@@ -128,7 +131,7 @@ The single highest-leverage piece of code in the BLE stack.
 
 - **Exponential backoff**: 5s, 15s, 30s, 60s, 5m, 15m. Retry count resets to 0 on a successful connect.
 - **Cap at 6 escalations**. After the 6th failure, return to `idle` and surface a "tap to retry" affordance. Prevents radio churn (battery drain).
-- **iOS**: use the BleManager state restoration identifier; iOS will auto-reconnect on advertise, and `willRestoreState` wakes the app to a `CONNECTED` transition.
+- **iOS**: use the BleManager state restoration identifier (`leiko-bt`); iOS will auto-reconnect on advertise, and `willRestoreState` wakes the app to a `CONNECTED` transition. Required Info.plist: `NSBluetoothAlwaysUsageDescription` + `UIBackgroundModes: ["bluetooth-central"]` (the phone is the *central*, watch is the peripheral — earlier draft of this doc had `bluetooth-peripheral`, which was wrong and would not enable background BLE for our role).
 - **Android**: a Foreground Service holds the BLE connection. `FOREGROUND_SERVICE_CONNECTED_DEVICE` service type required (Android 14+).
 - **On EVERY successful reconnect**: write `0x01` (set time / sync clock to parent local TZ) **before** issuing any read. The watch clock drifts.
 - **Mutex per `device_id`**: only one reconnection attempt at a time per device.
@@ -174,7 +177,7 @@ US pre-pairing was rejected on shipping-cost grounds.
 ## 7. Dependencies & gating
 - `react-native-ble-plx` v3.x (locked in `docs/00-tech-stack.md`)
 - XState v5
-- iOS `bluetooth-peripheral` background mode + state-restoration ID
+- iOS `bluetooth-central` background mode + state-restoration ID
 - Android 14+ `FOREGROUND_SERVICE_CONNECTED_DEVICE`
 - Sprint 5 hard-blocks on a physical Urion U16 watch in the founder's hand. Founder confirmed: multiple watches available.
 

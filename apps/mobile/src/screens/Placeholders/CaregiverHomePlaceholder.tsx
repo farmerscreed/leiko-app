@@ -6,15 +6,23 @@
 
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Button } from '../../components/Button';
 import { useTheme } from '../../theme';
 import { useAuth } from '../../state/auth';
 import { useOnboarding } from '../../state/onboarding';
+import { usePairing } from '../../state/pairing';
+import type { CaregiverStackParamList } from '../../navigation/types';
 
 export function CaregiverHomePlaceholder() {
   const theme = useTheme();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<CaregiverStackParamList>>();
   const profile = useAuth((s) => s.profile);
   const signOut = useAuth((s) => s.signOut);
   const familyId = useOnboarding((s) => s.familyId);
+  const pairedDevice = usePairing((s) => s.pairedDevice);
 
   const headline = theme.type('displayM');
   const body = theme.type('bodyL');
@@ -56,8 +64,32 @@ export function CaregiverHomePlaceholder() {
             marginBottom: theme.spacing.xxl,
           }}
         >
-          Next, we'll pair the watch. We're getting that part ready.
+          {pairedDevice
+            ? `The watch ending ${pairedDevice.macSuffix} is paired and ready.`
+            : "Next, pair the watch so we can start tracking readings."}
         </Text>
+
+        <View style={{ marginBottom: theme.spacing.xxl }}>
+          {pairedDevice ? (
+            <Button
+              variant="secondary"
+              onPress={() => navigation.navigate('Settings')}
+              accessibilityLabel="Open settings"
+              testID="placeholder-open-settings"
+            >
+              Settings
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              onPress={() => navigation.navigate('Pairing')}
+              accessibilityLabel="Pair your watch"
+              testID="placeholder-pair-watch"
+            >
+              Pair your watch
+            </Button>
+          )}
+        </View>
 
         <View
           style={{

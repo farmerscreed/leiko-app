@@ -9,10 +9,21 @@
     "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "com.leiko.app",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "Leiko uses Bluetooth to talk to your watch and sync readings.",
+        "NSBluetoothPeripheralUsageDescription": "Leiko uses Bluetooth to talk to your watch.",
+        "UIBackgroundModes": ["bluetooth-central"]
+      }
     },
     "android": {
-      "package": "com.leiko.app"
+      "package": "com.leiko.app",
+      "permissions": [
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"
+      ]
     }
   }
 }

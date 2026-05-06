@@ -24,8 +24,16 @@ export type CaregiverOnboardingStackParamList = {
   FamilyWatch: undefined;
 };
 
+// Sprint 5 — added Pairing and Settings to the caregiver home stack.
+// Pairing renders its own internal sub-view based on usePairing.phase
+// (PowerOn / Searching / Found / Pairing / Success / Failure +
+// PermissionPrime / BluetoothOff / PermissionDenied) so we don't push a
+// new native stack screen for every state transition. Settings hosts
+// the paired-devices list and the forget-watch flow.
 export type CaregiverStackParamList = {
   CaregiverHomePlaceholder: undefined;
+  Pairing: undefined;
+  Settings: undefined;
 };
 
 // Sprint 4 — self-buyer onboarding stack. Five screens per
@@ -41,6 +49,8 @@ export type SelfBuyerOnboardingStackParamList = {
 
 export type SelfBuyerStackParamList = {
   SelfBuyerHomePlaceholder: undefined;
+  Pairing: undefined;
+  Settings: undefined;
 };
 
 export type AuthScreenProps<R extends keyof AuthStackParamList> = NativeStackScreenProps<

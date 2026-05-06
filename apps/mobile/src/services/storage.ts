@@ -27,6 +27,9 @@ export const STORAGE_KEYS = {
   // Family id returned by the create_family RPC. Persisted so a crash
   // mid-flow doesn't orphan the family record.
   currentFamilyId: 'leiko.family.currentId',
+  // Paired Urion device for the current user/family. Sprint 5.
+  // Stored as JSON: { id, mac, model, deviceId (Supabase row id), pairedAt }.
+  pairedDevice: 'leiko.ble.pairedDevice',
 } as const;
 
 export const supabaseStorage = {
