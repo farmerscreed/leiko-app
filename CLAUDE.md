@@ -147,6 +147,77 @@ The right move is always: stop, summarise the ambiguity, ask. The
 founder is faster at resolving ambiguity than you are at recovering from
 having guessed wrong.
  
+## Agent orchestration
+
+The main thread (this conversation) is the only place context
+aggregates. Subagents — `Explore`, `Plan`, `general-purpose`, and any
+future custom agents in `.claude/agents/` — are stateless one-shot
+workers. They don't see each other; they don't see prior chat; they
+only see what the brief tells them. Main thread is the conductor.
+
+### Non-delegable (main thread always)
+- The session-start protocol (read CLAUDE.md + the active sprint card +
+  the docs/ files the card references). Quality control of agent
+  output depends on main-thread context — you can't QA what you
+  didn't read.
+- Plan proposal + user approval before any code is written.
+- Integration: merging agent outputs into the working tree.
+- All quality gates: lint, typecheck, test, voice-rule pass on every
+  user-visible string.
+- All commit messages, commits, and pushes.
+- ADRs and any data-model change.
+
+### When to delegate
+- **Bounded research** across >3 files → `Explore` agent.
+- **Implementation strategy / architecture review** → `Plan` agent
+  (one shot, then review + decide).
+- **Independent unit implementation** (one component, one screen, one
+  edge-function file) → `general-purpose` agent. Fan out 3–5 in
+  parallel max; review queue backs up above that.
+- **Don't bother** for sprints with ≤3 independent units — coordination
+  overhead exceeds gains.
+
+### How to brief an agent
+Every brief is self-contained because the agent has no chat history.
+Include:
+- Exact spec doc(s) to read.
+- Voice rules (`docs/05-voice-and-claims.md`) for any user-visible string.
+- Relevant stack pin from `docs/00-tech-stack.md` ("RN 0.81.5,
+  react-native-ble-plx 3.x — don't propose alternatives").
+- Exact file path(s) to write or edit.
+- The verification step the agent must report.
+- Whether to write tests (yes by default, per the testing standard).
+
+### How to review agent output
+- Read the **actual diff**, not the summary. Summaries describe intent.
+  Diffs describe reality.
+- Run lint + typecheck + test locally. CI is a backstop, not a reviewer.
+- Voice check every new user-visible string.
+- If the agent invented a token / flag / env var that isn't elsewhere
+  in the codebase, that's a bug — fix or reject before commit.
+
+### Sprint shape (the pattern)
+1. Main thread reads CLAUDE.md + sprint card + referenced docs.
+2. Main thread spawns `Plan` agent (one shot) for ordered task list.
+3. Main thread proposes plan + agent split to user; waits for approval.
+4. Main thread implements **foundations** sequentially (anything later
+   work depends on — tokens, theme provider, schema, base BLE module).
+5. Once foundations are committed, fan out parallel `general-purpose`
+   agents for the independent units.
+6. Main thread reviews + integrates + commits each agent's output.
+7. Final pass: full CI gates, voice check, demo recording, sprint card
+   to `plans/done/`, next card opened.
+
+### Anti-patterns
+- Spawning an agent to read CLAUDE.md or the sprint card on main
+  thread's behalf. The startup protocol is non-delegable.
+- "Based on your findings, implement X" — pushes synthesis onto the
+  agent. Main thread synthesizes; agents execute concrete tasks.
+- More than 5 agents in parallel.
+- Briefing without the voice rules. An agent without them will write
+  "patient" or "diagnose" without thinking.
+- Accepting an agent's "task complete" without reading the diff.
+ 
 ## What "done" means
  
 A sprint is done when:
