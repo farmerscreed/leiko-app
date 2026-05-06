@@ -1,4 +1,4 @@
-# Kena
+# Leiko
 
 Caregiver-mode blood pressure monitoring app, paired with a Urion U16 family BP smartwatch over BLE. Built for caregivers, self-buyers, and parents across Nigeria and the United States.
 
