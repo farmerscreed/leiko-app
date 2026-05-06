@@ -29,9 +29,9 @@ docs/04-screens/onboarding-fork.md, docs/01-data-model.md (§ users table), docs
 - Voice: every string passes the `docs/05-voice-and-claims.md` gate
 
 ## Test plan
-- Integration test: sign-up → OTP → fork → confirm account_type set
-- Integration test: attempt to update account_type after fork → fails
-- Component test: AccountTypeFork renders both options with correct copy
+- Integration test: fork → sign-up → OTP → confirm account_type set on `public.users`. (The fork happens BEFORE sign-in per `docs/04-screens/onboarding-fork.md` §"Audience"; the choice is cached in MMKV and committed via `raw_user_meta_data` at signup.)
+- Integration test: attempt to update account_type after fork → fails. The trigger raises P0001 → PostgREST returns HTTP 400 with the error code in the body. The original card text "403/forbidden" is read as functional intent ("the update is blocked"), not a literal status code.
+- Component test: AccountTypeFork renders both options with correct copy.
 
 ## Open prompt
 Sprint 2 — Auth + Fork. Read CLAUDE.md, then docs/04-screens/onboarding-fork.md, docs/01-data-model.md, docs/05-voice-and-claims.md.

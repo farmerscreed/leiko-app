@@ -19,7 +19,7 @@ Canonical version pins and service locks. Sourced from D7 §2 (final lock) and D
 | Server-state cache | TanStack Query (React Query) | v5 |
 | Navigation | React Navigation (native stack + bottom tabs) | v7 |
 | Local relational DB | WatermelonDB | 0.27+ |
-| Encrypted KV | react-native-mmkv (with platform Keychain/Keystore) | 2.x |
+| Encrypted KV | react-native-mmkv (with platform Keychain/Keystore) | 4.x (bumped from 2.x in Sprint 2 — Nitro Modules require 4.x for Expo SDK 54 + React 19 + New Architecture; same governance route as ADR-0004 for reanimated/gesture-handler. The 2.x lineage stopped at 2.12.2 in early 2024 and does not support the New Architecture cleanly.) |
 | Charts | Victory Native XL | latest stable |
 | i18n | i18next + react-i18next | latest stable |
 | Forms | React Hook Form + Zod | latest stable |
@@ -37,7 +37,7 @@ Canonical version pins and service locks. Sourced from D7 §2 (final lock) and D
 | --- | --- |
 | Platform | Supabase self-hosted on Hetzner (Frankfurt primary, Helsinki replica) |
 | Database | PostgreSQL 17 (see ADR-0003) |
-| Auth | Supabase Auth (GoTrue) — email magic-link + Apple + Google. PKCE on mobile. |
+| Auth | Supabase Auth (GoTrue) — email OTP (6-digit code) + Apple + Google. PKCE on mobile. (Sprint 2: code-only flow chosen over magic-link — Android third-party email clients break the deep-link handoff, and the 6-digit code matches Nigerian fintech / 2FA conventions for the 45–60 caregiver demographic.) |
 | Realtime | Supabase Realtime |
 | File storage | Supabase Storage (S3-compatible on Hetzner volume) |
 | Edge runtime | Supabase Edge Functions (Deno) |

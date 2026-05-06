@@ -41,6 +41,7 @@ Users who arrive via a caregiver invitation link (Universal Link → `leiko://pa
 | CTA 2 (bottom) | **`button.primary`** — "Myself" |
 | CTA 2 caption | Same style as CTA 1 caption |
 | Spacing between buttons | `spacing.l` (16pt) |
+| Sign-in link (Sprint 2 addition) | `type.body-m`, prose `color.text.secondary` + "Sign in" word `color.brand.primary` weight 600. Centred below CTA 2 with `spacing.xxl` above. **Tertiary** — not a CTA. Equal-visual-weight rule for the two CTAs (D8a §3.1.2) is preserved because this link sits below them and at smaller type. |
 | No back button | This is the first interactive screen |
 | Tab bar | Hidden during onboarding |
 
@@ -58,6 +59,7 @@ Users who arrive via a caregiver invitation link (Universal Link → `leiko://pa
 | CTA 1 caption | "A parent, partner, or other family member" |
 | CTA 2 label | "Myself" |
 | CTA 2 caption | "I have or want to track my own blood pressure" |
+| Sign-in link prose | "Already have an account? Sign in" — sentence-cased, "Sign in" is a verb-action (D8 §6 voice rules). Tap routes to the SignIn screen, which calls `signInWithOtp` with `shouldCreateUser=false` so a typo'd email cannot create a fresh account. |
 
 ---
 
