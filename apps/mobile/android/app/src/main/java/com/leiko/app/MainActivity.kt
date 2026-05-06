@@ -1,4 +1,4 @@
-package com.kena.app
+package com.leiko.app
 
 import android.os.Build
 import android.os.Bundle
