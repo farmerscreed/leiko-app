@@ -10,6 +10,9 @@
     "lint": "npm run lint --workspace=apps/mobile",
     "typecheck": "npm run typecheck --workspace=apps/mobile",
     "test": "npm run test --workspace=apps/mobile",
+    "start": "npm run start --workspace=apps/mobile",
+    "android": "npm run android --workspace=apps/mobile",
+    "ios": "npm run ios --workspace=apps/mobile",
     "format": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:fix": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
   },
