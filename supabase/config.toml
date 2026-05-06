@@ -192,7 +192,7 @@ password_requirements = ""
 [auth.rate_limit]
 # Number of emails that can be sent per hour. Requires auth.email.smtp to be
 # enabled. Bumped from the default 2/hour so Sprint 2 integration tests
-# (which exercise signInWithOtp repeatedly against Inbucket) don't hit the
+# (which exercise signInWithOtp repeatedly against the local mail catcher) don't hit the
 # limit. Production will rely on the upstream provider's rate limits.
 email_sent = 30
 # Number of SMS messages that can be sent per hour. Requires auth.sms to be enabled.
@@ -250,7 +250,7 @@ otp_expiry = 600
 # docs/04-screens/onboarding-fork.md and the Sprint 2 proposal.
 [auth.email.template.magic_link]
 subject = "Your Leiko sign-in code"
-content_path = "./templates/magic-link.html"
+content_path = "./supabase/templates/magic-link.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]
