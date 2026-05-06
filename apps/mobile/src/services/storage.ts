@@ -17,6 +17,13 @@ export const mmkv: MMKV = createMMKV({ id: 'leiko' });
 export const STORAGE_KEYS = {
   pendingAccountType: 'leiko.onboarding.pendingAccountType',
   authStorePrefix: 'leiko.auth.',
+  // Set true at the end of caregiver onboarding (FamilyWatch "I have the
+  // watch with me"). The navigator reads this to decide whether to render
+  // the onboarding stack or the home stack.
+  caregiverOnboardingComplete: 'leiko.onboarding.caregiver.complete',
+  // Family id returned by the /create-family Edge Function. Persisted so a
+  // crash mid-flow doesn't orphan the family record.
+  currentFamilyId: 'leiko.family.currentId',
 } as const;
 
 export const supabaseStorage = {

@@ -11,6 +11,19 @@ export type AuthStackParamList = {
   OTPVerify: { email: string; mode: 'signup' | 'signin' };
 };
 
+// Sprint 3 — caregiver onboarding stack. Six screens per
+// docs/04-screens/caregiver-onboarding.md (3 intros + 3 family-setup).
+// Skip from Intro2/Intro3 routes to FamilyYou. Skip is NOT available
+// during family-setup screens (4–6) per the spec.
+export type CaregiverOnboardingStackParamList = {
+  Intro1: undefined;
+  Intro2: undefined;
+  Intro3: undefined;
+  FamilyYou: undefined;
+  FamilyParent: undefined;
+  FamilyWatch: undefined;
+};
+
 export type CaregiverStackParamList = {
   CaregiverHomePlaceholder: undefined;
 };
@@ -28,6 +41,10 @@ export type CaregiverScreenProps<R extends keyof CaregiverStackParamList> = Nati
   CaregiverStackParamList,
   R
 >;
+
+export type CaregiverOnboardingScreenProps<
+  R extends keyof CaregiverOnboardingStackParamList,
+> = NativeStackScreenProps<CaregiverOnboardingStackParamList, R>;
 
 export type SelfBuyerScreenProps<R extends keyof SelfBuyerStackParamList> = NativeStackScreenProps<
   SelfBuyerStackParamList,

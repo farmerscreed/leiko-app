@@ -5,7 +5,9 @@
 //                     navigator container doesn't blink an empty stack)
 //   unauthenticated → AuthStack (fork → signup/signin → OTP)
 //   authenticated   → CaregiverStack or SelfBuyerStack, selected by
-//                     profile.account_type
+//                     profile.account_type. Caregivers without a completed
+//                     onboarding render the CaregiverOnboardingStack first
+//                     (Sprint 3).
 //
 // `parent` (D8a §1.3 invitation flow) routes to a placeholder for now;
 // Sprint 5 covers the parent-pairing handoff.
@@ -18,18 +20,28 @@ import { AccountTypeForkScreen } from '../screens/Onboarding/AccountTypeFork';
 import { SignUpScreen } from '../screens/Auth/SignUp';
 import { SignInScreen } from '../screens/Auth/SignIn';
 import { OTPVerifyScreen } from '../screens/Auth/OTPVerify';
+import { CaregiverIntro1Screen } from '../screens/Onboarding/Caregiver/Intro1';
+import { CaregiverIntro2Screen } from '../screens/Onboarding/Caregiver/Intro2';
+import { CaregiverIntro3Screen } from '../screens/Onboarding/Caregiver/Intro3';
+import { CaregiverFamilyYouScreen } from '../screens/Onboarding/Caregiver/FamilyYou';
+import { CaregiverFamilyParentScreen } from '../screens/Onboarding/Caregiver/FamilyParent';
+import { CaregiverFamilyWatchScreen } from '../screens/Onboarding/Caregiver/FamilyWatch';
 import { CaregiverHomePlaceholder } from '../screens/Placeholders/CaregiverHomePlaceholder';
 import { SelfBuyerHomePlaceholder } from '../screens/Placeholders/SelfBuyerHomePlaceholder';
 import { useTheme } from '../theme';
 import { useAuth } from '../state/auth';
+import { useOnboarding } from '../state/onboarding';
 import type {
   AuthStackParamList,
+  CaregiverOnboardingStackParamList,
   CaregiverStackParamList,
   SelfBuyerStackParamList,
 } from './types';
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const CaregiverStack = createNativeStackNavigator<CaregiverStackParamList>();
+const CaregiverOnboardingStack =
+  createNativeStackNavigator<CaregiverOnboardingStackParamList>();
 const SelfBuyerStack = createNativeStackNavigator<SelfBuyerStackParamList>();
 
 function AuthNavigator() {
@@ -46,7 +58,29 @@ function AuthNavigator() {
   );
 }
 
-function CaregiverNavigator() {
+function CaregiverOnboardingNavigator() {
+  return (
+    <CaregiverOnboardingStack.Navigator
+      initialRouteName="Intro1"
+      screenOptions={{ headerShown: false, gestureEnabled: false }}
+    >
+      <CaregiverOnboardingStack.Screen name="Intro1" component={CaregiverIntro1Screen} />
+      <CaregiverOnboardingStack.Screen name="Intro2" component={CaregiverIntro2Screen} />
+      <CaregiverOnboardingStack.Screen name="Intro3" component={CaregiverIntro3Screen} />
+      <CaregiverOnboardingStack.Screen name="FamilyYou" component={CaregiverFamilyYouScreen} />
+      <CaregiverOnboardingStack.Screen
+        name="FamilyParent"
+        component={CaregiverFamilyParentScreen}
+      />
+      <CaregiverOnboardingStack.Screen
+        name="FamilyWatch"
+        component={CaregiverFamilyWatchScreen}
+      />
+    </CaregiverOnboardingStack.Navigator>
+  );
+}
+
+function CaregiverHomeNavigator() {
   return (
     <CaregiverStack.Navigator screenOptions={{ headerShown: false }}>
       <CaregiverStack.Screen
@@ -55,6 +89,11 @@ function CaregiverNavigator() {
       />
     </CaregiverStack.Navigator>
   );
+}
+
+function CaregiverNavigator() {
+  const onboardingComplete = useOnboarding((s) => s.caregiverOnboardingComplete);
+  return onboardingComplete ? <CaregiverHomeNavigator /> : <CaregiverOnboardingNavigator />;
 }
 
 function SelfBuyerNavigator() {

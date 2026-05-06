@@ -1,16 +1,20 @@
-// Placeholder for Sprint 3 (caregiver onboarding) — exists so RootNavigator
-// has a destination after a caregiver signs in. Renders the signed-in
-// user's name and account_type so the routing can be visually verified.
+// Caregiver post-onboarding placeholder. Until Sprint 5 ships real BLE
+// pairing and Sprint 7 ships the home screen, this is what a caregiver
+// sees after finishing onboarding by tapping "I have the watch with me"
+// on FamilyWatch. Shows the bound family + the next step (pair the
+// watch) so routing is visually verifiable.
 
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme';
 import { useAuth } from '../../state/auth';
+import { useOnboarding } from '../../state/onboarding';
 
 export function CaregiverHomePlaceholder() {
   const theme = useTheme();
   const profile = useAuth((s) => s.profile);
   const signOut = useAuth((s) => s.signOut);
+  const familyId = useOnboarding((s) => s.familyId);
 
   const headline = theme.type('displayM');
   const body = theme.type('bodyL');
@@ -41,7 +45,7 @@ export function CaregiverHomePlaceholder() {
             marginBottom: theme.spacing.l,
           }}
         >
-          Caregiver onboarding goes here
+          You're all set
         </Text>
         <Text
           style={{
@@ -52,7 +56,7 @@ export function CaregiverHomePlaceholder() {
             marginBottom: theme.spacing.xxl,
           }}
         >
-          Sprint 3 fills this in. For now, you're signed in.
+          Next, we'll pair the watch. We're getting that part ready.
         </Text>
 
         <View
@@ -100,9 +104,31 @@ export function CaregiverHomePlaceholder() {
               color: theme.colors.text.primary,
               fontSize: body.size,
               fontFamily: body.family,
+              marginBottom: theme.spacing.l,
             }}
           >
             {profile?.email ?? '—'}
+          </Text>
+
+          <Text
+            style={{
+              color: theme.colors.text.secondary,
+              fontSize: label.size,
+              fontFamily: label.family,
+              marginBottom: theme.spacing.xs,
+            }}
+          >
+            Family
+          </Text>
+          <Text
+            testID="placeholder-family-id"
+            style={{
+              color: theme.colors.text.primary,
+              fontSize: body.size,
+              fontFamily: body.family,
+            }}
+          >
+            {familyId ?? '—'}
           </Text>
         </View>
 

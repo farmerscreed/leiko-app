@@ -7,11 +7,19 @@
 // runtime throws "outside the scope of the test code" because
 // `isInsideTestCode === false`. See memory/jest_expo_deferred.md.
 
-/* global jest */
+/* global jest, process */
 
 void globalThis.__ExpoImportMetaRegistry;
 void globalThis.URLSearchParams;
 void globalThis.structuredClone;
+
+// Supabase env vars — services/supabase.ts throws at module load if these
+// are missing. Screens that touch the auth or onboarding store transitively
+// import that file, so the rn test runner needs them set.
+process.env.EXPO_PUBLIC_SUPABASE_URL =
+  process.env.EXPO_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
+process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY =
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key';
 
 // Reanimated 4 + worklets expect a native module in the bundle that doesn't
 // exist under jest. The shipped `react-native-reanimated/mock` re-imports
