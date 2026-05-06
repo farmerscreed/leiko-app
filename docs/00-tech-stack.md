@@ -24,8 +24,10 @@ Canonical version pins and service locks. Sourced from D7 §2 (final lock) and D
 | i18n | i18next + react-i18next | latest stable |
 | Forms | React Hook Form + Zod | latest stable |
 | Date/time | Luxon (IANA TZ) | latest stable |
+| Gestures | react-native-gesture-handler | 2.28.0 (SDK 54 bundled-native-modules pin — see ADR-0004) |
+| Animation | react-native-reanimated | 4.1.7 (SDK 54 bundled-native-modules pin — see ADR-0004) |
 
-**Rejected (do not propose without ADR)**: Native Swift+Kotlin, Flutter, Expo Go, Realm, AsyncStorage as primary, Redux Toolkit, Apollo, Material/Chakra/NativeBase UI libs.
+**Rejected (do not propose without ADR)**: Native Swift+Kotlin, Flutter, Expo Go, Realm, AsyncStorage as primary, Redux Toolkit, Apollo, Material/Chakra/NativeBase UI libs, @gorhom/bottom-sheet (heavy abstraction — we use the primitives directly).
 
 ---
 
