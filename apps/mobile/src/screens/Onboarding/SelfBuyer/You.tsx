@@ -1,14 +1,12 @@
-// FamilyParent — docs/04-screens/caregiver-onboarding.md §4.4.2.
-// Captures parent name + relationship + timezone. Writes to the onboarding
-// draft; the families row is created at the end of FamilyWatch via the
-// create_family RPC.
+// Self-Buyer / You — docs/04-screens/self-buyer-onboarding.md §4.4.1
+// (D8a §4.1). Captures the self-buyer's name, optional year of birth,
+// and timezone. All copy strings are verified per D8a §4.1.1 and must
+// not drift.
 //
-// Sprint 3 timezone picker: a curated short-list covering Nigeria + US +
-// common diaspora destinations. Sprint 17 (or earlier if needed) replaces
-// this with a full searchable IANA list. The auto-detected device zone
-// is the default; the bottom sheet lets the caregiver override it for
-// parents living in a different region (a Lagos caregiver setting up the
-// watch for a parent in NYC, etc.).
+// Year-of-birth handling: optional, but if entered the value must fall
+// in the schema's check range (1900..2100). Invalid input keeps the
+// current draft year null and surfaces a subtle helper text — we don't
+// raise a hard error since the field is opt-in.
 
 import { useState } from 'react';
 import {
@@ -23,57 +21,52 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../../components/Button';
-import { Pill } from '../../../components/Pill';
 import { TimezonePicker } from '../../../components/TimezonePicker';
 import { useTheme } from '../../../theme';
-import { useOnboarding, type ParentRelationship } from '../../../state/onboarding';
-import type { CaregiverOnboardingScreenProps } from '../../../navigation/types';
+import { useOnboarding } from '../../../state/onboarding';
+import type { SelfBuyerOnboardingScreenProps } from '../../../navigation/types';
 
-interface ChipOption {
-  value: ParentRelationship;
-  label: string;
+const YEAR_MIN = 1900;
+const YEAR_MAX = 2100;
+
+function parseYearOfBirth(input: string): { value: number | null; valid: boolean } {
+  const trimmed = input.trim();
+  if (trimmed.length === 0) return { value: null, valid: true };  // skip
+  if (!/^\d{4}$/.test(trimmed)) return { value: null, valid: false };
+  const n = Number(trimmed);
+  if (n < YEAR_MIN || n > YEAR_MAX) return { value: null, valid: false };
+  return { value: n, valid: true };
 }
 
-const CHIPS: ChipOption[] = [
-  { value: 'mother', label: 'Mum' },
-  { value: 'father', label: 'Dad' },
-  { value: 'aunt', label: 'Aunt' },
-  { value: 'uncle', label: 'Uncle' },
-  { value: 'other', label: 'Other' },
-];
-
-export function CaregiverFamilyParentScreen({
+export function SelfBuyerYouScreen({
   navigation,
-}: CaregiverOnboardingScreenProps<'FamilyParent'>) {
+}: SelfBuyerOnboardingScreenProps<'You'>) {
   const theme = useTheme();
-  const setParent = useOnboarding((s) => s.setParent);
-  const draft = useOnboarding((s) => s.parent);
+  const setSelfBuyer = useOnboarding((s) => s.setSelfBuyer);
+  const draft = useOnboarding((s) => s.selfBuyer);
 
   const [name, setName] = useState(draft.displayName);
-  const [relationship, setRelationship] = useState<ParentRelationship | null>(
-    draft.relationship,
+  const [yearText, setYearText] = useState(
+    draft.yearOfBirth !== null ? String(draft.yearOfBirth) : '',
   );
-  const [customLabel, setCustomLabel] = useState(draft.relationshipCustom ?? '');
   const [timezone, setTimezone] = useState(draft.timezone);
 
   const headline = theme.type('displayM');
   const body = theme.type('bodyL');
   const label = theme.type('label');
+  const caption = theme.type('caption');
 
-  const customRequired = relationship === 'other';
-  const customValid = !customRequired || customLabel.trim().length > 0;
-  const valid =
-    name.trim().length > 0 && relationship !== null && customValid && timezone.length > 0;
+  const yob = parseYearOfBirth(yearText);
+  const valid = name.trim().length > 0 && yob.valid && timezone.length > 0;
 
   const handleContinue = () => {
-    if (!valid || !relationship) return;
-    setParent({
+    if (!valid) return;
+    setSelfBuyer({
       displayName: name.trim(),
-      relationship,
-      relationshipCustom: relationship === 'other' ? customLabel.trim() : null,
+      yearOfBirth: yob.value,
       timezone,
     });
-    navigation.navigate('FamilyWatch');
+    navigation.navigate('Watch');
   };
 
   return (
@@ -125,7 +118,7 @@ export function CaregiverFamilyParentScreen({
               marginBottom: theme.spacing.s,
             }}
           >
-            Who are you looking after?
+            Welcome. Let's set you up.
           </Text>
 
           <Text
@@ -137,9 +130,10 @@ export function CaregiverFamilyParentScreen({
               marginBottom: theme.spacing.xxl,
             }}
           >
-            We'll use this name in updates so the family circle stays personal.
+            A few quick details. We don't need much.
           </Text>
 
+          {/* Name */}
           <Text
             style={{
               color: theme.colors.text.secondary,
@@ -149,18 +143,18 @@ export function CaregiverFamilyParentScreen({
               marginBottom: theme.spacing.s,
             }}
           >
-            Their name
+            What should we call you?
           </Text>
           <TextInput
             value={name}
             onChangeText={setName}
-            placeholder="Mama Linda"
+            placeholder="First name is fine"
             placeholderTextColor={theme.colors.text.secondary}
             autoCapitalize="words"
             autoCorrect={false}
             returnKeyType="next"
-            accessibilityLabel="The name you call them"
-            testID="family-parent-name"
+            accessibilityLabel="Your first name"
+            testID="self-buyer-you-name"
             style={{
               backgroundColor: theme.colors.surface.elevated,
               borderRadius: theme.radii.m,
@@ -176,6 +170,7 @@ export function CaregiverFamilyParentScreen({
             }}
           />
 
+          {/* Year of birth (optional) */}
           <Text
             style={{
               color: theme.colors.text.secondary,
@@ -185,62 +180,47 @@ export function CaregiverFamilyParentScreen({
               marginBottom: theme.spacing.s,
             }}
           >
-            Who are they to you?
+            Year of birth (optional)
           </Text>
-          <View
-            accessible
-            accessibilityRole="radiogroup"
-            accessibilityLabel="Relationship"
-            style={styles.chipsRow}
+          <TextInput
+            value={yearText}
+            onChangeText={setYearText}
+            placeholder="e.g. 1962"
+            placeholderTextColor={theme.colors.text.secondary}
+            keyboardType="number-pad"
+            maxLength={4}
+            accessibilityLabel="Year of birth, optional"
+            testID="self-buyer-you-yob"
+            style={{
+              backgroundColor: theme.colors.surface.elevated,
+              borderRadius: theme.radii.m,
+              paddingHorizontal: theme.spacing.l,
+              paddingVertical: theme.spacing.m,
+              fontSize: body.size,
+              fontFamily: body.family,
+              color: theme.colors.text.primary,
+              borderWidth: 1,
+              borderColor: yob.valid
+                ? theme.colors.border.default
+                : theme.colors.state.urgent,
+              minHeight: theme.minTapTarget,
+              marginBottom: theme.spacing.s,
+            }}
+          />
+          <Text
+            style={{
+              color: yob.valid ? theme.colors.text.secondary : theme.colors.state.urgent,
+              fontSize: caption.size,
+              fontFamily: caption.family,
+              marginBottom: theme.spacing.xxl,
+            }}
           >
-            {CHIPS.map((chip) => {
-              const selected = relationship === chip.value;
-              return (
-                <View
-                  key={chip.value}
-                  style={{ marginRight: theme.spacing.s, marginBottom: theme.spacing.s }}
-                >
-                  <Pill
-                    selected={selected}
-                    onPress={() => setRelationship(chip.value)}
-                    accessibilityLabel={chip.label}
-                    testID={`family-parent-chip-${chip.value}`}
-                  >
-                    {chip.label}
-                  </Pill>
-                </View>
-              );
-            })}
-          </View>
+            {yob.valid
+              ? 'Helps us frame your readings in context. You can skip this.'
+              : `Enter a four-digit year between ${YEAR_MIN} and ${YEAR_MAX}.`}
+          </Text>
 
-          {customRequired ? (
-            <TextInput
-              value={customLabel}
-              onChangeText={setCustomLabel}
-              placeholder="Aunt Tola, Godmother, …"
-              placeholderTextColor={theme.colors.text.secondary}
-              autoCapitalize="words"
-              autoCorrect={false}
-              accessibilityLabel="Custom relationship"
-              testID="family-parent-custom"
-              style={{
-                backgroundColor: theme.colors.surface.elevated,
-                borderRadius: theme.radii.m,
-                paddingHorizontal: theme.spacing.l,
-                paddingVertical: theme.spacing.m,
-                fontSize: body.size,
-                fontFamily: body.family,
-                color: theme.colors.text.primary,
-                borderWidth: 1,
-                borderColor: theme.colors.border.default,
-                minHeight: theme.minTapTarget,
-                marginBottom: theme.spacing.l,
-              }}
-            />
-          ) : null}
-
-          <View style={{ height: theme.spacing.l }} />
-
+          {/* Timezone */}
           <Text
             style={{
               color: theme.colors.text.secondary,
@@ -250,15 +230,25 @@ export function CaregiverFamilyParentScreen({
               marginBottom: theme.spacing.s,
             }}
           >
-            Where do they live?
+            Your timezone
           </Text>
           <TimezonePicker
             value={timezone}
             onChange={setTimezone}
-            fieldA11yPrefix="Their timezone"
-            sheetTitle="Choose their timezone"
-            testID="family-parent-zone"
+            fieldA11yPrefix="Your timezone"
+            sheetTitle="Choose your timezone"
+            testID="self-buyer-you-zone"
           />
+          <Text
+            style={{
+              color: theme.colors.text.secondary,
+              fontSize: caption.size,
+              fontFamily: caption.family,
+              marginTop: theme.spacing.s,
+            }}
+          >
+            Auto-detected. Tap to change.
+          </Text>
 
           <View style={{ height: theme.spacing.xxxl }} />
 
@@ -266,7 +256,7 @@ export function CaregiverFamilyParentScreen({
             variant="primary"
             onPress={handleContinue}
             disabled={!valid}
-            testID="family-parent-continue"
+            testID="self-buyer-you-continue"
             style={{ width: '100%' }}
           >
             Continue
@@ -281,5 +271,4 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   fill: { flex: 1 },
   scroll: { flexGrow: 1 },
-  chipsRow: { flexDirection: 'row', flexWrap: 'wrap' },
 });

@@ -1,16 +1,19 @@
-// Placeholder for Sprint 4 (self-buyer onboarding). Same shape as the
-// caregiver placeholder; differentiated only by the headline so routing
-// can be visually verified.
+// Self-buyer post-onboarding placeholder. Until Sprint 5 ships real BLE
+// pairing and Sprint 8 ships the self-buyer home screen, this is what a
+// self-buyer sees after finishing onboarding by tapping "I have it" on
+// the Watch screen. Mirrors the caregiver placeholder.
 
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme';
 import { useAuth } from '../../state/auth';
+import { useOnboarding } from '../../state/onboarding';
 
 export function SelfBuyerHomePlaceholder() {
   const theme = useTheme();
   const profile = useAuth((s) => s.profile);
   const signOut = useAuth((s) => s.signOut);
+  const familyId = useOnboarding((s) => s.familyId);
 
   const headline = theme.type('displayM');
   const body = theme.type('bodyL');
@@ -38,7 +41,7 @@ export function SelfBuyerHomePlaceholder() {
             marginBottom: theme.spacing.l,
           }}
         >
-          Self-buyer onboarding goes here
+          You're all set
         </Text>
         <Text
           style={{
@@ -49,7 +52,7 @@ export function SelfBuyerHomePlaceholder() {
             marginBottom: theme.spacing.xxl,
           }}
         >
-          Sprint 4 fills this in. For now, you're signed in.
+          Next, we'll pair the watch. We're getting that part ready.
         </Text>
 
         <View
@@ -97,9 +100,31 @@ export function SelfBuyerHomePlaceholder() {
               color: theme.colors.text.primary,
               fontSize: body.size,
               fontFamily: body.family,
+              marginBottom: theme.spacing.l,
             }}
           >
             {profile?.email ?? '—'}
+          </Text>
+
+          <Text
+            style={{
+              color: theme.colors.text.secondary,
+              fontSize: label.size,
+              fontFamily: label.family,
+              marginBottom: theme.spacing.xs,
+            }}
+          >
+            Family
+          </Text>
+          <Text
+            testID="placeholder-family-id"
+            style={{
+              color: theme.colors.text.primary,
+              fontSize: body.size,
+              fontFamily: body.family,
+            }}
+          >
+            {familyId ?? '—'}
           </Text>
         </View>
 

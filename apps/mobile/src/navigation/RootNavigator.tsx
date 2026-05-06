@@ -26,6 +26,11 @@ import { CaregiverIntro3Screen } from '../screens/Onboarding/Caregiver/Intro3';
 import { CaregiverFamilyYouScreen } from '../screens/Onboarding/Caregiver/FamilyYou';
 import { CaregiverFamilyParentScreen } from '../screens/Onboarding/Caregiver/FamilyParent';
 import { CaregiverFamilyWatchScreen } from '../screens/Onboarding/Caregiver/FamilyWatch';
+import { SelfBuyerIntro1Screen } from '../screens/Onboarding/SelfBuyer/Intro1';
+import { SelfBuyerIntro2Screen } from '../screens/Onboarding/SelfBuyer/Intro2';
+import { SelfBuyerIntro3Screen } from '../screens/Onboarding/SelfBuyer/Intro3';
+import { SelfBuyerYouScreen } from '../screens/Onboarding/SelfBuyer/You';
+import { SelfBuyerWatchScreen } from '../screens/Onboarding/SelfBuyer/Watch';
 import { CaregiverHomePlaceholder } from '../screens/Placeholders/CaregiverHomePlaceholder';
 import { SelfBuyerHomePlaceholder } from '../screens/Placeholders/SelfBuyerHomePlaceholder';
 import { useTheme } from '../theme';
@@ -35,6 +40,7 @@ import type {
   AuthStackParamList,
   CaregiverOnboardingStackParamList,
   CaregiverStackParamList,
+  SelfBuyerOnboardingStackParamList,
   SelfBuyerStackParamList,
 } from './types';
 
@@ -43,6 +49,8 @@ const CaregiverStack = createNativeStackNavigator<CaregiverStackParamList>();
 const CaregiverOnboardingStack =
   createNativeStackNavigator<CaregiverOnboardingStackParamList>();
 const SelfBuyerStack = createNativeStackNavigator<SelfBuyerStackParamList>();
+const SelfBuyerOnboardingStack =
+  createNativeStackNavigator<SelfBuyerOnboardingStackParamList>();
 
 function AuthNavigator() {
   return (
@@ -96,7 +104,22 @@ function CaregiverNavigator() {
   return onboardingComplete ? <CaregiverHomeNavigator /> : <CaregiverOnboardingNavigator />;
 }
 
-function SelfBuyerNavigator() {
+function SelfBuyerOnboardingNavigator() {
+  return (
+    <SelfBuyerOnboardingStack.Navigator
+      initialRouteName="Intro1"
+      screenOptions={{ headerShown: false, gestureEnabled: false }}
+    >
+      <SelfBuyerOnboardingStack.Screen name="Intro1" component={SelfBuyerIntro1Screen} />
+      <SelfBuyerOnboardingStack.Screen name="Intro2" component={SelfBuyerIntro2Screen} />
+      <SelfBuyerOnboardingStack.Screen name="Intro3" component={SelfBuyerIntro3Screen} />
+      <SelfBuyerOnboardingStack.Screen name="You" component={SelfBuyerYouScreen} />
+      <SelfBuyerOnboardingStack.Screen name="Watch" component={SelfBuyerWatchScreen} />
+    </SelfBuyerOnboardingStack.Navigator>
+  );
+}
+
+function SelfBuyerHomeNavigator() {
   return (
     <SelfBuyerStack.Navigator screenOptions={{ headerShown: false }}>
       <SelfBuyerStack.Screen
@@ -105,6 +128,11 @@ function SelfBuyerNavigator() {
       />
     </SelfBuyerStack.Navigator>
   );
+}
+
+function SelfBuyerNavigator() {
+  const onboardingComplete = useOnboarding((s) => s.selfBuyerOnboardingComplete);
+  return onboardingComplete ? <SelfBuyerHomeNavigator /> : <SelfBuyerOnboardingNavigator />;
 }
 
 function HydratingFallback() {

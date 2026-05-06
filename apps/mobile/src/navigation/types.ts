@@ -28,6 +28,17 @@ export type CaregiverStackParamList = {
   CaregiverHomePlaceholder: undefined;
 };
 
+// Sprint 4 — self-buyer onboarding stack. Five screens per
+// docs/04-screens/self-buyer-onboarding.md (3 intros + You + Watch).
+// Skip available from Intro2 onward (mirrors caregiver pattern).
+export type SelfBuyerOnboardingStackParamList = {
+  Intro1: undefined;
+  Intro2: undefined;
+  Intro3: undefined;
+  You: undefined;
+  Watch: undefined;
+};
+
 export type SelfBuyerStackParamList = {
   SelfBuyerHomePlaceholder: undefined;
 };
@@ -50,3 +61,7 @@ export type SelfBuyerScreenProps<R extends keyof SelfBuyerStackParamList> = Nati
   SelfBuyerStackParamList,
   R
 >;
+
+export type SelfBuyerOnboardingScreenProps<
+  R extends keyof SelfBuyerOnboardingStackParamList,
+> = NativeStackScreenProps<SelfBuyerOnboardingStackParamList, R>;

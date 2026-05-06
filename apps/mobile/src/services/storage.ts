@@ -21,8 +21,11 @@ export const STORAGE_KEYS = {
   // watch with me"). The navigator reads this to decide whether to render
   // the onboarding stack or the home stack.
   caregiverOnboardingComplete: 'leiko.onboarding.caregiver.complete',
-  // Family id returned by the /create-family Edge Function. Persisted so a
-  // crash mid-flow doesn't orphan the family record.
+  // Set true at the end of self-buyer onboarding (Watch "I have it"),
+  // parallel to caregiverOnboardingComplete. Sprint 4.
+  selfBuyerOnboardingComplete: 'leiko.onboarding.selfBuyer.complete',
+  // Family id returned by the create_family RPC. Persisted so a crash
+  // mid-flow doesn't orphan the family record.
   currentFamilyId: 'leiko.family.currentId',
 } as const;
 

@@ -69,8 +69,14 @@ beforeEach(() => {
       relationshipCustom: null,
       timezone: 'UTC',
     },
+    selfBuyer: {
+      displayName: '',
+      yearOfBirth: null,
+      timezone: 'UTC',
+    },
     familyId: null,
     caregiverOnboardingComplete: false,
+    selfBuyerOnboardingComplete: false,
     finalizing: false,
     finalizeError: null,
   });
@@ -109,6 +115,31 @@ describe('useOnboarding — hydrate', () => {
 
     expect(useOnboarding.getState().familyId).toBe('family-uuid');
     expect(useOnboarding.getState().caregiverOnboardingComplete).toBe(true);
+  });
+
+  it('reads selfBuyerOnboardingComplete from MMKV', () => {
+    mmkv.set(STORAGE_KEYS.currentFamilyId, 'family-uuid-2');
+    mmkv.set(STORAGE_KEYS.selfBuyerOnboardingComplete, true);
+
+    useOnboarding.getState().hydrate();
+
+    expect(useOnboarding.getState().familyId).toBe('family-uuid-2');
+    expect(useOnboarding.getState().selfBuyerOnboardingComplete).toBe(true);
+  });
+});
+
+describe('useOnboarding — selfBuyer draft', () => {
+  it('setSelfBuyer merges into the self-buyer draft', () => {
+    useOnboarding.getState().setSelfBuyer({ displayName: 'Lawrence' });
+    useOnboarding.getState().setSelfBuyer({
+      yearOfBirth: 1985,
+      timezone: 'Africa/Lagos',
+    });
+
+    const { selfBuyer } = useOnboarding.getState();
+    expect(selfBuyer.displayName).toBe('Lawrence');
+    expect(selfBuyer.yearOfBirth).toBe(1985);
+    expect(selfBuyer.timezone).toBe('Africa/Lagos');
   });
 });
 
@@ -246,5 +277,111 @@ describe('useOnboarding — completeWithWatchInHand', () => {
     ).rejects.toMatchObject({ message: expect.stringContaining('permission denied') });
 
     expect(rpc).not.toHaveBeenCalled();
+  });
+});
+
+describe('useOnboarding — completeSelfBuyer', () => {
+  function fillSelfBuyerDraft() {
+    useOnboarding.getState().setSelfBuyer({
+      displayName: 'Lawrence',
+      yearOfBirth: 1985,
+      timezone: 'Africa/Lagos',
+    });
+  }
+
+  it('refuses if there is no signed-in profile', async () => {
+    useAuth.setState({ profile: null });
+    fillSelfBuyerDraft();
+    await expect(
+      useOnboarding.getState().completeSelfBuyer(),
+    ).rejects.toThrow(/Not signed in/);
+  });
+
+  it('refuses if the self-buyer name is empty', async () => {
+    await expect(
+      useOnboarding.getState().completeSelfBuyer(),
+    ).rejects.toThrow(/Profile is incomplete/);
+  });
+
+  it('updates public.users with display_name + timezone + year_of_birth when provided', async () => {
+    fillSelfBuyerDraft();
+    updateUser.mockResolvedValueOnce({ error: null });
+    rpc.mockResolvedValueOnce({ data: [{ family_id: 'fam-sb-1' }], error: null });
+
+    await useOnboarding.getState().completeSelfBuyer();
+
+    expect(updateUser).toHaveBeenCalledWith({
+      display_name: 'Lawrence',
+      timezone: 'Africa/Lagos',
+      year_of_birth: 1985,
+    });
+  });
+
+  it('omits year_of_birth from the patch when not provided', async () => {
+    useOnboarding.getState().setSelfBuyer({
+      displayName: 'Lawrence',
+      yearOfBirth: null,
+      timezone: 'Africa/Lagos',
+    });
+    updateUser.mockResolvedValueOnce({ error: null });
+    rpc.mockResolvedValueOnce({ data: [{ family_id: 'fam-sb-2' }], error: null });
+
+    await useOnboarding.getState().completeSelfBuyer();
+
+    expect(updateUser).toHaveBeenCalledWith({
+      display_name: 'Lawrence',
+      timezone: 'Africa/Lagos',
+    });
+    expect(updateUser.mock.calls[0][0]).not.toHaveProperty('year_of_birth');
+  });
+
+  it("calls create_family with parent_relationship='self'", async () => {
+    fillSelfBuyerDraft();
+    updateUser.mockResolvedValueOnce({ error: null });
+    rpc.mockResolvedValueOnce({ data: [{ family_id: 'fam-sb-3' }], error: null });
+
+    await useOnboarding.getState().completeSelfBuyer();
+
+    expect(rpc).toHaveBeenCalledWith('create_family', {
+      _parent_display_name: 'Lawrence',
+      _parent_relationship: 'self',
+      _caregiver_relationship: 'self',
+    });
+  });
+
+  it('persists familyId + selfBuyerOnboardingComplete on success', async () => {
+    fillSelfBuyerDraft();
+    updateUser.mockResolvedValueOnce({ error: null });
+    rpc.mockResolvedValueOnce({ data: [{ family_id: 'fam-sb-4' }], error: null });
+
+    await useOnboarding.getState().completeSelfBuyer();
+
+    const state = useOnboarding.getState();
+    expect(state.familyId).toBe('fam-sb-4');
+    expect(state.selfBuyerOnboardingComplete).toBe(true);
+    expect(state.caregiverOnboardingComplete).toBe(false);
+    expect(state.selfBuyer.displayName).toBe('');
+    expect(mmkv.getString(STORAGE_KEYS.currentFamilyId)).toBe('fam-sb-4');
+    expect(mmkv.getBoolean(STORAGE_KEYS.selfBuyerOnboardingComplete)).toBe(true);
+  });
+
+  it('surfaces an RPC failure and leaves the flag off', async () => {
+    fillSelfBuyerDraft();
+    updateUser.mockResolvedValueOnce({ error: null });
+    rpc.mockResolvedValueOnce({
+      data: null,
+      error: { message: 'P0001 self_buyer rejected' },
+    });
+
+    await expect(
+      useOnboarding.getState().completeSelfBuyer(),
+    ).rejects.toMatchObject({ message: expect.stringContaining('P0001') });
+
+    const state = useOnboarding.getState();
+    expect(state.selfBuyerOnboardingComplete).toBe(false);
+    expect(state.familyId).toBeNull();
+    expect(state.selfBuyer.displayName).toBe('Lawrence');
+    expect(state.finalizeError).toMatch(/P0001/);
+    expect(mmkv.contains(STORAGE_KEYS.selfBuyerOnboardingComplete)).toBe(false);
   });
 });
