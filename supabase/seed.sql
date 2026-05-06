@@ -11,5 +11,5 @@
 
 do $$
 begin
-  raise notice 'Kena seed.sql executed at %', now();
+  raise notice 'Leiko seed.sql executed at %', now();
 end $$;

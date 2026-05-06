@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "Kena",
-    "slug": "kena",
+    "name": "Leiko",
+    "slug": "leiko",
     "version": "0.0.0",
-    "scheme": "kena",
+    "scheme": "leiko",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "bundleIdentifier": "com.kena.app",
+      "bundleIdentifier": "com.leiko.app",
       "supportsTablet": false
     },
     "android": {
-      "package": "com.kena.app"
+      "package": "com.leiko.app"
     }
   }
 }

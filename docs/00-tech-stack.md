@@ -117,7 +117,7 @@ See `docs/11-push-notifications.md` for categories, routes, quiet hours.
 ## Compliance Posture (D3 + D7 §7)
 
 ### HIPAA scope (canonical)
-Kena is **direct-to-consumer**; we are NOT a Business Associate to a Covered Entity. HIPAA does not apply de jure. We adopt HIPAA-aligned practices because (a) D3 lists them as the operational floor, (b) US state laws (CCPA, CPRA, NY, CT) impose substantively similar duties, (c) caregiver buyers expect it, (d) it future-proofs us if a covered-entity partnership emerges.
+Leiko is **direct-to-consumer**; we are NOT a Business Associate to a Covered Entity. HIPAA does not apply de jure. We adopt HIPAA-aligned practices because (a) D3 lists them as the operational floor, (b) US state laws (CCPA, CPRA, NY, CT) impose substantively similar duties, (c) caregiver buyers expect it, (d) it future-proofs us if a covered-entity partnership emerges.
 
 ### Encryption inventory
 
@@ -145,7 +145,7 @@ Kena is **direct-to-consumer**; we are NOT a Business Associate to a Covered Ent
 ## NAFDAC / FDA (D3 — engineering implications)
 
 Engineering does not block on regulatory submissions; they're a separate workstream. But these touch the codebase:
-- **Watch firmware boot screen** must show "Kena Watch" / "Kena Watch Pro" + "LawOne Cloud LLC" manufacturer-of-record (D5 §5.2).
+- **Watch firmware boot screen** must show "Leiko Watch" / "Leiko Watch Pro" + "LawOne Cloud LLC" manufacturer-of-record (D5 §5.2).
 - **App Store listing**: every visible string runs through the forbidden-claims linter before submission (`docs/05-voice-and-claims.md`).
 - **FDA listing transfer + 510(k) labeling** is a Sprint 17 launch gate (US market only).
 - **Pregnancy deferral**: see `docs/_reference/D3-regulatory.md` for current pending amendment.
@@ -155,7 +155,7 @@ Engineering does not block on regulatory submissions; they're a separate workstr
 ## Repo Layout (canonical from D10 §2.1)
 
 ```
-kena-app/
+leiko-app/
 ├── CLAUDE.md
 ├── README.md
 ├── package.json              # npm workspaces root

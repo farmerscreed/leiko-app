@@ -47,4 +47,4 @@ Wait for approval.
 
 ## Risk notes
 - The bottom-sheet is the trickiest — drag-to-dismiss + reduced-motion + keyboard avoidance. Budget extra time.
-- Don't use a heavy UI lib. The Kena look is calm-before-clever; Material/Chakra/NativeBase will fight that.
+- Don't use a heavy UI lib. The Leiko look is calm-before-clever; Material/Chakra/NativeBase will fight that.

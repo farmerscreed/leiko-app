@@ -1,4 +1,4 @@
--- 0001_initial.sql — Kena initial schema.
+-- 0001_initial.sql — Leiko initial schema.
 -- Sourced from docs/01-data-model.md (D7 §3). Order:
 --   1. extensions
 --   2. enum types

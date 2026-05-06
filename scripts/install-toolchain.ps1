@@ -1,4 +1,4 @@
-# Kena local toolchain installer.
+# Leiko local toolchain installer.
 #
 # Two-pass installer — winget portion needs an elevated shell, Scoop portion
 # refuses to run elevated. The script detects the current elevation level and
@@ -25,7 +25,7 @@ $ErrorActionPreference = 'Stop'
 
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
-Write-Host "Kena toolchain installer" -ForegroundColor Cyan
+Write-Host "Leiko toolchain installer" -ForegroundColor Cyan
 Write-Host ("  Mode: {0}" -f ($(if ($isAdmin) { 'ELEVATED (winget pass)' } else { 'NON-ELEVATED (Scoop pass)' })))
 Write-Host ""
 

@@ -62,7 +62,7 @@ Per CLAUDE.md anti-pattern: **every screen has an empty state**. This is canonic
 
 Per `docs/09-paywall-and-iap.md`:
 - Free tier shows latest reading + last 7 days. Anything beyond requires Plus.
-- Unobtrusive "Get proactive alerts with Kena Plus" link near the Weekly Snapshot when free-tier user has 3+ readings (introduces paywall without blocking the basic surface).
+- Unobtrusive "Get proactive alerts with Leiko Plus" link near the Weekly Snapshot when free-tier user has 3+ readings (introduces paywall without blocking the basic surface).
 - **Latest reading is NEVER paywalled.**
 
 ---

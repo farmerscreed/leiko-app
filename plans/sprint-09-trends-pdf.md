@@ -23,7 +23,7 @@ docs/04-screens/trends.md, docs/03-components/pill.md, docs/01-data-model.md, do
 - Stat tiles tap targets are 48pt+ (per inline-explainer integration in Sprint 13)
 - PDF export for free users prompts the paywall (placeholder paywall UI OK; real paywall in Sprint 10)
 - PDF includes: user info, date range, all readings, summary stats, doctor-ready disclaimer
-- PDF cover line passes voice gate ("This report is general information from {parent_name}'s Kena watch. It is not a diagnosis. Please discuss with their doctor.")
+- PDF cover line passes voice gate ("This report is general information from {parent_name}'s Leiko watch. It is not a diagnosis. Please discuss with their doctor.")
 
 ## Open prompt
 Sprint 9 — Trends + PDF Export. Read CLAUDE.md, then docs/04-screens/trends.md, docs/09-paywall-and-iap.md.

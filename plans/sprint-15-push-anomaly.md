@@ -37,6 +37,6 @@ Propose:
 1. Anomaly detection: synchronous on insert vs cron over recent readings
 2. Push delivery via Edge Function vs direct from app
 3. Deep-link strategy
-4. iOS Critical Alerts: do we use them? (Spec says no for Kena, but confirm.)
+4. iOS Critical Alerts: do we use them? (Spec says no for Leiko, but confirm.)
 
 Wait for approval.

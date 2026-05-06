@@ -8,15 +8,15 @@ CANONICAL for Sprint 15. Sourced from D7 §8 (categories, deep links, body templ
 
 | Category | iOS Category ID | Android Channel | Default | Quiet hours |
 | --- | --- | --- | --- | --- |
-| Daily summary | `kena.daily_summary` | `daily-summary` (DEFAULT importance) | On | Suppressed |
-| Weekly summary | `kena.weekly_summary` | `weekly-summary` (DEFAULT) | On (Plus) | Suppressed |
-| Anomaly | `kena.anomaly` | `anomaly` (HIGH) | On (Plus) | Honored unless user opts to override |
-| Watch status | `kena.device` | `device` (LOW) | On | Suppressed |
-| Family activity | `kena.family` | `family` (DEFAULT) | On | Suppressed |
-| **Hybrid caregiver joined** (D8a §12.2 ADDS — self-buyer only) | `kena.hybrid` | `hybrid` (DEFAULT) | On | Suppressed |
-| Medication reminder | `kena.medication` | `medication` (HIGH) | On (parent) | **Always honored** (medication is time-bound) |
-| Subscription / account | `kena.account` | `account` (LOW) | On | Suppressed |
-| Marketing | `kena.marketing` | `marketing` (LOW) | **OFF by default** (D5 §3.4) | Suppressed |
+| Daily summary | `leiko.daily_summary` | `daily-summary` (DEFAULT importance) | On | Suppressed |
+| Weekly summary | `leiko.weekly_summary` | `weekly-summary` (DEFAULT) | On (Plus) | Suppressed |
+| Anomaly | `leiko.anomaly` | `anomaly` (HIGH) | On (Plus) | Honored unless user opts to override |
+| Watch status | `leiko.device` | `device` (LOW) | On | Suppressed |
+| Family activity | `leiko.family` | `family` (DEFAULT) | On | Suppressed |
+| **Hybrid caregiver joined** (D8a §12.2 ADDS — self-buyer only) | `leiko.hybrid` | `hybrid` (DEFAULT) | On | Suppressed |
+| Medication reminder | `leiko.medication` | `medication` (HIGH) | On (parent) | **Always honored** (medication is time-bound) |
+| Subscription / account | `leiko.account` | `account` (LOW) | On | Suppressed |
+| Marketing | `leiko.marketing` | `marketing` (LOW) | **OFF by default** (D5 §3.4) | Suppressed |
 
 ---
 
@@ -34,22 +34,22 @@ CANONICAL for Sprint 15. Sourced from D7 §8 (categories, deep links, body templ
 
 | Category | URL | Target screen |
 | --- | --- | --- |
-| Daily summary | `kena://home` | Caregiver home dashboard |
-| Weekly summary | `kena://weekly` | Weekly view (D6 US-52) |
-| Anomaly | `kena://reading/{reading_id}` | Reading detail (D6 US-24) |
-| Watch status | `kena://settings/devices` | Device settings (D6 US-84) |
-| Family activity | `kena://family` | Family screen (D6 US-47) |
-| Medication reminder | `kena://parent/medication/{med_id}` | Parent medication detail |
-| Subscription | `kena://settings/subscription` | Subscription settings |
-| Marketing | `kena://home` | Home (no targeted deep link to avoid abuse) |
+| Daily summary | `leiko://home` | Caregiver home dashboard |
+| Weekly summary | `leiko://weekly` | Weekly view (D6 US-52) |
+| Anomaly | `leiko://reading/{reading_id}` | Reading detail (D6 US-24) |
+| Watch status | `leiko://settings/devices` | Device settings (D6 US-84) |
+| Family activity | `leiko://family` | Family screen (D6 US-47) |
+| Medication reminder | `leiko://parent/medication/{med_id}` | Parent medication detail |
+| Subscription | `leiko://settings/subscription` | Subscription settings |
+| Marketing | `leiko://home` | Home (no targeted deep link to avoid abuse) |
 
 ### Universal links / App Links (REQUIRED)
-Universal Links (iOS) and App Links (Android) must be set up at the `kena.app` domain so `https://kena.app/*` and `https://pair.kena.app/*` paths can deep-link into the app.
+Universal Links (iOS) and App Links (Android) must be set up at the `leiko.app` domain so `https://leiko.app/*` and `https://pair.leiko.app/*` paths can deep-link into the app.
 
 - Apple's `apple-app-site-association` checked into `apps/mobile/well-known/`.
 - Android's `assetlinks.json` checked into the same path.
 
-Required because the parent's WhatsApp link will be a regular `https` URL, not a `kena://` URI.
+Required because the parent's WhatsApp link will be a regular `https` URL, not a `leiko://` URI.
 
 ---
 
@@ -116,7 +116,7 @@ export const selfBuyerNotifications = {
 
   // subscription-billing — UNCHANGED
   subscription_renewing_title: () => `Subscription renewing`,
-  subscription_renewing_body: () => `Kena will renew tomorrow for $4.99/month.`,
+  subscription_renewing_body: () => `Leiko will renew tomorrow for $4.99/month.`,
 
   // watch-shipped — UNCHANGED
   watch_shipped_title: () => `Your watch is on the way`,
@@ -146,11 +146,11 @@ The push composer selects the variant by the **recipient's** `account_type`:
 
 | Anomaly source (`docs/10-anomaly-logic.md`) | Category | Title | Body template |
 | --- | --- | --- | --- |
-| Calm-concerned: single outlier | `kena.anomaly` | "Worth a look" | `anomaly_single` |
-| Calm-concerned: morning trend | `kena.anomaly` | "Worth a look" | `anomaly_morning_trend` |
-| Calm-concerned: weekly trend (3+ in 7d) | `kena.weekly_summary` | "Mum's week" | (emphasised paragraph in weekly summary, not a separate push) |
-| Confirmed-urgent: Stage 2 sustained | `kena.anomaly` (HIGH; bypasses quiet hours **only if user opted in**) | "Please call Mum" | "Three high readings in the last hour. We recommend reaching out now." |
-| Confirmed-urgent: Crisis (≥180/120) | `kena.anomaly` (HIGH; bypasses quiet hours) | "Please call Mum" | "Mum's reading just now was very high — sys ≥ 180 or dia ≥ 120. We recommend reaching out now." |
+| Calm-concerned: single outlier | `leiko.anomaly` | "Worth a look" | `anomaly_single` |
+| Calm-concerned: morning trend | `leiko.anomaly` | "Worth a look" | `anomaly_morning_trend` |
+| Calm-concerned: weekly trend (3+ in 7d) | `leiko.weekly_summary` | "Mum's week" | (emphasised paragraph in weekly summary, not a separate push) |
+| Confirmed-urgent: Stage 2 sustained | `leiko.anomaly` (HIGH; bypasses quiet hours **only if user opted in**) | "Please call Mum" | "Three high readings in the last hour. We recommend reaching out now." |
+| Confirmed-urgent: Crisis (≥180/120) | `leiko.anomaly` (HIGH; bypasses quiet hours) | "Please call Mum" | "Mum's reading just now was very high — sys ≥ 180 or dia ≥ 120. We recommend reaching out now." |
 
 **Quiet-hours override behaviour**: even confirmed-urgent only bypasses quiet hours if the user explicitly opted to allow it during onboarding. Default is **respect quiet hours even for urgent** — caregiver gets the push at 07:00 instead of 03:00. Per CLAUDE.md anti-pattern: "Add fear-based push notifications" (forbidden).
 

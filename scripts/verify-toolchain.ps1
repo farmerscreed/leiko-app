@@ -1,4 +1,4 @@
-# Kena toolchain verifier.
+# Leiko toolchain verifier.
 # Run from a NEW PowerShell window after install-toolchain.ps1.
 # Confirms every required CLI is on PATH and reports versions.
 
@@ -14,7 +14,7 @@ function Show-Version {
     }
 }
 
-Write-Host "Kena toolchain verification" -ForegroundColor Cyan
+Write-Host "Leiko toolchain verification" -ForegroundColor Cyan
 Write-Host ""
 Show-Version 'Node.js'    'node'
 Show-Version 'npm'        'npm'

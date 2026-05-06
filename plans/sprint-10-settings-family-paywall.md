@@ -15,7 +15,7 @@ docs/04-screens/settings.md, docs/09-paywall-and-iap.md, docs/01-data-model.md, 
 ## Deliverables
 - Settings.tsx hub
 - Family invite flow: send invite → recipient enters code → accepts → family_member row created
-- RevenueCat configured, IAP products defined (monthly + annual tiers per D2): `com.kena.app.plus.monthly`, `com.kena.app.plus.annual`
+- RevenueCat configured, IAP products defined (monthly + annual tiers per D2): `com.leiko.app.plus.monthly`, `com.leiko.app.plus.annual`
 - /revenuecat-webhook Edge Function
 - Paywall screen shown at PDF export and AI back-and-forth touch-points
 

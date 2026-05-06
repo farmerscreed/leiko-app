@@ -1,10 +1,10 @@
-﻿D8  —  Design System Specification  •  Kena v1.0
+D8  —  Design System Specification  •  Leiko v1.0
 
 **D8**
 
 **Design System Specification**
 
-Kena — Caregiver Blood Pressure Monitoring App
+Leiko — Caregiver Blood Pressure Monitoring App
 
 **Version 1.0**
 
@@ -16,7 +16,7 @@ Date: May 2026
 
 *Confidential*
 
-*This document defines the Kena design system: tokens, components, screens, voice and accessibility rules. It is the single source of truth for all UI implementation across iOS and Android.*
+*This document defines the Leiko design system: tokens, components, screens, voice and accessibility rules. It is the single source of truth for all UI implementation across iOS and Android.*
 
 
 # **Document Metadata**
@@ -36,7 +36,7 @@ Date: May 2026
 
 
 ## **Document Purpose**
-This is the implementation contract between design intent and shipped code. Every screen, component, color and string in the Kena app must trace back to a token, component or rule defined in this document. If something is not specified here, it is not in the system — raise it as a design question (see §10) before adding it to a build.
+This is the implementation contract between design intent and shipped code. Every screen, component, color and string in the Leiko app must trace back to a token, component or rule defined in this document. If something is not specified here, it is not in the system — raise it as a design question (see §10) before adding it to a build.
 
 This document does not replace D5 (which carries the strategic brand rationale) or D7 (which defines the technical architecture). It sits between them: D5 says why the app feels this way, D8 says exactly how to build that feeling, D7 says what code stack delivers it.
 ## **Reading Order**
@@ -44,7 +44,7 @@ Sections are ordered foundation → atoms → molecules → screens → cross-cu
 
 
 # **Executive Summary**
-Kena is a caregiver-first health app: an adult child checks on a parent’s blood pressure trends from a different city, sometimes a different country. The product wins on emotional fit before it wins on features — the app must feel calm, dignified and non-alarmist on a Tuesday-morning anomaly notification when a daughter is about to walk into a meeting in Lagos and her father in Ibadan slept poorly last night. That emotional contract is what this design system encodes.
+Leiko is a caregiver-first health app: an adult child checks on a parent’s blood pressure trends from a different city, sometimes a different country. The product wins on emotional fit before it wins on features — the app must feel calm, dignified and non-alarmist on a Tuesday-morning anomaly notification when a daughter is about to walk into a meeting in Lagos and her father in Ibadan slept poorly last night. That emotional contract is what this design system encodes.
 ## **Six Decisions That Shape Everything Below**
 
 |**Decision**|**What it locks**|**Why**|
@@ -119,7 +119,7 @@ Every screen needs to be evaluated against two distinct users:
 
 Every screen specification in §4 marks which user(s) it serves. Parent-side screens use the large-text profile by default (body-xl = 19pt, display-l unchanged). Caregiver-side screens use the standard ramp.
 ## **1.5 Platform Stance**
-Kena follows platform conventions where they help and breaks them where they hurt the brand.
+Leiko follows platform conventions where they help and breaks them where they hurt the brand.
 
 |**Element**|**Stance**|**Reason**|
 | :- | :- | :- |
@@ -294,7 +294,7 @@ Default screen edge padding is spacing.2xl (24pt) on both sides. Status messages
 
 The default for any new container is radius.m (12pt). The system has a soft, organic feel — hard 0pt corners are reserved for full-bleed banners.
 ## **2.5 Elevation**
-Shadows in Kena are subtle. The product is calm, not glossy. iOS uses native shadow primitives; Android uses elevation (which Material translates to shadow).
+Shadows in Leiko are subtle. The product is calm, not glossy. iOS uses native shadow primitives; Android uses elevation (which Material translates to shadow).
 
 |**Token**|**iOS shadow**|**Android elevation**|**Used for**|
 | :- | :- | :- | :- |
@@ -308,7 +308,7 @@ Shadows in Kena are subtle. The product is calm, not glossy. iOS uses native sha
 
 Shadows are tinted navy (not pure black). The cream surface neutralises pure black shadows into a muddy gray. Navy preserves brand cohesion.
 ## **2.6 Motion**
-Motion in Kena is functional, not decorative. Every animation has a reason — confirmation, transition, or focus shift. Decorative loops are forbidden (see §1.3 anti-patterns).
+Motion in Leiko is functional, not decorative. Every animation has a reason — confirmation, transition, or focus shift. Decorative loops are forbidden (see §1.3 anti-patterns).
 ### **2.6.1 Duration Tokens**
 
 |**Token**|**Value (ms)**|**Used for**|
@@ -527,7 +527,7 @@ Bottom of screen on both iOS and Android. Five tabs maximum, three at MVP.
 
 
 ## **3.7 Bottom Sheet (and Modal)**
-Bottom sheet is the primary modal pattern in Kena. Full-screen modals are reserved for paywall and onboarding only. Centered dialog modals are NOT used.
+Bottom sheet is the primary modal pattern in Leiko. Full-screen modals are reserved for paywall and onboarding only. Centered dialog modals are NOT used.
 ### **Anatomy**
 - Surface: color.surface.elevated (white), radius.l on top corners, radius.none on bottom
 - Drag handle: 4pt high, 32pt wide, color.border.default, centered, spacing.s from top
@@ -676,7 +676,7 @@ The tokens defined in §2 ship as a TypeScript file consumed by every component.
 ### **apps/mobile/src/design-system/theme.ts**
 // SPDX: Internal — LawOne Cloud LLC
 
-// Kena Design Tokens — v1.0
+// Leiko Design Tokens — v1.0
 
 // This file is THE source of truth at runtime.
 
@@ -1026,7 +1026,7 @@ First-run only. Three screens, each one swipe. Skippable from screen 2 onwards. 
 
 |**Screen**|**Headline**|**Body**|**CTA**|
 | :- | :- | :- | :- |
-|4\.2.1|Stay close to the people who shaped you.|Kena is a calm way to keep an eye on a parent’s health, even from far away.|Continue (button.primary)|
+|4\.2.1|Stay close to the people who shaped you.|Leiko is a calm way to keep an eye on a parent’s health, even from far away.|Continue (button.primary)|
 |4\.2.2|Their watch. Your peace of mind.|When your parent’s blood pressure changes, we let you know — gently. No surveillance, no panic.|Continue (button.primary) + Skip (button.ghost)|
 |4\.2.3|You drive. They wear.|You set up the watch and pay. They wear it and tap once a day. Everyone sees the same readings.|Get started (button.accent) + Skip (button.ghost)|
 
@@ -1112,7 +1112,7 @@ Caregiver-side OR parent-side, with the Web Bluetooth fallback (Android Chrome) 
 |1|Power on the watch|Illustration of watch with power button highlighted; type.body-l instructions; button.primary "It’s on"|
 |2|Scanning|Centered spinner; type.body-m "Looking for the watch nearby…"; cancel button.ghost|
 |3a|Watch found (caregiver-local)|Card showing watch model + last 4 of MAC; button.primary "Pair this watch"; button.ghost "Not this one"|
-|3b|Watch not found → Web Bluetooth handoff (Android only)|Bottom sheet: "Pair from your parent’s Android phone" with QR code that opens chrome://kena.app/pair on their device|
+|3b|Watch not found → Web Bluetooth handoff (Android only)|Bottom sheet: "Pair from your parent’s Android phone" with QR code that opens chrome://leiko.app/pair on their device|
 |4|Pairing…|Progress indicator with motion.normal pulse; type.body-m "Talking to the watch…"|
 |5|Paired|Phosphor CheckCircle (Bold, 64pt amber); type.title "Paired"; button.primary "Continue"|
 |Failure|Pair failed (per D7 §5 failure-mode table)|Phosphor WarningCircle; type.title friendly cause; type.body-m suggested fix; button.primary "Try again"|
@@ -1126,7 +1126,7 @@ Caregiver-side OR parent-side, with the Web Bluetooth fallback (Android Chrome) 
 |Purpose|Conversational answers about readings, trends, what an anomaly means|
 |Components|Header with parent-context chip ("About Mum’s readings"); message thread (input.multiline at bottom); typing indicator; tap-to-cite (each AI answer references reading IDs which are tap-tappable)|
 |Suggested prompts (empty state)|"What does this anomaly mean?" / "How is Mum doing this week?" / "Is 138/86 high?"|
-|Disclaimer footer|Persistent caption: "Kena offers context, not medical advice. Always check with a clinician."|
+|Disclaimer footer|Persistent caption: "Leiko offers context, not medical advice. Always check with a clinician."|
 |Forbidden phrases|See D5 §6.4 — enforced by copy-lint on prompt template AND output guard (D7 §4)|
 
 
@@ -1198,7 +1198,7 @@ Two custom marks ship at MVP, both designed in-house:
 
 |**Mark**|**Use**|**Specification**|
 | :- | :- | :- |
-|Kena logo (mark)|Splash, tab bar branding, app icon|Geometric K monogram, navy on cream / cream on navy. SVG at 24pt, 64pt, 96pt, 1024pt (app store icon)|
+|Leiko logo (mark)|Splash, tab bar branding, app icon|Geometric K monogram, navy on cream / cream on navy. SVG at 24pt, 64pt, 96pt, 1024pt (app store icon)|
 |Anomaly indicator|Subtle dot used in family circle when a reading needs attention|6pt amber dot with 1pt cream stroke; 8pt crimson with 1pt cream stroke for confirmed-urgent. Always paired with a textual indicator (never color-only).|
 
 
@@ -1300,7 +1300,7 @@ Per D7 §8, notifications respect quiet hours and category. Copy templates per c
 |confirmed-urgent|Please call Mum|Three high readings in the last hour. We recommend reaching out now.|
 |missed-reading|Mum hasn’t worn the watch in 3 days|A friendly nudge might help. Tap to send a hello.|
 |family-invite|Your sister joined the circle|You’re both caring for Dad now.|
-|subscription-billing|Subscription renewing|Kena will renew tomorrow for $4.99/month.|
+|subscription-billing|Subscription renewing|Leiko will renew tomorrow for $4.99/month.|
 |watch-shipped|Your watch is on the way|Tracking #123: arriving Tuesday.|
 |parent-pairing-handoff|Pair the watch on Dad’s phone|Tap to open Dad’s pairing screen on his Android Chrome.|
 
@@ -1312,14 +1312,14 @@ Per D7 §8, notifications respect quiet hours and category. Copy templates per c
 |Reassuring|Daily, in-range|"All calm this morning. 128/82, within Mum’s usual range."|
 |Reassuring|Successful sync|"All up to date."|
 |Informative|Education card|"BP changes through the day. Morning readings are usually higher than evening ones."|
-|Informative|Paywall|"Kena helps you stay close to your parent’s health — with calm, contextual updates."|
+|Informative|Paywall|"Leiko helps you stay close to your parent’s health — with calm, contextual updates."|
 |Calm-Concerned|Calm-concerned anomaly|"We noticed something. Three of Dad’s readings this week were higher than usual. Worth a chat."|
 |Calm-Concerned|Missed readings|"Mum hasn’t worn her watch in 4 days. Want to send a friendly hello?"|
 |Direct (urgent only)|Confirmed-urgent threshold|"Three high readings in the last hour. We recommend reaching out to Dad now."|
 
 
 # **7. Accessibility Implementation**
-Kena commits to WCAG 2.2 AA across all v1.0 screens. Parent users skew older (55–80); accessibility is not a niche concern — it is a primary use case. Every release goes through the checks below before submission.
+Leiko commits to WCAG 2.2 AA across all v1.0 screens. Parent users skew older (55–80); accessibility is not a niche concern — it is a primary use case. Every release goes through the checks below before submission.
 ## **7.1 Screen Reader (VoiceOver / TalkBack)**
 - Every interactive element has an accessibilityLabel that reads as a complete sentence ("Pair watch, button" not "pair\_btn\_01")
 - Dynamic content announced via accessibilityLiveRegion="polite" — e.g., "New reading received: 128 over 82"
@@ -1383,7 +1383,7 @@ Kena commits to WCAG 2.2 AA across all v1.0 screens. Parent users skew older (55
 
 # **8. Theme Modes (Light / Dark)**
 ## **8.1 Decision: Light only at MVP**
-Kena ships LIGHT MODE ONLY in v1.0. Dark mode is a V2 feature, scheduled for re-evaluation at the v1.1 quarterly review.
+Leiko ships LIGHT MODE ONLY in v1.0. Dark mode is a V2 feature, scheduled for re-evaluation at the v1.1 quarterly review.
 
 |**Reason**|**Detail**|
 | :- | :- |
@@ -1395,7 +1395,7 @@ Kena ships LIGHT MODE ONLY in v1.0. Dark mode is a V2 feature, scheduled for re-
 
 ## **8.2 What this means in code**
 - At MVP, theme.ts exports a single theme object — no useColorScheme hook
-- OS dark-mode setting is detected and a one-time card is shown on first launch: "Kena uses a soft cream theme. We’ll add dark mode soon." — dismissible
+- OS dark-mode setting is detected and a one-time card is shown on first launch: "Leiko uses a soft cream theme. We’ll add dark mode soon." — dismissible
 - Status bar style is "dark-content" everywhere (navy text on cream)
 - Screenshots in App Store / Play Store are light only at MVP
 
@@ -1425,7 +1425,7 @@ All UI strings live in apps/mobile/src/i18n/locales/{locale}.json. Default local
 
 `      `"headline": "Stay close to the people who shaped you.",
 
-`      `"body": "Kena is a calm way to keep an eye on a parent's health, even from far away.",
+`      `"body": "Leiko is a calm way to keep an eye on a parent's health, even from far away.",
 
 `      `"cta": "Continue"
 
@@ -1520,10 +1520,10 @@ Resolved before or during Sprint 1 unless noted otherwise.
 
 |**#**|**Question**|**Owner**|**Target**|**Default if unresolved**|
 | :- | :- | :- | :- | :- |
-|Q-D8-1|Recoleta licensed for Kena, or fall back to Fraunces?|Founder|End of Sprint 1|Fraunces (free) — swap is one-token|
+|Q-D8-1|Recoleta licensed for Leiko, or fall back to Fraunces?|Founder|End of Sprint 1|Fraunces (free) — swap is one-token|
 |Q-D8-2|In-house illustrations or external illustrator brief?|Founder|End of Sprint 2|External illustrator briefed via Dribbble + style brief in §5.3|
 |Q-D8-3|How many parent-side localisations at MVP? Yoruba/Igbo/Hausa or English-only?|Founder|End of Sprint 3 (depends on Nigeria launch beta sign-up data)|English-only at v1.0; Yoruba in v1.1|
-|Q-D8-4|Web Bluetooth pairing UI: native React Native handoff URL or hosted PWA at kena.app/pair?|Founder + Eng|End of Sprint 1|Hosted PWA at kena.app/pair (matches D7 ADR-013)|
+|Q-D8-4|Web Bluetooth pairing UI: native React Native handoff URL or hosted PWA at leiko.app/pair?|Founder + Eng|End of Sprint 1|Hosted PWA at leiko.app/pair (matches D7 ADR-013)|
 |Q-D8-5|Parent reading-history retention in UI: rolling 7 days or scrollable history?|Founder|End of Sprint 4|Rolling 7 days at MVP (parent UI must stay simple)|
 |Q-D8-6|AI assistant entry point on home screen: persistent affordance or only after first anomaly?|Founder|End of Sprint 5|Only after first anomaly — protects calm-before-clever|
 |Q-D8-7|In-app onboarding for the parent (after invite accepted): 1 screen or skip?|Founder|End of Sprint 3|1 screen — explains the watch and the "tap to confirm" pattern|

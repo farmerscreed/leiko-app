@@ -18,7 +18,7 @@ Show the user their own most-recent BP reading and trend at a glance. Designed f
 
 | Element | Spec |
 | --- | --- |
-| Header bar | App title ("Kena") on the left, settings gear icon on the right |
+| Header bar | App title ("Leiko") on the left, settings gear icon on the right |
 | Anomaly Banner (conditional) | If active: full-bleed banner per `docs/10-anomaly-logic.md` §5 — **self-framed copy variant** per D8a §12.1 |
 | **Hero card** | Latest reading. Larger than the equivalent caregiver Reading Card. Uses `type.numeric-xl` (56pt) for BP value. Range chip below. Timestamp. |
 | Trend mini-chart | Last 7 days, BP only, sparkline-style (NOT the full BP Trend Chart). Tap-through to full Trends screen. |

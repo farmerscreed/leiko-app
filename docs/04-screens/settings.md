@@ -82,9 +82,9 @@ A single scroll view of `ListRow` components grouped by section. Each section he
 
 ### About section
 - `ListRow` `data` — App version (e.g. "1.0.0 (build 42)")
-- `ListRow` `navigation` — "Terms of service" — opens in-app webview at `https://kena.app/terms`
-- `ListRow` `navigation` — "Privacy policy" — `https://kena.app/privacy`
-- `ListRow` `navigation` — "Help" — opens email composer to `support@kena.app`
+- `ListRow` `navigation` — "Terms of service" — opens in-app webview at `https://leiko.app/terms`
+- `ListRow` `navigation` — "Privacy policy" — `https://leiko.app/privacy`
+- `ListRow` `navigation` — "Help" — opens email composer to `support@leiko.app`
 - `ListRow` `action` — "Sign out" — friendly when irreversible: "Yes, sign me out everywhere"
 
 ---

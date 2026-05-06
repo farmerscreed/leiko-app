@@ -9,8 +9,8 @@ CANONICAL for Sprint 10 (paywall plumbing) and Sprint 17 (store metadata). Sourc
 | Plan | Price | Trial | Notes |
 | --- | --- | --- | --- |
 | Free | $0 | n/a | Always shows latest reading + last 7 days of readings (per D5 §3.4) |
-| Kena Plus monthly | **$4.99 / month** | 7 days, no credit card at start | Card collected at trial end if user converts |
-| Kena Plus annual | **$39.99 / year (33% off)** | 7 days, no credit card at start | Same trial mechanics |
+| Leiko Plus monthly | **$4.99 / month** | 7 days, no credit card at start | Card collected at trial end if user converts |
+| Leiko Plus annual | **$39.99 / year (33% off)** | 7 days, no credit card at start | Same trial mechanics |
 
 **Single subscription per family circle** (D6 US-73). The `family_owner` subscribes; ALL caregivers in the family inherit Plus features. RevenueCat handles cross-platform — a subscription bought on iOS works for an Android caregiver in the same family, and vice versa.
 
@@ -53,10 +53,10 @@ The paywall lives at the boundary of free/plus. It is shown when a free user tap
 ### Anatomy (D8a §9.2 — UNCHANGED)
 - **Full-screen modal**, `radius.l` top corners, three sections: hero, value bullets, price block.
 - `button.accent` primary CTA + `button.ghost` secondary "Maybe later".
-- **Hero illustration** (Sprint 10 may stub with the Kena logomark) on `color.surface.elevated` (white).
+- **Hero illustration** (Sprint 10 may stub with the Leiko logomark) on `color.surface.elevated` (white).
 - **Bullet list** of unlocked features (`type.body-l`): 3 bullets per D8a §9.4.
 - **Price block**:
-  - "Try Kena Plus free for 7 days" — primary button
+  - "Try Leiko Plus free for 7 days" — primary button
   - Below: "$4.99/month or $39.99/year — saves 33%" (D8a §9.5 UNCHANGED)
   - Toggle between monthly and annual; annual is highlighted as recommended.
 - **"Maybe later"** dismiss link — `color.brand.primary-soft`, `type.label`, no penalty UX. *Cancellation is dignified.*
@@ -67,7 +67,7 @@ The paywall lives at the boundary of free/plus. It is shown when a free user tap
 | Element | Caregiver mode (D8) | **Self-buyer mode (D8a)** |
 | --- | --- | --- |
 | Hero headline | "Stay close, every day" | **"Understand your numbers"** |
-| Hero body | "Kena helps you stay close to your parent's health — with calm, contextual updates." | **"See trends clearly. Share them with your doctor. Get plain-language explanations of what your readings mean."** |
+| Hero body | "Leiko helps you stay close to your parent's health — with calm, contextual updates." | **"See trends clearly. Share them with your doctor. Get plain-language explanations of what your readings mean."** |
 
 ### Value bullets — SUPERSEDES per `account_type` (D8a §9.4)
 
@@ -101,7 +101,7 @@ Per `account_type`, the paywall triggers + headline use the SUPERSEDES table abo
 | AI assistant | First Tier-B query attempt | "Stay close, every day" | "Understand your numbers" |
 | Share with doctor (caregiver) | Tap "Share PDF report" | "Stay close, every day" | n/a |
 | Add caregiver | At single-caregiver limit | "Stay close, every day" | n/a |
-| Anomaly opt-in | "Get proactive alerts with Kena Plus" on home | "Stay close, every day" | "Understand your numbers" |
+| Anomaly opt-in | "Get proactive alerts with Leiko Plus" on home | "Stay close, every day" | "Understand your numbers" |
 | 6th reading per identity (D8a §9.1) | Auto-fires once per family per month | Mode-appropriate | Mode-appropriate |
 
 ---
@@ -137,8 +137,8 @@ Allowed values: `'free' | 'plus' | 'plus_trial' | 'plus_grace' | 'past_due'`.
 - Service-role key required (bypasses RLS by design).
 
 ### Product IDs (provisioned in App Store Connect + Google Play Console)
-- `com.kena.app.plus.monthly` — $4.99 / month
-- `com.kena.app.plus.annual` — $39.99 / year
+- `com.leiko.app.plus.monthly` — $4.99 / month
+- `com.leiko.app.plus.annual` — $39.99 / year
 
 > **Q11 (D7 §14)**: RevenueCat IAP product setup is an external-dependency block for Sprint 10. Founder-owned. Lead time 1–3 days. Track in `plans/backlog.md`.
 
@@ -150,7 +150,7 @@ Allowed values: `'free' | 'plus' | 'plus_trial' | 'plus_grace' | 'past_due'`.
 1. User taps "Try free for 7 days" on paywall.
 2. RevenueCat starts trial. **No credit card collected at start** (per D2 + D6 US-69).
 3. `families.subscription_status` → `'plus_trial'`.
-4. Push notification scheduled for trial-end −24h: *"Your trial ends in 1 day. Kena Plus stays $4.99/month and keeps your weekly summaries running."*
+4. Push notification scheduled for trial-end −24h: *"Your trial ends in 1 day. Leiko Plus stays $4.99/month and keeps your weekly summaries running."*
 
 ### Trial end → conversion
 - If user enters payment in time: RevenueCat charges, status → `'plus'`.
@@ -181,8 +181,8 @@ Subscription product disclosure copy is locked to:
 - **No "save", "discount", "limited time" framing** in the app — paywall copy must pass `docs/05-voice-and-claims.md` voice rules (no fear, no urgency).
 
 Privacy-policy and terms URLs (placeholders today):
-- `https://kena.app/privacy`
-- `https://kena.app/terms`
+- `https://leiko.app/privacy`
+- `https://leiko.app/terms`
 
 These must be live, real, and lawyer-reviewed by App Store submission.
 

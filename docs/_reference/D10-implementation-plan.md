@@ -1,10 +1,10 @@
-﻿D10  —  Implementation Plan & Sprint Roadmap  •  Kena v1.0
+D10  —  Implementation Plan & Sprint Roadmap  •  Leiko v1.0
 
 **D10**
 
 **Implementation Plan & Sprint Roadmap**
 
-Kena — Caregiver Blood Pressure Monitoring App
+Leiko — Caregiver Blood Pressure Monitoring App
 
 **Version 1.0**
 
@@ -44,7 +44,7 @@ Date: May 2026
 
 
 # **Executive Summary**
-Kena has a complete specification (D1–D9) and zero lines of production code. The gap between those two states is what this document closes. It does so by separating three things that look the same but are not:
+Leiko has a complete specification (D1–D9) and zero lines of production code. The gap between those two states is what this document closes. It does so by separating three things that look the same but are not:
 
 - The specification — D1–D9, ~250 pages of decisions about what to build
 - The operating manual — CLAUDE.md, ~200 lines that Claude Code reads every session
@@ -108,7 +108,7 @@ How Claude Code, the founder, the docs, and the repo interact. The model is deli
 ## **1.3 The Don’t-Do List**
 These are session-opener anti-patterns. Each one has wrecked Claude-Code-driven projects in the wild. CLAUDE.md §3.7 below repeats them; they are stated here for context.
 
-- Do not say "build the Kena app" or "implement everything in D8." That dilutes the context window across the whole spec and produces averaged, generic code.
+- Do not say "build the Leiko app" or "implement everything in D8." That dilutes the context window across the whole spec and produces averaged, generic code.
 - Do not skip the propose-step. The propose-step is faster than the cleanup-step.
 - Do not load all of D1–D9 into a session. Load only the docs/ files the sprint card names.
 - Do not let Claude Code "guess" at ambiguity. If something is ambiguous, the answer is to ask, not infer.
@@ -127,7 +127,7 @@ These are session-opener anti-patterns. Each one has wrecked Claude-Code-driven 
 # **2. Repo Structure & Bootstrap**
 The repository layout is the second-most-important artifact in this plan after CLAUDE.md. It determines what Claude Code can find, how the docs are partitioned, and what the test surface looks like. The structure below is the target after Sprint 0 completes.
 ## **2.1 Target Repo Structure**
-kena-app/
+leiko-app/
 
 `  `CLAUDE.md                          # The operating manual. Read every session.
 
@@ -293,7 +293,7 @@ The exact order in which Sprint 0 stands up the repo. This is the only sprint wi
 
 |**Step**|**Action**|**Verify**|
 | :- | :- | :- |
-|1|mkdir kena-app && cd kena-app && git init && npm init -y|package.json exists; git initialised|
+|1|mkdir leiko-app && cd leiko-app && git init && npm init -y|package.json exists; git initialised|
 |2|Drop CLAUDE.md (§3 of this doc) into repo root|cat CLAUDE.md returns the manual|
 |3|Create docs/ structure (mkdir docs && mkdir docs/03-components docs/04-screens) and copy in the extraction map output|docs/ has 13+ files|
 |4|Run scripts/extract-docs.sh OR manually slice D1–D9 into the docs/ files per the map in §4 below|docs/00-tech-stack.md exists and matches D7 §2|
@@ -315,11 +315,11 @@ This is the file that lives at the repo root. Claude Code reads it on every sess
 
 
 ## **3.1 The CLAUDE.md File (drop-in ready)**
-\# CLAUDE.md — Kena App Operating Manual
+\# CLAUDE.md — Leiko App Operating Manual
 
 
 
-You are working on Kena, a caregiver-mode blood pressure monitoring mobile app
+You are working on Leiko, a caregiver-mode blood pressure monitoring mobile app
 
 built on a Urion U16 family BP smartwatch (FDA-listed, EU MDR Class IIa).
 
@@ -481,7 +481,7 @@ ask.
 
 
 
-\## Anti-patterns (Kena visual & UX)
+\## Anti-patterns (Leiko visual & UX)
 
 
 
@@ -960,7 +960,7 @@ Propose:
 Wait for approval.
 ### **Risk notes**
 - The bottom-sheet is the trickiest — drag-to-dismiss + reduced-motion + keyboard avoidance. Budget extra time.
-- Don’t use a heavy UI lib. The Kena look is calm-before-clever; Material/Chakra/NativeBase will fight that.
+- Don’t use a heavy UI lib. The Leiko look is calm-before-clever; Material/Chakra/NativeBase will fight that.
 
 
 ## **Sprint 2 — Auth + Fork Screen**
@@ -1562,7 +1562,7 @@ Propose:
 
 3\. Deep-link strategy
 
-4\. iOS Critical Alerts: do we use them? (Spec says no for Kena, but
+4\. iOS Critical Alerts: do we use them? (Spec says no for Leiko, but
 
 `   `confirm.)
 
@@ -1766,7 +1766,7 @@ If any fail, propose a replacement before commit.
 |**Anti-pattern**|**How to spot it**|**How to redirect**|
 | :- | :- | :- |
 |Code without proposal|Claude Code starts writing files immediately|Stop, ask for the proposal first|
-|Generic React Native code|Boilerplate that doesn’t reference Kena tokens or spec|Point to docs/02-design-tokens.md, ask for revision|
+|Generic React Native code|Boilerplate that doesn’t reference Leiko tokens or spec|Point to docs/02-design-tokens.md, ask for revision|
 |Forbidden language slips through|Word like "patient" or "diagnose" appears in copy|Reject the commit, point to docs/05-voice-and-claims.md|
 |New dependency added unannounced|package.json changed without prior discussion|Ask why, evaluate, decide — don’t accept silently|
 |Tests that don’t actually test|Tests that mock everything and assert nothing meaningful|Ask for at least one assertion that would catch a real regression|

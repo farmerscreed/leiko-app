@@ -1,7 +1,7 @@
 D8a
 Self-Buyer Mode Addendum
 Amendment to D8 — Design System Specification v1.0
-Kena — Caregiver Blood Pressure Monitoring App
+Leiko — Caregiver Blood Pressure Monitoring App
 Version 1.0
 Status: Required reading alongside D8
 Prepared for: LawOne Cloud LLC
@@ -39,8 +39,8 @@ D8 Design System Specification v1.0 underweighted this persona — §1.4 specifi
 D8a (this document) closes that gap. It does NOT change D8’s caregiver/parent specifications — it adds a parallel track
 
 Executive Summary
-Kena ships v1.0 with a self-buyer mode — Mode 2 in D6 §4.2. The buyer is one identity who is both wearer and watcher: someone recently diagnosed with hypertension who buys the watch for themselves. They may invite family caregivers later (hybrid mode), but at first launch they are alone with their own data.
-The self-buyer is a tertiary persona, not the primary buyer. D5 §7.1 deliberately positions Kena in the Caregiver × Warm quadrant. The self-buyer flow exists to capture customers who arrive through Amazon listings, Shopify direct, or partner referrals — not to compete head-on with Omron, Withings, or Hello Heart for the self-monitoring crowd. The bar is: a self-buyer can use Kena well, never that they will love it more than a self-monitoring-first product.
+Leiko ships v1.0 with a self-buyer mode — Mode 2 in D6 §4.2. The buyer is one identity who is both wearer and watcher: someone recently diagnosed with hypertension who buys the watch for themselves. They may invite family caregivers later (hybrid mode), but at first launch they are alone with their own data.
+The self-buyer is a tertiary persona, not the primary buyer. D5 §7.1 deliberately positions Leiko in the Caregiver × Warm quadrant. The self-buyer flow exists to capture customers who arrive through Amazon listings, Shopify direct, or partner referrals — not to compete head-on with Omron, Withings, or Hello Heart for the self-monitoring crowd. The bar is: a self-buyer can use Leiko well, never that they will love it more than a self-monitoring-first product.
 This addendum specifies five things that D8 v1.0 missed:
 A first-launch fork between “For someone I care for” and “For myself” (D6 US-1)
 A self-buyer onboarding sub-flow with its own headline copy and explainer (US-7, US-8, US-9)
@@ -193,7 +193,7 @@ String
 Headline
 Who are you setting up for?
 Body
-Kena works for both — the path just looks a little different.
+Leiko works for both — the path just looks a little different.
 CTA 1 label
 Someone I care for
 CTA 1 caption (under)
@@ -205,7 +205,7 @@ I have or want to track my own blood pressure
  
 3.1.2 Component Use (from D8 §3)
 Container: standard screen with color.surface.base
-Logo: Kena mark, 96pt, centered, color.brand.primary
+Logo: Leiko mark, 96pt, centered, color.brand.primary
 Headline: type.display-l, color.text.primary
 Body: type.body-l, color.text.secondary, max-width 280pt
 CTA 1 and CTA 2: button.primary variant for both — NOT primary + secondary. The decision should not visually privilege one over the other.
@@ -225,7 +225,7 @@ Body
 CTA
 4.2.4
 Your blood pressure, in your own words.
-Kena helps you understand what your numbers mean — in plain language, on your terms.
+Leiko helps you understand what your numbers mean — in plain language, on your terms.
 Continue (button.primary)
 4.2.5
 Same accuracy as your doctor’s cuff.
@@ -335,7 +335,7 @@ D8 §4.9 step 5 success copy says “Paired”. In self-buyer mode this is uncha
 6. Home / Your Readings — SUPERSEDES D8 §4.5 (for self-buyer track only)
 The single most consequential UI change in this addendum. The Family Circle metaphor is replaced by a single-protagonist layout: your latest reading at the top, your trend immediately below, your weekly snapshot below that. No cards-per-parent. No “Add a family member” primary affordance.
 6.1 Screen Anatomy
-Header bar: app title (“Kena”) on the left, settings gear icon on the right
+Header bar: app title (“Leiko”) on the left, settings gear icon on the right
 Anomaly Banner (D8 §3.4) at top if active — self-framed copy variant per §12 below
 Hero card: latest reading. Larger than the equivalent caregiver Reading Card. Uses type.numeric-xl (56pt) for BP value. Range chip below. Timestamp.
 Below hero: trend mini-chart (last 7 days, BP only, sparkline-style — not the full §3.10 BP Trend Chart). Tap-through to full Trends screen.
@@ -491,11 +491,11 @@ ADDS: tap-through on each stat opens a brief explainer (per D9) — e.g., what "
 ADDS a feature that does not exist in caregiver mode:
 CTA at the bottom of the Trends screen: "Save as PDF for my doctor" (button.secondary)
 Generates a one-page PDF with header (name, age, date range), summary stats, the BP trend chart, and a small text section "What I want to discuss" (free-form notes the user typed in §7.3)
-Output file: Kena_BP_Report_{YYYY-MM-DD}.pdf, shareable via OS native share sheet (email, AirDrop, WhatsApp, print)
-Locked behind paywall (Kena Plus subscription)
+Output file: Leiko_BP_Report_{YYYY-MM-DD}.pdf, shareable via OS native share sheet (email, AirDrop, WhatsApp, print)
+Locked behind paywall (Leiko Plus subscription)
  
 Doctor-ready export is a paywall lever
-Per D6 §4.2 Mode 2 acceptance criteria, the self-buyer wants a one-page summary they can show their doctor. This is the single most compelling paywall trigger for this persona. Designers: do NOT show the export CTA as locked-and-greyed. Show it normal, and reveal the paywall on tap with the framing "Get the full PDF in Kena Plus" (per §9 below).
+Per D6 §4.2 Mode 2 acceptance criteria, the self-buyer wants a one-page summary they can show their doctor. This is the single most compelling paywall trigger for this persona. Designers: do NOT show the export CTA as locked-and-greyed. Show it normal, and reveal the paywall on tap with the framing "Get the full PDF in Leiko Plus" (per §9 below).
 
 9. Paywall — AMENDS D8 §4.12
 9.1 Trigger
@@ -515,7 +515,7 @@ Hero headline
 Stay close, every day
 Understand your numbers
 Hero body
-Kena helps you stay close to your parent’s health — with calm, contextual updates.
+Leiko helps you stay close to your parent’s health — with calm, contextual updates.
 See trends clearly. Share them with your doctor. Get plain-language explanations of what your readings mean.
  
 9.4 Value Bullets — SUPERSEDES
@@ -609,7 +609,7 @@ Self-buyer (D8a)
 "What do my numbers mean?" / "How am I doing this week?" / "Is 138/86 high for someone my age?"
  
 11.4 Disclaimer Footer
-UNCHANGED: "Kena offers context, not medical advice. Always check with a clinician."
+UNCHANGED: "Leiko offers context, not medical advice. Always check with a clinician."
  
 11.5 Forbidden Phrases (per D5 §6.4)
 UNCHANGED: enforced via copy-lint on prompt template AND output guard (D7 §4)
@@ -660,7 +660,7 @@ Sarah accepted your invite
 She can now see your readings.
 subscription-billing
 Subscription renewing
-Kena will renew tomorrow for $4.99/month.
+Leiko will renew tomorrow for $4.99/month.
 watch-shipped
 Your watch is on the way
 Tracking #123: arriving Tuesday.
@@ -723,9 +723,9 @@ UNCHANGED: anatomy, voice rules
 
 14. Edge Cases
 14.1 Self-buyer who already has a paired watch and changes mode (does not exist in v1.0)
-account_type is set on the onboarding fork and not user-editable. A self-buyer who decides they’d rather use Kena to monitor a parent must contact support, who creates a new account. This is intentional and matches the routing-rule philosophy in §1.2 — it forces a clean implementation rather than a leaky toggle.
-14.2 Self-buyer invites a family member who is also a Kena user
-Possible scenario: a self-buyer invites their adult daughter, who already has a Kena account because she set Kena up for her own mother. This is supported. The daughter’s account is account_type = caregiver and that does not change. She gains a new family_membership where she is a caregiver of her father (the self-buyer). Her home screen shows two cards now: her mother (existing) + her father (the self-buyer she just got added to). The data model in D7 §3 supports this multi-family case via the family_members table.
+account_type is set on the onboarding fork and not user-editable. A self-buyer who decides they’d rather use Leiko to monitor a parent must contact support, who creates a new account. This is intentional and matches the routing-rule philosophy in §1.2 — it forces a clean implementation rather than a leaky toggle.
+14.2 Self-buyer invites a family member who is also a Leiko user
+Possible scenario: a self-buyer invites their adult daughter, who already has a Leiko account because she set Leiko up for her own mother. This is supported. The daughter’s account is account_type = caregiver and that does not change. She gains a new family_membership where she is a caregiver of her father (the self-buyer). Her home screen shows two cards now: her mother (existing) + her father (the self-buyer she just got added to). The data model in D7 §3 supports this multi-family case via the family_members table.
 14.3 Self-buyer who later wants to change account_type after caregivers join
 Cannot. This is a deliberate constraint. The clean path is: leave the self-buyer family (cancel subscription / archive), create a new caregiver account. Support intervention — support documentation should call this out.
 14.4 Self-buyer who is also their own caregiver across two devices
@@ -735,7 +735,7 @@ If a self-buyer cancels their subscription, the doctor-PDF export and full-histo
 14.6 Pregnancy disclosure
 On the self-buyer Year-of-birth onboarding (§4.1.1), users who would plausibly be in childbearing age range (no specific cutoff applied — do not gate by age) see a one-time disclosure before completing setup:
 Verified disclosure copy
-A note about pregnancy: Kena is not validated for use during pregnancy. If you are pregnant or trying to conceive, please use a clinician-recommended upper-arm monitor instead. We will let you know when we add pregnancy support.
+A note about pregnancy: Leiko is not validated for use during pregnancy. If you are pregnant or trying to conceive, please use a clinician-recommended upper-arm monitor instead. We will let you know when we add pregnancy support.
 Acknowledgement: "I understand" — button.primary
 This appears once and is logged to the audit log per D3 (HIPAA-aligned consent)
 Self-buyers who change country / region / profile to indicate pregnancy in future can re-trigger this

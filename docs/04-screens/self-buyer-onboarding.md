@@ -22,7 +22,7 @@ Three screens parallel to the caregiver onboarding intros. **Same visual layout*
 
 | Screen | Headline | Body | CTA |
 | --- | --- | --- | --- |
-| **4.2.4** | "Your blood pressure, in your own words." | "Kena helps you understand what your numbers mean — in plain language, on your terms." | `button.primary` "Continue" |
+| **4.2.4** | "Your blood pressure, in your own words." | "Leiko helps you understand what your numbers mean — in plain language, on your terms." | `button.primary` "Continue" |
 | **4.2.5** | "Same accuracy as your doctor's cuff." | "The watch uses an inflatable cuff — the same method clinicians use — measured from your wrist instead of your arm." | `button.primary` "Continue" + `button.ghost` "Skip" |
 | **4.2.6** | "See your trends. Show them to your doctor." | "A clear weekly summary, the kind you can save and share at your next appointment." | `button.accent` "Get started" + `button.ghost` "Skip" |
 
@@ -82,7 +82,7 @@ If CTA 2 is chosen, the user lands on the home screen with a friendly empty stat
 
 When the user enters a year of birth that places them in plausible childbearing age range (no specific cutoff — **do not gate by age**), a one-time disclosure appears before completing setup:
 
-> **A note about pregnancy**: Kena is not validated for use during pregnancy. If you are pregnant or trying to conceive, please use a clinician-recommended upper-arm monitor instead. We will let you know when we add pregnancy support.
+> **A note about pregnancy**: Leiko is not validated for use during pregnancy. If you are pregnant or trying to conceive, please use a clinician-recommended upper-arm monitor instead. We will let you know when we add pregnancy support.
 >
 > Acknowledgement: `button.primary` "I understand"
 

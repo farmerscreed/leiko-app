@@ -32,7 +32,7 @@ Don't wait for the caregiver to check. Tell them what they need to know, when th
 Never patronise. Never say "simple" or "easy". Never use baby-talk for elders. The watch reports to the family, but the parent is in control of their own life.
 
 - ✗ "Simple. Easy. Just for you!"
-- ✓ "Designed to fit your morning. Whether it's 6:00am tea or 9:00am coffee, Kena adapts to your rhythm."
+- ✓ "Designed to fit your morning. Whether it's 6:00am tea or 9:00am coffee, Leiko adapts to your rhythm."
 
 ---
 
@@ -88,7 +88,7 @@ This list is the canonical input to the copy-lint hard-fail rules. Every string 
 | `you may have`, `we detected`, `you are at risk` | D8a §2.3 — predictive / diagnostic language | "this reading is classified as Elevated using the AHA 2017 thresholds" — descriptive only |
 | `take control of your hypertension` | D8a §3.4 — self-help cliché; brand voice is calmer | Use Reassuring or Informative tone |
 | `don't wait`, `start today`, `you owe it to yourself` | D8a §3.4 — urgency in onboarding | Calm-before-clever: no urgency in onboarding |
-| `smartwatch` (as primary product noun) | We are a caregiver platform that ships with a watch; the watch is incidental | "the wristband", "the device", "the watch", or just "Kena" (verb-able) |
+| `smartwatch` (as primary product noun) | We are a caregiver platform that ships with a watch; the watch is incidental | "the wristband", "the device", "the watch", or just "Leiko" (verb-able) |
 | `predict` (in disease context) | FDA enforcement risk; outside K141683 IFU | "helps you and your doctor see patterns over time" |
 | `prevent` (in disease context) | Same | Same |
 | `diagnose`, `diagnosis`, `diagnostic` | Diagnosis is a doctor's job | "measures your blood pressure" |
@@ -175,7 +175,7 @@ Every screen has one. Empty states are first impressions.
 | confirmed-urgent | Please call Mum | Three high readings in the last hour. We recommend reaching out now. |
 | missed-reading | Mum hasn't worn the watch in 3 days | A friendly nudge might help. Tap to send a hello. |
 | family-invite | Your sister joined the circle | You're both caring for Dad now. |
-| subscription-billing | Subscription renewing | Kena will renew tomorrow for $4.99/month. |
+| subscription-billing | Subscription renewing | Leiko will renew tomorrow for $4.99/month. |
 | watch-shipped | Your watch is on the way | Tracking #123: arriving Tuesday. |
 | parent-pairing-handoff | Pair the watch on Dad's phone | Tap to open Dad's pairing screen on his Android Chrome. |
 

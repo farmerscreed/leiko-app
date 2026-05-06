@@ -22,7 +22,7 @@ Newly-signed-up caregiver. Has just chosen "Someone I love" on the fork screen.
 | Field | Value |
 | --- | --- |
 | Headline | "Stay close to the people who shaped you." |
-| Body | "Kena is a calm way to keep an eye on a parent's health, even from far away." |
+| Body | "Leiko is a calm way to keep an eye on a parent's health, even from far away." |
 | CTA | `button.primary` "Continue" |
 | Layout | Centred 240×180pt illustration, headline (`type.display-l`), body (`type.body-l`, max-width 280pt), CTA at bottom of safe area. 3-dot page indicator, active = navy. |
 

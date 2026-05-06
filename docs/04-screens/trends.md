@@ -27,7 +27,7 @@ Show BP and HR trends over time. Surface meaningful patterns. Generate a doctor-
 | Summary stats card | `Card` (default elevation): average sys/dia, **% in range** (primary stat in self-buyer per D8a §8.3), anomaly count for selected range. Tier C summary line below if Plus. **Self-buyer (D8a §8.3 ADDS)**: tap-through on each stat opens a brief explainer (per `docs/08-learn-module.md`) — e.g., what "average BP" means, what "in-range" means. |
 | "View as table" toggle | `button.ghost` — flips chart for a sortable list (a11y essential). |
 | "Share with doctor" CTA (caregiver, Plus) | `button.primary` — opens PDF export sheet. Free-tier sees "Share with doctor — Plus" → paywall. |
-| **"Save as PDF for my doctor" CTA (self-buyer, Plus — D8a §8.4 ADDS)** | `button.secondary` at the bottom of the Trends screen. Generates a one-page PDF with header (name, age, date range), summary stats, BP trend chart, and a small "What I want to discuss" section (free-form notes from `docs/04-screens/reading-detail.md` "Note for my doctor"). Output filename: `Kena_BP_Report_{YYYY-MM-DD}.pdf`. Locked behind Kena Plus. |
+| **"Save as PDF for my doctor" CTA (self-buyer, Plus — D8a §8.4 ADDS)** | `button.secondary` at the bottom of the Trends screen. Generates a one-page PDF with header (name, age, date range), summary stats, BP trend chart, and a small "What I want to discuss" section (free-form notes from `docs/04-screens/reading-detail.md` "Note for my doctor"). Output filename: `Leiko_BP_Report_{YYYY-MM-DD}.pdf`. Locked behind Leiko Plus. |
 
 ---
 
@@ -61,7 +61,7 @@ Per `docs/05-voice-and-claims.md`:
 - Bottom sheet with: time range selector (7d / 30d / 90d / custom), preview thumbnail, options (include notes? include comments?), "Generate PDF" `button.primary`.
 - Edge Function `/generate-doctor-report` (Sprint 9 deliverable; `service_role`) renders the PDF and returns a signed URL.
 - Native share sheet (iOS / Android) for Email / WhatsApp / AirDrop / etc.
-- PDF voice: passes copy-lint. Never "diagnose", "treat", "predict". Cover line: *"This report is general information from {parent_name}'s Kena watch. It is not a diagnosis. Please discuss with their doctor."*
+- PDF voice: passes copy-lint. Never "diagnose", "treat", "predict". Cover line: *"This report is general information from {parent_name}'s Leiko watch. It is not a diagnosis. Please discuss with their doctor."*
 
 ---
 
@@ -116,6 +116,6 @@ Per `docs/05-voice-and-claims.md`:
 
 Per D6 §4.2 Mode 2 acceptance criteria, the self-buyer wants a one-page summary they can show their doctor. **This is the single most compelling paywall trigger for this persona.**
 
-> **Don't show the export CTA as locked-and-greyed.** Show it normal, and reveal the paywall on tap with the framing *"Get the full PDF in Kena Plus"* (per `docs/09-paywall-and-iap.md`).
+> **Don't show the export CTA as locked-and-greyed.** Show it normal, and reveal the paywall on tap with the framing *"Get the full PDF in Leiko Plus"* (per `docs/09-paywall-and-iap.md`).
 
-PDF cover line passes voice gate: *"This report is general information from your Kena watch. It is not a diagnosis. Please discuss with your doctor."*
+PDF cover line passes voice gate: *"This report is general information from your Leiko watch. It is not a diagnosis. Please discuss with your doctor."*

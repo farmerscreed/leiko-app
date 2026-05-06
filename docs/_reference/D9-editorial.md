@@ -1,10 +1,10 @@
-﻿D9  —  Learn / Education Module Specification
+D9  —  Learn / Education Module Specification
 
 **D9**
 
 **Learn / Education Module**
 
-Specification — Kena Caregiver BP Monitoring App
+Specification — Leiko Caregiver BP Monitoring App
 
 **Version 1.0**
 
@@ -198,7 +198,7 @@ When a user taps "What does this mean?" on a Reading Detail (D8a §5.3), the sys
 
 
 ## **3.4 Default Card Order on Learn Module Home**
-When the user opens the Learn tab, cards are ordered to surface progressively useful content for someone who has just started using Kena.
+When the user opens the Learn tab, cards are ordered to surface progressively useful content for someone who has just started using Leiko.
 
 - Featured row at top: numbers-001 ("What is blood pressure?") — the one card every user reads first
 - Section by category, in the order: NUMBERS → CHANGES → OTHER → DAILY → CULTURAL → DOCTOR
@@ -246,7 +246,7 @@ Three new screens and one new component are introduced for the Learn module. All
 
 
 ### **4.2.1 MDX Component Mapping**
-Body content is authored in MDX so editorial team can write naturally. The MDX renderer maps Markdown elements to Kena typography tokens:
+Body content is authored in MDX so editorial team can write naturally. The MDX renderer maps Markdown elements to Leiko typography tokens:
 
 |**MDX element**|**Renders as**|
 | :- | :- |
@@ -622,7 +622,7 @@ When the system flags a Calm-Concerned or Confirmed-Urgent state (per D6 anomaly
 ## **6.6 DOCTOR — Conversations with your doctor (3 cards)**
 ### **doctor-001 — When to talk to your doctor about BP**
 
-|**Outline**|**(a) For Stage 1 readings: bring it up at your next routine visit. (b) For Stage 2 readings sustained over a week: schedule a visit. Don’t wait for the next routine. (c) For Crisis readings (≥180/120) with symptoms: emergency. (d) For Crisis readings without symptoms: call your doctor today; usually managed without admission. (e) Bring your home trend (Kena makes this easy) — doctors get more from a 30-day chart than from one in-clinic reading. (f) Universal escape valve.**|
+|**Outline**|**(a) For Stage 1 readings: bring it up at your next routine visit. (b) For Stage 2 readings sustained over a week: schedule a visit. Don’t wait for the next routine. (c) For Crisis readings (≥180/120) with symptoms: emergency. (d) For Crisis readings without symptoms: call your doctor today; usually managed without admission. (e) Bring your home trend (Leiko makes this easy) — doctors get more from a 30-day chart than from one in-clinic reading. (f) Universal escape valve.**|
 | :- | :- |
 |Sources|AHA/ACC 2017|
 
@@ -636,7 +636,7 @@ When the system flags a Calm-Concerned or Confirmed-Urgent state (per D6 anomaly
 
 ### **doctor-003 — Sharing your trends**
 
-|**Outline**|**(a) The Kena weekly summary (subscription) gives you a one-page PDF you can show your doctor. (b) Even without subscription, you can show the Trends screen on your phone — most doctors will look. (c) A 14–30 day home trend is more useful than a single in-clinic reading, especially for ruling out white-coat or masked hypertension. (d) If your doctor is not used to looking at home BP data, frame it as "I have been tracking at home; here is what I am seeing." (e) Universal escape valve.**|
+|**Outline**|**(a) The Leiko weekly summary (subscription) gives you a one-page PDF you can show your doctor. (b) Even without subscription, you can show the Trends screen on your phone — most doctors will look. (c) A 14–30 day home trend is more useful than a single in-clinic reading, especially for ruling out white-coat or masked hypertension. (d) If your doctor is not used to looking at home BP data, frame it as "I have been tracking at home; here is what I am seeing." (e) Universal escape valve.**|
 | :- | :- |
 |Sources|AHA/ACC 2017 home monitoring; ESH 2023|
 
@@ -669,7 +669,7 @@ The AI response must be filtered server-side BEFORE delivery. Output guard (D7 �
 | :- | :- |
 |Specific medication|"Decisions about medication are best made with your doctor or pharmacist — they know what else you’re taking and what’s right for you."|
 |Symptom interpretation|"Symptoms can mean different things in different people. Worth a chat with your doctor about what you’re feeling."|
-|Pregnancy / pediatric|"Kena isn’t designed for pregnancy or for younger users — those situations need a clinician who can use the right monitor and the right thresholds."|
+|Pregnancy / pediatric|"Leiko isn’t designed for pregnancy or for younger users — those situations need a clinician who can use the right monitor and the right thresholds."|
 |Mental health crisis|"This sounds heavy. If you’re struggling, please reach out to a friend, family member, or local crisis line. In Nigeria you can call the Mental Health Foundation. You’re not alone in this."|
 |Generic out-of-scope|"That’s outside what I can help with. Your doctor is the right person for this one."|
 

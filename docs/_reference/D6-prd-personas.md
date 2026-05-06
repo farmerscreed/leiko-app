@@ -1,10 +1,10 @@
-﻿D6 — Product Requirements Document (PRD) v1.0
+D6 — Product Requirements Document (PRD) v1.0
 
 **DELIVERABLE 6**
 
 **Product Requirements**
 
-*Kena Caregiver BP Monitoring App  •  v1.0 (MVP)*
+*Leiko Caregiver BP Monitoring App  •  v1.0 (MVP)*
 
 BP Smartwatch Venture  •  LawOne Cloud LLC
 
@@ -15,7 +15,7 @@ BP Smartwatch Venture  •  LawOne Cloud LLC
 
 |**Deliverable**|D6 — Product Requirements Document (PRD), v1.0 MVP|
 | :- | :- |
-|**Project**|Kena Caregiver BP Monitoring App (Urion U16H + U19M white-label)|
+|**Project**|Leiko Caregiver BP Monitoring App (Urion U16H + U19M white-label)|
 |**Entity**|LawOne Cloud LLC (US-registered)|
 |**Output Standard**|Implementation-ready. Every requirement traced to D1–D5. Every user story has Given/When/Then acceptance criteria.|
 |**Predecessor Documents**|D1 (Competitive), D2 (Unit Economics), D3 (Regulatory), D4 (App Strategy), D5 (Brand Brief)|
@@ -25,7 +25,7 @@ BP Smartwatch Venture  •  LawOne Cloud LLC
 
 
 # **§0 Executive Summary**
-This PRD specifies the v1.0 (MVP) of Kena, a caregiver-first blood-pressure monitoring application that pairs with an FDA-cleared inflatable-cuff smartwatch (Urion U16H / U19M, marketed as Kena Watch / Kena Watch Pro per D5 §5.2). The MVP serves the diaspora caregiver as the primary buyer (per D5 §1.1), with secondary support for US Black-American family caregivers (D5 §1.2) and a tertiary path for newly-diagnosed self-buyers (D5 §1.3).
+This PRD specifies the v1.0 (MVP) of Leiko, a caregiver-first blood-pressure monitoring application that pairs with an FDA-cleared inflatable-cuff smartwatch (Urion U16H / U19M, marketed as Leiko Watch / Leiko Watch Pro per D5 §5.2). The MVP serves the diaspora caregiver as the primary buyer (per D5 §1.1), with secondary support for US Black-American family caregivers (D5 §1.2) and a tertiary path for newly-diagnosed self-buyers (D5 §1.3).
 
 Every requirement in this document is traceable to a source document — D1 (competitive evidence), D2 (unit economics and pricing), D3 (regulatory boundaries), D4 (technical and feature specifications), or D5 (brand voice and audience). Where a requirement is an inference rather than a direct citation, it is explicitly flagged as an assumption with an open question for founder review (see §10).
 ## **Build Scope at a Glance**
@@ -35,7 +35,7 @@ Every requirement in this document is traceable to a source document — D1 (com
 |**Languages**|English (US locale) at MVP. Architecture supports localization (per D4 Block 3 + D5 §10.3); additional languages deferred to v2.|
 |**Markets**|United States primary (per D2 + D3 — US is the locked launch market). Nigeria distribution via separate channel (D2). UK, Canada deferred.|
 |**Device Pairing**|Bluetooth 5.2 LE; one watch ↔ one parent identity; up to 5 caregivers can view (per D4 Block 2.1)|
-|**Subscription**|Kena Plus at $4.99/month or $39.99/year USD (per D2 + D5 §5.3); free tier always shows latest reading + 7-day history|
+|**Subscription**|Leiko Plus at $4.99/month or $39.99/year USD (per D2 + D5 §5.3); free tier always shows latest reading + 7-day history|
 |**Build Timeline**|18 weeks across three phases (per D4 Block 5). MVP feature-complete at end of Phase 3.|
 |**Build Budget**|$35K–$55K (per D4 Block 5 Scenario A — contracted React Native engineer plus part-time backend, plus tooling)|
 ## **Document Structure**
@@ -55,7 +55,7 @@ Every requirement in this document is traceable to a source document — D1 (com
 
 # **§1 Product Vision**
 
-|<p>**PRODUCT VISION (v1.0 MVP)**</p><p>Kena lets a caregiver watch over a parent's blood pressure from anywhere in the world. The watch is on the parent's wrist; the app is on the caregiver's phone. Every morning, the caregiver knows how the parent slept, what the parent's blood pressure was, and whether anything needs attention — without asking the parent to remember to call back. We are building this for the millions of diaspora and family caregivers whose love is constrained by geography but whose responsibility is not.</p>|
+|<p>**PRODUCT VISION (v1.0 MVP)**</p><p>Leiko lets a caregiver watch over a parent's blood pressure from anywhere in the world. The watch is on the parent's wrist; the app is on the caregiver's phone. Every morning, the caregiver knows how the parent slept, what the parent's blood pressure was, and whether anything needs attention — without asking the parent to remember to call back. We are building this for the millions of diaspora and family caregivers whose love is constrained by geography but whose responsibility is not.</p>|
 | :- |
 
 This vision is anchored to D5 §1 (audience), D5 §6.1 (primary message: "Watch over your parents from anywhere in the world"), and D5 §7 (positioning in the empty Caregiver × Warm quadrant of the BP smartwatch category).
@@ -69,7 +69,7 @@ This vision is anchored to D5 §1 (audience), D5 §6.1 (primary message: "Watch 
 # **§2 Target Users**
 Three personas, all from D5 §1. Each implies acceptance criteria for the product — i.e., things that must be true at v1.0 for that persona to actually adopt the product. Where two personas have conflicting needs, the primary persona (Adaeze) wins.
 ## **2.1 Persona 1 — "Adaeze" (Primary)**
-Diaspora caregiver. Composite from D5 §1.1; built from real data points (NiDCOM 2025 diaspora corridor data, Pew 2024 device ownership, D1 hypertension prevalence in Lagos urban populations). "Adaeze" is a stand-in name — Igbo, meaning "king's daughter" — used here for clarity in scenarios. The brand name is Kena (D5 §2).
+Diaspora caregiver. Composite from D5 §1.1; built from real data points (NiDCOM 2025 diaspora corridor data, Pew 2024 device ownership, D1 hypertension prevalence in Lagos urban populations). "Adaeze" is a stand-in name — Igbo, meaning "king's daughter" — used here for clarity in scenarios. The brand name is Leiko (D5 §2).
 
 |**Age**|38–52 (sandwich generation)|
 | :- | :- |
@@ -119,7 +119,7 @@ Same product, different onboarding path. Per D5 §1.3 and D4 Block 2.2.
 
 
 # **§3 User Problems & Jobs-to-be-Done**
-What people are really trying to do when they engage with Kena. Each job-to-be-done (JTBD) maps to evidence in D1 (what competitors fail at) and D5 (what audiences are trying to accomplish emotionally). The functional requirements in §5 are organized to fulfill these jobs — not to mirror feature lists from competitors.
+What people are really trying to do when they engage with Leiko. Each job-to-be-done (JTBD) maps to evidence in D1 (what competitors fail at) and D5 (what audiences are trying to accomplish emotionally). The functional requirements in §5 are organized to fulfill these jobs — not to mirror feature lists from competitors.
 ## **3.1 Caregiver Jobs-to-be-Done**
 ### **JTBD-1: "When my parent's BP is not okay, I want to know — without having to call them and have them downplay it."**
 **Source:** D5 §1.1 ("Wants something proactive, not reactive. Wants to know before being told.") + D1 caregiver-app sentiment research (top complaint about competing solutions: "my parent doesn't tell me when something's wrong").
@@ -166,9 +166,9 @@ The product is three components that together fulfill the JTBDs in §3.
 
 |**Component**|**Function**|**Source**|
 | :- | :- | :- |
-|**Kena Watch (U16H) Kena Watch Pro (U19M)**|Inflatable-cuff oscillometric BP smartwatch worn by the parent. Measures BP, HR, SpO2, sleep, steps. Streams readings to the parent's phone via BLE 5.2. Battery life 10 days.|D5 §5.2 (naming); D4 Block 4 (BLE protocol); Urion / Alphamed product spec|
-|**Kena App (iOS + Android)**|Mobile application with three modes: (a) Caregiver mode — primary; (b) Parent mode — large-text, voice-first; (c) Self-buyer mode — same as caregiver but watcher==wearer.|D4 Blocks 2 + 3; D5 §10.4|
-|**Kena Plus (subscription)**|$4.99/month or $39.99/year USD. Unlocks AI weekly summaries, multi-caregiver, anomaly detection, full historical trends, and clinician-ready reports.|D2 (pricing); D5 §3.4 (paywall ethics); D5 §5.3 (subscription naming)|
+|**Leiko Watch (U16H) Leiko Watch Pro (U19M)**|Inflatable-cuff oscillometric BP smartwatch worn by the parent. Measures BP, HR, SpO2, sleep, steps. Streams readings to the parent's phone via BLE 5.2. Battery life 10 days.|D5 §5.2 (naming); D4 Block 4 (BLE protocol); Urion / Alphamed product spec|
+|**Leiko App (iOS + Android)**|Mobile application with three modes: (a) Caregiver mode — primary; (b) Parent mode — large-text, voice-first; (c) Self-buyer mode — same as caregiver but watcher==wearer.|D4 Blocks 2 + 3; D5 §10.4|
+|**Leiko Plus (subscription)**|$4.99/month or $39.99/year USD. Unlocks AI weekly summaries, multi-caregiver, anomaly detection, full historical trends, and clinician-ready reports.|D2 (pricing); D5 §3.4 (paywall ethics); D5 §5.3 (subscription naming)|
 ## **4.2 Modes of Use**
 ### **Mode 1: Caregiver-Wearer Pair (default)**
 Caregiver buys, sets up account, ships watch to parent. Parent receives watch, scans QR code, app guides them through pairing. From that point on: parent wears the watch and takes readings; caregiver views readings in their own app on their phone.
@@ -196,7 +196,7 @@ The first 60 seconds determine whether the customer reaches their first reading.
 
 **US-1: First launch — choose path**
 
-|**As a**|first-time user opening the Kena app|
+|**As a**|first-time user opening the Leiko app|
 | :- | :- |
 |**I want to**|see a clear choice between "This is for my parent" and "This is for me"|
 |**So that**|the app routes me through the right setup flow without making assumptions|
@@ -222,7 +222,7 @@ The first 60 seconds determine whether the customer reaches their first reading.
 
 - Given the caregiver path is selected, When the user reaches the auth screen, Then the screen offers: (a) email + magic link, (b) Apple Sign-In on iOS, (c) Google Sign-In on Android.
 - Given the user enters an email, When they tap "Continue", Then a 6-digit OTP is sent within 10 seconds and the user can enter it to complete sign-in.
-- Given the user signs in with Apple or Google, When auth succeeds, Then a Kena account is created using the email returned by the provider; no extra registration step is required.
+- Given the user signs in with Apple or Google, When auth succeeds, Then a Leiko account is created using the email returned by the provider; no extra registration step is required.
 - Given the user has signed in successfully, Then they are taken to US-3 (parent profile setup).
 - Privacy: per D3, no health data is collected before consent. Auth screen displays a single privacy link to the privacy policy.
 - Voice check: "Welcome." or "Glad you're here." — never "Welcome to the app!" with exclamation (D5 §3.4).
@@ -247,7 +247,7 @@ The first 60 seconds determine whether the customer reaches their first reading.
 
 |**As a**|caregiver setting up for the first time|
 | :- | :- |
-|**I want to**|see a 3-step visual explanation of how Kena works|
+|**I want to**|see a 3-step visual explanation of how Leiko works|
 |**So that**|I understand what to expect before I order or pair the watch|
 |**Source**|*D4 Block 2.2 (onboarding flow); D5 §3, §4.3, §9.2*|
 
@@ -270,7 +270,7 @@ The first 60 seconds determine whether the customer reaches their first reading.
 
 - Given the caregiver finishes the explainer, Then they see two CTAs: "I already have the watch" and "I need to order one".
 - Given the caregiver taps "I already have the watch", Then the app proceeds to watch pairing (US-13 onward).
-- Given the caregiver taps "I need to order one", Then the app opens an in-app browser or external Safari/Chrome view to the Kena Shopify storefront, with their account email prefilled in the order form.
+- Given the caregiver taps "I need to order one", Then the app opens an in-app browser or external Safari/Chrome view to the Leiko Shopify storefront, with their account email prefilled in the order form.
 - Given the caregiver returns to the app after placing an order, Then the home screen displays a "Your watch is on its way" status with the order number and estimated arrival date (manually entered for MVP — no order tracking integration in v1.0; deferred to v2).
 - ASSUMPTION FLAG: Order tracking integration with Shopify is deferred to v2. v1.0 displays a static placeholder. Founder must validate this is acceptable. (See §9.)
 
@@ -301,14 +301,14 @@ The first 60 seconds determine whether the customer reaches their first reading.
 
 - Given the self-buyer path is selected, When the user reaches the auth screen, Then the same auth options as US-2 are offered.
 - Given auth succeeds, When the user lands on profile setup, Then they are asked: (a) first name, (b) year of birth, (c) optional: "Have you been diagnosed with high blood pressure?" Yes / No / Prefer not to say.
-- Given the user completes profile setup, Then they proceed to a self-buyer-specific explainer (US-8) that frames the product as "Kena helps you understand your blood pressure" rather than "Watch over your parents".
-- Voice: per D5 §6.2 secondary message C — "Hypertension is what you do every day. Kena helps you actually do it."
+- Given the user completes profile setup, Then they proceed to a self-buyer-specific explainer (US-8) that frames the product as "Leiko helps you understand your blood pressure" rather than "Watch over your parents".
+- Voice: per D5 §6.2 secondary message C — "Hypertension is what you do every day. Leiko helps you actually do it."
 
 **US-8: Self-buyer — explainer**
 
 |**As a**|self-buyer setting up for myself|
 | :- | :- |
-|**I want to**|understand what Kena will help me with|
+|**I want to**|understand what Leiko will help me with|
 |**So that**|I see clear value before being asked for credit card or watch order|
 |**Source**|*D5 §3.5, §6.4 (forbidden claims — must not say "diagnose" or "detect")*|
 
@@ -357,7 +357,7 @@ The first 60 seconds determine whether the customer reaches their first reading.
 
 **Acceptance criteria:**
 
-- Given the caregiver completes US-10 (privacy disclosure), Then a permission-priming screen is shown BEFORE the system permission dialog: "Kena uses notifications to let you know how Mom did this morning. We'll never spam you, and you can adjust which alerts come through."
+- Given the caregiver completes US-10 (privacy disclosure), Then a permission-priming screen is shown BEFORE the system permission dialog: "Leiko uses notifications to let you know how Mom did this morning. We'll never spam you, and you can adjust which alerts come through."
 - Given the caregiver taps Continue, Then the OS push notification permission dialog is triggered.
 - Given the user grants notifications, Then the user is taken to the home screen.
 - Given the user denies notifications, Then they are still taken to the home screen, but a banner reminds them they will not receive daily summaries until they enable notifications in Settings.
@@ -377,7 +377,7 @@ The first 60 seconds determine whether the customer reaches their first reading.
 - Given the user has not yet completed auth, When they reopen the app, Then they land on the welcome screen (US-1).
 - All onboarding state must persist locally (encrypted at rest per D3) and sync to backend on auth completion.
 ## **§5.2 Watch Pairing & Parent Setup**
-Pairing is the highest-stakes moment in the user journey. Per D1 user research on competitor BP smartwatches, ~30% of users abandon at first pairing. Kena's pairing flow is engineered to handle: (a) caregiver pairing the watch on themselves, (b) caregiver pairing the watch on a parent in the same room, (c) parent (or someone helping the parent) pairing the watch when received from a remote caregiver.
+Pairing is the highest-stakes moment in the user journey. Per D1 user research on competitor BP smartwatches, ~30% of users abandon at first pairing. Leiko's pairing flow is engineered to handle: (a) caregiver pairing the watch on themselves, (b) caregiver pairing the watch on a parent in the same room, (c) parent (or someone helping the parent) pairing the watch when received from a remote caregiver.
 
 **US-13: Pairing — start**
 
@@ -390,7 +390,7 @@ Pairing is the highest-stakes moment in the user journey. Per D1 user research o
 **Acceptance criteria:**
 
 - Given the user reaches the pairing flow (from US-5, US-9, or via shared invitation US-15), Then the screen says "Power on the watch — hold the side button for 3 seconds." with an illustration showing exactly which button.
-- Given the watch is powered on and within Bluetooth range, When the app scans, Then any Kena watches advertising are listed with their last-4-digits-of-MAC for disambiguation.
+- Given the watch is powered on and within Bluetooth range, When the app scans, Then any Leiko watches advertising are listed with their last-4-digits-of-MAC for disambiguation.
 - Given the watch is detected, When the user taps it, Then the app initiates pairing using the BLE protocol per D4 Block 4.
 - Given pairing fails (timeout, watch out of range, multiple watches confusion), Then a diagnostic screen offers: retry, restart watch, or get help (deep link to support).
 - Voice: "Power on the watch." — direct and respectful. Per D5 §3.3 (proactive).
@@ -420,9 +420,9 @@ Pairing is the highest-stakes moment in the user journey. Per D1 user research o
 
 **Acceptance criteria:**
 
-- Given the parent opens the invitation link (URL or QR code per US-6), When they tap it, Then they land on a mobile web pairing flow with: "Hi [Parent's First Name]. Your daughter [Caregiver's First Name] has set up Kena to help you both watch your blood pressure. Let's pair your watch — it'll take 2 minutes."
+- Given the parent opens the invitation link (URL or QR code per US-6), When they tap it, Then they land on a mobile web pairing flow with: "Hi [Parent's First Name]. Your daughter [Caregiver's First Name] has set up Leiko to help you both watch your blood pressure. Let's pair your watch — it'll take 2 minutes."
 - Given the parent confirms, Then the web flow guides them through powering on the watch (US-13 logic) and bonding (US-14 logic) — but using web Bluetooth (where supported) or by directing them to the app.
-- Given the parent's browser does not support web Bluetooth, Then the parent is redirected to install the native Kena app, which detects the pairing context (deep link) and continues automatically.
+- Given the parent's browser does not support web Bluetooth, Then the parent is redirected to install the native Leiko app, which detects the pairing context (deep link) and continues automatically.
 - Given pairing completes, Then the parent is shown: "You're all set, [Parent's First Name]. Tap the side button on the watch any time you want to take a reading."
 - Voice: per D5 §3.4 — parent-facing copy is dignified, never patronizing. Uses parent's first name. Per D5 §10.4, all text ≥ 24pt.
 - ASSUMPTION FLAG: web Bluetooth fallback is technically uncertain in Safari iOS (limited support). May default to requiring native app install for parent. TRD must resolve. (See §9.)
@@ -468,7 +468,7 @@ Pairing is the highest-stakes moment in the user journey. Per D1 user research o
 
 **Acceptance criteria:**
 
-- Given a user pairs a second watch, When the BLE scan returns multiple Kena devices, Then each device is shown with its last-4-digits-of-MAC AND the user is asked to physically confirm by reading the matching code from the watch's pairing screen.
+- Given a user pairs a second watch, When the BLE scan returns multiple Leiko devices, Then each device is shown with its last-4-digits-of-MAC AND the user is asked to physically confirm by reading the matching code from the watch's pairing screen.
 - Given the user enters the wrong physical code, Then pairing is rejected and the user is asked to try again.
 - v1.0 supports max 2 paired watches per family (per D4 Block 2.1). Each watch is bound to exactly one parent profile.
 
@@ -497,7 +497,7 @@ Pairing is the highest-stakes moment in the user journey. Per D1 user research o
 **Acceptance criteria:**
 
 - Given pairing fails 3+ times, When the user taps "Get help", Then the app collects: (a) phone OS version, (b) Bluetooth state, (c) BLE log of last attempt, (d) watch firmware version (if discoverable), (e) user's account email.
-- Given the user consents to share, Then the diagnostic bundle is sent to support@kena.health (or the chosen support address) with a ticket ID surfaced to the user.
+- Given the user consents to share, Then the diagnostic bundle is sent to support@leiko.health (or the chosen support address) with a ticket ID surfaced to the user.
 - Privacy: no health data is included in diagnostics. User must explicitly consent. Per D3 + D4 Block 3.
 
 **US-21: Watch — language selection**
@@ -555,7 +555,7 @@ Pairing is the highest-stakes moment in the user journey. Per D1 user research o
 
 **Acceptance criteria:**
 
-- Given the caregiver taps a reading on the dashboard, Then a detail screen shows: (a) SYS / DIA / Pulse in large numerals, (b) timestamp, (c) BP category label per AHA/ACC 2017 guidelines (Normal / Elevated / Stage 1 / Stage 2 / Hypertensive Crisis), (d) a single sentence interpretation in calm tone, (e) the parent's last 5 readings as a small chart, (f) a CTA: "Ask Kena about this reading".
+- Given the caregiver taps a reading on the dashboard, Then a detail screen shows: (a) SYS / DIA / Pulse in large numerals, (b) timestamp, (c) BP category label per AHA/ACC 2017 guidelines (Normal / Elevated / Stage 1 / Stage 2 / Hypertensive Crisis), (d) a single sentence interpretation in calm tone, (e) the parent's last 5 readings as a small chart, (f) a CTA: "Ask Leiko about this reading".
 - Given the reading is in the "Hypertensive Crisis" range (per AHA: ≥180/120), Then the interpretation uses the calm-concerned tone (D5 §3.5) and includes: "This reading is high. We'd suggest a phone call to check on her." — but does NOT use diagnostic language (no "emergency", no "crisis", no "call 911" — per D3 forbidden claims).
 - Voice: copy interpretations are pre-written per BP category, in the four voice pillars. Never says "detect", "diagnose", "predict". Per D5 §6.4.
 
@@ -570,8 +570,8 @@ Pairing is the highest-stakes moment in the user journey. Per D1 user research o
 **Acceptance criteria:**
 
 - Given the caregiver taps "Recent readings" from the dashboard, Then a list appears showing the last 30 readings with: timestamp, SYS/DIA/Pulse, and a colored dot indicating BP category.
-- Given free-tier user, Then only the last 7 days of readings are shown; an upsell card at the bottom indicates "See full history with Kena Plus".
-- Given Kena Plus subscriber, Then full history is shown (paginated, infinite scroll), with month/year section headers.
+- Given free-tier user, Then only the last 7 days of readings are shown; an upsell card at the bottom indicates "See full history with Leiko Plus".
+- Given Leiko Plus subscriber, Then full history is shown (paginated, infinite scroll), with month/year section headers.
 
 **US-26: Caregiver — manually log a reading**
 
@@ -748,13 +748,13 @@ Parent UX is intentionally simpler than caregiver UX. Per D5 §10.4: large text,
 
 |**As a**|parent who wants to see their own data on a phone|
 | :- | :- |
-|**I want to**|open the Kena app on my phone in a large-text, simplified mode|
+|**I want to**|open the Leiko app on my phone in a large-text, simplified mode|
 |**So that**|I see my readings clearly|
 |**Source**|*D5 §10.4; D4 Block 2.3*|
 
 **Acceptance criteria:**
 
-- Given the parent installs the Kena app and signs in (using the same account or as a separate "parent identity" within the family), Then they enter Parent mode by default (since their account role is parent\_owner per US-44).
+- Given the parent installs the Leiko app and signs in (using the same account or as a separate "parent identity" within the family), Then they enter Parent mode by default (since their account role is parent\_owner per US-44).
 - Given Parent mode is active, Then the UI uses ≥ 24pt body text, ≥ 32pt numerals, high-contrast palette, and a maximum of 3 actions per screen (per D5 §10.4).
 - Parent mode shows: today's reading, this week's chart (simplified), button to take a reading, button to view family.
 - Parent mode does NOT show: paywalls, subscription upsells, AI assistant chat (deferred to v2 — per D4 Block 2.3 caregiver-first scope).
@@ -962,11 +962,11 @@ Parent UX is intentionally simpler than caregiver UX. Per D5 §10.4: large text,
 
 - Given the caregiver taps "This week" from the dashboard, Then a weekly view shows: average BP, range (lowest/highest), number of readings, and a 7-day chart with morning vs. evening readings color-coded.
 - Given fewer than 3 readings exist for the week, Then the view explains: "Mom took fewer readings this week. We need a few more for a useful trend."
-- Free tier: this week + previous week. Paid tier (Kena Plus): unlimited weeks.
+- Free tier: this week + previous week. Paid tier (Leiko Plus): unlimited weeks.
 
 **US-53: Caregiver — monthly view**
 
-|**As a**|caregiver / Kena Plus subscriber|
+|**As a**|caregiver / Leiko Plus subscriber|
 | :- | :- |
 |**I want to**|see a monthly view|
 |**So that**|I can see slower-moving trends|
@@ -974,13 +974,13 @@ Parent UX is intentionally simpler than caregiver UX. Per D5 §10.4: large text,
 
 **Acceptance criteria:**
 
-- Given Kena Plus is active, When the caregiver taps "This month", Then a monthly chart shows daily averages over the month with annotations for outlier days.
-- Free tier sees an upsell: "See monthly trends with Kena Plus — $4.99/month."
+- Given Leiko Plus is active, When the caregiver taps "This month", Then a monthly chart shows daily averages over the month with annotations for outlier days.
+- Free tier sees an upsell: "See monthly trends with Leiko Plus — $4.99/month."
 - Per D5 §3.4 — paywall is on advanced views, not on the latest reading or 7-day history.
 
 **US-54: Caregiver — share with doctor (PDF export)**
 
-|**As a**|caregiver / Kena Plus subscriber|
+|**As a**|caregiver / Leiko Plus subscriber|
 | :- | :- |
 |**I want to**|generate a one-page PDF of my parent's BP data for the doctor|
 |**So that**|the doctor reads useful information in 30 seconds|
@@ -988,9 +988,9 @@ Parent UX is intentionally simpler than caregiver UX. Per D5 §10.4: large text,
 
 **Acceptance criteria:**
 
-- Given Kena Plus is active, When the caregiver taps "Share with doctor", Then they can pick a date range (default: last 14 days) and a destination (email PDF / Open in / Save link).
+- Given Leiko Plus is active, When the caregiver taps "Share with doctor", Then they can pick a date range (default: last 14 days) and a destination (email PDF / Open in / Save link).
 - Given the PDF is generated, Then it includes: parent's name + DOB, period covered, summary stats (avg BP, range, # readings, days in target), morning vs. evening averages, a chart, top 3 outlier readings with timestamps.
-- PDF MUST NOT include any diagnostic interpretation. Per D3 forbidden claims. The doctor reads the data; Kena does not interpret for the doctor.
+- PDF MUST NOT include any diagnostic interpretation. Per D3 forbidden claims. The doctor reads the data; Leiko does not interpret for the doctor.
 - Per D5 §6.4 — language used: "Summary of recent readings — for clinical review". Never "diagnosis", "detected", "abnormal".
 - Free tier: deferred — no PDF export in free tier (upsell card).
 
@@ -1011,7 +1011,7 @@ Parent UX is intentionally simpler than caregiver UX. Per D5 §10.4: large text,
 
 **US-56: Caregiver — see medication-correlated patterns**
 
-|**As a**|caregiver / Kena Plus subscriber|
+|**As a**|caregiver / Leiko Plus subscriber|
 | :- | :- |
 |**I want to**|see whether my parent's morning meds are correlating with afternoon BP drops|
 |**So that**|I get insight without being a clinician|
@@ -1024,7 +1024,7 @@ Parent UX is intentionally simpler than caregiver UX. Per D5 §10.4: large text,
 
 **US-57: Caregiver — export raw data (CSV)**
 
-|**As a**|caregiver / Kena Plus subscriber|
+|**As a**|caregiver / Leiko Plus subscriber|
 | :- | :- |
 |**I want to**|export raw readings as CSV|
 |**So that**|I have my own copy|
@@ -1032,7 +1032,7 @@ Parent UX is intentionally simpler than caregiver UX. Per D5 §10.4: large text,
 
 **Acceptance criteria:**
 
-- Given Kena Plus, When the caregiver taps Settings → Data → Export, Then a CSV is generated with all readings + metadata and emailed.
+- Given Leiko Plus, When the caregiver taps Settings → Data → Export, Then a CSV is generated with all readings + metadata and emailed.
 - CSV columns: timestamp\_local, timestamp\_utc, sys, dia, pulse, source (watch / manual), note, parent\_name.
 - Per D3 — user has a right to data portability.
 
@@ -1061,7 +1061,7 @@ Per D4 Block 2.3, the AI assistant has three tiers. Tier A: factual lookups & Q&
 
 **Acceptance criteria:**
 
-- Given the caregiver taps "Ask Kena" from the home screen or any reading detail, Then a chat interface opens with: input bar + recent conversation history.
+- Given the caregiver taps "Ask Leiko" from the home screen or any reading detail, Then a chat interface opens with: input bar + recent conversation history.
 - Given the caregiver types a question, Then the AI responds within 5 seconds (target; per §6.1).
 - Given the AI cannot answer (out of scope, ambiguous, or potentially diagnostic), Then it responds: "That's a good question for Mom's doctor. Want help putting it on her next visit list?"
 - Per D3 + D5 §6.4 — the assistant NEVER diagnoses, predicts, recommends medication changes, or gives medical advice. Pre-prompts enforce this in the system prompt.
@@ -1106,7 +1106,7 @@ Per D4 Block 2.3, the AI assistant has three tiers. Tier A: factual lookups & Q&
 
 **Acceptance criteria:**
 
-- Given Kena Plus is active for a family, When the weekly cron runs (default: Sunday 6 PM in caregiver's local time), Then the assistant generates a 1-paragraph weekly summary per parent and pushes it to all caregivers in the family.
+- Given Leiko Plus is active for a family, When the weekly cron runs (default: Sunday 6 PM in caregiver's local time), Then the assistant generates a 1-paragraph weekly summary per parent and pushes it to all caregivers in the family.
 - Summary structure: "This week, Mom averaged [SYS]/[DIA] over [N] readings. Her morning readings were [trend], her evenings were [trend]. The most notable change was [outlier or pattern]. Have a good week."
 - Summary is generated via Claude Sonnet API (Tier C — most context, longest output). Latency tolerance: minutes (background job).
 - Per D3 — never diagnostic. Always descriptive.
@@ -1136,7 +1136,7 @@ Per D4 Block 2.3, the AI assistant has three tiers. Tier A: factual lookups & Q&
 **Acceptance criteria:**
 
 - Given a free-tier user, Then they get 10 Tier A queries per month, 0 Tier B, 0 Tier C.
-- Given a Kena Plus subscriber, Then they get unlimited Tier A, 50 Tier B per month, 4 Tier C (auto-generated weekly).
+- Given a Leiko Plus subscriber, Then they get unlimited Tier A, 50 Tier B per month, 4 Tier C (auto-generated weekly).
 - Given a user exceeds their quota, Then a friendly message: "You've used all your AI questions for this month. They reset on the 1st." — never a jarring error.
 
 **US-65: AI — caregiver feedback / thumbs**
@@ -1169,7 +1169,7 @@ Per D4 Block 2.3, the AI assistant has three tiers. Tier A: factual lookups & Q&
 
 
 ## **§5.8 Subscription & Paywall**
-Per D2: Kena Plus = $4.99/month or $39.99/year USD. Free tier always shows latest reading + 7-day history (per D5 §3.4). Subscription billing via RevenueCat (per D4 Block 3).
+Per D2: Leiko Plus = $4.99/month or $39.99/year USD. Free tier always shows latest reading + 7-day history (per D5 §3.4). Subscription billing via RevenueCat (per D4 Block 3).
 
 **US-67: Subscription — free tier features**
 
@@ -1184,9 +1184,9 @@ Per D2: Kena Plus = $4.99/month or $39.99/year USD. Free tier always shows lates
 - Given the user has not subscribed, Then they have access to: latest reading, last 7 days of readings, weekly view (current week + 1 prior), parent dashboard, watch pairing, manual reading entry, basic settings, push notifications for daily summaries, single-caregiver mode (1 caregiver only).
 - Per D5 §3.4: free tier MUST always show the latest reading. Never paywalled.
 
-**US-68: Subscription — Kena Plus features**
+**US-68: Subscription — Leiko Plus features**
 
-|**As a**|Kena Plus subscriber|
+|**As a**|Leiko Plus subscriber|
 | :- | :- |
 |**I want to**|unlock the full feature set|
 |**So that**|I get full value for $4.99/month|
@@ -1194,11 +1194,11 @@ Per D2: Kena Plus = $4.99/month or $39.99/year USD. Free tier always shows lates
 
 **Acceptance criteria:**
 
-- Given Kena Plus is active, Then unlocked: full historical readings, monthly + multi-month trends, AI assistant Tier B + C, anomaly detection (US-91), weekly clinical summaries (US-62), share with doctor (US-54), CSV export (US-57), web link share (US-55), multi-caregiver up to 5, multi-parent up to 2, medication-correlation insights (US-56).
+- Given Leiko Plus is active, Then unlocked: full historical readings, monthly + multi-month trends, AI assistant Tier B + C, anomaly detection (US-91), weekly clinical summaries (US-62), share with doctor (US-54), CSV export (US-57), web link share (US-55), multi-caregiver up to 5, multi-parent up to 2, medication-correlation insights (US-56).
 
 **US-69: Subscription — paywall presentation**
 
-|**As a**|free user encountering a Kena Plus feature|
+|**As a**|free user encountering a Leiko Plus feature|
 | :- | :- |
 |**I want to**|see a clear, calm paywall|
 |**So that**|I understand the value and decide informed|
@@ -1213,7 +1213,7 @@ Per D2: Kena Plus = $4.99/month or $39.99/year USD. Free tier always shows lates
 
 **US-70: Subscription — purchase flow**
 
-|**As a**|user starting a Kena Plus subscription|
+|**As a**|user starting a Leiko Plus subscription|
 | :- | :- |
 |**I want to**|complete the purchase via Apple / Google subscriptions|
 |**So that**|billing is platform-native and trustworthy|
@@ -1222,12 +1222,12 @@ Per D2: Kena Plus = $4.99/month or $39.99/year USD. Free tier always shows lates
 **Acceptance criteria:**
 
 - Given the user taps Subscribe, Then the OS native subscription dialog is triggered (StoreKit on iOS, Google Play Billing on Android), routed via RevenueCat per D4 Block 3.
-- Given the purchase succeeds, Then the user's account is upgraded to Kena Plus immediately and the paywall screen they came from auto-converts to the unlocked view.
-- Given the user is on Android and the family\_owner is on iOS (or vice versa), Then both platforms accept the subscription tied to the user's Kena account — not the platform identity. (RevenueCat handles cross-platform.)
+- Given the purchase succeeds, Then the user's account is upgraded to Leiko Plus immediately and the paywall screen they came from auto-converts to the unlocked view.
+- Given the user is on Android and the family\_owner is on iOS (or vice versa), Then both platforms accept the subscription tied to the user's Leiko account — not the platform identity. (RevenueCat handles cross-platform.)
 
 **US-71: Subscription — manage / cancel**
 
-|**As a**|Kena Plus subscriber|
+|**As a**|Leiko Plus subscriber|
 | :- | :- |
 |**I want to**|manage or cancel my subscription|
 |**So that**|I retain control|
@@ -1249,20 +1249,20 @@ Per D2: Kena Plus = $4.99/month or $39.99/year USD. Free tier always shows lates
 
 **Acceptance criteria:**
 
-- Apple and Google handle subscription refunds via their stores. Kena's refund policy (publicly posted) follows: 30-day money-back on annual plans, no refunds on monthly plans (industry standard).
+- Apple and Google handle subscription refunds via their stores. Leiko's refund policy (publicly posted) follows: 30-day money-back on annual plans, no refunds on monthly plans (industry standard).
 - Customer support responds to refund requests within 24 business hours.
 
 **US-73: Subscription — multi-caregiver billing**
 
 |**As a**|system|
 | :- | :- |
-|**I want to**|ensure that one Kena Plus subscription covers the whole family circle|
+|**I want to**|ensure that one Leiko Plus subscription covers the whole family circle|
 |**So that**|no double-charging|
 |**Source**|*D2; D4 Block 2.1*|
 
 **Acceptance criteria:**
 
-- Given the family\_owner subscribes to Kena Plus, Then ALL caregivers in the family circle inherit Kena Plus features for that family.
+- Given the family\_owner subscribes to Leiko Plus, Then ALL caregivers in the family circle inherit Leiko Plus features for that family.
 - Given a non-owner caregiver is in multiple families and one family has Plus, Then they get Plus features only when viewing that family's data.
 - Per D2 — single subscription per family circle. Caregivers are not charged separately.
 - Edge case: if family\_owner cancels Plus, all caregivers revert to free tier on expiry.
@@ -1302,7 +1302,7 @@ Per D5 §3.5 voice tone variants. Notifications are categorized so users can fin
 
 **US-76: Notifications — weekly summary**
 
-|**As a**|Kena Plus caregiver|
+|**As a**|Leiko Plus caregiver|
 | :- | :- |
 |**I want to**|receive a weekly summary on Sunday evening|
 |**So that**|I have proactive insight without asking|
@@ -1310,7 +1310,7 @@ Per D5 §3.5 voice tone variants. Notifications are categorized so users can fin
 
 **Acceptance criteria:**
 
-- Given Kena Plus active and ≥ 3 readings during the week, Then the weekly summary (US-62) is generated and pushed at the caregiver's local 6:00 PM Sunday.
+- Given Leiko Plus active and ≥ 3 readings during the week, Then the weekly summary (US-62) is generated and pushed at the caregiver's local 6:00 PM Sunday.
 - Notification body: first sentence of the AI-generated summary. Tap → opens full summary.
 
 **US-77: Notifications — anomaly alert**
@@ -1323,7 +1323,7 @@ Per D5 §3.5 voice tone variants. Notifications are categorized so users can fin
 
 **Acceptance criteria:**
 
-- Given Kena Plus is active and an anomaly is detected (per US-91 detection logic), Then a notification is sent immediately to all caregivers in the family circle.
+- Given Leiko Plus is active and an anomaly is detected (per US-91 detection logic), Then a notification is sent immediately to all caregivers in the family circle.
 - Notification copy template (calm-concerned tone — D5 §3.5): "Mom's reading just now was higher than usual: [SYS]/[DIA]. We've added it to her log."
 - Notification NEVER includes panic language. NEVER "emergency". NEVER "call 911". (Per D3 forbidden claims.)
 - Free tier: anomaly alerts deferred (per D2 — paid feature). Free tier user sees the high reading on dashboard but no proactive push.
@@ -1573,14 +1573,14 @@ Per D4 Block 2.3 Tier B. Anomaly detection runs on every incoming reading and tr
 
 |**As a**|system|
 | :- | :- |
-|**I want to**|anomaly detection only available to Kena Plus subscribers|
+|**I want to**|anomaly detection only available to Leiko Plus subscribers|
 |**So that**|we maintain pricing rationale|
 |**Source**|*D2; D5 §3.4*|
 
 **Acceptance criteria:**
 
 - Free tier users see the reading on the dashboard (per US-67) but no proactive anomaly push.
-- On the dashboard, an unobtrusive note: "Get proactive alerts with Kena Plus".
+- On the dashboard, an unobtrusive note: "Get proactive alerts with Leiko Plus".
 - Per D2 + D5 §3.4 — paywall is on advanced features, not on basic data.
 
 
@@ -1648,7 +1648,7 @@ Explicitly NOT in v1.0. Each item lists which document deferred it. Anything not
 |**Pharmacy / prescription integration**|D3 — outside cleared IFU. Medication is logged manually only.|
 |**Multi-language UI**|D5 §10.3 — English only at MVP; Pidgin/Yoruba/Igbo/Spanish in v2.|
 |**Apple Health / Google Fit integration**|D4 — deferred to v2 (read-only export to HealthKit considered).|
-|**Apple Watch / Wear OS standalone app**|D4 — Kena watch is the primary wearable. Companion app on Apple Watch deferred.|
+|**Apple Watch / Wear OS standalone app**|D4 — Leiko watch is the primary wearable. Companion app on Apple Watch deferred.|
 |**Fall detection**|D3 — outside cleared IFU. Hardware does not support reliably. Not roadmapped.|
 |**ECG / arrhythmia detection**|D3 — hardware does not include ECG sensor. Out of scope entirely.|
 |**Continuous BP measurement**|D3 — device is on-demand BP only (cuff inflation requires user action). Misleading claim if marketed otherwise. Per D5 §6.4.|
@@ -1711,7 +1711,7 @@ Anything that needs decision or research before / during build. Each item is own
 
 |**Open Question**|**Context / Source**|
 | :- | :- |
-|Brand name verification: KENA confirmed via USPTO TESS, NIPC, domain availability?|D5 §11.1. Critical path to App Store and packaging. Target: before week 2 of build.|
+|Brand name verification: LEIKO confirmed via USPTO TESS, NIPC, domain availability?|D5 §11.1. Critical path to App Store and packaging. Target: before week 2 of build.|
 |510(k) holder LoA (Letter of Authorization)|D3. K141683 holder must agree to allow our re-labeling. Critical path to FDA establishment listing. Target: before week 4 of build.|
 |Anthropic BAA on Claude API for healthcare|§6.2. Required if any reading data is sent in AI prompts. Target: before week 8.|
 |Web Bluetooth pairing fallback for parent (US-15)|Affects whether parent must install native app. Engineering to spike during week 2 of build. Founder decision required if web BT is unreliable on iOS Safari.|
@@ -1749,12 +1749,12 @@ Every technical term used in this PRD, defined.
 |**Family circle**|The set of caregivers (1–5) and parents (1–2) who share access to the same readings. Per D4 Block 2.1.|
 |**Family owner**|The user who created the family record. Has admin powers (invite, remove, transfer ownership).|
 |**FDA-cleared**|Cleared via 510(k); Class II under K141683. Per D3. NOT "FDA-approved" (different pathway).|
-|**HIPAA**|Health Insurance Portability and Accountability Act. US federal regulation governing PHI. Kena is HIPAA-aligned (not a covered entity itself, but practices align).|
+|**HIPAA**|Health Insurance Portability and Accountability Act. US federal regulation governing PHI. Leiko is HIPAA-aligned (not a covered entity itself, but practices align).|
 |**HR**|Heart rate.|
 |**IFU**|Indications For Use. The use cases the device is cleared for, per FDA. Per D3.|
-|**Kena**|The consumer brand. Per D5 §2 (recommended primary candidate; subject to founder verification).|
-|**Kena Plus**|The paid subscription tier. $4.99/month or $39.99/year USD. Per D2 + D5 §5.3.|
-|**Kena Watch / Watch Pro**|Consumer-facing names for the U16H and U19M devices. Per D5 §5.2.|
+|**Leiko**|The consumer brand. Per D5 §2 (recommended primary candidate; subject to founder verification).|
+|**Leiko Plus**|The paid subscription tier. $4.99/month or $39.99/year USD. Per D2 + D5 §5.3.|
+|**Leiko Watch / Watch Pro**|Consumer-facing names for the U16H and U19M devices. Per D5 §5.2.|
 |**LiteLLM**|AI gateway proxy that routes between local (Ollama) and remote (Claude API) models. Per D4 Block 3.|
 |**Ollama**|Local LLM runtime running on the founder's existing Hetzner VPS. Used for Tier A. Per D4 Block 3.|
 |**Oscillometric**|BP measurement method based on inflatable cuff and pressure oscillations. The device's actual measurement method. Same as a doctor's office cuff. Per D1.|
@@ -1766,7 +1766,7 @@ Every technical term used in this PRD, defined.
 |**Self-buyer**|A user buying for themselves; both wearer and watcher. Per D5 §1.3.|
 |**SpO2**|Peripheral oxygen saturation. Wellness estimate on this device — NOT medical-grade per D3.|
 |**Supabase**|Backend platform: Postgres + Auth + Realtime + Storage + Edge Functions. Per D4 Block 3.|
-|**U16H / U19M**|Urion supplier SKUs. Marketed as Kena Watch / Kena Watch Pro. Per D5 §5.2.|
+|**U16H / U19M**|Urion supplier SKUs. Marketed as Leiko Watch / Leiko Watch Pro. Per D5 §5.2.|
 |**WCAG 2.2 AA**|Web Content Accessibility Guidelines, level AA. Required accessibility standard. Per D5 §10.|
 
 
@@ -1803,4 +1803,4 @@ Every user story mapped to its source document(s). For audit, scope review, and 
 **Total assumptions flagged:** 3 (web BT pairing fallback, watch reading deletion policy, order tracking integration). All routed to §9.
 
 **Next action:** Founder review of §9 open questions. Begin D7 (TRD).
-LawOne Cloud LLC  •  Kena BP Smartwatch Venture  •  Confidential  •  Page  of 
+LawOne Cloud LLC  •  Leiko BP Smartwatch Venture  •  Confidential  •  Page  of 

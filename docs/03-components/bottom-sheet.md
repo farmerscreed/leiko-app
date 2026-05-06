@@ -1,6 +1,6 @@
 # Component — Bottom Sheet
 
-The **primary modal pattern** in Kena. Full-screen modals are reserved for paywall and onboarding only. Centered dialog modals are NOT used.
+The **primary modal pattern** in Leiko. Full-screen modals are reserved for paywall and onboarding only. Centered dialog modals are NOT used.
 
 Sourced from D8 §3.7. Implementation at `apps/mobile/src/components/BottomSheet.tsx`.
 

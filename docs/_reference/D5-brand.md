@@ -1,4 +1,4 @@
-﻿D5 — Brand Brief
+D5 — Brand Brief
 
 **DELIVERABLE 5**
 
@@ -144,14 +144,14 @@ These names were considered and eliminated for the reasons listed. Documenting t
 |**Watchful / WatchOver**|Too literal (we are a watch); also 'WatchOver' has implications of surveillance that conflict with our dignity-of-the-parent positioning.|
 ## **2.5 Recommended Candidates**
 Eight names that pass all ten criteria as far as we can verify by available web data. Each is presented with strategic analysis. The founder must perform live USPTO TESS, NIPC, and domain checks before final selection — see §11. The eight are deliberately ranked: the top three are recommended; #4–#8 are alternates if any of the top three fails verification.
-### **Candidate 1 — KENA (recommended primary)**
+### **Candidate 1 — LEIKO (recommended primary)**
 
 |**Pronunciation**|KEH-nah  (two syllables, clear in English)|
 | :- | :- |
-|**Origin / Meaning**|'Kena' is a real word in multiple languages: Cebuano ('only this'), Igbo (informal: 'see this'), Hausa ('also'), Greek ('Κενα' — empty/free). Our usage: a coined evocative name that sounds African-rooted without being tied to a single ethnic group. The phonetics ('strong K + open vowels') project warmth + clarity.|
-|**Why It Works**|• Three letters in a row that look great as an app icon (one-letter K monogram). • Same root as 'kin' phonetically — subliminally signals family. • Easy to register in Class 9 + 10 (no obvious existing health brand). • Works as verb: 'Did you check Kena today?' — sounds natural. • Simple, dignified, premium.|
-|**Domain Status\***|kena.com taken (parked); kena.health and kena.app likely available — must verify|
-|**Concerns**|Common name internationally — must verify USPTO doesn't have a Class 10 conflict. Some existing 'Kena' uses (a Greek tech firm; a children's name).|
+|**Origin / Meaning**|'Leiko' is a real word in multiple languages: Cebuano ('only this'), Igbo (informal: 'see this'), Hausa ('also'), Greek ('Κενα' — empty/free). Our usage: a coined evocative name that sounds African-rooted without being tied to a single ethnic group. The phonetics ('strong K + open vowels') project warmth + clarity.|
+|**Why It Works**|• Three letters in a row that look great as an app icon (one-letter K monogram). • Same root as 'kin' phonetically — subliminally signals family. • Easy to register in Class 9 + 10 (no obvious existing health brand). • Works as verb: 'Did you check Leiko today?' — sounds natural. • Simple, dignified, premium.|
+|**Domain Status\***|leiko.com taken (parked); leiko.health and leiko.app likely available — must verify|
+|**Concerns**|Common name internationally — must verify USPTO doesn't have a Class 10 conflict. Some existing 'Leiko' uses (a Greek tech firm; a children's name).|
 ### **Candidate 2 — AYA (recommended secondary)**
 
 |**Pronunciation**|AH-yah  (two syllables, universal vowels)|
@@ -197,10 +197,10 @@ Eight names that pass all ten criteria as far as we can verify by available web 
 |**Concerns**|Religious connotation may narrow appeal. Spelling difficulty for non-Arabic-speakers (some would type 'Nia' instead). Higher friction. Lower conviction. Documented for completeness.|
 ## **2.6 Final Recommendation**
 
-|<p>**RECOMMENDED PRIMARY CANDIDATE: KENA**</p><p>Of the eight candidates analyzed, KENA scores highest on every criterion. It is short, distinctive, evocative without being narrow, pronounceable everywhere, and sounds African-rooted without locking us to a single language. The 'K' is a strong logo letter. The two-syllable structure (KEH-nah) maps naturally to verb usage in app copy. Founder must verify USPTO TESS Classes 9 and 10, NIPC trademark search, .com / .health / .app domain availability, App Store and Play Store name availability, and Google search fragmentation before committing.</p>|
+|<p>**RECOMMENDED PRIMARY CANDIDATE: LEIKO**</p><p>Of the eight candidates analyzed, LEIKO scores highest on every criterion. It is short, distinctive, evocative without being narrow, pronounceable everywhere, and sounds African-rooted without locking us to a single language. The 'K' is a strong logo letter. The two-syllable structure (KEH-nah) maps naturally to verb usage in app copy. Founder must verify USPTO TESS Classes 9 and 10, NIPC trademark search, .com / .health / .app domain availability, App Store and Play Store name availability, and Google search fragmentation before committing.</p>|
 | :- |
 
-If KENA fails verification: AYA is the strong second choice (with the additional brand-storytelling advantage of the Adinkra symbol). UMI is the third. Founder should hold #4–#8 as fallbacks but not invest in them until #1–#3 are verified eliminated.
+If LEIKO fails verification: AYA is the strong second choice (with the additional brand-storytelling advantage of the Adinkra symbol). UMI is the third. Founder should hold #4–#8 as fallbacks but not invest in them until #1–#3 are verified eliminated.
 
 
 # **§3 Voice and Tone**
@@ -242,12 +242,12 @@ We don't wait for the caregiver to check the app. We tell them what they need to
 We never patronize either the caregiver or the parent. We never say 'simple' or 'easy' (those imply the user is being condescended to). We never use baby-talk for elders. We respect the parent's autonomy: the watch reports to the family, but the parent is in control of their own life and their own readings.
 
 - **✗ AVOID:** 'Simple. Easy. Just for you!' (sounds infantilizing)
-- **✓ INSTEAD:** 'Designed to fit your morning. Whether it's 6:00am tea or 9:00am coffee, Kena adapts to your rhythm.'
+- **✓ INSTEAD:** 'Designed to fit your morning. Whether it's 6:00am tea or 9:00am coffee, Leiko adapts to your rhythm.'
 ## **3.4 Voice Anti-Patterns**
 Things we never do. These come up repeatedly in healthcare app copy and we will not repeat them.
 
 - **Never use "loved one" as the primary referent.** It is generic and emotionally-flat (and overused by every caregiver-app marketer). Use specifics: 'your mom', 'your dad', 'your father-in-law', 'your aunt'. Even in copy where the relationship is unknown, prefer 'your parent' over 'your loved one'.
-- **Never use "smartwatch" as the primary product noun.** We are a caregiver platform that ships with a watch. The watch is incidental. Use 'the wristband', 'the device', or just 'Kena' (when verb-able).
+- **Never use "smartwatch" as the primary product noun.** We are a caregiver platform that ships with a watch. The watch is incidental. Use 'the wristband', 'the device', or just 'Leiko' (when verb-able).
 - **Never use medical claim language.** Per D3: words like 'diagnose', 'predict stroke', 'detect heart attack', 'cure', 'treat' are FDA enforcement triggers. Replace with 'monitor', 'track', 'help you understand', 'flag for review with a doctor', 'share with your physician'.
 - **Never sound urgent unless an actual urgent situation exists.** Push notifications are not opportunities to scare the caregiver into engagement. The brand promise is REASSURANCE, not anxiety farming. (This is also a key differentiator vs. every typical health app, which pushes the user with anxious nudges.)
 - **Never use Nigerian slang or Pidgin in primary brand copy.** Save these for specifically-targeted Nigerian creative variants. The primary brand is multilingual-elegant. Cultural specificity goes in CREATIVE, not in CORE COPY.
@@ -277,7 +277,7 @@ Same voice, audience-specific creative variants:
 | :- | :- |
 |**Adaeze (Nigerian diaspora)**|"Watch over Mama from anywhere in the world. Built by a Nigerian, for the way we love."|
 |**Marcus (US Black American)**|"For the daughters and sons looking after the people who looked after us."|
-|**Newly-diagnosed self-buyer**|"Hypertension is what you do every day. Kena helps you actually do it."|
+|**Newly-diagnosed self-buyer**|"Hypertension is what you do every day. Leiko helps you actually do it."|
 |<p>**VOICE GOVERNANCE RULE**</p><p>Founder reviews every customer-facing string at MVP launch. After launch, AI assistant outputs (Tier B and C from D4) must be governed by a 'voice prompt' — a system prompt that encodes these four pillars and forces the AI to use them. Build this into the LiteLLM gateway as a non-overrideable system prompt prefix.</p>||
 
 
@@ -332,7 +332,7 @@ Per PM360's 2023 patient-trust-through-imagery study: 'In a 2019 survey, 53% of 
 We are not designing the logo in this brief. The founder will hire a designer (~$1,500–$5,000 for a brand identity package). What we DO specify is the design brief the designer will receive.
 ### **Logo Brief**
 - **Wordmark, custom-set in Recoleta or similar.** The brand name is the logo. No icon necessary at MVP. Strong wordmarks (Withings, Oura, Whoop) outperform mark+wordmark combos for brand recognition.
-- **Optional pictorial mark for app icon:** If KENA is the chosen name — a stylized 'K' in deep navy on warm cream. If AYA is chosen — the Adinkra fern symbol, simplified, deep navy on cream.
+- **Optional pictorial mark for app icon:** If LEIKO is the chosen name — a stylized 'K' in deep navy on warm cream. If AYA is chosen — the Adinkra fern symbol, simplified, deep navy on cream.
 - **Must work at 16x16 favicon size.** Test the proposed logo at all of: 16px favicon, 80px App Store icon, 256px social avatar, 1200x628px Open Graph card, 1500x500px Twitter header, billboard-scale (purely as future-proofing).
 - **Must work in monochrome.** Print, fax, photocopy, single-color packaging. Color is brand differentiation; monochrome is brand survivability.
 - **Must NOT use:** heart symbols (overdone, generic), stethoscopes (clinical), DNA helices (also generic), shield/badge shapes (security-software cliché), sun/sunrise (too on-the-nose for 'Africa').
@@ -345,23 +345,23 @@ How the brand name relates to the product names, the parent company, and the fut
 |**Tier**|**Entity**|**Purpose**|
 | :- | :- | :- |
 |**Parent company**|**LawOne Cloud LLC**|Legal entity. Invisible to customers. Holds IP, payment infrastructure, banking. Mentioned only in legal docs and on Shopify checkout.|
-|**Consumer brand**|**KENA (recommended)**|All customer-facing presence. Website, app, packaging, marketing.|
-|**Product nomenclature**|Kena Watch / Kena App / Kena Pro (later)|Product names within the Kena family. NOT 'U16H' (the supplier SKU).|
+|**Consumer brand**|**LEIKO (recommended)**|All customer-facing presence. Website, app, packaging, marketing.|
+|**Product nomenclature**|Leiko Watch / Leiko App / Leiko Pro (later)|Product names within the Leiko family. NOT 'U16H' (the supplier SKU).|
 ## **5.2 Product Naming**
-Within the Kena brand, the two device SKUs need consumer-facing names. The supplier-side names U16H and U19M are not used in consumer-facing copy; they remain only on internal packaging slips, customs documents, and FDA Establishment Listing.
+Within the Leiko brand, the two device SKUs need consumer-facing names. The supplier-side names U16H and U19M are not used in consumer-facing copy; they remain only on internal packaging slips, customs documents, and FDA Establishment Listing.
 
 |**Supplier SKU**|**Consumer Name**|**Why**|**Price (D2)**|
 | :- | :- | :- | :-: |
-|**U16H**|**Kena Watch**|Default product. Simple, descriptive, premium-feeling.|$179|
-|**U19M**|**Kena Watch Pro**|Premium variant. 'Pro' signal works because U19M has larger screen + bigger battery.|$229|
-|***(future SKUs)***|*Kena [variant]*|*Reserved namespace.*|—|
+|**U16H**|**Leiko Watch**|Default product. Simple, descriptive, premium-feeling.|$179|
+|**U19M**|**Leiko Watch Pro**|Premium variant. 'Pro' signal works because U19M has larger screen + bigger battery.|$229|
+|***(future SKUs)***|*Leiko [variant]*|*Reserved namespace.*|—|
 ## **5.3 Software Naming**
-- **App:** 'Kena' (no suffix). Caregiver app on iOS / Android. App Store listing: 'Kena — Watch over your parents'.
-- **Subscription tier:** 'Kena Plus' for the paid tier ($4.99/month). Free tier is just 'Kena'.
-- **AI assistant inside the app:** Reserved — internal naming TBD when AI personality is being built (may be 'Ask Kena' or a separate sub-brand). Out of scope for D5; flagged for D8 or design phase.
+- **App:** 'Leiko' (no suffix). Caregiver app on iOS / Android. App Store listing: 'Leiko — Watch over your parents'.
+- **Subscription tier:** 'Leiko Plus' for the paid tier ($4.99/month). Free tier is just 'Leiko'.
+- **AI assistant inside the app:** Reserved — internal naming TBD when AI personality is being built (may be 'Ask Leiko' or a separate sub-brand). Out of scope for D5; flagged for D8 or design phase.
 ## **5.4 Avoiding Brand Sprawl**
 
-|<p>**GOLDEN RULE**</p><p>Never invent a sub-brand without strategic necessity. Every sub-brand requires its own trademark search, its own design treatment, its own customer education. At MVP we have ONE brand (Kena), TWO products (Watch + Watch Pro), and ONE app. That is the entire architecture for Year 1. Resist the temptation to create 'Kena Health Hub' or 'Kena Family Cloud' or any other sub-brand. The most successful health wearables (Oura, Whoop) maintain monolithic brand architecture for years.</p>|
+|<p>**GOLDEN RULE**</p><p>Never invent a sub-brand without strategic necessity. Every sub-brand requires its own trademark search, its own design treatment, its own customer education. At MVP we have ONE brand (Leiko), TWO products (Watch + Watch Pro), and ONE app. That is the entire architecture for Year 1. Resist the temptation to create 'Leiko Health Hub' or 'Leiko Family Cloud' or any other sub-brand. The most successful health wearables (Oura, Whoop) maintain monolithic brand architecture for years.</p>|
 | :- |
 
 
@@ -377,15 +377,15 @@ This is the message that appears on the website hero, the App Store screenshot, 
 Each audience hears the primary message rephrased to match their cultural grammar. Three secondary messages:
 ### **Secondary A — Diaspora caregiver**
 
-|<p>**Built by a Nigerian, for the way we love.**</p><p>Watch over Mama from anywhere in the world. Kena keeps you close to her blood pressure, her heart, her sleep — even when miles separate you.</p>|
+|<p>**Built by a Nigerian, for the way we love.**</p><p>Watch over Mama from anywhere in the world. Leiko keeps you close to her blood pressure, her heart, her sleep — even when miles separate you.</p>|
 | :- |
 ### **Secondary B — US Black-American family caregiver**
 
-|<p>**For the daughters and sons looking after the people who looked after us.**</p><p>Kena is a watch, an app, and a quiet check-in every morning. Built for Black families who care for their elders the way our families taught us to.</p>|
+|<p>**For the daughters and sons looking after the people who looked after us.**</p><p>Leiko is a watch, an app, and a quiet check-in every morning. Built for Black families who care for their elders the way our families taught us to.</p>|
 | :- |
 ### **Secondary C — Newly-diagnosed self-buyer**
 
-|<p>**Hypertension is what you do every day.**</p><p>Kena turns the daily readings, the medication timing, and the lifestyle context into something you can actually understand — and share with your doctor in 30 seconds.</p>|
+|<p>**Hypertension is what you do every day.**</p><p>Leiko turns the daily readings, the medication timing, and the lifestyle context into something you can actually understand — and share with your doctor in 30 seconds.</p>|
 | :- |
 ## **6.3 Tertiary Messages (proof points, supporting claims)**
 These appear in feature pages, FAQ sections, paid ad subheadlines, and email follow-ups. They are factual and specific. Each is grounded in either D3 (regulatory), D4 (product), or D2 (commercial).
@@ -415,7 +415,7 @@ Per D3 regulatory roadmap and D4 marketing claim audit, these claims are NEVER u
 
 
 # **§7 Competitive Positioning**
-Where Kena sits relative to every competitor identified in D1 and D4. This is not a feature comparison (that's D1). This is a brand-position comparison — what each brand stands for emotionally and culturally.
+Where Leiko sits relative to every competitor identified in D1 and D4. This is not a feature comparison (that's D1). This is a brand-position comparison — what each brand stands for emotionally and culturally.
 ## **7.1 Two-Axis Positioning Map**
 Two axes derived from D5 audience and voice research:
 
@@ -427,38 +427,38 @@ Two axes derived from D5 audience and voice research:
 |**Self-buyer × Functional**|Omron, YHE BP Doctor, FITVII, HISOLAN, Withings|The crowded zone. Race-to-the-bottom on Amazon.|
 |**Self-buyer × Warm**|Hello Heart, Lark, Hypertension.APP|Strong brands but B2B-payer focused. Saturated for consumer subscription.|
 |**Caregiver × Functional**|CarePredict, Aloe Care (partial)|Premium pricing ($69/month CarePredict). Misses budget caregivers.|
-|**Caregiver × Warm**|**KENA (us)**|Empty. No BP-specific competitor occupies this quadrant. This is our position.|
+|**Caregiver × Warm**|**LEIKO (us)**|Empty. No BP-specific competitor occupies this quadrant. This is our position.|
 ## **7.2 Positioning Statement (Internal)**
 
-|<p>**FOR INTERNAL USE — NOT EXTERNAL COPY**</p><p>For [diaspora and family caregivers of aging parents with hypertension], Kena is [the only FDA-cleared blood pressure platform built for the caregiver, not the patient]. Unlike [the noisy, generic-Chinese-import smartwatch market or the B2B-only enterprise solutions like Hello Heart], Kena [combines clinical-grade measurement with the warmth and cultural specificity that comes from being built by someone who has loved a parent from far away].</p>|
+|<p>**FOR INTERNAL USE — NOT EXTERNAL COPY**</p><p>For [diaspora and family caregivers of aging parents with hypertension], Leiko is [the only FDA-cleared blood pressure platform built for the caregiver, not the patient]. Unlike [the noisy, generic-Chinese-import smartwatch market or the B2B-only enterprise solutions like Hello Heart], Leiko [combines clinical-grade measurement with the warmth and cultural specificity that comes from being built by someone who has loved a parent from far away].</p>|
 | :- |
 ## **7.3 Differentiator Tree**
-When a customer asks 'why Kena over [competitor]', here is the layered response:
+When a customer asks 'why Leiko over [competitor]', here is the layered response:
 
-1. vs. Hello Heart / Lark: 'Those are excellent platforms — but they're sold to your employer, not to you, and they're built for the patient. Kena is built for you to watch over your parent, anywhere in the world. And we're available now whether or not your employer offers benefits.'
-1. vs. Withings / Apple Watch: 'Those are general health tools. Kena is purpose-built for blood pressure, with a real inflatable cuff that measures the same way as your doctor — and an app designed for caregivers, not just self-monitoring quantified-self users.'
+1. vs. Hello Heart / Lark: 'Those are excellent platforms — but they're sold to your employer, not to you, and they're built for the patient. Leiko is built for you to watch over your parent, anywhere in the world. And we're available now whether or not your employer offers benefits.'
+1. vs. Withings / Apple Watch: 'Those are general health tools. Leiko is purpose-built for blood pressure, with a real inflatable cuff that measures the same way as your doctor — and an app designed for caregivers, not just self-monitoring quantified-self users.'
 1. vs. Omron HeartGuide / YHE BP Doctor: 'We use the same kind of inflatable cuff technology, but our app is built for the caregiver. We don't make you read graphs — we tell you what's happening with your parent. And we cost less.'
-1. vs. CarePredict / Aloe Care: 'Those are excellent platforms for senior living facilities. Kena is for families. Our subscription is $4.99/month, not $69. And we focus specifically on blood pressure — the most preventable risk factor for the diseases that take parents away.'
-1. vs. Generic Amazon BP smartwatches: 'Most of those don't have FDA clearance. Many use unreliable cuffless methods. Their apps look great in screenshots but break in real life. Kena's hardware is FDA-cleared (510(k) K141683), and the platform is built by someone whose own parents are aging in another country.'
+1. vs. CarePredict / Aloe Care: 'Those are excellent platforms for senior living facilities. Leiko is for families. Our subscription is $4.99/month, not $69. And we focus specifically on blood pressure — the most preventable risk factor for the diseases that take parents away.'
+1. vs. Generic Amazon BP smartwatches: 'Most of those don't have FDA clearance. Many use unreliable cuffless methods. Their apps look great in screenshots but break in real life. Leiko's hardware is FDA-cleared (510(k) K141683), and the platform is built by someone whose own parents are aging in another country.'
 
 
 # **§8 Brand Application Examples**
 How everything above shows up in actual marketing assets. These are illustrative drafts that demonstrate the brand voice and visual direction. They are NOT final copy; they are templates the founder and any hired copywriter / designer can use as voice references.
 ## **8.1 App Store Listing**
 
-|<p>**APP STORE TITLE & SUBTITLE (iOS allows 30 + 30 chars)**</p><p>Title: Kena — Family BP Care Subtitle: Watch over your parents.</p>|
+|<p>**APP STORE TITLE & SUBTITLE (iOS allows 30 + 30 chars)**</p><p>Title: Leiko — Family BP Care Subtitle: Watch over your parents.</p>|
 | :- |
 ### **App Store Description Draft**
 
-|<p>**DESCRIPTION (illustrative — under 4,000 char limit)**</p><p>Watch over your parents from anywhere in the world.  Kena is a blood pressure platform built for the family caregiver. The watch goes on your parent. The app comes to you. And every morning, you'll know how they slept, what their blood pressure was, and whether anything needs your attention — without asking them to remember to call you back.  • FDA-cleared blood pressure measurement (510(k) K141683) • Same oscillometric method as your doctor's cuff • Up to 5 family members can stay informed • 10 days of battery on a single charge • Weekly summaries you can share with your doctor in 30 seconds • Built for diaspora families and anyone who loves from far away  Free to use. Premium features (AI summaries, weekly reports, multi-caregiver) are $4.99/month — and we never paywall the basic reading.  Kena is not a replacement for your doctor. It is an additional pair of eyes — one that's always with your parent, always reporting back to you.</p>|
+|<p>**DESCRIPTION (illustrative — under 4,000 char limit)**</p><p>Watch over your parents from anywhere in the world.  Leiko is a blood pressure platform built for the family caregiver. The watch goes on your parent. The app comes to you. And every morning, you'll know how they slept, what their blood pressure was, and whether anything needs your attention — without asking them to remember to call you back.  • FDA-cleared blood pressure measurement (510(k) K141683) • Same oscillometric method as your doctor's cuff • Up to 5 family members can stay informed • 10 days of battery on a single charge • Weekly summaries you can share with your doctor in 30 seconds • Built for diaspora families and anyone who loves from far away  Free to use. Premium features (AI summaries, weekly reports, multi-caregiver) are $4.99/month — and we never paywall the basic reading.  Leiko is not a replacement for your doctor. It is an additional pair of eyes — one that's always with your parent, always reporting back to you.</p>|
 | :- |
 ## **8.2 Shopify Hero (D2C product page)**
 
-|<p>**ABOVE-THE-FOLD**</p><p>Headline: Watch over your parents. Subhead: An FDA-cleared blood pressure watch — and an app built for the family who loves them. CTA: Order Kena Watch — $179 Secondary CTA: Order Kena Watch Pro — $229  [Hero image: Lagos porch, golden hour, elder taking BP reading] [Secondary image: caregiver in US apartment, looking at app, smiling]</p>|
+|<p>**ABOVE-THE-FOLD**</p><p>Headline: Watch over your parents. Subhead: An FDA-cleared blood pressure watch — and an app built for the family who loves them. CTA: Order Leiko Watch — $179 Secondary CTA: Order Leiko Watch Pro — $229  [Hero image: Lagos porch, golden hour, elder taking BP reading] [Secondary image: caregiver in US apartment, looking at app, smiling]</p>|
 | :- |
 ## **8.3 Paid Social Ad — Diaspora variant (Facebook / Instagram)**
 
-|<p>**FB/IG SINGLE IMAGE AD**</p><p>Image: Mother in Lagos, smiling, watch visible on wrist. Primary text: 'Mama doesn't always tell us when her blood pressure is high. Kena does.' Headline: 'Watch over Mama from anywhere in the world.' Description: 'Built by a Nigerian, for the way we love. FDA-cleared. From $179.' CTA: Shop Now</p>|
+|<p>**FB/IG SINGLE IMAGE AD**</p><p>Image: Mother in Lagos, smiling, watch visible on wrist. Primary text: 'Mama doesn't always tell us when her blood pressure is high. Leiko does.' Headline: 'Watch over Mama from anywhere in the world.' Description: 'Built by a Nigerian, for the way we love. FDA-cleared. From $179.' CTA: Shop Now</p>|
 | :- |
 ## **8.4 Paid Social Ad — Black-American family variant**
 
@@ -473,16 +473,16 @@ How notifications sound in production. These map to D4 Block 2 and Block 4 speci
 |**Weekly summary ready**|"Mom's week is ready. 5 morning readings, 4 evenings. Trend: stable. Tap to see the report."|
 |**Anomaly (calm-concerned)**|"Mom's reading was higher than usual just now: 156/95. We've added it to her log. Tap to see."|
 |**Watch offline 24h**|"We haven't heard from Mom's watch since yesterday morning. She might need to charge it."|
-|**Trial ending**|"Your trial ends in 3 days. Kena Plus stays $4.99/month and keeps your weekly summaries running."|
-|<p>**TONE CHECK**</p><p>Notice that none of these notifications use the word 'alert', 'warning', 'critical', or any all-caps. None of them use emoji-driven urgency. Even the anomaly notification is calm-concerned, not panic-inducing. This consistency IS the brand. Caregivers will quickly learn that when Kena pings them, it's worth reading — and it's never going to be the screaming health-app crying-wolf they've experienced elsewhere.</p>||
+|**Trial ending**|"Your trial ends in 3 days. Leiko Plus stays $4.99/month and keeps your weekly summaries running."|
+|<p>**TONE CHECK**</p><p>Notice that none of these notifications use the word 'alert', 'warning', 'critical', or any all-caps. None of them use emoji-driven urgency. Even the anomaly notification is calm-concerned, not panic-inducing. This consistency IS the brand. Caregivers will quickly learn that when Leiko pings them, it's worth reading — and it's never going to be the screaming health-app crying-wolf they've experienced elsewhere.</p>||
 ## **8.6 Email — Welcome / Onboarding**
 
-|<p>**WELCOME EMAIL**</p><p>Subject: Welcome to Kena.  Hi [first name],  Thank you for trusting us with this. We know what it took for you to get here — for many of our customers, ordering Kena was a quiet decision made after weeks of worrying about a parent who lives far from them.  Here's what happens next:  1. Your watch will arrive in 5–10 days. Inside the box, there's a card with a simple setup guide for whoever will be with your parent when they first wear it.  2. While you wait, download the Kena app. (Link below.) You can pair the watch as soon as it's on your parent's wrist — even if you're not in the same country.  3. The first reading might feel slow (it takes about 45 seconds — that's the air cuff inflating, like at a doctor's office). After that, you'll start to see Mom's or Dad's blood pressure show up in the app, day by day.  We'll email you twice more: once when the watch ships, once after the first reading lands in your app. After that, we stay out of your inbox unless we have something useful to share.  If you need anything, reply to this email — it goes to a real human.  — [Founder Name] Founder, Kena LawOne Cloud LLC</p>|
+|<p>**WELCOME EMAIL**</p><p>Subject: Welcome to Leiko.  Hi [first name],  Thank you for trusting us with this. We know what it took for you to get here — for many of our customers, ordering Leiko was a quiet decision made after weeks of worrying about a parent who lives far from them.  Here's what happens next:  1. Your watch will arrive in 5–10 days. Inside the box, there's a card with a simple setup guide for whoever will be with your parent when they first wear it.  2. While you wait, download the Leiko app. (Link below.) You can pair the watch as soon as it's on your parent's wrist — even if you're not in the same country.  3. The first reading might feel slow (it takes about 45 seconds — that's the air cuff inflating, like at a doctor's office). After that, you'll start to see Mom's or Dad's blood pressure show up in the app, day by day.  We'll email you twice more: once when the watch ships, once after the first reading lands in your app. After that, we stay out of your inbox unless we have something useful to share.  If you need anything, reply to this email — it goes to a real human.  — [Founder Name] Founder, Leiko LawOne Cloud LLC</p>|
 | :- |
 
 
 # **§9 Brand Do's and Don'ts**
-Single-page reference for any contractor, designer, or marketer working on Kena. Print this. Stick it next to the design board. Every brand decision should pass these tests.
+Single-page reference for any contractor, designer, or marketer working on Leiko. Print this. Stick it next to the design board. Every brand decision should pass these tests.
 ## **9.1 Do**
 - Speak in second person ('you'). Use specifics: 'your mother', 'your father', 'your aunt'.
 - Use Recoleta (or Fraunces fallback) for headlines. Use Inter for UI body.
@@ -542,17 +542,17 @@ Per ThinkPod 2025 healthcare branding research and the WCAG 2.2 standard, access
 
 # **§11 Founder Validation Checklist**
 D5 cannot be locked until the founder personally completes the following verifications. Each item is binary: pass / fail. Any fail triggers a re-evaluation of the affected brand element.
-## **11.1 Name Verification (KENA primary; AYA secondary; UMI tertiary)**
-1. **USPTO TESS search** (**tmsearch.uspto.gov**) — search 'KENA' in International Class 9 (mobile applications, software) AND Class 10 (medical devices). Document any conflicts.
+## **11.1 Name Verification (LEIKO primary; AYA secondary; UMI tertiary)**
+1. **USPTO TESS search** (**tmsearch.uspto.gov**) — search 'LEIKO' in International Class 9 (mobile applications, software) AND Class 10 (medical devices). Document any conflicts.
 1. Repeat USPTO TESS search for AYA and UMI.
 1. Nigerian IPC (NIPC / Trademarks Office) search for the chosen name. Same classes.
 1. UK IPO search for UK trademark conflicts (UK is a major diaspora market).
 1. Canadian Intellectual Property Office (CIPO) search.
-1. Domain check: kena.com / kena.co / kena.app / kena.health / kenacare.com / getkena.com — register at least 3 of these.
-1. App Store name search: search 'Kena' in App Store and Google Play. Note any conflicts and how strong they are (active vs. abandoned).
-1. Google search: 'Kena' + ['health' / 'app' / 'medical' / 'wearable']. Look for SEO conflicts.
-1. Social handles: Instagram, Twitter/X, TikTok, LinkedIn — register @kena, @getkena, @kenahealth on as many as possible.
-1. Cultural / linguistic check: ask 3 native speakers each from Nigerian Yoruba, Igbo, Hausa, and Swahili-speaking countries (Kenya, Tanzania) what 'Kena' sounds like to them. Watch for unintended negative meanings.
+1. Domain check: leiko.com / leiko.co / leiko.app / leiko.health / leikocare.com / getleiko.com — register at least 3 of these.
+1. App Store name search: search 'Leiko' in App Store and Google Play. Note any conflicts and how strong they are (active vs. abandoned).
+1. Google search: 'Leiko' + ['health' / 'app' / 'medical' / 'wearable']. Look for SEO conflicts.
+1. Social handles: Instagram, Twitter/X, TikTok, LinkedIn — register @leiko, @getleiko, @leikohealth on as many as possible.
+1. Cultural / linguistic check: ask 3 native speakers each from Nigerian Yoruba, Igbo, Hausa, and Swahili-speaking countries (Kenya, Tanzania) what 'Leiko' sounds like to them. Watch for unintended negative meanings.
 ## **11.2 Voice Validation**
 1. Write 3 push notifications, 3 email subject lines, 1 App Store description following the §3 voice pillars. Have 5 caregiver-persona-fitting people read them. Ask: 'Does this sound trustworthy? Warm? Calm? Dignified?' Record responses.
 1. Show the secondary messages (§6.2 A, B, C) to 3 people in each audience. Capture verbatim reactions.
@@ -578,19 +578,19 @@ D5 cannot be locked until the founder personally completes the following verific
 # **§12 Closing — D5 Status & Handoffs**
 ## **What This Document Locks In**
 - **Audience:** Adaeze (diaspora caregiver) primary, Marcus (US Black-American caregiver) secondary, newly-diagnosed self-buyer tertiary. All three sharing the same emotional grammar.
-- **Naming:** KENA recommended primary (AYA secondary, UMI tertiary). Five names eliminated with documented reasons. Founder must validate per §11.1.
+- **Naming:** LEIKO recommended primary (AYA secondary, UMI tertiary). Five names eliminated with documented reasons. Founder must validate per §11.1.
 - **Voice:** Warm × Calm × Proactive × Dignified. Three tones (Reassuring / Informative / Calm-Concerned). Detailed anti-patterns documented.
 - **Color palette:** Deep Navy + Warm Amber + Calm Teal + Signal Crimson; Warm Cream as primary background. WCAG AAA for primary type pairings.
 - **Typography:** Recoleta (or Fraunces) for display + Inter for body UI. Tabular Inter for data displays. Specific size, weight, line-height rules.
 - **Photography:** Real, daylight, multi-generational, diaspora-and-Black-American-authentic. Hero composition specified: Lagos porch + US apartment pair.
-- **Brand architecture:** Three-tier: LawOne Cloud LLC (parent) → Kena (consumer brand) → Kena Watch / Kena Watch Pro / Kena App / Kena Plus (products). No additional sub-brands at MVP.
+- **Brand architecture:** Three-tier: LawOne Cloud LLC (parent) → Leiko (consumer brand) → Leiko Watch / Leiko Watch Pro / Leiko App / Leiko Plus (products). No additional sub-brands at MVP.
 - **Messaging hierarchy:** Primary (universal), Secondary (audience-specific), Tertiary (proof points). Forbidden claims list anchored to D3.
 - **Positioning:** Caregiver × Warm quadrant. Empty in BP smartwatch category. Defensible position.
 - **Application examples:** App Store listing, Shopify hero, paid social ads (3 audience variants), push notifications, welcome email — all drafted as voice references.
 - **Accessibility:** WCAG 2.2 AA / AAA verified palette; type and color rules documented.
 ## **Handoffs to Other Deliverables**
 - **→ D6 (Go-To-Market):** Uses §1 audiences for paid acquisition targeting; §6 messaging hierarchy for ad creative; §8 application examples as initial creative direction.
-- **→ D7 (Supply Chain Checklist):** Uses §5 product naming for packaging requirements ("Kena Watch" / "Kena Watch Pro" + LawOne Cloud LLC manufacturer-of-record per D3) — these strings must be on the box, on the watch face boot screen (firmware customization), and on the QR-code splash.
+- **→ D7 (Supply Chain Checklist):** Uses §5 product naming for packaging requirements ("Leiko Watch" / "Leiko Watch Pro" + LawOne Cloud LLC manufacturer-of-record per D3) — these strings must be on the box, on the watch face boot screen (firmware customization), and on the QR-code splash.
 - **→ D8 (Full Business Plan):** Uses §1, §6, §7 for the brand and positioning sections; §11 for the validation roadmap.
 - **→ App build (per D4 Block 5):** The engineer uses §4 visual identity to build design tokens (color variables, typography styles); §3 voice pillars to write all UI strings; §6.4 forbidden claims list as a string-linter rule.
 ## **Open Items**

@@ -19,7 +19,7 @@ docs/_reference/D3-regulatory.md, docs/09-paywall-and-iap.md.
 - Beta tester recruit list (10–20 people, mix of NG and US)
 - Maestro E2E: smoke tests for the critical-path flows (per docs/13-testing-standard.md — Maestro, not Detox)
 - All copy in App Store + Play Store listings runs through the forbidden-claims linter (`docs/05-voice-and-claims.md`)
-- Privacy policy and Terms of Service published at `https://kena.app/privacy` and `https://kena.app/terms`
+- Privacy policy and Terms of Service published at `https://leiko.app/privacy` and `https://leiko.app/terms`
 
 ## Acceptance criteria
 - TestFlight build runs end-to-end on a real device
@@ -56,7 +56,7 @@ Wait for approval.
 
 ## External dependencies
 - **Q1**: Anthropic BAA signed (gates Tier B/C in production)
-- **Q2**: Brand name KENA verified (USPTO, NIPC, domains)
+- **Q2**: Brand name LEIKO verified (USPTO, NIPC, domains)
 - **Q4**: 510(k) Letter of Authorisation from K141683 holder (gates US shipping)
 - **Q5**: Clinical advisor sign-off on Cluster A Learn cards
 - **Q11**: RevenueCat IAP product setup

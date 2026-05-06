@@ -61,7 +61,7 @@ Do not write any files yet. Wait for my approval.
 ## Session status — last updated 2026-05-05
 
 ### Session 0a — DONE
-- Group A (repo plumbing): `package.json`, `.gitignore`, `.env.example`, `README.md` written. `git init -b main` done. `origin` set to `https://github.com/farmerscreed/kena-app.git`.
+- Group A (repo plumbing): `package.json`, `.gitignore`, `.env.example`, `README.md` written. `git init -b main` done. `origin` set to `https://github.com/farmerscreed/leiko-app.git`.
 - Group B-ref (`docs/_reference/`): D1, D2, D3, D4, D5, D6×2, D7, D8, D8a, D9, D10 = **12 files**.
 - Group B-canon (`docs/`): 12 top-level + 6 components + 10 screens = **28 canonical sliced files**.
 - Group C (`plans/`): 18 sprint cards + `backlog.md` = **19 files**.
@@ -74,7 +74,7 @@ Remaining work for Sprint 0:
 
 - **Group D — Expo bare scaffold**:
   - `cd apps/mobile && npx create-expo-app . --template bare-minimum` (target Expo SDK 52)
-  - Edit `app.json` — slug `kena`, name `Kena`, bundle `com.kena.app`
+  - Edit `app.json` — slug `leiko`, name `Leiko`, bundle `com.leiko.app`
   - Edit `tsconfig.json` for strict mode
   - Add `jest.config.js` + `__tests__/sanity.test.ts`
   - Add `.eslintrc.json`, `.prettierrc`, `eas.json`
@@ -104,10 +104,10 @@ Remaining work for Sprint 0:
 6. Say "continue Sprint 0" — the new session will read CLAUDE.md, this file, and proceed with Group D → E → F → G.
 
 ### Decisions baked in during 0a (do not re-decide in 0b)
-- GitHub remote: `https://github.com/farmerscreed/kena-app.git` (private)
-- Bundle ID: `com.kena.app` (iOS + Android)
-- Expo slug: `kena`. Display name: `Kena`.
-- Local Supabase project name: `kena`. Remote project: deferred to Sprint 17.
+- GitHub remote: `https://github.com/farmerscreed/leiko-app.git` (private)
+- Bundle ID: `com.leiko.app` (iOS + Android)
+- Expo slug: `leiko`. Display name: `Leiko`.
+- Local Supabase project name: `leiko`. Remote project: deferred to Sprint 17.
 - npm workspaces enabled at root (`apps/*`).
 - Node 22 LTS (was 20 — bumped because Node 20 hit EOL 2026-04-30).
 - Manual doc slicing — no `extract-docs.sh` script.

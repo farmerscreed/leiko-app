@@ -9,8 +9,8 @@ This is the monorepo. The mobile app lives in [`apps/mobile/`](apps/mobile/). Ba
 ## Quick start
 
 ```bash
-git clone https://github.com/farmerscreed/kena-app.git
-cd kena-app
+git clone https://github.com/farmerscreed/leiko-app.git
+cd leiko-app
 npm install
 cp .env.example .env.local   # then fill in keys
 npm run typecheck
@@ -41,7 +41,7 @@ supabase db reset         # applies migrations + seed
 ## Repo layout
 
 ```
-kena-app/
+leiko-app/
 ├── CLAUDE.md              # Operating manual. Read every session.
 ├── docs/                  # Spec, sliced. One concern per file.
 │   ├── 00-tech-stack.md

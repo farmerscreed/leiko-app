@@ -230,7 +230,7 @@ create index vitals_family_time   on public.vitals_other (family_id, vital_type,
 create table public.subscriptions (
   user_id              uuid primary key references public.users(id) on delete cascade,
   rc_app_user_id       text not null,
-  product_id           text,                         -- com.lawonecloud.kena.plus.monthly
+  product_id           text,                         -- com.lawonecloud.leiko.plus.monthly
   entitlement          text not null default 'plus',
   status               text not null check (status in ('active','trialing','grace','past_due','cancelled','expired')),
   trial_ends_at        timestamptz,

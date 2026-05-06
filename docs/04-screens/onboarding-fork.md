@@ -24,7 +24,7 @@ Capture the single most important fact about this user: are they buying for some
 
 ## Skip rule (Q-D8a-1, default Yes)
 
-Users who arrive via a caregiver invitation link (Universal Link → `kena://pair?token=...` or `https://pair.kena.app/{url_token}`) **never see this fork**. The invitation flow sets `account_type = 'parent'` before the fork screen renders.
+Users who arrive via a caregiver invitation link (Universal Link → `leiko://pair?token=...` or `https://pair.leiko.app/{url_token}`) **never see this fork**. The invitation flow sets `account_type = 'parent'` before the fork screen renders.
 
 ---
 
@@ -33,7 +33,7 @@ Users who arrive via a caregiver invitation link (Universal Link → `kena://pai
 | Element | Spec |
 | --- | --- |
 | Container | Standard screen, `color.surface.base` (cream) |
-| Logo | Kena mark, 96pt, centred top, `color.brand.primary` |
+| Logo | Leiko mark, 96pt, centred top, `color.brand.primary` |
 | Headline | `type.display-l`, `color.text.primary` |
 | Body | `type.body-l`, `color.text.secondary`, max-width 280pt |
 | CTA 1 (top) | **`button.primary`** — "Someone I care for" |
@@ -53,7 +53,7 @@ Users who arrive via a caregiver invitation link (Universal Link → `kena://pai
 | Element | String |
 | --- | --- |
 | Headline | **"Who are you setting up for?"** |
-| Body | "Kena works for both — the path just looks a little different." |
+| Body | "Leiko works for both — the path just looks a little different." |
 | CTA 1 label | "Someone I care for" |
 | CTA 1 caption | "A parent, partner, or other family member" |
 | CTA 2 label | "Myself" |

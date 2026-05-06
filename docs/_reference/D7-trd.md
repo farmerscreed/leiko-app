@@ -1,4 +1,4 @@
-﻿D7  —  Technical Requirements Document  •  Kena v1.0
+D7  —  Technical Requirements Document  •  Leiko v1.0
 
 
 
@@ -6,7 +6,7 @@
 
 **Technical Requirements Document**
 
-*Kena Caregiver BP Monitoring App  •  v1.0 (MVP)*
+*Leiko Caregiver BP Monitoring App  •  v1.0 (MVP)*
 
 BP Smartwatch Venture  •  LawOne Cloud LLC
 
@@ -18,7 +18,7 @@ BP Smartwatch Venture  •  LawOne Cloud LLC
 |**Field**|**Value**|
 | :- | :- |
 |Deliverable|D7 — Technical Requirements Document (TRD), v1.0 MVP|
-|Project|Kena Caregiver BP Monitoring App (Urion U16H + U19M white-label)|
+|Project|Leiko Caregiver BP Monitoring App (Urion U16H + U19M white-label)|
 |Entity|LawOne Cloud LLC (US-registered)|
 |Output Standard|<p>Sprint-1-ready. Every choice in D4 with an "or" is locked here with rationale.</p><p>Every requirement traces to a D6 user story or a D3/D5 constraint.</p><p>An AI coding agent or contracted engineer can begin Sprint 1 immediately upon reading.</p>|
 |Predecessor Documents|D1 (Competitive), D2 (Unit Economics), D3 (Regulatory), D4 (App Strategy), D5 (Brand Brief), D6 (PRD v1.0)|
@@ -62,7 +62,7 @@ The TRD does not introduce new product decisions. Where a question turns out to 
 
 
 # **§1  Architecture Overview**
-Kena is a six-tier system: (a) the Urion-manufactured BLE watch on the parent's wrist; (b) the React Native app on the parent's phone (the BLE bridge); (c) the React Native app on the caregiver's phone (the consumer surface); (d) Supabase self-hosted on Hetzner (Postgres + Auth + Realtime + Storage + Edge Functions); (e) the AI orchestration layer (LiteLLM gateway → Ollama for Tier A, Claude Haiku 4.5 for Tier B, Claude Sonnet 4.6 for Tier C, with n8n for scheduled multi-step pipelines); (f) supporting external services (RevenueCat for subscription billing, Sentry for error tracking, PostHog for analytics, Shopify for hardware commerce).
+Leiko is a six-tier system: (a) the Urion-manufactured BLE watch on the parent's wrist; (b) the React Native app on the parent's phone (the BLE bridge); (c) the React Native app on the caregiver's phone (the consumer surface); (d) Supabase self-hosted on Hetzner (Postgres + Auth + Realtime + Storage + Edge Functions); (e) the AI orchestration layer (LiteLLM gateway → Ollama for Tier A, Claude Haiku 4.5 for Tier B, Claude Sonnet 4.6 for Tier C, with n8n for scheduled multi-step pipelines); (f) supporting external services (RevenueCat for subscription billing, Sentry for error tracking, PostHog for analytics, Shopify for hardware commerce).
 
 
 ## **1.1  System Diagram (described)**
@@ -74,7 +74,7 @@ The diagram below describes the production data plane. ASCII drawing is provided
 
 `   `─────────────────                        ─────────────────
 
-`   `Kena Watch (U16H/U19M)                   iPhone / Android
+`   `Leiko Watch (U16H/U19M)                   iPhone / Android
 
 `   `│ BLE 5.2 (Nordic UART GATT)             │
 
@@ -86,7 +86,7 @@ The diagram below describes the production data plane. ASCII drawing is provided
 
 `   `┌───────────────────────────┐            │
 
-`   `│  Kena App (Parent mode)   │            │
+`   `│  Leiko App (Parent mode)   │            │
 
 `   `│  - react-native-ble-plx   │            │
 
@@ -171,7 +171,7 @@ The diagram below describes the production data plane. ASCII drawing is provided
 
 |**Component**|**Description**|**Owned by**|**Trust zone**|
 | :- | :- | :- | :- |
-|Kena Watch firmware|<p>Urion-supplied firmware on U16H/U19M.</p><p>Out of scope for this TRD; tracked separately. App treats it as a black box exposing the BLE protocol from D4 Block 4.</p>|Urion (vendor)|Untrusted boundary|
+|Leiko Watch firmware|<p>Urion-supplied firmware on U16H/U19M.</p><p>Out of scope for this TRD; tracked separately. App treats it as a black box exposing the BLE protocol from D4 Block 4.</p>|Urion (vendor)|Untrusted boundary|
 |iOS app|<p>React Native + Expo bare workflow.</p><p>Two modes: Caregiver, Parent (Self-Buyer = Caregiver mode where wearer==watcher).</p>|LawOne Cloud|Trusted client|
 |Android app|<p>Same RN codebase.</p><p>Foreground Service required for background BLE.</p>|LawOne Cloud|Trusted client|
 |Supabase (self-hosted)|<p>Postgres 15 + GoTrue + Realtime + Storage + Edge Functions on Hetzner CCX23 in Frankfurt (eu-central).</p><p>Read-replica in Helsinki (eu-north).</p>|LawOne Cloud|Server (PHI in clear)|
@@ -296,7 +296,7 @@ Every choice that D4 left as an "or" is locked in this section. Each lock includ
 ## **2.9  Repository Layout**
 
 
-/kena
+/leiko
 
 ├── apps/
 
@@ -745,7 +745,7 @@ create table public.subscriptions (
 
 `  `rc\_app\_user\_id       text not null,                -- RevenueCat App User ID
 
-`  `product\_id           text,                         -- com.lawonecloud.kena.plus.monthly
+`  `product\_id           text,                         -- com.lawonecloud.leiko.plus.monthly
 
 `  `entitlement          text not null default 'plus',
 
@@ -1594,12 +1594,12 @@ Reconnection is the single highest-leverage piece of code in the BLE stack. The 
 
 ## **5.6  Web Bluetooth Pairing (Parent Side — Resolution Applied)**
 
-|<p>**LOCK: Web Bluetooth on Android Chrome is the primary parent-pairing path; iOS native fallback**</p><p>Per the founder resolution carried forward from the prior session: Nigeria is ~85% Android (Statcounter Nov 2025); the parent's phone in Lagos is overwhelmingly likely to be Android Chrome, where Web Bluetooth is supported. The parent receives a WhatsApp link from the caregiver, taps it, lands on a one-screen mobile web pairing flow at https://pair.kena.app/{url\_token}, grants Web Bluetooth permission, and the watch is paired in ≤ 2 minutes without installing an app.</p><p>iOS Safari does NOT support Web Bluetooth. On iOS, the pairing page detects this (navigator.bluetooth === undefined) and routes to a Universal Link: kena://pair?token=...  The link opens the Kena app if installed, otherwise the App Store. Once the app is installed, the deep link is preserved and the pairing context is restored on first launch.</p><p>US pre-pairing was rejected on shipping cost grounds.</p>|
+|<p>**LOCK: Web Bluetooth on Android Chrome is the primary parent-pairing path; iOS native fallback**</p><p>Per the founder resolution carried forward from the prior session: Nigeria is ~85% Android (Statcounter Nov 2025); the parent's phone in Lagos is overwhelmingly likely to be Android Chrome, where Web Bluetooth is supported. The parent receives a WhatsApp link from the caregiver, taps it, lands on a one-screen mobile web pairing flow at https://pair.leiko.app/{url\_token}, grants Web Bluetooth permission, and the watch is paired in ≤ 2 minutes without installing an app.</p><p>iOS Safari does NOT support Web Bluetooth. On iOS, the pairing page detects this (navigator.bluetooth === undefined) and routes to a Universal Link: leiko://pair?token=...  The link opens the Leiko app if installed, otherwise the App Store. Once the app is installed, the deep link is preserved and the pairing context is restored on first launch.</p><p>US pre-pairing was rejected on shipping cost grounds.</p>|
 | :- |
 
 
 ### **5.6.1  Web pairing tech stack**
-- Single Next.js page hosted on Vercel (separate repo /kena-pair-web; no PHI; no auth).
+- Single Next.js page hosted on Vercel (separate repo /leiko-pair-web; no PHI; no auth).
 - Web Bluetooth APIs: navigator.bluetooth.requestDevice({ filters: [{ services: ["6E40FFF0-..."] }]}).
 - Communicates with the same Edge Function /accept-pairing using the url\_token.
 - Once /accept-pairing returns success: device is bound to the family. The parent then takes their first reading (D6 US-17) directly from the watch.
@@ -1632,7 +1632,7 @@ Two invitation kinds, both backed by the public.invitations table:
 ### **6.2.1  Caregiver invitation (D6 US-45)**
 - family\_owner taps Invite → enter invitee label, optional email/phone.
 - App calls /invite-caregiver. Server creates invitations row with kind=caregiver, url\_token (24-byte URL-safe), expires\_at = now() + 14 days.
-- Server returns shareable URL: https://kena.app/join/{url\_token}. App opens platform share sheet (default to WhatsApp on Android per §10).
+- Server returns shareable URL: https://leiko.app/join/{url\_token}. App opens platform share sheet (default to WhatsApp on Android per §10).
 - Invitee taps link → if app installed, deep links to /join/{url\_token}; else App Store / Play Store; on first open after install, deep link is restored.
 - Invitee signs in (or signs up) → /accept-invite reads url\_token, validates, creates family\_members row with role=caregiver, marks invitation accepted\_at.
 - All other caregivers receive a push: "Your sister Tola has joined the family circle."
@@ -1641,7 +1641,7 @@ Two invitation kinds, both backed by the public.invitations table:
 ### **6.2.2  Parent pairing invitation (D6 US-6)**
 - Caregiver indicates parent will receive watch at a different address.
 - App calls /pairing-code. Server creates invitations row with kind=parent\_pairing, generates 6-digit pairing\_code (only one active per family), url\_token, expires\_at = 24h after first use, single-use.
-- App displays QR code containing JSON: { url: "https://pair.kena.app/{url\_token}", code: "123456" }, plus a "share to WhatsApp" affordance.
+- App displays QR code containing JSON: { url: "https://pair.leiko.app/{url\_token}", code: "123456" }, plus a "share to WhatsApp" affordance.
 - Parent receives link → opens on their device → §5.6 Web Bluetooth flow (Android Chrome) or Universal Link (iOS).
 - On successful BLE bond: /accept-pairing creates devices row, marks invitation accepted\_at, fires push to caregiver: "Mom paired her watch."
 
@@ -1664,12 +1664,12 @@ Two invitation kinds, both backed by the public.invitations table:
 # **§7  Privacy, Security & Compliance**
 
 ## **7.1  HIPAA Alignment (canonical position)**
-Kena is direct-to-consumer; we are not a Business Associate to a Covered Entity. HIPAA does not apply de jure. We adopt HIPAA-aligned best practices because (a) D3 lists them as the operational floor, (b) US-state laws (CCPA, CPRA, NY, Connecticut) impose substantively similar duties, (c) caregiver buyers expect it, (d) it future-proofs us if a covered-entity partnership emerges.
+Leiko is direct-to-consumer; we are not a Business Associate to a Covered Entity. HIPAA does not apply de jure. We adopt HIPAA-aligned best practices because (a) D3 lists them as the operational floor, (b) US-state laws (CCPA, CPRA, NY, Connecticut) impose substantively similar duties, (c) caregiver buyers expect it, (d) it future-proofs us if a covered-entity partnership emerges.
 
 
 ### **7.1.1  HIPAA-alignment checklist**
 
-|**HIPAA element**|**Implementation in Kena**|
+|**HIPAA element**|**Implementation in Leiko**|
 | :- | :- |
 |Encryption at rest|Postgres TDE on Hetzner block storage; Supabase Storage AES-256; MMKV via Keychain/Keystore on device.|
 |Encryption in transit|TLS 1.3 for all HTTPS; BLE bonded encryption between watch ↔ phone.|
@@ -1760,14 +1760,14 @@ Kena is direct-to-consumer; we are not a Business Associate to a Covered Entity.
 
 |**Category**|**iOS Category ID**|**Android Channel**|**Default state**|**Quiet-hours behaviour**|
 | :- | :- | :- | :- | :- |
-|Daily summary|kena.daily\_summary|daily-summary (DEFAULT)|On|Suppressed|
-|Weekly summary|kena.weekly\_summary|weekly-summary (DEFAULT)|On (Plus)|Suppressed|
-|Anomaly|kena.anomaly|anomaly (HIGH)|On (Plus)|Honored unless user opts to override|
-|Watch status|kena.device|device (LOW)|On|Suppressed|
-|Family activity|kena.family|family (DEFAULT)|On|Suppressed|
-|Medication reminder|kena.medication|medication (HIGH)|On (parent)|Always honored (medication is time-bound)|
-|Subscription / account|kena.account|account (LOW)|On|Suppressed|
-|Marketing|kena.marketing|marketing (LOW)|OFF (D5 §3.4)|Suppressed|
+|Daily summary|leiko.daily\_summary|daily-summary (DEFAULT)|On|Suppressed|
+|Weekly summary|leiko.weekly\_summary|weekly-summary (DEFAULT)|On (Plus)|Suppressed|
+|Anomaly|leiko.anomaly|anomaly (HIGH)|On (Plus)|Honored unless user opts to override|
+|Watch status|leiko.device|device (LOW)|On|Suppressed|
+|Family activity|leiko.family|family (DEFAULT)|On|Suppressed|
+|Medication reminder|leiko.medication|medication (HIGH)|On (parent)|Always honored (medication is time-bound)|
+|Subscription / account|leiko.account|account (LOW)|On|Suppressed|
+|Marketing|leiko.marketing|marketing (LOW)|OFF (D5 §3.4)|Suppressed|
 
 
 ## **8.2  Per-Category Quiet Hours**
@@ -1782,18 +1782,18 @@ Kena is direct-to-consumer; we are not a Business Associate to a Covered Entity.
 
 |**Category**|**URL**|**Target screen**|
 | :- | :- | :- |
-|Daily summary|kena://home|Caregiver home dashboard|
-|Weekly summary|kena://weekly|Weekly view (D6 US-52)|
-|Anomaly|kena://reading/{reading\_id}|Reading detail (D6 US-24)|
-|Watch status|kena://settings/devices|Device settings (D6 US-84)|
-|Family activity|kena://family|Family screen (D6 US-47)|
-|Medication reminder|kena://parent/medication/{med\_id}|Parent medication detail|
-|Subscription|kena://settings/subscription|Subscription settings|
-|Marketing|kena://home|Home (no targeted deep link to avoid abuse)|
+|Daily summary|leiko://home|Caregiver home dashboard|
+|Weekly summary|leiko://weekly|Weekly view (D6 US-52)|
+|Anomaly|leiko://reading/{reading\_id}|Reading detail (D6 US-24)|
+|Watch status|leiko://settings/devices|Device settings (D6 US-84)|
+|Family activity|leiko://family|Family screen (D6 US-47)|
+|Medication reminder|leiko://parent/medication/{med\_id}|Parent medication detail|
+|Subscription|leiko://settings/subscription|Subscription settings|
+|Marketing|leiko://home|Home (no targeted deep link to avoid abuse)|
 
 
 
-|<p>**UNIVERSAL LINKS / APP LINKS REQUIRED**</p><p>Universal Links (iOS) and App Links (Android) must be set up at the kena.app domain so that http(s)://kena.app/\* and pair.kena.app/\* paths can deep-link into the app. Apple's apple-app-site-association file and Android's assetlinks.json are checked into /apps/mobile/well-known/. Required because the parent's WhatsApp link will be a regular https URL, not a kena:// URI.</p>|
+|<p>**UNIVERSAL LINKS / APP LINKS REQUIRED**</p><p>Universal Links (iOS) and App Links (Android) must be set up at the leiko.app domain so that http(s)://leiko.app/\* and pair.leiko.app/\* paths can deep-link into the app. Apple's apple-app-site-association file and Android's assetlinks.json are checked into /apps/mobile/well-known/. Required because the parent's WhatsApp link will be a regular https URL, not a leiko:// URI.</p>|
 | :- |
 
 
@@ -1910,7 +1910,7 @@ Conflicts will be rare in practice — readings are append-only and ownership of
 
 {
 
-`  `"appName": "Kena",
+`  `"appName": "Leiko",
 
 `  `"actions": {
 
@@ -2223,7 +2223,7 @@ jobs:
 - App Store listing copy passes copy-lint (D6 §6.5) and has been reviewed by founder + (recommended) FDA-savvy lawyer per D5 §11.4.
 - Privacy nutrition label: Health & Fitness data; Identifiers (per device); Usage data; collected, linked to user, not used for tracking.
 - App Store screenshots use authentic photography (D5 §4.3 hero composition).
-- App description includes: 510(k) K141683 reference, "FDA-cleared blood pressure measurement", and the disclaimer "Kena is not a replacement for your doctor."
+- App description includes: 510(k) K141683 reference, "FDA-cleared blood pressure measurement", and the disclaimer "Leiko is not a replacement for your doctor."
 - Demo account credentials provided to App Store reviewers (a synthetic family with synthetic readings).
 - FDA documentation (Establishment Registration Number, manufacturer-of-record) ready to attach if requested by Apple Health Records review.
 - Google Play Health & Fitness declaration submitted; restricted health permissions (BLUETOOTH\_CONNECT etc.) justified in Play Console form.
@@ -2239,7 +2239,7 @@ Items the founder or a senior engineer must decide BEFORE Sprint 1 begins. Each 
 |**#**|**Question**|**Owner**|**Target**|**Default if unanswered**|
 | :- | :- | :- | :- | :- |
 |Q1|Anthropic BAA signed for Claude API healthcare use?|Founder|Before Week 8 of build|Tier B/C disabled in production until signed; Tier A only available in production|
-|Q2|Brand name KENA verified via USPTO TESS, NIPC, .com/.app/.health domains, App Store, Play Store?|Founder|Before Week 2|Hold app name as code-name "Kena" but do NOT begin App Store listing prep|
+|Q2|Brand name LEIKO verified via USPTO TESS, NIPC, .com/.app/.health domains, App Store, Play Store?|Founder|Before Week 2|Hold app name as code-name "Leiko" but do NOT begin App Store listing prep|
 |Q3|Urion firmware UI customization scope (parallel track)|Founder + Urion (James Lee)|Non-blocking|Watch ships with supplier-default firmware; LawOne customisations land in v1.1|
 |Q4|510(k) Letter of Authorisation from K141683 holder|Founder|Before Week 4|CANNOT ship to US without — escalate to D3 if blocking|
 |Q5|Clinical advisor for AI prompt and copy-lint review|Founder|Before Week 12|Ship without if unavailable; founder owns review pass; flagged as a risk|

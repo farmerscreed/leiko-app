@@ -65,7 +65,7 @@ Per `docs/05-voice-and-claims.md`:
 
 ## Behaviour
 
-- Default route: tap on Reading Card from home, or anomaly notification deep link `kena://reading/{reading_id}`.
+- Default route: tap on Reading Card from home, or anomaly notification deep link `leiko://reading/{reading_id}`.
 - **First-reading auto-expand**: when this is the user's FIRST reading, the Inline Explainer auto-opens pre-expanded with `numbers-001` ("What is blood pressure?"). Flag stored in MMKV. (`docs/08-learn-module.md` §7.)
 - For confirmed-urgent readings opened via push: the screen shows the urgent banner at top until acknowledged.
 - Comment thread sync uses Supabase Realtime — caregiver sees siblings' comments live.

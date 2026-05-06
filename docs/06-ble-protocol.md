@@ -156,14 +156,14 @@ The single highest-leverage piece of code in the BLE stack.
 
 **LOCK: Web Bluetooth on Android Chrome is the primary parent-pairing path; iOS native fallback.**
 
-Reasoning: Nigeria is ~85% Android (Statcounter Nov 2025); the parent's phone in Lagos is overwhelmingly likely to be Android Chrome, where Web Bluetooth is supported. The parent receives a WhatsApp link from the caregiver, taps it, lands on a one-screen mobile web pairing flow at `https://pair.kena.app/{url_token}`, grants Web Bluetooth permission, and the watch is paired in ≤ 2 minutes without installing an app.
+Reasoning: Nigeria is ~85% Android (Statcounter Nov 2025); the parent's phone in Lagos is overwhelmingly likely to be Android Chrome, where Web Bluetooth is supported. The parent receives a WhatsApp link from the caregiver, taps it, lands on a one-screen mobile web pairing flow at `https://pair.leiko.app/{url_token}`, grants Web Bluetooth permission, and the watch is paired in ≤ 2 minutes without installing an app.
 
-iOS Safari does NOT support Web Bluetooth. On iOS, the pairing page detects this (`navigator.bluetooth === undefined`) and routes to a Universal Link: `kena://pair?token=...` — opens the Kena app if installed, otherwise the App Store. Once installed, the pairing context is restored on first launch.
+iOS Safari does NOT support Web Bluetooth. On iOS, the pairing page detects this (`navigator.bluetooth === undefined`) and routes to a Universal Link: `leiko://pair?token=...` — opens the Leiko app if installed, otherwise the App Store. Once installed, the pairing context is restored on first launch.
 
 US pre-pairing was rejected on shipping-cost grounds.
 
 ### 6.1 Web pairing tech stack
-- Single Next.js page hosted on Vercel (separate repo `kena-pair-web`; no PHI; no auth).
+- Single Next.js page hosted on Vercel (separate repo `leiko-pair-web`; no PHI; no auth).
 - `navigator.bluetooth.requestDevice({ filters: [{ services: ["6E40FFF0-B5A3-F393-E0A9-E50E24DCCA9E"] }]})`.
 - Communicates with `/accept-pairing` Edge Function using the `url_token`.
 - Once `/accept-pairing` returns success: device is bound to the family. Parent takes their first reading directly from the watch (D6 US-17).

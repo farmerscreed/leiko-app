@@ -1,8 +1,8 @@
 {
-  "name": "kena-app",
+  "name": "leiko-app",
   "private": true,
   "version": "0.0.0",
-  "description": "Kena — caregiver-mode blood pressure monitoring app. Monorepo root.",
+  "description": "Leiko — caregiver-mode blood pressure monitoring app. Monorepo root.",
   "workspaces": [
     "apps/*"
   ],
@@ -22,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/farmerscreed/kena-app.git"
+    "url": "https://github.com/farmerscreed/leiko-app.git"
   },
   "license": "UNLICENSED"
 }

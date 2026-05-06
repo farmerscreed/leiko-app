@@ -1,6 +1,6 @@
-# CLAUDE.md — Kena App Operating Manual
+# CLAUDE.md — Leiko App Operating Manual
  
-You are working on Kena, a caregiver-mode blood pressure monitoring mobile app
+You are working on Leiko, a caregiver-mode blood pressure monitoring mobile app
 built on a Urion U16 family BP smartwatch (FDA-listed, EU MDR Class IIa).
  
 ## How every session starts
@@ -81,7 +81,7 @@ PREFERRED patterns:
 If a string fails any of these, fix it before commit. If you're not sure,
 ask.
  
-## Anti-patterns (Kena visual & UX)
+## Anti-patterns (Leiko visual & UX)
  
 From docs/02-design-tokens.md and docs/04-screens/. Do not:
  

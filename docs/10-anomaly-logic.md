@@ -148,7 +148,7 @@ Per the voice rules:
 
 ## 6. Feature gate (D6 US-95)
 
-- **Free tier** sees the reading on the dashboard but **no proactive anomaly push**. An unobtrusive note on home: *"Get proactive alerts with Kena Plus"* (links to paywall).
+- **Free tier** sees the reading on the dashboard but **no proactive anomaly push**. An unobtrusive note on home: *"Get proactive alerts with Leiko Plus"* (links to paywall).
 - **Plus tier** receives anomaly pushes per category preferences (`docs/11-push-notifications.md`).
 - The reading itself is never paywalled — only the proactive notification.
 

@@ -83,7 +83,7 @@ Output guard runs BEFORE delivery to the client. Blocks any response containing 
 | --- | --- |
 | Specific medication | "Decisions about medication are best made with your doctor or pharmacist — they know what else you're taking and what's right for you." |
 | Symptom interpretation | "Symptoms can mean different things in different people. Worth a chat with your doctor about what you're feeling." |
-| Pregnancy / paediatric | "Kena isn't designed for pregnancy or for younger users — those situations need a clinician who can use the right monitor and the right thresholds." |
+| Pregnancy / paediatric | "Leiko isn't designed for pregnancy or for younger users — those situations need a clinician who can use the right monitor and the right thresholds." |
 | Mental health crisis | "This sounds heavy. If you're struggling, please reach out to a friend, family member, or local crisis line. In Nigeria you can call the Mental Health Foundation. You're not alone in this." |
 | Generic out-of-scope | "That's outside what I can help with. Your doctor is the right person for this one." |
 | "Should Mom's medication change?" / "Is she having a stroke?" | "That's a question for Mom's doctor. I can help you put it together for her next visit — want me to add it to the share-with-doctor list?" |

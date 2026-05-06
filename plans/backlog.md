@@ -7,7 +7,7 @@ Things deferred from sprints, plus the open technical questions from D7 §14. Tr
 | # | Question | Owner | Target | Default if unanswered |
 | --- | --- | --- | --- | --- |
 | Q1 | Anthropic BAA signed for Claude API healthcare use? | Founder | Before Week 8 of build | Tier B/C disabled in production until signed; Tier A only available in production |
-| Q2 | Brand name KENA verified via USPTO TESS, NIPC, .com/.app/.health domains, App Store, Play Store? | Founder | Before Week 2 | Hold app name as code-name "Kena" but do NOT begin App Store listing prep |
+| Q2 | Brand name LEIKO verified via USPTO TESS, NIPC, .com/.app/.health domains, App Store, Play Store? | Founder | Before Week 2 | Hold app name as code-name "Leiko" but do NOT begin App Store listing prep |
 | Q3 | Urion firmware UI customization scope (parallel track) | Founder + Urion (James Lee) | Non-blocking | Watch ships with supplier-default firmware; LawOne customisations land in v1.1 |
 | Q4 | 510(k) Letter of Authorisation from K141683 holder | Founder | Before Week 4 | CANNOT ship to US without — escalate to D3 if blocking |
 | Q5 | Clinical advisor for AI prompt and copy-lint review | Founder | Before Week 12 | Ship without if unavailable; founder owns review pass; flagged as a risk |
@@ -46,7 +46,7 @@ Things deferred from sprints, plus the open technical questions from D7 §14. Tr
 
 (Populated as sprints discover items not in their scope. Each item lists: from which sprint, why deferred, target sprint to resolve.)
 
-- ~~**Bundle ID mismatch**~~ — RESOLVED 2026-05-06 in Sprint 0 closer. Ran `npx expo prebuild --clean`; android/ regenerated with `applicationId 'com.kena.app'` and package source tree at `com/kena/app/`. Verified with a clean install on Pixel 8 — `adb shell pm list packages | grep kena` shows `com.kena.app`, app launches and renders App.tsx content. iOS folder was wiped by --clean; whoever picks up iOS work on a Mac will run `npx expo prebuild --platform ios` to regenerate it (normal Expo flow).
+- ~~**Bundle ID mismatch**~~ — RESOLVED 2026-05-06 in Sprint 0 closer. Ran `npx expo prebuild --clean`; android/ regenerated with `applicationId 'com.leiko.app'` and package source tree at `com/leiko/app/`. Verified with a clean install on Pixel 8 — `adb shell pm list packages | grep leiko` shows `com.leiko.app`, app launches and renders App.tsx content. iOS folder was wiped by --clean; whoever picks up iOS work on a Mac will run `npx expo prebuild --platform ios` to regenerate it (normal Expo flow).
 - **Augment `scripts/install-toolchain.ps1` with Android tooling** — the script currently installs only Node, Supabase CLI, GitHub CLI. A fresh machine also needs JDK 17 (Temurin), Android Studio, and Windows Long Path Support enabled (`HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled = 1`) before `npx expo run:android` works. **Long Path Support is non-obvious and silently breaks NDK extraction**. Add elevated-pass winget installs for `EclipseAdoptium.Temurin.17.JDK` + `Google.AndroidStudio` and a `Set-ItemProperty` for the long-paths registry key. Target: **Sprint 17** (launch prep), so any fresh-machine onboarding before submission has a one-shot setup script. *(From Sprint 0 simulator setup, 2026-05-06.)*
 
 ---
