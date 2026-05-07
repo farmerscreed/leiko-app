@@ -10,8 +10,9 @@
 //   - No animation on the line. Calm-before-clever.
 //   - No axis labels, gridlines, or numbers. The card already has a
 //     numeric hero; the sparkline is a glance, not a chart.
-//   - Color: brand.primarySoft at full opacity. Crimson/urgent state
-//     stays reserved for the card's left-edge stripe.
+//   - Color: text.secondary at full opacity (D12 — was brand.primarySoft
+//     in D8). Crimson/urgent state stays reserved for the card's
+//     left-edge stripe.
 //
 // Math: each adjacent pair (p_i, p_{i+1}) becomes a thin rotated View
 // segment. Length = euclidean distance; rotation = atan2(dy, dx);
@@ -27,7 +28,7 @@ export interface SparklineProps {
   values: number[];
   width: number;
   height: number;
-  /** Override the line color. Defaults to brand.primarySoft. */
+  /** Override the line color. Defaults to text.secondary. */
   color?: string;
   strokeWidth?: number;
   style?: StyleProp<ViewStyle>;
@@ -97,7 +98,7 @@ export function Sparkline({
   testID,
 }: SparklineProps) {
   const theme = useTheme();
-  const stroke = color ?? theme.colors.brand.primarySoft;
+  const stroke = color ?? theme.colors.text.secondary;
   const { segments, endpoint } = useMemo(
     () => plot(values, width, height),
     [values, width, height],
