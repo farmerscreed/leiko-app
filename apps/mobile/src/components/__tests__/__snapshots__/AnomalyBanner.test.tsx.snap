@@ -1,0 +1,631 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`AnomalyBanner — severity × colorMode snapshot matrix renders severity=calm-concerned mode=dark 1`] = `
+<View
+  accessibilityLabel="Worth-a-chat alert: Worth a chat with Mum. We've noticed a pattern worth a gentle check-in."
+  accessibilityLiveRegion="polite"
+  accessibilityRole="alert"
+  style={
+    [
+      {
+        "backgroundColor": "#E8A063",
+        "borderRadius": 14,
+        "elevation": 0,
+        "padding": 16,
+        "shadowColor": "transparent",
+        "shadowOffset": {
+          "height": 0,
+          "width": 0,
+        },
+        "shadowOpacity": 0,
+        "shadowRadius": 0,
+      },
+      {
+        "transform": [
+          {
+            "translateY": -100,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="banner"
+>
+  <View
+    style={
+      {
+        "alignItems": "flex-start",
+        "flexDirection": "row",
+      }
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={24}
+      bbWidth={24}
+      className="warning-regular__svg-icon-phosphor"
+      color="#0A0F1A"
+      fill="currentColor"
+      focusable={false}
+      height={24}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            undefined,
+            undefined,
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": 24,
+            "width": 24,
+          },
+        ]
+      }
+      testID="banner-icon"
+      vbHeight={256}
+      vbWidth={256}
+      width={24}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "type": 2,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGGroup
+          fill={
+            {
+              "payload": 4278849306,
+              "type": 0,
+            }
+          }
+          propList={
+            [
+              "fill",
+            ]
+          }
+        >
+          <RNSVGPath
+            d="M236.8 188.09 149.35 36.22a24.76 24.76 0 0 0-42.7 0L19.2 188.09a23.51 23.51 0 0 0 0 23.72A24.35 24.35 0 0 0 40.55 224h174.9a24.35 24.35 0 0 0 21.33-12.19 23.51 23.51 0 0 0 .02-23.72m-13.87 15.71a8.5 8.5 0 0 1-7.48 4.2H40.55a8.5 8.5 0 0 1-7.48-4.2 7.59 7.59 0 0 1 0-7.72l87.45-151.87a8.75 8.75 0 0 1 15 0l87.45 151.87a7.59 7.59 0 0 1-.04 7.72M120 144v-40a8 8 0 0 1 16 0v40a8 8 0 0 1-16 0m20 36a12 12 0 1 1-12-12 12 12 0 0 1 12 12"
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          />
+        </RNSVGGroup>
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <View
+      style={
+        {
+          "width": 12,
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "flex": 1,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#0A0F1A",
+            "fontFamily": "Inter_600SemiBold",
+            "fontSize": 18,
+            "fontWeight": "600",
+            "lineHeight": 24,
+            "marginBottom": 4,
+          }
+        }
+      >
+        Worth a chat with Mum
+      </Text>
+      <Text
+        style={
+          {
+            "color": "#0A0F1A",
+            "fontFamily": "Inter_400Regular",
+            "fontSize": 15,
+            "lineHeight": 22,
+          }
+        }
+      >
+        We've noticed a pattern worth a gentle check-in.
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`AnomalyBanner — severity × colorMode snapshot matrix renders severity=calm-concerned mode=light 1`] = `
+<View
+  accessibilityLabel="Worth-a-chat alert: Worth a chat with Mum. We've noticed a pattern worth a gentle check-in."
+  accessibilityLiveRegion="polite"
+  accessibilityRole="alert"
+  style={
+    [
+      {
+        "backgroundColor": "#C5824A",
+        "borderRadius": 14,
+        "elevation": 0,
+        "padding": 16,
+        "shadowColor": "transparent",
+        "shadowOffset": {
+          "height": 0,
+          "width": 0,
+        },
+        "shadowOpacity": 0,
+        "shadowRadius": 0,
+      },
+      {
+        "transform": [
+          {
+            "translateY": -100,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="banner"
+>
+  <View
+    style={
+      {
+        "alignItems": "flex-start",
+        "flexDirection": "row",
+      }
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={24}
+      bbWidth={24}
+      className="warning-regular__svg-icon-phosphor"
+      color="#0A0F1A"
+      fill="currentColor"
+      focusable={false}
+      height={24}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            undefined,
+            undefined,
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": 24,
+            "width": 24,
+          },
+        ]
+      }
+      testID="banner-icon"
+      vbHeight={256}
+      vbWidth={256}
+      width={24}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "type": 2,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGGroup
+          fill={
+            {
+              "payload": 4278849306,
+              "type": 0,
+            }
+          }
+          propList={
+            [
+              "fill",
+            ]
+          }
+        >
+          <RNSVGPath
+            d="M236.8 188.09 149.35 36.22a24.76 24.76 0 0 0-42.7 0L19.2 188.09a23.51 23.51 0 0 0 0 23.72A24.35 24.35 0 0 0 40.55 224h174.9a24.35 24.35 0 0 0 21.33-12.19 23.51 23.51 0 0 0 .02-23.72m-13.87 15.71a8.5 8.5 0 0 1-7.48 4.2H40.55a8.5 8.5 0 0 1-7.48-4.2 7.59 7.59 0 0 1 0-7.72l87.45-151.87a8.75 8.75 0 0 1 15 0l87.45 151.87a7.59 7.59 0 0 1-.04 7.72M120 144v-40a8 8 0 0 1 16 0v40a8 8 0 0 1-16 0m20 36a12 12 0 1 1-12-12 12 12 0 0 1 12 12"
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          />
+        </RNSVGGroup>
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <View
+      style={
+        {
+          "width": 12,
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "flex": 1,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#0A0F1A",
+            "fontFamily": "Inter_600SemiBold",
+            "fontSize": 18,
+            "fontWeight": "600",
+            "lineHeight": 24,
+            "marginBottom": 4,
+          }
+        }
+      >
+        Worth a chat with Mum
+      </Text>
+      <Text
+        style={
+          {
+            "color": "#0A0F1A",
+            "fontFamily": "Inter_400Regular",
+            "fontSize": 15,
+            "lineHeight": 22,
+          }
+        }
+      >
+        We've noticed a pattern worth a gentle check-in.
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`AnomalyBanner — severity × colorMode snapshot matrix renders severity=confirmed-urgent mode=dark 1`] = `
+<View
+  accessibilityLabel="Urgent alert: Talk to Mum now. Their latest reading was above their usual range. A calm check-in helps."
+  accessibilityLiveRegion="assertive"
+  accessibilityRole="alert"
+  style={
+    [
+      {
+        "backgroundColor": "#A8403F",
+        "borderRadius": 14,
+        "borderTopColor": "rgba(255,255,255,0.06)",
+        "borderTopWidth": 1,
+        "elevation": 16,
+        "padding": 16,
+        "shadowColor": "#000000",
+        "shadowOffset": {
+          "height": 16,
+          "width": 0,
+        },
+        "shadowOpacity": 0.45,
+        "shadowRadius": 48,
+      },
+      {
+        "transform": [
+          {
+            "translateY": -100,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="banner"
+>
+  <View
+    style={
+      {
+        "alignItems": "flex-start",
+        "flexDirection": "row",
+      }
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={24}
+      bbWidth={24}
+      className="warning-circle-regular__svg-icon-phosphor"
+      color="#F5F1EA"
+      fill="currentColor"
+      focusable={false}
+      height={24}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            undefined,
+            undefined,
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": 24,
+            "width": 24,
+          },
+        ]
+      }
+      testID="banner-icon"
+      vbHeight={256}
+      vbWidth={256}
+      width={24}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "type": 2,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGGroup
+          fill={
+            {
+              "payload": 4294308330,
+              "type": 0,
+            }
+          }
+          propList={
+            [
+              "fill",
+            ]
+          }
+        >
+          <RNSVGPath
+            d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24m0 192a88 88 0 1 1 88-88 88.1 88.1 0 0 1-88 88m-8-80V80a8 8 0 0 1 16 0v56a8 8 0 0 1-16 0m20 36a12 12 0 1 1-12-12 12 12 0 0 1 12 12"
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          />
+        </RNSVGGroup>
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <View
+      style={
+        {
+          "width": 12,
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "flex": 1,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "Inter_600SemiBold",
+            "fontSize": 18,
+            "fontWeight": "600",
+            "lineHeight": 24,
+            "marginBottom": 4,
+          }
+        }
+      >
+        Talk to Mum now
+      </Text>
+      <Text
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "Inter_400Regular",
+            "fontSize": 15,
+            "lineHeight": 22,
+          }
+        }
+      >
+        Their latest reading was above their usual range. A calm check-in helps.
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`AnomalyBanner — severity × colorMode snapshot matrix renders severity=confirmed-urgent mode=light 1`] = `
+<View
+  accessibilityLabel="Urgent alert: Talk to Mum now. Their latest reading was above their usual range. A calm check-in helps."
+  accessibilityLiveRegion="assertive"
+  accessibilityRole="alert"
+  style={
+    [
+      {
+        "backgroundColor": "#8C2D2D",
+        "borderRadius": 14,
+        "elevation": 12,
+        "padding": 16,
+        "shadowColor": "#0A0F1A",
+        "shadowOffset": {
+          "height": 8,
+          "width": 0,
+        },
+        "shadowOpacity": 0.14,
+        "shadowRadius": 24,
+      },
+      {
+        "transform": [
+          {
+            "translateY": -100,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="banner"
+>
+  <View
+    style={
+      {
+        "alignItems": "flex-start",
+        "flexDirection": "row",
+      }
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={24}
+      bbWidth={24}
+      className="warning-circle-regular__svg-icon-phosphor"
+      color="#F5F1EA"
+      fill="currentColor"
+      focusable={false}
+      height={24}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            undefined,
+            undefined,
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": 24,
+            "width": 24,
+          },
+        ]
+      }
+      testID="banner-icon"
+      vbHeight={256}
+      vbWidth={256}
+      width={24}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "type": 2,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGGroup
+          fill={
+            {
+              "payload": 4294308330,
+              "type": 0,
+            }
+          }
+          propList={
+            [
+              "fill",
+            ]
+          }
+        >
+          <RNSVGPath
+            d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24m0 192a88 88 0 1 1 88-88 88.1 88.1 0 0 1-88 88m-8-80V80a8 8 0 0 1 16 0v56a8 8 0 0 1-16 0m20 36a12 12 0 1 1-12-12 12 12 0 0 1 12 12"
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          />
+        </RNSVGGroup>
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <View
+      style={
+        {
+          "width": 12,
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "flex": 1,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "Inter_600SemiBold",
+            "fontSize": 18,
+            "fontWeight": "600",
+            "lineHeight": 24,
+            "marginBottom": 4,
+          }
+        }
+      >
+        Talk to Mum now
+      </Text>
+      <Text
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "Inter_400Regular",
+            "fontSize": 15,
+            "lineHeight": 22,
+          }
+        }
+      >
+        Their latest reading was above their usual range. A calm check-in helps.
+      </Text>
+    </View>
+  </View>
+</View>
+`;
