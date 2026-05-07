@@ -23,9 +23,12 @@ import { writeUint32LE } from '../../ble/commands/readBPHistory';
 import {
   getLastSyncSec,
   setLastSyncSec,
+  getVitalCursor,
+  setVitalCursor,
   syncBacklog,
   watchTimestampToUtcSec,
 } from '../syncBacklog';
+import { STORAGE_KEYS } from '../../storage';
 import { useReadings } from '../../../state/readings';
 import { mmkv } from '../../storage';
 
@@ -107,6 +110,100 @@ describe('lastSyncSec cursor (per-device)', () => {
     expect(getLastSyncSec('AA:BB:CC:DD:E4:F2')).toBe(1737385351);
     expect(getLastSyncSec('11:22:33:44:55:66')).toBe(1737000000);
     expect(getLastSyncSec('99:99:99:99:99:99')).toBe(0);
+  });
+});
+
+describe('per-vital cursor (D13 §3.4)', () => {
+  const dev = 'AA:BB:CC:DD:E4:F2';
+
+  it('returns the empty cursor when nothing is stored', () => {
+    const c = getVitalCursor(dev);
+    expect(c).toEqual({ bp: 0, hr: 0, spo2: '', sleep: '', activity: '' });
+  });
+
+  it('round-trips per-sample (bp, hr) cursors as numbers', () => {
+    setVitalCursor(dev, 'bp', 1737385351);
+    setVitalCursor(dev, 'hr', 1737385900);
+    const c = getVitalCursor(dev);
+    expect(c.bp).toBe(1737385351);
+    expect(c.hr).toBe(1737385900);
+  });
+
+  it('round-trips per-day (spo2, sleep, activity) cursors as YYYY-MM-DD strings', () => {
+    setVitalCursor(dev, 'spo2', '2026-05-06');
+    setVitalCursor(dev, 'sleep', '2026-05-05');
+    setVitalCursor(dev, 'activity', '2026-05-07');
+    const c = getVitalCursor(dev);
+    expect(c.spo2).toBe('2026-05-06');
+    expect(c.sleep).toBe('2026-05-05');
+    expect(c.activity).toBe('2026-05-07');
+  });
+
+  it('advancing one vital does not touch the others', () => {
+    setVitalCursor(dev, 'bp', 1000);
+    setVitalCursor(dev, 'hr', 2000);
+    setVitalCursor(dev, 'sleep', '2026-05-05');
+    setVitalCursor(dev, 'hr', 3000);   // advance only hr
+    const c = getVitalCursor(dev);
+    expect(c.bp).toBe(1000);
+    expect(c.hr).toBe(3000);
+    expect(c.sleep).toBe('2026-05-05');
+  });
+
+  it('advancing for one device does not touch other devices', () => {
+    const dev2 = '11:22:33:44:55:66';
+    setVitalCursor(dev, 'bp', 1000);
+    setVitalCursor(dev2, 'bp', 2000);
+    expect(getVitalCursor(dev).bp).toBe(1000);
+    expect(getVitalCursor(dev2).bp).toBe(2000);
+  });
+
+  it('migrates legacy bare-number entries to the bp cursor on read', () => {
+    // Manually plant a Sprint-6-shape value: { [bleId]: number }.
+    mmkv.set(
+      STORAGE_KEYS.lastSyncByDevice,
+      JSON.stringify({ [dev]: 1737000000 }),
+    );
+    const c = getVitalCursor(dev);
+    expect(c.bp).toBe(1737000000);
+    expect(c.hr).toBe(0);
+    expect(c.spo2).toBe('');
+    expect(c.sleep).toBe('');
+    expect(c.activity).toBe('');
+  });
+
+  it('legacy getLastSyncSec still returns the bp value after migration', () => {
+    mmkv.set(
+      STORAGE_KEYS.lastSyncByDevice,
+      JSON.stringify({ [dev]: 1737000000 }),
+    );
+    expect(getLastSyncSec(dev)).toBe(1737000000);
+  });
+
+  it('writing through the new API after a legacy read flushes the new shape', () => {
+    mmkv.set(
+      STORAGE_KEYS.lastSyncByDevice,
+      JSON.stringify({ [dev]: 1737000000 }),
+    );
+    setVitalCursor(dev, 'hr', 999);
+    const stored = JSON.parse(mmkv.getString(STORAGE_KEYS.lastSyncByDevice) ?? '{}');
+    expect(stored[dev]).toEqual({
+      bp: 1737000000,
+      hr: 999,
+      spo2: '',
+      sleep: '',
+      activity: '',
+    });
+  });
+
+  it('defensively populates missing keys when reading a partial new-shape entry', () => {
+    // A future-version write that only set some keys.
+    mmkv.set(
+      STORAGE_KEYS.lastSyncByDevice,
+      JSON.stringify({ [dev]: { bp: 100 } }),
+    );
+    const c = getVitalCursor(dev);
+    expect(c).toEqual({ bp: 100, hr: 0, spo2: '', sleep: '', activity: '' });
   });
 });
 
