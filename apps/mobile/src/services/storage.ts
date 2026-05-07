@@ -51,6 +51,17 @@ export const STORAGE_KEYS = {
   // Default 'system' (follow OS appearance). User-facing toggle ships in
   // Sprint 10 Settings; ThemeProvider reads/writes this key directly.
   themeColorMode: 'leiko.theme.colorMode',
+  // Per-vital pending buffers — Sprint 7.5 / D13 §5.1. Each is a JSON
+  // array of typed samples (HRSample / SpO2Sample / SleepSession /
+  // ActivityDay / CaloriesDay) waiting for a successful /sync upload.
+  // Same offline-first guarantee as pendingReadings: every captured
+  // sample lands here BEFORE any sync attempt, so a network/BLE failure
+  // never loses data. Flushed by each vital state slice's syncPending.
+  pendingHR: 'leiko.vitals.pending.hr',
+  pendingSpO2: 'leiko.vitals.pending.spo2',
+  pendingSleep: 'leiko.vitals.pending.sleep',
+  pendingActivity: 'leiko.vitals.pending.activity',
+  pendingCalories: 'leiko.vitals.pending.calories',
 } as const;
 
 export const supabaseStorage = {
