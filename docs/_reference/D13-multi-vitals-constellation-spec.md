@@ -209,16 +209,20 @@ All wrappers follow the pattern in `docs/06-ble-protocol.md` §3 — pure functi
 
 ### 3.2 Notify routing fix
 
-Current `apps/mobile/src/services/ble/notify.ts` subscribes to the notify characteristic but only routes the BP byte. D13 expands to all live triggers per `docs/06-ble-protocol.md` §3 cmd 0x73 sub-events:
+Current `apps/mobile/src/services/ble/notify.ts` subscribes to the notify characteristic but only routes the BP byte to a downstream handler (the other handlers exist as typed dead-code paths). D13 expands the wiring to all live triggers per the vendor U16PRO PDF §4.13 + `docs/06-ble-protocol.md` §3 cmd 0x73 sub-events.
+
+The byte mapping below is **empirically verified** against U19M_013C in Lagos 2026-05-07 — the Sprint 6 BP path proves `0x02 = BP completed`. An earlier draft of this section had `0x01` and `0x02` reversed; corrected here in Sprint 7.5.
 
 | Sub-event byte | Meaning | Routes to |
 |---|---|---|
-| `0x01` | Live BP completed | Existing `readingCaptured` handler |
-| `0x02` | Live HR sample | New `hrSampled` handler — push to local `state/hr.ts` |
-| `0x03` | Live SpO2 sample | New `spo2Sampled` handler |
-| `0x04` | Live sport/activity event | New `activityEvent` handler — invalidate steps cache |
-| `0x0C` | Battery state | Existing battery handler |
-| `0x10` | Sleep session complete | New `sleepSessionComplete` handler — trigger sync |
+| `0x01` | Live HR sample | New `onHR` handler — push to local `state/hr.ts` |
+| `0x02` | Live BP completed | Existing `onBP` handler |
+| `0x03` | Live SpO2 sample | New `onSpO2` handler |
+| `0x04` | Step-counting event | New `onSteps` handler — invalidate activity cache |
+| `0x07` | Sports record | New `onSports` handler — invalidate activity cache |
+| `0x09` | Do-not-disturb echo | Settings echo (no-op for ingest) |
+| `0x0C` | Battery state | Existing `onBattery` handler |
+| `0x10` | Sleep session complete | New `onSleepSessionComplete` handler — trigger `readSleep` (UNVERIFIED empirically — to be confirmed during Sprint 7.5 soak; the orchestrator's sequenced-sync also pulls last-night sleep on every reconnect so a missed/misrouted byte here is non-fatal) |
 
 ### 3.3 Sequenced sync on reconnect
 
