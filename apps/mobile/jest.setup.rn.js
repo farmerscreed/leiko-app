@@ -30,11 +30,18 @@ process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY =
 // the official jestSetup module mocks them.
 jest.mock('react-native-reanimated', () => {
   const { View } = jest.requireActual('react-native');
+  // createAnimatedComponent passes the wrapped component through as-is.
+  // animatedProps is merged into props at render time so SVG attributes
+  // appear on the underlying element for snapshot inspection.
+  const createAnimatedComponent = (Component) => Component;
   return {
     __esModule: true,
-    default: { View, ScrollView: View },
+    default: { View, ScrollView: View, createAnimatedComponent },
+    createAnimatedComponent,
     useSharedValue: (initial) => ({ value: initial }),
     useAnimatedStyle: (fn) => fn(),
+    useAnimatedProps: (fn) => fn(),
+    useDerivedValue: (fn) => ({ value: fn() }),
     withTiming: (toValue, _config, callback) => {
       if (typeof callback === 'function') callback(true);
       return toValue;
@@ -43,6 +50,9 @@ jest.mock('react-native-reanimated', () => {
       if (typeof callback === 'function') callback(true);
       return toValue;
     },
+    withRepeat: (anim) => anim,
+    withSequence: (...anims) => anims[anims.length - 1],
+    withDelay: (_delay, anim) => anim,
     runOnJS: (fn) => fn,
     runOnUI: (fn) => fn,
     Easing: {

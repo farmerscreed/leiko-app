@@ -1,0 +1,1653 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`VitalRing — size variation renders size=hero 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 1,
+      "min": 0,
+      "now": 0.5,
+    }
+  }
+  style={
+    [
+      {
+        "height": 240,
+        "opacity": 1,
+        "width": 240,
+      },
+      {
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="ring"
+>
+  <RNSVGSvgView
+    bbHeight={240}
+    bbWidth={240}
+    focusable={false}
+    height={240}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 240,
+          "width": 240,
+        },
+      ]
+    }
+    width={240}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGCircle
+        cx={120}
+        cy={120}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+          ]
+        }
+        r={112}
+        stroke={
+          {
+            "payload": 4292244570,
+            "type": 0,
+          }
+        }
+        strokeOpacity={0.12}
+        strokeWidth={16}
+      />
+      <RNSVGCircle
+        cx={120}
+        cy={120}
+        fill={null}
+        matrix={
+          [
+            6.123233995736766e-17,
+            -1,
+            1,
+            6.123233995736766e-17,
+            -1.4210854715202004e-14,
+            240,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+            "strokeLinecap",
+          ]
+        }
+        r={112}
+        stroke={
+          {
+            "payload": 4292244570,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            703.7167544041137,
+            703.7167544041137,
+          ]
+        }
+        strokeDashoffset={351.85837720205683}
+        strokeLinecap={1}
+        strokeWidth={16}
+      />
+      <RNSVGCircle
+        cx={120}
+        cy={120}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        r={103}
+        stroke={
+          {
+            "payload": 268435455,
+            "type": 0,
+          }
+        }
+        strokeWidth={1}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`VitalRing — size variation renders size=lg 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 1,
+      "min": 0,
+      "now": 0.5,
+    }
+  }
+  style={
+    [
+      {
+        "height": 168,
+        "opacity": 1,
+        "width": 168,
+      },
+      {
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="ring"
+>
+  <RNSVGSvgView
+    bbHeight={168}
+    bbWidth={168}
+    focusable={false}
+    height={168}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 168,
+          "width": 168,
+        },
+      ]
+    }
+    width={168}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGCircle
+        cx={84}
+        cy={84}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+          ]
+        }
+        r={78}
+        stroke={
+          {
+            "payload": 4292244570,
+            "type": 0,
+          }
+        }
+        strokeOpacity={0.12}
+        strokeWidth={12}
+      />
+      <RNSVGCircle
+        cx={84}
+        cy={84}
+        fill={null}
+        matrix={
+          [
+            6.123233995736766e-17,
+            -1,
+            1,
+            6.123233995736766e-17,
+            0,
+            168,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+            "strokeLinecap",
+          ]
+        }
+        r={78}
+        stroke={
+          {
+            "payload": 4292244570,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            490.0884539600077,
+            490.0884539600077,
+          ]
+        }
+        strokeDashoffset={245.04422698000386}
+        strokeLinecap={1}
+        strokeWidth={12}
+      />
+      <RNSVGCircle
+        cx={84}
+        cy={84}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        r={71}
+        stroke={
+          {
+            "payload": 268435455,
+            "type": 0,
+          }
+        }
+        strokeWidth={1}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`VitalRing — size variation renders size=md 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 1,
+      "min": 0,
+      "now": 0.5,
+    }
+  }
+  style={
+    [
+      {
+        "height": 88,
+        "opacity": 1,
+        "width": 88,
+      },
+      {
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="ring"
+>
+  <RNSVGSvgView
+    bbHeight={88}
+    bbWidth={88}
+    focusable={false}
+    height={88}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 88,
+          "width": 88,
+        },
+      ]
+    }
+    width={88}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4292244570,
+            "type": 0,
+          }
+        }
+        strokeOpacity={0.12}
+        strokeWidth={8}
+      />
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        matrix={
+          [
+            6.123233995736766e-17,
+            -1,
+            1,
+            6.123233995736766e-17,
+            0,
+            88,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+            "strokeLinecap",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4292244570,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            251.32741228718345,
+            251.32741228718345,
+          ]
+        }
+        strokeDashoffset={125.66370614359172}
+        strokeLinecap={1}
+        strokeWidth={8}
+      />
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        r={35}
+        stroke={
+          {
+            "payload": 268435455,
+            "type": 0,
+          }
+        }
+        strokeWidth={1}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`VitalRing — size variation renders size=sm 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 1,
+      "min": 0,
+      "now": 0.5,
+    }
+  }
+  style={
+    [
+      {
+        "height": 40,
+        "opacity": 1,
+        "width": 40,
+      },
+      {
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="ring"
+>
+  <RNSVGSvgView
+    bbHeight={40}
+    bbWidth={40}
+    focusable={false}
+    height={40}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 40,
+          "width": 40,
+        },
+      ]
+    }
+    width={40}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGCircle
+        cx={20}
+        cy={20}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+          ]
+        }
+        r={18}
+        stroke={
+          {
+            "payload": 4292244570,
+            "type": 0,
+          }
+        }
+        strokeOpacity={0.12}
+        strokeWidth={4}
+      />
+      <RNSVGCircle
+        cx={20}
+        cy={20}
+        fill={null}
+        matrix={
+          [
+            6.123233995736766e-17,
+            -1,
+            1,
+            6.123233995736766e-17,
+            0,
+            40,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+            "strokeLinecap",
+          ]
+        }
+        r={18}
+        stroke={
+          {
+            "payload": 4292244570,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            113.09733552923255,
+            113.09733552923255,
+          ]
+        }
+        strokeDashoffset={56.548667764616276}
+        strokeLinecap={1}
+        strokeWidth={4}
+      />
+      <RNSVGCircle
+        cx={20}
+        cy={20}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        r={15}
+        stroke={
+          {
+            "payload": 268435455,
+            "type": 0,
+          }
+        }
+        strokeWidth={1}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`VitalRing — state × mode snapshot matrix renders state=filling mode=dark 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 1,
+      "min": 0,
+      "now": 0.62,
+    }
+  }
+  style={
+    [
+      {
+        "height": 88,
+        "opacity": 1,
+        "width": 88,
+      },
+      {
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="ring"
+>
+  <RNSVGSvgView
+    bbHeight={88}
+    bbWidth={88}
+    focusable={false}
+    height={88}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 88,
+          "width": 88,
+        },
+      ]
+    }
+    width={88}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeOpacity={0.12}
+        strokeWidth={8}
+      />
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        matrix={
+          [
+            6.123233995736766e-17,
+            -1,
+            1,
+            6.123233995736766e-17,
+            0,
+            88,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+            "strokeLinecap",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            251.32741228718345,
+            251.32741228718345,
+          ]
+        }
+        strokeDashoffset={95.50441666912971}
+        strokeLinecap={1}
+        strokeWidth={8}
+      />
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        r={35}
+        stroke={
+          {
+            "payload": 268435455,
+            "type": 0,
+          }
+        }
+        strokeWidth={1}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`VitalRing — state × mode snapshot matrix renders state=filling mode=light 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 1,
+      "min": 0,
+      "now": 0.62,
+    }
+  }
+  style={
+    [
+      {
+        "height": 88,
+        "opacity": 1,
+        "width": 88,
+      },
+      {
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="ring"
+>
+  <RNSVGSvgView
+    bbHeight={88}
+    bbWidth={88}
+    focusable={false}
+    height={88}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 88,
+          "width": 88,
+        },
+      ]
+    }
+    width={88}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeOpacity={0.12}
+        strokeWidth={8}
+      />
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        matrix={
+          [
+            6.123233995736766e-17,
+            -1,
+            1,
+            6.123233995736766e-17,
+            0,
+            88,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+            "strokeLinecap",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            251.32741228718345,
+            251.32741228718345,
+          ]
+        }
+        strokeDashoffset={95.50441666912971}
+        strokeLinecap={1}
+        strokeWidth={8}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`VitalRing — state × mode snapshot matrix renders state=idle mode=dark 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 1,
+      "min": 0,
+      "now": 0.62,
+    }
+  }
+  style={
+    [
+      {
+        "height": 88,
+        "opacity": 1,
+        "width": 88,
+      },
+      {
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="ring"
+>
+  <RNSVGSvgView
+    bbHeight={88}
+    bbWidth={88}
+    focusable={false}
+    height={88}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 88,
+          "width": 88,
+        },
+      ]
+    }
+    width={88}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeOpacity={0.12}
+        strokeWidth={8}
+      />
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        matrix={
+          [
+            6.123233995736766e-17,
+            -1,
+            1,
+            6.123233995736766e-17,
+            0,
+            88,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+            "strokeLinecap",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            251.32741228718345,
+            251.32741228718345,
+          ]
+        }
+        strokeDashoffset={95.50441666912971}
+        strokeLinecap={1}
+        strokeWidth={8}
+      />
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        r={35}
+        stroke={
+          {
+            "payload": 268435455,
+            "type": 0,
+          }
+        }
+        strokeWidth={1}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`VitalRing — state × mode snapshot matrix renders state=idle mode=light 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 1,
+      "min": 0,
+      "now": 0.62,
+    }
+  }
+  style={
+    [
+      {
+        "height": 88,
+        "opacity": 1,
+        "width": 88,
+      },
+      {
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="ring"
+>
+  <RNSVGSvgView
+    bbHeight={88}
+    bbWidth={88}
+    focusable={false}
+    height={88}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 88,
+          "width": 88,
+        },
+      ]
+    }
+    width={88}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeOpacity={0.12}
+        strokeWidth={8}
+      />
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        matrix={
+          [
+            6.123233995736766e-17,
+            -1,
+            1,
+            6.123233995736766e-17,
+            0,
+            88,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+            "strokeLinecap",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            251.32741228718345,
+            251.32741228718345,
+          ]
+        }
+        strokeDashoffset={95.50441666912971}
+        strokeLinecap={1}
+        strokeWidth={8}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`VitalRing — state × mode snapshot matrix renders state=pulsing mode=dark 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 1,
+      "min": 0,
+      "now": 0.62,
+    }
+  }
+  style={
+    [
+      {
+        "height": 88,
+        "opacity": 1,
+        "width": 88,
+      },
+      {
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="ring"
+>
+  <RNSVGSvgView
+    bbHeight={88}
+    bbWidth={88}
+    focusable={false}
+    height={88}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 88,
+          "width": 88,
+        },
+      ]
+    }
+    width={88}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeOpacity={0.12}
+        strokeWidth={8}
+      />
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        matrix={
+          [
+            6.123233995736766e-17,
+            -1,
+            1,
+            6.123233995736766e-17,
+            0,
+            88,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+            "strokeLinecap",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            251.32741228718345,
+            251.32741228718345,
+          ]
+        }
+        strokeDashoffset={95.50441666912971}
+        strokeLinecap={1}
+        strokeWidth={8}
+      />
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        r={35}
+        stroke={
+          {
+            "payload": 268435455,
+            "type": 0,
+          }
+        }
+        strokeWidth={1}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`VitalRing — state × mode snapshot matrix renders state=pulsing mode=light 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 1,
+      "min": 0,
+      "now": 0.62,
+    }
+  }
+  style={
+    [
+      {
+        "height": 88,
+        "opacity": 1,
+        "width": 88,
+      },
+      {
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="ring"
+>
+  <RNSVGSvgView
+    bbHeight={88}
+    bbWidth={88}
+    focusable={false}
+    height={88}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 88,
+          "width": 88,
+        },
+      ]
+    }
+    width={88}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeOpacity={0.12}
+        strokeWidth={8}
+      />
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        matrix={
+          [
+            6.123233995736766e-17,
+            -1,
+            1,
+            6.123233995736766e-17,
+            0,
+            88,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+            "strokeLinecap",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            251.32741228718345,
+            251.32741228718345,
+          ]
+        }
+        strokeDashoffset={95.50441666912971}
+        strokeLinecap={1}
+        strokeWidth={8}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`VitalRing — state × mode snapshot matrix renders state=stale mode=dark 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 1,
+      "min": 0,
+      "now": 0.62,
+    }
+  }
+  style={
+    [
+      {
+        "height": 88,
+        "opacity": 0.5,
+        "width": 88,
+      },
+      {
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="ring"
+>
+  <RNSVGSvgView
+    bbHeight={88}
+    bbWidth={88}
+    focusable={false}
+    height={88}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 88,
+          "width": 88,
+        },
+      ]
+    }
+    width={88}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeOpacity={0.12}
+        strokeWidth={8}
+      />
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        matrix={
+          [
+            6.123233995736766e-17,
+            -1,
+            1,
+            6.123233995736766e-17,
+            0,
+            88,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+            "strokeLinecap",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            251.32741228718345,
+            251.32741228718345,
+          ]
+        }
+        strokeDashoffset={95.50441666912971}
+        strokeLinecap={1}
+        strokeWidth={8}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`VitalRing — state × mode snapshot matrix renders state=stale mode=light 1`] = `
+<View
+  accessibilityRole="progressbar"
+  accessibilityValue={
+    {
+      "max": 1,
+      "min": 0,
+      "now": 0.62,
+    }
+  }
+  style={
+    [
+      {
+        "height": 88,
+        "opacity": 0.5,
+        "width": 88,
+      },
+      {
+        "opacity": 1,
+        "transform": [
+          {
+            "scale": 1,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="ring"
+>
+  <RNSVGSvgView
+    bbHeight={88}
+    bbWidth={88}
+    focusable={false}
+    height={88}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 88,
+          "width": 88,
+        },
+      ]
+    }
+    width={88}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeOpacity={0.12}
+        strokeWidth={8}
+      />
+      <RNSVGCircle
+        cx={44}
+        cy={44}
+        fill={null}
+        matrix={
+          [
+            6.123233995736766e-17,
+            -1,
+            1,
+            6.123233995736766e-17,
+            0,
+            88,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+            "strokeLinecap",
+          ]
+        }
+        r={40}
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            251.32741228718345,
+            251.32741228718345,
+          ]
+        }
+        strokeDashoffset={95.50441666912971}
+        strokeLinecap={1}
+        strokeWidth={8}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
