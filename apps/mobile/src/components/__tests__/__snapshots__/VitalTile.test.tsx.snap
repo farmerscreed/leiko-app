@@ -1,0 +1,2747 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`VitalTile — state × colorMode snapshot matrix renders state=live mode=dark 1`] = `
+<View
+  accessibilityLabel="Heart rate tile, 62 bpm, resting"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": true,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  testID="tile"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#11171F",
+          "borderColor": "#D6745A33",
+          "borderRadius": 14,
+          "borderTopColor": "rgba(255,255,255,0.06)",
+          "borderTopWidth": 1,
+          "borderWidth": 1,
+          "padding": 16,
+          "shadowColor": "#D6745A",
+          "shadowOffset": {
+            "height": 4,
+            "width": 0,
+          },
+          "shadowOpacity": 0.2,
+          "shadowRadius": 16,
+        },
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          accessibilityRole="progressbar"
+          accessibilityValue={
+            {
+              "max": 1,
+              "min": 0,
+              "now": 0.5,
+            }
+          }
+          style={
+            [
+              {
+                "height": 40,
+                "opacity": 1,
+                "width": 40,
+              },
+              {
+                "opacity": 1,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+              },
+              undefined,
+            ]
+          }
+        >
+          <RNSVGSvgView
+            bbHeight={40}
+            bbWidth={40}
+            focusable={false}
+            height={40}
+            style={
+              [
+                {
+                  "backgroundColor": "transparent",
+                  "borderWidth": 0,
+                },
+                {
+                  "flex": 0,
+                  "height": 40,
+                  "width": 40,
+                },
+              ]
+            }
+            width={40}
+          >
+            <RNSVGGroup
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            >
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeOpacity",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4292244570,
+                    "type": 0,
+                  }
+                }
+                strokeOpacity={0.12}
+                strokeWidth={4}
+              />
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                matrix={
+                  [
+                    6.123233995736766e-17,
+                    -1,
+                    1,
+                    6.123233995736766e-17,
+                    0,
+                    40,
+                  ]
+                }
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeDasharray",
+                    "strokeDashoffset",
+                    "strokeLinecap",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4292244570,
+                    "type": 0,
+                  }
+                }
+                strokeDasharray={
+                  [
+                    113.09733552923255,
+                    113.09733552923255,
+                  ]
+                }
+                strokeDashoffset={56.548667764616276}
+                strokeLinecap={1}
+                strokeWidth={4}
+              />
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                  ]
+                }
+                r={15}
+                stroke={
+                  {
+                    "payload": 268435455,
+                    "type": 0,
+                  }
+                }
+                strokeWidth={1}
+              />
+            </RNSVGGroup>
+          </RNSVGSvgView>
+        </View>
+        <View
+          style={
+            {
+              "width": 4,
+            }
+          }
+        />
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight={16}
+          bbWidth={16}
+          className="heart-straight-duotone__svg-icon-phosphor"
+          color="#D6745A"
+          fill="currentColor"
+          focusable={false}
+          height={16}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              [
+                undefined,
+                undefined,
+                {},
+              ],
+              {
+                "flex": 0,
+                "height": 16,
+                "width": 16,
+              },
+            ]
+          }
+          testID="phosphor-react-native-heart-straight-duotone"
+          vbHeight={256}
+          vbWidth={256}
+          width={16}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "type": 2,
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+          >
+            <RNSVGPath
+              d="M217.36 133.36 128 224l-89.36-90.64a50 50 0 0 1 70.72-70.72L128 80l18.64-17.36a50 50 0 1 1 70.72 70.72"
+              fill={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              opacity={0.5}
+              propList={
+                [
+                  "fill",
+                ]
+              }
+            />
+            <RNSVGPath
+              d="M223 57a58.07 58.07 0 0 0-81.92-.1L128 69.05l-13.09-12.19A58 58 0 0 0 33 139l89.35 90.66a8 8 0 0 0 11.4 0L223 139a58 58 0 0 0 0-82m-11.35 70.76L128 212.6l-83.7-84.92a42 42 0 0 1 59.4-59.4l.2.2 18.65 17.35a8 8 0 0 0 10.9 0l18.65-17.35.2-.2a42 42 0 1 1 59.36 59.44Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+      <Text
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+          }
+        }
+      >
+        HR
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "height": 12,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#F5F1EA",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 36,
+          "lineHeight": 40,
+        }
+      }
+    >
+      62 bpm
+    </Text>
+    <View
+      style={
+        {
+          "height": 4,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "Inter_400Regular",
+          "fontSize": 12,
+          "lineHeight": 16,
+        }
+      }
+    >
+      resting
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`VitalTile — state × colorMode snapshot matrix renders state=live mode=light 1`] = `
+<View
+  accessibilityLabel="Heart rate tile, 62 bpm, resting"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": true,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  testID="tile"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#F5F2EC",
+          "borderColor": "#C95F4433",
+          "borderRadius": 14,
+          "borderWidth": 1,
+          "padding": 16,
+          "shadowColor": "#C95F44",
+          "shadowOffset": {
+            "height": 2,
+            "width": 0,
+          },
+          "shadowOpacity": 0.2,
+          "shadowRadius": 8,
+        },
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          accessibilityRole="progressbar"
+          accessibilityValue={
+            {
+              "max": 1,
+              "min": 0,
+              "now": 0.5,
+            }
+          }
+          style={
+            [
+              {
+                "height": 40,
+                "opacity": 1,
+                "width": 40,
+              },
+              {
+                "opacity": 1,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+              },
+              undefined,
+            ]
+          }
+        >
+          <RNSVGSvgView
+            bbHeight={40}
+            bbWidth={40}
+            focusable={false}
+            height={40}
+            style={
+              [
+                {
+                  "backgroundColor": "transparent",
+                  "borderWidth": 0,
+                },
+                {
+                  "flex": 0,
+                  "height": 40,
+                  "width": 40,
+                },
+              ]
+            }
+            width={40}
+          >
+            <RNSVGGroup
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            >
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeOpacity",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4291387204,
+                    "type": 0,
+                  }
+                }
+                strokeOpacity={0.12}
+                strokeWidth={4}
+              />
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                matrix={
+                  [
+                    6.123233995736766e-17,
+                    -1,
+                    1,
+                    6.123233995736766e-17,
+                    0,
+                    40,
+                  ]
+                }
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeDasharray",
+                    "strokeDashoffset",
+                    "strokeLinecap",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4291387204,
+                    "type": 0,
+                  }
+                }
+                strokeDasharray={
+                  [
+                    113.09733552923255,
+                    113.09733552923255,
+                  ]
+                }
+                strokeDashoffset={56.548667764616276}
+                strokeLinecap={1}
+                strokeWidth={4}
+              />
+            </RNSVGGroup>
+          </RNSVGSvgView>
+        </View>
+        <View
+          style={
+            {
+              "width": 4,
+            }
+          }
+        />
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight={16}
+          bbWidth={16}
+          className="heart-straight-duotone__svg-icon-phosphor"
+          color="#C95F44"
+          fill="currentColor"
+          focusable={false}
+          height={16}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              [
+                undefined,
+                undefined,
+                {},
+              ],
+              {
+                "flex": 0,
+                "height": 16,
+                "width": 16,
+              },
+            ]
+          }
+          testID="phosphor-react-native-heart-straight-duotone"
+          vbHeight={256}
+          vbWidth={256}
+          width={16}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "type": 2,
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+          >
+            <RNSVGPath
+              d="M217.36 133.36 128 224l-89.36-90.64a50 50 0 0 1 70.72-70.72L128 80l18.64-17.36a50 50 0 1 1 70.72 70.72"
+              fill={
+                {
+                  "payload": 4291387204,
+                  "type": 0,
+                }
+              }
+              opacity={0.5}
+              propList={
+                [
+                  "fill",
+                ]
+              }
+            />
+            <RNSVGPath
+              d="M223 57a58.07 58.07 0 0 0-81.92-.1L128 69.05l-13.09-12.19A58 58 0 0 0 33 139l89.35 90.66a8 8 0 0 0 11.4 0L223 139a58 58 0 0 0 0-82m-11.35 70.76L128 212.6l-83.7-84.92a42 42 0 0 1 59.4-59.4l.2.2 18.65 17.35a8 8 0 0 0 10.9 0l18.65-17.35.2-.2a42 42 0 1 1 59.36 59.44Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+      <Text
+        style={
+          {
+            "color": "#5A6478",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+          }
+        }
+      >
+        HR
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "height": 12,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#0F121C",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 36,
+          "lineHeight": 40,
+        }
+      }
+    >
+      62 bpm
+    </Text>
+    <View
+      style={
+        {
+          "height": 4,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#5A6478",
+          "fontFamily": "Inter_400Regular",
+          "fontSize": 12,
+          "lineHeight": 16,
+        }
+      }
+    >
+      resting
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`VitalTile — state × colorMode snapshot matrix renders state=no-data mode=dark 1`] = `
+<View
+  accessibilityLabel="Heart rate tile, 62 bpm"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": true,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  testID="tile"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#11171F",
+          "borderRadius": 14,
+          "borderTopColor": "rgba(255,255,255,0.06)",
+          "borderTopWidth": 1,
+          "elevation": 4,
+          "padding": 16,
+          "shadowColor": "#000000",
+          "shadowOffset": {
+            "height": 4,
+            "width": 0,
+          },
+          "shadowOpacity": 0.2,
+          "shadowRadius": 16,
+        },
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          accessibilityRole="progressbar"
+          accessibilityValue={
+            {
+              "max": 1,
+              "min": 0,
+              "now": 0,
+            }
+          }
+          style={
+            [
+              {
+                "height": 40,
+                "opacity": 1,
+                "width": 40,
+              },
+              {
+                "opacity": 1,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+              },
+              undefined,
+            ]
+          }
+        >
+          <RNSVGSvgView
+            bbHeight={40}
+            bbWidth={40}
+            focusable={false}
+            height={40}
+            style={
+              [
+                {
+                  "backgroundColor": "transparent",
+                  "borderWidth": 0,
+                },
+                {
+                  "flex": 0,
+                  "height": 40,
+                  "width": 40,
+                },
+              ]
+            }
+            width={40}
+          >
+            <RNSVGGroup
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            >
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeOpacity",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4292244570,
+                    "type": 0,
+                  }
+                }
+                strokeOpacity={0.12}
+                strokeWidth={4}
+              />
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                matrix={
+                  [
+                    6.123233995736766e-17,
+                    -1,
+                    1,
+                    6.123233995736766e-17,
+                    0,
+                    40,
+                  ]
+                }
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeDasharray",
+                    "strokeDashoffset",
+                    "strokeLinecap",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4292244570,
+                    "type": 0,
+                  }
+                }
+                strokeDasharray={
+                  [
+                    113.09733552923255,
+                    113.09733552923255,
+                  ]
+                }
+                strokeDashoffset={113.09733552923255}
+                strokeLinecap={1}
+                strokeWidth={4}
+              />
+            </RNSVGGroup>
+          </RNSVGSvgView>
+        </View>
+        <View
+          style={
+            {
+              "width": 4,
+            }
+          }
+        />
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight={16}
+          bbWidth={16}
+          className="heart-straight-duotone__svg-icon-phosphor"
+          color="#D6745A"
+          fill="currentColor"
+          focusable={false}
+          height={16}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              [
+                undefined,
+                undefined,
+                {},
+              ],
+              {
+                "flex": 0,
+                "height": 16,
+                "width": 16,
+              },
+            ]
+          }
+          testID="phosphor-react-native-heart-straight-duotone"
+          vbHeight={256}
+          vbWidth={256}
+          width={16}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "type": 2,
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+          >
+            <RNSVGPath
+              d="M217.36 133.36 128 224l-89.36-90.64a50 50 0 0 1 70.72-70.72L128 80l18.64-17.36a50 50 0 1 1 70.72 70.72"
+              fill={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              opacity={0.5}
+              propList={
+                [
+                  "fill",
+                ]
+              }
+            />
+            <RNSVGPath
+              d="M223 57a58.07 58.07 0 0 0-81.92-.1L128 69.05l-13.09-12.19A58 58 0 0 0 33 139l89.35 90.66a8 8 0 0 0 11.4 0L223 139a58 58 0 0 0 0-82m-11.35 70.76L128 212.6l-83.7-84.92a42 42 0 0 1 59.4-59.4l.2.2 18.65 17.35a8 8 0 0 0 10.9 0l18.65-17.35.2-.2a42 42 0 1 1 59.36 59.44Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+      <Text
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+          }
+        }
+      >
+        HR
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "height": 12,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#F5F1EA",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 36,
+          "lineHeight": 40,
+        }
+      }
+    >
+      62 bpm
+    </Text>
+    <View
+      style={
+        {
+          "height": 4,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "Inter_400Regular",
+          "fontSize": 12,
+          "lineHeight": 16,
+        }
+      }
+    >
+      No reading yet today
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`VitalTile — state × colorMode snapshot matrix renders state=no-data mode=light 1`] = `
+<View
+  accessibilityLabel="Heart rate tile, 62 bpm"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": true,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  testID="tile"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#F5F2EC",
+          "borderRadius": 14,
+          "elevation": 2,
+          "padding": 16,
+          "shadowColor": "#0A0F1A",
+          "shadowOffset": {
+            "height": 2,
+            "width": 0,
+          },
+          "shadowOpacity": 0.06,
+          "shadowRadius": 8,
+        },
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          accessibilityRole="progressbar"
+          accessibilityValue={
+            {
+              "max": 1,
+              "min": 0,
+              "now": 0,
+            }
+          }
+          style={
+            [
+              {
+                "height": 40,
+                "opacity": 1,
+                "width": 40,
+              },
+              {
+                "opacity": 1,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+              },
+              undefined,
+            ]
+          }
+        >
+          <RNSVGSvgView
+            bbHeight={40}
+            bbWidth={40}
+            focusable={false}
+            height={40}
+            style={
+              [
+                {
+                  "backgroundColor": "transparent",
+                  "borderWidth": 0,
+                },
+                {
+                  "flex": 0,
+                  "height": 40,
+                  "width": 40,
+                },
+              ]
+            }
+            width={40}
+          >
+            <RNSVGGroup
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            >
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeOpacity",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4291387204,
+                    "type": 0,
+                  }
+                }
+                strokeOpacity={0.12}
+                strokeWidth={4}
+              />
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                matrix={
+                  [
+                    6.123233995736766e-17,
+                    -1,
+                    1,
+                    6.123233995736766e-17,
+                    0,
+                    40,
+                  ]
+                }
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeDasharray",
+                    "strokeDashoffset",
+                    "strokeLinecap",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4291387204,
+                    "type": 0,
+                  }
+                }
+                strokeDasharray={
+                  [
+                    113.09733552923255,
+                    113.09733552923255,
+                  ]
+                }
+                strokeDashoffset={113.09733552923255}
+                strokeLinecap={1}
+                strokeWidth={4}
+              />
+            </RNSVGGroup>
+          </RNSVGSvgView>
+        </View>
+        <View
+          style={
+            {
+              "width": 4,
+            }
+          }
+        />
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight={16}
+          bbWidth={16}
+          className="heart-straight-duotone__svg-icon-phosphor"
+          color="#C95F44"
+          fill="currentColor"
+          focusable={false}
+          height={16}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              [
+                undefined,
+                undefined,
+                {},
+              ],
+              {
+                "flex": 0,
+                "height": 16,
+                "width": 16,
+              },
+            ]
+          }
+          testID="phosphor-react-native-heart-straight-duotone"
+          vbHeight={256}
+          vbWidth={256}
+          width={16}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "type": 2,
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+          >
+            <RNSVGPath
+              d="M217.36 133.36 128 224l-89.36-90.64a50 50 0 0 1 70.72-70.72L128 80l18.64-17.36a50 50 0 1 1 70.72 70.72"
+              fill={
+                {
+                  "payload": 4291387204,
+                  "type": 0,
+                }
+              }
+              opacity={0.5}
+              propList={
+                [
+                  "fill",
+                ]
+              }
+            />
+            <RNSVGPath
+              d="M223 57a58.07 58.07 0 0 0-81.92-.1L128 69.05l-13.09-12.19A58 58 0 0 0 33 139l89.35 90.66a8 8 0 0 0 11.4 0L223 139a58 58 0 0 0 0-82m-11.35 70.76L128 212.6l-83.7-84.92a42 42 0 0 1 59.4-59.4l.2.2 18.65 17.35a8 8 0 0 0 10.9 0l18.65-17.35.2-.2a42 42 0 1 1 59.36 59.44Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+      <Text
+        style={
+          {
+            "color": "#5A6478",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+          }
+        }
+      >
+        HR
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "height": 12,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#0F121C",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 36,
+          "lineHeight": 40,
+        }
+      }
+    >
+      62 bpm
+    </Text>
+    <View
+      style={
+        {
+          "height": 4,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#5A6478",
+          "fontFamily": "Inter_400Regular",
+          "fontSize": 12,
+          "lineHeight": 16,
+        }
+      }
+    >
+      No reading yet today
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`VitalTile — state × colorMode snapshot matrix renders state=normal mode=dark 1`] = `
+<View
+  accessibilityLabel="Heart rate tile, 62 bpm, resting"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": true,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  testID="tile"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#11171F",
+          "borderRadius": 14,
+          "borderTopColor": "rgba(255,255,255,0.06)",
+          "borderTopWidth": 1,
+          "elevation": 4,
+          "padding": 16,
+          "shadowColor": "#000000",
+          "shadowOffset": {
+            "height": 4,
+            "width": 0,
+          },
+          "shadowOpacity": 0.2,
+          "shadowRadius": 16,
+        },
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          accessibilityRole="progressbar"
+          accessibilityValue={
+            {
+              "max": 1,
+              "min": 0,
+              "now": 0.5,
+            }
+          }
+          style={
+            [
+              {
+                "height": 40,
+                "opacity": 1,
+                "width": 40,
+              },
+              {
+                "opacity": 1,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+              },
+              undefined,
+            ]
+          }
+        >
+          <RNSVGSvgView
+            bbHeight={40}
+            bbWidth={40}
+            focusable={false}
+            height={40}
+            style={
+              [
+                {
+                  "backgroundColor": "transparent",
+                  "borderWidth": 0,
+                },
+                {
+                  "flex": 0,
+                  "height": 40,
+                  "width": 40,
+                },
+              ]
+            }
+            width={40}
+          >
+            <RNSVGGroup
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            >
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeOpacity",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4292244570,
+                    "type": 0,
+                  }
+                }
+                strokeOpacity={0.12}
+                strokeWidth={4}
+              />
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                matrix={
+                  [
+                    6.123233995736766e-17,
+                    -1,
+                    1,
+                    6.123233995736766e-17,
+                    0,
+                    40,
+                  ]
+                }
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeDasharray",
+                    "strokeDashoffset",
+                    "strokeLinecap",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4292244570,
+                    "type": 0,
+                  }
+                }
+                strokeDasharray={
+                  [
+                    113.09733552923255,
+                    113.09733552923255,
+                  ]
+                }
+                strokeDashoffset={56.548667764616276}
+                strokeLinecap={1}
+                strokeWidth={4}
+              />
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                  ]
+                }
+                r={15}
+                stroke={
+                  {
+                    "payload": 268435455,
+                    "type": 0,
+                  }
+                }
+                strokeWidth={1}
+              />
+            </RNSVGGroup>
+          </RNSVGSvgView>
+        </View>
+        <View
+          style={
+            {
+              "width": 4,
+            }
+          }
+        />
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight={16}
+          bbWidth={16}
+          className="heart-straight-duotone__svg-icon-phosphor"
+          color="#D6745A"
+          fill="currentColor"
+          focusable={false}
+          height={16}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              [
+                undefined,
+                undefined,
+                {},
+              ],
+              {
+                "flex": 0,
+                "height": 16,
+                "width": 16,
+              },
+            ]
+          }
+          testID="phosphor-react-native-heart-straight-duotone"
+          vbHeight={256}
+          vbWidth={256}
+          width={16}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "type": 2,
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+          >
+            <RNSVGPath
+              d="M217.36 133.36 128 224l-89.36-90.64a50 50 0 0 1 70.72-70.72L128 80l18.64-17.36a50 50 0 1 1 70.72 70.72"
+              fill={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              opacity={0.5}
+              propList={
+                [
+                  "fill",
+                ]
+              }
+            />
+            <RNSVGPath
+              d="M223 57a58.07 58.07 0 0 0-81.92-.1L128 69.05l-13.09-12.19A58 58 0 0 0 33 139l89.35 90.66a8 8 0 0 0 11.4 0L223 139a58 58 0 0 0 0-82m-11.35 70.76L128 212.6l-83.7-84.92a42 42 0 0 1 59.4-59.4l.2.2 18.65 17.35a8 8 0 0 0 10.9 0l18.65-17.35.2-.2a42 42 0 1 1 59.36 59.44Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+      <Text
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+          }
+        }
+      >
+        HR
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "height": 12,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#F5F1EA",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 36,
+          "lineHeight": 40,
+        }
+      }
+    >
+      62 bpm
+    </Text>
+    <View
+      style={
+        {
+          "height": 4,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "Inter_400Regular",
+          "fontSize": 12,
+          "lineHeight": 16,
+        }
+      }
+    >
+      resting
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`VitalTile — state × colorMode snapshot matrix renders state=normal mode=light 1`] = `
+<View
+  accessibilityLabel="Heart rate tile, 62 bpm, resting"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": true,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  testID="tile"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#F5F2EC",
+          "borderRadius": 14,
+          "elevation": 2,
+          "padding": 16,
+          "shadowColor": "#0A0F1A",
+          "shadowOffset": {
+            "height": 2,
+            "width": 0,
+          },
+          "shadowOpacity": 0.06,
+          "shadowRadius": 8,
+        },
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          accessibilityRole="progressbar"
+          accessibilityValue={
+            {
+              "max": 1,
+              "min": 0,
+              "now": 0.5,
+            }
+          }
+          style={
+            [
+              {
+                "height": 40,
+                "opacity": 1,
+                "width": 40,
+              },
+              {
+                "opacity": 1,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+              },
+              undefined,
+            ]
+          }
+        >
+          <RNSVGSvgView
+            bbHeight={40}
+            bbWidth={40}
+            focusable={false}
+            height={40}
+            style={
+              [
+                {
+                  "backgroundColor": "transparent",
+                  "borderWidth": 0,
+                },
+                {
+                  "flex": 0,
+                  "height": 40,
+                  "width": 40,
+                },
+              ]
+            }
+            width={40}
+          >
+            <RNSVGGroup
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            >
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeOpacity",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4291387204,
+                    "type": 0,
+                  }
+                }
+                strokeOpacity={0.12}
+                strokeWidth={4}
+              />
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                matrix={
+                  [
+                    6.123233995736766e-17,
+                    -1,
+                    1,
+                    6.123233995736766e-17,
+                    0,
+                    40,
+                  ]
+                }
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeDasharray",
+                    "strokeDashoffset",
+                    "strokeLinecap",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4291387204,
+                    "type": 0,
+                  }
+                }
+                strokeDasharray={
+                  [
+                    113.09733552923255,
+                    113.09733552923255,
+                  ]
+                }
+                strokeDashoffset={56.548667764616276}
+                strokeLinecap={1}
+                strokeWidth={4}
+              />
+            </RNSVGGroup>
+          </RNSVGSvgView>
+        </View>
+        <View
+          style={
+            {
+              "width": 4,
+            }
+          }
+        />
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight={16}
+          bbWidth={16}
+          className="heart-straight-duotone__svg-icon-phosphor"
+          color="#C95F44"
+          fill="currentColor"
+          focusable={false}
+          height={16}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              [
+                undefined,
+                undefined,
+                {},
+              ],
+              {
+                "flex": 0,
+                "height": 16,
+                "width": 16,
+              },
+            ]
+          }
+          testID="phosphor-react-native-heart-straight-duotone"
+          vbHeight={256}
+          vbWidth={256}
+          width={16}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "type": 2,
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+          >
+            <RNSVGPath
+              d="M217.36 133.36 128 224l-89.36-90.64a50 50 0 0 1 70.72-70.72L128 80l18.64-17.36a50 50 0 1 1 70.72 70.72"
+              fill={
+                {
+                  "payload": 4291387204,
+                  "type": 0,
+                }
+              }
+              opacity={0.5}
+              propList={
+                [
+                  "fill",
+                ]
+              }
+            />
+            <RNSVGPath
+              d="M223 57a58.07 58.07 0 0 0-81.92-.1L128 69.05l-13.09-12.19A58 58 0 0 0 33 139l89.35 90.66a8 8 0 0 0 11.4 0L223 139a58 58 0 0 0 0-82m-11.35 70.76L128 212.6l-83.7-84.92a42 42 0 0 1 59.4-59.4l.2.2 18.65 17.35a8 8 0 0 0 10.9 0l18.65-17.35.2-.2a42 42 0 1 1 59.36 59.44Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+      <Text
+        style={
+          {
+            "color": "#5A6478",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+          }
+        }
+      >
+        HR
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "height": 12,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#0F121C",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 36,
+          "lineHeight": 40,
+        }
+      }
+    >
+      62 bpm
+    </Text>
+    <View
+      style={
+        {
+          "height": 4,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#5A6478",
+          "fontFamily": "Inter_400Regular",
+          "fontSize": 12,
+          "lineHeight": 16,
+        }
+      }
+    >
+      resting
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`VitalTile — state × colorMode snapshot matrix renders state=stale mode=dark 1`] = `
+<View
+  accessibilityLabel="Heart rate tile, 62 bpm, resting"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": true,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  testID="tile"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#11171F",
+          "borderRadius": 14,
+          "borderTopColor": "rgba(255,255,255,0.06)",
+          "borderTopWidth": 1,
+          "elevation": 4,
+          "padding": 16,
+          "shadowColor": "#000000",
+          "shadowOffset": {
+            "height": 4,
+            "width": 0,
+          },
+          "shadowOpacity": 0.2,
+          "shadowRadius": 16,
+        },
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          accessibilityRole="progressbar"
+          accessibilityValue={
+            {
+              "max": 1,
+              "min": 0,
+              "now": 0.5,
+            }
+          }
+          style={
+            [
+              {
+                "height": 40,
+                "opacity": 0.5,
+                "width": 40,
+              },
+              {
+                "opacity": 1,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+              },
+              undefined,
+            ]
+          }
+        >
+          <RNSVGSvgView
+            bbHeight={40}
+            bbWidth={40}
+            focusable={false}
+            height={40}
+            style={
+              [
+                {
+                  "backgroundColor": "transparent",
+                  "borderWidth": 0,
+                },
+                {
+                  "flex": 0,
+                  "height": 40,
+                  "width": 40,
+                },
+              ]
+            }
+            width={40}
+          >
+            <RNSVGGroup
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            >
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeOpacity",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4292244570,
+                    "type": 0,
+                  }
+                }
+                strokeOpacity={0.12}
+                strokeWidth={4}
+              />
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                matrix={
+                  [
+                    6.123233995736766e-17,
+                    -1,
+                    1,
+                    6.123233995736766e-17,
+                    0,
+                    40,
+                  ]
+                }
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeDasharray",
+                    "strokeDashoffset",
+                    "strokeLinecap",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4292244570,
+                    "type": 0,
+                  }
+                }
+                strokeDasharray={
+                  [
+                    113.09733552923255,
+                    113.09733552923255,
+                  ]
+                }
+                strokeDashoffset={56.548667764616276}
+                strokeLinecap={1}
+                strokeWidth={4}
+              />
+            </RNSVGGroup>
+          </RNSVGSvgView>
+        </View>
+        <View
+          style={
+            {
+              "width": 4,
+            }
+          }
+        />
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight={16}
+          bbWidth={16}
+          className="heart-straight-duotone__svg-icon-phosphor"
+          color="#D6745A"
+          fill="currentColor"
+          focusable={false}
+          height={16}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              [
+                undefined,
+                undefined,
+                {},
+              ],
+              {
+                "flex": 0,
+                "height": 16,
+                "width": 16,
+              },
+            ]
+          }
+          testID="phosphor-react-native-heart-straight-duotone"
+          vbHeight={256}
+          vbWidth={256}
+          width={16}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "type": 2,
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+          >
+            <RNSVGPath
+              d="M217.36 133.36 128 224l-89.36-90.64a50 50 0 0 1 70.72-70.72L128 80l18.64-17.36a50 50 0 1 1 70.72 70.72"
+              fill={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              opacity={0.5}
+              propList={
+                [
+                  "fill",
+                ]
+              }
+            />
+            <RNSVGPath
+              d="M223 57a58.07 58.07 0 0 0-81.92-.1L128 69.05l-13.09-12.19A58 58 0 0 0 33 139l89.35 90.66a8 8 0 0 0 11.4 0L223 139a58 58 0 0 0 0-82m-11.35 70.76L128 212.6l-83.7-84.92a42 42 0 0 1 59.4-59.4l.2.2 18.65 17.35a8 8 0 0 0 10.9 0l18.65-17.35.2-.2a42 42 0 1 1 59.36 59.44Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+      <Text
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+          }
+        }
+      >
+        HR
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "height": 12,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#F5F1EA",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 36,
+          "lineHeight": 40,
+        }
+      }
+    >
+      62 bpm
+    </Text>
+    <View
+      style={
+        {
+          "height": 4,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "Inter_400Regular",
+          "fontSize": 12,
+          "lineHeight": 16,
+        }
+      }
+    >
+      resting
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`VitalTile — state × colorMode snapshot matrix renders state=stale mode=light 1`] = `
+<View
+  accessibilityLabel="Heart rate tile, 62 bpm, resting"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": true,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  testID="tile"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#F5F2EC",
+          "borderRadius": 14,
+          "elevation": 2,
+          "padding": 16,
+          "shadowColor": "#0A0F1A",
+          "shadowOffset": {
+            "height": 2,
+            "width": 0,
+          },
+          "shadowOpacity": 0.06,
+          "shadowRadius": 8,
+        },
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          accessibilityRole="progressbar"
+          accessibilityValue={
+            {
+              "max": 1,
+              "min": 0,
+              "now": 0.5,
+            }
+          }
+          style={
+            [
+              {
+                "height": 40,
+                "opacity": 0.5,
+                "width": 40,
+              },
+              {
+                "opacity": 1,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+              },
+              undefined,
+            ]
+          }
+        >
+          <RNSVGSvgView
+            bbHeight={40}
+            bbWidth={40}
+            focusable={false}
+            height={40}
+            style={
+              [
+                {
+                  "backgroundColor": "transparent",
+                  "borderWidth": 0,
+                },
+                {
+                  "flex": 0,
+                  "height": 40,
+                  "width": 40,
+                },
+              ]
+            }
+            width={40}
+          >
+            <RNSVGGroup
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            >
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeOpacity",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4291387204,
+                    "type": 0,
+                  }
+                }
+                strokeOpacity={0.12}
+                strokeWidth={4}
+              />
+              <RNSVGCircle
+                cx={20}
+                cy={20}
+                fill={null}
+                matrix={
+                  [
+                    6.123233995736766e-17,
+                    -1,
+                    1,
+                    6.123233995736766e-17,
+                    0,
+                    40,
+                  ]
+                }
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeDasharray",
+                    "strokeDashoffset",
+                    "strokeLinecap",
+                  ]
+                }
+                r={18}
+                stroke={
+                  {
+                    "payload": 4291387204,
+                    "type": 0,
+                  }
+                }
+                strokeDasharray={
+                  [
+                    113.09733552923255,
+                    113.09733552923255,
+                  ]
+                }
+                strokeDashoffset={56.548667764616276}
+                strokeLinecap={1}
+                strokeWidth={4}
+              />
+            </RNSVGGroup>
+          </RNSVGSvgView>
+        </View>
+        <View
+          style={
+            {
+              "width": 4,
+            }
+          }
+        />
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight={16}
+          bbWidth={16}
+          className="heart-straight-duotone__svg-icon-phosphor"
+          color="#C95F44"
+          fill="currentColor"
+          focusable={false}
+          height={16}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              [
+                undefined,
+                undefined,
+                {},
+              ],
+              {
+                "flex": 0,
+                "height": 16,
+                "width": 16,
+              },
+            ]
+          }
+          testID="phosphor-react-native-heart-straight-duotone"
+          vbHeight={256}
+          vbWidth={256}
+          width={16}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "type": 2,
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+          >
+            <RNSVGPath
+              d="M217.36 133.36 128 224l-89.36-90.64a50 50 0 0 1 70.72-70.72L128 80l18.64-17.36a50 50 0 1 1 70.72 70.72"
+              fill={
+                {
+                  "payload": 4291387204,
+                  "type": 0,
+                }
+              }
+              opacity={0.5}
+              propList={
+                [
+                  "fill",
+                ]
+              }
+            />
+            <RNSVGPath
+              d="M223 57a58.07 58.07 0 0 0-81.92-.1L128 69.05l-13.09-12.19A58 58 0 0 0 33 139l89.35 90.66a8 8 0 0 0 11.4 0L223 139a58 58 0 0 0 0-82m-11.35 70.76L128 212.6l-83.7-84.92a42 42 0 0 1 59.4-59.4l.2.2 18.65 17.35a8 8 0 0 0 10.9 0l18.65-17.35.2-.2a42 42 0 1 1 59.36 59.44Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+      <Text
+        style={
+          {
+            "color": "#5A6478",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+          }
+        }
+      >
+        HR
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "height": 12,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#0F121C",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 36,
+          "lineHeight": 40,
+        }
+      }
+    >
+      62 bpm
+    </Text>
+    <View
+      style={
+        {
+          "height": 4,
+        }
+      }
+    />
+    <Text
+      style={
+        {
+          "color": "#5A6478",
+          "fontFamily": "Inter_400Regular",
+          "fontSize": 12,
+          "lineHeight": 16,
+        }
+      }
+    >
+      resting
+    </Text>
+  </View>
+</View>
+`;
