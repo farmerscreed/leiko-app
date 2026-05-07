@@ -1,0 +1,76 @@
+{
+  "version": "5",
+  "specifiers": {
+    "jsr:@std/assert@1": "1.0.19",
+    "jsr:@std/internal@^1.0.12": "1.0.13",
+    "jsr:@supabase/functions-js@^0.0.0-automated": "0.0.0-jsr-test.1",
+    "jsr:@supabase/supabase-js@2": "2.105.3"
+  },
+  "jsr": {
+    "@std/assert@1.0.19": {
+      "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
+      "dependencies": [
+        "jsr:@std/internal"
+      ]
+    },
+    "@std/internal@1.0.13": {
+      "integrity": "2f9546691d4ac2d32859c82dff284aaeac980ddeca38430d07941e7e288725c0"
+    },
+    "@supabase/functions-js@0.0.0-jsr-test.1": {
+      "integrity": "b1b37924af1f0011b4753201e1585a37b030e996c6682492e02575eb27d902b2"
+    },
+    "@supabase/supabase-js@2.105.3": {
+      "integrity": "ac67236935775d91602b94d654a6b919404c56aa71960e5c9342e83adfd498e3",
+      "dependencies": [
+        "jsr:@supabase/functions-js"
+      ]
+    }
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:prettier@3.3.3"
+      ]
+    },
+    "members": {
+      "apps/mobile": {
+        "packageJson": {
+          "dependencies": [
+            "npm:@eslint/js@9.39.4",
+            "npm:@expo-google-fonts/inter@~0.4.2",
+            "npm:@expo-google-fonts/jetbrains-mono@~0.4.1",
+            "npm:@react-navigation/native-stack@^7.14.12",
+            "npm:@react-navigation/native@^7.2.2",
+            "npm:@supabase/supabase-js@^2.105.3",
+            "npm:@tanstack/react-query@^5.100.9",
+            "npm:@testing-library/react-native@^13.3.3",
+            "npm:@types/jest@30.0.0",
+            "npm:@types/react@19.1.17",
+            "npm:eslint@9.39.4",
+            "npm:expo-blur@~15.0.8",
+            "npm:expo-font@~14.0.11",
+            "npm:expo-haptics@~15.0.8",
+            "npm:expo-status-bar@3.0.9",
+            "npm:expo@54.0.33",
+            "npm:jest-expo@^54.0.17",
+            "npm:jest@30.3.0",
+            "npm:react-native-ble-plx@^3.5.1",
+            "npm:react-native-gesture-handler@2.28.0",
+            "npm:react-native-mmkv@^4.3.1",
+            "npm:react-native-reanimated@4.1.7",
+            "npm:react-native-safe-area-context@5.6",
+            "npm:react-native-screens@4.16",
+            "npm:react-native@0.81.5",
+            "npm:react-test-renderer@^19.1.0",
+            "npm:react@19.1.0",
+            "npm:ts-jest@29.4.9",
+            "npm:typescript-eslint@8.59.2",
+            "npm:typescript@5.9.3",
+            "npm:xstate@^5.31.0",
+            "npm:zustand@^4.5.7"
+          ]
+        }
+      }
+    }
+  }
+}
