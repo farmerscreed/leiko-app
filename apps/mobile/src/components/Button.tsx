@@ -1,35 +1,35 @@
-// Sourced from docs/03-components/button.md (D8 §3.1). 5 variants × default /
-// pressed / disabled / loading / focused. Container uses Pressable so we can
-// drive the pressed-state visual through the render-prop style callback (same
-// pattern as Pill).
+// Sourced from docs/_reference/D12-visual-system-v2.md §11.1 (Button — D12
+// migration: new color tokens, new radius (m=14 — automatic via theme.radii.m),
+// spring press animation, haptic.tick on press) and the original Sprint 1
+// anatomy in docs/03-components/button.md.
 //
-// Sprint 1 deviation: the spec calls for a Phosphor `CircleNotch` spinner
-// rotating over `motion.linear` 1s in the loading state. We don't ship an icon
-// library in Sprint 1, so we substitute react-native's built-in
-// <ActivityIndicator size="small" />. The colour is wired to each variant's
-// text colour so the spinner reads as the same affordance as the label it
-// replaces. Will be swapped for the Phosphor icon when the icon library lands.
+// Sprint 1.5 changes from D8:
+//   - Press animation is a Reanimated spring (motion.pattern.button-press
+//     in D12 §7.3) instead of a static `transform: scale(0.98)`. Scale
+//     target tightened to 0.97 per spec.
+//   - haptic.tick fires on press (D12 §11.1 + §9 — selectionAsync on iOS,
+//     KEYBOARD_TAP on Android, no-op on devices without haptics).
+//   - Color references migrated off the buildTheme compat shims:
+//     * brand.accent      → brand.primary  (D12 collapsed accent → primary; same hex now)
+//     * brand.primarySoft → text.secondary (sub-emphasis text on default surface)
+//
+// Sprint 1 deviation retained: spec calls for a Phosphor `CircleNotch`
+// spinner. Phosphor library is installed in Sprint 7.6; until then the
+// loading state uses RN's <ActivityIndicator size="small" /> tinted to
+// each variant's text colour.
 //
 // Pressed-darken strategy: the spec calls for "background darkens 8% (or
-// lightens 8% for ghost/secondary)". We precompute the pressed shade per
-// variant rather than applying an opacity overlay — overlays interact with
-// transparent variants (ghost, secondary, destructive) in surprising ways
-// (the cream surface bleeds through). Precomputed hex keeps the visual
-// deterministic and matches the design tokens in spirit (navy.900 darkened
-// 8% remains a navy; navy.700 lightened 8% remains a teal). The mix
-// helper below is local to this file because it's a presentational concern.
+// lightens 8% for ghost/secondary)". Precomputed shade per variant rather
+// than an opacity overlay — overlays interact with transparent variants
+// (ghost, secondary, destructive) in surprising ways (the surface bleeds
+// through). The precomputed hex keeps the visual deterministic.
 //
 // Loading visual: the label Text node is unmounted while loading and the
 // spinner is rendered in its place. This satisfies the spec — "Label hidden;
-// spinner replaces it" — and crucially keeps the label string out of the
-// rendered tree so screen readers and tests do not pick up stale label
-// content while the action is in flight (the accessibilityLabel — which
-// gains a "loading" suffix — remains the source of truth for assistive
-// tech). The container clamps to minTapTarget vertically and grows
-// horizontally to fit either label or spinner; in practice the spinner is
-// narrower than most CTAs, so the button may shrink slightly when entering
-// loading state. Consumers that need stable width should set a fixed width
-// via the `style` prop (typical for full-width primary CTAs).
+// spinner replaces it" — and keeps the label string out of the rendered tree
+// so screen readers and tests do not pick up stale label content while the
+// action is in flight (the accessibilityLabel — which gains a "loading"
+// suffix — remains the source of truth for assistive tech).
 
 import { type ReactNode } from 'react';
 import {
@@ -40,7 +40,13 @@ import {
   type TextStyle,
   type ViewStyle,
 } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
 import { useTheme } from '../theme';
+import { buttonPressInScale, buttonPressOutScale } from '../theme/motion/patterns';
+import { fireHaptic } from '../theme/tokens/haptics';
 
 export type ButtonVariant = 'primary' | 'accent' | 'secondary' | 'ghost' | 'destructive';
 
@@ -50,8 +56,8 @@ interface ButtonProps {
   disabled?: boolean;
   onPress?: () => void;
   /**
-   * Reserved slot — Sprint 1 does not render the icon UI. Accepted on the
-   * type so consumers can wire it up; rendering lands when the icon library
+   * Reserved slot — Phosphor library lands in Sprint 7.6. Accepted on the
+   * type so consumers can wire it up; rendering wires when the icon library
    * does.
    */
   leadingIcon?: ReactNode;
@@ -72,8 +78,7 @@ interface VariantPaint {
 /**
  * Mix a #rrggbb hex colour with another #rrggbb hex colour by `amount` (0–1).
  * `amount = 0` returns `hex`, `amount = 1` returns `mixWith`. Used to compute
- * the pressed-state shade (mix toward black for filled, toward white for
- * transparent variants — matches D8 §3.1 "darkens 8% / lightens 8%").
+ * the pressed-state shade.
  */
 function mixHex(hex: string, mixWith: string, amount: number): string {
   const a = hex.replace('#', '');
@@ -91,27 +96,21 @@ function mixHex(hex: string, mixWith: string, amount: number): string {
   return `#${toHex(r)}${toHex(g)}${toHex(bl)}`;
 }
 
-const PRESS_AMOUNT = 0.08; // 8% per docs/03-components/button.md states table
+const PRESS_AMOUNT = 0.08;
 
 function variantPaint(variant: ButtonVariant, theme: ReturnType<typeof useTheme>): VariantPaint {
   const black = '#000000';
   const white = '#FFFFFF';
   switch (variant) {
     case 'primary':
+    case 'accent':
+      // D12 collapsed brand.accent → brand.primary; both variants paint identically.
       return {
         background: theme.colors.brand.primary,
         pressedBackground: mixHex(theme.colors.brand.primary, black, PRESS_AMOUNT),
         text: theme.colors.text.onBrand,
       };
-    case 'accent':
-      return {
-        background: theme.colors.brand.accent,
-        pressedBackground: mixHex(theme.colors.brand.accent, black, PRESS_AMOUNT),
-        text: theme.colors.text.primary,
-      };
     case 'secondary':
-      // Transparent fill — pressed state lightens by tinting the surface 8%
-      // toward white (a subtle scrim behind the label/border).
       return {
         background: 'transparent',
         pressedBackground: mixHex(theme.colors.surface.base, white, PRESS_AMOUNT),
@@ -122,7 +121,7 @@ function variantPaint(variant: ButtonVariant, theme: ReturnType<typeof useTheme>
       return {
         background: 'transparent',
         pressedBackground: mixHex(theme.colors.surface.base, white, PRESS_AMOUNT),
-        text: theme.colors.brand.primarySoft,
+        text: theme.colors.text.secondary,
       };
     case 'destructive':
       return {
@@ -149,23 +148,39 @@ export function Button({
   const paint = variantPaint(variant, theme);
 
   // Per docs/03-components/button.md anatomy: type.label in caregiver,
-  // type.body-l in parent. The theme.type() helper resolves parent overrides
-  // automatically for tokens that have one — but to honour the spec exactly
-  // (different token names per mode), we branch here.
-  const labelToken = theme.mode === 'parent' ? 'bodyL' : 'label';
+  // type.body-l in parent.
+  const labelToken = theme.typeMode === 'parent' ? 'bodyL' : 'label';
   const labelStyle = theme.type(labelToken);
 
   const interactionDisabled = disabled || loading;
 
-  // accessibilityLabel: visible label + state suffix when relevant
-  // ("Sign in, button, loading"). When the consumer supplies an explicit
-  // accessibilityLabel we honour it verbatim.
   const labelFromChildren = typeof children === 'string' ? children : undefined;
   const baseA11yLabel = accessibilityLabel ?? labelFromChildren;
   const a11yLabel =
     accessibilityLabel === undefined && loading && baseA11yLabel
       ? `${baseA11yLabel}, button, loading`
       : baseA11yLabel;
+
+  // Reanimated spring press — motion.pattern.button-press (D12 §7.3).
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    if (interactionDisabled) return;
+    scale.value = buttonPressInScale(theme.reduceMotion);
+  };
+  const handlePressOut = () => {
+    if (interactionDisabled) return;
+    scale.value = buttonPressOutScale(theme.reduceMotion);
+  };
+  const handlePress = () => {
+    // Fire-and-forget haptic. Swallow errors so a haptic-unavailable device
+    // (or simulator) never propagates an unhandled rejection.
+    fireHaptic('tick').catch(() => undefined);
+    onPress?.();
+  };
 
   const containerBase: ViewStyle = {
     flexDirection: 'row',
@@ -190,31 +205,34 @@ export function Button({
   };
 
   return (
-    <Pressable
-      disabled={interactionDisabled}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityState={{ disabled: disabled || undefined, busy: loading || undefined }}
-      accessibilityLabel={a11yLabel}
-      accessibilityHint={accessibilityHint}
-      testID={testID}
-      style={({ pressed }) => {
-        const showPressedLook = (pressed && !interactionDisabled) || loading;
-        return [
-          containerBase,
-          {
-            backgroundColor: showPressedLook ? paint.pressedBackground : paint.background,
-            transform: [{ scale: pressed && !interactionDisabled ? 0.98 : 1 }],
-          },
-          style,
-        ];
-      }}
-    >
-      {loading ? (
-        <ActivityIndicator size="small" color={paint.text} />
-      ) : (
-        <Text style={textStyle}>{children}</Text>
-      )}
-    </Pressable>
+    <Animated.View style={animatedStyle}>
+      <Pressable
+        disabled={interactionDisabled}
+        onPress={handlePress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: disabled || undefined, busy: loading || undefined }}
+        accessibilityLabel={a11yLabel}
+        accessibilityHint={accessibilityHint}
+        testID={testID}
+        style={({ pressed }) => {
+          const showPressedLook = (pressed && !interactionDisabled) || loading;
+          return [
+            containerBase,
+            {
+              backgroundColor: showPressedLook ? paint.pressedBackground : paint.background,
+            },
+            style,
+          ];
+        }}
+      >
+        {loading ? (
+          <ActivityIndicator size="small" color={paint.text} />
+        ) : (
+          <Text style={textStyle}>{children}</Text>
+        )}
+      </Pressable>
+    </Animated.View>
   );
 }

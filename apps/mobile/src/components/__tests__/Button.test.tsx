@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
+import * as Haptics from 'expo-haptics';
 import { Button, type ButtonVariant } from '../Button';
 import { ThemeProvider } from '../../theme';
 
@@ -107,5 +108,24 @@ describe('Button — parent mode', () => {
   it('renders without crashing under parent mode', () => {
     render(withTheme(<Button onPress={() => undefined}>Pair watch</Button>, 'parent'));
     expect(screen.getByRole('button', { name: 'Pair watch' })).toBeTruthy();
+  });
+});
+
+describe('Button — haptics (D12 §11.1)', () => {
+  beforeEach(() => {
+    (Haptics.selectionAsync as jest.Mock).mockClear();
+  });
+
+  it('fires haptic.tick on press (selectionAsync)', () => {
+    render(withTheme(<Button onPress={() => undefined}>Pair watch</Button>));
+    fireEvent.press(screen.getByRole('button', { name: 'Pair watch' }));
+    expect(Haptics.selectionAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('still fires haptic when there is no onPress handler', () => {
+    // Haptics fire on press regardless — they confirm touch contact.
+    render(withTheme(<Button>Pair watch</Button>));
+    fireEvent.press(screen.getByRole('button', { name: 'Pair watch' }));
+    expect(Haptics.selectionAsync).toHaveBeenCalledTimes(1);
   });
 });

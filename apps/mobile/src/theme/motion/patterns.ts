@@ -23,7 +23,6 @@ import {
   withSequence,
   withSpring,
   withTiming,
-  type AnimatableValue,
   type WithSpringConfig,
 } from 'react-native-reanimated';
 import { duration, spring } from '../tokens';
@@ -35,12 +34,12 @@ const SPRING_CONFIG: WithSpringConfig = spring.default;
 // Scale 1.0 → 0.97 over fast (120ms) ease.spring. Reverses on release.
 // ─────────────────────────────────────────────────────────────────────
 
-export function buttonPressInScale(reduceMotion: boolean): AnimatableValue {
+export function buttonPressInScale(reduceMotion: boolean): number {
   if (reduceMotion) return 0.97;
   return withSpring(0.97, SPRING_CONFIG);
 }
 
-export function buttonPressOutScale(reduceMotion: boolean): AnimatableValue {
+export function buttonPressOutScale(reduceMotion: boolean): number {
   if (reduceMotion) return 1.0;
   return withSpring(1.0, SPRING_CONFIG);
 }
@@ -55,12 +54,12 @@ export function buttonPressOutScale(reduceMotion: boolean): AnimatableValue {
 const STANDARD_EASE = Easing.bezier(0.2, 0, 0, 1);
 const ACCELERATE_EASE = Easing.bezier(0.3, 0, 1, 1);
 
-export function sheetRiseInTranslate(reduceMotion: boolean, restingY: number): AnimatableValue {
+export function sheetRiseInTranslate(reduceMotion: boolean, restingY: number): number {
   if (reduceMotion) return restingY;
   return withSpring(restingY, SPRING_CONFIG);
 }
 
-export function sheetRiseOutTranslate(reduceMotion: boolean, fullHeight: number): AnimatableValue {
+export function sheetRiseOutTranslate(reduceMotion: boolean, fullHeight: number): number {
   if (reduceMotion) return fullHeight;
   return withTiming(fullHeight, {
     duration: reduceMotion ? duration.fast : duration.normal,
@@ -68,7 +67,7 @@ export function sheetRiseOutTranslate(reduceMotion: boolean, fullHeight: number)
   });
 }
 
-export function sheetRiseInBackdropOpacity(reduceMotion: boolean, scrim: number): AnimatableValue {
+export function sheetRiseInBackdropOpacity(reduceMotion: boolean, scrim: number): number {
   if (reduceMotion) return scrim;
   return withTiming(scrim, {
     duration: duration.normal,
@@ -76,7 +75,7 @@ export function sheetRiseInBackdropOpacity(reduceMotion: boolean, scrim: number)
   });
 }
 
-export function sheetRiseOutBackdropOpacity(reduceMotion: boolean): AnimatableValue {
+export function sheetRiseOutBackdropOpacity(reduceMotion: boolean): number {
   if (reduceMotion) return 0;
   return withTiming(0, {
     duration: duration.normal,
@@ -90,7 +89,7 @@ export function sheetRiseOutBackdropOpacity(reduceMotion: boolean): AnimatableVa
 // Disabled when reduced motion is on (consumer renders a static placeholder).
 // ─────────────────────────────────────────────────────────────────────
 
-export function skeletonShimmer(reduceMotion: boolean): AnimatableValue {
+export function skeletonShimmer(reduceMotion: boolean): number {
   if (reduceMotion) return 0; // consumer should render a static placeholder instead
   return withRepeat(
     withSequence(

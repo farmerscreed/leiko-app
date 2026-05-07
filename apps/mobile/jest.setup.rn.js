@@ -52,6 +52,16 @@ jest.mock('react-native-reanimated', () => {
     },
   };
 });
+// expo-haptics is consumed by theme/tokens/haptics.ts (imported by any
+// component that fires a haptic via `fireHaptic`). Mock to no-op promises;
+// haptic firing is verified by behavioural intent, not by native effect.
+jest.mock('expo-haptics', () => ({
+  selectionAsync: jest.fn(() => Promise.resolve()),
+  impactAsync: jest.fn(() => Promise.resolve()),
+  notificationAsync: jest.fn(() => Promise.resolve()),
+  ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
+  NotificationFeedbackType: { Success: 'success', Warning: 'warning', Error: 'error' },
+}));
 jest.mock('react-native-gesture-handler', () => {
   const { View } = jest.requireActual('react-native');
   const PanGestureBuilder = {
