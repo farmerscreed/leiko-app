@@ -18,25 +18,28 @@ export const iconSize = {
 
 export type IconSizeToken = keyof typeof iconSize;
 
+// Names are the canonical phosphor-react-native v3 form (*Icon suffix). The
+// legacy names (HeartStraight, Drop, etc.) still resolve in v3 but are
+// deprecated; v4 may remove them.
 export const phosphorIconName = {
-  settings: 'GearSix',
-  family: 'UserPlus',
-  vitalBp: 'Drop',
-  vitalHr: 'HeartStraight',
-  vitalSpo2: 'Wind',
-  vitalSleep: 'Moon',
-  vitalActivity: 'Footprints',
-  aiNarration: 'Sparkle',
-  anomalyCalmConcerned: 'Warning',
-  anomalyConfirmedUrgent: 'WarningCircle',
-  syncing: 'ArrowsClockwise',
-  syncError: 'WifiSlash',
-  bluetooth: 'Bluetooth',
-  watchLowBattery: 'BatteryLow',
-  doctor: 'Stethoscope',
-  chevronTrailing: 'CaretRight',
-  close: 'X',
-  check: 'Check',
+  settings: 'GearSixIcon',
+  family: 'UserPlusIcon',
+  vitalBp: 'DropIcon',
+  vitalHr: 'HeartStraightIcon',
+  vitalSpo2: 'WindIcon',
+  vitalSleep: 'MoonIcon',
+  vitalActivity: 'FootprintsIcon',
+  aiNarration: 'SparkleIcon',
+  anomalyCalmConcerned: 'WarningIcon',
+  anomalyConfirmedUrgent: 'WarningCircleIcon',
+  syncing: 'ArrowsClockwiseIcon',
+  syncError: 'WifiSlashIcon',
+  bluetooth: 'BluetoothIcon',
+  watchLowBattery: 'BatteryLowIcon',
+  doctor: 'StethoscopeIcon',
+  chevronTrailing: 'CaretRightIcon',
+  close: 'XIcon',
+  check: 'CheckIcon',
 } as const;
 
 export type PhosphorIconKey = keyof typeof phosphorIconName;

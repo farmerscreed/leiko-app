@@ -207,11 +207,11 @@ describe('icon (D12 §10)', () => {
     expect(iconSize.hero).toBe(56);
   });
 
-  it('Phosphor mapping matches D12 §10.4 contract', () => {
-    expect(phosphorIconName.vitalBp).toBe('Drop');
-    expect(phosphorIconName.vitalHr).toBe('HeartStraight');
-    expect(phosphorIconName.aiNarration).toBe('Sparkle');
-    expect(phosphorIconName.anomalyConfirmedUrgent).toBe('WarningCircle');
-    expect(phosphorIconName.chevronTrailing).toBe('CaretRight');
+  it('Phosphor mapping matches D12 §10.4 contract (v3 *Icon names)', () => {
+    expect(phosphorIconName.vitalBp).toBe('DropIcon');
+    expect(phosphorIconName.vitalHr).toBe('HeartStraightIcon');
+    expect(phosphorIconName.aiNarration).toBe('SparkleIcon');
+    expect(phosphorIconName.anomalyConfirmedUrgent).toBe('WarningCircleIcon');
+    expect(phosphorIconName.chevronTrailing).toBe('CaretRightIcon');
   });
 });
