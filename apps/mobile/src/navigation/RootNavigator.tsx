@@ -12,10 +12,11 @@
 // `parent` (D8a §1.3 invitation flow) routes to a placeholder for now;
 // Sprint 5 covers the parent-pairing handoff.
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AccountTypeForkScreen } from '../screens/Onboarding/AccountTypeFork';
 import { SignUpScreen } from '../screens/Auth/SignUp';
 import { SignInScreen } from '../screens/Auth/SignIn';
@@ -31,7 +32,8 @@ import { SelfBuyerIntro2Screen } from '../screens/Onboarding/SelfBuyer/Intro2';
 import { SelfBuyerIntro3Screen } from '../screens/Onboarding/SelfBuyer/Intro3';
 import { SelfBuyerYouScreen } from '../screens/Onboarding/SelfBuyer/You';
 import { SelfBuyerWatchScreen } from '../screens/Onboarding/SelfBuyer/Watch';
-import { CaregiverHomePlaceholder } from '../screens/Placeholders/CaregiverHomePlaceholder';
+import { CaregiverHome } from '../screens/Home/CaregiverHome';
+import { ParentReadingsList } from '../screens/Home/ParentReadingsList';
 import { SelfBuyerHomePlaceholder } from '../screens/Placeholders/SelfBuyerHomePlaceholder';
 import { PairingScreen } from '../screens/Pairing/PairingScreen';
 import { SettingsScreen } from '../screens/Settings/SettingsScreen';
@@ -42,6 +44,7 @@ import { useAuth } from '../state/auth';
 import { useOnboarding } from '../state/onboarding';
 import { usePairing } from '../state/pairing';
 import { useReadings } from '../state/readings';
+import { useSyncOrchestrator } from '../state/syncOrchestrator';
 import { inferModel, setDeviceMetaProvider } from '../services/sync/postReading';
 
 // Wire postReading's device-meta provider once at app boot. The
@@ -115,10 +118,8 @@ function CaregiverOnboardingNavigator() {
 function CaregiverHomeNavigator() {
   return (
     <CaregiverStack.Navigator screenOptions={{ headerShown: false }}>
-      <CaregiverStack.Screen
-        name="CaregiverHomePlaceholder"
-        component={CaregiverHomePlaceholder}
-      />
+      <CaregiverStack.Screen name="CaregiverHome" component={CaregiverHome} />
+      <CaregiverStack.Screen name="ParentReadings" component={ParentReadingsList} />
       <CaregiverStack.Screen name="Pairing" component={PairingScreen} />
       <CaregiverStack.Screen name="Settings" component={SettingsScreen} />
       <CaregiverStack.Screen name="TakeReading" component={TakeReadingScreen} />
@@ -183,6 +184,26 @@ export function RootNavigator() {
   const hydratePairing = usePairing((s) => s.hydrate);
   const hydrateReadings = useReadings((s) => s.hydrate);
   const syncPending = useReadings((s) => s.syncPending);
+  const startOrchestrator = useSyncOrchestrator((s) => s.start);
+  const stopOrchestrator = useSyncOrchestrator((s) => s.stop);
+
+  // Single QueryClient instance for the app's lifetime. MMKV remains
+  // the offline source of truth (per docs/01-data-model.md "Sync
+  // strategy"); Query holds the in-memory server-state cache only —
+  // no disk persistence configured.
+  const queryClient = useMemo(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 30_000,
+            retry: 1,
+            refetchOnWindowFocus: false,
+          },
+        },
+      }),
+    [],
+  );
 
   useEffect(() => {
     void hydrate();
@@ -191,7 +212,20 @@ export function RootNavigator() {
     // Best-effort: try to sync any pending readings on app cold start
     // (offline captures from a previous session).
     void syncPending();
-  }, [hydrate, hydratePairing, hydrateReadings, syncPending]);
+    // Sprint 7: register the sync orchestrator's AppState + BT
+    // listeners and fire the cold-start sync. Idempotent.
+    startOrchestrator();
+    return () => {
+      stopOrchestrator();
+    };
+  }, [
+    hydrate,
+    hydratePairing,
+    hydrateReadings,
+    syncPending,
+    startOrchestrator,
+    stopOrchestrator,
+  ]);
 
   let content: React.ReactNode;
   if (status === 'loading') {
@@ -206,7 +240,11 @@ export function RootNavigator() {
     content = <CaregiverNavigator />;
   }
 
-  return <NavigationContainer>{content}</NavigationContainer>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <NavigationContainer>{content}</NavigationContainer>
+    </QueryClientProvider>
+  );
 }
 
 const styles = StyleSheet.create({

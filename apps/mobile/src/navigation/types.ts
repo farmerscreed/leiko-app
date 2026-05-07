@@ -31,7 +31,12 @@ export type CaregiverOnboardingStackParamList = {
 // new native stack screen for every state transition. Settings hosts
 // the paired-devices list and the forget-watch flow.
 export type CaregiverStackParamList = {
-  CaregiverHomePlaceholder: undefined;
+  // Sprint 7 — replaces the Sprint 2 placeholder. Family Circle list
+  // of parents per docs/04-screens/caregiver-home.md.
+  CaregiverHome: undefined;
+  // Sprint 7 — tap-on-card target. Placeholder for now; full reading
+  // list view ships in Sprint 9.
+  ParentReadings: { familyId: string };
   Pairing: undefined;
   Settings: undefined;
   // Sprint 6 — Take Reading + Reading Detail. ReadingDetail receives

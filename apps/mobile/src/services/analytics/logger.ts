@@ -37,7 +37,14 @@ export type AnalyticsEvent =
   | { name: 'reading_sync_failed'; props?: { reason: string } }
   | { name: 'take_reading_started'; props?: { trigger: 'fab' | 'manual_sheet' } }
   | { name: 'take_reading_received'; props?: { source: 'watch' | 'manual' } }
-  | { name: 'take_reading_failed'; props?: { reason: string } };
+  | { name: 'take_reading_failed'; props?: { reason: string } }
+  // Sprint 7 — sync orchestrator. Counts + categories only; the reading
+  // values themselves never appear in events (CLAUDE.md data rule).
+  | { name: 'sync_started'; props?: { trigger: 'cold_start' | 'app_foreground' | 'bt_ready' | 'manual_force' | 'live_notify' } }
+  | { name: 'sync_completed'; props?: { trigger: string; batches: number; hitBatchCap: boolean; pulled: number } }
+  | { name: 'sync_skipped'; props?: { trigger: string; reason: 'no_paired_device' | 'take_reading_active' | 'too_recent' | 'already_running' } }
+  | { name: 'sync_failed'; props?: { trigger: string; reason: string } }
+  | { name: 'reading_realtime_received'; props?: { familyId: string } };
 
 type EventName = AnalyticsEvent['name'];
 

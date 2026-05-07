@@ -16,10 +16,11 @@
 //                     with TS=lastSync, DIR=1 (backtrack from latest
 //                     stopping at TS, return up to 50 newer ones)
 //
-// Pagination is intentionally NOT looped here. 50 records is plenty
-// for the take-reading-sheet trigger (a parent who takes 1-3 readings
-// a day buffers ≤3 weeks before exhausting the page). Sprint 7's
-// orchestrator will loop the cursor when it owns scheduled syncs.
+// Single-batch syncBacklog stays the building block (used by the
+// take-reading-sheet flow). Sprint 7 adds syncBacklogToCompletion
+// below, which loops the cursor until the watch returns an empty
+// page — needed when the watch has been buffering for >50 readings
+// (parent's phone offline for a week scenario, intent memo §6.2).
 
 import { mmkv, STORAGE_KEYS } from '../storage';
 import { readBPHistory } from '../ble/commands/readBPHistory';
@@ -146,3 +147,4 @@ export async function syncBacklog(
     latestTimestampSec: newest > 0 ? newest : null,
   };
 }
+

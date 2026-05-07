@@ -72,6 +72,30 @@ export type FamilyMemberRow = {
   removed_reason: string | null;
 };
 
+export type QualityScore = 'good' | 'fair' | 'suspect';
+
+export type ReadingSource = 'watch' | 'manual' | 'clinic' | 'pharmacy' | 'other';
+
+export type ReadingRow = {
+  id: string;
+  family_id: string;
+  device_id: string | null;
+  source: ReadingSource;
+  measured_at: string;
+  measured_at_local: string | null;
+  systolic: number;
+  diastolic: number;
+  pulse: number | null;
+  quality_score: QualityScore | null;
+  quality_flags: Record<string, unknown>;
+  motion_detected: boolean | null;
+  hidden: boolean;
+  hidden_reason: string | null;
+  hidden_by_user_id: string | null;
+  hidden_at: string | null;
+  created_at: string;
+};
+
 export type CreateFamilyArgs = {
   _parent_display_name: string;
   _parent_relationship: string;
@@ -104,6 +128,15 @@ export type Database = {
         Row: FamilyMemberRow;
         Insert: FamilyMemberRow;
         Update: Partial<FamilyMemberRow>;
+        Relationships: [];
+      };
+      readings: {
+        Row: ReadingRow;
+        Insert: Omit<ReadingRow, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<ReadingRow>;
         Relationships: [];
       };
     };
