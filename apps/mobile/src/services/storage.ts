@@ -62,6 +62,14 @@ export const STORAGE_KEYS = {
   pendingSleep: 'leiko.vitals.pending.sleep',
   pendingActivity: 'leiko.vitals.pending.activity',
   pendingCalories: 'leiko.vitals.pending.calories',
+  // Per-vital recent caches — Sprint 7.5. Server-acknowledged samples,
+  // capped per-slice for the home/Daily Pulse aggregators. Mirrors the
+  // recentReadings pattern; see state/hr.ts etc. for the cap constants.
+  recentHR: 'leiko.vitals.recent.hr',
+  recentSpO2: 'leiko.vitals.recent.spo2',
+  recentSleep: 'leiko.vitals.recent.sleep',
+  recentActivity: 'leiko.vitals.recent.activity',
+  recentCalories: 'leiko.vitals.recent.calories',
 } as const;
 
 export const supabaseStorage = {

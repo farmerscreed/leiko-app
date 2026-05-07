@@ -44,7 +44,12 @@ export type AnalyticsEvent =
   | { name: 'sync_completed'; props?: { trigger: string; batches: number; hitBatchCap: boolean; pulled: number } }
   | { name: 'sync_skipped'; props?: { trigger: string; reason: 'no_paired_device' | 'take_reading_active' | 'too_recent' | 'already_running' } }
   | { name: 'sync_failed'; props?: { trigger: string; reason: string } }
-  | { name: 'reading_realtime_received'; props?: { familyId: string } };
+  | { name: 'reading_realtime_received'; props?: { familyId: string } }
+  // Sprint 7.5 — per-vital persistence + sync lifecycle. Counts +
+  // categories only; sample VALUES (bpm, percent, steps, etc.) never
+  // appear in analytics. Per CLAUDE.md data rule + D13 §5.1.
+  | { name: 'vital_persisted'; props?: { vital_type: 'hr' | 'spo2' | 'sleep' | 'activity' | 'calories'; count?: number } }
+  | { name: 'vital_sync_accepted'; props?: { vital_type: 'hr' | 'spo2' | 'sleep' | 'activity' | 'calories'; count: number } };
 
 type EventName = AnalyticsEvent['name'];
 

@@ -1,0 +1,243 @@
+// HR state slice — Sprint 7.5 / D13 §2.2.
+//
+// Mirrors the readings.ts pattern for the offline-first guarantee:
+//   pending — captured locally, NOT yet acknowledged by /sync. The
+//             pending MMKV buffer is the source of truth for the
+//             offline-first rule (every sample lands here before any
+//             sync attempt).
+//   recent  — server-acknowledged samples, capped at RECENT_SAMPLES_CAP.
+//
+// Sync orchestration (the 8-step pipeline per D13 §3.3) is owned by
+// the orchestrator slice; this file exposes `acceptSyncResult` as the
+// integration seam — the orchestrator calls it AFTER /sync returns the
+// per-vital `inserted` count + duplicates.
+//
+// Aggregators (`restingBpmToday`, `restingBpmRecent`) compute the
+// inputs the dailyPulse selector hook (next sprint task) feeds into
+// classifyHR. They do NOT call the classifier directly — slices stay
+// storage-and-aggregation only per the brief.
+//
+// Per CLAUDE.md data rule: sample VALUES (bpm) never appear in
+// analytics events. Only counts + the vital_type discriminator.
+
+import { create } from 'zustand';
+import { mmkv, STORAGE_KEYS } from '../services/storage';
+import { createPendingVitalBuffer } from '../services/pendingVitalBuffer';
+import { logger } from '../services/analytics/logger';
+import type { HRSample } from '../types/vitals';
+
+const RECENT_SAMPLES_CAP = 200;     // ~7 days at 30-min auto-sampling
+const SLEEP_WINDOW_START_HOUR = 22; // 22:00 user-local
+const SLEEP_WINDOW_END_HOUR = 6;    // 06:00 user-local
+const ROLLING_WINDOW_SEC = 10 * 60; // 10-min rolling avg
+const RESTING_RECENT_DAYS = 14;     // last 14 days of restingBpmToday
+const SECONDS_PER_DAY = 24 * 60 * 60;
+
+interface HRState {
+  pending: HRSample[];
+  recent: HRSample[];
+  syncing: boolean;
+  syncError: string | null;
+
+  hydrate: () => void;
+  /** Synchronous MMKV write. Returns the row. */
+  addPending: (sample: HRSample) => HRSample;
+  /** Move acknowledged rows from pending → recent (cap respected). */
+  acceptSyncResult: (acceptedKeys: string[]) => void;
+  /** Latest sample regardless of pending/recent. */
+  latest: () => HRSample | null;
+  /** Resting HR for "today" — the lowest 10-minute rolling-average HR
+   *  sample during the sleep window 22:00–06:00. Returns null when
+   *  there are <2 samples in the window. The window is interpreted in
+   *  UTC for test determinism — production callers pass a TZ-aware
+   *  nowSec; the same hour-of-day arithmetic produces user-local
+   *  results because the watch shifts samples to TRUE UTC at ingest
+   *  per D13 §3.5. */
+  restingBpmToday: (nowSec?: number) => number | null;
+  /** Last RESTING_RECENT_DAYS days of restingBpmToday, oldest first.
+   *  Empty entries are skipped (not zero-filled) so classifyHR sees
+   *  baseline length = days-with-data. */
+  restingBpmRecent: (nowSec?: number) => number[];
+  reset: () => void;
+}
+
+const buffer = createPendingVitalBuffer<HRSample>({
+  storageKey: STORAGE_KEYS.pendingHR,
+  getKey: (s) => String(s.measuredAtSec),
+});
+
+function readJson<T>(key: string, fallback: T): T {
+  const raw = mmkv.getString(key);
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+function persistRecent(recent: HRSample[]): void {
+  mmkv.set(STORAGE_KEYS.recentHR, JSON.stringify(recent));
+}
+
+function dedupRecent(rows: HRSample[]): HRSample[] {
+  const seen = new Set<string>();
+  const out: HRSample[] = [];
+  for (const r of rows) {
+    const key = String(r.measuredAtSec);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(r);
+  }
+  return out;
+}
+
+/** UTC-anchored sleep window check. The window 22:00–06:00 spans the
+ *  midnight boundary, so we accept hours >= 22 OR hours < 6. */
+function inSleepWindow(measuredAtSec: number): boolean {
+  const hr = new Date(measuredAtSec * 1000).getUTCHours();
+  return hr >= SLEEP_WINDOW_START_HOUR || hr < SLEEP_WINDOW_END_HOUR;
+}
+
+/** Sleep night identity: a sample at 23:00 on May 6 and 03:00 on May 7
+ *  belong to the SAME night. We anchor each sample to its "owning
+ *  morning" (the date when the user wakes up). For an evening sample
+ *  (hour >= 22), the owning morning is the next UTC date; for an early-
+ *  morning sample (hour < 6), it's the same UTC date. */
+function nightDateKey(measuredAtSec: number): string {
+  const d = new Date(measuredAtSec * 1000);
+  const hr = d.getUTCHours();
+  const anchored = hr >= SLEEP_WINDOW_START_HOUR
+    ? new Date(d.getTime() + SECONDS_PER_DAY * 1000)
+    : d;
+  return anchored.toISOString().slice(0, 10);
+}
+
+function rollingMinAverage(samples: HRSample[]): number | null {
+  if (samples.length < 2) return null;
+  const sorted = [...samples].sort((a, b) => a.measuredAtSec - b.measuredAtSec);
+  let lo = Infinity;
+  for (let i = 0; i < sorted.length; i++) {
+    const windowEnd = sorted[i].measuredAtSec;
+    const windowStart = windowEnd - ROLLING_WINDOW_SEC;
+    let sum = 0;
+    let n = 0;
+    for (let j = i; j >= 0; j--) {
+      if (sorted[j].measuredAtSec < windowStart) break;
+      sum += sorted[j].bpm;
+      n += 1;
+    }
+    // Need at least 2 samples in the window to count as a rolling avg —
+    // single-sample windows are noise, not "rest".
+    if (n >= 2) {
+      const avg = sum / n;
+      if (avg < lo) lo = avg;
+    }
+  }
+  return Number.isFinite(lo) ? lo : null;
+}
+
+export const useHR = create<HRState>((set, get) => ({
+  pending: [],
+  recent: [],
+  syncing: false,
+  syncError: null,
+
+  hydrate: () => {
+    const pending = buffer.readAll();
+    const recent = readJson<HRSample[]>(STORAGE_KEYS.recentHR, []);
+    set({ pending, recent });
+  },
+
+  addPending: (sample) => {
+    buffer.append(sample);
+    // Re-read from MMKV so the in-memory state matches what was
+    // actually written (preserves dedup behaviour from the buffer).
+    const pending = buffer.readAll();
+    set({ pending });
+    logger.track('vital_persisted', { vital_type: 'hr', count: 1 });
+    return sample;
+  },
+
+  acceptSyncResult: (acceptedKeys) => {
+    if (acceptedKeys.length === 0) return;
+    const keySet = new Set(acceptedKeys);
+    const currentPending = get().pending;
+    const movedRows = currentPending.filter((s) =>
+      keySet.has(String(s.measuredAtSec)),
+    );
+    const remainingPending = currentPending.filter(
+      (s) => !keySet.has(String(s.measuredAtSec)),
+    );
+    for (const k of acceptedKeys) buffer.removeByKey(k);
+    // Freshest first (sort by measuredAtSec desc), dedup against existing
+    // recent, cap.
+    const merged = dedupRecent(
+      [...movedRows, ...get().recent].sort(
+        (a, b) => b.measuredAtSec - a.measuredAtSec,
+      ),
+    ).slice(0, RECENT_SAMPLES_CAP);
+    set({ pending: remainingPending, recent: merged });
+    persistRecent(merged);
+    logger.track('vital_sync_accepted', {
+      vital_type: 'hr',
+      count: movedRows.length,
+    });
+  },
+
+  latest: () => {
+    const all = [...get().pending, ...get().recent];
+    if (all.length === 0) return null;
+    return all.reduce((a, b) => (b.measuredAtSec > a.measuredAtSec ? b : a));
+  },
+
+  restingBpmToday: (nowSec) => {
+    const now = nowSec ?? Math.floor(Date.now() / 1000);
+    const all = [...get().pending, ...get().recent];
+    if (all.length < 2) return null;
+    // Tonight's sleep window starts at the most recent 22:00 boundary;
+    // for "today" we want the window that ends within `now`'s morning.
+    const todayKey = nightDateKey(now);
+    const windowSamples = all.filter(
+      (s) => inSleepWindow(s.measuredAtSec) && nightDateKey(s.measuredAtSec) === todayKey,
+    );
+    if (windowSamples.length < 2) return null;
+    return rollingMinAverage(windowSamples);
+  },
+
+  restingBpmRecent: (nowSec) => {
+    const now = nowSec ?? Math.floor(Date.now() / 1000);
+    const all = [...get().pending, ...get().recent];
+    if (all.length === 0) return [];
+    // Build a map of nightKey → samples in the sleep window.
+    const byNight = new Map<string, HRSample[]>();
+    for (const s of all) {
+      if (!inSleepWindow(s.measuredAtSec)) continue;
+      const key = nightDateKey(s.measuredAtSec);
+      const arr = byNight.get(key);
+      if (arr) arr.push(s);
+      else byNight.set(key, [s]);
+    }
+    // Walk back RESTING_RECENT_DAYS days from "yesterday" (the day
+    // before today's nightKey) so today's restingBpm is NOT included
+    // — classifyHR consumes today separately.
+    const todayKey = nightDateKey(now);
+    const out: number[] = [];
+    for (let d = RESTING_RECENT_DAYS; d >= 1; d--) {
+      const nightKey = nightDateKey(now - d * SECONDS_PER_DAY);
+      if (nightKey === todayKey) continue;
+      const samples = byNight.get(nightKey);
+      if (!samples || samples.length < 2) continue;
+      const avg = rollingMinAverage(samples);
+      if (avg === null) continue;
+      out.push(avg);
+    }
+    return out;
+  },
+
+  reset: () => {
+    set({ pending: [], recent: [], syncing: false, syncError: null });
+    buffer.clear();
+    mmkv.remove(STORAGE_KEYS.recentHR);
+  },
+}));
