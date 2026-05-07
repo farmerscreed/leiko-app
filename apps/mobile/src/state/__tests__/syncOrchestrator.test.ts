@@ -10,6 +10,7 @@ const mockObserveBluetoothState: jest.Mock = jest.fn(() => ({
 }));
 const mockSubscribeToNotifications: jest.Mock = jest.fn(() => () => undefined);
 const mockSyncBacklogToCompletion: jest.Mock = jest.fn();
+const mockSyncMultiVitals: jest.Mock = jest.fn();
 const mockUseReadingsSync: jest.Mock = jest.fn(async () => undefined);
 const mockTakeReadingPhase = { current: 'idle' as string };
 
@@ -37,6 +38,15 @@ jest.mock('../../services/ble/notify', () => ({
 jest.mock('../../services/sync/syncBacklogToCompletion', () => ({
   syncBacklogToCompletion: (device: unknown, deviceBleId: string) =>
     mockSyncBacklogToCompletion(device, deviceBleId),
+}));
+
+jest.mock('../../services/sync/syncMultiVitals', () => ({
+  syncMultiVitals: (device: unknown, deviceBleId: string, meta: unknown) =>
+    mockSyncMultiVitals(device, deviceBleId, meta),
+}));
+
+jest.mock('../../services/sync/postReading', () => ({
+  inferModel: (name: string | null) => (name?.startsWith('U19') ? 'U19M' : 'U16H'),
 }));
 
 jest.mock('../readings', () => ({
@@ -76,6 +86,12 @@ beforeEach(() => {
     batches: 1,
     hitBatchCap: false,
     latestTimestampSec: null,
+  });
+  mockSyncMultiVitals.mockResolvedValue({
+    ok: true,
+    errors: {},
+    pulled: { hr: 0, spo2: 0, sleep: 0, activity: 0 },
+    inserted: null,
   });
 });
 

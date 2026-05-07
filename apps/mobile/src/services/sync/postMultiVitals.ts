@@ -1,0 +1,63 @@
+// POST a MultiVitalsPayload batch to the /sync Edge Function. Sprint 7.5
+// expansion of postReading.ts (which keeps the legacy single-BP shape
+// alive for Sprint 6 callers).
+//
+// Per docs/_reference/D13-multi-vitals-constellation-spec.md §4.2: each
+// vital array is independently optional — a payload with only HR
+// samples is valid, as is sending all five at once. The Edge Function
+// shape-discriminates on body and dispatches to the multi-vitals path
+// when it sees any of the *Readings/*Samples/*Sessions/*Days arrays.
+//
+// Idempotency: the dedupe indexes on (device_id, vital_type, measured_at)
+// for vitals_other and (device_id, measured_at) for readings make
+// retries safe — duplicates are silently absorbed and counted in the
+// `duplicates` field of the response. Callers may treat duplicates as
+// success (the row is in the database, just not from THIS request).
+//
+// Per CLAUDE.md voice + data rules: this function does NOT log values.
+// Errors carry codes only.
+
+import { supabase } from '../supabase';
+import type { MultiVitalsPayload } from '../../types/vitals';
+
+export interface MultiVitalsCounts {
+  bp: number;
+  hr: number;
+  spo2: number;
+  sleep: number;
+  steps: number;
+  calories: number;
+}
+
+export interface MultiVitalsResponse {
+  deviceId: string;
+  inserted: MultiVitalsCounts;
+  rejected: MultiVitalsCounts;
+  duplicates: MultiVitalsCounts;
+}
+
+export async function postMultiVitals(
+  payload: MultiVitalsPayload,
+): Promise<MultiVitalsResponse> {
+  const { data, error } = await supabase.functions.invoke<MultiVitalsResponse>(
+    'sync',
+    { body: payload },
+  );
+  if (error) throw new Error(`/sync invoke failed: ${error.message}`);
+  if (!data) throw new Error('/sync returned no body');
+  return data;
+}
+
+/** True when the payload carries no rows. Skip the network round-trip
+ *  in that case — the orchestrator may run with all reads returning
+ *  empty (e.g. mid-day with auto-sample disabled). */
+export function isPayloadEmpty(payload: MultiVitalsPayload): boolean {
+  return (
+    !payload.bpReadings?.length &&
+    !payload.hrSamples?.length &&
+    !payload.spo2Samples?.length &&
+    !payload.sleepSessions?.length &&
+    !payload.activityDays?.length &&
+    !payload.caloriesDays?.length
+  );
+}

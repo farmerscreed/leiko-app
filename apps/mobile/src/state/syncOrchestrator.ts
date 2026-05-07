@@ -29,6 +29,8 @@ import type { State as BluetoothState, Subscription } from 'react-native-ble-plx
 import { connectToUrion, observeBluetoothState } from '../services/ble/bleManager';
 import { subscribeToNotifications } from '../services/ble/notify';
 import { syncBacklogToCompletion } from '../services/sync/syncBacklogToCompletion';
+import { syncMultiVitals } from '../services/sync/syncMultiVitals';
+import { inferModel } from '../services/sync/postReading';
 import { logger } from '../services/analytics/logger';
 import type { UrionDevice } from '../services/ble/UrionDevice';
 import { usePairing } from './pairing';
@@ -210,6 +212,29 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
         // count is non-PHI; reading values stay out of analytics.
         pulled: result.totalPulled,
       });
+
+      // Steps 5–8 of D13 §3.3 — multi-vitals reads + batch /sync.
+      // Failures are isolated inside syncMultiVitals (per-vital
+      // Promise.allSettled); the BP path's success doesn't depend on
+      // these. Skipped silently when no paired-device meta or when the
+      // multi-vitals path itself errors — the next reconnect retries.
+      try {
+        const meta = {
+          bleId: paired.bleId,
+          macSuffix: paired.macSuffix,
+          name: paired.name,
+          model: inferModel(paired.name),
+        };
+        await syncMultiVitals(device, paired.bleId, meta);
+      } catch (e) {
+        // Defensive — syncMultiVitals already swallows step-level
+        // errors and returns a result; only an unexpected throw lands
+        // here. Don't fail the whole sync run on this.
+        logger.track('sync_failed', {
+          trigger,
+          reason: e instanceof Error ? `multi_vitals:${e.message}` : 'multi_vitals:unknown',
+        });
+      }
 
       // Stay live for the idle window: if the user takes a fresh
       // reading on the watch right now, we catch it via 0x73 0x02
