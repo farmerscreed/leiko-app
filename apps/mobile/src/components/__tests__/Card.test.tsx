@@ -9,7 +9,7 @@ function withTheme(ui: ReactNode, mode: 'caregiver' | 'parent' = 'caregiver') {
 }
 
 describe('Card — elevation variants', () => {
-  const elevations = ['default', 'low', 'medium', 'high'] as const;
+  const elevations = ['default', 'low', 'medium', 'high', 'glass'] as const;
 
   it.each(elevations)('renders the %s elevation variant', (elevation) => {
     render(
