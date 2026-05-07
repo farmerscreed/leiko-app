@@ -16,7 +16,7 @@ import { Card } from '../components/Card';
 import { ListRow } from '../components/ListRow';
 import { Pill } from '../components/Pill';
 import { BottomSheet, type BottomSheetSize } from '../components/BottomSheet';
-import { useTheme, type ThemeMode } from '../theme';
+import { useColorModeControl, useTheme, type ThemeMode } from '../theme';
 
 interface Props {
   mode: ThemeMode;
@@ -25,6 +25,8 @@ interface Props {
 
 export function ComponentGallery({ mode, onModeChange }: Props) {
   const theme = useTheme();
+  const { override: colorOverride, setOverride: setColorOverride, resolved: resolvedColorMode } =
+    useColorModeControl();
   const [largeSwitch, setLargeSwitch] = useState(false);
   const [pushSwitch, setPushSwitch] = useState(true);
   const [selectedFilter, setSelectedFilter] = useState<'today' | 'week' | 'month'>('week');
@@ -64,8 +66,8 @@ export function ComponentGallery({ mode, onModeChange }: Props) {
       <ScrollView contentContainerStyle={{ padding: theme.spacing.xxl }}>
         <Text style={headlineStyle}>Leiko design system</Text>
 
-        {/* Mode toggle */}
-        <Text style={captionStyle}>Mode</Text>
+        {/* Type mode toggle (caregiver / parent) */}
+        <Text style={captionStyle}>Type mode</Text>
         <View style={styles.modeRow}>
           <Pill
             variant="outline"
@@ -86,6 +88,39 @@ export function ComponentGallery({ mode, onModeChange }: Props) {
         <Text style={captionStyle}>
           {mode === 'caregiver' ? '48pt tap targets · standard type' : '64pt tap targets · larger type'}
           {theme.reduceMotion ? ' · reduced motion on' : ''}
+        </Text>
+
+        {/* Color mode toggle (system / dark / light) — D12 §12.6 */}
+        <Text style={captionStyle}>Color mode</Text>
+        <View style={styles.modeRow}>
+          <Pill
+            variant="outline"
+            selected={colorOverride === 'system'}
+            onPress={() => setColorOverride('system')}
+          >
+            System
+          </Pill>
+          <View style={{ width: theme.spacing.s }} />
+          <Pill
+            variant="outline"
+            selected={colorOverride === 'dark'}
+            onPress={() => setColorOverride('dark')}
+          >
+            Dark
+          </Pill>
+          <View style={{ width: theme.spacing.s }} />
+          <Pill
+            variant="outline"
+            selected={colorOverride === 'light'}
+            onPress={() => setColorOverride('light')}
+          >
+            Light
+          </Pill>
+        </View>
+        <Text style={captionStyle}>
+          {colorOverride === 'system'
+            ? `Following OS · resolved to ${resolvedColorMode}`
+            : `Forced ${resolvedColorMode}`}
         </Text>
 
         {/* Pill */}
@@ -124,6 +159,12 @@ export function ComponentGallery({ mode, onModeChange }: Props) {
         <View style={{ height: theme.spacing.l }} />
         <Card elevation="medium">
           <Text style={bodyStyle}>Medium elevation — for sheet content.</Text>
+        </Card>
+        <View style={{ height: theme.spacing.l }} />
+        <Card elevation="glass">
+          <Text style={bodyStyle}>
+            Glass elevation — material.glass.medium with BlurView.
+          </Text>
         </Card>
         <View style={{ height: theme.spacing.l }} />
         <Card
@@ -254,6 +295,18 @@ export function ComponentGallery({ mode, onModeChange }: Props) {
             }}
           >
             Open tall
+          </Button>
+        </View>
+        <View style={styles.buttonRow}>
+          <Button
+            variant="secondary"
+            onPress={() => {
+              setSheetSize('full');
+              setSheetUrgent(false);
+              setSheetVisible(true);
+            }}
+          >
+            Open full
           </Button>
         </View>
         <View style={styles.buttonRow}>
