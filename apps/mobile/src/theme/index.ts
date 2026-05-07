@@ -16,28 +16,26 @@ export {
   type TypeStyle,
 } from './buildTheme';
 
-// Legacy D8 token re-exports — consumed by the few sites that still import
-// raw tokens directly (ListRow.test palette assertion, etc). These come from
-// `./legacy-tokens` (the renamed D8 tokens.ts) and are removed in Phase C
-// cleanup once every consumer migrates to the D12 token surface via useTheme().
+// Re-exports from the new D12 token surface. Components can import these
+// directly when they need raw tokens (rare — most code goes through useTheme()).
 export {
-  colors,
-  elevation,
-  fontFamily,
-  listRowMinHeight,
-  minTapTarget,
-  motion,
-  opacity,
-  palette,
-  radii,
-  reducedMotionDuration,
+  paletteDark,
+  paletteLight,
+  semanticColorsDark,
+  semanticColorsLight,
+  fontFamilies,
   spacing,
-  typeScale,
+  radii,
+  opacity,
+  iconSize,
+  phosphorIconName,
+  type ColorMode as TokenColorMode,
+  type SpacingToken,
+  type RadiusToken,
+  type OpacityToken,
   type DurationToken,
   type EasingToken,
   type ElevationToken,
-  type OpacityToken,
-  type RadiusToken,
-  type SpacingToken,
   type TypeToken,
-} from './legacy-tokens';
+  type IconSizeToken,
+} from './tokens';
