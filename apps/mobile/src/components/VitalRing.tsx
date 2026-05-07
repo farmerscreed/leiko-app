@@ -27,6 +27,7 @@ import Animated, {
   useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
@@ -64,6 +65,10 @@ export interface VitalRingProps {
   /** Arc fraction 0..1. Computed by consumer per D13 §7.1 formulas. */
   fill: number;
   size?: VitalRingSize;
+  /** Custom diameter in pt; overrides `size`'s diameter when set. */
+  diameter?: number;
+  /** Custom stroke width in pt; overrides `size`'s strokeWidth when set. */
+  strokeWidth?: number;
   state?: VitalRingState;
   /** Render rim-light inner highlight on dark mode. Default true. */
   withRimLight?: boolean;
@@ -74,6 +79,12 @@ export interface VitalRingProps {
   style?: StyleProp<ViewStyle>;
   /** bpm for the live-pulse cycle when state='pulsing'. Defaults to 50. */
   pulseBpm?: number;
+  /**
+   * Optional delay in ms before the state='filling' arc animation begins.
+   * Used by DailyPulseHero to stagger the constellation reveal per
+   * D12 §7.3 motion.pattern.daily-pulse-reveal. Ignored unless state='filling'.
+   */
+  fillDelayMs?: number;
 }
 
 function clamp01(x: number): number {
@@ -94,6 +105,8 @@ export function VitalRing({
   vitalType,
   fill,
   size = 'md',
+  diameter: diameterOverride,
+  strokeWidth: strokeWidthOverride,
   state = 'idle',
   withRimLight = true,
   children,
@@ -101,11 +114,14 @@ export function VitalRing({
   testID,
   style,
   pulseBpm = LIVE_PULSE_BPM_DEFAULT,
+  fillDelayMs = 0,
 }: VitalRingProps) {
   const theme = useTheme();
   const reduceMotion = useReducedMotion();
 
-  const { diameter, strokeWidth } = SIZE_CONFIG[size];
+  const sizeConfig = SIZE_CONFIG[size];
+  const diameter = diameterOverride ?? sizeConfig.diameter;
+  const strokeWidth = strokeWidthOverride ?? sizeConfig.strokeWidth;
   const center = diameter / 2;
   const radius = (diameter - strokeWidth) / 2;
   const circumference = arcCircumference(radius);
@@ -116,14 +132,16 @@ export function VitalRing({
   );
   useEffect(() => {
     if (state === 'filling' && !reduceMotion) {
-      dashOffset.value = withTiming(targetOffset, {
+      const fillTiming = withTiming(targetOffset, {
         duration: FILL_DURATION_MS,
         easing: FILL_EASING,
       });
+      dashOffset.value =
+        fillDelayMs > 0 ? withDelay(fillDelayMs, fillTiming) : fillTiming;
     } else {
       dashOffset.value = targetOffset;
     }
-  }, [state, targetOffset, reduceMotion, dashOffset]);
+  }, [state, targetOffset, reduceMotion, dashOffset, fillDelayMs]);
 
   const isPulsing = state === 'pulsing';
   const pulseScaleValue = useSharedValue(1);
