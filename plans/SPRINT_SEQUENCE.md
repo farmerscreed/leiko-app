@@ -28,19 +28,19 @@
 | ✅ | 5 | Watch pairing |
 | ✅ | 6 | Take reading (BP) |
 | ✅ | 7 | Caregiver Home (BP-only original — superseded by Sprint 7.7 rewrite) |
+| ✅ | 1.5 | Visual System v2 token rollout (D12) |
 
 ---
 
-## Phase 2 — Foundation rebuild (new + rewritten)
+## Phase 2 — Foundation rebuild (remaining)
 
 | Order | Sprint | Title | Type | File |
 |---|---|---|---|---|
-| 1 | **1.5** | Visual System v2 token rollout | NEW | `sprint-01-5-visual-system-v2.md` |
 | 2 | **7.5** | Multi-vitals ingest plumbing | NEW | `sprint-07-5-multi-vitals-plumbing.md` |
 | 3 | **7.6** | Daily Pulse + Vital Tile component primitives | NEW | `sprint-07-6-daily-pulse-primitives.md` |
 | 4 | **7.7** | Caregiver Home rewrite (Daily Pulse cards) | NEW | `sprint-07-7-caregiver-home-rewrite.md` |
 
-These four are the foundation. They must complete before any new screen sprints execute. Sprint 1.5 cannot start until D12 is signed off and a designer has produced final hex values + typeface decisions.
+Sprint 1.5 shipped 2026-05-07 (closeout in `plans/done/sprint-01-5-visual-system-v2.md`). Remaining three are the Phase 2 work that gates any new screen sprints.
 
 ---
 
