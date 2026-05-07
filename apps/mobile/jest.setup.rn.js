@@ -52,6 +52,14 @@ jest.mock('react-native-reanimated', () => {
     },
   };
 });
+// expo-blur exposes a native BlurView. In jest we render it as a plain View
+// so the rest of the tree mounts normally; the actual blur effect isn't
+// testable in jest anyway.
+jest.mock('expo-blur', () => {
+  const { View } = jest.requireActual('react-native');
+  return { BlurView: View };
+});
+
 // expo-haptics is consumed by theme/tokens/haptics.ts (imported by any
 // component that fires a haptic via `fireHaptic`). Mock to no-op promises;
 // haptic firing is verified by behavioural intent, not by native effect.

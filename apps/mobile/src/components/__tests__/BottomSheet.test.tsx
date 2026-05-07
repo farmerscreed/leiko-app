@@ -124,6 +124,17 @@ describe('BottomSheet — sizing variants', () => {
     );
     expect(screen.getByText('tall')).toBeTruthy();
   });
+
+  it('renders the full size (D12 §11.1)', () => {
+    render(
+      withTheme(
+        <BottomSheet visible size="full" onDismiss={() => undefined}>
+          <Text>full</Text>
+        </BottomSheet>,
+      ),
+    );
+    expect(screen.getByText('full')).toBeTruthy();
+  });
 });
 
 describe('BottomSheet — parent mode', () => {
