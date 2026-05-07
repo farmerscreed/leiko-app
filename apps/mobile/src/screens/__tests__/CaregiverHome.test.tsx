@@ -291,7 +291,7 @@ describe('mergeLocalLatest', () => {
       diastolic: 82,
       pulse: 75,
       source: 'watch' as const,
-      classification: { tier: 'in_range' as const, reason: 'cold_start' as const },
+      classification: { tier: 'in_pattern' as const, reason: 'cold_start' as const },
       deviceBleId: null,
       capturedAtMs: now * 1000,
     };
@@ -326,7 +326,7 @@ describe('mergeLocalLatest', () => {
       diastolic: 80,
       pulse: 70,
       source: 'watch' as const,
-      classification: { tier: 'in_range' as const, reason: 'cold_start' as const },
+      classification: { tier: 'in_pattern' as const, reason: 'cold_start' as const },
       deviceBleId: null,
       capturedAtMs: now * 1000,
     };

@@ -32,7 +32,7 @@ export type AnalyticsEvent =
   // Sprint 6 — reading capture lifecycle. Per CLAUDE.md data rule,
   // event payloads NEVER include sys/dia/pulse values, only counts +
   // categories.
-  | { name: 'reading_persisted'; props?: { source: 'watch' | 'manual'; tier: 'in_range' | 'calm_concerned' | 'confirmed_urgent' } }
+  | { name: 'reading_persisted'; props?: { source: 'watch' | 'manual'; tier: 'in_pattern' | 'calm_concerned' | 'confirmed_urgent' } }
   | { name: 'reading_sync_success'; props?: { duplicate: boolean } }
   | { name: 'reading_sync_failed'; props?: { reason: string } }
   | { name: 'take_reading_started'; props?: { trigger: 'fab' | 'manual_sheet' } }

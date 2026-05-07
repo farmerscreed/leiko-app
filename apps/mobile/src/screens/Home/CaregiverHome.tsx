@@ -557,7 +557,7 @@ function pickAnomaly(parents: ParentSummary[]): AnomalyState | null {
       { systolic: r.systolic, diastolic: r.diastolic, pulse: r.pulse },
       null,
     ).tier;
-    if (tier === 'in_range') continue;
+    if (tier === 'in_pattern') continue;
     if (tier === 'confirmed_urgent') {
       return {
         tier,

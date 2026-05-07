@@ -54,7 +54,7 @@ function formatRelative(measuredAtSec: number): string {
 
 function tierAccessibilitySuffix(tier: ClassificationTier): string {
   switch (tier) {
-    case 'in_range':
+    case 'in_pattern':
       return '';
     case 'calm_concerned':
       return ' — worth a chat';
@@ -75,7 +75,7 @@ export function ReadingCard({
   const theme = useTheme();
   const tier = reading.classification.tier;
   const isUrgent = tier === 'confirmed_urgent';
-  const showTierBadge = tier !== 'in_range';
+  const showTierBadge = tier !== 'in_pattern';
   const isOffline = reading.serverId === null;
 
   const title = theme.type('title');

@@ -5,7 +5,7 @@
 // • Cold-start (no baseline / <14 days of data): absolute-threshold
 //   ladder only. Any reading at or above 180/120 is `confirmed_urgent`
 //   (crisis); anything strictly above 160/100 (or pulse > 130) is
-//   `calm_concerned`; otherwise `in_range`. Sprint 6 always runs this
+//   `calm_concerned`; otherwise `in_pattern`. Sprint 6 always runs this
 //   path because the baseline isn't computed until the anomaly engine
 //   ships in Sprint 15.
 //
@@ -23,7 +23,9 @@
 // `confirmed_urgent` crisis threshold still catches the single-reading
 // emergency case.
 
-export type ClassificationTier = 'in_range' | 'calm_concerned' | 'confirmed_urgent';
+// Tier taxonomy per D13 §6 — `in_pattern` (premium-pulse framing) replaces
+// the Sprint 6 `in_range` literal. Display string is "In pattern".
+export type ClassificationTier = 'in_pattern' | 'calm_concerned' | 'confirmed_urgent';
 
 export interface ReadingForClassification {
   systolic: number;
@@ -79,7 +81,7 @@ export function classifyReading(
     if (systolic > STAGE2_SYS || diastolic > STAGE2_DIA || pulse > COLD_PULSE) {
       return { tier: 'calm_concerned', reason: 'absolute_cold_start' };
     }
-    return { tier: 'in_range', reason: 'cold_start' };
+    return { tier: 'in_pattern', reason: 'cold_start' };
   }
 
   // Hot path: outlier AND exceeds soft threshold → calm-concerned.
@@ -97,14 +99,14 @@ export function classifyReading(
   if ((sysOutlier || diaOutlier || pulseOutlier) && exceedsSoft) {
     return { tier: 'calm_concerned', reason: 'outlier_and_soft_threshold' };
   }
-  return { tier: 'in_range', reason: 'within_baseline' };
+  return { tier: 'in_pattern', reason: 'within_baseline' };
 }
 
 /** UI string for the tier chip. Centralised so tests catch voice-rule drift. */
 export function tierChipText(tier: ClassificationTier): string {
   switch (tier) {
-    case 'in_range':
-      return 'In range';
+    case 'in_pattern':
+      return 'In pattern';
     case 'calm_concerned':
       return 'Worth a look';
     case 'confirmed_urgent':
@@ -114,7 +116,7 @@ export function tierChipText(tier: ClassificationTier): string {
 
 export function tierPillVariant(tier: ClassificationTier): 'success' | 'accent' | 'urgent' {
   switch (tier) {
-    case 'in_range':
+    case 'in_pattern':
       return 'success';
     case 'calm_concerned':
       return 'accent';
