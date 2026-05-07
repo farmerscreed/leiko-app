@@ -128,7 +128,7 @@ export function ListRow({
 
   const dividerStyle: ViewStyle = {
     height: 1,
-    backgroundColor: theme.colors.border.default,
+    backgroundColor: theme.colors.border.subtle,
     marginLeft: theme.spacing.l,
     marginRight: theme.spacing.l,
   };
@@ -280,7 +280,7 @@ function renderTrailing(args: TrailingArgs): ReactNode {
     const style: TextStyle = {
       fontSize: t.size,
       lineHeight: t.lineHeight,
-      fontFamily: numeric ? theme.fontFamily.numeric : t.family,
+      fontFamily: numeric ? theme.fontFamilies.numeric : t.family,
       fontWeight: t.weight as TextStyle['fontWeight'],
       color: theme.colors.text.primary,
       textAlign: 'right',

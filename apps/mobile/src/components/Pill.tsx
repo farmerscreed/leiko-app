@@ -40,6 +40,15 @@ interface VariantStyle {
   borderColor?: string;
 }
 
+function hexAt(hex: string, alpha: number): string {
+  // Compose a hex color with an alpha channel as rgba(). Used for the
+  // success variant background (D12-mode-aware tint over the surface).
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 function variantStyle(
   variant: PillVariant,
   theme: ReturnType<typeof useTheme>,
@@ -48,21 +57,25 @@ function variantStyle(
     case 'neutral':
       return { background: theme.colors.surface.subtle, text: theme.colors.text.primary };
     case 'info':
-      return { background: theme.colors.surface.subtle, text: theme.colors.brand.primarySoft };
+      return { background: theme.colors.surface.subtle, text: theme.colors.text.secondary };
     case 'accent':
-      return { background: theme.colors.brand.accent, text: theme.colors.text.primary };
+      // D12 §11.1: selected state uses brand-primary background. accent === selected
+      // since Pill's selected-flip delegates to this variant.
+      return { background: theme.colors.brand.primary, text: theme.colors.text.onBrand };
     case 'urgent':
-      return { background: theme.colors.state.urgent, text: theme.colors.text.onBrand };
+      return { background: theme.colors.state.urgent, text: theme.colors.text.onUrgent };
     case 'success':
-      // color.state.success at 15% on cream — composited via rgba so the cream
-      // surface shows through. Keeps the green legible without darkening to
-      // urgent levels (D8 §3.13 success row).
-      return { background: 'rgba(47, 122, 63, 0.15)', text: theme.colors.state.success };
+      // color.state.success at 15% over the surface — derived from the
+      // mode-resolved hex so the tint stays legible in both dark and light.
+      return {
+        background: hexAt(theme.colors.state.success, 0.15),
+        text: theme.colors.state.success,
+      };
     case 'outline':
       return {
         background: 'transparent',
         text: theme.colors.text.primary,
-        borderColor: theme.colors.border.default,
+        borderColor: theme.colors.border.subtle,
       };
   }
 }

@@ -35,7 +35,7 @@ export function PageIndicator({ total, current, testID }: PageIndicatorProps) {
                 marginHorizontal: theme.spacing.xs,
                 backgroundColor: active
                   ? theme.colors.brand.primary
-                  : theme.colors.border.default,
+                  : theme.colors.border.subtle,
                 width: active ? 10 : 8,
                 height: active ? 10 : 8,
                 borderRadius: theme.radii.full,

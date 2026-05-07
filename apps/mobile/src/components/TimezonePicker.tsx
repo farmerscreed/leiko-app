@@ -121,7 +121,7 @@ export function TimezonePicker({
             paddingHorizontal: theme.spacing.l,
             paddingVertical: theme.spacing.m,
             borderWidth: 1,
-            borderColor: theme.colors.border.default,
+            borderColor: theme.colors.border.subtle,
             minHeight: theme.minTapTarget,
             flexDirection: 'row',
             alignItems: 'center',
@@ -176,7 +176,7 @@ export function TimezonePicker({
               fontFamily: body.family,
               color: theme.colors.text.primary,
               borderWidth: 1,
-              borderColor: theme.colors.border.default,
+              borderColor: theme.colors.border.subtle,
               minHeight: theme.minTapTarget,
             }}
           />
