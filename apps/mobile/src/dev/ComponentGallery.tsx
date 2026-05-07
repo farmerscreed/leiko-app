@@ -17,6 +17,7 @@ import { ListRow } from '../components/ListRow';
 import { Pill } from '../components/Pill';
 import { BottomSheet, type BottomSheetSize } from '../components/BottomSheet';
 import { useColorModeControl, useTheme, type ThemeMode } from '../theme';
+import { VitalsDebugPanel } from './VitalsDebugPanel';
 
 interface Props {
   mode: ThemeMode;
@@ -321,6 +322,8 @@ export function ComponentGallery({ mode, onModeChange }: Props) {
             Open confirmed-urgent
           </Button>
         </View>
+
+        <VitalsDebugPanel />
 
         <View style={{ height: theme.spacing.xxxxl }} />
       </ScrollView>

@@ -28,6 +28,7 @@ import {
 } from '@expo-google-fonts/inter';
 import { JetBrainsMono_500Medium } from '@expo-google-fonts/jetbrains-mono';
 import { ComponentGallery } from './src/dev/ComponentGallery';
+import { DebugLauncher } from './src/dev/DebugLauncher';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { ThemeProvider, type ThemeMode } from './src/theme';
 
@@ -75,6 +76,7 @@ function Root() {
       <SafeAreaProvider>
         <ThemeProvider mode="caregiver">
           <RootNavigator />
+          <DebugLauncher />
           <StatusBar style="auto" />
         </ThemeProvider>
       </SafeAreaProvider>
