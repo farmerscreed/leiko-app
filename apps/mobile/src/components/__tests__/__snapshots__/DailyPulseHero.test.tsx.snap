@@ -1,0 +1,6861 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 1 — fresh BP: "128/82" / "morning BP" 1`] = `
+<View
+  accessibilityLabel="Daily pulse. morning BP 128/82. Blood pressure 75 percent. Heart rate 40 percent. Oxygen 85 percent. Sleep 60 percent. Activity 50 percent"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      undefined,
+    ]
+  }
+  testID="hero"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "height": 280,
+        "justifyContent": "center",
+        "width": 280,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.75,
+          }
+        }
+        style={
+          [
+            {
+              "height": 280,
+              "opacity": 1,
+              "width": 280,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={280}
+          bbWidth={280}
+          focusable={false}
+          height={280}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 280,
+                "width": 280,
+              },
+            ]
+          }
+          width={280}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={133}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={14}
+            />
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  280,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={133}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  835.663645854885,
+                  835.663645854885,
+                ]
+              }
+              strokeDashoffset={208.91591146372124}
+              strokeLinecap={1}
+              strokeWidth={14}
+            />
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={125}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.4,
+          }
+        }
+        style={
+          [
+            {
+              "height": 232,
+              "opacity": 1,
+              "width": 232,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={232}
+          bbWidth={232}
+          focusable={false}
+          height={232}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 232,
+                "width": 232,
+              },
+            ]
+          }
+          width={232}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={110}
+              stroke={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={12}
+            />
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  232,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={110}
+              stroke={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  691.1503837897545,
+                  691.1503837897545,
+                ]
+              }
+              strokeDashoffset={414.6902302738527}
+              strokeLinecap={1}
+              strokeWidth={12}
+            />
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={103}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.85,
+          }
+        }
+        style={
+          [
+            {
+              "height": 188,
+              "opacity": 1,
+              "width": 188,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={188}
+          bbWidth={188}
+          focusable={false}
+          height={188}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 188,
+                "width": 188,
+              },
+            ]
+          }
+          width={188}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={89}
+              stroke={
+                {
+                  "payload": 4284459176,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={10}
+            />
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  188,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={89}
+              stroke={
+                {
+                  "payload": 4284459176,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  559.2034923389832,
+                  559.2034923389832,
+                ]
+              }
+              strokeDashoffset={83.8805238508475}
+              strokeLinecap={1}
+              strokeWidth={10}
+            />
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={83}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.6,
+          }
+        }
+        style={
+          [
+            {
+              "height": 148,
+              "opacity": 1,
+              "width": 148,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={148}
+          bbWidth={148}
+          focusable={false}
+          height={148}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 148,
+                "width": 148,
+              },
+            ]
+          }
+          width={148}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={70}
+              stroke={
+                {
+                  "payload": 4286347947,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  148,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={70}
+              stroke={
+                {
+                  "payload": 4286347947,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  439.822971502571,
+                  439.822971502571,
+                ]
+              }
+              strokeDashoffset={175.92918860102841}
+              strokeLinecap={1}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={65}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.5,
+          }
+        }
+        style={
+          [
+            {
+              "height": 112,
+              "opacity": 1,
+              "width": 112,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={112}
+          bbWidth={112}
+          focusable={false}
+          height={112}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 112,
+                "width": 112,
+              },
+            ]
+          }
+          width={112}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={52}
+              stroke={
+                {
+                  "payload": 4286358895,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  112,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={52}
+              stroke={
+                {
+                  "payload": 4286358895,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  326.7256359733385,
+                  326.7256359733385,
+                ]
+              }
+              strokeDashoffset={163.36281798666926}
+              strokeLinecap={1}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={47}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "position": "absolute",
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 80,
+            "lineHeight": 80,
+            "textAlign": "center",
+          }
+        }
+      >
+        128/82
+      </Text>
+      <Text
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+            "marginTop": 4,
+            "textAlign": "center",
+          }
+        }
+      >
+        morning BP
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 2 — HR only: "62" / "resting HR" 1`] = `
+<View
+  accessibilityLabel="Daily pulse. resting HR 62. Blood pressure 75 percent. Heart rate 40 percent. Oxygen 85 percent. Sleep 60 percent. Activity 50 percent"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      undefined,
+    ]
+  }
+  testID="hero"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "height": 280,
+        "justifyContent": "center",
+        "width": 280,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.75,
+          }
+        }
+        style={
+          [
+            {
+              "height": 280,
+              "opacity": 1,
+              "width": 280,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={280}
+          bbWidth={280}
+          focusable={false}
+          height={280}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 280,
+                "width": 280,
+              },
+            ]
+          }
+          width={280}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={133}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={14}
+            />
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  280,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={133}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  835.663645854885,
+                  835.663645854885,
+                ]
+              }
+              strokeDashoffset={208.91591146372124}
+              strokeLinecap={1}
+              strokeWidth={14}
+            />
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={125}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.4,
+          }
+        }
+        style={
+          [
+            {
+              "height": 232,
+              "opacity": 1,
+              "width": 232,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={232}
+          bbWidth={232}
+          focusable={false}
+          height={232}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 232,
+                "width": 232,
+              },
+            ]
+          }
+          width={232}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={110}
+              stroke={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={12}
+            />
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  232,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={110}
+              stroke={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  691.1503837897545,
+                  691.1503837897545,
+                ]
+              }
+              strokeDashoffset={414.6902302738527}
+              strokeLinecap={1}
+              strokeWidth={12}
+            />
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={103}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.85,
+          }
+        }
+        style={
+          [
+            {
+              "height": 188,
+              "opacity": 1,
+              "width": 188,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={188}
+          bbWidth={188}
+          focusable={false}
+          height={188}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 188,
+                "width": 188,
+              },
+            ]
+          }
+          width={188}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={89}
+              stroke={
+                {
+                  "payload": 4284459176,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={10}
+            />
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  188,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={89}
+              stroke={
+                {
+                  "payload": 4284459176,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  559.2034923389832,
+                  559.2034923389832,
+                ]
+              }
+              strokeDashoffset={83.8805238508475}
+              strokeLinecap={1}
+              strokeWidth={10}
+            />
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={83}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.6,
+          }
+        }
+        style={
+          [
+            {
+              "height": 148,
+              "opacity": 1,
+              "width": 148,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={148}
+          bbWidth={148}
+          focusable={false}
+          height={148}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 148,
+                "width": 148,
+              },
+            ]
+          }
+          width={148}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={70}
+              stroke={
+                {
+                  "payload": 4286347947,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  148,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={70}
+              stroke={
+                {
+                  "payload": 4286347947,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  439.822971502571,
+                  439.822971502571,
+                ]
+              }
+              strokeDashoffset={175.92918860102841}
+              strokeLinecap={1}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={65}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.5,
+          }
+        }
+        style={
+          [
+            {
+              "height": 112,
+              "opacity": 1,
+              "width": 112,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={112}
+          bbWidth={112}
+          focusable={false}
+          height={112}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 112,
+                "width": 112,
+              },
+            ]
+          }
+          width={112}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={52}
+              stroke={
+                {
+                  "payload": 4286358895,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  112,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={52}
+              stroke={
+                {
+                  "payload": 4286358895,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  326.7256359733385,
+                  326.7256359733385,
+                ]
+              }
+              strokeDashoffset={163.36281798666926}
+              strokeLinecap={1}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={47}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "position": "absolute",
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 80,
+            "lineHeight": 80,
+            "textAlign": "center",
+          }
+        }
+      >
+        62
+      </Text>
+      <Text
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+            "marginTop": 4,
+            "textAlign": "center",
+          }
+        }
+      >
+        resting HR
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 3 — sleep only: "7h 24m" / "last night" 1`] = `
+<View
+  accessibilityLabel="Daily pulse. last night 7h 24m. Blood pressure 75 percent. Heart rate 40 percent. Oxygen 85 percent. Sleep 60 percent. Activity 50 percent"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      undefined,
+    ]
+  }
+  testID="hero"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "height": 280,
+        "justifyContent": "center",
+        "width": 280,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.75,
+          }
+        }
+        style={
+          [
+            {
+              "height": 280,
+              "opacity": 1,
+              "width": 280,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={280}
+          bbWidth={280}
+          focusable={false}
+          height={280}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 280,
+                "width": 280,
+              },
+            ]
+          }
+          width={280}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={133}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={14}
+            />
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  280,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={133}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  835.663645854885,
+                  835.663645854885,
+                ]
+              }
+              strokeDashoffset={208.91591146372124}
+              strokeLinecap={1}
+              strokeWidth={14}
+            />
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={125}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.4,
+          }
+        }
+        style={
+          [
+            {
+              "height": 232,
+              "opacity": 1,
+              "width": 232,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={232}
+          bbWidth={232}
+          focusable={false}
+          height={232}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 232,
+                "width": 232,
+              },
+            ]
+          }
+          width={232}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={110}
+              stroke={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={12}
+            />
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  232,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={110}
+              stroke={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  691.1503837897545,
+                  691.1503837897545,
+                ]
+              }
+              strokeDashoffset={414.6902302738527}
+              strokeLinecap={1}
+              strokeWidth={12}
+            />
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={103}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.85,
+          }
+        }
+        style={
+          [
+            {
+              "height": 188,
+              "opacity": 1,
+              "width": 188,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={188}
+          bbWidth={188}
+          focusable={false}
+          height={188}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 188,
+                "width": 188,
+              },
+            ]
+          }
+          width={188}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={89}
+              stroke={
+                {
+                  "payload": 4284459176,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={10}
+            />
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  188,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={89}
+              stroke={
+                {
+                  "payload": 4284459176,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  559.2034923389832,
+                  559.2034923389832,
+                ]
+              }
+              strokeDashoffset={83.8805238508475}
+              strokeLinecap={1}
+              strokeWidth={10}
+            />
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={83}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.6,
+          }
+        }
+        style={
+          [
+            {
+              "height": 148,
+              "opacity": 1,
+              "width": 148,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={148}
+          bbWidth={148}
+          focusable={false}
+          height={148}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 148,
+                "width": 148,
+              },
+            ]
+          }
+          width={148}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={70}
+              stroke={
+                {
+                  "payload": 4286347947,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  148,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={70}
+              stroke={
+                {
+                  "payload": 4286347947,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  439.822971502571,
+                  439.822971502571,
+                ]
+              }
+              strokeDashoffset={175.92918860102841}
+              strokeLinecap={1}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={65}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.5,
+          }
+        }
+        style={
+          [
+            {
+              "height": 112,
+              "opacity": 1,
+              "width": 112,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={112}
+          bbWidth={112}
+          focusable={false}
+          height={112}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 112,
+                "width": 112,
+              },
+            ]
+          }
+          width={112}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={52}
+              stroke={
+                {
+                  "payload": 4286358895,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  112,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={52}
+              stroke={
+                {
+                  "payload": 4286358895,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  326.7256359733385,
+                  326.7256359733385,
+                ]
+              }
+              strokeDashoffset={163.36281798666926}
+              strokeLinecap={1}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={47}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "position": "absolute",
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 80,
+            "lineHeight": 80,
+            "textAlign": "center",
+          }
+        }
+      >
+        7h 24m
+      </Text>
+      <Text
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+            "marginTop": 4,
+            "textAlign": "center",
+          }
+        }
+      >
+        last night
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 4 — nothing: "—" / "no readings yet today" 1`] = `
+<View
+  accessibilityLabel="Daily pulse. no readings yet today —. Blood pressure 75 percent. Heart rate 40 percent. Oxygen 85 percent. Sleep 60 percent. Activity 50 percent"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      undefined,
+    ]
+  }
+  testID="hero"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "height": 280,
+        "justifyContent": "center",
+        "width": 280,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.75,
+          }
+        }
+        style={
+          [
+            {
+              "height": 280,
+              "opacity": 1,
+              "width": 280,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={280}
+          bbWidth={280}
+          focusable={false}
+          height={280}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 280,
+                "width": 280,
+              },
+            ]
+          }
+          width={280}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={133}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={14}
+            />
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  280,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={133}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  835.663645854885,
+                  835.663645854885,
+                ]
+              }
+              strokeDashoffset={208.91591146372124}
+              strokeLinecap={1}
+              strokeWidth={14}
+            />
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={125}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.4,
+          }
+        }
+        style={
+          [
+            {
+              "height": 232,
+              "opacity": 1,
+              "width": 232,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={232}
+          bbWidth={232}
+          focusable={false}
+          height={232}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 232,
+                "width": 232,
+              },
+            ]
+          }
+          width={232}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={110}
+              stroke={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={12}
+            />
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  232,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={110}
+              stroke={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  691.1503837897545,
+                  691.1503837897545,
+                ]
+              }
+              strokeDashoffset={414.6902302738527}
+              strokeLinecap={1}
+              strokeWidth={12}
+            />
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={103}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.85,
+          }
+        }
+        style={
+          [
+            {
+              "height": 188,
+              "opacity": 1,
+              "width": 188,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={188}
+          bbWidth={188}
+          focusable={false}
+          height={188}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 188,
+                "width": 188,
+              },
+            ]
+          }
+          width={188}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={89}
+              stroke={
+                {
+                  "payload": 4284459176,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={10}
+            />
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  188,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={89}
+              stroke={
+                {
+                  "payload": 4284459176,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  559.2034923389832,
+                  559.2034923389832,
+                ]
+              }
+              strokeDashoffset={83.8805238508475}
+              strokeLinecap={1}
+              strokeWidth={10}
+            />
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={83}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.6,
+          }
+        }
+        style={
+          [
+            {
+              "height": 148,
+              "opacity": 1,
+              "width": 148,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={148}
+          bbWidth={148}
+          focusable={false}
+          height={148}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 148,
+                "width": 148,
+              },
+            ]
+          }
+          width={148}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={70}
+              stroke={
+                {
+                  "payload": 4286347947,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  148,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={70}
+              stroke={
+                {
+                  "payload": 4286347947,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  439.822971502571,
+                  439.822971502571,
+                ]
+              }
+              strokeDashoffset={175.92918860102841}
+              strokeLinecap={1}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={65}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.5,
+          }
+        }
+        style={
+          [
+            {
+              "height": 112,
+              "opacity": 1,
+              "width": 112,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={112}
+          bbWidth={112}
+          focusable={false}
+          height={112}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 112,
+                "width": 112,
+              },
+            ]
+          }
+          width={112}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={52}
+              stroke={
+                {
+                  "payload": 4286358895,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  112,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={52}
+              stroke={
+                {
+                  "payload": 4286358895,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  326.7256359733385,
+                  326.7256359733385,
+                ]
+              }
+              strokeDashoffset={163.36281798666926}
+              strokeLinecap={1}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={47}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "position": "absolute",
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 80,
+            "lineHeight": 80,
+            "textAlign": "center",
+          }
+        }
+      >
+        —
+      </Text>
+      <Text
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+            "marginTop": 4,
+            "textAlign": "center",
+          }
+        }
+      >
+        no readings yet today
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`DailyPulseHero — mode × colorMode snapshot matrix renders mode=card colorMode=dark 1`] = `
+<View
+  accessibilityLabel="Daily pulse for Mum. morning BP 128/82. Blood pressure 75 percent. Heart rate 40 percent. Oxygen 85 percent. Sleep 60 percent. Activity 50 percent. Mum is in pattern."
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      undefined,
+    ]
+  }
+  testID="hero"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "height": 192,
+        "justifyContent": "center",
+        "width": 192,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.75,
+          }
+        }
+        style={
+          [
+            {
+              "height": 192,
+              "opacity": 1,
+              "width": 192,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={192}
+          bbWidth={192}
+          focusable={false}
+          height={192}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 192,
+                "width": 192,
+              },
+            ]
+          }
+          width={192}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={96}
+              cy={96}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={91}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={10}
+            />
+            <RNSVGCircle
+              cx={96}
+              cy={96}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  192,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={91}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  571.7698629533423,
+                  571.7698629533423,
+                ]
+              }
+              strokeDashoffset={142.94246573833559}
+              strokeLinecap={1}
+              strokeWidth={10}
+            />
+            <RNSVGCircle
+              cx={96}
+              cy={96}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={85}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.4,
+          }
+        }
+        style={
+          [
+            {
+              "height": 160,
+              "opacity": 1,
+              "width": 160,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={160}
+          bbWidth={160}
+          focusable={false}
+          height={160}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 160,
+                "width": 160,
+              },
+            ]
+          }
+          width={160}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={80}
+              cy={80}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={76}
+              stroke={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={80}
+              cy={80}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  160,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={76}
+              stroke={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  477.5220833456485,
+                  477.5220833456485,
+                ]
+              }
+              strokeDashoffset={286.5132500073891}
+              strokeLinecap={1}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={80}
+              cy={80}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={71}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.85,
+          }
+        }
+        style={
+          [
+            {
+              "height": 130,
+              "opacity": 1,
+              "width": 130,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={130}
+          bbWidth={130}
+          focusable={false}
+          height={130}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 130,
+                "width": 130,
+              },
+            ]
+          }
+          width={130}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={65}
+              cy={65}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={61.5}
+              stroke={
+                {
+                  "payload": 4284459176,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={7}
+            />
+            <RNSVGCircle
+              cx={65}
+              cy={65}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  130,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={61.5}
+              stroke={
+                {
+                  "payload": 4284459176,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  386.41589639154455,
+                  386.41589639154455,
+                ]
+              }
+              strokeDashoffset={57.96238445873169}
+              strokeLinecap={1}
+              strokeWidth={7}
+            />
+            <RNSVGCircle
+              cx={65}
+              cy={65}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={57}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.6,
+          }
+        }
+        style={
+          [
+            {
+              "height": 102,
+              "opacity": 1,
+              "width": 102,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={102}
+          bbWidth={102}
+          focusable={false}
+          height={102}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 102,
+                "width": 102,
+              },
+            ]
+          }
+          width={102}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={51}
+              cy={51}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={48}
+              stroke={
+                {
+                  "payload": 4286347947,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={6}
+            />
+            <RNSVGCircle
+              cx={51}
+              cy={51}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  102,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={48}
+              stroke={
+                {
+                  "payload": 4286347947,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  301.59289474462014,
+                  301.59289474462014,
+                ]
+              }
+              strokeDashoffset={120.63715789784806}
+              strokeLinecap={1}
+              strokeWidth={6}
+            />
+            <RNSVGCircle
+              cx={51}
+              cy={51}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={44}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.5,
+          }
+        }
+        style={
+          [
+            {
+              "height": 76,
+              "opacity": 1,
+              "width": 76,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={76}
+          bbWidth={76}
+          focusable={false}
+          height={76}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 76,
+                "width": 76,
+              },
+            ]
+          }
+          width={76}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={38}
+              cy={38}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={35.5}
+              stroke={
+                {
+                  "payload": 4286358895,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={5}
+            />
+            <RNSVGCircle
+              cx={38}
+              cy={38}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  76,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={35.5}
+              stroke={
+                {
+                  "payload": 4286358895,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  223.05307840487532,
+                  223.05307840487532,
+                ]
+              }
+              strokeDashoffset={111.52653920243766}
+              strokeLinecap={1}
+              strokeWidth={5}
+            />
+            <RNSVGCircle
+              cx={38}
+              cy={38}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={32}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "position": "absolute",
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 56,
+            "lineHeight": 60,
+            "textAlign": "center",
+          }
+        }
+      >
+        128/82
+      </Text>
+      <Text
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+            "marginTop": 4,
+            "textAlign": "center",
+          }
+        }
+      >
+        morning BP
+      </Text>
+    </View>
+  </View>
+  <Text
+    style={
+      [
+        {
+          "opacity": 0,
+        },
+        {
+          "color": "#E8A063",
+          "fontFamily": "Inter_700Bold",
+          "fontSize": 28,
+          "fontStyle": "italic",
+          "fontWeight": "600",
+          "lineHeight": 34,
+          "marginTop": 16,
+          "textAlign": "center",
+        },
+      ]
+    }
+  >
+    Mum is in pattern.
+  </Text>
+</View>
+`;
+
+exports[`DailyPulseHero — mode × colorMode snapshot matrix renders mode=card colorMode=light 1`] = `
+<View
+  accessibilityLabel="Daily pulse for Mum. morning BP 128/82. Blood pressure 75 percent. Heart rate 40 percent. Oxygen 85 percent. Sleep 60 percent. Activity 50 percent. Mum is in pattern."
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      undefined,
+    ]
+  }
+  testID="hero"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "height": 192,
+        "justifyContent": "center",
+        "width": 192,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.75,
+          }
+        }
+        style={
+          [
+            {
+              "height": 192,
+              "opacity": 1,
+              "width": 192,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={192}
+          bbWidth={192}
+          focusable={false}
+          height={192}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 192,
+                "width": 192,
+              },
+            ]
+          }
+          width={192}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={96}
+              cy={96}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={91}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={10}
+            />
+            <RNSVGCircle
+              cx={96}
+              cy={96}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  192,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={91}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  571.7698629533423,
+                  571.7698629533423,
+                ]
+              }
+              strokeDashoffset={142.94246573833559}
+              strokeLinecap={1}
+              strokeWidth={10}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.4,
+          }
+        }
+        style={
+          [
+            {
+              "height": 160,
+              "opacity": 1,
+              "width": 160,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={160}
+          bbWidth={160}
+          focusable={false}
+          height={160}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 160,
+                "width": 160,
+              },
+            ]
+          }
+          width={160}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={80}
+              cy={80}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={76}
+              stroke={
+                {
+                  "payload": 4291387204,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={80}
+              cy={80}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  160,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={76}
+              stroke={
+                {
+                  "payload": 4291387204,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  477.5220833456485,
+                  477.5220833456485,
+                ]
+              }
+              strokeDashoffset={286.5132500073891}
+              strokeLinecap={1}
+              strokeWidth={8}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.85,
+          }
+        }
+        style={
+          [
+            {
+              "height": 130,
+              "opacity": 1,
+              "width": 130,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={130}
+          bbWidth={130}
+          focusable={false}
+          height={130}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 130,
+                "width": 130,
+              },
+            ]
+          }
+          width={130}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={65}
+              cy={65}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={61.5}
+              stroke={
+                {
+                  "payload": 4282353800,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={7}
+            />
+            <RNSVGCircle
+              cx={65}
+              cy={65}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  130,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={61.5}
+              stroke={
+                {
+                  "payload": 4282353800,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  386.41589639154455,
+                  386.41589639154455,
+                ]
+              }
+              strokeDashoffset={57.96238445873169}
+              strokeLinecap={1}
+              strokeWidth={7}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.6,
+          }
+        }
+        style={
+          [
+            {
+              "height": 102,
+              "opacity": 1,
+              "width": 102,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={102}
+          bbWidth={102}
+          focusable={false}
+          height={102}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 102,
+                "width": 102,
+              },
+            ]
+          }
+          width={102}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={51}
+              cy={51}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={48}
+              stroke={
+                {
+                  "payload": 4284110983,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={6}
+            />
+            <RNSVGCircle
+              cx={51}
+              cy={51}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  102,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={48}
+              stroke={
+                {
+                  "payload": 4284110983,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  301.59289474462014,
+                  301.59289474462014,
+                ]
+              }
+              strokeDashoffset={120.63715789784806}
+              strokeLinecap={1}
+              strokeWidth={6}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.5,
+          }
+        }
+        style={
+          [
+            {
+              "height": 76,
+              "opacity": 1,
+              "width": 76,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={76}
+          bbWidth={76}
+          focusable={false}
+          height={76}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 76,
+                "width": 76,
+              },
+            ]
+          }
+          width={76}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={38}
+              cy={38}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={35.5}
+              stroke={
+                {
+                  "payload": 4284252754,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={5}
+            />
+            <RNSVGCircle
+              cx={38}
+              cy={38}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  76,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={35.5}
+              stroke={
+                {
+                  "payload": 4284252754,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  223.05307840487532,
+                  223.05307840487532,
+                ]
+              }
+              strokeDashoffset={111.52653920243766}
+              strokeLinecap={1}
+              strokeWidth={5}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "position": "absolute",
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#0F121C",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 56,
+            "lineHeight": 60,
+            "textAlign": "center",
+          }
+        }
+      >
+        128/82
+      </Text>
+      <Text
+        style={
+          {
+            "color": "#5A6478",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+            "marginTop": 4,
+            "textAlign": "center",
+          }
+        }
+      >
+        morning BP
+      </Text>
+    </View>
+  </View>
+  <Text
+    style={
+      [
+        {
+          "opacity": 0,
+        },
+        {
+          "color": "#E8A063",
+          "fontFamily": "Inter_700Bold",
+          "fontSize": 28,
+          "fontStyle": "italic",
+          "fontWeight": "600",
+          "lineHeight": 34,
+          "marginTop": 16,
+          "textAlign": "center",
+        },
+      ]
+    }
+  >
+    Mum is in pattern.
+  </Text>
+</View>
+`;
+
+exports[`DailyPulseHero — mode × colorMode snapshot matrix renders mode=immersive colorMode=dark 1`] = `
+<View
+  accessibilityLabel="Daily pulse for Mum. morning BP 128/82. Blood pressure 75 percent. Heart rate 40 percent. Oxygen 85 percent. Sleep 60 percent. Activity 50 percent. Mum is in pattern."
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      undefined,
+    ]
+  }
+  testID="hero"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "height": 280,
+        "justifyContent": "center",
+        "width": 280,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.75,
+          }
+        }
+        style={
+          [
+            {
+              "height": 280,
+              "opacity": 1,
+              "width": 280,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={280}
+          bbWidth={280}
+          focusable={false}
+          height={280}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 280,
+                "width": 280,
+              },
+            ]
+          }
+          width={280}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={133}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={14}
+            />
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  280,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={133}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  835.663645854885,
+                  835.663645854885,
+                ]
+              }
+              strokeDashoffset={208.91591146372124}
+              strokeLinecap={1}
+              strokeWidth={14}
+            />
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={125}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.4,
+          }
+        }
+        style={
+          [
+            {
+              "height": 232,
+              "opacity": 1,
+              "width": 232,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={232}
+          bbWidth={232}
+          focusable={false}
+          height={232}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 232,
+                "width": 232,
+              },
+            ]
+          }
+          width={232}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={110}
+              stroke={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={12}
+            />
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  232,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={110}
+              stroke={
+                {
+                  "payload": 4292244570,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  691.1503837897545,
+                  691.1503837897545,
+                ]
+              }
+              strokeDashoffset={414.6902302738527}
+              strokeLinecap={1}
+              strokeWidth={12}
+            />
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={103}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.85,
+          }
+        }
+        style={
+          [
+            {
+              "height": 188,
+              "opacity": 1,
+              "width": 188,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={188}
+          bbWidth={188}
+          focusable={false}
+          height={188}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 188,
+                "width": 188,
+              },
+            ]
+          }
+          width={188}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={89}
+              stroke={
+                {
+                  "payload": 4284459176,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={10}
+            />
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  188,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={89}
+              stroke={
+                {
+                  "payload": 4284459176,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  559.2034923389832,
+                  559.2034923389832,
+                ]
+              }
+              strokeDashoffset={83.8805238508475}
+              strokeLinecap={1}
+              strokeWidth={10}
+            />
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={83}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.6,
+          }
+        }
+        style={
+          [
+            {
+              "height": 148,
+              "opacity": 1,
+              "width": 148,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={148}
+          bbWidth={148}
+          focusable={false}
+          height={148}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 148,
+                "width": 148,
+              },
+            ]
+          }
+          width={148}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={70}
+              stroke={
+                {
+                  "payload": 4286347947,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  148,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={70}
+              stroke={
+                {
+                  "payload": 4286347947,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  439.822971502571,
+                  439.822971502571,
+                ]
+              }
+              strokeDashoffset={175.92918860102841}
+              strokeLinecap={1}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={65}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.5,
+          }
+        }
+        style={
+          [
+            {
+              "height": 112,
+              "opacity": 1,
+              "width": 112,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={112}
+          bbWidth={112}
+          focusable={false}
+          height={112}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 112,
+                "width": 112,
+              },
+            ]
+          }
+          width={112}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={52}
+              stroke={
+                {
+                  "payload": 4286358895,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  112,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={52}
+              stroke={
+                {
+                  "payload": 4286358895,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  326.7256359733385,
+                  326.7256359733385,
+                ]
+              }
+              strokeDashoffset={163.36281798666926}
+              strokeLinecap={1}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                ]
+              }
+              r={47}
+              stroke={
+                {
+                  "payload": 268435455,
+                  "type": 0,
+                }
+              }
+              strokeWidth={1}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "position": "absolute",
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 80,
+            "lineHeight": 80,
+            "textAlign": "center",
+          }
+        }
+      >
+        128/82
+      </Text>
+      <Text
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+            "marginTop": 4,
+            "textAlign": "center",
+          }
+        }
+      >
+        morning BP
+      </Text>
+    </View>
+  </View>
+  <Text
+    style={
+      [
+        {
+          "opacity": 0,
+        },
+        {
+          "color": "#E8A063",
+          "fontFamily": "Inter_700Bold",
+          "fontSize": 28,
+          "fontStyle": "italic",
+          "fontWeight": "600",
+          "lineHeight": 34,
+          "marginTop": 16,
+          "textAlign": "center",
+        },
+      ]
+    }
+  >
+    Mum is in pattern.
+  </Text>
+</View>
+`;
+
+exports[`DailyPulseHero — mode × colorMode snapshot matrix renders mode=immersive colorMode=light 1`] = `
+<View
+  accessibilityLabel="Daily pulse for Mum. morning BP 128/82. Blood pressure 75 percent. Heart rate 40 percent. Oxygen 85 percent. Sleep 60 percent. Activity 50 percent. Mum is in pattern."
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      undefined,
+    ]
+  }
+  testID="hero"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "height": 280,
+        "justifyContent": "center",
+        "width": 280,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.75,
+          }
+        }
+        style={
+          [
+            {
+              "height": 280,
+              "opacity": 1,
+              "width": 280,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={280}
+          bbWidth={280}
+          focusable={false}
+          height={280}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 280,
+                "width": 280,
+              },
+            ]
+          }
+          width={280}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={133}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={14}
+            />
+            <RNSVGCircle
+              cx={140}
+              cy={140}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  280,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={133}
+              stroke={
+                {
+                  "payload": 4293435491,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  835.663645854885,
+                  835.663645854885,
+                ]
+              }
+              strokeDashoffset={208.91591146372124}
+              strokeLinecap={1}
+              strokeWidth={14}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.4,
+          }
+        }
+        style={
+          [
+            {
+              "height": 232,
+              "opacity": 1,
+              "width": 232,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={232}
+          bbWidth={232}
+          focusable={false}
+          height={232}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 232,
+                "width": 232,
+              },
+            ]
+          }
+          width={232}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={110}
+              stroke={
+                {
+                  "payload": 4291387204,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={12}
+            />
+            <RNSVGCircle
+              cx={116}
+              cy={116}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  232,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={110}
+              stroke={
+                {
+                  "payload": 4291387204,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  691.1503837897545,
+                  691.1503837897545,
+                ]
+              }
+              strokeDashoffset={414.6902302738527}
+              strokeLinecap={1}
+              strokeWidth={12}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.85,
+          }
+        }
+        style={
+          [
+            {
+              "height": 188,
+              "opacity": 1,
+              "width": 188,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={188}
+          bbWidth={188}
+          focusable={false}
+          height={188}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 188,
+                "width": 188,
+              },
+            ]
+          }
+          width={188}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={89}
+              stroke={
+                {
+                  "payload": 4282353800,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={10}
+            />
+            <RNSVGCircle
+              cx={94}
+              cy={94}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  188,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={89}
+              stroke={
+                {
+                  "payload": 4282353800,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  559.2034923389832,
+                  559.2034923389832,
+                ]
+              }
+              strokeDashoffset={83.8805238508475}
+              strokeLinecap={1}
+              strokeWidth={10}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.6,
+          }
+        }
+        style={
+          [
+            {
+              "height": 148,
+              "opacity": 1,
+              "width": 148,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={148}
+          bbWidth={148}
+          focusable={false}
+          height={148}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 148,
+                "width": 148,
+              },
+            ]
+          }
+          width={148}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={70}
+              stroke={
+                {
+                  "payload": 4284110983,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={74}
+              cy={74}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  148,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={70}
+              stroke={
+                {
+                  "payload": 4284110983,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  439.822971502571,
+                  439.822971502571,
+                ]
+              }
+              strokeDashoffset={175.92918860102841}
+              strokeLinecap={1}
+              strokeWidth={8}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "bottom": 0,
+            "justifyContent": "center",
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "opacity": 0,
+          },
+        ]
+      }
+    >
+      <View
+        accessibilityRole="progressbar"
+        accessibilityValue={
+          {
+            "max": 1,
+            "min": 0,
+            "now": 0.5,
+          }
+        }
+        style={
+          [
+            {
+              "height": 112,
+              "opacity": 1,
+              "width": 112,
+            },
+            {
+              "opacity": 1,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+            undefined,
+          ]
+        }
+      >
+        <RNSVGSvgView
+          bbHeight={112}
+          bbWidth={112}
+          focusable={false}
+          height={112}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": 112,
+                "width": 112,
+              },
+            ]
+          }
+          width={112}
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeOpacity",
+                ]
+              }
+              r={52}
+              stroke={
+                {
+                  "payload": 4284252754,
+                  "type": 0,
+                }
+              }
+              strokeOpacity={0.12}
+              strokeWidth={8}
+            />
+            <RNSVGCircle
+              cx={56}
+              cy={56}
+              fill={null}
+              matrix={
+                [
+                  6.123233995736766e-17,
+                  -1,
+                  1,
+                  6.123233995736766e-17,
+                  0,
+                  112,
+                ]
+              }
+              propList={
+                [
+                  "fill",
+                  "stroke",
+                  "strokeWidth",
+                  "strokeDasharray",
+                  "strokeDashoffset",
+                  "strokeLinecap",
+                ]
+              }
+              r={52}
+              stroke={
+                {
+                  "payload": 4284252754,
+                  "type": 0,
+                }
+              }
+              strokeDasharray={
+                [
+                  326.7256359733385,
+                  326.7256359733385,
+                ]
+              }
+              strokeDashoffset={163.36281798666926}
+              strokeLinecap={1}
+              strokeWidth={8}
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "justifyContent": "center",
+          "position": "absolute",
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "color": "#0F121C",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 80,
+            "lineHeight": 80,
+            "textAlign": "center",
+          }
+        }
+      >
+        128/82
+      </Text>
+      <Text
+        style={
+          {
+            "color": "#5A6478",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+            "marginTop": 4,
+            "textAlign": "center",
+          }
+        }
+      >
+        morning BP
+      </Text>
+    </View>
+  </View>
+  <Text
+    style={
+      [
+        {
+          "opacity": 0,
+        },
+        {
+          "color": "#E8A063",
+          "fontFamily": "Inter_700Bold",
+          "fontSize": 28,
+          "fontStyle": "italic",
+          "fontWeight": "600",
+          "lineHeight": 34,
+          "marginTop": 16,
+          "textAlign": "center",
+        },
+      ]
+    }
+  >
+    Mum is in pattern.
+  </Text>
+</View>
+`;

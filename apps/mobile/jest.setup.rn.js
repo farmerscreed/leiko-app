@@ -29,14 +29,14 @@ process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY =
 // gesture-handler exposes `Gesture.Pan()` builders and <GestureDetector>;
 // the official jestSetup module mocks them.
 jest.mock('react-native-reanimated', () => {
-  const { View } = jest.requireActual('react-native');
+  const { View, Text } = jest.requireActual('react-native');
   // createAnimatedComponent passes the wrapped component through as-is.
   // animatedProps is merged into props at render time so SVG attributes
   // appear on the underlying element for snapshot inspection.
   const createAnimatedComponent = (Component) => Component;
   return {
     __esModule: true,
-    default: { View, ScrollView: View, createAnimatedComponent },
+    default: { View, ScrollView: View, Text, createAnimatedComponent },
     createAnimatedComponent,
     useSharedValue: (initial) => ({ value: initial }),
     useAnimatedStyle: (fn) => fn(),
