@@ -1,0 +1,291 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`CorrelationStrip — colorMode snapshot matrix renders range=7d colorMode=dark 1`] = `
+<View
+  testID="strip"
+>
+  <Text
+    style={
+      [
+        {
+          "marginBottom": 4,
+        },
+        {
+          "color": "#ECE9E2",
+          "fontFamily": "Inter_400Regular",
+          "fontSize": 12,
+          "fontWeight": "400",
+          "lineHeight": 16,
+        },
+      ]
+    }
+    testID="strip-caption"
+  >
+    Sleep × Morning BP
+  </Text>
+  <RNSVGSvgView
+    bbHeight={96}
+    bbWidth={320}
+    focusable={false}
+    height={96}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 96,
+          "width": 320,
+        },
+      ]
+    }
+    testID="strip-svg"
+    width={320}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGPath
+        d="M 4,92 L 4,78.10526315789474 L 56,54.94736842105263 L 108,17.894736842105257 L 160,92 L 212,36.421052631578924 L 264,4 L 316,31.789473684210513 L 316,92 Z"
+        fill={
+          {
+            "payload": 4286347947,
+            "type": 0,
+          }
+        }
+        fillOpacity={0.12}
+        propList={
+          [
+            "fill",
+            "fillOpacity",
+          ]
+        }
+      />
+      <RNSVGPath
+        d="M4 78.10526315789474 56 54.94736842105263 108 17.894736842105257 160 92 212 36.421052631578924 264 4 316 31.789473684210513"
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+          ]
+        }
+        stroke={
+          {
+            "payload": 4286347947,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            669,
+            669,
+          ]
+        }
+        strokeDashoffset={669}
+        strokeWidth={2}
+        testID="strip-line-a"
+      />
+      <RNSVGPath
+        d="M 4,92 L 4,31.07692307692308 L 56,58.15384615384616 L 108,78.46153846153847 L 160,4 L 212,44.61538461538462 L 264,92 L 316,71.69230769230768 L 316,92 Z"
+        fill={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        fillOpacity={0.12}
+        propList={
+          [
+            "fill",
+            "fillOpacity",
+          ]
+        }
+      />
+      <RNSVGPath
+        d="M4 31.07692307692308 56 58.15384615384616 108 78.46153846153847 160 4 212 44.61538461538462 264 92 316 71.69230769230768"
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+          ]
+        }
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            "4",
+            "4",
+          ]
+        }
+        strokeDashoffset={669}
+        strokeWidth={2}
+        testID="strip-line-b"
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`CorrelationStrip — colorMode snapshot matrix renders range=7d colorMode=light 1`] = `
+<View
+  testID="strip"
+>
+  <Text
+    style={
+      [
+        {
+          "marginBottom": 4,
+        },
+        {
+          "color": "#2A3040",
+          "fontFamily": "Inter_400Regular",
+          "fontSize": 12,
+          "fontWeight": "400",
+          "lineHeight": 16,
+        },
+      ]
+    }
+    testID="strip-caption"
+  >
+    Sleep × Morning BP
+  </Text>
+  <RNSVGSvgView
+    bbHeight={96}
+    bbWidth={320}
+    focusable={false}
+    height={96}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": 96,
+          "width": 320,
+        },
+      ]
+    }
+    testID="strip-svg"
+    width={320}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGPath
+        d="M 4,92 L 4,78.10526315789474 L 56,54.94736842105263 L 108,17.894736842105257 L 160,92 L 212,36.421052631578924 L 264,4 L 316,31.789473684210513 L 316,92 Z"
+        fill={
+          {
+            "payload": 4284110983,
+            "type": 0,
+          }
+        }
+        fillOpacity={0.12}
+        propList={
+          [
+            "fill",
+            "fillOpacity",
+          ]
+        }
+      />
+      <RNSVGPath
+        d="M4 78.10526315789474 56 54.94736842105263 108 17.894736842105257 160 92 212 36.421052631578924 264 4 316 31.789473684210513"
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+          ]
+        }
+        stroke={
+          {
+            "payload": 4284110983,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            669,
+            669,
+          ]
+        }
+        strokeDashoffset={669}
+        strokeWidth={2}
+        testID="strip-line-a"
+      />
+      <RNSVGPath
+        d="M 4,92 L 4,31.07692307692308 L 56,58.15384615384616 L 108,78.46153846153847 L 160,4 L 212,44.61538461538462 L 264,92 L 316,71.69230769230768 L 316,92 Z"
+        fill={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        fillOpacity={0.12}
+        propList={
+          [
+            "fill",
+            "fillOpacity",
+          ]
+        }
+      />
+      <RNSVGPath
+        d="M4 31.07692307692308 56 58.15384615384616 108 78.46153846153847 160 4 212 44.61538461538462 264 92 316 71.69230769230768"
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeDasharray",
+            "strokeDashoffset",
+          ]
+        }
+        stroke={
+          {
+            "payload": 4293435491,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            "4",
+            "4",
+          ]
+        }
+        strokeDashoffset={669}
+        strokeWidth={2}
+        testID="strip-line-b"
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
