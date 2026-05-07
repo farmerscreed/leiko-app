@@ -23,6 +23,12 @@ module.exports = {
       testEnvironment: 'node',
       rootDir: __dirname,
       roots: ['<rootDir>'],
+      // Sprint 6: sync helpers transitively pull services/supabase
+      // (via the readings store → postReading), which throws at module
+      // load if EXPO_PUBLIC_SUPABASE_URL / _ANON_KEY are unset. Mirror
+      // the rn-project's defaults so pure tests don't need a real
+      // Supabase running.
+      setupFiles: ['<rootDir>/jest.setup.pure.js'],
       testMatch: [
         '<rootDir>/__tests__/**/*.test.ts?(x)',
         '<rootDir>/src/theme/**/__tests__/**/*.test.ts?(x)',

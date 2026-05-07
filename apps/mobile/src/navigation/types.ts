@@ -34,6 +34,11 @@ export type CaregiverStackParamList = {
   CaregiverHomePlaceholder: undefined;
   Pairing: undefined;
   Settings: undefined;
+  // Sprint 6 — Take Reading + Reading Detail. ReadingDetail receives
+  // the local id of the reading to display (UUIDv4 minted client-side
+  // by the readings store; serverId is filled in once /sync acks).
+  TakeReading: undefined;
+  ReadingDetail: { readingLocalId: string };
 };
 
 // Sprint 4 — self-buyer onboarding stack. Five screens per
@@ -51,6 +56,8 @@ export type SelfBuyerStackParamList = {
   SelfBuyerHomePlaceholder: undefined;
   Pairing: undefined;
   Settings: undefined;
+  TakeReading: undefined;
+  ReadingDetail: { readingLocalId: string };
 };
 
 export type AuthScreenProps<R extends keyof AuthStackParamList> = NativeStackScreenProps<

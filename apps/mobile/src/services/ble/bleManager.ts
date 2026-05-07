@@ -85,9 +85,25 @@ export function scanForUrion(
   };
 }
 
-export async function connectToUrion(deviceId: string): Promise<UrionDevice> {
+export async function connectToUrion(
+  deviceId: string,
+  options: { timeoutMs?: number } = {},
+): Promise<UrionDevice> {
   const mgr = bleManager();
-  const native = await mgr.connectToDevice(deviceId, { autoConnect: false });
+  const timeoutMs = options.timeoutMs ?? 15_000;
+  // ble-plx's connectToDevice has no platform-uniform timeout; on
+  // Android it can sit on a stalled GATT handshake indefinitely. Wrap
+  // it so the UI always gets a definite outcome.
+  const connect = mgr.connectToDevice(deviceId, { autoConnect: false, timeout: timeoutMs });
+  const native = await Promise.race([
+    connect,
+    new Promise<never>((_, reject) =>
+      setTimeout(
+        () => reject(new Error(`connect timeout after ${timeoutMs}ms`)),
+        timeoutMs,
+      ),
+    ),
+  ]);
   await native.discoverAllServicesAndCharacteristics();
   const wrapper = new UrionDevice(native);
   await wrapper.startNotify();

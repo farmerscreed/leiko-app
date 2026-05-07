@@ -13,6 +13,8 @@ Triggered when the caregiver or self-buyer wants to capture a fresh BP reading v
 
 ## Two paths
 
+> **Hardware constraint** (verified against `docs/_reference/U16PRO_protocol_en.pdf` 2026-05-06): the U16PRO protocol has NO command for the app to remotely trigger a BP measurement. The 14-section command catalog covers reads, config, find-watch, factory-reset, and the watch-pushed `0x73` notification — but no inflate-now command. Reading is **always** initiated by the parent pressing the BP button on the watch. Both Paths below converge on that physical action.
+
 ### Path A — Parent takes a reading on the watch (most common)
 1. Parent presses the BP button on the watch.
 2. Watch inflates cuff (~45s), reads sys/dia/pulse, pushes via `0x73` notify packet.
@@ -22,8 +24,18 @@ Triggered when the caregiver or self-buyer wants to capture a fresh BP reading v
 6. Anomaly engine classifies on ingest (`docs/10-anomaly-logic.md`).
 7. Push to all caregivers in the family per `docs/11-push-notifications.md` daily-summary or anomaly category.
 
-### Path B — User taps "Take a reading now" in the app
-This screen lives at `apps/mobile/src/screens/TakeReading.tsx`. Used when:
+### Path B — User opens the in-app "Take a reading" sheet
+This screen lives at `apps/mobile/src/screens/TakeReading/TakeReadingScreen.tsx`. The app **does not** inflate the cuff — it can't, per the hardware constraint above. Instead the sheet:
+
+1. Reconnects to the persisted device.
+2. Subscribes to `0x73` and shows instructional copy: *"Press the BP button on your watch — we'll catch the result here."*
+3. When `0x73 0x02` (BP ready) arrives, the app issues `0x14 readBPHistory` with `count=1` to fetch the just-recorded reading.
+4. Reading is persisted to MMKV pending buffer synchronously, classified, then best-effort POSTed to `/sync`.
+5. UI lands on Reading Detail.
+
+A secondary "Add a manual reading" affordance opens a BottomSheet for sys/dia/pulse entry (D6 US-26) — used when the watch isn't on the wrist.
+
+Used when:
 - Self-buyer wants an on-demand reading.
 - Caregiver wants to test the watch is responsive.
 - Parent (post-reading tap-confirm) confirms the reading is theirs.
@@ -34,11 +46,12 @@ This screen lives at `apps/mobile/src/screens/TakeReading.tsx`. Used when:
 
 | Element | Spec |
 | --- | --- |
-| Hero | Illustration of watch + arm cuff position, 240×180pt, `radius.xl` |
-| Headline | `type.display-m` "Take a reading" |
-| Body | `type.body-l` "Sit still for about 45 seconds. The watch will inflate the cuff, take the reading, and tell you when it's done." |
-| Primary CTA | `button.accent` **"Start reading"** — full-width — large per CLAUDE.md anti-pattern: *"Don't make the 'Take a reading' CTA smaller than the spec says"* |
-| Secondary | `button.ghost` "Add a manual reading" — opens bottom sheet with sys / dia / pulse inputs (D6 US-26 manual entry) |
+| Hero | Illustration of watch + arm cuff position, 240×180pt, `radius.xl` (Sprint 6 ships without the illustration; placeholder text only) |
+| Headline | `type.display-m` "Press the BP button on your watch" |
+| Body | `type.body-l` "Sit still while the watch inflates and takes the reading. We'll catch the result here." |
+| (No primary CTA in `waiting_for_watch`) | The watch button is the trigger; the screen is informational while we wait for `0x73 0x02`. The CLAUDE.md "Take a reading CTA size" anti-pattern applies to the FAB on home (which IS the entry point), not to the in-flight screen. |
+| Secondary | `button.ghost` "Add a manual reading" — opens bottom sheet with sys / dia / pulse inputs (D6 US-26 manual entry). Used when the watch isn't on the wrist. |
+| Cancel | `button.ghost` "Cancel" — disconnects + dismisses |
 
 ---
 
@@ -46,13 +59,11 @@ This screen lives at `apps/mobile/src/screens/TakeReading.tsx`. Used when:
 
 | State | Visual |
 | --- | --- |
-| `idle` | Default — Start CTA enabled |
-| `inflating` | Progress ring around watch illustration; `type.body-m` "Inflating cuff…" (~10s) |
-| `measuring` | Progress ring continues; `type.body-m` "Holding still…" (~25s) |
-| `analysing` | Spinner; `type.body-m` "Reading complete. Saving…" |
-| `success` | `type.numeric-xl` showing sys/dia/pulse; `chip.success` showing in-range tier; CTA "Done" routes to Reading Detail |
-| `anomaly` | Same layout as success, but with calm-concerned copy from `docs/10-anomaly-logic.md` |
-| `failure` | Friendly cause + fix per `docs/06-ble-protocol.md` §5.5 ("We couldn't get a clean reading. Bring the phone closer to the watch and try again.") + `button.primary` "Try again" |
+| `connecting` | Spinner; "Reaching the watch" headline; ~2s on a healthy connection |
+| `waiting_for_watch` | Headline "Press the BP button on your watch"; cancel + manual-entry secondary; 90s timeout |
+| `fetching` | Spinner; "Reading complete — saving" while the app issues `0x14` and writes the row to MMKV |
+| `success` | `type.numeric-xl` showing sys/dia; tier chip from `docs/10-anomaly-logic.md`; CTA "See the full reading" routes to Reading Detail |
+| `failure` | Friendly cause + fix per `docs/06-ble-protocol.md` §5.5 + `button.primary` "Try again" |
 
 > Per CLAUDE.md anti-pattern: **Animate anomaly banners aggressively. Calm-before-clever.** State transitions on this screen use `motion.normal` (200ms) — never aggressive pulses or flashing.
 
@@ -90,13 +101,13 @@ Per `docs/01-data-model.md` §"Sync strategy" + CLAUDE.md ("offline-first: every
 ---
 
 ## Sprint 6 acceptance criteria
-- All 6 states render with correct tokens.
-- Path A (watch-pushed reading) wires through to anomaly classification + push.
-- Path B (in-app start) issues the right BLE command sequence to inflate cuff.
-- MMKV pending-buffer write is **synchronous** before UI confirmation (test with airplane mode).
-- Parent-side tap-confirm bottom sheet works.
+- All 5 states (`connecting`, `waiting_for_watch`, `fetching`, `success`, `failure`) render with correct tokens.
+- Path A and Path B both flow: watch button press → `0x73 0x02` → `0x14 readBPHistory` → MMKV write → classification → Reading Detail. The "trigger" is identical because the hardware doesn't accept a remote inflate command.
+- Manual-entry sheet (D6 US-26) saves a reading without touching the watch.
+- MMKV pending-buffer write is **synchronous** before UI confirmation (test with airplane mode — the success view renders even with the device offline).
+- Parent-side tap-confirm bottom sheet is deferred to Sprint 7 (caregiver home + anomaly engine context).
 - Voice gate passes (including success-state numeric readout).
-- Component + integration tests covering happy path + airplane-mode + failure path.
+- Component + integration tests covering happy path + manual-entry + failure path.
 
 ---
 

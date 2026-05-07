@@ -28,7 +28,16 @@ export type AnalyticsEvent =
   | { name: 'ble_reconnect_gave_up'; props?: { deviceId?: string } }
   | { name: 'ble_permission_denied'; props?: { permission: string } }
   | { name: 'ble_bluetooth_off' }
-  | { name: 'ble_forget_device'; props?: { deviceId?: string } };
+  | { name: 'ble_forget_device'; props?: { deviceId?: string } }
+  // Sprint 6 — reading capture lifecycle. Per CLAUDE.md data rule,
+  // event payloads NEVER include sys/dia/pulse values, only counts +
+  // categories.
+  | { name: 'reading_persisted'; props?: { source: 'watch' | 'manual'; tier: 'in_range' | 'calm_concerned' | 'confirmed_urgent' } }
+  | { name: 'reading_sync_success'; props?: { duplicate: boolean } }
+  | { name: 'reading_sync_failed'; props?: { reason: string } }
+  | { name: 'take_reading_started'; props?: { trigger: 'fab' | 'manual_sheet' } }
+  | { name: 'take_reading_received'; props?: { source: 'watch' | 'manual' } }
+  | { name: 'take_reading_failed'; props?: { reason: string } };
 
 type EventName = AnalyticsEvent['name'];
 

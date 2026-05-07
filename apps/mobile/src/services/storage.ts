@@ -30,6 +30,23 @@ export const STORAGE_KEYS = {
   // Paired Urion device for the current user/family. Sprint 5.
   // Stored as JSON: { id, mac, model, deviceId (Supabase row id), pairedAt }.
   pairedDevice: 'leiko.ble.pairedDevice',
+  // Readings buffer — Sprint 6. Two arrays of LocalReading rows:
+  //   pending: not yet successfully POSTed to /sync
+  //   recent:  synced + persisted, capped at RECENT_READINGS_CAP for UI
+  // Both serialised as JSON. Pending is the source of truth for the
+  // offline-first guarantee per CLAUDE.md ("every reading is saved to
+  // MMKV before any sync attempt"). Sprint 7+ replaces the recent
+  // cache with WatermelonDB queries.
+  pendingReadings: 'leiko.readings.pending',
+  recentReadings: 'leiko.readings.recent',
+  // Per-device sync cursor — Sprint 6. JSON map { [bleId]: timestampSec }
+  // of the newest reading already pulled from each watch. Drives the
+  // incremental readBPHistory(sinceTimestampSec=cursor) calls so we
+  // backfill everything captured while the app was closed.
+  // The lastSync is per-device (not per-family) because the watch is
+  // the unit that buffers; pairing a different watch resets that
+  // device's cursor naturally on first sync.
+  lastSyncByDevice: 'leiko.sync.lastSyncByDevice',
 } as const;
 
 export const supabaseStorage = {

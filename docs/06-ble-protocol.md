@@ -22,6 +22,37 @@ Packets are **16 bytes fixed length**:
 
 CRC failures are silent: drop, request retransmit, log a `ble_crc_fail` PostHog event. Do not surface to user.
 
+### 1.1 Reading-timestamp timezone quirk (Sprint 6)
+
+The Urion firmware **always serialises reading timestamps as if its wall clock were in China-local time (UTC+8)**, regardless of what we pass to `setTime (0x01)`. Confirmed empirically against U19M_013C on 2026-05-07 in Lagos (UTC+1):
+
+- We set the watch via `0x01` with `now.getHours()` / `now.getMinutes()` from the phone's local time.
+- The watch shows the correct wall-clock face (e.g., 09:03 Lagos).
+- A reading recorded at that wall clock comes back via `0x14` with `timestampSec` = "Unix-seconds-of-09:03-as-if-China-local" = the actual UTC moment 01:03.
+- Without correction the rendered "Today HH:MM" reads 02:03 (= 01:03 UTC + Lagos offset), which is 7h behind reality.
+
+**Fix (current implementation, in `apps/mobile/src/services/ble/services/sync/syncBacklog.ts` via `watchTimestampToUtcSec`):**
+
+```ts
+const WATCH_FIRMWARE_OFFSET_SEC = 8 * 3600;
+const phoneOffsetSec = -new Date(rawSec * 1000).getTimezoneOffset() * 60;
+const trueUtc = rawSec + WATCH_FIRMWARE_OFFSET_SEC - phoneOffsetSec;
+```
+
+The shift is applied **at ingest** in `syncBacklog`, not at the rendering layer — every other downstream consumer (readings store, ReadingCard, ReadingDetail, classification, /sync POST) treats `measuredAtSec` as a real Unix UTC second. Only the per-device sync cursor (`lastSyncByDevice`) preserves the raw watch value, since the next `0x14 sinceTimestampSec=…` request must match the watch's storage format byte-for-byte.
+
+**Per-locale shift table** (= `8h − local offset`):
+
+| User locale | Local offset | Shift applied | Raw watch sec rendered | After fix |
+| --- | --- | --- | --- | --- |
+| Lagos (UTC+1) | +1h | +7h | 02:03 (= raw 01:03 UTC + 1h) | 09:03 ✓ |
+| US East (UTC−5) | −5h | +13h | wrong | correct |
+| Beijing (UTC+8) | +8h | 0 | matches reality already | correct |
+
+**Sprint 7 follow-up:** the orchestrator will move TZ reconciliation server-side using the parent's stored IANA timezone in `public.users.timezone`. The Sprint 6 device-side fix is the safe-default for the dev-client + DTC path until then.
+
+The vendor reference `docs/_reference/U16PRO_protocol_en.pdf` §4.5.5 explicitly notes "this result is -8 hours equals the current time" — meaning whatever timestamp the firmware emits, you have to subtract 8 hours to get UTC (which is what the formula above bakes in via `WATCH_FIRMWARE_OFFSET_SEC`).
+
 ---
 
 ## 2. Connection state machine

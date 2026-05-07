@@ -9,11 +9,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button } from '../../components/Button';
+import { ReadingCard } from '../../components/ReadingCard';
 import { useTheme } from '../../theme';
 import { useAuth } from '../../state/auth';
 import { useOnboarding } from '../../state/onboarding';
 import { usePairing } from '../../state/pairing';
+import { useReadings } from '../../state/readings';
 import type { CaregiverStackParamList } from '../../navigation/types';
+import { mmkv, STORAGE_KEYS } from '../../services/storage';
 
 export function CaregiverHomePlaceholder() {
   const theme = useTheme();
@@ -23,6 +26,9 @@ export function CaregiverHomePlaceholder() {
   const signOut = useAuth((s) => s.signOut);
   const familyId = useOnboarding((s) => s.familyId);
   const pairedDevice = usePairing((s) => s.pairedDevice);
+  const latestReading = useReadings((s) => s.latest());
+  const resetReadings = useReadings((s) => s.reset);
+  const parent = useOnboarding((s) => s.parent);
 
   const headline = theme.type('displayM');
   const body = theme.type('bodyL');
@@ -90,6 +96,23 @@ export function CaregiverHomePlaceholder() {
             </Button>
           )}
         </View>
+
+        {pairedDevice && latestReading ? (
+          <View style={{ marginBottom: theme.spacing.xxl }}>
+            <ReadingCard
+              reading={latestReading}
+              ownerVariant="parent"
+              parentName={parent.displayName || 'Latest reading'}
+              parentRelationship={parent.relationship ?? undefined}
+              onPress={() =>
+                navigation.navigate('ReadingDetail', {
+                  readingLocalId: latestReading.localId,
+                })
+              }
+              testID="placeholder-latest-reading"
+            />
+          </View>
+        ) : null}
 
         <View
           style={{
@@ -181,7 +204,72 @@ export function CaregiverHomePlaceholder() {
             Sign out
           </Text>
         </Pressable>
+
+        {/*
+          DEV AFFORDANCE — Sprint 6.
+          Keep until Sprint 17 (launch) so the founder can clear MMKV
+          state during per-sprint field testing without uninstalling
+          the dev-client APK (which would also drop the auth session).
+          Sprint 17's pre-launch sweep should remove this Pressable
+          and the imports of resetReadings + mmkv + STORAGE_KEYS that
+          serve only this button.
+        */}
+        <Pressable
+          onPress={() => {
+            resetReadings();
+            // Clear the per-device sync cursor too so the next sync
+            // pulls everything fresh from the watch.
+            mmkv.remove(STORAGE_KEYS.lastSyncByDevice);
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="Clear reading history (debug)"
+          testID="placeholder-reset-readings"
+          style={{ paddingVertical: theme.spacing.s, alignSelf: 'flex-start' }}
+        >
+          <Text
+            style={{
+              color: theme.colors.text.secondary,
+              fontSize: body.size,
+              fontFamily: body.family,
+            }}
+          >
+            Clear readings (debug)
+          </Text>
+        </Pressable>
       </ScrollView>
+
+      {pairedDevice ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Take a reading"
+          testID="placeholder-take-reading-fab"
+          onPress={() => navigation.navigate('TakeReading')}
+          style={({ pressed }) => ({
+            position: 'absolute',
+            right: theme.spacing.xxl,
+            bottom: theme.spacing.xxl,
+            backgroundColor: pressed
+              ? theme.colors.brand.primarySoft
+              : theme.colors.brand.primary,
+            borderRadius: theme.radii.full,
+            paddingVertical: theme.spacing.l,
+            paddingHorizontal: theme.spacing.xl,
+            ...theme.elevation.medium.ios,
+            ...theme.elevation.medium.android,
+          })}
+        >
+          <Text
+            style={{
+              color: theme.colors.text.onBrand,
+              fontSize: body.size,
+              fontFamily: body.family,
+              fontWeight: '600',
+            }}
+          >
+            Take a reading
+          </Text>
+        </Pressable>
+      ) : null}
     </SafeAreaView>
   );
 }

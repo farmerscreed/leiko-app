@@ -74,6 +74,17 @@ export class UrionDevice {
     return () => this.listeners.delete(handler);
   }
 
+  /**
+   * Subscribe to disconnection events on the underlying Device.
+   * Fires whether the disconnect was caller-initiated (cancelConnection)
+   * or remote (out-of-range, OEM kill, watch power-off). Returns an
+   * unsubscribe function.
+   */
+  onDisconnected(handler: () => void): () => void {
+    const sub = this.device.onDisconnected(() => handler());
+    return () => sub.remove();
+  }
+
   async writePacket(packet: Uint8Array): Promise<void> {
     await this.device.writeCharacteristicWithoutResponseForService(
       URION_SERVICE_UUID,
@@ -116,6 +127,42 @@ export class UrionDevice {
         }
       });
     });
+  }
+
+  /**
+   * For commands that stream multiple response packets ending in a
+   * sentinel — most importantly 0x14 readBPHistory which returns one
+   * packet per reading + a `0xFFFFFFFF` terminator. Collects every
+   * matching packet (including the terminator) and resolves when the
+   * terminator predicate fires. Rejects with CommandTimeoutError if
+   * no terminator arrives within `timeoutMs`.
+   */
+  async sendCommandStream(
+    command: number,
+    payload: Uint8Array | readonly number[] | undefined,
+    isTerminator: (packet: ParsedPacket) => boolean,
+    options: { timeoutMs?: number } = {},
+  ): Promise<ParsedPacket[]> {
+    const timeoutMs = options.timeoutMs ?? 10_000;
+    const packet = buildPacket(command, payload);
+    const collected: ParsedPacket[] = [];
+    const promise = new Promise<ParsedPacket[]>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        unsub();
+        reject(new CommandTimeoutError(command, timeoutMs));
+      }, timeoutMs);
+      const unsub = this.onNotify((p) => {
+        if (p.command !== command) return;
+        collected.push(p);
+        if (isTerminator(p)) {
+          clearTimeout(timer);
+          unsub();
+          resolve(collected);
+        }
+      });
+    });
+    await this.writePacket(packet);
+    return promise;
   }
 
   async disconnect(): Promise<void> {

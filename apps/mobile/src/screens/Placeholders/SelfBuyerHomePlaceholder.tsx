@@ -8,10 +8,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Button } from '../../components/Button';
+import { ReadingCard } from '../../components/ReadingCard';
 import { useTheme } from '../../theme';
 import { useAuth } from '../../state/auth';
 import { useOnboarding } from '../../state/onboarding';
 import { usePairing } from '../../state/pairing';
+import { useReadings } from '../../state/readings';
 import type { SelfBuyerStackParamList } from '../../navigation/types';
 
 export function SelfBuyerHomePlaceholder() {
@@ -22,6 +24,7 @@ export function SelfBuyerHomePlaceholder() {
   const signOut = useAuth((s) => s.signOut);
   const familyId = useOnboarding((s) => s.familyId);
   const pairedDevice = usePairing((s) => s.pairedDevice);
+  const latestReading = useReadings((s) => s.latest());
 
   const headline = theme.type('displayM');
   const body = theme.type('bodyL');
@@ -86,6 +89,21 @@ export function SelfBuyerHomePlaceholder() {
             </Button>
           )}
         </View>
+
+        {pairedDevice && latestReading ? (
+          <View style={{ marginBottom: theme.spacing.xxl }}>
+            <ReadingCard
+              reading={latestReading}
+              ownerVariant="self"
+              onPress={() =>
+                navigation.navigate('ReadingDetail', {
+                  readingLocalId: latestReading.localId,
+                })
+              }
+              testID="placeholder-latest-reading"
+            />
+          </View>
+        ) : null}
 
         <View
           style={{
@@ -178,6 +196,39 @@ export function SelfBuyerHomePlaceholder() {
           </Text>
         </Pressable>
       </ScrollView>
+
+      {pairedDevice ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Take a reading"
+          testID="placeholder-take-reading-fab"
+          onPress={() => navigation.navigate('TakeReading')}
+          style={({ pressed }) => ({
+            position: 'absolute',
+            right: theme.spacing.xxl,
+            bottom: theme.spacing.xxl,
+            backgroundColor: pressed
+              ? theme.colors.brand.primarySoft
+              : theme.colors.brand.primary,
+            borderRadius: theme.radii.full,
+            paddingVertical: theme.spacing.l,
+            paddingHorizontal: theme.spacing.xl,
+            ...theme.elevation.medium.ios,
+            ...theme.elevation.medium.android,
+          })}
+        >
+          <Text
+            style={{
+              color: theme.colors.text.onBrand,
+              fontSize: body.size,
+              fontFamily: body.family,
+              fontWeight: '600',
+            }}
+          >
+            Take a reading
+          </Text>
+        </Pressable>
+      ) : null}
     </SafeAreaView>
   );
 }

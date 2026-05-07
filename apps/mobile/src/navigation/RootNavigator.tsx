@@ -35,10 +35,31 @@ import { CaregiverHomePlaceholder } from '../screens/Placeholders/CaregiverHomeP
 import { SelfBuyerHomePlaceholder } from '../screens/Placeholders/SelfBuyerHomePlaceholder';
 import { PairingScreen } from '../screens/Pairing/PairingScreen';
 import { SettingsScreen } from '../screens/Settings/SettingsScreen';
+import { TakeReadingScreen } from '../screens/TakeReading/TakeReadingScreen';
+import { ReadingDetailScreen } from '../screens/ReadingDetail/ReadingDetailScreen';
 import { useTheme } from '../theme';
 import { useAuth } from '../state/auth';
 import { useOnboarding } from '../state/onboarding';
 import { usePairing } from '../state/pairing';
+import { useReadings } from '../state/readings';
+import { inferModel, setDeviceMetaProvider } from '../services/sync/postReading';
+
+// Wire postReading's device-meta provider once at app boot. The
+// pairing store can't be imported by postReading directly without
+// pulling react-native into pure-project test loads — so the lookup
+// gets injected here, where the navigator already imports the
+// pairing store. Per-call resolution always returns the latest paired
+// device.
+setDeviceMetaProvider(() => {
+  const paired = usePairing.getState().pairedDevice;
+  if (!paired) return null;
+  return {
+    bleId: paired.bleId,
+    macSuffix: paired.macSuffix,
+    name: paired.name,
+    model: inferModel(paired.name),
+  };
+});
 import type {
   AuthStackParamList,
   CaregiverOnboardingStackParamList,
@@ -100,6 +121,8 @@ function CaregiverHomeNavigator() {
       />
       <CaregiverStack.Screen name="Pairing" component={PairingScreen} />
       <CaregiverStack.Screen name="Settings" component={SettingsScreen} />
+      <CaregiverStack.Screen name="TakeReading" component={TakeReadingScreen} />
+      <CaregiverStack.Screen name="ReadingDetail" component={ReadingDetailScreen} />
     </CaregiverStack.Navigator>
   );
 }
@@ -133,6 +156,8 @@ function SelfBuyerHomeNavigator() {
       />
       <SelfBuyerStack.Screen name="Pairing" component={PairingScreen} />
       <SelfBuyerStack.Screen name="Settings" component={SettingsScreen} />
+      <SelfBuyerStack.Screen name="TakeReading" component={TakeReadingScreen} />
+      <SelfBuyerStack.Screen name="ReadingDetail" component={ReadingDetailScreen} />
     </SelfBuyerStack.Navigator>
   );
 }
@@ -156,11 +181,17 @@ export function RootNavigator() {
   const accountType = useAuth((s) => s.profile?.account_type);
   const hydrate = useAuth((s) => s.hydrate);
   const hydratePairing = usePairing((s) => s.hydrate);
+  const hydrateReadings = useReadings((s) => s.hydrate);
+  const syncPending = useReadings((s) => s.syncPending);
 
   useEffect(() => {
     void hydrate();
     hydratePairing();
-  }, [hydrate, hydratePairing]);
+    hydrateReadings();
+    // Best-effort: try to sync any pending readings on app cold start
+    // (offline captures from a previous session).
+    void syncPending();
+  }, [hydrate, hydratePairing, hydrateReadings, syncPending]);
 
   let content: React.ReactNode;
   if (status === 'loading') {
