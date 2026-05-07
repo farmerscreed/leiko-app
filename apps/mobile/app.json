@@ -13,7 +13,9 @@
       "infoPlist": {
         "NSBluetoothAlwaysUsageDescription": "Leiko uses Bluetooth to talk to your watch and sync readings.",
         "NSBluetoothPeripheralUsageDescription": "Leiko uses Bluetooth to talk to your watch.",
-        "UIBackgroundModes": ["bluetooth-central"]
+        "UIBackgroundModes": [
+          "bluetooth-central"
+        ]
       }
     },
     "android": {
@@ -24,6 +26,9 @@
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"
       ]
-    }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

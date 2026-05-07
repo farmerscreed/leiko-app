@@ -322,7 +322,7 @@ Translucent surfaces are first-class. They appear in three places at v1.0:
 | `material.glass.medium` | `surface.glass-medium` + backdrop-filter blur(20px) |
 | `material.glass.heavy` | `surface.glass-heavy` + backdrop-filter blur(40px) |
 
-Implementation: React Native does not support native CSS `backdrop-filter`. Use `@react-native-community/blur` (BlurView) or, on Android < 12 fallback, a non-blurred translucent overlay. Engineering acceptance criterion: glass should look intentional even on the fallback path.
+Implementation: React Native does not support native CSS `backdrop-filter`. Use **`expo-blur`** (BlurView) — selected during Sprint 1.5 over `@react-native-community/blur` because it is Expo first-party and better-maintained for SDK 54 + New Architecture. On Android < 12 the BlurView falls back to a non-blurred translucent overlay (the underlying token already specifies an opacity-tinted surface as the floor — blur is additive). Engineering acceptance criterion: glass should look intentional even on the fallback path. See `docs/00-tech-stack.md` Mobile table for the version pin.
 
 ---
 
@@ -732,8 +732,10 @@ VitalRing is SVG-based at v1.0 via `react-native-svg`. Performance characteristi
 
 ### 12.5 Glass / BlurView fallback
 
-iOS: `@react-native-community/blur` with type `regular` for `material.glass.medium`, `prominent` for `heavy`.
-Android 12+: same package supports native blur.
+**Library:** `expo-blur` (Expo first-party, locked in Sprint 1.5 — supersedes the original `@react-native-community/blur` reference).
+
+iOS: `expo-blur` `BlurView` with `intensity` 50–60 + `tint='dark'` for `material.glass.medium`, `intensity` 80–90 + `tint='dark'` for `heavy`.
+Android 12+: same package supports native blur via `experimentalBlurMethod="dimezisBlurView"`.
 Android < 12: BlurView falls back to non-blurred translucency. Engineering acceptance: glass surfaces must look intentional even without blur. The token already specifies an opacity-tinted surface as the base — blur is additive polish.
 
 ### 12.6 Theme switching

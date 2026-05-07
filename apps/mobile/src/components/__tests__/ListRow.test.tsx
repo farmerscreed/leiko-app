@@ -2,10 +2,21 @@ import { type ReactNode } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 import { ListRow, type ListRowVariant } from '../ListRow';
 import { ThemeProvider } from '../../theme';
-import { palette } from '../../theme/tokens';
+// `palette` from legacy-tokens is no longer used by these tests — D12 colors
+// flow through ThemeProvider and ListRow now renders D12 dark values. The
+// assertions below reference paletteDark from the new D12 token folder.
+import { paletteDark } from '../../theme/tokens';
 
 function withTheme(ui: ReactNode, mode: 'caregiver' | 'parent' = 'caregiver') {
-  return <ThemeProvider mode={mode}>{ui}</ThemeProvider>;
+  // colorMode locked to 'dark' (D12 canonical) so the rendered hex values
+  // are deterministic across test environments — jest-expo's
+  // useColorScheme() defaults to 'light', which would otherwise flip the
+  // assertions below.
+  return (
+    <ThemeProvider mode={mode} colorMode="dark">
+      {ui}
+    </ThemeProvider>
+  );
 }
 
 describe('ListRow — variants render', () => {
@@ -140,7 +151,8 @@ describe('ListRow — action', () => {
     const flat = Array.isArray(titleNode.props.style)
       ? Object.assign({}, ...titleNode.props.style)
       : titleNode.props.style;
-    expect(flat.color).toBe(palette.crimson[700]);
+    // D12 dark crimson — semantic state.urgent in the new token system.
+    expect(flat.color).toBe(paletteDark.crimson[700]);
   });
 
   it('uses primary text color for non-destructive action rows', () => {
@@ -153,7 +165,8 @@ describe('ListRow — action', () => {
     const flat = Array.isArray(titleNode.props.style)
       ? Object.assign({}, ...titleNode.props.style)
       : titleNode.props.style;
-    expect(flat.color).toBe(palette.text.primary);
+    // D12 dark text.primary — bone-50 (warm white).
+    expect(flat.color).toBe(paletteDark.bone[50]);
   });
 });
 

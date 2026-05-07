@@ -26,8 +26,12 @@ Canonical version pins and service locks. Sourced from D7 §2 (final lock) and D
 | Date/time | Luxon (IANA TZ) | latest stable |
 | Gestures | react-native-gesture-handler | 2.28.0 (SDK 54 bundled-native-modules pin — see ADR-0004) |
 | Animation | react-native-reanimated | 4.1.7 (SDK 54 bundled-native-modules pin — see ADR-0004) |
+| Fonts | expo-font + `@expo-google-fonts/inter` + `@expo-google-fonts/jetbrains-mono` | expo-font 14.0.x · @expo-google-fonts/inter 0.4.x · @expo-google-fonts/jetbrains-mono 0.4.x (added Sprint 1.5 — D12 §3.1 typography stack: Inter Regular/Medium/SemiBold/SemiBoldItalic/Bold/Black + JetBrains Mono Medium. All weights free OFL.) |
+| Blur / glass material | expo-blur | 15.0.x (added Sprint 1.5 — D12 §6.3 material.glass.* surfaces. Chosen over `@react-native-community/blur` named in D12 §12.5 because expo-blur is Expo first-party, better-maintained for SDK 54 + New Architecture. D12 §12.5 amended to reflect.) |
+| Haptics | expo-haptics | 15.0.x (added Sprint 1.5 — D12 §9 haptic token category. Wraps iOS Core Haptics + Android Haptic Feedback Constants. Consumed first by Button `haptic.tick` on press, expanding through later sprints.) |
+| Iconography (planned) | `@phosphor-icons/react-native` + `react-native-svg` | Pinned by D12 §10.1; not installed in Sprint 1.5 (no consuming components yet). First install with Sprint 7.6 (VitalTile / AnomalyBanner). |
 
-**Rejected (do not propose without ADR)**: Native Swift+Kotlin, Flutter, Expo Go, Realm, AsyncStorage as primary, Redux Toolkit, Apollo, Material/Chakra/NativeBase UI libs, @gorhom/bottom-sheet (heavy abstraction — we use the primitives directly).
+**Rejected (do not propose without ADR)**: Native Swift+Kotlin, Flutter, Expo Go, Realm, AsyncStorage as primary, Redux Toolkit, Apollo, Material/Chakra/NativeBase UI libs, @gorhom/bottom-sheet (heavy abstraction — we use the primitives directly), `@react-native-community/blur` (replaced by expo-blur in Sprint 1.5; remains in some D12 references pre-amendment), paid display typefaces — Recoleta / Söhne / Reckless Neue (deferred to v1.1 per D12 §3.1 founder decision).
 
 ---
 

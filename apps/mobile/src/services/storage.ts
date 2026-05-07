@@ -47,6 +47,10 @@ export const STORAGE_KEYS = {
   // the unit that buffers; pairing a different watch resets that
   // device's cursor naturally on first sync.
   lastSyncByDevice: 'leiko.sync.lastSyncByDevice',
+  // D12 visual mode — Sprint 1.5. ColorModeOverride: 'system' | 'dark' | 'light'.
+  // Default 'system' (follow OS appearance). User-facing toggle ships in
+  // Sprint 10 Settings; ThemeProvider reads/writes this key directly.
+  themeColorMode: 'leiko.theme.colorMode',
 } as const;
 
 export const supabaseStorage = {

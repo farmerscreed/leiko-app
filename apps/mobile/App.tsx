@@ -17,6 +17,16 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import {
+  useFonts,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_600SemiBold_Italic,
+  Inter_700Bold,
+  Inter_900Black,
+} from '@expo-google-fonts/inter';
+import { JetBrainsMono_500Medium } from '@expo-google-fonts/jetbrains-mono';
 import { ComponentGallery } from './src/dev/ComponentGallery';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { ThemeProvider, type ThemeMode } from './src/theme';
@@ -24,6 +34,21 @@ import { ThemeProvider, type ThemeMode } from './src/theme';
 const DEV_GALLERY_ENABLED = process.env.EXPO_PUBLIC_DEV_GALLERY === 'true';
 
 export default function App() {
+  const [fontsLoaded, fontError] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_600SemiBold_Italic,
+    Inter_700Bold,
+    Inter_900Black,
+    JetBrainsMono_500Medium,
+  });
+
+  // While fonts are loading, return null so the Expo splash stays visible.
+  // On a font-load error, fall through and render with the system fallback
+  // rather than bricking the app on a transient asset failure.
+  if (!fontsLoaded && !fontError) return null;
+
   if (__DEV__ && DEV_GALLERY_ENABLED) {
     return <DevGallery />;
   }

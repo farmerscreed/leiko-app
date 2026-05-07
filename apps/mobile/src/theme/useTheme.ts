@@ -7,5 +7,5 @@ export function useTheme(): Theme {
   if (!ctx) {
     throw new Error('useTheme must be used inside <ThemeProvider>');
   }
-  return ctx;
+  return ctx.theme;
 }

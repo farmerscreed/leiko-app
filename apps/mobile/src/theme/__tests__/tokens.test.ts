@@ -1,6 +1,8 @@
-// Verifies token values match docs/02-design-tokens.md exactly. If the spec
-// changes a hex value, ms duration, or font family, this test fails — which
-// is the signal to update tokens.ts.
+// Legacy D8 tokens test — verifies values in legacy-tokens.ts (the renamed
+// D8 tokens.ts) still match docs/02-design-tokens.md. Both this test file
+// and legacy-tokens.ts are deleted in Phase C cleanup once every component
+// has migrated to the D12 token surface (`theme/tokens/`). The new D12 token
+// assertions live in `theme/tokens/__tests__/tokens.test.ts`.
 
 import {
   colors,
@@ -12,7 +14,7 @@ import {
   reducedMotionDuration,
   spacing,
   typeScale,
-} from '../tokens';
+} from '../legacy-tokens';
 
 describe('palette (D5 §4.1)', () => {
   it('matches D5 §4.1 hex values exactly', () => {
