@@ -1,10 +1,11 @@
 // Source of truth: docs/_reference/D12-visual-system-v2.md §10.
 //
-// Icon library (`@phosphor-icons/react-native`) is pinned in
-// docs/00-tech-stack.md but not installed until Sprint 7.6 (no Sprint 1.5
-// component swaps to a real Phosphor glyph). The mapping table below is the
+// Icon library is `phosphor-react-native` (D12 §10 spells this as
+// `@phosphor-icons/react-native` — that scope does not exist on npm; doc
+// patch follow-up). Installed in Sprint 7.6. The mapping table below is the
 // contract — when a component first imports a Phosphor icon, it looks up the
-// glyph name here.
+// glyph name here, then imports it from `phosphor-react-native` with that
+// name as a named export.
 
 export const iconSize = {
   xs: 14,
