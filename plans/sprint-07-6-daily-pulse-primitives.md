@@ -51,6 +51,36 @@ Wait for approval.
 - Live-pulse on JS thread is forbidden — if Reanimated worklets aren't holding up, that's a stop-the-line bug, not a "ship it for now."
 - Five concurrent SVG arcs at 60fps with one pulsing is on the edge of `react-native-svg` performance. Have the Skia migration ready if profiling fails.
 
+## On-device verification (user-driven, required for sprint close)
+
+The implementation work is complete in code; two acceptance items can only
+be measured on a physical device. Both run from `apps/mobile` on the
+Pixel 8 (USB + adb reverse per `memory/running_on_phone.md`).
+
+1. **Live-pulse JS-thread check.** Open the dev gallery's "Replay motion"
+   button so the live-pulse drives on a VitalRing for at least 60s. With
+   Reactotron's Performance Monitor open (or `adb shell dumpsys gfxinfo
+   <pkg>` if Reactotron isn't wired), confirm zero JS-thread frame work
+   during the 60s window. Pass criterion per the sprint card: live-pulse
+   is UI-thread-only.
+
+2. **Constellation FPS profile.** From the same dev gallery section, scroll
+   to "DailyPulseHero — immersive" and tap "Replay motion" so the
+   choreography fires while one ring is also pulsing. Capture FPS for 60s
+   via Reactotron Performance Monitor. The D12 §12.4 baseline is a
+   Pixel 6a, but the project's only test device is a Pixel 8 — record on
+   the Pixel 8 with the device-gap noted.
+
+   - **≥ 55 fps on Pixel 8** → presumed pass; the Pixel 6a result is
+     unverified but the migration path stays available. Sprint closes.
+   - **< 55 fps on Pixel 8** → stop-the-line. Open a Sprint 7.6.1 to
+     migrate `VitalRing` to `@shopify/react-native-skia` per D12 §12.4.
+     The prop contract is the boundary; consumers don't change.
+
+Once both checks land, paste the FPS number + any Reactotron screenshot
+into the close-out commit / sprint card body and move the card to
+`plans/done/`.
+
 ## What this sprint explicitly does NOT ship
 - No screens that consume these primitives (Sprint 7.7, 8, 8.5 do that)
 - No AI narration generator (Sprint 12.5)
