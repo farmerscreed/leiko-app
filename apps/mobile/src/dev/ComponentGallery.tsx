@@ -42,18 +42,18 @@ interface Props {
 // Mock data — gallery only. Voice rules apply: narrations and tile copy
 // pass the forbidden-words list.
 const MOCK_HERO_VITALS: DailyPulseHeroVitals = {
-  bp: { fill: 0.75, state: 'filling' },
-  hr: { fill: 0.4, state: 'filling' },
-  spo2: { fill: 0.85, state: 'filling' },
-  sleep: { fill: 0.6, state: 'filling' },
-  activity: { fill: 0.5, state: 'filling' },
+  bp: { fill: 0.75, state: 'filling', display: '128/82', unit: 'mmHg' },
+  hr: { fill: 0.4, state: 'filling', display: '64', unit: 'bpm' },
+  spo2: { fill: 0.85, state: 'filling', display: '98', unit: '%' },
+  sleep: { fill: 0.6, state: 'filling', display: '7:42', unit: 'hrs' },
+  activity: { fill: 0.5, state: 'filling', display: '4,166', unit: 'steps' },
 };
 const MOCK_HERO_VITALS_EMPTY: DailyPulseHeroVitals = {
-  bp: { fill: 0, state: 'idle' },
-  hr: { fill: 0, state: 'idle' },
-  spo2: { fill: 0, state: 'idle' },
-  sleep: { fill: 0, state: 'idle' },
-  activity: { fill: 0, state: 'idle' },
+  bp: { fill: 0, state: 'idle', display: '—', unit: 'mmHg' },
+  hr: { fill: 0, state: 'idle', display: '—', unit: 'bpm' },
+  spo2: { fill: 0, state: 'idle', display: '—', unit: '%' },
+  sleep: { fill: 0, state: 'idle', display: '—', unit: 'hrs' },
+  activity: { fill: 0, state: 'idle', display: '—', unit: 'steps' },
 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -512,28 +512,17 @@ export function ComponentGallery({ mode, onModeChange }: Props) {
           </View>
         ))}
 
-        {/* DailyPulseHero — immersive */}
-        <Text style={sectionTitleStyle}>DailyPulseHero — immersive</Text>
+        {/* DailyPulseHero — constellation (1 central BP + 4 satellites) */}
+        <Text style={sectionTitleStyle}>DailyPulseHero — constellation</Text>
         <DailyPulseHero
           key={`hero-immersive-${motionKey}`}
           vitals={MOCK_HERO_VITALS}
-          centralValue="128/82"
-          centralLabel="morning BP"
+          central={{
+            label: 'Blood pressure',
+            value: '128/82',
+            sub: 'mmHg · 6:42 am',
+          }}
           aiNarration="Mum is in pattern. 124/79 this morning, six below her week."
-          mode="immersive"
-          parentName="Mum"
-        />
-        <View style={{ height: theme.spacing.xxl }} />
-
-        {/* DailyPulseHero — card mode */}
-        <Text style={sectionTitleStyle}>DailyPulseHero — card</Text>
-        <DailyPulseHero
-          key={`hero-card-${motionKey}`}
-          vitals={MOCK_HERO_VITALS}
-          centralValue="128/82"
-          centralLabel="morning BP"
-          aiNarration="Mum is in pattern."
-          mode="card"
           parentName="Mum"
         />
         <View style={{ height: theme.spacing.xxl }} />
@@ -545,9 +534,7 @@ export function ComponentGallery({ mode, onModeChange }: Props) {
           <DailyPulseHero
             key={`hero-hr-${motionKey}`}
             vitals={MOCK_HERO_VITALS}
-            centralValue="62"
-            centralLabel="resting HR"
-            mode="card"
+            central={{ label: 'Resting HR', value: '62', sub: 'bpm · resting' }}
           />
         </View>
         <View style={{ marginBottom: theme.spacing.l }}>
@@ -555,9 +542,7 @@ export function ComponentGallery({ mode, onModeChange }: Props) {
           <DailyPulseHero
             key={`hero-sleep-${motionKey}`}
             vitals={MOCK_HERO_VITALS}
-            centralValue="7h 24m"
-            centralLabel="last night"
-            mode="card"
+            central={{ label: 'Last night', value: '7h 24m', sub: 'sleep' }}
           />
         </View>
         <View style={{ marginBottom: theme.spacing.l }}>
@@ -565,9 +550,7 @@ export function ComponentGallery({ mode, onModeChange }: Props) {
           <DailyPulseHero
             key={`hero-none-${motionKey}`}
             vitals={MOCK_HERO_VITALS_EMPTY}
-            centralValue="—"
-            centralLabel="no readings yet today"
-            mode="card"
+            central={{ label: 'No readings yet today', value: '—' }}
           />
         </View>
 

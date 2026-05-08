@@ -78,11 +78,11 @@ function withTheme(ui: ReactNode) {
 }
 
 const SAMPLE_VITALS: DailyPulseHeroVitals = {
-  bp: { fill: 0.75, state: 'filling' },
-  hr: { fill: 0.4, state: 'filling' },
-  spo2: { fill: 0.85, state: 'filling' },
-  sleep: { fill: 0.6, state: 'filling' },
-  activity: { fill: 0.5, state: 'filling' },
+  bp: { fill: 0.75, state: 'filling', display: '128/82', unit: 'mmHg' },
+  hr: { fill: 0.4, state: 'filling', display: '64', unit: 'bpm' },
+  spo2: { fill: 0.85, state: 'filling', display: '98', unit: '%' },
+  sleep: { fill: 0.6, state: 'filling', display: '7:42', unit: 'hrs' },
+  activity: { fill: 0.5, state: 'filling', display: '4,166', unit: 'steps' },
 };
 
 const T0 = 1_700_000_000_000;
@@ -143,10 +143,12 @@ describe('Reduced motion (D12 §7.4) — no driver fires', () => {
       withTheme(
         <DailyPulseHero
           vitals={SAMPLE_VITALS}
-          centralValue="128/82"
-          centralLabel="morning BP"
+          central={{
+            label: 'Blood pressure',
+            value: '128/82',
+            sub: 'mmHg · 6:42 am',
+          }}
           aiNarration="Mum is in pattern."
-          mode="immersive"
         />,
       ),
     );
@@ -238,15 +240,17 @@ describe('Reduced motion — end-state snapshots', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('DailyPulseHero immersive renders all five rings at their target fills', () => {
+  it('DailyPulseHero constellation renders all rings at their target fills', () => {
     const { toJSON } = render(
       withTheme(
         <DailyPulseHero
           vitals={SAMPLE_VITALS}
-          centralValue="128/82"
-          centralLabel="morning BP"
+          central={{
+            label: 'Blood pressure',
+            value: '128/82',
+            sub: 'mmHg · 6:42 am',
+          }}
           aiNarration="Mum is in pattern."
-          mode="immersive"
           testID="hero"
         />,
       ),

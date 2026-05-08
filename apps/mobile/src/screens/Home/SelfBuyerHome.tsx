@@ -98,11 +98,13 @@ export function SelfBuyerHome() {
   const headerText = useMemo(() => buildHeader(profile?.display_name), [profile]);
 
   const handleHeroPress = useCallback(() => {
-    if (!data.bp.latest) return;
-    // Tap → reading detail for the latest BP. Available only when
-    // there's a BP reading to open.
-    navigation.navigate('ReadingDetail', { readingLocalId: '' });
-  }, [navigation, data.bp.latest]);
+    // Hero tap → BP detail screen. The central value is BP-headline by
+    // D13 §7.2 priority cascade, so opening the BP trend screen is the
+    // most useful drill-in regardless of which adaptive value is showing.
+    // (On-device review 2026-05-08: previous code routed to
+    // ReadingDetail with an empty localId → blank screen.)
+    navigation.navigate('VitalDetail', { vital: 'bp' });
+  }, [navigation]);
 
   const handleVitalPress = useCallback(
     (vital: 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity') => {
@@ -180,9 +182,16 @@ export function SelfBuyerHome() {
         >
           <DailyPulseHero
             vitals={heroVitals}
-            centralValue={central.value}
-            centralLabel={central.label}
-            mode="immersive"
+            central={{
+              label:
+                central.priority === 'bp'
+                  ? 'Blood pressure'
+                  : central.label,
+              value: central.value,
+              sub: buildCentralSub(data, central.priority),
+              live: false,
+            }}
+            onSelectVital={handleVitalPress}
             testID="self-buyer-home-hero"
           />
         </Pressable>
@@ -587,7 +596,8 @@ function SelfBuyerTabBar({ theme, onSelect }: SelfBuyerTabBarProps) {
 // suite when sensible (banner derivation tested as part of integration).
 // =============================================================================
 
-/** D13 §7.1 ring fill formulas — produces the heroVitals shape. */
+/** D13 §7.1 ring fill formulas + per-satellite display + unit strings.
+ *  Produces the heroVitals shape consumed by the constellation hero. */
 export function buildHeroVitals(
   data: ReturnType<typeof useDailyPulseData>,
 ): DailyPulseHeroVitals {
@@ -604,13 +614,71 @@ export function buildHeroVitals(
   const activityFill = data.activity.targetSteps > 0
     ? clamp01(data.activity.stepsToday / data.activity.targetSteps)
     : 0;
+
+  const bp = data.bp.latest;
   return {
-    bp: { fill: bpFill },
-    hr: { fill: hrFill },
-    spo2: { fill: spo2Fill },
-    sleep: { fill: sleepFill },
-    activity: { fill: activityFill },
+    bp: {
+      fill: bpFill,
+      display: bp ? `${bp.systolic}/${bp.diastolic}` : '—',
+      unit: 'mmHg',
+    },
+    hr: {
+      fill: hrFill,
+      display:
+        data.hr.restingToday !== null ? String(data.hr.restingToday) : '—',
+      unit: 'bpm',
+    },
+    spo2: {
+      fill: spo2Fill,
+      display:
+        data.spo2.latestPercent !== null ? `${data.spo2.latestPercent}` : '—',
+      unit: '%',
+    },
+    sleep: {
+      fill: sleepFill,
+      display: data.sleep.session
+        ? formatSleepHm(data.sleep.session.totalMinutes)
+        : '—',
+      unit: 'hrs',
+    },
+    activity: {
+      fill: activityFill,
+      display:
+        data.activity.stepsToday > 0
+          ? data.activity.stepsToday.toLocaleString()
+          : '—',
+      unit: 'steps',
+    },
   };
+}
+
+/**
+ * Builds the small mono caption that sits under the giant value inside
+ * the central BP ring. Per the constellation design: "mmHg · 6:42 am"
+ * for fresh BP, falls through to a unit-only caption for the HR / sleep
+ * cascade states. Pure helper.
+ */
+export function buildCentralSub(
+  data: ReturnType<typeof useDailyPulseData>,
+  priority: 'bp' | 'hr' | 'sleep' | 'none',
+): string | undefined {
+  switch (priority) {
+    case 'bp': {
+      if (!data.bp.latestSampleSec) return 'mmHg';
+      const t = new Date(data.bp.latestSampleSec * 1000).toLocaleTimeString(
+        undefined,
+        { hour: 'numeric', minute: '2-digit' },
+      );
+      return `mmHg · ${t}`;
+    }
+    case 'hr':
+      return 'bpm · resting';
+    case 'sleep':
+      return 'last night';
+    case 'none':
+    default:
+      return undefined;
+  }
 }
 
 function bpFillFromTier(tier: string | null | undefined): number {

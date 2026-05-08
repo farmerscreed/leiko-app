@@ -176,11 +176,9 @@ describe('SelfBuyerHome — adaptive central value (D13 §7.2)', () => {
     // are correct. Confirming a fresh-BP eyebrow distinguishes this from
     // the no-data path.
     expect(screen.getAllByText('128/82').length).toBeGreaterThanOrEqual(1);
-    // Morning vs latest depends on the BP timestamp's local hour, which
-    // depends on the test machine's timezone — accept either.
-    const morning = screen.queryByText('morning BP');
-    const latest = screen.queryByText('latest BP');
-    expect(morning || latest).toBeTruthy();
+    // Constellation hero (2026-05-08 redesign): the central label inside
+    // the BP ring is always "Blood pressure" when priority resolves to bp.
+    expect(screen.getByText('Blood pressure')).toBeTruthy();
   });
 
   it('priority 2: HR fallback when BP is absent', () => {

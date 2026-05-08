@@ -1,58 +1,60 @@
-// DailyPulseHero — D12 §11.2.3 + D13 §7 (Sprint 7.6).
+// DailyPulseHero — D12 §11.2.3 + D13 §7 (Sprint 7.6, redesigned 2026-05-08
+// against `leiko-constellation.jsx` from the design bundle after on-device
+// review).
 //
-// The signature component of the app. Five concentric VitalRing instances
-// (BP outermost → Activity innermost) plus the central value, central
-// label, and AI narration line. Two modes: `immersive` fills the screen
-// (Self-Buyer Home), `card` is the scaled-down version inside each
-// parent's card on Caregiver Home (the Family Circle pattern).
+// The signature component of the app. Replaces the earlier 5-concentric-
+// ring stack with the actual constellation layout from the design source:
 //
-// Composition: 5 VitalRing instances stacked concentrically using the
-// extended `diameter` + `strokeWidth` props. The signature
-// daily-pulse-reveal choreography (D12 §7.3) is split:
-//   - Each ring fades in (opacity 0→1) over 200ms, staggered 80ms per
-//     ring (BP→HR→SpO2→Sleep→Activity). DailyPulseHero drives the
-//     opacity wrapper.
-//   - Each ring's arc fills (0→target) over 720ms cinematic, beginning
-//     after that ring's opacity completes. VitalRing's `fillDelayMs`
-//     prop receives the per-ring delay and runs the existing internal
-//     fill animation.
-//   - The narration line fades in 200ms after the last ring starts
-//     filling (per D12 §7.3 / dailyPulseRevealNarrationOpacity).
+//   - One LARGE central ring (BP) carrying the headline value.
+//   - FOUR satellite rings arranged on a curved arc above the central
+//     ring (HR upper-left · SpO2 upper-left-mid · Sleep upper-right-mid ·
+//     Activity upper-right). Each satellite shows its own value + unit
+//     inside its ring.
+//   - Faint dashed connector lines from each satellite to the BP edge,
+//     so the cluster reads as a constellation map.
+//   - An ambient breathing glow under the central ring.
 //
-// Reduced motion (D12 §7.4): rings render at idle state with their final
-// fill, opacity 1 immediately. No staggered animation. Narration opacity
-// 1 immediately.
+// Why the rebuild: the concentric stack we shipped first failed the
+// "can a stranger glance at this and know" test — five rings stacked at
+// progressively smaller diameters didn't communicate which value was
+// which, and only the outermost (BP) had room for a number. The
+// constellation layout below gives every vital its own home + label.
 //
-// Accessibility (D12 §11.2.3): single tappable region with a composed
-// accessibilityLabel that reads the central value + every vital ring +
-// the narration. The component is passed `parentName` (for caregiver
-// mode) so the label can address the right person.
+// API:
+//   - `vitals` carries five `DailyPulseHeroVital` shapes — each has
+//     `fill` (arc 0..1), `display` (pre-formatted value), `unit`
+//     (mono uppercase caption inside the ring), and optional `live`.
+//   - `central` is the BP block (label + value + sub + live). Per D13
+//     §7.2 the caller may also pass an adapted central — e.g. when BP
+//     is absent and the cascade resolves to HR. The hero renders
+//     whatever `central` carries inside the BP ring; the BP ring's
+//     own fill always reflects the BP tier per D13 §7.1.
+//   - `onSelectVital` fires when a ring is tapped, with the
+//     VitalType string.
 //
-// D13 §7.1 fill formulas: each ring's `fill` is computed by the consumer
-// from per-vital data. DailyPulseHero accepts pre-computed
-// `RingState { fill: number; state: VitalRingState }` per vital so the
-// composition stays presentational.
-//
-// D12 §11.2.3 visual ambiguity: the spec says "five concentric arcs,
-// each occupying ~60° of arc... arranged like a flower or atom" but
-// D13 §7.1 describes them as outer → inner concentric rings with
-// 0–100% fill formulas. We render full-circle concentric rings at
-// progressively smaller diameters per D13's "outer → inner" language.
-// The "60° of arc" wording in D12 reads as a designer-level Figma cue
-// for how the arc fills LOOK at typical fill levels, not a literal
-// 60° per ring constraint. Designer's Figma is the tiebreaker.
+// Reduced motion (D12 §7.4): every animation gates on useReducedMotion.
+// The dashed connector lines and ambient glow render statically; rings
+// fill instantly with no stagger; the live-pulse worklet is bypassed.
 
-import { Fragment, type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import {
+  Pressable,
   StyleSheet,
   Text,
   View,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { useEffect } from 'react';
-import { VitalRing, type VitalType, type VitalRingState } from './VitalRing';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
+import Svg, { Line } from 'react-native-svg';
+import { VitalRing, type VitalRingState, type VitalType } from './VitalRing';
 import { useTheme } from '../theme';
 import { useReducedMotion } from '../theme/useReducedMotion';
 import {
@@ -60,63 +62,88 @@ import {
   dailyPulseRevealOpacity,
 } from '../theme/motion/patterns';
 
-export type DailyPulseHeroMode = 'immersive' | 'card';
-
-export interface VitalRingState_ {
+export interface DailyPulseHeroVital {
+  /** Arc fraction 0..1 — see D13 §7.1 fill formulas. */
   fill: number;
+  /** Pre-formatted display value ("122", "64", "98", "7:42", "4,166"). */
+  display: string;
+  /** Mono uppercase unit caption ("bpm", "%", "hrs", "steps"). */
+  unit: string;
+  /** When true, the ring runs the live-pulse worklet. Only one vital
+   *  should be live at a time; the consumer decides which. */
+  live?: boolean;
+  /** Optional explicit ring state — overrides `live` when supplied. */
   state?: VitalRingState;
 }
 
 export interface DailyPulseHeroVitals {
-  bp: VitalRingState_;
-  hr: VitalRingState_;
-  spo2: VitalRingState_;
-  sleep: VitalRingState_;
-  activity: VitalRingState_;
+  bp: DailyPulseHeroVital;
+  hr: DailyPulseHeroVital;
+  spo2: DailyPulseHeroVital;
+  sleep: DailyPulseHeroVital;
+  activity: DailyPulseHeroVital;
+}
+
+export interface DailyPulseHeroCentral {
+  /** Mono uppercase eyebrow above the giant value ("Blood pressure", "Resting HR"). */
+  label: string;
+  /** Pre-formatted giant value ("122/78", "64", "7:42", "—"). */
+  value: string;
+  /** Mono caption below the value ("mmHg · 6:42 am", "bpm · now"). */
+  sub?: string;
+  /** When true, a small "live" pill renders below the sub. */
+  live?: boolean;
 }
 
 export interface DailyPulseHeroProps {
   vitals: DailyPulseHeroVitals;
-  /** The hero number — pre-computed by `computeDailyPulseCentral` per D13 §7.2. */
-  centralValue: string;
-  /** Short label under the central value ("morning BP", "resting HR", "last night"). */
-  centralLabel: string;
-  /** AI-generated daily readiness sentence. Voice rules apply at the source. */
+  /** What to render inside the central ring. Caller composes via the
+   *  D13 §7.2 priority cascade (BP fresh ≤8h → HR ≤12h → sleep → "—"). */
+  central: DailyPulseHeroCentral;
+  /** Optional AI narration sentence rendered under the constellation. */
   aiNarration?: string;
-  mode?: DailyPulseHeroMode;
   /** Used in the composed accessibilityLabel ("Daily pulse for {parentName}"). */
   parentName?: string;
+  /** Fires when a ring is tapped — the consumer routes to that vital's
+   *  detail screen. */
+  onSelectVital?: (vital: VitalType) => void;
   testID?: string;
   style?: StyleProp<ViewStyle>;
 }
 
-interface RingDef {
-  vitalType: VitalType;
-  diameter: number;
-  strokeWidth: number;
-}
+// ---------------------------------------------------------------------------
+// Layout constants — match the design's polar-coordinate placements.
+// `cx` / `cy` are the BP ring's centre inside the SVG canvas.
+// ---------------------------------------------------------------------------
 
-// Five concentric ring sizes, outer → inner. Picked so each ring's stroke
-// has at least 8pt of gap to the next ring's outer edge — the constellation
-// reads as five distinct rings, not a single thick stroke band.
-const IMMERSIVE_RINGS: RingDef[] = [
-  { vitalType: 'bp', diameter: 280, strokeWidth: 14 },
-  { vitalType: 'hr', diameter: 232, strokeWidth: 12 },
-  { vitalType: 'spo2', diameter: 188, strokeWidth: 10 },
-  { vitalType: 'sleep', diameter: 148, strokeWidth: 8 },
-  { vitalType: 'activity', diameter: 112, strokeWidth: 8 },
-];
-
-const CARD_RINGS: RingDef[] = [
-  { vitalType: 'bp', diameter: 192, strokeWidth: 10 },
-  { vitalType: 'hr', diameter: 160, strokeWidth: 8 },
-  { vitalType: 'spo2', diameter: 130, strokeWidth: 7 },
-  { vitalType: 'sleep', diameter: 102, strokeWidth: 6 },
-  { vitalType: 'activity', diameter: 76, strokeWidth: 5 },
-];
-
+const CANVAS_W = 360;
+const CANVAS_H = 380;
+const BP_CX = CANVAS_W / 2;
+const BP_CY = 230;
+const BP_DIAMETER = 220;
+const BP_STROKE = 9;
 const STAGGER_MS = 80;
 const OPACITY_REVEAL_MS = 200; // duration.normal — see motion/patterns.ts
+const GLOW_BREATHE_DURATION_MS = 4500;
+
+interface SatelliteDef {
+  vital: 'hr' | 'spo2' | 'sleep' | 'activity';
+  /** Polar angle (deg from horizontal, CCW). */
+  deg: number;
+  /** Polar distance from BP centre (pt). */
+  dist: number;
+  /** Ring diameter (pt). */
+  size: number;
+  /** Inner stroke width (pt). */
+  stroke: number;
+}
+
+const SATELLITES: SatelliteDef[] = [
+  { vital: 'hr',       deg: 152, dist: 158, size: 78, stroke: 4 }, // upper-left
+  { vital: 'spo2',     deg: 118, dist: 168, size: 64, stroke: 4 }, // upper-left-mid
+  { vital: 'sleep',    deg: 62,  dist: 168, size: 64, stroke: 4 }, // upper-right-mid
+  { vital: 'activity', deg: 28,  dist: 158, size: 78, stroke: 4 }, // upper-right
+];
 
 const VITAL_HUMAN_NAME: Record<VitalType, string> = {
   bp: 'Blood pressure',
@@ -126,57 +153,66 @@ const VITAL_HUMAN_NAME: Record<VitalType, string> = {
   activity: 'Activity',
 };
 
-function ringIndexForVital(vitalType: VitalType): number {
-  switch (vitalType) {
-    case 'bp':
-      return 0;
-    case 'hr':
-      return 1;
-    case 'spo2':
-      return 2;
-    case 'sleep':
-      return 3;
-    case 'activity':
-      return 4;
-  }
+interface SatellitePosition {
+  /** Top-left x for a `size`×`size` square so the ring centres on the polar point. */
+  left: number;
+  /** Top-left y for the satellite. */
+  top: number;
+  /** Centre x (used for the connector line). */
+  cx: number;
+  /** Centre y. */
+  cy: number;
 }
 
-function composeAccessibilityLabel(
-  vitals: DailyPulseHeroVitals,
-  centralValue: string,
-  centralLabel: string,
-  aiNarration: string | undefined,
-  parentName: string | undefined,
-): string {
-  const subject = parentName ? `Daily pulse for ${parentName}` : 'Daily pulse';
-  const parts: string[] = [subject];
-  parts.push(`${centralLabel} ${centralValue}`);
-  // Read each vital's fill as a percentage so screen-reader users hear
-  // the same trend information as visual users.
-  const vitalEntries: Array<[VitalType, VitalRingState_]> = [
-    ['bp', vitals.bp],
-    ['hr', vitals.hr],
-    ['spo2', vitals.spo2],
-    ['sleep', vitals.sleep],
-    ['activity', vitals.activity],
-  ];
-  for (const [type, ring] of vitalEntries) {
-    const pct = Math.round(Math.max(0, Math.min(1, ring.fill)) * 100);
-    parts.push(`${VITAL_HUMAN_NAME[type]} ${pct} percent`);
-  }
-  if (aiNarration) parts.push(aiNarration);
-  return parts.join('. ');
+/**
+ * Polar → rect for one satellite. `deg` is measured CCW from horizontal,
+ * matching the design source. `cy` decreases upward in screen coordinates,
+ * so we subtract `sin` from `cy`.
+ *
+ * Exported for unit-tests so the geometry stays pinnable without
+ * mounting the component.
+ */
+export function satellitePosition(def: SatelliteDef): SatellitePosition {
+  const a = (def.deg * Math.PI) / 180;
+  const cx = BP_CX + Math.cos(a) * def.dist;
+  const cy = BP_CY - Math.sin(a) * def.dist;
+  return {
+    left: cx - def.size / 2,
+    top: cy - def.size / 2,
+    cx,
+    cy,
+  };
 }
+
+/**
+ * Endpoint on the BP ring's edge for a connector line drawn from
+ * `(sx, sy)`. The line stops 4pt outside the BP stroke so the dashed
+ * marks don't crash into the ring.
+ */
+export function connectorEndpoint(sx: number, sy: number): { x: number; y: number } {
+  const dx = BP_CX - sx;
+  const dy = BP_CY - sy;
+  const len = Math.hypot(dx, dy);
+  if (len === 0) return { x: BP_CX, y: BP_CY };
+  const r = BP_DIAMETER / 2 + 4;
+  const ux = dx / len;
+  const uy = dy / len;
+  return { x: BP_CX - ux * r, y: BP_CY - uy * r };
+}
+
+// ---------------------------------------------------------------------------
+// Subviews
+// ---------------------------------------------------------------------------
 
 interface RingWrapperProps {
+  /** Stagger index — 0 for BP centre, 1..4 for satellites. */
   index: number;
   reduceMotion: boolean;
   children: ReactNode;
+  style?: StyleProp<ViewStyle>;
 }
 
-// Drives a per-ring opacity 0→1 staggered reveal via the daily-pulse-reveal
-// motion pattern. Each ring's wrapper hooks the pattern at its own index.
-function RingWrapper({ index, reduceMotion, children }: RingWrapperProps) {
+function RingWrapper({ index, reduceMotion, children, style }: RingWrapperProps) {
   const opacity = useSharedValue(reduceMotion ? 1 : 0);
   useEffect(() => {
     if (reduceMotion) {
@@ -185,13 +221,8 @@ function RingWrapper({ index, reduceMotion, children }: RingWrapperProps) {
     }
     opacity.value = dailyPulseRevealOpacity(false, index);
   }, [index, reduceMotion, opacity]);
-
-  const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
-  return (
-    <Animated.View style={[styles.ringStackPosition, animatedStyle]}>
-      {children}
-    </Animated.View>
-  );
+  const animated = useAnimatedStyle(() => ({ opacity: opacity.value }));
+  return <Animated.View style={[style, animated]}>{children}</Animated.View>;
 }
 
 interface NarrationProps {
@@ -209,23 +240,22 @@ function NarrationLine({ text, reduceMotion }: NarrationProps) {
     }
     opacity.value = dailyPulseRevealNarrationOpacity(false);
   }, [reduceMotion, opacity]);
-
-  const animatedStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+  const animated = useAnimatedStyle(() => ({ opacity: opacity.value }));
   const displayMStyle = theme.type('displayM');
-
   return (
     <Animated.Text
       style={[
-        animatedStyle,
+        animated,
         {
           fontFamily: displayMStyle.family,
           fontSize: displayMStyle.size,
           lineHeight: displayMStyle.lineHeight,
           fontStyle: 'italic',
           fontWeight: '600',
-          color: theme.colors.brand.primary,
+          color: theme.colors.brand.coral,
           textAlign: 'center',
-          marginTop: theme.spacing.l,
+          marginTop: 12,
+          paddingHorizontal: 24,
         },
       ]}
     >
@@ -234,105 +264,303 @@ function NarrationLine({ text, reduceMotion }: NarrationProps) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Composed accessibility label — read by screen-reader users. Mirrors
+// what visual users see: central value first, then each satellite, then
+// the AI narration.
+// ---------------------------------------------------------------------------
+
+function composeAccessibilityLabel(
+  central: DailyPulseHeroCentral,
+  vitals: DailyPulseHeroVitals,
+  aiNarration: string | undefined,
+  parentName: string | undefined,
+): string {
+  const subject = parentName ? `Daily pulse for ${parentName}` : 'Daily pulse';
+  const parts: string[] = [subject, `${central.label} ${central.value}`];
+  for (const def of SATELLITES) {
+    const v = vitals[def.vital];
+    parts.push(`${VITAL_HUMAN_NAME[def.vital]} ${v.display} ${v.unit}`);
+  }
+  if (aiNarration) parts.push(aiNarration);
+  return parts.join('. ');
+}
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
+
 export function DailyPulseHero({
   vitals,
-  centralValue,
-  centralLabel,
+  central,
   aiNarration,
-  mode = 'immersive',
   parentName,
+  onSelectVital,
   testID,
   style,
 }: DailyPulseHeroProps) {
   const theme = useTheme();
   const reduceMotion = useReducedMotion();
 
-  const rings = mode === 'card' ? CARD_RINGS : IMMERSIVE_RINGS;
-  const outerDiameter = rings[0].diameter;
-
-  const numericStyle =
-    mode === 'card' ? theme.type('numericXl') : theme.type('numericHero');
   const labelStyle = theme.type('labelUppercase');
+  const numericHero = theme.type('numericHero');
+  const numericM = theme.type('numericM');
+  const captionStyle = theme.type('caption');
+  const bpColor = theme.colors.vital.bp;
+
+  // Ambient breathing glow under the BP ring. Reduced motion → static.
+  const glowOpacity = useSharedValue(reduceMotion ? 0.55 : 0.55);
+  useEffect(() => {
+    if (reduceMotion) return;
+    glowOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.75, {
+          duration: GLOW_BREATHE_DURATION_MS / 2,
+          easing: Easing.inOut(Easing.ease),
+        }),
+        withTiming(0.55, {
+          duration: GLOW_BREATHE_DURATION_MS / 2,
+          easing: Easing.inOut(Easing.ease),
+        }),
+      ),
+      -1,
+      false,
+    );
+  }, [reduceMotion, glowOpacity]);
+  const glowAnimated = useAnimatedStyle(() => ({ opacity: glowOpacity.value }));
 
   const composedA11yLabel = composeAccessibilityLabel(
+    central,
     vitals,
-    centralValue,
-    centralLabel,
     aiNarration,
     parentName,
   );
 
+  const bpRing = vitals.bp;
+  const bpRingState: VitalRingState = reduceMotion
+    ? 'idle'
+    : bpRing.state ?? (bpRing.live ? 'pulsing' : 'filling');
+
+  // Pre-compute satellite positions + connector endpoints once.
+  const satellites = SATELLITES.map((def) => ({
+    def,
+    pos: satellitePosition(def),
+    state: vitals[def.vital],
+  }));
+
   return (
-    <View
-      style={[styles.root, style]}
-      accessibilityRole="text"
-      accessibilityLabel={composedA11yLabel}
-      testID={testID}
-    >
+    <View style={[styles.root, style]} testID={testID}>
       <View
-        style={{
-          width: outerDiameter,
-          height: outerDiameter,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+        accessibilityRole="text"
+        accessibilityLabel={composedA11yLabel}
+        style={{ width: CANVAS_W, height: CANVAS_H }}
       >
-        {rings.map((ring, idx) => {
-          const ringState = vitals[ring.vitalType];
-          const fillDelayMs =
-            ringIndexForVital(ring.vitalType) * STAGGER_MS + OPACITY_REVEAL_MS;
-          // If the consumer asked for state='pulsing' we honour it; otherwise
-          // the reveal kicks the ring into 'filling' for a one-shot draw.
-          // Under reduced motion every ring is forced to 'idle' so it
-          // renders statically at its target fill — no animation drivers.
+        {/* Ambient glow under the central ring — soft tinted blob. */}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.glow,
+            { backgroundColor: bpColor, left: BP_CX - 130, top: BP_CY - 130 },
+            glowAnimated,
+          ]}
+        />
+
+        {/* Decorative dashed connector lines: each satellite → BP edge. */}
+        <Svg
+          width={CANVAS_W}
+          height={CANVAS_H}
+          style={styles.svgOverlay}
+          pointerEvents="none"
+        >
+          {satellites.map(({ pos }, i) => {
+            const end = connectorEndpoint(pos.cx, pos.cy);
+            return (
+              <Line
+                key={i}
+                x1={pos.cx}
+                y1={pos.cy}
+                x2={end.x}
+                y2={end.y}
+                stroke={theme.colors.text.primary}
+                strokeOpacity={0.08}
+                strokeWidth={0.5}
+                strokeDasharray="2 3"
+              />
+            );
+          })}
+        </Svg>
+
+        {/* Central BP ring. Tappable when onSelectVital is supplied. */}
+        <RingWrapper
+          index={0}
+          reduceMotion={reduceMotion}
+          style={{
+            position: 'absolute',
+            left: BP_CX - BP_DIAMETER / 2,
+            top: BP_CY - BP_DIAMETER / 2,
+            width: BP_DIAMETER,
+            height: BP_DIAMETER,
+          }}
+        >
+          <Pressable
+            onPress={onSelectVital ? () => onSelectVital('bp') : undefined}
+            accessibilityRole={onSelectVital ? 'button' : 'text'}
+            accessibilityLabel={`${central.label} ${central.value}`}
+            testID={testID ? `${testID}-bp` : undefined}
+            style={styles.bpPressable}
+          >
+            <VitalRing
+              vitalType="bp"
+              fill={bpRing.fill}
+              diameter={BP_DIAMETER}
+              strokeWidth={BP_STROKE}
+              state={bpRingState}
+              fillDelayMs={
+                bpRingState === 'filling' ? OPACITY_REVEAL_MS : 0
+              }
+            />
+            <View pointerEvents="none" style={styles.bpCentre}>
+              <Text
+                allowFontScaling={false}
+                style={{
+                  fontFamily: labelStyle.family,
+                  fontSize: labelStyle.size,
+                  lineHeight: labelStyle.lineHeight,
+                  letterSpacing: labelStyle.letterSpacing,
+                  color: bpColor,
+                  textTransform: 'uppercase',
+                  marginBottom: 2,
+                }}
+              >
+                {central.label}
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={{
+                  fontFamily: theme.fontFamilies.editorial,
+                  fontSize: numericHero.size,
+                  lineHeight: numericHero.lineHeight,
+                  color: theme.colors.text.primary,
+                  letterSpacing: -0.5,
+                }}
+                testID={testID ? `${testID}-bp-value` : undefined}
+              >
+                {central.value}
+              </Text>
+              {central.sub ? (
+                <Text
+                  allowFontScaling={false}
+                  style={{
+                    fontFamily: theme.fontFamilies.numeric,
+                    fontSize: captionStyle.size,
+                    lineHeight: captionStyle.lineHeight,
+                    color: theme.colors.text.tertiary,
+                    letterSpacing: 0.4,
+                    marginTop: 6,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {central.sub}
+                </Text>
+              ) : null}
+              {central.live ? (
+                <View
+                  style={[styles.livePill, { backgroundColor: bpColor + '26' }]}
+                  testID={testID ? `${testID}-bp-live` : undefined}
+                >
+                  <View
+                    style={[styles.liveDot, { backgroundColor: bpColor }]}
+                  />
+                  <Text
+                    allowFontScaling={false}
+                    style={{
+                      fontFamily: theme.fontFamilies.numeric,
+                      fontSize: 9,
+                      letterSpacing: 1.4,
+                      color: bpColor,
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Live
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          </Pressable>
+        </RingWrapper>
+
+        {/* Satellite rings — HR / SpO2 / Sleep / Activity in a curved arc. */}
+        {satellites.map(({ def, pos, state }, i) => {
+          const vitalColor = theme.colors.vital[def.vital];
           const ringRenderState: VitalRingState = reduceMotion
             ? 'idle'
-            : (ringState.state ?? 'filling');
-
+            : state.state ?? (state.live ? 'pulsing' : 'filling');
           return (
-            <Fragment key={ring.vitalType}>
-              <RingWrapper index={idx} reduceMotion={reduceMotion}>
+            <RingWrapper
+              key={def.vital}
+              index={i + 1}
+              reduceMotion={reduceMotion}
+              style={{
+                position: 'absolute',
+                left: pos.left,
+                top: pos.top,
+                width: def.size,
+                height: def.size,
+              }}
+            >
+              <Pressable
+                onPress={onSelectVital ? () => onSelectVital(def.vital) : undefined}
+                accessibilityRole={onSelectVital ? 'button' : 'text'}
+                accessibilityLabel={`${VITAL_HUMAN_NAME[def.vital]} ${state.display} ${state.unit}`}
+                testID={testID ? `${testID}-${def.vital}` : undefined}
+                style={styles.satellitePressable}
+              >
                 <VitalRing
-                  vitalType={ring.vitalType}
-                  fill={ringState.fill}
-                  diameter={ring.diameter}
-                  strokeWidth={ring.strokeWidth}
+                  vitalType={def.vital}
+                  fill={state.fill}
+                  diameter={def.size}
+                  strokeWidth={def.stroke}
                   state={ringRenderState}
                   fillDelayMs={
-                    ringRenderState === 'filling' ? fillDelayMs : 0
+                    ringRenderState === 'filling'
+                      ? OPACITY_REVEAL_MS + (i + 1) * STAGGER_MS
+                      : 0
                   }
                 />
-              </RingWrapper>
-            </Fragment>
+                <View pointerEvents="none" style={styles.satCentre}>
+                  <Text
+                    allowFontScaling={false}
+                    style={{
+                      fontFamily: theme.fontFamilies.editorial,
+                      fontSize: def.size > 70 ? numericM.size : numericM.size - 4,
+                      lineHeight: def.size > 70 ? numericM.lineHeight : numericM.lineHeight - 4,
+                      color: theme.colors.text.primary,
+                      letterSpacing: -0.3,
+                    }}
+                    numberOfLines={1}
+                  >
+                    {state.display}
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={{
+                      fontFamily: theme.fontFamilies.numeric,
+                      fontSize: 8,
+                      letterSpacing: 0.5,
+                      color: vitalColor,
+                      textTransform: 'uppercase',
+                      marginTop: 2,
+                    }}
+                  >
+                    {state.unit}
+                  </Text>
+                </View>
+              </Pressable>
+            </RingWrapper>
           );
         })}
-        <View pointerEvents="none" style={styles.center}>
-          <Text
-            style={{
-              fontFamily: numericStyle.family,
-              fontSize: numericStyle.size,
-              lineHeight: numericStyle.lineHeight,
-              color: theme.colors.text.primary,
-              textAlign: 'center',
-            }}
-          >
-            {centralValue}
-          </Text>
-          <Text
-            style={{
-              fontFamily: labelStyle.family,
-              fontSize: labelStyle.size,
-              lineHeight: labelStyle.lineHeight,
-              letterSpacing: labelStyle.letterSpacing,
-              color: theme.colors.text.tertiary,
-              textAlign: 'center',
-              marginTop: theme.spacing.xs,
-            }}
-          >
-            {centralLabel}
-          </Text>
-        </View>
       </View>
+
       {aiNarration ? (
         <NarrationLine text={aiNarration} reduceMotion={reduceMotion} />
       ) : null}
@@ -340,11 +568,33 @@ export function DailyPulseHero({
   );
 }
 
+// ---------------------------------------------------------------------------
+// Styles
+// ---------------------------------------------------------------------------
+
 const styles = StyleSheet.create({
   root: {
     alignItems: 'center',
   },
-  ringStackPosition: {
+  glow: {
+    position: 'absolute',
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    opacity: 0.18,
+  },
+  svgOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
+  bpPressable: {
+    width: BP_DIAMETER,
+    height: BP_DIAMETER,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bpCentre: {
     position: 'absolute',
     top: 0,
     left: 0,
@@ -353,9 +603,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  center: {
-    position: 'absolute',
+  satellitePressable: {
+    width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  satCentre: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  livePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    marginTop: 8,
+  },
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
 });

@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import { ThemeProvider } from '../../theme';
 import {
   DailyPulseHero,
@@ -19,28 +19,58 @@ function withTheme(
 }
 
 const SAMPLE_VITALS: DailyPulseHeroVitals = {
-  bp: { fill: 0.75 },
-  hr: { fill: 0.4 },
-  spo2: { fill: 0.85 },
-  sleep: { fill: 0.6 },
-  activity: { fill: 0.5 },
+  bp: { fill: 0.75, display: '128/82', unit: 'mmHg' },
+  hr: { fill: 0.4, display: '64', unit: 'bpm' },
+  spo2: { fill: 0.85, display: '98', unit: '%' },
+  sleep: { fill: 0.6, display: '7:42', unit: 'hrs' },
+  activity: { fill: 0.5, display: '4,166', unit: 'steps' },
 };
 
+const FRESH_BP = {
+  label: 'Blood pressure',
+  value: '128/82',
+  sub: 'mmHg · 6:42 am',
+} as const;
+
 describe('DailyPulseHero — render', () => {
-  it('renders the central value + label', () => {
+  it('renders the central value + label inside the BP ring', () => {
     render(
       withTheme(
         <DailyPulseHero
           vitals={SAMPLE_VITALS}
-          centralValue="128/82"
-          centralLabel="morning BP"
+          central={FRESH_BP}
           parentName="Mum"
           testID="hero"
         />,
       ),
     );
     expect(screen.getByText('128/82')).toBeTruthy();
-    expect(screen.getByText('morning BP')).toBeTruthy();
+    expect(screen.getByText('Blood pressure')).toBeTruthy();
+    expect(screen.getByText('mmHg · 6:42 am')).toBeTruthy();
+  });
+
+  it('renders each satellite vital with its display + unit', () => {
+    render(
+      withTheme(
+        <DailyPulseHero
+          vitals={SAMPLE_VITALS}
+          central={FRESH_BP}
+          testID="hero"
+        />,
+      ),
+    );
+    // HR satellite — 64 bpm.
+    expect(screen.getByText('64')).toBeTruthy();
+    expect(screen.getByText('bpm')).toBeTruthy();
+    // SpO2 satellite — 98 %.
+    expect(screen.getByText('98')).toBeTruthy();
+    expect(screen.getByText('%')).toBeTruthy();
+    // Sleep satellite — 7:42 hrs.
+    expect(screen.getByText('7:42')).toBeTruthy();
+    expect(screen.getByText('hrs')).toBeTruthy();
+    // Activity satellite — 4,166 steps.
+    expect(screen.getByText('4,166')).toBeTruthy();
+    expect(screen.getByText('steps')).toBeTruthy();
   });
 
   it('renders the AI narration when provided', () => {
@@ -48,8 +78,7 @@ describe('DailyPulseHero — render', () => {
       withTheme(
         <DailyPulseHero
           vitals={SAMPLE_VITALS}
-          centralValue="128/82"
-          centralLabel="morning BP"
+          central={FRESH_BP}
           aiNarration="Mum is in pattern. 124/79 this morning, six below her week."
           testID="hero"
         />,
@@ -60,18 +89,53 @@ describe('DailyPulseHero — render', () => {
     ).toBeTruthy();
   });
 
-  it('omits the narration line when aiNarration is undefined', () => {
+  it('omits the narration when aiNarration is undefined', () => {
     render(
       withTheme(
         <DailyPulseHero
           vitals={SAMPLE_VITALS}
-          centralValue="—"
-          centralLabel="no readings yet today"
+          central={{ label: 'No readings yet today', value: '—' }}
           testID="hero"
         />,
       ),
     );
     expect(screen.queryByText(/in pattern/)).toBeNull();
+  });
+});
+
+describe('DailyPulseHero — interaction', () => {
+  it('fires onSelectVital("bp") when the central ring is tapped', () => {
+    const onSelectVital = jest.fn();
+    render(
+      withTheme(
+        <DailyPulseHero
+          vitals={SAMPLE_VITALS}
+          central={FRESH_BP}
+          onSelectVital={onSelectVital}
+          testID="hero"
+        />,
+      ),
+    );
+    fireEvent.press(screen.getByTestId('hero-bp'));
+    expect(onSelectVital).toHaveBeenCalledWith('bp');
+  });
+
+  it('fires onSelectVital with the satellite vital when a satellite is tapped', () => {
+    const onSelectVital = jest.fn();
+    render(
+      withTheme(
+        <DailyPulseHero
+          vitals={SAMPLE_VITALS}
+          central={FRESH_BP}
+          onSelectVital={onSelectVital}
+          testID="hero"
+        />,
+      ),
+    );
+    fireEvent.press(screen.getByTestId('hero-hr'));
+    expect(onSelectVital).toHaveBeenCalledWith('hr');
+    fireEvent.press(screen.getByTestId('hero-sleep'));
+    expect(onSelectVital).toHaveBeenCalledWith('sleep');
   });
 });
 
@@ -81,15 +145,19 @@ describe('DailyPulseHero — accessibility composition (D12 §11.2.3)', () => {
       withTheme(
         <DailyPulseHero
           vitals={SAMPLE_VITALS}
-          centralValue="128/82"
-          centralLabel="morning BP"
+          central={FRESH_BP}
           parentName="Mum"
           testID="hero"
         />,
       ),
     );
-    const node = screen.getByTestId('hero');
-    expect(node.props.accessibilityLabel).toMatch(/^Daily pulse for Mum/);
+    // The composed label sits on the inner canvas node, not the testID
+    // root. Check whichever child carries it.
+    const matches = screen.UNSAFE_root.findAll((n: { props: { accessibilityLabel?: unknown } }) =>
+      typeof n.props.accessibilityLabel === 'string' &&
+      n.props.accessibilityLabel.startsWith('Daily pulse for Mum'),
+    );
+    expect(matches.length).toBeGreaterThan(0);
   });
 
   it('falls back to "Daily pulse" without a parentName', () => {
@@ -97,111 +165,69 @@ describe('DailyPulseHero — accessibility composition (D12 §11.2.3)', () => {
       withTheme(
         <DailyPulseHero
           vitals={SAMPLE_VITALS}
-          centralValue="128/82"
-          centralLabel="morning BP"
+          central={FRESH_BP}
           testID="hero"
         />,
       ),
     );
-    expect(screen.getByTestId('hero').props.accessibilityLabel).toMatch(
-      /^Daily pulse\./,
+    const matches = screen.UNSAFE_root.findAll((n: { props: { accessibilityLabel?: unknown } }) =>
+      typeof n.props.accessibilityLabel === 'string' &&
+      n.props.accessibilityLabel.startsWith('Daily pulse.'),
     );
+    expect(matches.length).toBeGreaterThan(0);
   });
 
-  it('includes the central value + label and every vital fill as a percent', () => {
+  it('includes the central value + label and every satellite vital', () => {
     render(
       withTheme(
         <DailyPulseHero
           vitals={SAMPLE_VITALS}
-          centralValue="128/82"
-          centralLabel="morning BP"
+          central={FRESH_BP}
           testID="hero"
         />,
       ),
     );
-    const label = screen.getByTestId('hero').props.accessibilityLabel;
-    expect(label).toContain('morning BP 128/82');
-    expect(label).toContain('Blood pressure 75 percent');
-    expect(label).toContain('Heart rate 40 percent');
-    expect(label).toContain('Oxygen 85 percent');
-    expect(label).toContain('Sleep 60 percent');
-    expect(label).toContain('Activity 50 percent');
-  });
-
-  it('includes the AI narration verbatim when provided', () => {
-    render(
-      withTheme(
-        <DailyPulseHero
-          vitals={SAMPLE_VITALS}
-          centralValue="128/82"
-          centralLabel="morning BP"
-          aiNarration="Mum is in pattern."
-          testID="hero"
-        />,
-      ),
-    );
-    expect(screen.getByTestId('hero').props.accessibilityLabel).toContain(
-      'Mum is in pattern.',
-    );
-  });
-
-  it('clamps fills above 1 to 100% in the announced label', () => {
-    render(
-      withTheme(
-        <DailyPulseHero
-          vitals={{ ...SAMPLE_VITALS, bp: { fill: 1.4 } }}
-          centralValue="128/82"
-          centralLabel="morning BP"
-          testID="hero"
-        />,
-      ),
-    );
-    expect(screen.getByTestId('hero').props.accessibilityLabel).toContain(
-      'Blood pressure 100 percent',
-    );
+    const node = screen.UNSAFE_root.findAll((n: { props: { accessibilityLabel?: unknown } }) =>
+      typeof n.props.accessibilityLabel === 'string' &&
+      n.props.accessibilityLabel.startsWith('Daily pulse'),
+    )[0];
+    const label: string = node.props.accessibilityLabel;
+    expect(label).toContain('Blood pressure 128/82');
+    expect(label).toContain('Heart rate 64 bpm');
+    expect(label).toContain('Oxygen 98 %');
+    expect(label).toContain('Sleep 7:42 hrs');
+    expect(label).toContain('Activity 4,166 steps');
   });
 });
 
-describe('DailyPulseHero — mode × colorMode snapshot matrix', () => {
-  const modes: Array<'immersive' | 'card'> = ['immersive', 'card'];
+describe('DailyPulseHero — colorMode snapshot matrix', () => {
   const colorModes: Array<'dark' | 'light'> = ['dark', 'light'];
-
-  for (const mode of modes) {
-    for (const colorMode of colorModes) {
-      it(`renders mode=${mode} colorMode=${colorMode}`, () => {
-        const { toJSON } = render(
-          withTheme(
-            <DailyPulseHero
-              vitals={SAMPLE_VITALS}
-              centralValue="128/82"
-              centralLabel="morning BP"
-              aiNarration="Mum is in pattern."
-              mode={mode}
-              parentName="Mum"
-              testID="hero"
-            />,
-            colorMode,
-          ),
-        );
-        expect(toJSON()).toMatchSnapshot();
-      });
-    }
+  for (const colorMode of colorModes) {
+    it(`renders colorMode=${colorMode}`, () => {
+      const { toJSON } = render(
+        withTheme(
+          <DailyPulseHero
+            vitals={SAMPLE_VITALS}
+            central={FRESH_BP}
+            aiNarration="Mum is in pattern."
+            parentName="Mum"
+            testID="hero"
+          />,
+          colorMode,
+        ),
+      );
+      expect(toJSON()).toMatchSnapshot();
+    });
   }
 });
 
 describe('DailyPulseHero — adaptive central value branches (D13 §7.2)', () => {
-  // Each branch is a different (centralValue, centralLabel) combination.
-  // The Hero is presentational; the priority logic is unit-tested in
-  // utils/__tests__/dailyPulseCentral.test.ts. These snapshots prove the
-  // branches render correctly in the visual.
-
-  it('branch 1 — fresh BP: "128/82" / "morning BP"', () => {
+  it('branch 1 — fresh BP', () => {
     const { toJSON } = render(
       withTheme(
         <DailyPulseHero
           vitals={SAMPLE_VITALS}
-          centralValue="128/82"
-          centralLabel="morning BP"
+          central={FRESH_BP}
           testID="hero"
         />,
       ),
@@ -209,13 +235,16 @@ describe('DailyPulseHero — adaptive central value branches (D13 §7.2)', () =>
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('branch 2 — HR only: "62" / "resting HR"', () => {
+  it('branch 2 — HR fallback', () => {
     const { toJSON } = render(
       withTheme(
         <DailyPulseHero
           vitals={SAMPLE_VITALS}
-          centralValue="62"
-          centralLabel="resting HR"
+          central={{
+            label: 'Resting HR',
+            value: '62',
+            sub: 'bpm · resting',
+          }}
           testID="hero"
         />,
       ),
@@ -223,13 +252,16 @@ describe('DailyPulseHero — adaptive central value branches (D13 §7.2)', () =>
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('branch 3 — sleep only: "7h 24m" / "last night"', () => {
+  it('branch 3 — sleep fallback', () => {
     const { toJSON } = render(
       withTheme(
         <DailyPulseHero
           vitals={SAMPLE_VITALS}
-          centralValue="7h 24m"
-          centralLabel="last night"
+          central={{
+            label: 'Last night',
+            value: '7h 24m',
+            sub: 'sleep',
+          }}
           testID="hero"
         />,
       ),
@@ -237,13 +269,15 @@ describe('DailyPulseHero — adaptive central value branches (D13 §7.2)', () =>
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('branch 4 — nothing: "—" / "no readings yet today"', () => {
+  it('branch 4 — nothing', () => {
     const { toJSON } = render(
       withTheme(
         <DailyPulseHero
           vitals={SAMPLE_VITALS}
-          centralValue="—"
-          centralLabel="no readings yet today"
+          central={{
+            label: 'No readings yet today',
+            value: '—',
+          }}
           testID="hero"
         />,
       ),
