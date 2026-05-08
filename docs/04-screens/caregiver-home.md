@@ -3,8 +3,9 @@
 Sourced from D11 (brand repositioning) + D13 §7.4 (Family Circle) + the
 Sprint 7.7 design `leiko-caregiver-unified.html`.
 
-**Status:** Sprint 7.7a shipped 2026-05-08 (bird's-eye view). Sprint 7.7b
-ships the editorial-card view + segmented toggle + cinematic transition.
+**Status:** Sprint 7.7a + 7.7b both shipped 2026-05-08. Bird's-eye view,
+editorial-card view, segmented toggle, cinematic transition, and the
+cross-phone HR/SpO₂/sleep wire-up are all live.
 
 ---
 
@@ -40,11 +41,12 @@ A `ConstellationLegend` below the field has one row per person — accent
 dot + first-name + relation + headline + StatusPill. Both the orbs and
 the legend rows are tap targets.
 
-### Detailed (`cards` — Sprint 7.7b)
-Vertical stack of editorial cards, one per person. Portrait initial +
-italic Instrument-Serif headline ("A calm morning.") + AI prose paragraph
-+ four-vital row (BP/HR/SpO₂/Sleep) + footer with last-read timestamp +
-"Open ›".
+### Detailed (`cards`)
+Vertical stack of editorial `PersonCard` instances, one per person.
+Portrait initial + italic Instrument-Serif headline ("A calm morning.")
++ deterministic prose paragraph (Sprint 12.5 swaps to AI) + four-vital
+row (BP/HR/SpO₂/Sleep — real values from `vitals_other` cross-phone) +
+footer with last-read timestamp + "Open ›".
 
 ---
 
@@ -54,7 +56,7 @@ italic Instrument-Serif headline ("A calm morning.") + AI prose paragraph
 | --- | --- |
 | Header | "Leiko · Family" eyebrow (mono uppercase, brand coral) + date (mono uppercase, text.tertiary) on one line; "Good morning" greeting below (mono uppercase, text.tertiary). User-name personalisation (e.g. "Good morning, Adaeze") is deferred to Sprint 10 user-profile work. |
 | Anomaly Banner (conditional) | `<AnomalyBanner>` — most-severe-wins across all family members. Confirmed-urgent fires immediately ("Talk to {firstName} now"); calm-concerned only if no urgent person exists ("Worth a chat with {firstName}"). CTA routes to that person's drill-in. |
-| View toggle (Sprint 7.7b) | Top-right segmented control — Bird's-eye ↔ Detailed. Glass background, coral active state. |
+| View toggle | Top-right segmented control — Bird's-eye ↔ Detailed. Glass background, coral active state. ~320ms cinematic crossfade between layers (scale + opacity, no blur — RN limitation). |
 | Action bar | `<CaregiverActionBar>` pinned at the bottom: "{count} · all in your circle" + "+ Add someone" affordance (only visible if caregiver is `family_owner` with capacity remaining — Plus = up to 5 caregivers; gate not yet wired in 7.7a). |
 | Background | `surface.warmBase` (warm-charcoal `#0A0908`). Light mode is intentionally a Sprint 1.6 follow-up — caregiver home is dark-canonical for v1.0. |
 | Tab bar | Visible — Home tab active |
@@ -216,10 +218,8 @@ Family Circle metaphor is preserved per D13 §7.4, but the BP-only
 ReadingCard stack is replaced by the Family Constellation per the
 `leiko-caregiver-unified.html` design.
 
-The legacy implementation lives at
-`apps/mobile/src/screens/Home/CaregiverHome.legacy.tsx` until Sprint
-7.7b ships the editorial-card view; remove the legacy file in the 7.7b
-close-out.
+The legacy `CaregiverHome.legacy.tsx` implementation was removed at
+Sprint 7.7b close (2026-05-08).
 
 In **hybrid mode** (a self-buyer who invited a caregiver), the caregiver
 sees this screen with the self-buyer's data as one orb in their Family
