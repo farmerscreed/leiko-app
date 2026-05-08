@@ -1,0 +1,1177 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person fixture in colorMode=dark 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "#120C07",
+        "borderColor": "rgba(255,255,255,0.08)",
+        "borderRadius": 18,
+        "borderWidth": 0.5,
+        "paddingHorizontal": 18,
+        "paddingVertical": 14,
+      },
+      undefined,
+    ]
+  }
+  testID="legend"
+>
+  <View
+    accessibilityLabel="Marian, Mom, All clear, A calm morning."
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 12,
+          "paddingVertical": 8,
+        },
+        null,
+      ]
+    }
+    testID="legend-row-marian"
+  >
+    <View
+      pointerEvents="none"
+      style={
+        [
+          {
+            "backgroundColor": "#FF7350",
+            "borderRadius": 4,
+            "flexShrink": 0,
+            "height": 8,
+            "opacity": 1,
+            "width": 8,
+          },
+          {
+            "elevation": 0,
+            "shadowColor": "#FF7350",
+            "shadowOffset": {
+              "height": 0,
+              "width": 0,
+            },
+            "shadowOpacity": 0.85,
+            "shadowRadius": 4,
+          },
+        ]
+      }
+    />
+    <View
+      style={
+        {
+          "flex": 1,
+          "minWidth": 0,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "baseline",
+            "flexDirection": "row",
+            "gap": 8,
+          }
+        }
+      >
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#F5F1EA",
+              "fontFamily": "InstrumentSerif_400Regular",
+              "fontSize": 15,
+              "letterSpacing": -0.075,
+              "lineHeight": 18,
+            }
+          }
+        >
+          Marian
+        </Text>
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#9C9890",
+              "fontFamily": "JetBrainsMono_500Medium",
+              "fontSize": 9,
+              "letterSpacing": 0.9,
+              "lineHeight": 12,
+              "textTransform": "uppercase",
+            }
+          }
+        >
+          · Mom
+        </Text>
+      </View>
+      <Text
+        allowFontScaling={false}
+        ellipsizeMode="tail"
+        numberOfLines={1}
+        style={
+          {
+            "color": "#ECE9E2",
+            "fontSize": 11.5,
+            "lineHeight": 16,
+            "marginTop": 1,
+          }
+        }
+      >
+        A calm morning.
+      </Text>
+    </View>
+    <View
+      accessibilityLabel="All clear"
+      accessibilityRole="text"
+      style={
+        [
+          {
+            "alignItems": "center",
+            "alignSelf": "flex-start",
+            "backgroundColor": "#61B56524",
+            "borderColor": "#61B56559",
+            "borderRadius": 99,
+            "borderWidth": 0.5,
+            "flexDirection": "row",
+            "gap": 5,
+            "paddingLeft": 7,
+            "paddingRight": 8,
+            "paddingVertical": 4,
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#61B565",
+              "borderRadius": 99,
+              "height": 5,
+              "width": 5,
+            },
+            {
+              "elevation": 0,
+              "shadowColor": "#61B565",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.6,
+              "shadowRadius": 4,
+            },
+          ]
+        }
+      />
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#61B565",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.95,
+            "lineHeight": 14,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        All clear
+      </Text>
+    </View>
+  </View>
+  <View
+    accessibilityLabel="Emeka, Dad, Needs attention, BP is trending up."
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "borderTopColor": "rgba(255,255,255,0.08)",
+          "borderTopWidth": 0.5,
+          "flexDirection": "row",
+          "gap": 12,
+          "paddingVertical": 8,
+        },
+        null,
+      ]
+    }
+    testID="legend-row-emeka"
+  >
+    <View
+      pointerEvents="none"
+      style={
+        [
+          {
+            "backgroundColor": "#F2A618",
+            "borderRadius": 4,
+            "flexShrink": 0,
+            "height": 8,
+            "opacity": 1,
+            "width": 8,
+          },
+          {
+            "elevation": 0,
+            "shadowColor": "#F2A618",
+            "shadowOffset": {
+              "height": 0,
+              "width": 0,
+            },
+            "shadowOpacity": 0.85,
+            "shadowRadius": 4,
+          },
+        ]
+      }
+    />
+    <View
+      style={
+        {
+          "flex": 1,
+          "minWidth": 0,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "baseline",
+            "flexDirection": "row",
+            "gap": 8,
+          }
+        }
+      >
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#F5F1EA",
+              "fontFamily": "InstrumentSerif_400Regular",
+              "fontSize": 15,
+              "letterSpacing": -0.075,
+              "lineHeight": 18,
+            }
+          }
+        >
+          Emeka
+        </Text>
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#9C9890",
+              "fontFamily": "JetBrainsMono_500Medium",
+              "fontSize": 9,
+              "letterSpacing": 0.9,
+              "lineHeight": 12,
+              "textTransform": "uppercase",
+            }
+          }
+        >
+          · Dad
+        </Text>
+      </View>
+      <Text
+        allowFontScaling={false}
+        ellipsizeMode="tail"
+        numberOfLines={1}
+        style={
+          {
+            "color": "#ECE9E2",
+            "fontSize": 11.5,
+            "lineHeight": 16,
+            "marginTop": 1,
+          }
+        }
+      >
+        BP is trending up.
+      </Text>
+    </View>
+    <View
+      accessibilityLabel="Needs attention"
+      accessibilityRole="text"
+      style={
+        [
+          {
+            "alignItems": "center",
+            "alignSelf": "flex-start",
+            "backgroundColor": "#FF735024",
+            "borderColor": "#FF735059",
+            "borderRadius": 99,
+            "borderWidth": 0.5,
+            "flexDirection": "row",
+            "gap": 5,
+            "paddingLeft": 7,
+            "paddingRight": 8,
+            "paddingVertical": 4,
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#FF7350",
+              "borderRadius": 99,
+              "height": 5,
+              "width": 5,
+            },
+            {
+              "elevation": 0,
+              "shadowColor": "#FF7350",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.6,
+              "shadowRadius": 4,
+            },
+          ]
+        }
+      />
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FF7350",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.95,
+            "lineHeight": 14,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Needs attention
+      </Text>
+    </View>
+  </View>
+  <View
+    accessibilityLabel="Joy, Aunt, Sleeping, Resting since 11pm."
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "borderTopColor": "rgba(255,255,255,0.08)",
+          "borderTopWidth": 0.5,
+          "flexDirection": "row",
+          "gap": 12,
+          "paddingVertical": 8,
+        },
+        null,
+      ]
+    }
+    testID="legend-row-joy"
+  >
+    <View
+      pointerEvents="none"
+      style={
+        [
+          {
+            "backgroundColor": "#7B67CC",
+            "borderRadius": 4,
+            "flexShrink": 0,
+            "height": 8,
+            "opacity": 0.5,
+            "width": 8,
+          },
+          null,
+        ]
+      }
+    />
+    <View
+      style={
+        {
+          "flex": 1,
+          "minWidth": 0,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "baseline",
+            "flexDirection": "row",
+            "gap": 8,
+          }
+        }
+      >
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#F5F1EA",
+              "fontFamily": "InstrumentSerif_400Regular",
+              "fontSize": 15,
+              "letterSpacing": -0.075,
+              "lineHeight": 18,
+            }
+          }
+        >
+          Joy
+        </Text>
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#9C9890",
+              "fontFamily": "JetBrainsMono_500Medium",
+              "fontSize": 9,
+              "letterSpacing": 0.9,
+              "lineHeight": 12,
+              "textTransform": "uppercase",
+            }
+          }
+        >
+          · Aunt
+        </Text>
+      </View>
+      <Text
+        allowFontScaling={false}
+        ellipsizeMode="tail"
+        numberOfLines={1}
+        style={
+          {
+            "color": "#ECE9E2",
+            "fontSize": 11.5,
+            "lineHeight": 16,
+            "marginTop": 1,
+          }
+        }
+      >
+        Resting since 11pm.
+      </Text>
+    </View>
+    <View
+      accessibilityLabel="Sleeping"
+      accessibilityRole="text"
+      style={
+        [
+          {
+            "alignItems": "center",
+            "alignSelf": "flex-start",
+            "backgroundColor": "#7B67CC24",
+            "borderColor": "#7B67CC59",
+            "borderRadius": 99,
+            "borderWidth": 0.5,
+            "flexDirection": "row",
+            "gap": 5,
+            "paddingLeft": 7,
+            "paddingRight": 8,
+            "paddingVertical": 4,
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#7B67CC",
+              "borderRadius": 99,
+              "height": 5,
+              "width": 5,
+            },
+            null,
+          ]
+        }
+      />
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#7B67CC",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.95,
+            "lineHeight": 14,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Sleeping
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person fixture in colorMode=light 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "#120C07",
+        "borderColor": "rgba(15,18,28,0.08)",
+        "borderRadius": 18,
+        "borderWidth": 0.5,
+        "paddingHorizontal": 18,
+        "paddingVertical": 14,
+      },
+      undefined,
+    ]
+  }
+  testID="legend"
+>
+  <View
+    accessibilityLabel="Marian, Mom, All clear, A calm morning."
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 12,
+          "paddingVertical": 8,
+        },
+        null,
+      ]
+    }
+    testID="legend-row-marian"
+  >
+    <View
+      pointerEvents="none"
+      style={
+        [
+          {
+            "backgroundColor": "#FF7350",
+            "borderRadius": 4,
+            "flexShrink": 0,
+            "height": 8,
+            "opacity": 1,
+            "width": 8,
+          },
+          {
+            "elevation": 0,
+            "shadowColor": "#FF7350",
+            "shadowOffset": {
+              "height": 0,
+              "width": 0,
+            },
+            "shadowOpacity": 0.85,
+            "shadowRadius": 4,
+          },
+        ]
+      }
+    />
+    <View
+      style={
+        {
+          "flex": 1,
+          "minWidth": 0,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "baseline",
+            "flexDirection": "row",
+            "gap": 8,
+          }
+        }
+      >
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#0F121C",
+              "fontFamily": "InstrumentSerif_400Regular",
+              "fontSize": 15,
+              "letterSpacing": -0.075,
+              "lineHeight": 18,
+            }
+          }
+        >
+          Marian
+        </Text>
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#5A6478",
+              "fontFamily": "JetBrainsMono_500Medium",
+              "fontSize": 9,
+              "letterSpacing": 0.9,
+              "lineHeight": 12,
+              "textTransform": "uppercase",
+            }
+          }
+        >
+          · Mom
+        </Text>
+      </View>
+      <Text
+        allowFontScaling={false}
+        ellipsizeMode="tail"
+        numberOfLines={1}
+        style={
+          {
+            "color": "#2A3040",
+            "fontSize": 11.5,
+            "lineHeight": 16,
+            "marginTop": 1,
+          }
+        }
+      >
+        A calm morning.
+      </Text>
+    </View>
+    <View
+      accessibilityLabel="All clear"
+      accessibilityRole="text"
+      style={
+        [
+          {
+            "alignItems": "center",
+            "alignSelf": "flex-start",
+            "backgroundColor": "#61B56524",
+            "borderColor": "#61B56559",
+            "borderRadius": 99,
+            "borderWidth": 0.5,
+            "flexDirection": "row",
+            "gap": 5,
+            "paddingLeft": 7,
+            "paddingRight": 8,
+            "paddingVertical": 4,
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#61B565",
+              "borderRadius": 99,
+              "height": 5,
+              "width": 5,
+            },
+            {
+              "elevation": 0,
+              "shadowColor": "#61B565",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.6,
+              "shadowRadius": 4,
+            },
+          ]
+        }
+      />
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#61B565",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.95,
+            "lineHeight": 14,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        All clear
+      </Text>
+    </View>
+  </View>
+  <View
+    accessibilityLabel="Emeka, Dad, Needs attention, BP is trending up."
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "borderTopColor": "rgba(15,18,28,0.08)",
+          "borderTopWidth": 0.5,
+          "flexDirection": "row",
+          "gap": 12,
+          "paddingVertical": 8,
+        },
+        null,
+      ]
+    }
+    testID="legend-row-emeka"
+  >
+    <View
+      pointerEvents="none"
+      style={
+        [
+          {
+            "backgroundColor": "#F2A618",
+            "borderRadius": 4,
+            "flexShrink": 0,
+            "height": 8,
+            "opacity": 1,
+            "width": 8,
+          },
+          {
+            "elevation": 0,
+            "shadowColor": "#F2A618",
+            "shadowOffset": {
+              "height": 0,
+              "width": 0,
+            },
+            "shadowOpacity": 0.85,
+            "shadowRadius": 4,
+          },
+        ]
+      }
+    />
+    <View
+      style={
+        {
+          "flex": 1,
+          "minWidth": 0,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "baseline",
+            "flexDirection": "row",
+            "gap": 8,
+          }
+        }
+      >
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#0F121C",
+              "fontFamily": "InstrumentSerif_400Regular",
+              "fontSize": 15,
+              "letterSpacing": -0.075,
+              "lineHeight": 18,
+            }
+          }
+        >
+          Emeka
+        </Text>
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#5A6478",
+              "fontFamily": "JetBrainsMono_500Medium",
+              "fontSize": 9,
+              "letterSpacing": 0.9,
+              "lineHeight": 12,
+              "textTransform": "uppercase",
+            }
+          }
+        >
+          · Dad
+        </Text>
+      </View>
+      <Text
+        allowFontScaling={false}
+        ellipsizeMode="tail"
+        numberOfLines={1}
+        style={
+          {
+            "color": "#2A3040",
+            "fontSize": 11.5,
+            "lineHeight": 16,
+            "marginTop": 1,
+          }
+        }
+      >
+        BP is trending up.
+      </Text>
+    </View>
+    <View
+      accessibilityLabel="Needs attention"
+      accessibilityRole="text"
+      style={
+        [
+          {
+            "alignItems": "center",
+            "alignSelf": "flex-start",
+            "backgroundColor": "#FF735024",
+            "borderColor": "#FF735059",
+            "borderRadius": 99,
+            "borderWidth": 0.5,
+            "flexDirection": "row",
+            "gap": 5,
+            "paddingLeft": 7,
+            "paddingRight": 8,
+            "paddingVertical": 4,
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#FF7350",
+              "borderRadius": 99,
+              "height": 5,
+              "width": 5,
+            },
+            {
+              "elevation": 0,
+              "shadowColor": "#FF7350",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.6,
+              "shadowRadius": 4,
+            },
+          ]
+        }
+      />
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FF7350",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.95,
+            "lineHeight": 14,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Needs attention
+      </Text>
+    </View>
+  </View>
+  <View
+    accessibilityLabel="Joy, Aunt, Sleeping, Resting since 11pm."
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "borderTopColor": "rgba(15,18,28,0.08)",
+          "borderTopWidth": 0.5,
+          "flexDirection": "row",
+          "gap": 12,
+          "paddingVertical": 8,
+        },
+        null,
+      ]
+    }
+    testID="legend-row-joy"
+  >
+    <View
+      pointerEvents="none"
+      style={
+        [
+          {
+            "backgroundColor": "#7B67CC",
+            "borderRadius": 4,
+            "flexShrink": 0,
+            "height": 8,
+            "opacity": 0.5,
+            "width": 8,
+          },
+          null,
+        ]
+      }
+    />
+    <View
+      style={
+        {
+          "flex": 1,
+          "minWidth": 0,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "baseline",
+            "flexDirection": "row",
+            "gap": 8,
+          }
+        }
+      >
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#0F121C",
+              "fontFamily": "InstrumentSerif_400Regular",
+              "fontSize": 15,
+              "letterSpacing": -0.075,
+              "lineHeight": 18,
+            }
+          }
+        >
+          Joy
+        </Text>
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#5A6478",
+              "fontFamily": "JetBrainsMono_500Medium",
+              "fontSize": 9,
+              "letterSpacing": 0.9,
+              "lineHeight": 12,
+              "textTransform": "uppercase",
+            }
+          }
+        >
+          · Aunt
+        </Text>
+      </View>
+      <Text
+        allowFontScaling={false}
+        ellipsizeMode="tail"
+        numberOfLines={1}
+        style={
+          {
+            "color": "#2A3040",
+            "fontSize": 11.5,
+            "lineHeight": 16,
+            "marginTop": 1,
+          }
+        }
+      >
+        Resting since 11pm.
+      </Text>
+    </View>
+    <View
+      accessibilityLabel="Sleeping"
+      accessibilityRole="text"
+      style={
+        [
+          {
+            "alignItems": "center",
+            "alignSelf": "flex-start",
+            "backgroundColor": "#7B67CC24",
+            "borderColor": "#7B67CC59",
+            "borderRadius": 99,
+            "borderWidth": 0.5,
+            "flexDirection": "row",
+            "gap": 5,
+            "paddingLeft": 7,
+            "paddingRight": 8,
+            "paddingVertical": 4,
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "backgroundColor": "#7B67CC",
+              "borderRadius": 99,
+              "height": 5,
+              "width": 5,
+            },
+            null,
+          ]
+        }
+      />
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#7B67CC",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.95,
+            "lineHeight": 14,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Sleeping
+      </Text>
+    </View>
+  </View>
+</View>
+`;
