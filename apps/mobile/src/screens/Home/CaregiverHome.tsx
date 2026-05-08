@@ -22,8 +22,9 @@
 // for now" / "Add a family member to start sharing care." — all
 // existing voice-rule-clean copy preserved from the legacy screen.
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -31,10 +32,11 @@ import {
   View,
 } from 'react-native';
 import Animated, {
+  Easing,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  Easing,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -122,11 +124,18 @@ export function CaregiverHome() {
         navigation.navigate('ReadingDetail', {
           readingLocalId: target.latestReading.id,
         });
-      } else if (!pairedDevice) {
-        navigation.navigate('Pairing');
+        return;
       }
-      // Has parent, has watch, but no readings yet → no-op for now.
-      // Sprint 8.5 routes this to the per-parent immersive view.
+      // No reading yet — route based on what the user can act on. If the
+      // caregiver hasn't paired their own watch yet, route to Pairing
+      // (they may BE the parent in hybrid mode). Otherwise route to
+      // ParentReadings, the per-parent placeholder list — Sprint 8.5
+      // replaces this with the per-parent immersive Daily Pulse.
+      if (!pairedDevice) {
+        navigation.navigate('Pairing');
+        return;
+      }
+      navigation.navigate('ParentReadings', { familyId: id });
     },
     [merged, navigation, pairedDevice],
   );
@@ -152,17 +161,29 @@ export function CaregiverHome() {
   // Cinematic crossfade between the two views. A single shared value
   // (0 = birds, 1 = cards) drives both stacked views' opacity + scale.
   // Reduced motion → snap to target without the timing.
+  //
+  // Mount strategy: only the ACTIVE view is mounted at rest. During a
+  // transition both views render (so the cross-fade is visible) and the
+  // outgoing layer is unmounted on completion. This prevents the
+  // inactive layer from bleeding through (Sprint 7.7b found this with
+  // empty headlines visible behind the orbs) and from intercepting
+  // touches on the ScrollView.
   const viewProgress = useSharedValue(viewMode === 'cards' ? VIEW_CARDS : VIEW_BIRDS);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   useEffect(() => {
     const target = viewMode === 'cards' ? VIEW_CARDS : VIEW_BIRDS;
     if (reduceMotion) {
       viewProgress.value = target;
       return;
     }
-    viewProgress.value = withTiming(target, {
-      duration: VIEW_TRANSITION_MS,
-      easing: VIEW_TRANSITION_EASING,
-    });
+    setIsTransitioning(true);
+    viewProgress.value = withTiming(
+      target,
+      { duration: VIEW_TRANSITION_MS, easing: VIEW_TRANSITION_EASING },
+      (finished) => {
+        if (finished) runOnJS(setIsTransitioning)(false);
+      },
+    );
   }, [viewMode, reduceMotion, viewProgress]);
 
   const birdsAnimatedStyle = useAnimatedStyle(() => ({
@@ -173,6 +194,9 @@ export function CaregiverHome() {
     opacity: viewProgress.value,
     transform: [{ scale: 0.96 + viewProgress.value * 0.04 }],
   }));
+
+  const showBirds = viewMode === 'birds' || isTransitioning;
+  const showCards = viewMode === 'cards' || isTransitioning;
 
   // Editorial PersonCard data — derived per-render. The footer label is
   // generated here (not in the helper) because the format depends on
@@ -221,7 +245,10 @@ export function CaregiverHome() {
           />
         }
       >
-        <SharedHeader theme={theme} />
+        <SharedHeader
+          theme={theme}
+          onSettingsPress={() => navigation.navigate('Settings')}
+        />
 
         {anomaly ? (
           <View style={{ marginTop: theme.spacing.l }}>
@@ -242,50 +269,55 @@ export function CaregiverHome() {
         ) : merged.length === 0 ? (
           <EmptyNoFamily theme={theme} />
         ) : (
-          // Stacked layers — both views are mounted; only the active one
-          // is visible (full opacity + scale 1) while the other sits
-          // behind at scale 0.96 / opacity 0. pointerEvents on the
-          // hidden layer disabled so taps land on the active surface.
-          <View
-            style={{ marginTop: theme.spacing.l, position: 'relative' }}
-          >
-            <Animated.View
-              pointerEvents={viewMode === 'birds' ? 'auto' : 'none'}
-              style={birdsAnimatedStyle}
-              testID="caregiver-home-birds-layer"
-            >
-              <ConstellationField
-                people={constellationPeople}
-                onSelectPerson={handlePersonPress}
-                testID="caregiver-home-constellation"
-              />
-              <View style={{ marginTop: theme.spacing.xl }}>
-                <ConstellationLegend
-                  people={legendPeople}
+          // Mount only the active view at rest; both render briefly during
+          // the transition window so the cross-fade is visible. The
+          // outgoing layer is unmounted on animation completion (see
+          // `isTransitioning`). Inactive layer cannot bleed through visually
+          // or intercept ScrollView gestures because it isn't in the tree.
+          <View style={{ marginTop: theme.spacing.l, position: 'relative' }}>
+            {showBirds ? (
+              <Animated.View
+                pointerEvents={viewMode === 'birds' ? 'auto' : 'none'}
+                style={[
+                  birdsAnimatedStyle,
+                  showCards
+                    ? { position: 'absolute', top: 0, left: 0, right: 0 }
+                    : null,
+                ]}
+                testID="caregiver-home-birds-layer"
+              >
+                <ConstellationField
+                  people={constellationPeople}
                   onSelectPerson={handlePersonPress}
-                  testID="caregiver-home-legend"
+                  testID="caregiver-home-constellation"
                 />
-              </View>
-            </Animated.View>
-            <Animated.View
-              pointerEvents={viewMode === 'cards' ? 'auto' : 'none'}
-              style={[
-                cardsAnimatedStyle,
-                {
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                },
-              ]}
-              testID="caregiver-home-cards-layer"
-            >
-              <DetailedView
-                people={cardData}
-                onSelectPerson={handlePersonPress}
-                theme={theme}
-              />
-            </Animated.View>
+                <View style={{ marginTop: theme.spacing.xl }}>
+                  <ConstellationLegend
+                    people={legendPeople}
+                    onSelectPerson={handlePersonPress}
+                    testID="caregiver-home-legend"
+                  />
+                </View>
+              </Animated.View>
+            ) : null}
+            {showCards ? (
+              <Animated.View
+                pointerEvents={viewMode === 'cards' ? 'auto' : 'none'}
+                style={[
+                  cardsAnimatedStyle,
+                  showBirds
+                    ? { position: 'absolute', top: 0, left: 0, right: 0 }
+                    : null,
+                ]}
+                testID="caregiver-home-cards-layer"
+              >
+                <DetailedView
+                  people={cardData}
+                  onSelectPerson={handlePersonPress}
+                  theme={theme}
+                />
+              </Animated.View>
+            ) : null}
           </View>
         )}
       </ScrollView>
@@ -295,11 +327,13 @@ export function CaregiverHome() {
           {/* Top-right segmented toggle. Glass background reads against
               both views; absolute position so the constellation/cards
               behind it scroll while the toggle stays anchored to the
-              SafeArea top inset. */}
+              SafeArea top inset. spacing.xxxl (48pt) below the inset so
+              the touch target sits clear of the system status bar +
+              battery gauge — spacing.xxl was too cramped on Pixel 8. */}
           <View
             style={{
               position: 'absolute',
-              top: theme.spacing.xxl,
+              top: theme.spacing.xxxl,
               right: theme.spacing.l,
             }}
           >
@@ -406,7 +440,13 @@ function humanizeCount(n: number): string {
 // SharedHeader — eyebrow + date + greeting. Mono uppercase per the design.
 // -----------------------------------------------------------------------------
 
-function SharedHeader({ theme }: { theme: Theme }) {
+function SharedHeader({
+  theme,
+  onSettingsPress,
+}: {
+  theme: Theme;
+  onSettingsPress: () => void;
+}) {
   const dateLabel = useMemo(() => formatHeaderDate(new Date()), []);
   return (
     <View
@@ -433,18 +473,43 @@ function SharedHeader({ theme }: { theme: Theme }) {
         >
           Leiko · Family
         </Text>
-        <Text
-          allowFontScaling={false}
-          style={{
-            fontFamily: theme.fontFamilies.numeric,
-            fontSize: 9.5,
-            letterSpacing: 1.3,
-            color: theme.colors.text.tertiary,
-            textTransform: 'uppercase',
-          }}
+        <View
+          style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.m }}
         >
-          {dateLabel}
-        </Text>
+          <Text
+            allowFontScaling={false}
+            style={{
+              fontFamily: theme.fontFamilies.numeric,
+              fontSize: 9.5,
+              letterSpacing: 1.3,
+              color: theme.colors.text.tertiary,
+              textTransform: 'uppercase',
+            }}
+          >
+            {dateLabel}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Open settings"
+            onPress={onSettingsPress}
+            hitSlop={12}
+            testID="caregiver-home-settings"
+            style={({ pressed }) => ({ opacity: pressed ? 0.65 : 1 })}
+          >
+            {/* Phosphor GearSix lands when icons sweep through screens.
+                Plain glyph until then — affordance still reads. */}
+            <Text
+              allowFontScaling={false}
+              style={{
+                fontSize: 18,
+                color: theme.colors.text.tertiary,
+                lineHeight: 18,
+              }}
+            >
+              {'⚙'}
+            </Text>
+          </Pressable>
+        </View>
       </View>
       <Text
         allowFontScaling={false}

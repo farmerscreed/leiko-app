@@ -39,8 +39,14 @@ jest.mock('../../hooks/useCaregiverFamily', () => ({
   useCaregiverFamily: () => mockHookResult,
 }));
 
+// Test-controlled viewMode — defaults to 'birds'; individual tests
+// flip it via `setMockViewMode('cards')` before render.
+let mockViewMode: 'birds' | 'cards' = 'birds';
+const setMockViewMode = (m: 'birds' | 'cards') => {
+  mockViewMode = m;
+};
 jest.mock('../../hooks/useCaregiverViewMode', () => ({
-  useCaregiverViewMode: () => ({ viewMode: 'birds', setViewMode: jest.fn() }),
+  useCaregiverViewMode: () => ({ viewMode: mockViewMode, setViewMode: jest.fn() }),
 }));
 
 jest.mock('../../state/pairing', () => ({
@@ -110,6 +116,7 @@ beforeEach(() => {
   mockHookResult.isLoading = false;
   mockHookResult.isRefreshing = false;
   mockHookResult.error = null;
+  setMockViewMode('birds');
 });
 
 describe('<CaregiverHome /> — empty state', () => {
@@ -362,26 +369,30 @@ describe('<CaregiverHome /> — view toggle (Sprint 7.7b)', () => {
     expect(screen.queryByTestId('caregiver-home-view-toggle')).toBeNull();
   });
 
-  it('renders both layers (birds + cards) — both views are mounted at once', () => {
+  it('renders only the birds layer at rest (cards layer unmounted)', () => {
     setupThree();
     render(withProviders(<CaregiverHome />));
     expect(screen.getByTestId('caregiver-home-birds-layer')).toBeTruthy();
-    expect(screen.getByTestId('caregiver-home-cards-layer')).toBeTruthy();
+    // Cards layer is unmounted at rest to prevent bleed-through and
+    // touch interception. It mounts during the transition window.
+    expect(screen.queryByTestId('caregiver-home-cards-layer')).toBeNull();
   });
 
-  it('renders the editorial DetailedView with the count headline', () => {
+  it('renders the editorial DetailedView when viewMode is cards', () => {
     setupThree();
+    setMockViewMode('cards');
     render(withProviders(<CaregiverHome />));
     expect(screen.getByTestId('caregiver-home-detailed')).toBeTruthy();
+    expect(screen.queryByTestId('caregiver-home-birds-layer')).toBeNull();
     // 1 person → "One you love, checked in."
     expect(screen.getByText(/One/)).toBeTruthy();
   });
 
-  it('renders a PersonCard per person with its vital strip', () => {
+  it('renders a PersonCard per person with its vital strip in cards mode', () => {
     setupThree();
+    setMockViewMode('cards');
     render(withProviders(<CaregiverHome />));
     expect(screen.getByTestId('caregiver-home-card-fam-1')).toBeTruthy();
-    // The card surfaces real values from the fixture's vitalStrip.
     expect(screen.getAllByText('122/78').length).toBeGreaterThan(0);
     expect(screen.getByText('64')).toBeTruthy();
     expect(screen.getByText('98%')).toBeTruthy();
