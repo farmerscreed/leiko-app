@@ -8,7 +8,7 @@ import { mmkv, STORAGE_KEYS } from '../../services/storage';
 import { useActivity } from '../activity';
 import type { ActivityDay, CaloriesDay } from '../../types/vitals';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const fixtures = require('../../../../../tools/ble-mock/fixtures');
 
 const SECONDS_PER_DAY = 24 * 60 * 60;
