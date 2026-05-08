@@ -22,7 +22,7 @@
 // for now" / "Add a family member to start sharing care." — all
 // existing voice-rule-clean copy preserved from the legacy screen.
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import {
   RefreshControl,
   ScrollView,
@@ -30,6 +30,12 @@ import {
   Text,
   View,
 } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -44,8 +50,11 @@ import {
   ConstellationLegend,
   type LegendPerson,
 } from '../../components/ConstellationLegend';
+import { PersonCard } from '../../components/PersonCard';
+import { ViewToggle } from '../../components/ViewToggle';
 import { useCaregiverFamily } from '../../hooks/useCaregiverFamily';
 import { useCaregiverViewMode } from '../../hooks/useCaregiverViewMode';
+import { useReducedMotion } from '../../theme/useReducedMotion';
 import { useTheme, type Theme } from '../../theme';
 import { usePairing } from '../../state/pairing';
 import { useReadings } from '../../state/readings';
@@ -68,15 +77,26 @@ type Nav = NativeStackNavigationProp<CaregiverStackParamList>;
 // just the count.
 const CAN_INVITE_FOR_NOW = false;
 
+// Cinematic-transition timing. Outgoing view scales+fades out; incoming
+// scales+fades in. ~320ms total — short enough to feel snappy, long
+// enough to read as a cinematic moment. RN doesn't support filter blur
+// on Animated.View styles cross-platform, so the design's blur stage
+// is dropped; opacity + scale carry the choreography.
+const VIEW_TRANSITION_MS = 320;
+const VIEW_TRANSITION_EASING = Easing.bezier(0.22, 1, 0.36, 1);
+// 0 = bird's-eye, 1 = cards. The shared value drives both stacked views'
+// opacity + scale.
+const VIEW_BIRDS = 0;
+const VIEW_CARDS = 1;
+
 export function CaregiverHome() {
   const theme = useTheme();
   const navigation = useNavigation<Nav>();
   const { parents, people, isLoading, isRefreshing, refresh } = useCaregiverFamily();
   const pairedDevice = usePairing((s) => s.pairedDevice);
   const localLatest = useReadings((s) => s.latest());
-  // Plumbed for 7.7b — `viewMode` is intentionally unread here in 7.7a;
-  // only the bird's-eye branch renders.
-  useCaregiverViewMode();
+  const { viewMode, setViewMode } = useCaregiverViewMode();
+  const reduceMotion = useReducedMotion();
 
   // Owning-phone first-paint merge: if local latest is newer than the
   // server view, prepend it. Same logic the legacy screen used.
@@ -129,6 +149,56 @@ export function CaregiverHome() {
     headline: p.headline,
   }));
 
+  // Cinematic crossfade between the two views. A single shared value
+  // (0 = birds, 1 = cards) drives both stacked views' opacity + scale.
+  // Reduced motion → snap to target without the timing.
+  const viewProgress = useSharedValue(viewMode === 'cards' ? VIEW_CARDS : VIEW_BIRDS);
+  useEffect(() => {
+    const target = viewMode === 'cards' ? VIEW_CARDS : VIEW_BIRDS;
+    if (reduceMotion) {
+      viewProgress.value = target;
+      return;
+    }
+    viewProgress.value = withTiming(target, {
+      duration: VIEW_TRANSITION_MS,
+      easing: VIEW_TRANSITION_EASING,
+    });
+  }, [viewMode, reduceMotion, viewProgress]);
+
+  const birdsAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: 1 - viewProgress.value,
+    transform: [{ scale: 0.96 + (1 - viewProgress.value) * 0.04 }],
+  }));
+  const cardsAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: viewProgress.value,
+    transform: [{ scale: 0.96 + viewProgress.value * 0.04 }],
+  }));
+
+  // Editorial PersonCard data — derived per-render. The footer label is
+  // generated here (not in the helper) because the format depends on
+  // current local time, not just the data shape.
+  const cardData = useMemo(
+    () =>
+      mergedPeople.map((p) => {
+        const parentRow = merged.find((row) => row.familyId === p.id);
+        const measuredAt = parentRow?.latestReading?.measuredAt;
+        const footerLeftLabel = formatFooterLabel(measuredAt, Date.now());
+        return {
+          id: p.id,
+          accent: theme.colors.person[p.accentIndex],
+          initial: p.initial,
+          fullName: p.fullName,
+          relation: p.relation,
+          status: p.status,
+          headline: p.headline,
+          sentence: p.sentence,
+          vitalStrip: p.vitalStrip,
+          footerLeftLabel,
+        };
+      }),
+    [mergedPeople, merged, theme],
+  );
+
   return (
     <SafeAreaView
       style={[styles.root, { backgroundColor: theme.colors.surface.warmBase }]}
@@ -172,43 +242,164 @@ export function CaregiverHome() {
         ) : merged.length === 0 ? (
           <EmptyNoFamily theme={theme} />
         ) : (
-          <>
-            <View style={{ marginTop: theme.spacing.l }}>
+          // Stacked layers — both views are mounted; only the active one
+          // is visible (full opacity + scale 1) while the other sits
+          // behind at scale 0.96 / opacity 0. pointerEvents on the
+          // hidden layer disabled so taps land on the active surface.
+          <View
+            style={{ marginTop: theme.spacing.l, position: 'relative' }}
+          >
+            <Animated.View
+              pointerEvents={viewMode === 'birds' ? 'auto' : 'none'}
+              style={birdsAnimatedStyle}
+              testID="caregiver-home-birds-layer"
+            >
               <ConstellationField
                 people={constellationPeople}
                 onSelectPerson={handlePersonPress}
                 testID="caregiver-home-constellation"
               />
-            </View>
-            <View style={{ marginTop: theme.spacing.xl }}>
-              <ConstellationLegend
-                people={legendPeople}
+              <View style={{ marginTop: theme.spacing.xl }}>
+                <ConstellationLegend
+                  people={legendPeople}
+                  onSelectPerson={handlePersonPress}
+                  testID="caregiver-home-legend"
+                />
+              </View>
+            </Animated.View>
+            <Animated.View
+              pointerEvents={viewMode === 'cards' ? 'auto' : 'none'}
+              style={[
+                cardsAnimatedStyle,
+                {
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                },
+              ]}
+              testID="caregiver-home-cards-layer"
+            >
+              <DetailedView
+                people={cardData}
                 onSelectPerson={handlePersonPress}
-                testID="caregiver-home-legend"
+                theme={theme}
               />
-            </View>
-          </>
+            </Animated.View>
+          </View>
         )}
       </ScrollView>
 
       {merged.length > 0 ? (
-        <View
-          style={{
-            position: 'absolute',
-            left: theme.spacing.l,
-            right: theme.spacing.l,
-            bottom: theme.spacing.xxl,
-          }}
-        >
-          <CaregiverActionBar
-            count={merged.length}
-            canInvite={CAN_INVITE_FOR_NOW}
-            testID="caregiver-home-action-bar"
-          />
-        </View>
+        <>
+          {/* Top-right segmented toggle. Glass background reads against
+              both views; absolute position so the constellation/cards
+              behind it scroll while the toggle stays anchored to the
+              SafeArea top inset. */}
+          <View
+            style={{
+              position: 'absolute',
+              top: theme.spacing.xxl,
+              right: theme.spacing.l,
+            }}
+          >
+            <ViewToggle
+              value={viewMode}
+              onChange={setViewMode}
+              testID="caregiver-home-view-toggle"
+            />
+          </View>
+          <View
+            style={{
+              position: 'absolute',
+              left: theme.spacing.l,
+              right: theme.spacing.l,
+              bottom: theme.spacing.xxl,
+            }}
+          >
+            <CaregiverActionBar
+              count={merged.length}
+              canInvite={CAN_INVITE_FOR_NOW}
+              testID="caregiver-home-action-bar"
+            />
+          </View>
+        </>
       ) : null}
     </SafeAreaView>
   );
+}
+
+// -----------------------------------------------------------------------------
+// DetailedView — vertical stack of editorial PersonCards. Renders inside
+// the cards-layer Animated.View; the parent screen handles position +
+// transition. The "Three you love, checked in." headline at the top
+// matches the design's leiko-caregiver-unified.html DetailedView wrapper.
+// -----------------------------------------------------------------------------
+
+interface DetailedViewProps {
+  people: Array<{
+    id: string;
+    accent: string;
+    initial: string;
+    fullName: string;
+    relation: string;
+    status: import('../../components/StatusPill').Status;
+    headline: string;
+    sentence: string;
+    vitalStrip: { bp: string; hr: string; spo2: string; sleep: string };
+    footerLeftLabel: string;
+  }>;
+  onSelectPerson: (id: string) => void;
+  theme: Theme;
+}
+
+function DetailedView({ people, onSelectPerson, theme }: DetailedViewProps) {
+  const headlineWordCount = people.length;
+  const headlineWord = humanizeCount(headlineWordCount);
+  const headlineStyle = theme.type('displayM');
+  return (
+    <View testID="caregiver-home-detailed">
+      <View style={{ paddingHorizontal: theme.spacing.s, marginBottom: theme.spacing.l }}>
+        <Text
+          allowFontScaling={false}
+          style={{
+            fontFamily: theme.fontFamilies.editorial,
+            fontSize: headlineStyle.size,
+            lineHeight: headlineStyle.lineHeight,
+            color: theme.colors.text.primary,
+          }}
+        >
+          <Text style={{ fontStyle: 'italic', color: theme.colors.text.secondary }}>
+            {headlineWord}
+          </Text>
+          {' you love,\nchecked in.'}
+        </Text>
+      </View>
+      {people.map((p) => (
+        <View key={p.id} style={{ marginBottom: theme.spacing.l }}>
+          <PersonCard
+            accent={p.accent}
+            initial={p.initial}
+            fullName={p.fullName}
+            relation={p.relation}
+            status={p.status}
+            headline={p.headline}
+            sentence={p.sentence}
+            vitalStrip={p.vitalStrip}
+            footerLeftLabel={p.footerLeftLabel}
+            onPress={() => onSelectPerson(p.id)}
+            testID={`caregiver-home-card-${p.id}`}
+          />
+        </View>
+      ))}
+    </View>
+  );
+}
+
+const COUNT_WORDS = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five'] as const;
+function humanizeCount(n: number): string {
+  if (n >= 0 && n < COUNT_WORDS.length) return COUNT_WORDS[n];
+  return String(n);
 }
 
 // -----------------------------------------------------------------------------
@@ -392,6 +583,34 @@ function formatHeaderDate(d: Date): string {
   const dayName = d.toLocaleDateString(undefined, { weekday: 'long' });
   const monthName = d.toLocaleDateString(undefined, { month: 'long' });
   return `${dayName} · ${monthName} ${d.getDate()}`;
+}
+
+// Footer label for a PersonCard. Matches the design's "Read · 6:42 am"
+// when the reading is recent, "Last reading · 13 hr ago" when stale,
+// "No readings yet" when null. Calm, factual, voice-rule clean.
+const FOOTER_STALE_THRESHOLD_MS = 12 * 60 * 60 * 1000;
+function formatFooterLabel(measuredAtIso: string | undefined, nowMs: number): string {
+  if (!measuredAtIso) return 'No readings yet';
+  const measuredAtMs = Date.parse(measuredAtIso);
+  if (Number.isNaN(measuredAtMs)) return 'No readings yet';
+  const ageMs = Math.max(0, nowMs - measuredAtMs);
+  if (ageMs > FOOTER_STALE_THRESHOLD_MS) {
+    return `Last reading · ${humanizeFooterAge(ageMs)} ago`;
+  }
+  const time = new Date(measuredAtMs).toLocaleTimeString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+  return `Read · ${time}`;
+}
+
+function humanizeFooterAge(ms: number): string {
+  const minutes = Math.floor(ms / 60_000);
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hr`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days === 1 ? '' : 's'}`;
 }
 
 export function mergeLocalLatest(

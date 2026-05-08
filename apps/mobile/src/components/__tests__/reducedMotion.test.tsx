@@ -64,6 +64,7 @@ import { AmbientPulse } from '../AmbientPulse';
 import { AnomalyBanner } from '../AnomalyBanner';
 import { CorrelationStrip } from '../CorrelationStrip';
 import { DailyPulseHero, type DailyPulseHeroVitals } from '../DailyPulseHero';
+import { PersonCard } from '../PersonCard';
 import { PersonOrb } from '../PersonOrb';
 import { VitalRing } from '../VitalRing';
 import { VitalTile } from '../VitalTile';
@@ -202,6 +203,26 @@ describe('Reduced motion (D12 §7.4) — no driver fires', () => {
           status="attention"
           fullName="Marian Okeke"
           bpLabel="138/89"
+        />,
+      ),
+    );
+    expect(driverCalls).toHaveLength(0);
+  });
+
+  it('PersonCard does not invoke withSpring (button-press scale)', () => {
+    render(
+      withTheme(
+        <PersonCard
+          accent="#FF7350"
+          initial="M"
+          fullName="Marian Okeke"
+          relation="Mom"
+          age={71}
+          status="clear"
+          headline="A calm morning."
+          sentence="BP 122/78 a moment ago. Inside the usual band."
+          vitalStrip={{ bp: '122/78', hr: '64', spo2: '98%', sleep: '7:42' }}
+          footerLeftLabel="Read · 6:42 am"
         />,
       ),
     );

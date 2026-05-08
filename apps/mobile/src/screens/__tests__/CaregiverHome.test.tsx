@@ -19,27 +19,21 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '../../theme';
 import { CaregiverHome } from '../Home/CaregiverHome';
 import type { ParentSummary } from '../../services/families/fetchParentSummaries';
+import type { CaregiverPerson } from '../../utils/caregiverPerson';
 
 const mockNavigate = jest.fn();
 const mockRefresh = jest.fn(async () => undefined);
 
 const mockHookResult = {
   parents: [] as ParentSummary[],
-  people: [] as Array<{
-    id: string;
-    fullName: string;
-    initial: string;
-    accentIndex: 1 | 2 | 3;
-    status: 'clear' | 'watch' | 'attention' | 'urgent' | 'offline' | 'sleeping';
-    bpLabel: string;
-    headline: string;
-    relation: string;
-  }>,
+  people: [] as CaregiverPerson[],
   isLoading: false,
   isRefreshing: false,
   error: null as Error | null,
   refresh: mockRefresh,
 };
+
+const EMPTY_VITAL_STRIP = { bp: '—', hr: '—', spo2: '—', sleep: '—' };
 
 jest.mock('../../hooks/useCaregiverFamily', () => ({
   useCaregiverFamily: () => mockHookResult,
@@ -177,7 +171,9 @@ describe('<CaregiverHome /> — populated state', () => {
         status: 'clear',
         bpLabel: '122/78',
         headline: 'Read 1 min ago — in pattern.',
+        sentence: 'BP 122/78 a moment ago. Inside the usual band.',
         relation: 'Mom',
+        vitalStrip: { bp: '122/78', hr: '64', spo2: '98%', sleep: '7:42' },
       },
       {
         id: 'fam-2',
@@ -187,7 +183,9 @@ describe('<CaregiverHome /> — populated state', () => {
         status: 'clear',
         bpLabel: '134/86',
         headline: 'Read 1 min ago — in pattern.',
+        sentence: 'BP 134/86 a moment ago. Inside the usual band.',
         relation: 'Dad',
+        vitalStrip: { bp: '134/86', hr: '72', spo2: '96%', sleep: '6:18' },
       },
       {
         id: 'fam-3',
@@ -197,7 +195,9 @@ describe('<CaregiverHome /> — populated state', () => {
         status: 'clear',
         bpLabel: '118/74',
         headline: 'Read 1 min ago — in pattern.',
+        sentence: 'BP 118/74 a moment ago. Inside the usual band.',
         relation: 'Aunt',
+        vitalStrip: { bp: '118/74', hr: '58', spo2: '97%', sleep: '8:00' },
       },
     ];
   }
@@ -249,7 +249,9 @@ describe('<CaregiverHome /> — anomaly banner', () => {
         status,
         bpLabel: '122/78',
         headline: 'headline',
+        sentence: 'sentence',
         relation: 'Mom',
+        vitalStrip: EMPTY_VITAL_STRIP,
       },
     ];
   }
@@ -297,7 +299,9 @@ describe('<CaregiverHome /> — anomaly banner', () => {
         status: 'attention',
         bpLabel: '122/78',
         headline: 'h',
+        sentence: 's',
         relation: 'Mom',
+        vitalStrip: EMPTY_VITAL_STRIP,
       },
       {
         id: 'fam-2',
@@ -307,13 +311,81 @@ describe('<CaregiverHome /> — anomaly banner', () => {
         status: 'urgent',
         bpLabel: '188/120',
         headline: 'h',
+        sentence: 's',
         relation: 'Dad',
+        vitalStrip: EMPTY_VITAL_STRIP,
       },
     ];
     render(withProviders(<CaregiverHome />));
     // Confirmed-urgent (Dad) wins; calm-concerned (Marian) is suppressed.
     expect(screen.getByText('Talk to Emeka now')).toBeTruthy();
     expect(screen.queryByText(/Worth a chat/)).toBeNull();
+  });
+});
+
+describe('<CaregiverHome /> — view toggle (Sprint 7.7b)', () => {
+  function setupThree() {
+    mockHookResult.parents = [
+      parent({
+        familyId: 'fam-1',
+        parentDisplayName: 'Marian Okeke',
+        parentRelationship: 'Mom',
+        latestReading: reading({ id: 'r-mom' }),
+      }),
+    ];
+    mockHookResult.people = [
+      {
+        id: 'fam-1',
+        fullName: 'Marian Okeke',
+        initial: 'M',
+        accentIndex: 1,
+        status: 'clear',
+        bpLabel: '122/78',
+        headline: 'h',
+        sentence: 'BP 122/78 a moment ago. Inside the usual band.',
+        relation: 'Mom',
+        vitalStrip: { bp: '122/78', hr: '64', spo2: '98%', sleep: '7:42' },
+      },
+    ];
+  }
+
+  it('renders the segmented toggle when populated', () => {
+    setupThree();
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-view-toggle')).toBeTruthy();
+    expect(screen.getByRole('button', { name: "Bird's-eye view" })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Detailed view' })).toBeTruthy();
+  });
+
+  it('does NOT render the toggle in empty state', () => {
+    render(withProviders(<CaregiverHome />));
+    expect(screen.queryByTestId('caregiver-home-view-toggle')).toBeNull();
+  });
+
+  it('renders both layers (birds + cards) — both views are mounted at once', () => {
+    setupThree();
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-birds-layer')).toBeTruthy();
+    expect(screen.getByTestId('caregiver-home-cards-layer')).toBeTruthy();
+  });
+
+  it('renders the editorial DetailedView with the count headline', () => {
+    setupThree();
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-detailed')).toBeTruthy();
+    // 1 person → "One you love, checked in."
+    expect(screen.getByText(/One/)).toBeTruthy();
+  });
+
+  it('renders a PersonCard per person with its vital strip', () => {
+    setupThree();
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-card-fam-1')).toBeTruthy();
+    // The card surfaces real values from the fixture's vitalStrip.
+    expect(screen.getAllByText('122/78').length).toBeGreaterThan(0);
+    expect(screen.getByText('64')).toBeTruthy();
+    expect(screen.getByText('98%')).toBeTruthy();
+    expect(screen.getByText('7:42')).toBeTruthy();
   });
 });
 
