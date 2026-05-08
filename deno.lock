@@ -37,6 +37,7 @@
         "packageJson": {
           "dependencies": [
             "npm:@eslint/js@9.39.4",
+            "npm:@expo-google-fonts/instrument-serif@~0.4.1",
             "npm:@expo-google-fonts/inter@~0.4.2",
             "npm:@expo-google-fonts/jetbrains-mono@~0.4.1",
             "npm:@react-navigation/native-stack@^7.14.12",
@@ -54,12 +55,14 @@
             "npm:expo@54.0.33",
             "npm:jest-expo@^54.0.17",
             "npm:jest@30.3.0",
+            "npm:phosphor-react-native@^3.0.6",
             "npm:react-native-ble-plx@^3.5.1",
             "npm:react-native-gesture-handler@2.28.0",
             "npm:react-native-mmkv@^4.3.1",
             "npm:react-native-reanimated@4.1.7",
             "npm:react-native-safe-area-context@5.6",
             "npm:react-native-screens@4.16",
+            "npm:react-native-svg@15.12.1",
             "npm:react-native@0.81.5",
             "npm:react-test-renderer@^19.1.0",
             "npm:react@19.1.0",
