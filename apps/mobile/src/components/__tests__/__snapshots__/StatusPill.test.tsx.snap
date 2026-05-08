@@ -1,0 +1,751 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`StatusPill — status × mode snapshot matrix renders status=attention mode=dark 1`] = `
+<View
+  accessibilityLabel="Needs attention"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#FF735024",
+        "borderColor": "#FF735059",
+        "borderRadius": 99,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "gap": 5,
+        "paddingLeft": 7,
+        "paddingRight": 8,
+        "paddingVertical": 4,
+      },
+      undefined,
+    ]
+  }
+  testID="pill"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#FF7350",
+          "borderRadius": 99,
+          "height": 5,
+          "width": 5,
+        },
+        {
+          "elevation": 0,
+          "shadowColor": "#FF7350",
+          "shadowOffset": {
+            "height": 0,
+            "width": 0,
+          },
+          "shadowOpacity": 0.6,
+          "shadowRadius": 4,
+        },
+      ]
+    }
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#FF7350",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 10,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    Needs attention
+  </Text>
+</View>
+`;
+
+exports[`StatusPill — status × mode snapshot matrix renders status=attention mode=light 1`] = `
+<View
+  accessibilityLabel="Needs attention"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#FF735024",
+        "borderColor": "#FF735059",
+        "borderRadius": 99,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "gap": 5,
+        "paddingLeft": 7,
+        "paddingRight": 8,
+        "paddingVertical": 4,
+      },
+      undefined,
+    ]
+  }
+  testID="pill"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#FF7350",
+          "borderRadius": 99,
+          "height": 5,
+          "width": 5,
+        },
+        {
+          "elevation": 0,
+          "shadowColor": "#FF7350",
+          "shadowOffset": {
+            "height": 0,
+            "width": 0,
+          },
+          "shadowOpacity": 0.6,
+          "shadowRadius": 4,
+        },
+      ]
+    }
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#FF7350",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 10,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    Needs attention
+  </Text>
+</View>
+`;
+
+exports[`StatusPill — status × mode snapshot matrix renders status=clear mode=dark 1`] = `
+<View
+  accessibilityLabel="All clear"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#61B56524",
+        "borderColor": "#61B56559",
+        "borderRadius": 99,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "gap": 5,
+        "paddingLeft": 7,
+        "paddingRight": 8,
+        "paddingVertical": 4,
+      },
+      undefined,
+    ]
+  }
+  testID="pill"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#61B565",
+          "borderRadius": 99,
+          "height": 5,
+          "width": 5,
+        },
+        {
+          "elevation": 0,
+          "shadowColor": "#61B565",
+          "shadowOffset": {
+            "height": 0,
+            "width": 0,
+          },
+          "shadowOpacity": 0.6,
+          "shadowRadius": 4,
+        },
+      ]
+    }
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#61B565",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 10,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    All clear
+  </Text>
+</View>
+`;
+
+exports[`StatusPill — status × mode snapshot matrix renders status=clear mode=light 1`] = `
+<View
+  accessibilityLabel="All clear"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#61B56524",
+        "borderColor": "#61B56559",
+        "borderRadius": 99,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "gap": 5,
+        "paddingLeft": 7,
+        "paddingRight": 8,
+        "paddingVertical": 4,
+      },
+      undefined,
+    ]
+  }
+  testID="pill"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#61B565",
+          "borderRadius": 99,
+          "height": 5,
+          "width": 5,
+        },
+        {
+          "elevation": 0,
+          "shadowColor": "#61B565",
+          "shadowOffset": {
+            "height": 0,
+            "width": 0,
+          },
+          "shadowOpacity": 0.6,
+          "shadowRadius": 4,
+        },
+      ]
+    }
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#61B565",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 10,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    All clear
+  </Text>
+</View>
+`;
+
+exports[`StatusPill — status × mode snapshot matrix renders status=offline mode=dark 1`] = `
+<View
+  accessibilityLabel="No recent reading"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#857F7A24",
+        "borderColor": "#857F7A59",
+        "borderRadius": 99,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "gap": 5,
+        "paddingLeft": 7,
+        "paddingRight": 8,
+        "paddingVertical": 4,
+      },
+      undefined,
+    ]
+  }
+  testID="pill"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#857F7A",
+          "borderRadius": 99,
+          "height": 5,
+          "width": 5,
+        },
+        {
+          "elevation": 0,
+          "shadowColor": "#857F7A",
+          "shadowOffset": {
+            "height": 0,
+            "width": 0,
+          },
+          "shadowOpacity": 0.6,
+          "shadowRadius": 4,
+        },
+      ]
+    }
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#857F7A",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 10,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    No recent reading
+  </Text>
+</View>
+`;
+
+exports[`StatusPill — status × mode snapshot matrix renders status=offline mode=light 1`] = `
+<View
+  accessibilityLabel="No recent reading"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#857F7A24",
+        "borderColor": "#857F7A59",
+        "borderRadius": 99,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "gap": 5,
+        "paddingLeft": 7,
+        "paddingRight": 8,
+        "paddingVertical": 4,
+      },
+      undefined,
+    ]
+  }
+  testID="pill"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#857F7A",
+          "borderRadius": 99,
+          "height": 5,
+          "width": 5,
+        },
+        {
+          "elevation": 0,
+          "shadowColor": "#857F7A",
+          "shadowOffset": {
+            "height": 0,
+            "width": 0,
+          },
+          "shadowOpacity": 0.6,
+          "shadowRadius": 4,
+        },
+      ]
+    }
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#857F7A",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 10,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    No recent reading
+  </Text>
+</View>
+`;
+
+exports[`StatusPill — status × mode snapshot matrix renders status=sleeping mode=dark 1`] = `
+<View
+  accessibilityLabel="Sleeping"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#7B67CC24",
+        "borderColor": "#7B67CC59",
+        "borderRadius": 99,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "gap": 5,
+        "paddingLeft": 7,
+        "paddingRight": 8,
+        "paddingVertical": 4,
+      },
+      undefined,
+    ]
+  }
+  testID="pill"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#7B67CC",
+          "borderRadius": 99,
+          "height": 5,
+          "width": 5,
+        },
+        null,
+      ]
+    }
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#7B67CC",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 10,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    Sleeping
+  </Text>
+</View>
+`;
+
+exports[`StatusPill — status × mode snapshot matrix renders status=sleeping mode=light 1`] = `
+<View
+  accessibilityLabel="Sleeping"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#7B67CC24",
+        "borderColor": "#7B67CC59",
+        "borderRadius": 99,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "gap": 5,
+        "paddingLeft": 7,
+        "paddingRight": 8,
+        "paddingVertical": 4,
+      },
+      undefined,
+    ]
+  }
+  testID="pill"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#7B67CC",
+          "borderRadius": 99,
+          "height": 5,
+          "width": 5,
+        },
+        null,
+      ]
+    }
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#7B67CC",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 10,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    Sleeping
+  </Text>
+</View>
+`;
+
+exports[`StatusPill — status × mode snapshot matrix renders status=urgent mode=dark 1`] = `
+<View
+  accessibilityLabel="Urgent"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#EE343B24",
+        "borderColor": "#EE343B59",
+        "borderRadius": 99,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "gap": 5,
+        "paddingLeft": 7,
+        "paddingRight": 8,
+        "paddingVertical": 4,
+      },
+      undefined,
+    ]
+  }
+  testID="pill"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#EE343B",
+          "borderRadius": 99,
+          "height": 5,
+          "width": 5,
+        },
+        {
+          "elevation": 0,
+          "shadowColor": "#EE343B",
+          "shadowOffset": {
+            "height": 0,
+            "width": 0,
+          },
+          "shadowOpacity": 0.6,
+          "shadowRadius": 4,
+        },
+      ]
+    }
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#EE343B",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 10,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    Urgent
+  </Text>
+</View>
+`;
+
+exports[`StatusPill — status × mode snapshot matrix renders status=urgent mode=light 1`] = `
+<View
+  accessibilityLabel="Urgent"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#EE343B24",
+        "borderColor": "#EE343B59",
+        "borderRadius": 99,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "gap": 5,
+        "paddingLeft": 7,
+        "paddingRight": 8,
+        "paddingVertical": 4,
+      },
+      undefined,
+    ]
+  }
+  testID="pill"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#EE343B",
+          "borderRadius": 99,
+          "height": 5,
+          "width": 5,
+        },
+        {
+          "elevation": 0,
+          "shadowColor": "#EE343B",
+          "shadowOffset": {
+            "height": 0,
+            "width": 0,
+          },
+          "shadowOpacity": 0.6,
+          "shadowRadius": 4,
+        },
+      ]
+    }
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#EE343B",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 10,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    Urgent
+  </Text>
+</View>
+`;
+
+exports[`StatusPill — status × mode snapshot matrix renders status=watch mode=dark 1`] = `
+<View
+  accessibilityLabel="Watch"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#F2A61824",
+        "borderColor": "#F2A61859",
+        "borderRadius": 99,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "gap": 5,
+        "paddingLeft": 7,
+        "paddingRight": 8,
+        "paddingVertical": 4,
+      },
+      undefined,
+    ]
+  }
+  testID="pill"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#F2A618",
+          "borderRadius": 99,
+          "height": 5,
+          "width": 5,
+        },
+        {
+          "elevation": 0,
+          "shadowColor": "#F2A618",
+          "shadowOffset": {
+            "height": 0,
+            "width": 0,
+          },
+          "shadowOpacity": 0.6,
+          "shadowRadius": 4,
+        },
+      ]
+    }
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#F2A618",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 10,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    Watch
+  </Text>
+</View>
+`;
+
+exports[`StatusPill — status × mode snapshot matrix renders status=watch mode=light 1`] = `
+<View
+  accessibilityLabel="Watch"
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#F2A61824",
+        "borderColor": "#F2A61859",
+        "borderRadius": 99,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "gap": 5,
+        "paddingLeft": 7,
+        "paddingRight": 8,
+        "paddingVertical": 4,
+      },
+      undefined,
+    ]
+  }
+  testID="pill"
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "#F2A618",
+          "borderRadius": 99,
+          "height": 5,
+          "width": 5,
+        },
+        {
+          "elevation": 0,
+          "shadowColor": "#F2A618",
+          "shadowOffset": {
+            "height": 0,
+            "width": 0,
+          },
+          "shadowOpacity": 0.6,
+          "shadowRadius": 4,
+        },
+      ]
+    }
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#F2A618",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 10,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    Watch
+  </Text>
+</View>
+`;
