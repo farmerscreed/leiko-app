@@ -1,5 +1,12 @@
 # Sprint 7.7 — Caregiver Home Rewrite (Family Constellation)
 
+## Status
+
+| Sub-sprint | Status |
+| --- | --- |
+| 7.7a — Bird's-eye + drill-in | ✅ Shipped 2026-05-08 |
+| 7.7b — Editorial cards + view toggle + cinematic transition | ⏳ Open |
+
 ## Goal
 Rewrite the Caregiver Home (`src/screens/Home/CaregiverHome.tsx`) to the **Family Constellation** design — a single screen with two view modes:
 
