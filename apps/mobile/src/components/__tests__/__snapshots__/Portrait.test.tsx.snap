@@ -1,0 +1,316 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Portrait — size × accent snapshot matrix renders size=lg accent=amber 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "#F2A61822",
+        "borderColor": "#F2A61866",
+        "borderRadius": 28,
+        "borderWidth": 0.5,
+        "height": 56,
+        "justifyContent": "center",
+        "width": 56,
+      },
+      undefined,
+    ]
+  }
+  testID="portrait"
+>
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#F2A618",
+        "fontFamily": "InstrumentSerif_400Regular_Italic",
+        "fontSize": 25,
+        "lineHeight": 25,
+      }
+    }
+  >
+    J
+  </Text>
+</View>
+`;
+
+exports[`Portrait — size × accent snapshot matrix renders size=lg accent=coral 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FF735022",
+        "borderColor": "#FF735066",
+        "borderRadius": 28,
+        "borderWidth": 0.5,
+        "height": 56,
+        "justifyContent": "center",
+        "width": 56,
+      },
+      undefined,
+    ]
+  }
+  testID="portrait"
+>
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#FF7350",
+        "fontFamily": "InstrumentSerif_400Regular_Italic",
+        "fontSize": 25,
+        "lineHeight": 25,
+      }
+    }
+  >
+    J
+  </Text>
+</View>
+`;
+
+exports[`Portrait — size × accent snapshot matrix renders size=lg accent=periwinkle 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "#7B67CC22",
+        "borderColor": "#7B67CC66",
+        "borderRadius": 28,
+        "borderWidth": 0.5,
+        "height": 56,
+        "justifyContent": "center",
+        "width": 56,
+      },
+      undefined,
+    ]
+  }
+  testID="portrait"
+>
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#7B67CC",
+        "fontFamily": "InstrumentSerif_400Regular_Italic",
+        "fontSize": 25,
+        "lineHeight": 25,
+      }
+    }
+  >
+    J
+  </Text>
+</View>
+`;
+
+exports[`Portrait — size × accent snapshot matrix renders size=md accent=amber 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "#F2A61822",
+        "borderColor": "#F2A61866",
+        "borderRadius": 22,
+        "borderWidth": 0.5,
+        "height": 44,
+        "justifyContent": "center",
+        "width": 44,
+      },
+      undefined,
+    ]
+  }
+  testID="portrait"
+>
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#F2A618",
+        "fontFamily": "InstrumentSerif_400Regular_Italic",
+        "fontSize": 20,
+        "lineHeight": 20,
+      }
+    }
+  >
+    J
+  </Text>
+</View>
+`;
+
+exports[`Portrait — size × accent snapshot matrix renders size=md accent=coral 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FF735022",
+        "borderColor": "#FF735066",
+        "borderRadius": 22,
+        "borderWidth": 0.5,
+        "height": 44,
+        "justifyContent": "center",
+        "width": 44,
+      },
+      undefined,
+    ]
+  }
+  testID="portrait"
+>
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#FF7350",
+        "fontFamily": "InstrumentSerif_400Regular_Italic",
+        "fontSize": 20,
+        "lineHeight": 20,
+      }
+    }
+  >
+    J
+  </Text>
+</View>
+`;
+
+exports[`Portrait — size × accent snapshot matrix renders size=md accent=periwinkle 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "#7B67CC22",
+        "borderColor": "#7B67CC66",
+        "borderRadius": 22,
+        "borderWidth": 0.5,
+        "height": 44,
+        "justifyContent": "center",
+        "width": 44,
+      },
+      undefined,
+    ]
+  }
+  testID="portrait"
+>
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#7B67CC",
+        "fontFamily": "InstrumentSerif_400Regular_Italic",
+        "fontSize": 20,
+        "lineHeight": 20,
+      }
+    }
+  >
+    J
+  </Text>
+</View>
+`;
+
+exports[`Portrait — size × accent snapshot matrix renders size=sm accent=amber 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "#F2A61822",
+        "borderColor": "#F2A61866",
+        "borderRadius": 16,
+        "borderWidth": 0.5,
+        "height": 32,
+        "justifyContent": "center",
+        "width": 32,
+      },
+      undefined,
+    ]
+  }
+  testID="portrait"
+>
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#F2A618",
+        "fontFamily": "InstrumentSerif_400Regular_Italic",
+        "fontSize": 14,
+        "lineHeight": 14,
+      }
+    }
+  >
+    J
+  </Text>
+</View>
+`;
+
+exports[`Portrait — size × accent snapshot matrix renders size=sm accent=coral 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FF735022",
+        "borderColor": "#FF735066",
+        "borderRadius": 16,
+        "borderWidth": 0.5,
+        "height": 32,
+        "justifyContent": "center",
+        "width": 32,
+      },
+      undefined,
+    ]
+  }
+  testID="portrait"
+>
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#FF7350",
+        "fontFamily": "InstrumentSerif_400Regular_Italic",
+        "fontSize": 14,
+        "lineHeight": 14,
+      }
+    }
+  >
+    J
+  </Text>
+</View>
+`;
+
+exports[`Portrait — size × accent snapshot matrix renders size=sm accent=periwinkle 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "#7B67CC22",
+        "borderColor": "#7B67CC66",
+        "borderRadius": 16,
+        "borderWidth": 0.5,
+        "height": 32,
+        "justifyContent": "center",
+        "width": 32,
+      },
+      undefined,
+    ]
+  }
+  testID="portrait"
+>
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#7B67CC",
+        "fontFamily": "InstrumentSerif_400Regular_Italic",
+        "fontSize": 14,
+        "lineHeight": 14,
+      }
+    }
+  >
+    J
+  </Text>
+</View>
+`;
