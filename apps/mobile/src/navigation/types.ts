@@ -44,6 +44,11 @@ export type CaregiverStackParamList = {
   // by the readings store; serverId is filled in once /sync acks).
   TakeReading: undefined;
   ReadingDetail: { readingLocalId: string };
+  // Sprint 9 — multi-vital trends + correlation cards + doctor PDF
+  // export per docs/04-screens/trends.md. Caregiver entry point will
+  // be wired into a tab-bar follow-up; the route is registered now so
+  // navigation.navigate('Trends') resolves from any caregiver screen.
+  Trends: undefined;
 };
 
 // Sprint 4 — self-buyer onboarding stack. Five screens per
@@ -70,6 +75,10 @@ export type SelfBuyerStackParamList = {
   TakeReading: undefined;
   ReadingDetail: { readingLocalId: string };
   VitalDetail: { vital: 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity' };
+  // Sprint 9 — multi-vital trends + correlation cards + doctor PDF
+  // export. The Self-Buyer Home tab bar's "Trends" entry routes here
+  // (was a placeholder in Sprint 8).
+  Trends: undefined;
 };
 
 export type AuthScreenProps<R extends keyof AuthStackParamList> = NativeStackScreenProps<

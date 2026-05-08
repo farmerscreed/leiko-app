@@ -19,7 +19,7 @@
 // for the cross-phone case. Sprint 8 (self-buyer home) reuses the
 // same hook with a different consumer shape.
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useId, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../services/supabase';
 import { fetchParentSummaries, type ParentSummary } from '../services/families/fetchParentSummaries';
@@ -42,6 +42,13 @@ export function useFamilyReadings(): UseFamilyReadingsResult {
   const userId = useAuth((s) => s.session?.user.id ?? null);
   const queryClient = useQueryClient();
   const forceSync = useSyncOrchestrator((s) => s.runSync);
+  // Per-hook-instance id — supabase-js rejects a second
+  // postgres_changes registration on a channel that's already
+  // subscribed, so the channel NAME must be unique per consumer.
+  // Without this, navigating from SelfBuyerHome to Trends (both call
+  // useFamilyReadings) crashes the second screen with "cannot add
+  // postgres_changes callbacks for realtime family-readings".
+  const subscriberId = useId();
 
   const queryKey = useMemo(() => [...QUERY_KEY, userId] as const, [userId]);
 
@@ -76,7 +83,7 @@ export function useFamilyReadings(): UseFamilyReadingsResult {
     // during on-device review (2026-05-08).
     const channels = familyIds.flatMap((familyId) => {
       const readingsChannel = supabase
-        .channel(`family-readings:readings:${familyId}`)
+        .channel(`family-readings:readings:${familyId}:${subscriberId}`)
         .on(
           'postgres_changes',
           {
@@ -92,7 +99,7 @@ export function useFamilyReadings(): UseFamilyReadingsResult {
         )
         .subscribe();
       const vitalsChannel = supabase
-        .channel(`family-readings:vitals_other:${familyId}`)
+        .channel(`family-readings:vitals_other:${familyId}:${subscriberId}`)
         .on(
           'postgres_changes',
           {
@@ -117,7 +124,7 @@ export function useFamilyReadings(): UseFamilyReadingsResult {
     // queryKey + queryClient + familyIds are derived from userId +
     // familyIdsKey; this dep list is intentionally narrowed to those
     // keys to avoid re-subscribing on every parents render.
-  }, [userId, familyIdsKey, familyIds, queryClient, queryKey]);
+  }, [userId, familyIdsKey, familyIds, queryClient, queryKey, subscriberId]);
 
   return {
     parents: query.data ?? [],

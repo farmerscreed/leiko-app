@@ -313,8 +313,8 @@ export function SelfBuyerHome() {
         onPress={() => navigation.navigate('TakeReading')}
       />
 
-      {/* Visual tab bar — Home active. Settings wired. Trends + Family
-          route to a placeholder until Sprints 9 / 10. */}
+      {/* Visual tab bar — Home active. Settings wired. Trends wired
+          (Sprint 9). Family routes to a placeholder until Sprint 10. */}
       <SelfBuyerTabBar
         theme={theme}
         onSelect={(tab) => {
@@ -325,6 +325,8 @@ export function SelfBuyerHome() {
               navigation.navigate('Settings');
               return;
             case 'trends':
+              navigation.navigate('Trends');
+              return;
             case 'family':
               navigation.navigate('VitalDetail', { vital: 'bp' });
               return;
