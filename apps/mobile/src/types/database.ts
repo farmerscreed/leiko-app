@@ -132,6 +132,33 @@ export type VitalsOtherRow = {
   created_at: string;
 };
 
+// Cross-vital correlation engine output (Sprint 9 / D13 §9.2). One row
+// per (family, user, correlation_type) per nightly compute_correlations
+// run. Read-only from the client; the Edge Function is the only writer
+// (RLS service_role insert policy).
+export type CorrelationType =
+  | 'sleep_x_morning_bp'
+  | 'activity_x_resting_hr'
+  | 'spo2_dip_x_sleep_score';
+
+export type CorrelationRow = {
+  id: string;
+  family_id: string;
+  user_id: string;
+  correlation_type: CorrelationType;
+  window_days: number;
+  computed_at: string;
+  pearson_r: number | null;
+  effect_size: number | null;
+  effect_unit: string | null;
+  significance: number | null;
+  sample_n: number | null;
+  is_meaningful: boolean;
+  narrative_short: string | null;
+  narrative_long: string | null;
+  created_at: string;
+};
+
 // Shape conforms to @supabase/postgrest-js's GenericSchema constraint
 // (Tables / Views / Functions, with Relationships on each table). Without
 // Views + Relationships the postgrest-js client falls back to `any`-typed
@@ -179,6 +206,19 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<VitalsOtherRow>;
+        Relationships: [];
+      };
+      correlations: {
+        Row: CorrelationRow;
+        // Inserts go through the compute-correlations Edge Function
+        // (service_role). RLS allows only members to read; the Insert
+        // type exists for the postgrest-js builder typecheck.
+        Insert: Omit<CorrelationRow, 'id' | 'created_at' | 'computed_at'> & {
+          id?: string;
+          created_at?: string;
+          computed_at?: string;
+        };
+        Update: Partial<CorrelationRow>;
         Relationships: [];
       };
     };
