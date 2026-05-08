@@ -50,7 +50,7 @@ Sprint 1.5 shipped 2026-05-07 (closeout in `plans/done/sprint-01-5-visual-system
 |---|---|---|---|---|
 | 5 | **8** | Self-Buyer Home (Daily Pulse) | REWRITTEN | `sprint-08-self-buyer-home.md` |
 | 6 | **8.5** | Per-vital detail screens (HR · SpO2 · Sleep · Activity) | NEW | `sprint-08-5-vital-detail-screens.md` |
-| 7 | **9** | Trends + Multi-Vital PDF | REWRITTEN | `sprint-09-trends-pdf.md` |
+| ✅ | **9** | Trends + Multi-Vital PDF | REWRITTEN | `done/sprint-09-trends-pdf.md` |
 | 8 | **9.5** | Apple Health + Health Connect | NEW | `sprint-09-5-health-platform-integration.md` |
 | 9 | **10** | Settings + Family + Paywall | EDITED | `sprint-10-settings-family-paywall.md` |
 
