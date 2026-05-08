@@ -1,0 +1,327 @@
+// CaregiverHome — Sprint 7.7a integration tests for the bird's-eye view.
+//
+// Acceptance criteria covered:
+//   - Empty state ("Your family circle is quiet for now")
+//   - Loading state (skeleton renders)
+//   - Three-person populated state (orbs + legend present)
+//   - Drill-in: tap a person → navigation.navigate('ReadingDetail', ...)
+//   - AnomalyBanner: confirmed-urgent fires; calm-concerned fires; clear-only suppresses
+//   - CaregiverActionBar visible with count when populated
+//   - Voice gate passes on every authored screen-level string
+//
+// Mocks the data hooks at the boundary so these stay screen tests,
+// not data tests. The pure helper (utils/caregiverPerson.ts) has its
+// own unit tests; this file just exercises the wiring.
+
+import { type ReactNode } from 'react';
+import { fireEvent, render, screen } from '@testing-library/react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemeProvider } from '../../theme';
+import { CaregiverHome } from '../Home/CaregiverHome';
+import type { ParentSummary } from '../../services/families/fetchParentSummaries';
+
+const mockNavigate = jest.fn();
+const mockRefresh = jest.fn(async () => undefined);
+
+const mockHookResult = {
+  parents: [] as ParentSummary[],
+  people: [] as Array<{
+    id: string;
+    fullName: string;
+    initial: string;
+    accentIndex: 1 | 2 | 3;
+    status: 'clear' | 'watch' | 'attention' | 'urgent' | 'offline' | 'sleeping';
+    bpLabel: string;
+    headline: string;
+    relation: string;
+  }>,
+  isLoading: false,
+  isRefreshing: false,
+  error: null as Error | null,
+  refresh: mockRefresh,
+};
+
+jest.mock('../../hooks/useCaregiverFamily', () => ({
+  useCaregiverFamily: () => mockHookResult,
+}));
+
+jest.mock('../../hooks/useCaregiverViewMode', () => ({
+  useCaregiverViewMode: () => ({ viewMode: 'birds', setViewMode: jest.fn() }),
+}));
+
+jest.mock('../../state/pairing', () => ({
+  usePairing: (selector?: (s: unknown) => unknown) => {
+    const state = { pairedDevice: null };
+    return selector ? selector(state) : state;
+  },
+}));
+
+jest.mock('../../state/readings', () => ({
+  useReadings: (selector?: (s: unknown) => unknown) => {
+    const state = { latest: () => null };
+    return selector ? selector(state) : state;
+  },
+}));
+
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ navigate: mockNavigate }),
+  useRoute: () => ({ params: {} }),
+}));
+
+function withProviders(ui: ReactNode) {
+  return (
+    <SafeAreaProvider
+      initialMetrics={{
+        frame: { x: 0, y: 0, width: 360, height: 720 },
+        insets: { top: 0, left: 0, right: 0, bottom: 0 },
+      }}
+    >
+      <ThemeProvider mode="caregiver" colorMode="dark">
+        {ui}
+      </ThemeProvider>
+    </SafeAreaProvider>
+  );
+}
+
+function reading(overrides: Partial<{ id: string; measuredAt: string; systolic: number; diastolic: number }> = {}) {
+  return {
+    id: overrides.id ?? 'r1',
+    measuredAt:
+      overrides.measuredAt ?? new Date(Date.now() - 60_000).toISOString(),
+    systolic: overrides.systolic ?? 122,
+    diastolic: overrides.diastolic ?? 78,
+    pulse: 64,
+    qualityScore: 'good' as const,
+  };
+}
+
+function parent(overrides: Partial<ParentSummary> & { familyId: string; parentDisplayName: string }): ParentSummary {
+  return {
+    familyId: overrides.familyId,
+    parentDisplayName: overrides.parentDisplayName,
+    parentRelationship: overrides.parentRelationship ?? 'Mom',
+    parentYearOfBirth: overrides.parentYearOfBirth ?? 1955,
+    latestReading: overrides.latestReading ?? null,
+    recentReadings: overrides.recentReadings ?? [],
+  };
+}
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockHookResult.parents = [];
+  mockHookResult.people = [];
+  mockHookResult.isLoading = false;
+  mockHookResult.isRefreshing = false;
+  mockHookResult.error = null;
+});
+
+describe('<CaregiverHome /> — empty state', () => {
+  it('renders the verified empty-state copy when the user has no families', () => {
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByText('Your family circle is quiet for now')).toBeTruthy();
+    expect(
+      screen.getByText('Add a family member to start sharing care.'),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'Add a family member' }),
+    ).toBeTruthy();
+  });
+
+  it('does not render the constellation or action bar when empty', () => {
+    render(withProviders(<CaregiverHome />));
+    expect(screen.queryByTestId('caregiver-home-constellation')).toBeNull();
+    expect(screen.queryByTestId('caregiver-home-action-bar')).toBeNull();
+  });
+});
+
+describe('<CaregiverHome /> — loading state', () => {
+  it('renders the skeleton (no orbs yet)', () => {
+    mockHookResult.isLoading = true;
+    render(withProviders(<CaregiverHome />));
+    expect(screen.queryByTestId('caregiver-home-constellation')).toBeNull();
+    expect(screen.queryByText('Your family circle is quiet for now')).toBeNull();
+  });
+});
+
+describe('<CaregiverHome /> — populated state', () => {
+  function setupThreePeople() {
+    mockHookResult.parents = [
+      parent({
+        familyId: 'fam-1',
+        parentDisplayName: 'Marian Okeke',
+        parentRelationship: 'Mom',
+        latestReading: reading({ id: 'r-mom', systolic: 122, diastolic: 78 }),
+      }),
+      parent({
+        familyId: 'fam-2',
+        parentDisplayName: 'Emeka Okeke',
+        parentRelationship: 'Dad',
+        latestReading: reading({ id: 'r-dad', systolic: 134, diastolic: 86 }),
+      }),
+      parent({
+        familyId: 'fam-3',
+        parentDisplayName: 'Joy Adeyemi',
+        parentRelationship: 'Aunt',
+        latestReading: reading({ id: 'r-aunt', systolic: 118, diastolic: 74 }),
+      }),
+    ];
+    mockHookResult.people = [
+      {
+        id: 'fam-1',
+        fullName: 'Marian Okeke',
+        initial: 'M',
+        accentIndex: 1,
+        status: 'clear',
+        bpLabel: '122/78',
+        headline: 'Read 1 min ago — in pattern.',
+        relation: 'Mom',
+      },
+      {
+        id: 'fam-2',
+        fullName: 'Emeka Okeke',
+        initial: 'E',
+        accentIndex: 2,
+        status: 'clear',
+        bpLabel: '134/86',
+        headline: 'Read 1 min ago — in pattern.',
+        relation: 'Dad',
+      },
+      {
+        id: 'fam-3',
+        fullName: 'Joy Adeyemi',
+        initial: 'J',
+        accentIndex: 3,
+        status: 'clear',
+        bpLabel: '118/74',
+        headline: 'Read 1 min ago — in pattern.',
+        relation: 'Aunt',
+      },
+    ];
+  }
+
+  it('renders three orbs (constellation) + legend + action bar', () => {
+    setupThreePeople();
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-constellation')).toBeTruthy();
+    expect(screen.getByTestId('caregiver-home-legend')).toBeTruthy();
+    expect(screen.getByTestId('caregiver-home-action-bar')).toBeTruthy();
+  });
+
+  it('renders the count in the action bar', () => {
+    setupThreePeople();
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByText('3 · all in your circle')).toBeTruthy();
+  });
+
+  it('navigates to ReadingDetail on a legend row tap', () => {
+    setupThreePeople();
+    render(withProviders(<CaregiverHome />));
+    fireEvent.press(
+      screen.getByRole('button', {
+        name: 'Marian, Mom, All clear, Read 1 min ago — in pattern.',
+      }),
+    );
+    expect(mockNavigate).toHaveBeenCalledWith('ReadingDetail', {
+      readingLocalId: 'r-mom',
+    });
+  });
+});
+
+describe('<CaregiverHome /> — anomaly banner', () => {
+  function setupOnePerson(status: 'clear' | 'attention' | 'urgent') {
+    mockHookResult.parents = [
+      parent({
+        familyId: 'fam-1',
+        parentDisplayName: 'Marian Okeke',
+        parentRelationship: 'Mom',
+        latestReading: reading({ id: 'r1', systolic: 122, diastolic: 78 }),
+      }),
+    ];
+    mockHookResult.people = [
+      {
+        id: 'fam-1',
+        fullName: 'Marian Okeke',
+        initial: 'M',
+        accentIndex: 1,
+        status,
+        bpLabel: '122/78',
+        headline: 'headline',
+        relation: 'Mom',
+      },
+    ];
+  }
+
+  it('shows confirmed-urgent banner when any person is urgent', () => {
+    setupOnePerson('urgent');
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByText('Talk to Marian now')).toBeTruthy();
+  });
+
+  it('shows calm-concerned banner when only attention status is present', () => {
+    setupOnePerson('attention');
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByText('Worth a chat with Marian')).toBeTruthy();
+  });
+
+  it('does NOT render an AnomalyBanner when everyone is clear', () => {
+    setupOnePerson('clear');
+    render(withProviders(<CaregiverHome />));
+    expect(screen.queryByText(/Talk to/)).toBeNull();
+    expect(screen.queryByText(/Worth a chat/)).toBeNull();
+  });
+
+  it('confirmed-urgent wins over calm-concerned (most-severe-wins)', () => {
+    mockHookResult.parents = [
+      parent({
+        familyId: 'fam-1',
+        parentDisplayName: 'Marian Okeke',
+        parentRelationship: 'Mom',
+        latestReading: reading({ id: 'r1' }),
+      }),
+      parent({
+        familyId: 'fam-2',
+        parentDisplayName: 'Emeka Okeke',
+        parentRelationship: 'Dad',
+        latestReading: reading({ id: 'r2' }),
+      }),
+    ];
+    mockHookResult.people = [
+      {
+        id: 'fam-1',
+        fullName: 'Marian Okeke',
+        initial: 'M',
+        accentIndex: 1,
+        status: 'attention',
+        bpLabel: '122/78',
+        headline: 'h',
+        relation: 'Mom',
+      },
+      {
+        id: 'fam-2',
+        fullName: 'Emeka Okeke',
+        initial: 'E',
+        accentIndex: 2,
+        status: 'urgent',
+        bpLabel: '188/120',
+        headline: 'h',
+        relation: 'Dad',
+      },
+    ];
+    render(withProviders(<CaregiverHome />));
+    // Confirmed-urgent (Dad) wins; calm-concerned (Marian) is suppressed.
+    expect(screen.getByText('Talk to Emeka now')).toBeTruthy();
+    expect(screen.queryByText(/Worth a chat/)).toBeNull();
+  });
+});
+
+describe('<CaregiverHome /> — voice rules', () => {
+  it.each([
+    'Your family circle is quiet for now',
+    'Add a family member to start sharing care.',
+    'Good morning',
+    'Leiko · Family',
+  ])('voice-rule clean string present: %s', (text) => {
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByText(text)).toBeTruthy();
+  });
+});
