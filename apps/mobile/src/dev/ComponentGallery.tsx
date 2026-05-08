@@ -16,6 +16,12 @@ import { Card } from '../components/Card';
 import { ListRow } from '../components/ListRow';
 import { Pill } from '../components/Pill';
 import { BottomSheet, type BottomSheetSize } from '../components/BottomSheet';
+import { VitalRing, type VitalRingSize, type VitalRingState, type VitalType } from '../components/VitalRing';
+import { AmbientPulse } from '../components/AmbientPulse';
+import { VitalTile, type VitalTileState } from '../components/VitalTile';
+import { DailyPulseHero, type DailyPulseHeroVitals } from '../components/DailyPulseHero';
+import { CorrelationStrip } from '../components/CorrelationStrip';
+import { AnomalyBanner } from '../components/AnomalyBanner';
 import { useColorModeControl, useTheme, type ThemeMode } from '../theme';
 import { VitalsDebugPanel } from './VitalsDebugPanel';
 
@@ -23,6 +29,34 @@ interface Props {
   mode: ThemeMode;
   onModeChange: (mode: ThemeMode) => void;
 }
+
+// Mock data — gallery only. Voice rules apply: narrations and tile copy
+// pass the forbidden-words list.
+const MOCK_HERO_VITALS: DailyPulseHeroVitals = {
+  bp: { fill: 0.75, state: 'filling' },
+  hr: { fill: 0.4, state: 'filling' },
+  spo2: { fill: 0.85, state: 'filling' },
+  sleep: { fill: 0.6, state: 'filling' },
+  activity: { fill: 0.5, state: 'filling' },
+};
+const MOCK_HERO_VITALS_EMPTY: DailyPulseHeroVitals = {
+  bp: { fill: 0, state: 'idle' },
+  hr: { fill: 0, state: 'idle' },
+  spo2: { fill: 0, state: 'idle' },
+  sleep: { fill: 0, state: 'idle' },
+  activity: { fill: 0, state: 'idle' },
+};
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const T0 = 1_700_000_000_000;
+const MOCK_SLEEP_POINTS = Array.from({ length: 7 }, (_, i) => ({
+  t: T0 + i * DAY_MS,
+  value: 6.5 + Math.sin(i / 1.4) * 1.2,
+}));
+const MOCK_BP_POINTS = Array.from({ length: 7 }, (_, i) => ({
+  t: T0 + i * DAY_MS,
+  value: 124 + Math.cos(i / 1.4) * 6,
+}));
 
 export function ComponentGallery({ mode, onModeChange }: Props) {
   const theme = useTheme();
@@ -34,6 +68,10 @@ export function ComponentGallery({ mode, onModeChange }: Props) {
   const [sheetVisible, setSheetVisible] = useState(false);
   const [sheetSize, setSheetSize] = useState<BottomSheetSize>('default');
   const [sheetUrgent, setSheetUrgent] = useState(false);
+  // Bump to remount every motion-using component so the daily-pulse-reveal
+  // and live-pulse animations replay. Lets a designer review the
+  // choreography without restarting the app.
+  const [motionKey, setMotionKey] = useState(0);
 
   const headlineStyle = {
     fontSize: theme.type('headline').size,
@@ -323,6 +361,202 @@ export function ComponentGallery({ mode, onModeChange }: Props) {
           </Button>
         </View>
 
+        {/* ─── Sprint 7.6 primitives ─────────────────────────────── */}
+
+        <Text style={sectionTitleStyle}>Sprint 7.6 — multi-vitals primitives</Text>
+        <Text style={captionStyle}>
+          Tap "Replay motion" to remount every animated component so the
+          daily-pulse-reveal + live-pulse choreography plays from scratch.
+        </Text>
+        <View style={styles.buttonRow}>
+          <Button
+            variant="secondary"
+            onPress={() => setMotionKey((k) => k + 1)}
+          >
+            Replay motion
+          </Button>
+        </View>
+
+        {/* VitalRing */}
+        <Text style={sectionTitleStyle}>VitalRing — sizes</Text>
+        <View style={styles.ringRow}>
+          {(['sm', 'md', 'lg', 'hero'] as VitalRingSize[]).map((size) => (
+            <VitalRing
+              key={`size-${size}-${motionKey}`}
+              vitalType="bp"
+              fill={0.62}
+              size={size}
+              state="filling"
+            />
+          ))}
+        </View>
+        <Text style={sectionTitleStyle}>VitalRing — states (md, BP)</Text>
+        <View style={styles.ringRow}>
+          {(['idle', 'filling', 'pulsing', 'stale'] as VitalRingState[]).map(
+            (s) => (
+              <View key={`state-${s}-${motionKey}`} style={{ alignItems: 'center' }}>
+                <VitalRing vitalType="bp" fill={0.62} state={s} />
+                <Text style={[captionStyle, { marginTop: theme.spacing.xs }]}>
+                  {s}
+                </Text>
+              </View>
+            ),
+          )}
+        </View>
+        <Text style={sectionTitleStyle}>VitalRing — vital types (md)</Text>
+        <View style={styles.ringRow}>
+          {(['bp', 'hr', 'spo2', 'sleep', 'activity'] as VitalType[]).map(
+            (v) => (
+              <View key={`vital-${v}`} style={{ alignItems: 'center' }}>
+                <VitalRing vitalType={v} fill={0.5} state="idle" />
+                <Text style={[captionStyle, { marginTop: theme.spacing.xs }]}>
+                  {v}
+                </Text>
+              </View>
+            ),
+          )}
+        </View>
+
+        {/* AmbientPulse */}
+        <Text style={sectionTitleStyle}>AmbientPulse — wraps any element</Text>
+        <View style={styles.ringRow}>
+          <AmbientPulse key={`ap-${motionKey}`} active bpm={62}>
+            <Card>
+              <Text style={bodyStyle}>Live HR — pulsing wrapper</Text>
+            </Card>
+          </AmbientPulse>
+        </View>
+
+        {/* VitalTile */}
+        <Text style={sectionTitleStyle}>VitalTile — states (BP)</Text>
+        {(['normal', 'live', 'stale', 'no-data'] as VitalTileState[]).map(
+          (s) => (
+            <View key={`tile-${s}-${motionKey}`} style={{ marginBottom: theme.spacing.l }}>
+              <Text style={captionStyle}>state = {s}</Text>
+              <VitalTile
+                vitalType="bp"
+                value={s === 'no-data' ? '—' : '128/82'}
+                secondary={s === 'stale' ? 'Last sync 4h ago' : 'morning'}
+                state={s}
+                ringFill={0.62}
+                onPress={() => undefined}
+              />
+            </View>
+          ),
+        )}
+        <Text style={sectionTitleStyle}>VitalTile — vital types (normal)</Text>
+        {(
+          [
+            { type: 'hr' as VitalType, value: '62 bpm', sub: 'resting' },
+            { type: 'spo2' as VitalType, value: '97%', sub: 'last reading' },
+            { type: 'sleep' as VitalType, value: '7h 24m', sub: 'last night' },
+            { type: 'activity' as VitalType, value: '8,432', sub: 'steps today' },
+          ]
+        ).map(({ type, value, sub }) => (
+          <View key={`tile-vital-${type}`} style={{ marginBottom: theme.spacing.l }}>
+            <VitalTile
+              vitalType={type}
+              value={value}
+              secondary={sub}
+              state="normal"
+              ringFill={0.55}
+              onPress={() => undefined}
+            />
+          </View>
+        ))}
+
+        {/* DailyPulseHero — immersive */}
+        <Text style={sectionTitleStyle}>DailyPulseHero — immersive</Text>
+        <DailyPulseHero
+          key={`hero-immersive-${motionKey}`}
+          vitals={MOCK_HERO_VITALS}
+          centralValue="128/82"
+          centralLabel="morning BP"
+          aiNarration="Mum is in pattern. 124/79 this morning, six below her week."
+          mode="immersive"
+          parentName="Mum"
+        />
+        <View style={{ height: theme.spacing.xxl }} />
+
+        {/* DailyPulseHero — card mode */}
+        <Text style={sectionTitleStyle}>DailyPulseHero — card</Text>
+        <DailyPulseHero
+          key={`hero-card-${motionKey}`}
+          vitals={MOCK_HERO_VITALS}
+          centralValue="128/82"
+          centralLabel="morning BP"
+          aiNarration="Mum is in pattern."
+          mode="card"
+          parentName="Mum"
+        />
+        <View style={{ height: theme.spacing.xxl }} />
+
+        {/* DailyPulseHero — adaptive central branches */}
+        <Text style={sectionTitleStyle}>DailyPulseHero — adaptive central</Text>
+        <View style={{ marginBottom: theme.spacing.l }}>
+          <Text style={captionStyle}>HR fallback (no fresh BP)</Text>
+          <DailyPulseHero
+            key={`hero-hr-${motionKey}`}
+            vitals={MOCK_HERO_VITALS}
+            centralValue="62"
+            centralLabel="resting HR"
+            mode="card"
+          />
+        </View>
+        <View style={{ marginBottom: theme.spacing.l }}>
+          <Text style={captionStyle}>Sleep fallback (no BP, no HR today)</Text>
+          <DailyPulseHero
+            key={`hero-sleep-${motionKey}`}
+            vitals={MOCK_HERO_VITALS}
+            centralValue="7h 24m"
+            centralLabel="last night"
+            mode="card"
+          />
+        </View>
+        <View style={{ marginBottom: theme.spacing.l }}>
+          <Text style={captionStyle}>None — first-open of the day</Text>
+          <DailyPulseHero
+            key={`hero-none-${motionKey}`}
+            vitals={MOCK_HERO_VITALS_EMPTY}
+            centralValue="—"
+            centralLabel="no readings yet today"
+            mode="card"
+          />
+        </View>
+
+        {/* CorrelationStrip */}
+        <Text style={sectionTitleStyle}>CorrelationStrip — Sleep × Morning BP</Text>
+        <Card>
+          <CorrelationStrip
+            key={`corr-${motionKey}`}
+            vitalA={{ type: 'sleep', points: MOCK_SLEEP_POINTS }}
+            vitalB={{ type: 'bp', points: MOCK_BP_POINTS }}
+            range="7d"
+            caption="Sleep × Morning BP"
+          />
+        </Card>
+        <View style={{ height: theme.spacing.l }} />
+
+        {/* AnomalyBanner */}
+        <Text style={sectionTitleStyle}>AnomalyBanner — calm-concerned</Text>
+        <AnomalyBanner
+          key={`banner-calm-${motionKey}`}
+          severity="calm-concerned"
+          title="Worth a chat with Mum"
+          body="We've noticed a pattern worth a gentle check-in."
+          cta={{ label: 'Open reading', onPress: () => undefined }}
+          onDismiss={() => undefined}
+        />
+        <View style={{ height: theme.spacing.l }} />
+        <Text style={sectionTitleStyle}>AnomalyBanner — confirmed-urgent</Text>
+        <AnomalyBanner
+          key={`banner-urgent-${motionKey}`}
+          severity="confirmed-urgent"
+          title="Talk to Mum now"
+          body="Their latest reading was above their usual range. A calm check-in helps."
+          cta={{ label: 'Call Mum', onPress: () => undefined }}
+        />
+
         <VitalsDebugPanel />
 
         <View style={{ height: theme.spacing.xxxxl }} />
@@ -366,5 +600,12 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     marginBottom: 12,
+  },
+  ringRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 16,
   },
 });
