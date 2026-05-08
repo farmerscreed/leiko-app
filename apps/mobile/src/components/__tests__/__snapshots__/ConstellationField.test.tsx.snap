@@ -1,0 +1,1875 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ConstellationField — snapshot per colorMode renders three-person fixture in mode=dark 1`] = `
+<View
+  accessibilityRole="summary"
+  style={
+    [
+      {
+        "alignSelf": "center",
+        "height": 360,
+        "position": "relative",
+        "width": 360,
+      },
+      undefined,
+    ]
+  }
+  testID="field"
+>
+  <RNSVGSvgView
+    bbHeight={360}
+    bbWidth={360}
+    focusable={false}
+    height={360}
+    pointerEvents="none"
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "bottom": 0,
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 0,
+        },
+        {
+          "flex": 0,
+          "height": 360,
+          "width": 360,
+        },
+      ]
+    }
+    testID="field-svg"
+    width={360}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGDefs>
+        <RNSVGRadialGradient
+          cx="50%"
+          cy="50%"
+          fx="50%"
+          fy="50%"
+          gradient={
+            [
+              0,
+              620720976,
+              1,
+              16741200,
+            ]
+          }
+          gradientTransform={null}
+          gradientUnits={0}
+          name="cg-fieldglow"
+          rx="50%"
+          ry="50%"
+        />
+      </RNSVGDefs>
+      <RNSVGCircle
+        cx={180}
+        cy={180}
+        fill={
+          {
+            "brushRef": "cg-fieldglow",
+            "type": 1,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+        r={160}
+      />
+      <RNSVGCircle
+        cx={180}
+        cy={180}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+            "strokeDasharray",
+          ]
+        }
+        r={130}
+        stroke={
+          {
+            "payload": 4294308330,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            "2",
+            "4",
+          ]
+        }
+        strokeOpacity={0.08}
+        strokeWidth={0.5}
+      />
+      <RNSVGCircle
+        cx={180}
+        cy={180}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+            "strokeDasharray",
+          ]
+        }
+        r={80}
+        stroke={
+          {
+            "payload": 4294308330,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            "2",
+            "4",
+          ]
+        }
+        strokeOpacity={0.06}
+        strokeWidth={0.5}
+      />
+      <RNSVGLine
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        stroke={
+          {
+            "payload": 788493136,
+            "type": 0,
+          }
+        }
+        strokeWidth={0.5}
+        x1={180}
+        x2={92}
+        y1={180}
+        y2={120}
+      />
+      <RNSVGLine
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        stroke={
+          {
+            "payload": 787654168,
+            "type": 0,
+          }
+        }
+        strokeWidth={0.5}
+        x1={180}
+        x2={272}
+        y1={180}
+        y2={166}
+      />
+      <RNSVGLine
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        stroke={
+          {
+            "payload": 779839436,
+            "type": 0,
+          }
+        }
+        strokeWidth={0.5}
+        x1={180}
+        x2={150}
+        y1={180}
+        y2={280}
+      />
+      <RNSVGCircle
+        cx={180}
+        cy={180}
+        fill={
+          {
+            "payload": 4294308330,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+        r={3}
+      />
+      <RNSVGCircle
+        cx={180}
+        cy={180}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        r={3}
+        stroke={
+          {
+            "payload": 4294308330,
+            "type": 0,
+          }
+        }
+        strokeWidth={0.5}
+        testID="field-pulse"
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+  <View
+    pointerEvents="none"
+    style={
+      {
+        "left": 180,
+        "position": "absolute",
+        "top": 190,
+        "transform": [
+          {
+            "translateX": -16,
+          },
+        ],
+      }
+    }
+  >
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 9,
+          "letterSpacing": 1.8,
+          "lineHeight": 11,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      You
+    </Text>
+  </View>
+  <View
+    style={
+      {
+        "left": 64,
+        "position": "absolute",
+        "top": 92,
+      }
+    }
+    testID="field-orb-mom"
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+          },
+          {
+            "opacity": 0,
+            "transform": [
+              {
+                "scale": 0.7,
+              },
+            ],
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        accessibilityLabel="Marian, All clear, blood pressure 122/78"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        hitSlop={8}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "opacity": 1,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "height": 56,
+              "width": 56,
+            }
+          }
+        >
+          <View
+            pointerEvents="none"
+            style={
+              [
+                {
+                  "backgroundColor": "#FF735059",
+                  "borderRadius": 9999,
+                  "bottom": -16,
+                  "left": -16,
+                  "position": "absolute",
+                  "right": -16,
+                  "top": -16,
+                },
+                {
+                  "opacity": 0.55,
+                  "transform": [
+                    {
+                      "scale": 1,
+                    },
+                  ],
+                },
+              ]
+            }
+          />
+          <View
+            style={
+              [
+                {
+                  "shadowColor": "#FF7350",
+                  "shadowOffset": {
+                    "height": 0,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.55,
+                  "shadowRadius": 16,
+                },
+                {
+                  "opacity": 1,
+                },
+              ]
+            }
+          >
+            <View
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#FF735022",
+                    "borderColor": "#FF735066",
+                    "borderRadius": 22,
+                    "borderWidth": 0.5,
+                    "height": 44,
+                    "justifyContent": "center",
+                    "width": 44,
+                  },
+                  {
+                    "borderRadius": 28,
+                    "height": 56,
+                    "width": 56,
+                  },
+                ]
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#FF7350",
+                    "fontFamily": "InstrumentSerif_400Regular_Italic",
+                    "fontSize": 20,
+                    "lineHeight": 20,
+                  }
+                }
+              >
+                M
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View
+          pointerEvents="none"
+          style={
+            {
+              "alignItems": "center",
+              "left": 0,
+              "position": "absolute",
+              "right": 0,
+              "top": 60,
+            }
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#F5F1EA",
+                "fontFamily": "InstrumentSerif_400Regular",
+                "fontSize": 14,
+                "lineHeight": 16,
+              }
+            }
+          >
+            Marian
+          </Text>
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#FF7350",
+                "fontFamily": "JetBrainsMono_500Medium",
+                "fontSize": 10,
+                "letterSpacing": 0.4,
+                "lineHeight": 12,
+                "marginTop": 1,
+              }
+            }
+          >
+            122/78
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "left": 240,
+        "position": "absolute",
+        "top": 134,
+      }
+    }
+    testID="field-orb-dad"
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+          },
+          {
+            "opacity": 0,
+            "transform": [
+              {
+                "scale": 0.7,
+              },
+            ],
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        accessibilityLabel="Emeka, Needs attention, blood pressure 138/89"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        hitSlop={8}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "opacity": 1,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "height": 64,
+              "width": 64,
+            }
+          }
+        >
+          <View
+            pointerEvents="none"
+            style={
+              [
+                {
+                  "backgroundColor": "#F2A61859",
+                  "borderRadius": 9999,
+                  "bottom": -16,
+                  "left": -16,
+                  "position": "absolute",
+                  "right": -16,
+                  "top": -16,
+                },
+                {
+                  "opacity": 0.55,
+                  "transform": [
+                    {
+                      "scale": 1,
+                    },
+                  ],
+                },
+              ]
+            }
+          />
+          <View
+            style={
+              [
+                {
+                  "shadowColor": "#F2A618",
+                  "shadowOffset": {
+                    "height": 0,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.55,
+                  "shadowRadius": 16,
+                },
+                {
+                  "opacity": 1,
+                },
+              ]
+            }
+          >
+            <View
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#F2A61822",
+                    "borderColor": "#F2A61866",
+                    "borderRadius": 28,
+                    "borderWidth": 0.5,
+                    "height": 56,
+                    "justifyContent": "center",
+                    "width": 56,
+                  },
+                  {
+                    "borderRadius": 32,
+                    "height": 64,
+                    "width": 64,
+                  },
+                ]
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#F2A618",
+                    "fontFamily": "InstrumentSerif_400Regular_Italic",
+                    "fontSize": 25,
+                    "lineHeight": 25,
+                  }
+                }
+              >
+                E
+              </Text>
+            </View>
+          </View>
+          <View
+            pointerEvents="none"
+            style={
+              {
+                "backgroundColor": "#FF7350",
+                "borderColor": "#0A0908",
+                "borderRadius": 99,
+                "borderWidth": 1.5,
+                "height": 8,
+                "position": "absolute",
+                "right": 2,
+                "top": 2,
+                "width": 8,
+              }
+            }
+          />
+        </View>
+        <View
+          pointerEvents="none"
+          style={
+            {
+              "alignItems": "center",
+              "left": 0,
+              "position": "absolute",
+              "right": 0,
+              "top": 68,
+            }
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#F5F1EA",
+                "fontFamily": "InstrumentSerif_400Regular",
+                "fontSize": 14,
+                "lineHeight": 16,
+              }
+            }
+          >
+            Emeka
+          </Text>
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#F2A618",
+                "fontFamily": "JetBrainsMono_500Medium",
+                "fontSize": 10,
+                "letterSpacing": 0.4,
+                "lineHeight": 12,
+                "marginTop": 1,
+              }
+            }
+          >
+            138/89
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "left": 128,
+        "position": "absolute",
+        "top": 258,
+      }
+    }
+    testID="field-orb-aunt"
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+          },
+          {
+            "opacity": 0,
+            "transform": [
+              {
+                "scale": 0.7,
+              },
+            ],
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        accessibilityLabel="Joy, Sleeping, blood pressure 118/74"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        hitSlop={8}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "opacity": 1,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "height": 44,
+              "width": 44,
+            }
+          }
+        >
+          <View
+            pointerEvents="none"
+            style={
+              [
+                {
+                  "backgroundColor": "#7B67CC59",
+                  "borderRadius": 9999,
+                  "bottom": -16,
+                  "left": -16,
+                  "position": "absolute",
+                  "right": -16,
+                  "top": -16,
+                },
+                {
+                  "opacity": 0.25,
+                  "transform": [
+                    {
+                      "scale": 1,
+                    },
+                  ],
+                },
+              ]
+            }
+          />
+          <View
+            style={
+              [
+                {
+                  "shadowColor": "#7B67CC",
+                  "shadowOffset": {
+                    "height": 0,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.25,
+                  "shadowRadius": 9,
+                },
+                {
+                  "opacity": 0.65,
+                },
+              ]
+            }
+          >
+            <View
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#7B67CC22",
+                    "borderColor": "#7B67CC66",
+                    "borderRadius": 16,
+                    "borderWidth": 0.5,
+                    "height": 32,
+                    "justifyContent": "center",
+                    "width": 32,
+                  },
+                  {
+                    "borderRadius": 22,
+                    "height": 44,
+                    "width": 44,
+                  },
+                ]
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#7B67CC",
+                    "fontFamily": "InstrumentSerif_400Regular_Italic",
+                    "fontSize": 14,
+                    "lineHeight": 14,
+                  }
+                }
+              >
+                J
+              </Text>
+            </View>
+          </View>
+          <View
+            pointerEvents="none"
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#0A0908",
+                "borderColor": "#7B67CC80",
+                "borderRadius": 99,
+                "borderWidth": 1,
+                "height": 14,
+                "justifyContent": "center",
+                "position": "absolute",
+                "right": 2,
+                "top": 2,
+                "width": 14,
+              }
+            }
+          >
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#7B67CC",
+                  "fontSize": 9,
+                  "lineHeight": 11,
+                }
+              }
+            >
+              ☾
+            </Text>
+          </View>
+        </View>
+        <View
+          pointerEvents="none"
+          style={
+            {
+              "alignItems": "center",
+              "left": 0,
+              "position": "absolute",
+              "right": 0,
+              "top": 48,
+            }
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#F5F1EA",
+                "fontFamily": "InstrumentSerif_400Regular",
+                "fontSize": 14,
+                "lineHeight": 16,
+              }
+            }
+          >
+            Joy
+          </Text>
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#7B67CC",
+                "fontFamily": "JetBrainsMono_500Medium",
+                "fontSize": 10,
+                "letterSpacing": 0.4,
+                "lineHeight": 12,
+                "marginTop": 1,
+              }
+            }
+          >
+            118/74
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`ConstellationField — snapshot per colorMode renders three-person fixture in mode=light 1`] = `
+<View
+  accessibilityRole="summary"
+  style={
+    [
+      {
+        "alignSelf": "center",
+        "height": 360,
+        "position": "relative",
+        "width": 360,
+      },
+      undefined,
+    ]
+  }
+  testID="field"
+>
+  <RNSVGSvgView
+    bbHeight={360}
+    bbWidth={360}
+    focusable={false}
+    height={360}
+    pointerEvents="none"
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "bottom": 0,
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 0,
+        },
+        {
+          "flex": 0,
+          "height": 360,
+          "width": 360,
+        },
+      ]
+    }
+    testID="field-svg"
+    width={360}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGDefs>
+        <RNSVGRadialGradient
+          cx="50%"
+          cy="50%"
+          fx="50%"
+          fy="50%"
+          gradient={
+            [
+              0,
+              620720976,
+              1,
+              16741200,
+            ]
+          }
+          gradientTransform={null}
+          gradientUnits={0}
+          name="cg-fieldglow"
+          rx="50%"
+          ry="50%"
+        />
+      </RNSVGDefs>
+      <RNSVGCircle
+        cx={180}
+        cy={180}
+        fill={
+          {
+            "brushRef": "cg-fieldglow",
+            "type": 1,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+        r={160}
+      />
+      <RNSVGCircle
+        cx={180}
+        cy={180}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+            "strokeDasharray",
+          ]
+        }
+        r={130}
+        stroke={
+          {
+            "payload": 4279177756,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            "2",
+            "4",
+          ]
+        }
+        strokeOpacity={0.08}
+        strokeWidth={0.5}
+      />
+      <RNSVGCircle
+        cx={180}
+        cy={180}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+            "strokeOpacity",
+            "strokeDasharray",
+          ]
+        }
+        r={80}
+        stroke={
+          {
+            "payload": 4279177756,
+            "type": 0,
+          }
+        }
+        strokeDasharray={
+          [
+            "2",
+            "4",
+          ]
+        }
+        strokeOpacity={0.06}
+        strokeWidth={0.5}
+      />
+      <RNSVGLine
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        stroke={
+          {
+            "payload": 788493136,
+            "type": 0,
+          }
+        }
+        strokeWidth={0.5}
+        x1={180}
+        x2={92}
+        y1={180}
+        y2={120}
+      />
+      <RNSVGLine
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        stroke={
+          {
+            "payload": 787654168,
+            "type": 0,
+          }
+        }
+        strokeWidth={0.5}
+        x1={180}
+        x2={272}
+        y1={180}
+        y2={166}
+      />
+      <RNSVGLine
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        stroke={
+          {
+            "payload": 779839436,
+            "type": 0,
+          }
+        }
+        strokeWidth={0.5}
+        x1={180}
+        x2={150}
+        y1={180}
+        y2={280}
+      />
+      <RNSVGCircle
+        cx={180}
+        cy={180}
+        fill={
+          {
+            "payload": 4279177756,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+        r={3}
+      />
+      <RNSVGCircle
+        cx={180}
+        cy={180}
+        fill={null}
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        r={3}
+        stroke={
+          {
+            "payload": 4279177756,
+            "type": 0,
+          }
+        }
+        strokeWidth={0.5}
+        testID="field-pulse"
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+  <View
+    pointerEvents="none"
+    style={
+      {
+        "left": 180,
+        "position": "absolute",
+        "top": 190,
+        "transform": [
+          {
+            "translateX": -16,
+          },
+        ],
+      }
+    }
+  >
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#5A6478",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 9,
+          "letterSpacing": 1.8,
+          "lineHeight": 11,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      You
+    </Text>
+  </View>
+  <View
+    style={
+      {
+        "left": 64,
+        "position": "absolute",
+        "top": 92,
+      }
+    }
+    testID="field-orb-mom"
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+          },
+          {
+            "opacity": 0,
+            "transform": [
+              {
+                "scale": 0.7,
+              },
+            ],
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        accessibilityLabel="Marian, All clear, blood pressure 122/78"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        hitSlop={8}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "opacity": 1,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "height": 56,
+              "width": 56,
+            }
+          }
+        >
+          <View
+            pointerEvents="none"
+            style={
+              [
+                {
+                  "backgroundColor": "#FF735059",
+                  "borderRadius": 9999,
+                  "bottom": -16,
+                  "left": -16,
+                  "position": "absolute",
+                  "right": -16,
+                  "top": -16,
+                },
+                {
+                  "opacity": 0.55,
+                  "transform": [
+                    {
+                      "scale": 1,
+                    },
+                  ],
+                },
+              ]
+            }
+          />
+          <View
+            style={
+              [
+                {
+                  "shadowColor": "#FF7350",
+                  "shadowOffset": {
+                    "height": 0,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.55,
+                  "shadowRadius": 16,
+                },
+                {
+                  "opacity": 1,
+                },
+              ]
+            }
+          >
+            <View
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#FF735022",
+                    "borderColor": "#FF735066",
+                    "borderRadius": 22,
+                    "borderWidth": 0.5,
+                    "height": 44,
+                    "justifyContent": "center",
+                    "width": 44,
+                  },
+                  {
+                    "borderRadius": 28,
+                    "height": 56,
+                    "width": 56,
+                  },
+                ]
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#FF7350",
+                    "fontFamily": "InstrumentSerif_400Regular_Italic",
+                    "fontSize": 20,
+                    "lineHeight": 20,
+                  }
+                }
+              >
+                M
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View
+          pointerEvents="none"
+          style={
+            {
+              "alignItems": "center",
+              "left": 0,
+              "position": "absolute",
+              "right": 0,
+              "top": 60,
+            }
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#0F121C",
+                "fontFamily": "InstrumentSerif_400Regular",
+                "fontSize": 14,
+                "lineHeight": 16,
+              }
+            }
+          >
+            Marian
+          </Text>
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#FF7350",
+                "fontFamily": "JetBrainsMono_500Medium",
+                "fontSize": 10,
+                "letterSpacing": 0.4,
+                "lineHeight": 12,
+                "marginTop": 1,
+              }
+            }
+          >
+            122/78
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "left": 240,
+        "position": "absolute",
+        "top": 134,
+      }
+    }
+    testID="field-orb-dad"
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+          },
+          {
+            "opacity": 0,
+            "transform": [
+              {
+                "scale": 0.7,
+              },
+            ],
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        accessibilityLabel="Emeka, Needs attention, blood pressure 138/89"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        hitSlop={8}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "opacity": 1,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "height": 64,
+              "width": 64,
+            }
+          }
+        >
+          <View
+            pointerEvents="none"
+            style={
+              [
+                {
+                  "backgroundColor": "#F2A61859",
+                  "borderRadius": 9999,
+                  "bottom": -16,
+                  "left": -16,
+                  "position": "absolute",
+                  "right": -16,
+                  "top": -16,
+                },
+                {
+                  "opacity": 0.55,
+                  "transform": [
+                    {
+                      "scale": 1,
+                    },
+                  ],
+                },
+              ]
+            }
+          />
+          <View
+            style={
+              [
+                {
+                  "shadowColor": "#F2A618",
+                  "shadowOffset": {
+                    "height": 0,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.55,
+                  "shadowRadius": 16,
+                },
+                {
+                  "opacity": 1,
+                },
+              ]
+            }
+          >
+            <View
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#F2A61822",
+                    "borderColor": "#F2A61866",
+                    "borderRadius": 28,
+                    "borderWidth": 0.5,
+                    "height": 56,
+                    "justifyContent": "center",
+                    "width": 56,
+                  },
+                  {
+                    "borderRadius": 32,
+                    "height": 64,
+                    "width": 64,
+                  },
+                ]
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#F2A618",
+                    "fontFamily": "InstrumentSerif_400Regular_Italic",
+                    "fontSize": 25,
+                    "lineHeight": 25,
+                  }
+                }
+              >
+                E
+              </Text>
+            </View>
+          </View>
+          <View
+            pointerEvents="none"
+            style={
+              {
+                "backgroundColor": "#FF7350",
+                "borderColor": "#0A0908",
+                "borderRadius": 99,
+                "borderWidth": 1.5,
+                "height": 8,
+                "position": "absolute",
+                "right": 2,
+                "top": 2,
+                "width": 8,
+              }
+            }
+          />
+        </View>
+        <View
+          pointerEvents="none"
+          style={
+            {
+              "alignItems": "center",
+              "left": 0,
+              "position": "absolute",
+              "right": 0,
+              "top": 68,
+            }
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#0F121C",
+                "fontFamily": "InstrumentSerif_400Regular",
+                "fontSize": 14,
+                "lineHeight": 16,
+              }
+            }
+          >
+            Emeka
+          </Text>
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#F2A618",
+                "fontFamily": "JetBrainsMono_500Medium",
+                "fontSize": 10,
+                "letterSpacing": 0.4,
+                "lineHeight": 12,
+                "marginTop": 1,
+              }
+            }
+          >
+            138/89
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "left": 128,
+        "position": "absolute",
+        "top": 258,
+      }
+    }
+    testID="field-orb-aunt"
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+          },
+          {
+            "opacity": 0,
+            "transform": [
+              {
+                "scale": 0.7,
+              },
+            ],
+          },
+          undefined,
+        ]
+      }
+    >
+      <View
+        accessibilityLabel="Joy, Sleeping, blood pressure 118/74"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        hitSlop={8}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "opacity": 1,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "height": 44,
+              "width": 44,
+            }
+          }
+        >
+          <View
+            pointerEvents="none"
+            style={
+              [
+                {
+                  "backgroundColor": "#7B67CC59",
+                  "borderRadius": 9999,
+                  "bottom": -16,
+                  "left": -16,
+                  "position": "absolute",
+                  "right": -16,
+                  "top": -16,
+                },
+                {
+                  "opacity": 0.25,
+                  "transform": [
+                    {
+                      "scale": 1,
+                    },
+                  ],
+                },
+              ]
+            }
+          />
+          <View
+            style={
+              [
+                {
+                  "shadowColor": "#7B67CC",
+                  "shadowOffset": {
+                    "height": 0,
+                    "width": 0,
+                  },
+                  "shadowOpacity": 0.25,
+                  "shadowRadius": 9,
+                },
+                {
+                  "opacity": 0.65,
+                },
+              ]
+            }
+          >
+            <View
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "backgroundColor": "#7B67CC22",
+                    "borderColor": "#7B67CC66",
+                    "borderRadius": 16,
+                    "borderWidth": 0.5,
+                    "height": 32,
+                    "justifyContent": "center",
+                    "width": 32,
+                  },
+                  {
+                    "borderRadius": 22,
+                    "height": 44,
+                    "width": 44,
+                  },
+                ]
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#7B67CC",
+                    "fontFamily": "InstrumentSerif_400Regular_Italic",
+                    "fontSize": 14,
+                    "lineHeight": 14,
+                  }
+                }
+              >
+                J
+              </Text>
+            </View>
+          </View>
+          <View
+            pointerEvents="none"
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#0A0908",
+                "borderColor": "#7B67CC80",
+                "borderRadius": 99,
+                "borderWidth": 1,
+                "height": 14,
+                "justifyContent": "center",
+                "position": "absolute",
+                "right": 2,
+                "top": 2,
+                "width": 14,
+              }
+            }
+          >
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#7B67CC",
+                  "fontSize": 9,
+                  "lineHeight": 11,
+                }
+              }
+            >
+              ☾
+            </Text>
+          </View>
+        </View>
+        <View
+          pointerEvents="none"
+          style={
+            {
+              "alignItems": "center",
+              "left": 0,
+              "position": "absolute",
+              "right": 0,
+              "top": 48,
+            }
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#0F121C",
+                "fontFamily": "InstrumentSerif_400Regular",
+                "fontSize": 14,
+                "lineHeight": 16,
+              }
+            }
+          >
+            Joy
+          </Text>
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#7B67CC",
+                "fontFamily": "JetBrainsMono_500Medium",
+                "fontSize": 10,
+                "letterSpacing": 0.4,
+                "lineHeight": 12,
+                "marginTop": 1,
+              }
+            }
+          >
+            118/74
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
