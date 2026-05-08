@@ -1,0 +1,311 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders canInvite=false colorMode=dark 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "rgba(255,255,255,0.08)",
+      "borderColor": "rgba(255,255,255,0.08)",
+      "borderRadius": 999,
+      "borderWidth": 0.5,
+      "flexDirection": "row",
+      "justifyContent": "space-between",
+      "overflow": "hidden",
+      "paddingHorizontal": 18,
+      "paddingVertical": 10,
+    }
+  }
+  testID="action-bar"
+>
+  <View
+    intensity={50}
+    pointerEvents="none"
+    style={
+      {
+        "bottom": 0,
+        "left": 0,
+        "position": "absolute",
+        "right": 0,
+        "top": 0,
+      }
+    }
+    tint="dark"
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#9C9890",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 9.5,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    3 · all in your circle
+  </Text>
+</View>
+`;
+
+exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders canInvite=false colorMode=light 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "rgba(15,18,28,0.08)",
+      "borderColor": "rgba(15,18,28,0.08)",
+      "borderRadius": 999,
+      "borderWidth": 0.5,
+      "flexDirection": "row",
+      "justifyContent": "space-between",
+      "overflow": "hidden",
+      "paddingHorizontal": 18,
+      "paddingVertical": 10,
+    }
+  }
+  testID="action-bar"
+>
+  <View
+    intensity={50}
+    pointerEvents="none"
+    style={
+      {
+        "bottom": 0,
+        "left": 0,
+        "position": "absolute",
+        "right": 0,
+        "top": 0,
+      }
+    }
+    tint="light"
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#5A6478",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 9.5,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    3 · all in your circle
+  </Text>
+</View>
+`;
+
+exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders canInvite=true colorMode=dark 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "rgba(255,255,255,0.08)",
+      "borderColor": "rgba(255,255,255,0.08)",
+      "borderRadius": 999,
+      "borderWidth": 0.5,
+      "flexDirection": "row",
+      "justifyContent": "space-between",
+      "overflow": "hidden",
+      "paddingHorizontal": 18,
+      "paddingVertical": 10,
+    }
+  }
+  testID="action-bar"
+>
+  <View
+    intensity={50}
+    pointerEvents="none"
+    style={
+      {
+        "bottom": 0,
+        "left": 0,
+        "position": "absolute",
+        "right": 0,
+        "top": 0,
+      }
+    }
+    tint="dark"
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#9C9890",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 9.5,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    3 · all in your circle
+  </Text>
+  <View
+    accessibilityLabel="Add someone"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={8}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "opacity": 1,
+      }
+    }
+    testID="action-bar-invite"
+  >
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#FF7350",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 11.5,
+          "letterSpacing": 0.46,
+          "lineHeight": 16,
+        }
+      }
+    >
+      + Add someone
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders canInvite=true colorMode=light 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "rgba(15,18,28,0.08)",
+      "borderColor": "rgba(15,18,28,0.08)",
+      "borderRadius": 999,
+      "borderWidth": 0.5,
+      "flexDirection": "row",
+      "justifyContent": "space-between",
+      "overflow": "hidden",
+      "paddingHorizontal": 18,
+      "paddingVertical": 10,
+    }
+  }
+  testID="action-bar"
+>
+  <View
+    intensity={50}
+    pointerEvents="none"
+    style={
+      {
+        "bottom": 0,
+        "left": 0,
+        "position": "absolute",
+        "right": 0,
+        "top": 0,
+      }
+    }
+    tint="light"
+  />
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#5A6478",
+        "fontFamily": "JetBrainsMono_500Medium",
+        "fontSize": 9.5,
+        "letterSpacing": 0.95,
+        "lineHeight": 14,
+        "textTransform": "uppercase",
+      }
+    }
+  >
+    3 · all in your circle
+  </Text>
+  <View
+    accessibilityLabel="Add someone"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={8}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "opacity": 1,
+      }
+    }
+    testID="action-bar-invite"
+  >
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#FF7350",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 11.5,
+          "letterSpacing": 0.46,
+          "lineHeight": 16,
+        }
+      }
+    >
+      + Add someone
+    </Text>
+  </View>
+</View>
+`;
