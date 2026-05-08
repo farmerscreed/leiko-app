@@ -47,6 +47,10 @@ module.exports = {
         '<rootDir>/src/components/**/__tests__/**/*.test.ts?(x)',
         '<rootDir>/src/screens/**/__tests__/**/*.test.ts?(x)',
         '<rootDir>/src/dev/**/__tests__/**/*.test.ts?(x)',
+        // Sprint 7.7a — hooks need React (useState/useEffect/useCallback)
+        // so they run under the rn project; existing hooks (useFamilyReadings)
+        // had no tests, useCaregiverViewMode is the first.
+        '<rootDir>/src/hooks/**/__tests__/**/*.test.ts?(x)',
       ],
       testPathIgnorePatterns: ['/node_modules/', '/android/', '/ios/'],
     },

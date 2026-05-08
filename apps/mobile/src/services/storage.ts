@@ -51,6 +51,11 @@ export const STORAGE_KEYS = {
   // Default 'system' (follow OS appearance). User-facing toggle ships in
   // Sprint 10 Settings; ThemeProvider reads/writes this key directly.
   themeColorMode: 'leiko.theme.colorMode',
+  // Caregiver Family Constellation view preference — Sprint 7.7a/b.
+  // Values: 'birds' (bird's-eye constellation) | 'cards' (editorial card
+  // stack — lands in 7.7b). Default 'birds'. Plumbed in 7.7a; toggle UI
+  // ships in 7.7b alongside the editorial-card view.
+  caregiverViewMode: 'leiko.caregiver.viewMode',
   // Per-vital pending buffers — Sprint 7.5 / D13 §5.1. Each is a JSON
   // array of typed samples (HRSample / SpO2Sample / SleepSession /
   // ActivityDay / CaloriesDay) waiting for a successful /sync upload.
