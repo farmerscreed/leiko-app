@@ -1,4 +1,5 @@
-// syncMultiVitals — Sprint 7.5 / D13 §3.3.
+// syncMultiVitals — Sprint 7.5 / D13 §3.3, multi-day backfill added
+// in Sprint 9 / D13 §3.4.
 //
 // Unit-level coverage of the orchestration logic. The 4 BLE read
 // wrappers and the postMultiVitals sender are mocked at the module
@@ -9,11 +10,14 @@
 //     synchronously)
 //   • per-vital cursors advance independently after each successful
 //     read (D13 §3.4)
-//   • Promise.allSettled isolates failures: one vital erroring does
+//   • Promise.allSettled isolates failures: one branch erroring does
 //     not block the others, and the partial payload still flushes
 //   • acceptSyncResult is called per-slice on /sync success, moving
 //     pending → recent
 //   • empty-payload short-circuits the network round-trip
+//   • multi-day backfill: per-day loops cover (cursor+1 .. today) per
+//     vital with the per-vital cursor-day-inclusion + always-include-
+//     today rules baked in
 //
 // Real BLE-packet → wrapper → slice flow is covered manually via the
 // 48h soak test (sprint card) — that's the integration-level proof.
@@ -37,7 +41,10 @@ jest.mock('../postMultiVitals', () => ({
   isPayloadEmpty: jest.requireActual('../postMultiVitals').isPayloadEmpty,
 }));
 
-import { syncMultiVitals } from '../syncMultiVitals';
+import {
+  syncMultiVitals,
+  computeBackfillDayList,
+} from '../syncMultiVitals';
 import { useHR } from '../../../state/hr';
 import { useSpO2 } from '../../../state/spo2';
 import { useSleep } from '../../../state/sleep';
@@ -60,6 +67,7 @@ const DEVICE_META: DeviceMeta = {
 // deterministic. dayLocalFromBcd(25, 1, 21) === '2025-01-21'.
 const NOW_SEC = 1737460800;
 const TODAY_LOCAL = '2025-01-21';
+const YESTERDAY_LOCAL = '2025-01-20';
 
 const fakeDevice = { __isFake: true } as unknown as Parameters<
   typeof syncMultiVitals
@@ -85,14 +93,25 @@ beforeEach(() => {
   });
 });
 
+/** Seed every per-day cursor at yesterday so the orchestrator's
+ *  backfill window collapses to a single day (today). Used by tests
+ *  whose intent is to exercise single-day sync behaviour. */
+function seedCursorsAtYesterday(): void {
+  setVitalCursor(DEVICE_BLE_ID, 'spo2', YESTERDAY_LOCAL);
+  setVitalCursor(DEVICE_BLE_ID, 'sleep', YESTERDAY_LOCAL);
+  setVitalCursor(DEVICE_BLE_ID, 'activity', YESTERDAY_LOCAL);
+}
+
 describe('syncMultiVitals — happy path', () => {
   it('pushes HR samples to useHR.pending and advances cursor.hr', async () => {
+    seedCursorsAtYesterday();
     mockReadHRHistory.mockResolvedValueOnce([
       { timestampSec: 1737420000, bpm: 65 },
       { timestampSec: 1737423600, bpm: 68 },
     ]);
     const result = await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
+      firstSyncDays: 1,
     });
     expect(result.ok).toBe(true);
     expect(result.pulled.hr).toBe(2);
@@ -104,6 +123,7 @@ describe('syncMultiVitals — happy path', () => {
   });
 
   it('pushes SpO2 samples and advances cursor.spo2 to today', async () => {
+    seedCursorsAtYesterday();
     mockReadSpO2History.mockResolvedValueOnce([
       {
         timestampSec: 1737420000,
@@ -114,6 +134,7 @@ describe('syncMultiVitals — happy path', () => {
     ]);
     const result = await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
+      firstSyncDays: 1,
     });
     expect(result.ok).toBe(true);
     expect(result.pulled.spo2).toBe(1);
@@ -128,9 +149,8 @@ describe('syncMultiVitals — happy path', () => {
   });
 
   it('pushes sleep session and advances cursor.sleep', async () => {
-    // Same Promise.allSettled fan-out as the activity test — both
-    // sleep + activity steps share readDayInfo. Steady mock.
-    mockReadDayInfo.mockResolvedValue({
+    seedCursorsAtYesterday();
+    mockReadDayInfo.mockResolvedValueOnce({
       activity: null,
       sleep: {
         daysAgo: 0,
@@ -145,6 +165,7 @@ describe('syncMultiVitals — happy path', () => {
     });
     const result = await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
+      firstSyncDays: 1,
     });
     expect(result.ok).toBe(true);
     expect(result.pulled.sleep).toBe(1);
@@ -156,10 +177,8 @@ describe('syncMultiVitals — happy path', () => {
   });
 
   it('pushes activity day + calories day and advances cursor.activity', async () => {
-    // Both syncSleepStep and syncActivityStep call readDayInfo with the
-    // same args (Promise.allSettled fans them out), so use a steady
-    // mockResolvedValue rather than ...Once.
-    mockReadDayInfo.mockResolvedValue({
+    seedCursorsAtYesterday();
+    mockReadDayInfo.mockResolvedValueOnce({
       activity: {
         daysAgo: 0,
         yearOfCentury: 25,
@@ -174,6 +193,7 @@ describe('syncMultiVitals — happy path', () => {
     });
     const result = await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
+      firstSyncDays: 1,
     });
     expect(result.ok).toBe(true);
     expect(result.pulled.activity).toBe(1);
@@ -184,16 +204,54 @@ describe('syncMultiVitals — happy path', () => {
     const kcalDay = useActivity.getState().recentCalories[0];
     expect(kcalDay.totalKcal).toBe(1800);
   });
+
+  it('issues a single readDayInfo per day for the merged sleep+activity branch', async () => {
+    // Sleep + activity share the 0x07 wire packet; the orchestrator
+    // calls readDayInfo ONCE per backfill day and routes both reply
+    // shapes into their slices. Sprint 9 merge — used to be 2 calls.
+    seedCursorsAtYesterday();
+    mockReadDayInfo.mockResolvedValueOnce({
+      activity: {
+        daysAgo: 0,
+        yearOfCentury: 25,
+        month: 1,
+        day: 21,
+        totalSteps: 5000,
+        totalKcal: 1500,
+        totalStandingHours: 4,
+        totalDistanceMeters: 3700,
+      },
+      sleep: {
+        daysAgo: 0,
+        yearOfCentury: 25,
+        month: 1,
+        day: 21,
+        totalMinutes: 420,
+        deepMinutes: 90,
+        lightMinutes: 230,
+        exerciseMinutes: 0,
+      },
+    });
+    await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
+      nowSec: NOW_SEC,
+      firstSyncDays: 1,
+    });
+    expect(mockReadDayInfo).toHaveBeenCalledTimes(1);
+    expect(useSleep.getState().recent).toHaveLength(1);
+    expect(useActivity.getState().recentSteps).toHaveLength(1);
+  });
 });
 
 describe('syncMultiVitals — failure isolation', () => {
   it('continues when HR step fails (Promise.allSettled isolation)', async () => {
+    seedCursorsAtYesterday();
     mockReadHRHistory.mockRejectedValueOnce(new Error('hr_timeout'));
     mockReadSpO2History.mockResolvedValueOnce([
       { timestampSec: NOW_SEC - 3600, percent: 96, maxInWindow: 97, minInWindow: 95 },
     ]);
     const result = await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
+      firstSyncDays: 1,
     });
     expect(result.ok).toBe(false);
     expect(result.errors.hr).toBe('hr_timeout');
@@ -206,13 +264,30 @@ describe('syncMultiVitals — failure isolation', () => {
     expect(getVitalCursor(DEVICE_BLE_ID).spo2).toBe(TODAY_LOCAL);
   });
 
+  it('surfaces a merged-step failure under both sleep + activity errors', async () => {
+    // The merged DayInfo branch covers both vitals; when readDayInfo
+    // rejects the orchestrator surfaces the same message under both
+    // errors.sleep and errors.activity (D13 §3.3 step 7-8 coupling).
+    seedCursorsAtYesterday();
+    mockReadDayInfo.mockRejectedValueOnce(new Error('dayinfo_timeout'));
+    const result = await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
+      nowSec: NOW_SEC,
+      firstSyncDays: 1,
+    });
+    expect(result.ok).toBe(false);
+    expect(result.errors.sleep).toBe('dayinfo_timeout');
+    expect(result.errors.activity).toBe('dayinfo_timeout');
+  });
+
   it('marks ok=false when /sync POST fails but step errors are still recorded', async () => {
+    seedCursorsAtYesterday();
     mockReadHRHistory.mockResolvedValueOnce([
       { timestampSec: 1737420000, bpm: 65 },
     ]);
     mockPostMultiVitals.mockRejectedValueOnce(new Error('network'));
     const result = await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
+      firstSyncDays: 1,
     });
     expect(result.ok).toBe(false);
     expect(result.errors.sync).toBe('network');
@@ -226,8 +301,10 @@ describe('syncMultiVitals — failure isolation', () => {
 
 describe('syncMultiVitals — empty payload', () => {
   it('skips the /sync POST entirely when no samples were collected', async () => {
+    seedCursorsAtYesterday();
     const result = await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
+      firstSyncDays: 1,
     });
     expect(result.ok).toBe(true);
     expect(result.inserted).toBeNull();
@@ -237,6 +314,7 @@ describe('syncMultiVitals — empty payload', () => {
 
 describe('syncMultiVitals — cursor dedup', () => {
   it('drops HR samples older than cursor.hr', async () => {
+    seedCursorsAtYesterday();
     setVitalCursor(DEVICE_BLE_ID, 'hr', 1737422000);
     mockReadHRHistory.mockResolvedValueOnce([
       { timestampSec: 1737420000, bpm: 60 }, // older than cursor — drop
@@ -244,6 +322,7 @@ describe('syncMultiVitals — cursor dedup', () => {
     ]);
     const result = await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
+      firstSyncDays: 1,
     });
     expect(result.pulled.hr).toBe(1);
     expect(useHR.getState().recent[0].bpm).toBe(65);
@@ -255,8 +334,11 @@ describe('syncMultiVitals — cursor dedup', () => {
     // re-reads, which locked out new SpO2 samples that landed later
     // in the day. Now the read always fires; the slice dedupes.
     setVitalCursor(DEVICE_BLE_ID, 'spo2', TODAY_LOCAL);
+    setVitalCursor(DEVICE_BLE_ID, 'sleep', TODAY_LOCAL);
+    setVitalCursor(DEVICE_BLE_ID, 'activity', TODAY_LOCAL);
     await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
+      firstSyncDays: 1,
     });
     expect(mockReadSpO2History).toHaveBeenCalledTimes(1);
   });
@@ -268,13 +350,206 @@ describe('syncMultiVitals — cursor dedup', () => {
     // fires; the slice dedupes by dayLocal so today's row is replaced.
     // Sleep stays locked out — last night's totals don't change once
     // captured.
+    setVitalCursor(DEVICE_BLE_ID, 'spo2', TODAY_LOCAL);
+    setVitalCursor(DEVICE_BLE_ID, 'sleep', TODAY_LOCAL);
+    setVitalCursor(DEVICE_BLE_ID, 'activity', TODAY_LOCAL);
+    await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
+      nowSec: NOW_SEC,
+      firstSyncDays: 1,
+    });
+    // Sleep is still locked out (cursor at today); activity always reads
+    // → readDayInfo fires once for the activity-only day list.
+    expect(mockReadDayInfo).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('syncMultiVitals — multi-day backfill', () => {
+  it('walks (cursor+1 .. today) for SpO2 when cursor is 3 days behind', async () => {
+    // Cursor at 2025-01-18 (3 days behind today 2025-01-21). Backfill
+    // list = ['2025-01-19', '2025-01-20', '2025-01-21']. Same-day rule
+    // already includes today — no extra append.
+    setVitalCursor(DEVICE_BLE_ID, 'spo2', '2025-01-18');
+    setVitalCursor(DEVICE_BLE_ID, 'sleep', TODAY_LOCAL);
+    setVitalCursor(DEVICE_BLE_ID, 'activity', TODAY_LOCAL);
+    await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
+      nowSec: NOW_SEC,
+    });
+    expect(mockReadSpO2History).toHaveBeenCalledTimes(3);
+    // Final cursor advances all the way to today.
+    expect(getVitalCursor(DEVICE_BLE_ID).spo2).toBe(TODAY_LOCAL);
+  });
+
+  it('caps the backfill window at maxBackfillDays even with an old cursor', async () => {
+    // Cursor far in the past (>10 days). Cap at 10 days back.
+    setVitalCursor(DEVICE_BLE_ID, 'spo2', '2024-12-01');
+    setVitalCursor(DEVICE_BLE_ID, 'sleep', TODAY_LOCAL);
+    setVitalCursor(DEVICE_BLE_ID, 'activity', TODAY_LOCAL);
+    await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
+      nowSec: NOW_SEC,
+      maxBackfillDays: 10,
+    });
+    // Default cap = 10 days inclusive → today, today-1, ..., today-9.
+    expect(mockReadSpO2History).toHaveBeenCalledTimes(10);
+  });
+
+  it('first-sync look-back: empty cursor pulls firstSyncDays inclusive of today', async () => {
+    // Empty cursor (fresh device). With firstSyncDays=3, expect calls
+    // for [today-2, today-1, today] across SpO2 + DayInfo branches.
+    await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
+      nowSec: NOW_SEC,
+      firstSyncDays: 3,
+    });
+    expect(mockReadSpO2History).toHaveBeenCalledTimes(3);
+    // DayInfo branch: union of sleep-days [3 days] and activity-days
+    // [3 days] = 3 unique days.
+    expect(mockReadDayInfo).toHaveBeenCalledTimes(3);
+  });
+
+  it('advances cursor partially when a mid-loop day fails', async () => {
+    // Day 1 succeeds, Day 2 throws — cursor should sit at Day 1 so the
+    // next sync resumes from Day 2.
+    setVitalCursor(DEVICE_BLE_ID, 'spo2', '2025-01-18'); // 3 days behind
+    setVitalCursor(DEVICE_BLE_ID, 'sleep', TODAY_LOCAL);
+    setVitalCursor(DEVICE_BLE_ID, 'activity', TODAY_LOCAL);
+    mockReadSpO2History
+      .mockResolvedValueOnce([
+        { timestampSec: 1737336000, percent: 96, maxInWindow: 97, minInWindow: 95 },
+      ])
+      .mockRejectedValueOnce(new Error('spo2_timeout'));
+    const result = await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
+      nowSec: NOW_SEC,
+    });
+    expect(result.errors.spo2).toBe('spo2_timeout');
+    // Cursor advanced past day 1, NOT past day 2.
+    expect(getVitalCursor(DEVICE_BLE_ID).spo2).toBe('2025-01-19');
+  });
+
+  it('walks (cursor+1 .. today) for sleep without re-reading cursor day', async () => {
+    // Sleep does NOT use alwaysIncludeToday; cursor at yesterday →
+    // backfill = [today]. cursor at today → backfill = [] → 0 calls.
+    setVitalCursor(DEVICE_BLE_ID, 'spo2', TODAY_LOCAL);
     setVitalCursor(DEVICE_BLE_ID, 'activity', TODAY_LOCAL);
     setVitalCursor(DEVICE_BLE_ID, 'sleep', TODAY_LOCAL);
     await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
+      firstSyncDays: 1,
     });
-    // Sleep is still locked out (cursor at today); activity always reads
-    // → readDayInfo fires once for the activity step only.
+    // Activity always re-reads today → 1 dayInfo call. Sleep would
+    // have skipped, but the merged step covers both.
     expect(mockReadDayInfo).toHaveBeenCalledTimes(1);
+  });
+
+  it('routes the SAME readDayInfo per day to both sleep and activity slices', async () => {
+    // Three-day backfill over the merged branch — verifies one BLE
+    // round-trip per day services both vitals.
+    setVitalCursor(DEVICE_BLE_ID, 'spo2', TODAY_LOCAL);
+    setVitalCursor(DEVICE_BLE_ID, 'sleep', '2025-01-18');
+    setVitalCursor(DEVICE_BLE_ID, 'activity', '2025-01-18');
+    mockReadDayInfo.mockResolvedValue({
+      activity: {
+        daysAgo: 0,
+        yearOfCentury: 25,
+        month: 1,
+        day: 21,
+        totalSteps: 4000,
+        totalKcal: 1400,
+        totalStandingHours: 3,
+        totalDistanceMeters: 3000,
+      },
+      sleep: {
+        daysAgo: 0,
+        yearOfCentury: 25,
+        month: 1,
+        day: 21,
+        totalMinutes: 400,
+        deepMinutes: 80,
+        lightMinutes: 220,
+        exerciseMinutes: 0,
+      },
+    });
+    await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
+      nowSec: NOW_SEC,
+    });
+    // Sleep days [2025-01-19, 2025-01-20, 2025-01-21] union activity
+    // days [2025-01-19, 2025-01-20, 2025-01-21] = 3 unique days.
+    expect(mockReadDayInfo).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('computeBackfillDayList', () => {
+  // Pure helper — exercised across the four per-vital rule combinations
+  // so the table stays close to the orchestrator's call sites.
+  const today = '2025-01-21';
+
+  it('empty cursor + alwaysIncludeToday=true → last firstSyncDays inclusive', () => {
+    expect(
+      computeBackfillDayList('', today, {
+        firstSyncDays: 3,
+        maxBackfillDays: 10,
+        inclusiveCursorDay: false,
+        alwaysIncludeToday: true,
+      }),
+    ).toEqual(['2025-01-19', '2025-01-20', '2025-01-21']);
+  });
+
+  it('non-empty cursor (exclusive) + alwaysIncludeToday=true → cursor+1 .. today', () => {
+    expect(
+      computeBackfillDayList('2025-01-18', today, {
+        firstSyncDays: 7,
+        maxBackfillDays: 10,
+        inclusiveCursorDay: false,
+        alwaysIncludeToday: true,
+      }),
+    ).toEqual(['2025-01-19', '2025-01-20', '2025-01-21']);
+  });
+
+  it('cursor === today + alwaysIncludeToday=true → [today]', () => {
+    expect(
+      computeBackfillDayList(today, today, {
+        firstSyncDays: 7,
+        maxBackfillDays: 10,
+        inclusiveCursorDay: false,
+        alwaysIncludeToday: true,
+      }),
+    ).toEqual(['2025-01-21']);
+  });
+
+  it('cursor === today + alwaysIncludeToday=false (sleep) → []', () => {
+    expect(
+      computeBackfillDayList(today, today, {
+        firstSyncDays: 7,
+        maxBackfillDays: 10,
+        inclusiveCursorDay: false,
+        alwaysIncludeToday: false,
+      }),
+    ).toEqual([]);
+  });
+
+  it('inclusiveCursorDay=true (HR) re-reads the cursor day for intra-day catch-up', () => {
+    expect(
+      computeBackfillDayList('2025-01-19', today, {
+        firstSyncDays: 7,
+        maxBackfillDays: 10,
+        inclusiveCursorDay: true,
+        alwaysIncludeToday: true,
+      }),
+    ).toEqual(['2025-01-19', '2025-01-20', '2025-01-21']);
+  });
+
+  it('caps the look-back to maxBackfillDays even with an ancient cursor', () => {
+    expect(
+      computeBackfillDayList('2024-01-01', today, {
+        firstSyncDays: 7,
+        maxBackfillDays: 5,
+        inclusiveCursorDay: false,
+        alwaysIncludeToday: true,
+      }),
+    ).toEqual([
+      '2025-01-17',
+      '2025-01-18',
+      '2025-01-19',
+      '2025-01-20',
+      '2025-01-21',
+    ]);
   });
 });

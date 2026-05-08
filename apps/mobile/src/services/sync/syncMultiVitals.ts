@@ -1,4 +1,5 @@
-// Multi-vitals sync pipeline — Sprint 7.5 / D13 §3.3.
+// Multi-vitals sync pipeline — Sprint 7.5 / D13 §3.3, multi-day
+// backfill added in Sprint 9 / D13 §3.4.
 //
 // Runs AFTER syncBacklogToCompletion (BP path) on every successful
 // reconnect. Implements steps 5–8 of the D13 §3.3 sequence:
@@ -6,15 +7,15 @@
 //   2. setUserParams (dirty)             (stub for Sprint 7.5 — Settings UI lands later)
 //   3. setGoals (dirty)                  (stub for Sprint 7.5)
 //   4. readBPHistory                     (handled by syncBacklog)
-//   5. readHRHistory                     ← here
-//   6. readSpO2History(today_local)      ← here
-//   7. readSleep(last_night)             ← here
-//   8. readActivity(today_local)         ← here
+//   5. readHRHistory                     ← here, looped per missing day
+//   6. readSpO2History                   ← here, looped per missing day
+//   7-8. readDayInfo (sleep + activity)  ← here, ONE call per day routed to both slices
 //
-// Failures are isolated via Promise.allSettled across steps 5–8; one
-// vital's failure does not block the others. Each successful read
-// advances its per-vital cursor (per D13 §3.4) and pushes samples into
-// the matching state slice's pending buffer (offline-first guarantee).
+// Failures are isolated via Promise.allSettled across the three step
+// branches (HR, SpO2, DayInfo); one branch's failure does not block
+// the others. Within a branch, the per-day loop advances the cursor
+// after each successful day so partial backfills resume on the next
+// reconnect.
 //
 // After all reads settle, the pipeline batches the slices' pending
 // arrays into a single MultiVitalsPayload and posts to /sync. On
@@ -24,9 +25,26 @@
 // network leg (the per-vital cursor already advanced, so the watch
 // won't be re-read).
 //
-// Sprint 7.5 simplifications (flagged for follow-up sprints):
-//   • Always pulls "today" / "last night" — no multi-day backfill yet.
-//     Per D13 §3.4 the cursor enables backfill; wiring lands later.
+// Backfill rules (per vital):
+//   • HR: cursor.hr is a watch-firmware second; backfill list includes
+//     cursor's own day so intra-day samples newer than cursor.hr can be
+//     picked up. Per-sample dedup via cursor.hr threshold + the slice's
+//     measuredAtSec dedup. Today is always re-read.
+//   • SpO2: cursor.spo2 is YYYY-MM-DD of last fully-synced day; backfill
+//     list is (cursor+1 .. yesterday) plus today (always re-read; same-
+//     day samples accumulate as the day progresses).
+//   • Sleep: cursor.sleep is YYYY-MM-DD; backfill list is (cursor+1 ..
+//     today). Last-night totals don't change once captured, so when
+//     cursor === today we skip — no always-include-today rule.
+//   • Activity: cursor.activity is YYYY-MM-DD; backfill list is
+//     (cursor+1 .. yesterday) plus today (today's step total grows
+//     throughout the day).
+// The three day-cursor vitals share a single readDayInfo per day
+// (request returns both sleep + activity reply packets) — the union
+// of sleep-days and activity-days drives the loop.
+//
+// Sprint 7.5 simplifications still in force (flagged for follow-up
+// sprints):
 //   • Sleep session boundaries are synthesized from totalMinutes (the
 //     0x07 reply doesn't expose start/end). sessionEnd = day 08:00 UTC,
 //     sessionStart = sessionEnd - totalMinutes. Score's efficiency
@@ -34,7 +52,7 @@
 //     §15.4 Q-D13-3.
 //   • Activity hourly[24] = zeros. Per-hour distribution requires a
 //     different ingest path (raw step samples via 0x73 0x04 notify) —
-//     Sprint 8.5 vital-detail screens may add this.
+//     to be wired by a later sprint.
 //   • setUserParams + setGoals dirty-checks always return false for
 //     now; the dirty-tracker hooks into Settings UI when it lands.
 //
@@ -71,6 +89,24 @@ const HR_DEFAULT_WINDOW_SEC = 30 * 60;
 const SPO2_DEFAULT_WINDOW_SEC = 60 * 60;
 const SECONDS_PER_DAY = 24 * 60 * 60;
 
+/** First-connect look-back window. The watch's protocol §4.3 supports
+ *  daysAgo up to 10; we default to 7 days so fresh users see a working
+ *  Trends baseline immediately while staying inside the protocol cap. */
+export const DEFAULT_FIRST_SYNC_DAYS = 7;
+
+/** Hard cap on backfill window — matches U16PRO §4.3 daysAgo support. */
+export const MAX_BACKFILL_DAYS = 10;
+
+export interface SyncMultiVitalsOptions {
+  /** Override the wall-clock used for "today" — test seam. */
+  nowSec?: number;
+  /** Days to look back when a vital's cursor is empty (first connect).
+   *  Default DEFAULT_FIRST_SYNC_DAYS. Capped at maxBackfillDays. */
+  firstSyncDays?: number;
+  /** Hard ceiling on the look-back window. Default MAX_BACKFILL_DAYS. */
+  maxBackfillDays?: number;
+}
+
 export interface SyncMultiVitalsResult {
   /** True when every step succeeded. False if ANY of steps 5–8 failed
    *  OR the /sync POST failed; per-step errors collected in `errors`. */
@@ -94,11 +130,6 @@ function dayLocalFromNow(nowSec: number): string {
   return new Date(nowSec * 1000).toISOString().slice(0, 10);
 }
 
-function dayStartSec(nowSec: number): number {
-  // Start-of-day UTC for the day containing nowSec.
-  return Math.floor(nowSec / SECONDS_PER_DAY) * SECONDS_PER_DAY;
-}
-
 function dayLocalFromBcd(yc: number, month: number, day: number): string {
   const yyyy = 2000 + yc;
   const mm = String(month).padStart(2, '0');
@@ -108,6 +139,89 @@ function dayLocalFromBcd(yc: number, month: number, day: number): string {
 
 function unixSecFromDayLocal(dayLocal: string): number {
   return Math.floor(new Date(`${dayLocal}T00:00:00Z`).getTime() / 1000);
+}
+
+/** Add (or subtract) whole days to a YYYY-MM-DD string. UTC math. */
+function addDays(dayLocal: string, n: number): string {
+  const ms = new Date(`${dayLocal}T00:00:00Z`).getTime() + n * SECONDS_PER_DAY * 1000;
+  return new Date(ms).toISOString().slice(0, 10);
+}
+
+/** Inclusive list of YYYY-MM-DD from start to end. Empty when start > end. */
+function enumerateDays(start: string, end: string): string[] {
+  const out: string[] = [];
+  let d = start;
+  while (d <= end) {
+    out.push(d);
+    d = addDays(d, 1);
+  }
+  return out;
+}
+
+/** Whole-day distance from `earlier` to `later`. Used to derive the
+ *  watch's `daysAgo` argument for any target day. */
+function countDaysBetween(earlier: string, later: string): number {
+  const a = new Date(`${earlier}T00:00:00Z`).getTime();
+  const b = new Date(`${later}T00:00:00Z`).getTime();
+  return Math.round((b - a) / (SECONDS_PER_DAY * 1000));
+}
+
+interface DayListOpts {
+  firstSyncDays: number;
+  maxBackfillDays: number;
+  /** Include cursor's own day in the list. HR uses true (intra-day
+   *  samples newer than cursor.hr can still arrive on cursor's day);
+   *  day-cursor vitals use false (cursor's day is fully synced). */
+  inclusiveCursorDay: boolean;
+  /** Append today regardless of cursor. SpO2 / Activity / HR use true
+   *  (same-day data grows). Sleep uses false (last-night totals don't
+   *  change once captured). */
+  alwaysIncludeToday: boolean;
+}
+
+/** Compute the inclusive list of YYYY-MM-DD days the orchestrator
+ *  should pull for a given vital. Empty list = nothing to do. */
+export function computeBackfillDayList(
+  cursorDayLocal: string,
+  todayLocal: string,
+  opts: DayListOpts,
+): string[] {
+  const earliestAllowed = addDays(todayLocal, -(opts.maxBackfillDays - 1));
+  let start: string;
+  if (!cursorDayLocal) {
+    start = addDays(todayLocal, -(opts.firstSyncDays - 1));
+  } else {
+    start = opts.inclusiveCursorDay
+      ? cursorDayLocal
+      : addDays(cursorDayLocal, 1);
+  }
+  if (start < earliestAllowed) start = earliestAllowed;
+
+  let days: string[] = [];
+  if (start <= todayLocal) {
+    days = enumerateDays(start, todayLocal);
+  }
+  if (
+    opts.alwaysIncludeToday &&
+    (days.length === 0 || days[days.length - 1] !== todayLocal)
+  ) {
+    days.push(todayLocal);
+  }
+  return days;
+}
+
+function resolveBackfillOptions(
+  options: SyncMultiVitalsOptions,
+): { firstSyncDays: number; maxBackfillDays: number } {
+  const maxBackfillDays = Math.max(
+    1,
+    Math.min(options.maxBackfillDays ?? MAX_BACKFILL_DAYS, MAX_BACKFILL_DAYS),
+  );
+  const firstSyncDays = Math.max(
+    1,
+    Math.min(options.firstSyncDays ?? DEFAULT_FIRST_SYNC_DAYS, maxBackfillDays),
+  );
+  return { firstSyncDays, maxBackfillDays };
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -120,175 +234,214 @@ async function syncHRStep(
   device: UrionDevice,
   deviceBleId: string,
   nowSec: number,
+  options: SyncMultiVitalsOptions,
 ): Promise<number> {
+  const { firstSyncDays, maxBackfillDays } = resolveBackfillOptions(options);
+  const todayLocal = dayLocalFromNow(nowSec);
   const cursor = getVitalCursor(deviceBleId);
-  // Per D13 §3.5 + readHRHistory.ts: the wrapper returns RAW watch
-  // seconds. Apply watchTimestampToUtcSec when converting to HRSample.
-  const samples = await readHRHistory(device, {
-    dayTimestampSec: dayStartSec(nowSec),
+
+  const cursorDayLocal =
+    cursor.hr > 0
+      ? dayLocalFromNow(watchTimestampToUtcSec(cursor.hr))
+      : '';
+
+  const days = computeBackfillDayList(cursorDayLocal, todayLocal, {
+    firstSyncDays,
+    maxBackfillDays,
+    inclusiveCursorDay: true,
+    alwaysIncludeToday: true,
   });
-  // Dedup against cursor.hr (raw watch sec): keep only newer samples.
-  const fresh = cursor.hr > 0
-    ? samples.filter((s) => s.timestampSec > cursor.hr)
-    : samples;
-  if (fresh.length === 0) return 0;
+
   const addPending = useHR.getState().addPending;
   let newestRaw = cursor.hr;
-  for (const s of fresh) {
-    const sample: HRSample = {
-      measuredAtSec: watchTimestampToUtcSec(s.timestampSec),
-      bpm: s.bpm,
-      sampleWindowSec: HR_DEFAULT_WINDOW_SEC,
-      // The 0x15 history packet does not expose motion-state per sample.
-      // Classifier's sensor-error fallback ignores motion='unknown' for
-      // baseline computation but still classifies extreme values.
-      motionState: 'unknown',
-      isSpotCheck: false,
-    };
-    addPending(sample);
-    if (s.timestampSec > newestRaw) newestRaw = s.timestampSec;
+  let totalPulled = 0;
+
+  for (const day of days) {
+    const samples = await readHRHistory(device, {
+      dayTimestampSec: unixSecFromDayLocal(day),
+    });
+    // Sample-level dedup: keep only samples newer than cursor.hr.
+    const fresh =
+      cursor.hr > 0
+        ? samples.filter((s) => s.timestampSec > cursor.hr)
+        : samples;
+    for (const s of fresh) {
+      const sample: HRSample = {
+        measuredAtSec: watchTimestampToUtcSec(s.timestampSec),
+        bpm: s.bpm,
+        sampleWindowSec: HR_DEFAULT_WINDOW_SEC,
+        // The 0x15 history packet does not expose motion-state per sample.
+        // Classifier's sensor-error fallback ignores motion='unknown' for
+        // baseline computation but still classifies extreme values.
+        motionState: 'unknown',
+        isSpotCheck: false,
+      };
+      addPending(sample);
+      if (s.timestampSec > newestRaw) newestRaw = s.timestampSec;
+    }
+    totalPulled += fresh.length;
   }
+
   if (newestRaw > cursor.hr) {
     setVitalCursor(deviceBleId, 'hr', newestRaw);
   }
-  return fresh.length;
+  return totalPulled;
 }
 
 async function syncSpO2Step(
   device: UrionDevice,
   deviceBleId: string,
   nowSec: number,
+  options: SyncMultiVitalsOptions,
 ): Promise<number> {
-  const todayLocal = dayLocalFromNow(nowSec);
-  // Bug fix (caught on-device 2026-05-08): the original Sprint 7.5
-  // implementation short-circuited when `cursor.spo2 === todayLocal`,
-  // which locked out same-day re-reads after the very first sync of
-  // the day. Watch SpO2 samples accumulate across the day; the lockout
-  // meant new samples never reached the slice until the next calendar
-  // day. We now always read; the slice dedupes by measuredAtSec so
-  // already-known samples are no-ops.
-  const samples = await readSpO2History(device, {
-    dayTimestampSec: dayStartSec(nowSec),
-  });
-  if (samples.length === 0) {
-    // Cursor still advances — empty days are valid "synced" days.
-    setVitalCursor(deviceBleId, 'spo2', todayLocal);
-    return 0;
-  }
-  const addPending = useSpO2.getState().addPending;
-  for (const s of samples) {
-    const sample: SpO2Sample = {
-      measuredAtSec: watchTimestampToUtcSec(s.timestampSec),
-      percent: s.percent,
-      maxInWindow: s.maxInWindow,
-      minInWindow: s.minInWindow,
-      sampleWindowSec: SPO2_DEFAULT_WINDOW_SEC,
-      isSpotCheck: false,
-      // 0x2D doesn't expose perfusion index per sample.
-      perfusionIndex: null,
-    };
-    addPending(sample);
-  }
-  setVitalCursor(deviceBleId, 'spo2', todayLocal);
-  return samples.length;
-}
-
-async function syncSleepStep(
-  device: UrionDevice,
-  deviceBleId: string,
-  nowSec: number,
-): Promise<number> {
+  const { firstSyncDays, maxBackfillDays } = resolveBackfillOptions(options);
   const todayLocal = dayLocalFromNow(nowSec);
   const cursor = getVitalCursor(deviceBleId);
-  if (cursor.sleep === todayLocal) return 0;
-  // daysAgo=0 — last completed sleep ending this morning. The 0x07 reply
-  // returns the day's totals; we DON'T re-pull yesterday because the
-  // session that ended this morning is reported under today's date.
-  const info = await readDayInfo(device, { daysAgo: 0 });
-  if (!info.sleep || info.sleep.totalMinutes === 0) {
-    setVitalCursor(deviceBleId, 'sleep', todayLocal);
-    return 0;
+
+  const days = computeBackfillDayList(cursor.spo2, todayLocal, {
+    firstSyncDays,
+    maxBackfillDays,
+    inclusiveCursorDay: false,
+    alwaysIncludeToday: true,
+  });
+
+  const addPending = useSpO2.getState().addPending;
+  let totalPulled = 0;
+
+  for (const day of days) {
+    const samples = await readSpO2History(device, {
+      dayTimestampSec: unixSecFromDayLocal(day),
+    });
+    for (const s of samples) {
+      const sample: SpO2Sample = {
+        measuredAtSec: watchTimestampToUtcSec(s.timestampSec),
+        percent: s.percent,
+        maxInWindow: s.maxInWindow,
+        minInWindow: s.minInWindow,
+        sampleWindowSec: SPO2_DEFAULT_WINDOW_SEC,
+        isSpotCheck: false,
+        // 0x2D doesn't expose perfusion index per sample.
+        perfusionIndex: null,
+      };
+      addPending(sample);
+    }
+    totalPulled += samples.length;
+    // Advance per-day so a mid-loop failure leaves a resumable cursor.
+    setVitalCursor(deviceBleId, 'spo2', day);
   }
-  const dayLocal = dayLocalFromBcd(
-    info.sleep.yearOfCentury,
-    info.sleep.month,
-    info.sleep.day,
-  );
-  const dayStart = unixSecFromDayLocal(dayLocal);
-  // Synthesize session boundaries (see file header §"simplifications"):
-  // sessionEnd = day 08:00 UTC (proxy for "this morning's wake"),
-  // sessionStart = sessionEnd - totalMinutes.
-  const sessionEndSec = dayStart + 8 * 3600;
-  const sessionStartSec = sessionEndSec - info.sleep.totalMinutes * 60;
-  const session: SleepSession = {
-    sessionStartSec,
-    sessionEndSec,
-    sessionStartLocal: new Date(sessionStartSec * 1000).toISOString(),
-    sessionEndLocal: new Date(sessionEndSec * 1000).toISOString(),
-    totalMinutes: info.sleep.totalMinutes,
-    deepMinutes: info.sleep.deepMinutes,
-    remMinutes: 0, // 0x07 doesn't expose REM; classifier handles 0 gracefully
-    lightMinutes: info.sleep.lightMinutes,
-    awakeMinutes: 0,
-    awakeCount: 0,
-    transitions: [] as { atSec: number; stage: SleepStage }[],
-    sleepScore: 0, // computed by classifier downstream
-  };
-  useSleep.getState().addPending(session);
-  setVitalCursor(deviceBleId, 'sleep', todayLocal);
-  return 1;
+  return totalPulled;
 }
 
-async function syncActivityStep(
+/** Combined sleep + activity step. The 0x07 watch request returns both
+ *  reply packets, so calling readDayInfo once per day services both
+ *  vitals. Day list is the union of sleep-days and activity-days. */
+async function syncDayInfoStep(
   device: UrionDevice,
   deviceBleId: string,
   nowSec: number,
-): Promise<number> {
+  options: SyncMultiVitalsOptions,
+): Promise<{ sleep: number; activity: number }> {
+  const { firstSyncDays, maxBackfillDays } = resolveBackfillOptions(options);
   const todayLocal = dayLocalFromNow(nowSec);
-  // Bug fix (caught on-device 2026-05-08): the original Sprint 7.5
-  // implementation short-circuited when `cursor.activity === todayLocal`,
-  // which locked out same-day re-reads. The watch's day-step total
-  // grows throughout the day; the lockout meant the first sync of the
-  // day (often with steps=0) was the only chance to capture activity.
-  // The slice dedupes by dayLocal so re-reading + replacing today's
-  // row is the right behaviour. Cursor still advances at the end so
-  // backfill loops (Sprint 7.7+) can reason about "we've seen today".
-  const info = await readDayInfo(device, { daysAgo: 0 });
-  if (!info.activity) {
-    setVitalCursor(deviceBleId, 'activity', todayLocal);
-    return 0;
+  const cursor = getVitalCursor(deviceBleId);
+
+  const sleepDays = computeBackfillDayList(cursor.sleep, todayLocal, {
+    firstSyncDays,
+    maxBackfillDays,
+    inclusiveCursorDay: false,
+    alwaysIncludeToday: false,
+  });
+  const activityDays = computeBackfillDayList(cursor.activity, todayLocal, {
+    firstSyncDays,
+    maxBackfillDays,
+    inclusiveCursorDay: false,
+    alwaysIncludeToday: true,
+  });
+
+  const sleepDaySet = new Set(sleepDays);
+  const activityDaySet = new Set(activityDays);
+  const allDays = Array.from(
+    new Set<string>([...sleepDays, ...activityDays]),
+  ).sort();
+
+  let sleepCount = 0;
+  let activityCount = 0;
+
+  for (const day of allDays) {
+    const daysAgo = countDaysBetween(day, todayLocal);
+    const info = await readDayInfo(device, { daysAgo });
+
+    if (sleepDaySet.has(day)) {
+      if (info.sleep && info.sleep.totalMinutes > 0) {
+        const dayLocal = dayLocalFromBcd(
+          info.sleep.yearOfCentury,
+          info.sleep.month,
+          info.sleep.day,
+        );
+        const dayStart = unixSecFromDayLocal(dayLocal);
+        // Synthesize session boundaries — the 0x07 reply doesn't expose
+        // start/end. sessionEnd = day 08:00 UTC (proxy for "this morning's
+        // wake"); sessionStart = sessionEnd - totalMinutes. Tracked in D13
+        // §15.4 Q-D13-3.
+        const sessionEndSec = dayStart + 8 * 3600;
+        const sessionStartSec = sessionEndSec - info.sleep.totalMinutes * 60;
+        const session: SleepSession = {
+          sessionStartSec,
+          sessionEndSec,
+          sessionStartLocal: new Date(sessionStartSec * 1000).toISOString(),
+          sessionEndLocal: new Date(sessionEndSec * 1000).toISOString(),
+          totalMinutes: info.sleep.totalMinutes,
+          deepMinutes: info.sleep.deepMinutes,
+          remMinutes: 0, // 0x07 doesn't expose REM; classifier handles 0 gracefully
+          lightMinutes: info.sleep.lightMinutes,
+          awakeMinutes: 0,
+          awakeCount: 0,
+          transitions: [] as { atSec: number; stage: SleepStage }[],
+          sleepScore: 0, // computed by classifier downstream
+        };
+        useSleep.getState().addPending(session);
+        sleepCount += 1;
+      }
+      setVitalCursor(deviceBleId, 'sleep', day);
+    }
+
+    if (activityDaySet.has(day)) {
+      if (info.activity) {
+        const dayLocal = dayLocalFromBcd(
+          info.activity.yearOfCentury,
+          info.activity.month,
+          info.activity.day,
+        );
+        const dayStart = unixSecFromDayLocal(dayLocal);
+        const activityDay: ActivityDay = {
+          dayLocal,
+          measuredAtSec: dayStart,
+          totalSteps: info.activity.totalSteps,
+          targetSteps: 6000, // D13 §15.4 Q-D13-1 default; orchestrator overrides when Settings UI ships
+          lastSampleAtSec: dayStart + 23 * 3600 + 59 * 60,
+          // Per-hour distribution comes from the 0x73 0x04 step-event notify
+          // path, not 0x07. Filled with zeros until that path is wired.
+          hourly: new Array<number>(24).fill(0),
+        };
+        const caloriesDay: CaloriesDay = {
+          dayLocal,
+          measuredAtSec: dayStart,
+          totalKcal: info.activity.totalKcal,
+          // 0x07 doesn't split active vs basal; until setUserParams gives us
+          // BMR-input data we attribute the total to activity.
+          activityKcal: info.activity.totalKcal,
+          bmrKcal: 0,
+          targetKcal: null,
+        };
+        useActivity.getState().addPendingSteps(activityDay);
+        useActivity.getState().addPendingCalories(caloriesDay);
+        activityCount += 1;
+      }
+      setVitalCursor(deviceBleId, 'activity', day);
+    }
   }
-  const dayLocal = dayLocalFromBcd(
-    info.activity.yearOfCentury,
-    info.activity.month,
-    info.activity.day,
-  );
-  const dayStart = unixSecFromDayLocal(dayLocal);
-  const activityDay: ActivityDay = {
-    dayLocal,
-    measuredAtSec: dayStart,
-    totalSteps: info.activity.totalSteps,
-    targetSteps: 6000, // D13 §15.4 Q-D13-1 default; orchestrator overrides when Settings UI ships
-    lastSampleAtSec: dayStart + 23 * 3600 + 59 * 60,
-    // Sprint 7.5 limitation: per-hour distribution comes from the
-    // 0x73 0x04 step-event notify path, not 0x07. Filled with zeros
-    // until that path is wired.
-    hourly: new Array<number>(24).fill(0),
-  };
-  const caloriesDay: CaloriesDay = {
-    dayLocal,
-    measuredAtSec: dayStart,
-    totalKcal: info.activity.totalKcal,
-    // 0x07 doesn't split active vs basal; until setUserParams gives us
-    // BMR-input data we attribute the total to activity.
-    activityKcal: info.activity.totalKcal,
-    bmrKcal: 0,
-    targetKcal: null,
-  };
-  useActivity.getState().addPendingSteps(activityDay);
-  useActivity.getState().addPendingCalories(caloriesDay);
-  setVitalCursor(deviceBleId, 'activity', todayLocal);
-  return 1;
+
+  return { sleep: sleepCount, activity: activityCount };
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -298,7 +451,7 @@ export async function syncMultiVitals(
   device: UrionDevice,
   deviceBleId: string,
   deviceMeta: DeviceMeta,
-  options: { nowSec?: number } = {},
+  options: SyncMultiVitalsOptions = {},
 ): Promise<SyncMultiVitalsResult> {
   const nowSec = options.nowSec ?? Math.floor(Date.now() / 1000);
   const errors: Record<string, string> = {};
@@ -307,23 +460,38 @@ export async function syncMultiVitals(
   // Steps 2-3 — dirty-tracked writers. Stubbed for Sprint 7.5: always
   // returns false (no-op) until Settings UI lands.
 
-  // Steps 5-8 — per-vital reads. Promise.allSettled isolates failures
-  // (one vital error doesn't block the others). Each step manages its
-  // own cursor + pending-buffer push.
-  const [hrR, spo2R, sleepR, actR] = await Promise.allSettled([
-    syncHRStep(device, deviceBleId, nowSec),
-    syncSpO2Step(device, deviceBleId, nowSec),
-    syncSleepStep(device, deviceBleId, nowSec),
-    syncActivityStep(device, deviceBleId, nowSec),
+  // Steps 5-8 — three branches in parallel. Per-vital error isolation
+  // via Promise.allSettled. Sleep + activity share readDayInfo, so
+  // they're merged into one branch (1 BLE round-trip per day instead
+  // of 2 across multi-day backfill).
+  const [hrR, spo2R, dayInfoR] = await Promise.allSettled([
+    syncHRStep(device, deviceBleId, nowSec, options),
+    syncSpO2Step(device, deviceBleId, nowSec, options),
+    syncDayInfoStep(device, deviceBleId, nowSec, options),
   ]);
-  if (hrR.status === 'fulfilled') pulled.hr = hrR.value;
-  else errors.hr = hrR.reason instanceof Error ? hrR.reason.message : String(hrR.reason);
-  if (spo2R.status === 'fulfilled') pulled.spo2 = spo2R.value;
-  else errors.spo2 = spo2R.reason instanceof Error ? spo2R.reason.message : String(spo2R.reason);
-  if (sleepR.status === 'fulfilled') pulled.sleep = sleepR.value;
-  else errors.sleep = sleepR.reason instanceof Error ? sleepR.reason.message : String(sleepR.reason);
-  if (actR.status === 'fulfilled') pulled.activity = actR.value;
-  else errors.activity = actR.reason instanceof Error ? actR.reason.message : String(actR.reason);
+  if (hrR.status === 'fulfilled') {
+    pulled.hr = hrR.value;
+  } else {
+    errors.hr = hrR.reason instanceof Error ? hrR.reason.message : String(hrR.reason);
+  }
+  if (spo2R.status === 'fulfilled') {
+    pulled.spo2 = spo2R.value;
+  } else {
+    errors.spo2 =
+      spo2R.reason instanceof Error ? spo2R.reason.message : String(spo2R.reason);
+  }
+  if (dayInfoR.status === 'fulfilled') {
+    pulled.sleep = dayInfoR.value.sleep;
+    pulled.activity = dayInfoR.value.activity;
+  } else {
+    const msg =
+      dayInfoR.reason instanceof Error
+        ? dayInfoR.reason.message
+        : String(dayInfoR.reason);
+    // The merged step covers both vitals; surface the failure under both.
+    errors.sleep = msg;
+    errors.activity = msg;
+  }
 
   // Build the batched payload from the slices' pending arrays.
   const hrPending = useHR.getState().pending;
