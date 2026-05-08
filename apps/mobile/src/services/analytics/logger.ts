@@ -45,6 +45,10 @@ export type AnalyticsEvent =
   | { name: 'sync_skipped'; props?: { trigger: string; reason: 'no_paired_device' | 'take_reading_active' | 'too_recent' | 'already_running' } }
   | { name: 'sync_failed'; props?: { trigger: string; reason: string } }
   | { name: 'reading_realtime_received'; props?: { familyId: string } }
+  // Sprint 7.7b — multi-vital realtime path. Caregiver home invalidates
+  // its query when any vitals_other row is INSERTed for a family the
+  // signed-in user belongs to. Counts/categories never carry the value.
+  | { name: 'vitals_other_realtime_received'; props?: { familyId: string } }
   // Sprint 7.5 — per-vital persistence + sync lifecycle. Counts +
   // categories only; sample VALUES (bpm, percent, steps, etc.) never
   // appear in analytics. Per CLAUDE.md data rule + D13 §5.1.

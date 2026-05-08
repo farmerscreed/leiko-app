@@ -66,9 +66,14 @@ export function useFamilyReadings(): UseFamilyReadingsResult {
 
   useEffect(() => {
     if (!userId || familyIds.length === 0) return;
+    // One channel per family covers BOTH `readings` (BP) and
+    // `vitals_other` (hr / spo2 / sleep_session etc.) — Sprint 7.7b
+    // extended fetchParentSummaries to surface the multi-vitals, and
+    // this hook now invalidates on inserts to either source so the
+    // caregiver home updates live for any vital, not just BP.
     const channels = familyIds.map((familyId) => {
       const channel = supabase
-        .channel(`readings:${familyId}`)
+        .channel(`family-readings:${familyId}`)
         .on(
           'postgres_changes',
           {
@@ -79,6 +84,19 @@ export function useFamilyReadings(): UseFamilyReadingsResult {
           },
           () => {
             logger.track('reading_realtime_received', { familyId });
+            void queryClient.invalidateQueries({ queryKey });
+          },
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'vitals_other',
+            filter: `family_id=eq.${familyId}`,
+          },
+          () => {
+            logger.track('vitals_other_realtime_received', { familyId });
             void queryClient.invalidateQueries({ queryKey });
           },
         )
