@@ -16,7 +16,7 @@ import {
   pickAnomaly,
   averageRecent,
   mergeLocalLatest,
-} from '../Home/CaregiverHome';
+} from '../Home/CaregiverHome.legacy';
 import type { ParentSummary } from '../../services/families/fetchParentSummaries';
 
 // Mock the hook entirely — these are screen tests, not data tests.
