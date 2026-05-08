@@ -1,8 +1,8 @@
-// @ts-nocheck — Sprint 7.7b widened ParentSummary with multi-vital
-// fields. This legacy test predates that and constructs ParentSummary
-// literals inline in many places. File is deleted at Sprint 7.7 close;
-// suppressing the type errors here keeps the test running until then
-// without obscuring real type issues elsewhere.
+// Sprint 7.7b widened ParentSummary with multi-vital fields. This legacy
+// test predates that and uses inline ParentSummary literals in several
+// places; rather than rewrite each one, the helper invocations that
+// take parent arrays cast via `as ParentSummary[]`. File is deleted at
+// Sprint 7.7 close.
 //
 // CaregiverHome — Sprint 7 component tests.
 //
@@ -232,7 +232,7 @@ describe('pickAnomaly (most-severe wins)', () => {
           },
           recentReadings: [],
         },
-      ]),
+      ] as unknown as ParentSummary[]),
     ).toBeNull();
   });
 
@@ -268,7 +268,7 @@ describe('pickAnomaly (most-severe wins)', () => {
         },
         recentReadings: [],
       },
-    ]);
+    ] as unknown as ParentSummary[]);
     expect(result?.tier).toBe('confirmed_urgent');
     expect(result?.parentName).toBe('Dad');
   });
@@ -320,7 +320,7 @@ describe('mergeLocalLatest', () => {
       deviceBleId: null,
       capturedAtMs: now * 1000,
     };
-    const parents: ParentSummary[] = [
+    const parents = [
       {
         familyId: 'fam-1',
         parentDisplayName: 'Mum',
@@ -336,7 +336,7 @@ describe('mergeLocalLatest', () => {
         },
         recentReadings: [],
       },
-    ];
+    ] as unknown as ParentSummary[];
     const merged = mergeLocalLatest(parents, localReading);
     expect(merged[0].latestReading?.systolic).toBe(128);
   });
@@ -355,7 +355,7 @@ describe('mergeLocalLatest', () => {
       deviceBleId: null,
       capturedAtMs: now * 1000,
     };
-    const parents: ParentSummary[] = [
+    const parents = [
       {
         familyId: 'fam-1',
         parentDisplayName: 'Mum',
@@ -371,7 +371,7 @@ describe('mergeLocalLatest', () => {
         },
         recentReadings: [],
       },
-    ];
+    ] as unknown as ParentSummary[];
     expect(mergeLocalLatest(parents, local)).toBe(parents);
   });
 });

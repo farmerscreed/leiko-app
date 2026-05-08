@@ -1,0 +1,1513 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds colorMode=dark 1`] = `
+<View
+  accessibilityRole="radiogroup"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#1D140DB3",
+        "borderColor": "rgba(255,255,255,0.08)",
+        "borderRadius": 999,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "overflow": "hidden",
+        "padding": 3,
+      },
+      undefined,
+    ]
+  }
+  testID="toggle"
+>
+  <View
+    intensity={50}
+    pointerEvents="none"
+    style={
+      {
+        "bottom": 0,
+        "left": 0,
+        "position": "absolute",
+        "right": 0,
+        "top": 0,
+      }
+    }
+    tint="dark"
+  />
+  <View
+    accessibilityLabel="Bird's-eye view"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": true,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={4}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "#FF73502E",
+          "borderColor": "#FF735059",
+          "borderRadius": 999,
+          "borderWidth": 0.5,
+          "flexDirection": "row",
+          "paddingBottom": 7,
+          "paddingLeft": 9,
+          "paddingRight": 11,
+          "paddingTop": 7,
+        },
+        null,
+      ]
+    }
+    testID="toggle-birds"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={14}
+      bbWidth={14}
+      focusable={false}
+      height={14}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 14,
+            "width": 14,
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+      width={14}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGCircle
+          cx={7}
+          cy={9}
+          fill={
+            {
+              "payload": 4294931280,
+              "type": 0,
+            }
+          }
+          opacity={0.9}
+          propList={
+            [
+              "fill",
+            ]
+          }
+          r={2.5}
+        />
+        <RNSVGCircle
+          cx={16}
+          cy={6}
+          fill={
+            {
+              "payload": 4294931280,
+              "type": 0,
+            }
+          }
+          opacity={0.7}
+          propList={
+            [
+              "fill",
+            ]
+          }
+          r={1.8}
+        />
+        <RNSVGCircle
+          cx={14}
+          cy={16}
+          fill={
+            {
+              "payload": 4294931280,
+              "type": 0,
+            }
+          }
+          opacity={0.85}
+          propList={
+            [
+              "fill",
+            ]
+          }
+          r={2.2}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#FF7350",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 10.5,
+          "letterSpacing": 0.6,
+          "lineHeight": 14,
+          "marginLeft": 6,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Bird's-eye
+    </Text>
+  </View>
+  <View
+    accessibilityLabel="Detailed view"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": false,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={4}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "transparent",
+          "borderColor": "transparent",
+          "borderRadius": 999,
+          "borderWidth": 0.5,
+          "flexDirection": "row",
+          "paddingBottom": 7,
+          "paddingLeft": 9,
+          "paddingRight": 11,
+          "paddingTop": 7,
+        },
+        null,
+      ]
+    }
+    testID="toggle-cards"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={14}
+      bbWidth={14}
+      fill="none"
+      focusable={false}
+      height={14}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 14,
+            "width": 14,
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+      width={14}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGRect
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          height={4}
+          propList={
+            [
+              "stroke",
+              "strokeWidth",
+            ]
+          }
+          rx={1.2}
+          stroke={
+            {
+              "payload": 4288452752,
+              "type": 0,
+            }
+          }
+          strokeWidth={1.6}
+          width={16}
+          x={4}
+          y={5}
+        />
+        <RNSVGRect
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          height={4}
+          propList={
+            [
+              "stroke",
+              "strokeWidth",
+            ]
+          }
+          rx={1.2}
+          stroke={
+            {
+              "payload": 4288452752,
+              "type": 0,
+            }
+          }
+          strokeWidth={1.6}
+          width={16}
+          x={4}
+          y={11}
+        />
+        <RNSVGRect
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          height={2.5}
+          propList={
+            [
+              "stroke",
+              "strokeWidth",
+            ]
+          }
+          rx={1}
+          stroke={
+            {
+              "payload": 4288452752,
+              "type": 0,
+            }
+          }
+          strokeWidth={1.6}
+          width={16}
+          x={4}
+          y={17}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 10.5,
+          "letterSpacing": 0.6,
+          "lineHeight": 14,
+          "marginLeft": 6,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Detailed
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds colorMode=light 1`] = `
+<View
+  accessibilityRole="radiogroup"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#1D140DB3",
+        "borderColor": "rgba(15,18,28,0.08)",
+        "borderRadius": 999,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "overflow": "hidden",
+        "padding": 3,
+      },
+      undefined,
+    ]
+  }
+  testID="toggle"
+>
+  <View
+    intensity={50}
+    pointerEvents="none"
+    style={
+      {
+        "bottom": 0,
+        "left": 0,
+        "position": "absolute",
+        "right": 0,
+        "top": 0,
+      }
+    }
+    tint="light"
+  />
+  <View
+    accessibilityLabel="Bird's-eye view"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": true,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={4}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "#FF73502E",
+          "borderColor": "#FF735059",
+          "borderRadius": 999,
+          "borderWidth": 0.5,
+          "flexDirection": "row",
+          "paddingBottom": 7,
+          "paddingLeft": 9,
+          "paddingRight": 11,
+          "paddingTop": 7,
+        },
+        null,
+      ]
+    }
+    testID="toggle-birds"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={14}
+      bbWidth={14}
+      focusable={false}
+      height={14}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 14,
+            "width": 14,
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+      width={14}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGCircle
+          cx={7}
+          cy={9}
+          fill={
+            {
+              "payload": 4294931280,
+              "type": 0,
+            }
+          }
+          opacity={0.9}
+          propList={
+            [
+              "fill",
+            ]
+          }
+          r={2.5}
+        />
+        <RNSVGCircle
+          cx={16}
+          cy={6}
+          fill={
+            {
+              "payload": 4294931280,
+              "type": 0,
+            }
+          }
+          opacity={0.7}
+          propList={
+            [
+              "fill",
+            ]
+          }
+          r={1.8}
+        />
+        <RNSVGCircle
+          cx={14}
+          cy={16}
+          fill={
+            {
+              "payload": 4294931280,
+              "type": 0,
+            }
+          }
+          opacity={0.85}
+          propList={
+            [
+              "fill",
+            ]
+          }
+          r={2.2}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#FF7350",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 10.5,
+          "letterSpacing": 0.6,
+          "lineHeight": 14,
+          "marginLeft": 6,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Bird's-eye
+    </Text>
+  </View>
+  <View
+    accessibilityLabel="Detailed view"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": false,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={4}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "transparent",
+          "borderColor": "transparent",
+          "borderRadius": 999,
+          "borderWidth": 0.5,
+          "flexDirection": "row",
+          "paddingBottom": 7,
+          "paddingLeft": 9,
+          "paddingRight": 11,
+          "paddingTop": 7,
+        },
+        null,
+      ]
+    }
+    testID="toggle-cards"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={14}
+      bbWidth={14}
+      fill="none"
+      focusable={false}
+      height={14}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 14,
+            "width": 14,
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+      width={14}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGRect
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          height={4}
+          propList={
+            [
+              "stroke",
+              "strokeWidth",
+            ]
+          }
+          rx={1.2}
+          stroke={
+            {
+              "payload": 4284114040,
+              "type": 0,
+            }
+          }
+          strokeWidth={1.6}
+          width={16}
+          x={4}
+          y={5}
+        />
+        <RNSVGRect
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          height={4}
+          propList={
+            [
+              "stroke",
+              "strokeWidth",
+            ]
+          }
+          rx={1.2}
+          stroke={
+            {
+              "payload": 4284114040,
+              "type": 0,
+            }
+          }
+          strokeWidth={1.6}
+          width={16}
+          x={4}
+          y={11}
+        />
+        <RNSVGRect
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          height={2.5}
+          propList={
+            [
+              "stroke",
+              "strokeWidth",
+            ]
+          }
+          rx={1}
+          stroke={
+            {
+              "payload": 4284114040,
+              "type": 0,
+            }
+          }
+          strokeWidth={1.6}
+          width={16}
+          x={4}
+          y={17}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#5A6478",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 10.5,
+          "letterSpacing": 0.6,
+          "lineHeight": 14,
+          "marginLeft": 6,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Detailed
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards colorMode=dark 1`] = `
+<View
+  accessibilityRole="radiogroup"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#1D140DB3",
+        "borderColor": "rgba(255,255,255,0.08)",
+        "borderRadius": 999,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "overflow": "hidden",
+        "padding": 3,
+      },
+      undefined,
+    ]
+  }
+  testID="toggle"
+>
+  <View
+    intensity={50}
+    pointerEvents="none"
+    style={
+      {
+        "bottom": 0,
+        "left": 0,
+        "position": "absolute",
+        "right": 0,
+        "top": 0,
+      }
+    }
+    tint="dark"
+  />
+  <View
+    accessibilityLabel="Bird's-eye view"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": false,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={4}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "transparent",
+          "borderColor": "transparent",
+          "borderRadius": 999,
+          "borderWidth": 0.5,
+          "flexDirection": "row",
+          "paddingBottom": 7,
+          "paddingLeft": 9,
+          "paddingRight": 11,
+          "paddingTop": 7,
+        },
+        null,
+      ]
+    }
+    testID="toggle-birds"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={14}
+      bbWidth={14}
+      focusable={false}
+      height={14}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 14,
+            "width": 14,
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+      width={14}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGCircle
+          cx={7}
+          cy={9}
+          fill={
+            {
+              "payload": 4288452752,
+              "type": 0,
+            }
+          }
+          opacity={0.9}
+          propList={
+            [
+              "fill",
+            ]
+          }
+          r={2.5}
+        />
+        <RNSVGCircle
+          cx={16}
+          cy={6}
+          fill={
+            {
+              "payload": 4288452752,
+              "type": 0,
+            }
+          }
+          opacity={0.7}
+          propList={
+            [
+              "fill",
+            ]
+          }
+          r={1.8}
+        />
+        <RNSVGCircle
+          cx={14}
+          cy={16}
+          fill={
+            {
+              "payload": 4288452752,
+              "type": 0,
+            }
+          }
+          opacity={0.85}
+          propList={
+            [
+              "fill",
+            ]
+          }
+          r={2.2}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 10.5,
+          "letterSpacing": 0.6,
+          "lineHeight": 14,
+          "marginLeft": 6,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Bird's-eye
+    </Text>
+  </View>
+  <View
+    accessibilityLabel="Detailed view"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": true,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={4}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "#FF73502E",
+          "borderColor": "#FF735059",
+          "borderRadius": 999,
+          "borderWidth": 0.5,
+          "flexDirection": "row",
+          "paddingBottom": 7,
+          "paddingLeft": 9,
+          "paddingRight": 11,
+          "paddingTop": 7,
+        },
+        null,
+      ]
+    }
+    testID="toggle-cards"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={14}
+      bbWidth={14}
+      fill="none"
+      focusable={false}
+      height={14}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 14,
+            "width": 14,
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+      width={14}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGRect
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          height={4}
+          propList={
+            [
+              "stroke",
+              "strokeWidth",
+            ]
+          }
+          rx={1.2}
+          stroke={
+            {
+              "payload": 4294931280,
+              "type": 0,
+            }
+          }
+          strokeWidth={1.6}
+          width={16}
+          x={4}
+          y={5}
+        />
+        <RNSVGRect
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          height={4}
+          propList={
+            [
+              "stroke",
+              "strokeWidth",
+            ]
+          }
+          rx={1.2}
+          stroke={
+            {
+              "payload": 4294931280,
+              "type": 0,
+            }
+          }
+          strokeWidth={1.6}
+          width={16}
+          x={4}
+          y={11}
+        />
+        <RNSVGRect
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          height={2.5}
+          propList={
+            [
+              "stroke",
+              "strokeWidth",
+            ]
+          }
+          rx={1}
+          stroke={
+            {
+              "payload": 4294931280,
+              "type": 0,
+            }
+          }
+          strokeWidth={1.6}
+          width={16}
+          x={4}
+          y={17}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#FF7350",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 10.5,
+          "letterSpacing": 0.6,
+          "lineHeight": 14,
+          "marginLeft": 6,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Detailed
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards colorMode=light 1`] = `
+<View
+  accessibilityRole="radiogroup"
+  style={
+    [
+      {
+        "alignItems": "center",
+        "alignSelf": "flex-start",
+        "backgroundColor": "#1D140DB3",
+        "borderColor": "rgba(15,18,28,0.08)",
+        "borderRadius": 999,
+        "borderWidth": 0.5,
+        "flexDirection": "row",
+        "overflow": "hidden",
+        "padding": 3,
+      },
+      undefined,
+    ]
+  }
+  testID="toggle"
+>
+  <View
+    intensity={50}
+    pointerEvents="none"
+    style={
+      {
+        "bottom": 0,
+        "left": 0,
+        "position": "absolute",
+        "right": 0,
+        "top": 0,
+      }
+    }
+    tint="light"
+  />
+  <View
+    accessibilityLabel="Bird's-eye view"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": false,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={4}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "transparent",
+          "borderColor": "transparent",
+          "borderRadius": 999,
+          "borderWidth": 0.5,
+          "flexDirection": "row",
+          "paddingBottom": 7,
+          "paddingLeft": 9,
+          "paddingRight": 11,
+          "paddingTop": 7,
+        },
+        null,
+      ]
+    }
+    testID="toggle-birds"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={14}
+      bbWidth={14}
+      focusable={false}
+      height={14}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 14,
+            "width": 14,
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+      width={14}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGCircle
+          cx={7}
+          cy={9}
+          fill={
+            {
+              "payload": 4284114040,
+              "type": 0,
+            }
+          }
+          opacity={0.9}
+          propList={
+            [
+              "fill",
+            ]
+          }
+          r={2.5}
+        />
+        <RNSVGCircle
+          cx={16}
+          cy={6}
+          fill={
+            {
+              "payload": 4284114040,
+              "type": 0,
+            }
+          }
+          opacity={0.7}
+          propList={
+            [
+              "fill",
+            ]
+          }
+          r={1.8}
+        />
+        <RNSVGCircle
+          cx={14}
+          cy={16}
+          fill={
+            {
+              "payload": 4284114040,
+              "type": 0,
+            }
+          }
+          opacity={0.85}
+          propList={
+            [
+              "fill",
+            ]
+          }
+          r={2.2}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#5A6478",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 10.5,
+          "letterSpacing": 0.6,
+          "lineHeight": 14,
+          "marginLeft": 6,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Bird's-eye
+    </Text>
+  </View>
+  <View
+    accessibilityLabel="Detailed view"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": true,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={4}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "backgroundColor": "#FF73502E",
+          "borderColor": "#FF735059",
+          "borderRadius": 999,
+          "borderWidth": 0.5,
+          "flexDirection": "row",
+          "paddingBottom": 7,
+          "paddingLeft": 9,
+          "paddingRight": 11,
+          "paddingTop": 7,
+        },
+        null,
+      ]
+    }
+    testID="toggle-cards"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={14}
+      bbWidth={14}
+      fill="none"
+      focusable={false}
+      height={14}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 14,
+            "width": 14,
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+      width={14}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGRect
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          height={4}
+          propList={
+            [
+              "stroke",
+              "strokeWidth",
+            ]
+          }
+          rx={1.2}
+          stroke={
+            {
+              "payload": 4294931280,
+              "type": 0,
+            }
+          }
+          strokeWidth={1.6}
+          width={16}
+          x={4}
+          y={5}
+        />
+        <RNSVGRect
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          height={4}
+          propList={
+            [
+              "stroke",
+              "strokeWidth",
+            ]
+          }
+          rx={1.2}
+          stroke={
+            {
+              "payload": 4294931280,
+              "type": 0,
+            }
+          }
+          strokeWidth={1.6}
+          width={16}
+          x={4}
+          y={11}
+        />
+        <RNSVGRect
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          height={2.5}
+          propList={
+            [
+              "stroke",
+              "strokeWidth",
+            ]
+          }
+          rx={1}
+          stroke={
+            {
+              "payload": 4294931280,
+              "type": 0,
+            }
+          }
+          strokeWidth={1.6}
+          width={16}
+          x={4}
+          y={17}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#FF7350",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 10.5,
+          "letterSpacing": 0.6,
+          "lineHeight": 14,
+          "marginLeft": 6,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Detailed
+    </Text>
+  </View>
+</View>
+`;
