@@ -59,6 +59,12 @@ jest.mock('react-native-reanimated', () => {
       bezier: () => ({}),
       linear: ({}),
       ease: ({}),
+      // Wrapping easings — `Easing.inOut(fn)` returns a symmetric easing
+      // around `fn`. In the mock these are no-op pass-throughs since
+      // animations resolve synchronously.
+      inOut: (fn) => fn,
+      in: (fn) => fn,
+      out: (fn) => fn,
     },
   };
 });

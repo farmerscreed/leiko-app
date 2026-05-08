@@ -1,0 +1,2451 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`PersonOrb — status × mode snapshot matrix renders status=attention mode=dark 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      {
+        "opacity": 0,
+        "transform": [
+          {
+            "scale": 0.7,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="orb"
+>
+  <View
+    accessibilityLabel="Marian, Needs attention, blood pressure 122/78"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={8}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "opacity": 1,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 56,
+          "width": 56,
+        }
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          [
+            {
+              "backgroundColor": "#FF735059",
+              "borderRadius": 9999,
+              "bottom": -16,
+              "left": -16,
+              "position": "absolute",
+              "right": -16,
+              "top": -16,
+            },
+            {
+              "opacity": 0.55,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+          ]
+        }
+      />
+      <View
+        style={
+          [
+            {
+              "shadowColor": "#FF7350",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.55,
+              "shadowRadius": 16,
+            },
+            {
+              "opacity": 1,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FF735022",
+                "borderColor": "#FF735066",
+                "borderRadius": 22,
+                "borderWidth": 0.5,
+                "height": 44,
+                "justifyContent": "center",
+                "width": 44,
+              },
+              {
+                "borderRadius": 28,
+                "height": 56,
+                "width": 56,
+              },
+            ]
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#FF7350",
+                "fontFamily": "InstrumentSerif_400Regular_Italic",
+                "fontSize": 20,
+                "lineHeight": 20,
+              }
+            }
+          >
+            M
+          </Text>
+        </View>
+      </View>
+      <View
+        pointerEvents="none"
+        style={
+          {
+            "backgroundColor": "#FF7350",
+            "borderColor": "#0A0908",
+            "borderRadius": 99,
+            "borderWidth": 1.5,
+            "height": 8,
+            "position": "absolute",
+            "right": 2,
+            "top": 2,
+            "width": 8,
+          }
+        }
+      />
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 60,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "lineHeight": 16,
+          }
+        }
+      >
+        Marian
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FF7350",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.4,
+            "lineHeight": 12,
+            "marginTop": 1,
+          }
+        }
+      >
+        122/78
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`PersonOrb — status × mode snapshot matrix renders status=attention mode=light 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      {
+        "opacity": 0,
+        "transform": [
+          {
+            "scale": 0.7,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="orb"
+>
+  <View
+    accessibilityLabel="Marian, Needs attention, blood pressure 122/78"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={8}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "opacity": 1,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 56,
+          "width": 56,
+        }
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          [
+            {
+              "backgroundColor": "#FF735059",
+              "borderRadius": 9999,
+              "bottom": -16,
+              "left": -16,
+              "position": "absolute",
+              "right": -16,
+              "top": -16,
+            },
+            {
+              "opacity": 0.55,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+          ]
+        }
+      />
+      <View
+        style={
+          [
+            {
+              "shadowColor": "#FF7350",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.55,
+              "shadowRadius": 16,
+            },
+            {
+              "opacity": 1,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FF735022",
+                "borderColor": "#FF735066",
+                "borderRadius": 22,
+                "borderWidth": 0.5,
+                "height": 44,
+                "justifyContent": "center",
+                "width": 44,
+              },
+              {
+                "borderRadius": 28,
+                "height": 56,
+                "width": 56,
+              },
+            ]
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#FF7350",
+                "fontFamily": "InstrumentSerif_400Regular_Italic",
+                "fontSize": 20,
+                "lineHeight": 20,
+              }
+            }
+          >
+            M
+          </Text>
+        </View>
+      </View>
+      <View
+        pointerEvents="none"
+        style={
+          {
+            "backgroundColor": "#FF7350",
+            "borderColor": "#0A0908",
+            "borderRadius": 99,
+            "borderWidth": 1.5,
+            "height": 8,
+            "position": "absolute",
+            "right": 2,
+            "top": 2,
+            "width": 8,
+          }
+        }
+      />
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 60,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#0F121C",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "lineHeight": 16,
+          }
+        }
+      >
+        Marian
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FF7350",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.4,
+            "lineHeight": 12,
+            "marginTop": 1,
+          }
+        }
+      >
+        122/78
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`PersonOrb — status × mode snapshot matrix renders status=clear mode=dark 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      {
+        "opacity": 0,
+        "transform": [
+          {
+            "scale": 0.7,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="orb"
+>
+  <View
+    accessibilityLabel="Marian, All clear, blood pressure 122/78"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={8}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "opacity": 1,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 56,
+          "width": 56,
+        }
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          [
+            {
+              "backgroundColor": "#FF735059",
+              "borderRadius": 9999,
+              "bottom": -16,
+              "left": -16,
+              "position": "absolute",
+              "right": -16,
+              "top": -16,
+            },
+            {
+              "opacity": 0.55,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+          ]
+        }
+      />
+      <View
+        style={
+          [
+            {
+              "shadowColor": "#FF7350",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.55,
+              "shadowRadius": 16,
+            },
+            {
+              "opacity": 1,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FF735022",
+                "borderColor": "#FF735066",
+                "borderRadius": 22,
+                "borderWidth": 0.5,
+                "height": 44,
+                "justifyContent": "center",
+                "width": 44,
+              },
+              {
+                "borderRadius": 28,
+                "height": 56,
+                "width": 56,
+              },
+            ]
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#FF7350",
+                "fontFamily": "InstrumentSerif_400Regular_Italic",
+                "fontSize": 20,
+                "lineHeight": 20,
+              }
+            }
+          >
+            M
+          </Text>
+        </View>
+      </View>
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 60,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "lineHeight": 16,
+          }
+        }
+      >
+        Marian
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FF7350",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.4,
+            "lineHeight": 12,
+            "marginTop": 1,
+          }
+        }
+      >
+        122/78
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`PersonOrb — status × mode snapshot matrix renders status=clear mode=light 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      {
+        "opacity": 0,
+        "transform": [
+          {
+            "scale": 0.7,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="orb"
+>
+  <View
+    accessibilityLabel="Marian, All clear, blood pressure 122/78"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={8}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "opacity": 1,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 56,
+          "width": 56,
+        }
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          [
+            {
+              "backgroundColor": "#FF735059",
+              "borderRadius": 9999,
+              "bottom": -16,
+              "left": -16,
+              "position": "absolute",
+              "right": -16,
+              "top": -16,
+            },
+            {
+              "opacity": 0.55,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+          ]
+        }
+      />
+      <View
+        style={
+          [
+            {
+              "shadowColor": "#FF7350",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.55,
+              "shadowRadius": 16,
+            },
+            {
+              "opacity": 1,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FF735022",
+                "borderColor": "#FF735066",
+                "borderRadius": 22,
+                "borderWidth": 0.5,
+                "height": 44,
+                "justifyContent": "center",
+                "width": 44,
+              },
+              {
+                "borderRadius": 28,
+                "height": 56,
+                "width": 56,
+              },
+            ]
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#FF7350",
+                "fontFamily": "InstrumentSerif_400Regular_Italic",
+                "fontSize": 20,
+                "lineHeight": 20,
+              }
+            }
+          >
+            M
+          </Text>
+        </View>
+      </View>
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 60,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#0F121C",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "lineHeight": 16,
+          }
+        }
+      >
+        Marian
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FF7350",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.4,
+            "lineHeight": 12,
+            "marginTop": 1,
+          }
+        }
+      >
+        122/78
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`PersonOrb — status × mode snapshot matrix renders status=offline mode=dark 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      {
+        "opacity": 0,
+        "transform": [
+          {
+            "scale": 0.7,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="orb"
+>
+  <View
+    accessibilityLabel="Marian, No recent reading, blood pressure 122/78"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={8}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "opacity": 1,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 56,
+          "width": 56,
+        }
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          [
+            {
+              "backgroundColor": "#FF735059",
+              "borderRadius": 9999,
+              "bottom": -16,
+              "left": -16,
+              "position": "absolute",
+              "right": -16,
+              "top": -16,
+            },
+            {
+              "opacity": 0.55,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+          ]
+        }
+      />
+      <View
+        style={
+          [
+            {
+              "shadowColor": "#FF7350",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.55,
+              "shadowRadius": 16,
+            },
+            {
+              "opacity": 1,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FF735022",
+                "borderColor": "#FF735066",
+                "borderRadius": 22,
+                "borderWidth": 0.5,
+                "height": 44,
+                "justifyContent": "center",
+                "width": 44,
+              },
+              {
+                "borderRadius": 28,
+                "height": 56,
+                "width": 56,
+              },
+            ]
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#FF7350",
+                "fontFamily": "InstrumentSerif_400Regular_Italic",
+                "fontSize": 20,
+                "lineHeight": 20,
+              }
+            }
+          >
+            M
+          </Text>
+        </View>
+      </View>
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 60,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "lineHeight": 16,
+          }
+        }
+      >
+        Marian
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FF7350",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.4,
+            "lineHeight": 12,
+            "marginTop": 1,
+          }
+        }
+      >
+        122/78
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`PersonOrb — status × mode snapshot matrix renders status=offline mode=light 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      {
+        "opacity": 0,
+        "transform": [
+          {
+            "scale": 0.7,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="orb"
+>
+  <View
+    accessibilityLabel="Marian, No recent reading, blood pressure 122/78"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={8}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "opacity": 1,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 56,
+          "width": 56,
+        }
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          [
+            {
+              "backgroundColor": "#FF735059",
+              "borderRadius": 9999,
+              "bottom": -16,
+              "left": -16,
+              "position": "absolute",
+              "right": -16,
+              "top": -16,
+            },
+            {
+              "opacity": 0.55,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+          ]
+        }
+      />
+      <View
+        style={
+          [
+            {
+              "shadowColor": "#FF7350",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.55,
+              "shadowRadius": 16,
+            },
+            {
+              "opacity": 1,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FF735022",
+                "borderColor": "#FF735066",
+                "borderRadius": 22,
+                "borderWidth": 0.5,
+                "height": 44,
+                "justifyContent": "center",
+                "width": 44,
+              },
+              {
+                "borderRadius": 28,
+                "height": 56,
+                "width": 56,
+              },
+            ]
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#FF7350",
+                "fontFamily": "InstrumentSerif_400Regular_Italic",
+                "fontSize": 20,
+                "lineHeight": 20,
+              }
+            }
+          >
+            M
+          </Text>
+        </View>
+      </View>
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 60,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#0F121C",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "lineHeight": 16,
+          }
+        }
+      >
+        Marian
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FF7350",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.4,
+            "lineHeight": 12,
+            "marginTop": 1,
+          }
+        }
+      >
+        122/78
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`PersonOrb — status × mode snapshot matrix renders status=sleeping mode=dark 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      {
+        "opacity": 0,
+        "transform": [
+          {
+            "scale": 0.7,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="orb"
+>
+  <View
+    accessibilityLabel="Marian, Sleeping, blood pressure 122/78"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={8}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "opacity": 1,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 56,
+          "width": 56,
+        }
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          [
+            {
+              "backgroundColor": "#FF735059",
+              "borderRadius": 9999,
+              "bottom": -16,
+              "left": -16,
+              "position": "absolute",
+              "right": -16,
+              "top": -16,
+            },
+            {
+              "opacity": 0.25,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+          ]
+        }
+      />
+      <View
+        style={
+          [
+            {
+              "shadowColor": "#FF7350",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.25,
+              "shadowRadius": 9,
+            },
+            {
+              "opacity": 0.65,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FF735022",
+                "borderColor": "#FF735066",
+                "borderRadius": 22,
+                "borderWidth": 0.5,
+                "height": 44,
+                "justifyContent": "center",
+                "width": 44,
+              },
+              {
+                "borderRadius": 28,
+                "height": 56,
+                "width": 56,
+              },
+            ]
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#FF7350",
+                "fontFamily": "InstrumentSerif_400Regular_Italic",
+                "fontSize": 20,
+                "lineHeight": 20,
+              }
+            }
+          >
+            M
+          </Text>
+        </View>
+      </View>
+      <View
+        pointerEvents="none"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#0A0908",
+            "borderColor": "#FF735080",
+            "borderRadius": 99,
+            "borderWidth": 1,
+            "height": 14,
+            "justifyContent": "center",
+            "position": "absolute",
+            "right": 2,
+            "top": 2,
+            "width": 14,
+          }
+        }
+      >
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#FF7350",
+              "fontSize": 9,
+              "lineHeight": 11,
+            }
+          }
+        >
+          ☾
+        </Text>
+      </View>
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 60,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "lineHeight": 16,
+          }
+        }
+      >
+        Marian
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FF7350",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.4,
+            "lineHeight": 12,
+            "marginTop": 1,
+          }
+        }
+      >
+        122/78
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`PersonOrb — status × mode snapshot matrix renders status=sleeping mode=light 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      {
+        "opacity": 0,
+        "transform": [
+          {
+            "scale": 0.7,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="orb"
+>
+  <View
+    accessibilityLabel="Marian, Sleeping, blood pressure 122/78"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={8}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "opacity": 1,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 56,
+          "width": 56,
+        }
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          [
+            {
+              "backgroundColor": "#FF735059",
+              "borderRadius": 9999,
+              "bottom": -16,
+              "left": -16,
+              "position": "absolute",
+              "right": -16,
+              "top": -16,
+            },
+            {
+              "opacity": 0.25,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+          ]
+        }
+      />
+      <View
+        style={
+          [
+            {
+              "shadowColor": "#FF7350",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.25,
+              "shadowRadius": 9,
+            },
+            {
+              "opacity": 0.65,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FF735022",
+                "borderColor": "#FF735066",
+                "borderRadius": 22,
+                "borderWidth": 0.5,
+                "height": 44,
+                "justifyContent": "center",
+                "width": 44,
+              },
+              {
+                "borderRadius": 28,
+                "height": 56,
+                "width": 56,
+              },
+            ]
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#FF7350",
+                "fontFamily": "InstrumentSerif_400Regular_Italic",
+                "fontSize": 20,
+                "lineHeight": 20,
+              }
+            }
+          >
+            M
+          </Text>
+        </View>
+      </View>
+      <View
+        pointerEvents="none"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#0A0908",
+            "borderColor": "#FF735080",
+            "borderRadius": 99,
+            "borderWidth": 1,
+            "height": 14,
+            "justifyContent": "center",
+            "position": "absolute",
+            "right": 2,
+            "top": 2,
+            "width": 14,
+          }
+        }
+      >
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#FF7350",
+              "fontSize": 9,
+              "lineHeight": 11,
+            }
+          }
+        >
+          ☾
+        </Text>
+      </View>
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 60,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#0F121C",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "lineHeight": 16,
+          }
+        }
+      >
+        Marian
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FF7350",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.4,
+            "lineHeight": 12,
+            "marginTop": 1,
+          }
+        }
+      >
+        122/78
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`PersonOrb — status × mode snapshot matrix renders status=urgent mode=dark 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      {
+        "opacity": 0,
+        "transform": [
+          {
+            "scale": 0.7,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="orb"
+>
+  <View
+    accessibilityLabel="Marian, Urgent, blood pressure 122/78"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={8}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "opacity": 1,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 56,
+          "width": 56,
+        }
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          [
+            {
+              "backgroundColor": "#FF735059",
+              "borderRadius": 9999,
+              "bottom": -16,
+              "left": -16,
+              "position": "absolute",
+              "right": -16,
+              "top": -16,
+            },
+            {
+              "opacity": 0.55,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+          ]
+        }
+      />
+      <View
+        style={
+          [
+            {
+              "shadowColor": "#FF7350",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.55,
+              "shadowRadius": 16,
+            },
+            {
+              "opacity": 1,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FF735022",
+                "borderColor": "#FF735066",
+                "borderRadius": 22,
+                "borderWidth": 0.5,
+                "height": 44,
+                "justifyContent": "center",
+                "width": 44,
+              },
+              {
+                "borderRadius": 28,
+                "height": 56,
+                "width": 56,
+              },
+            ]
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#FF7350",
+                "fontFamily": "InstrumentSerif_400Regular_Italic",
+                "fontSize": 20,
+                "lineHeight": 20,
+              }
+            }
+          >
+            M
+          </Text>
+        </View>
+      </View>
+      <View
+        pointerEvents="none"
+        style={
+          {
+            "backgroundColor": "#EE343B",
+            "borderColor": "#0A0908",
+            "borderRadius": 99,
+            "borderWidth": 1.5,
+            "height": 8,
+            "position": "absolute",
+            "right": 2,
+            "top": 2,
+            "width": 8,
+          }
+        }
+      />
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 60,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "lineHeight": 16,
+          }
+        }
+      >
+        Marian
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FF7350",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.4,
+            "lineHeight": 12,
+            "marginTop": 1,
+          }
+        }
+      >
+        122/78
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`PersonOrb — status × mode snapshot matrix renders status=urgent mode=light 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      {
+        "opacity": 0,
+        "transform": [
+          {
+            "scale": 0.7,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="orb"
+>
+  <View
+    accessibilityLabel="Marian, Urgent, blood pressure 122/78"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={8}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "opacity": 1,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 56,
+          "width": 56,
+        }
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          [
+            {
+              "backgroundColor": "#FF735059",
+              "borderRadius": 9999,
+              "bottom": -16,
+              "left": -16,
+              "position": "absolute",
+              "right": -16,
+              "top": -16,
+            },
+            {
+              "opacity": 0.55,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+          ]
+        }
+      />
+      <View
+        style={
+          [
+            {
+              "shadowColor": "#FF7350",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.55,
+              "shadowRadius": 16,
+            },
+            {
+              "opacity": 1,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FF735022",
+                "borderColor": "#FF735066",
+                "borderRadius": 22,
+                "borderWidth": 0.5,
+                "height": 44,
+                "justifyContent": "center",
+                "width": 44,
+              },
+              {
+                "borderRadius": 28,
+                "height": 56,
+                "width": 56,
+              },
+            ]
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#FF7350",
+                "fontFamily": "InstrumentSerif_400Regular_Italic",
+                "fontSize": 20,
+                "lineHeight": 20,
+              }
+            }
+          >
+            M
+          </Text>
+        </View>
+      </View>
+      <View
+        pointerEvents="none"
+        style={
+          {
+            "backgroundColor": "#EE343B",
+            "borderColor": "#0A0908",
+            "borderRadius": 99,
+            "borderWidth": 1.5,
+            "height": 8,
+            "position": "absolute",
+            "right": 2,
+            "top": 2,
+            "width": 8,
+          }
+        }
+      />
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 60,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#0F121C",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "lineHeight": 16,
+          }
+        }
+      >
+        Marian
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FF7350",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.4,
+            "lineHeight": 12,
+            "marginTop": 1,
+          }
+        }
+      >
+        122/78
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`PersonOrb — status × mode snapshot matrix renders status=watch mode=dark 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      {
+        "opacity": 0,
+        "transform": [
+          {
+            "scale": 0.7,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="orb"
+>
+  <View
+    accessibilityLabel="Marian, Watch, blood pressure 122/78"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={8}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "opacity": 1,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 56,
+          "width": 56,
+        }
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          [
+            {
+              "backgroundColor": "#FF735059",
+              "borderRadius": 9999,
+              "bottom": -16,
+              "left": -16,
+              "position": "absolute",
+              "right": -16,
+              "top": -16,
+            },
+            {
+              "opacity": 0.55,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+          ]
+        }
+      />
+      <View
+        style={
+          [
+            {
+              "shadowColor": "#FF7350",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.55,
+              "shadowRadius": 16,
+            },
+            {
+              "opacity": 1,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FF735022",
+                "borderColor": "#FF735066",
+                "borderRadius": 22,
+                "borderWidth": 0.5,
+                "height": 44,
+                "justifyContent": "center",
+                "width": 44,
+              },
+              {
+                "borderRadius": 28,
+                "height": 56,
+                "width": 56,
+              },
+            ]
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#FF7350",
+                "fontFamily": "InstrumentSerif_400Regular_Italic",
+                "fontSize": 20,
+                "lineHeight": 20,
+              }
+            }
+          >
+            M
+          </Text>
+        </View>
+      </View>
+      <View
+        pointerEvents="none"
+        style={
+          {
+            "backgroundColor": "#F2A618",
+            "borderColor": "#0A0908",
+            "borderRadius": 99,
+            "borderWidth": 1.5,
+            "height": 8,
+            "position": "absolute",
+            "right": 2,
+            "top": 2,
+            "width": 8,
+          }
+        }
+      />
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 60,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "lineHeight": 16,
+          }
+        }
+      >
+        Marian
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FF7350",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.4,
+            "lineHeight": 12,
+            "marginTop": 1,
+          }
+        }
+      >
+        122/78
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`PersonOrb — status × mode snapshot matrix renders status=watch mode=light 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+      },
+      {
+        "opacity": 0,
+        "transform": [
+          {
+            "scale": 0.7,
+          },
+        ],
+      },
+      undefined,
+    ]
+  }
+  testID="orb"
+>
+  <View
+    accessibilityLabel="Marian, Watch, blood pressure 122/78"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    hitSlop={8}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "opacity": 1,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 56,
+          "width": 56,
+        }
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          [
+            {
+              "backgroundColor": "#FF735059",
+              "borderRadius": 9999,
+              "bottom": -16,
+              "left": -16,
+              "position": "absolute",
+              "right": -16,
+              "top": -16,
+            },
+            {
+              "opacity": 0.55,
+              "transform": [
+                {
+                  "scale": 1,
+                },
+              ],
+            },
+          ]
+        }
+      />
+      <View
+        style={
+          [
+            {
+              "shadowColor": "#FF7350",
+              "shadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "shadowOpacity": 0.55,
+              "shadowRadius": 16,
+            },
+            {
+              "opacity": 1,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "backgroundColor": "#FF735022",
+                "borderColor": "#FF735066",
+                "borderRadius": 22,
+                "borderWidth": 0.5,
+                "height": 44,
+                "justifyContent": "center",
+                "width": 44,
+              },
+              {
+                "borderRadius": 28,
+                "height": 56,
+                "width": 56,
+              },
+            ]
+          }
+        >
+          <Text
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#FF7350",
+                "fontFamily": "InstrumentSerif_400Regular_Italic",
+                "fontSize": 20,
+                "lineHeight": 20,
+              }
+            }
+          >
+            M
+          </Text>
+        </View>
+      </View>
+      <View
+        pointerEvents="none"
+        style={
+          {
+            "backgroundColor": "#F2A618",
+            "borderColor": "#0A0908",
+            "borderRadius": 99,
+            "borderWidth": 1.5,
+            "height": 8,
+            "position": "absolute",
+            "right": 2,
+            "top": 2,
+            "width": 8,
+          }
+        }
+      />
+    </View>
+    <View
+      pointerEvents="none"
+      style={
+        {
+          "alignItems": "center",
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 60,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#0F121C",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "lineHeight": 16,
+          }
+        }
+      >
+        Marian
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FF7350",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 10,
+            "letterSpacing": 0.4,
+            "lineHeight": 12,
+            "marginTop": 1,
+          }
+        }
+      >
+        122/78
+      </Text>
+    </View>
+  </View>
+</View>
+`;

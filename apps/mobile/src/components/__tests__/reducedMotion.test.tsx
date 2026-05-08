@@ -64,6 +64,7 @@ import { AmbientPulse } from '../AmbientPulse';
 import { AnomalyBanner } from '../AnomalyBanner';
 import { CorrelationStrip } from '../CorrelationStrip';
 import { DailyPulseHero, type DailyPulseHeroVitals } from '../DailyPulseHero';
+import { PersonOrb } from '../PersonOrb';
 import { VitalRing } from '../VitalRing';
 import { VitalTile } from '../VitalTile';
 
@@ -186,6 +187,21 @@ describe('Reduced motion (D12 §7.4) — no driver fires', () => {
           severity="confirmed-urgent"
           title="Talk to Mum now"
           body="Their latest reading was above their usual range."
+        />,
+      ),
+    );
+    expect(driverCalls).toHaveLength(0);
+  });
+
+  it('PersonOrb does not invoke withRepeat or withDelay (orb-in + halo pulse)', () => {
+    render(
+      withTheme(
+        <PersonOrb
+          initial="M"
+          accent="#FF7350"
+          status="attention"
+          fullName="Marian Okeke"
+          bpLabel="138/89"
         />,
       ),
     );
