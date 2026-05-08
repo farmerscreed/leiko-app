@@ -2449,35 +2449,27 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
               Your morning numbers tend to climb roughly 8 points after coffee — a normal physiological response. The afternoon dip you usually see is here too. Talk to your doctor if you'd like to understand the morning band.
             </Text>
           </View>
-          <View>
-            <View
+          <View
+            testID="bp-detail-readings"
+          >
+            <Text
+              allowFontScaling={false}
               style={
-                [
-                  {},
-                  {
-                    "paddingHorizontal": 20,
-                  },
-                ]
-              }
-            >
-              <Text
-                allowFontScaling={false}
-                style={
-                  {
-                    "color": "#9C9890",
-                    "fontFamily": "Inter_500Medium",
-                    "fontSize": 11,
-                    "letterSpacing": 0.55,
-                    "lineHeight": 14,
-                    "marginBottom": 8,
-                    "textTransform": "uppercase",
-                  }
+                {
+                  "color": "#9C9890",
+                  "fontFamily": "Inter_500Medium",
+                  "fontSize": 11,
+                  "letterSpacing": 0.55,
+                  "lineHeight": 14,
+                  "marginBottom": 8,
+                  "paddingHorizontal": 20,
+                  "textTransform": "uppercase",
                 }
-                testID="bp-detail-readings-eyebrow"
-              >
-                Today's readings
-              </Text>
-            </View>
+              }
+              testID="bp-detail-readings-eyebrow"
+            >
+              Recent readings
+            </Text>
             <View
               style={
                 [
@@ -2494,7 +2486,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                   undefined,
                 ]
               }
-              testID="bp-detail-readings"
+              testID="bp-detail-readings-list"
             >
               <View
                 accessibilityLabel="122/78, Today afternoon, now"
@@ -2542,7 +2534,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                     },
                   ]
                 }
-                testID="bp-detail-readings-row-bp-snap"
+                testID="bp-detail-readings-list-row-bp-snap"
               >
                 <View
                   style={

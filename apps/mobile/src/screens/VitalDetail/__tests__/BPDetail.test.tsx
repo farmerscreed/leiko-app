@@ -206,7 +206,9 @@ describe('BPDetail — interactions', () => {
         <BPDetail onBack={() => undefined} onSelectReading={onSelectReading} />,
       ),
     );
-    fireEvent.press(screen.getByTestId('bp-detail-readings-row-bp-aaa'));
+    // testID nests through RecentReadingsSection → RecentReadingsList:
+    // `${section}-list-row-${id}`.
+    fireEvent.press(screen.getByTestId('bp-detail-readings-list-row-bp-aaa'));
     expect(onSelectReading).toHaveBeenCalledWith('bp-aaa');
   });
 

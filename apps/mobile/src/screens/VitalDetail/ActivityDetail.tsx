@@ -41,10 +41,8 @@ import {
 import { DetailShell } from '../../components/DetailShell';
 import { StatTrio } from '../../components/StatTrio';
 import { VitalInsightCard } from '../../components/VitalInsightCard';
-import {
-  RecentReadingsList,
-  type RecentReading,
-} from '../../components/RecentReadingsList';
+import { type RecentReading } from '../../components/RecentReadingsList';
+import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { ActivityRingsHero } from '../../components/ActivityRingsHero';
 import { ActivityWeeklyBars } from '../../components/ActivityWeeklyBars';
 import { ActivityGoalSheet } from '../../components/ActivityGoalSheet';
@@ -201,14 +199,12 @@ export function ActivityDetail({ onBack, onGoalChange }: ActivityDetailProps) {
         />
 
         {!isEmpty ? (
-          <View>
-            <RecentDaysSection />
-            <RecentReadingsList
-              vital="activity"
-              readings={recentReadings}
-              testID="activity-detail-recent"
-            />
-          </View>
+          <RecentReadingsSection
+            vital="activity"
+            eyebrow="Recent days"
+            readings={recentReadings}
+            testID="activity-detail-recent"
+          />
         ) : null}
 
         <GoalConfigSection
@@ -224,33 +220,6 @@ export function ActivityDetail({ onBack, onGoalChange }: ActivityDetailProps) {
         testID="activity-detail-goal-sheet"
       />
     </>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Section: "Recent days" eyebrow
-// ---------------------------------------------------------------------------
-
-function RecentDaysSection() {
-  const theme = useTheme();
-  const labelStyle = theme.type('labelUppercase');
-  return (
-    <Text
-      allowFontScaling={false}
-      style={{
-        fontFamily: labelStyle.family,
-        fontSize: labelStyle.size,
-        lineHeight: labelStyle.lineHeight,
-        letterSpacing: labelStyle.letterSpacing,
-        color: theme.colors.text.tertiary,
-        textTransform: 'uppercase',
-        marginHorizontal: 20,
-        marginBottom: theme.spacing.s,
-      }}
-      testID="activity-detail-recent-eyebrow"
-    >
-      Recent days
-    </Text>
   );
 }
 

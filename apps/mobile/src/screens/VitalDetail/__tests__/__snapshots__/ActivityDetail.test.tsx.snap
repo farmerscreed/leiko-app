@@ -2233,7 +2233,9 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
               You hit your step goal four times this week — a quiet improvement. Today's still early; an evening walk would close the ring. Step count tends to track gently with calmer evening blood pressure.
             </Text>
           </View>
-          <View>
+          <View
+            testID="activity-detail-recent"
+          >
             <Text
               allowFontScaling={false}
               style={
@@ -2244,7 +2246,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   "letterSpacing": 0.55,
                   "lineHeight": 14,
                   "marginBottom": 8,
-                  "marginHorizontal": 20,
+                  "paddingHorizontal": 20,
                   "textTransform": "uppercase",
                 }
               }
@@ -2268,7 +2270,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   undefined,
                 ]
               }
-              testID="activity-detail-recent"
+              testID="activity-detail-recent-list"
             >
               <View
                 accessibilityLabel="6,250, Today · in progress, now"
@@ -2316,7 +2318,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     },
                   ]
                 }
-                testID="activity-detail-recent-row-today"
+                testID="activity-detail-recent-list-row-today"
               >
                 <View
                   style={
@@ -2431,7 +2433,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     },
                   ]
                 }
-                testID="activity-detail-recent-row-day-5"
+                testID="activity-detail-recent-list-row-day-5"
               >
                 <View
                   style={
@@ -2546,7 +2548,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     },
                   ]
                 }
-                testID="activity-detail-recent-row-day-4"
+                testID="activity-detail-recent-list-row-day-4"
               >
                 <View
                   style={
@@ -2661,7 +2663,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     },
                   ]
                 }
-                testID="activity-detail-recent-row-day-3"
+                testID="activity-detail-recent-list-row-day-3"
               >
                 <View
                   style={

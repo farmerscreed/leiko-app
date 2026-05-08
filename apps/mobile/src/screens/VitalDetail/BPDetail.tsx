@@ -35,10 +35,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { DetailShell } from '../../components/DetailShell';
 import { VitalHero } from '../../components/VitalHero';
 import { StatTrio, type StatTrioItem } from '../../components/StatTrio';
-import {
-  RecentReadingsList,
-  type RecentReading,
-} from '../../components/RecentReadingsList';
+import { type RecentReading } from '../../components/RecentReadingsList';
+import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { VitalInsightCard } from '../../components/VitalInsightCard';
 import { BPTwinLineChart } from '../../components/BPTwinLineChart';
 import { useDailyPulseData } from '../../state/dailyPulse';
@@ -311,12 +309,14 @@ export function BPDetail({ onBack, onSelectReading }: BPDetailProps) {
     [todayReadings],
   );
 
-  // ----- Recent readings list (last 4) -------------------------------
+  // ----- Recent readings list — full list, sliced by RecentReadingsSection
+  // (on-device review 2026-05-08: original sliced to 4; user couldn't
+  // reach the rest of their server-side history. Pass everything; the
+  // section wrapper owns the visible-count + picker UX).
   const recentRows: RecentReading[] = useMemo(() => {
     return allBPReadings
       .slice()
       .sort((a, b) => b.measuredAtSec - a.measuredAtSec)
-      .slice(0, 4)
       .map((r, idx) => ({
         id: r.localId,
         value: `${r.systolic}/${r.diastolic}`,
@@ -387,35 +387,15 @@ export function BPDetail({ onBack, onSelectReading }: BPDetailProps) {
       />
 
       {!isEmpty ? (
-        <View>
-          <View style={[styles.section, { paddingHorizontal: theme.spacing.xl }]}>
-            <Text
-              allowFontScaling={false}
-              style={{
-                fontFamily: theme.type('labelUppercase').family,
-                fontSize: theme.type('labelUppercase').size,
-                lineHeight: theme.type('labelUppercase').lineHeight,
-                letterSpacing: theme.type('labelUppercase').letterSpacing,
-                color: theme.colors.text.tertiary,
-                textTransform: 'uppercase',
-                marginBottom: theme.spacing.s,
-              }}
-              testID="bp-detail-readings-eyebrow"
-            >
-              Today's readings
-            </Text>
-          </View>
-          <RecentReadingsList
-            vital="bp"
-            readings={recentRows}
-            onSelect={
-              onSelectReading
-                ? (r) => onSelectReading(r.id)
-                : undefined
-            }
-            testID="bp-detail-readings"
-          />
-        </View>
+        <RecentReadingsSection
+          vital="bp"
+          eyebrow="Recent readings"
+          readings={recentRows}
+          onSelect={
+            onSelectReading ? (r) => onSelectReading(r.id) : undefined
+          }
+          testID="bp-detail-readings"
+        />
       ) : null}
     </DetailShell>
   );

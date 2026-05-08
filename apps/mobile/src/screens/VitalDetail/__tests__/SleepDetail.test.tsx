@@ -226,7 +226,9 @@ describe('SleepDetail — hypnogram + recent', () => {
     mockSleepRecent = [session];
     render(withProviders(<SleepDetail onBack={() => undefined} />));
     expect(screen.getByTestId('sleep-detail-hypnogram')).toBeTruthy();
-    expect(screen.getByText('Last seven nights')).toBeTruthy();
+    // Eyebrow renamed when SleepDetail moved to RecentReadingsSection
+    // (on-device review 2026-05-08): "Last seven nights" → "Recent nights".
+    expect(screen.getByText('Recent nights')).toBeTruthy();
   });
 });
 

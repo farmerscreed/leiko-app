@@ -21,18 +21,12 @@
 // phosphor-react-native v3 (per docs/00-tech-stack.md).
 
 import { useMemo } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { DetailShell } from '../../components/DetailShell';
 import { VitalHero } from '../../components/VitalHero';
 import { StatTrio, type StatTrioItem } from '../../components/StatTrio';
-import {
-  RecentReadingsList,
-  type RecentReading,
-} from '../../components/RecentReadingsList';
+import { type RecentReading } from '../../components/RecentReadingsList';
+import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { VitalInsightCard } from '../../components/VitalInsightCard';
 import {
   CorrelationStrip,
@@ -42,7 +36,6 @@ import { SleepHypnogram } from '../../components/SleepHypnogram';
 import { useDailyPulseData } from '../../state/dailyPulse';
 import { useSleep } from '../../state/sleep';
 import { useReadings } from '../../state/readings';
-import { useTheme } from '../../theme';
 import { sleepFill } from '../../utils/vitalThemes';
 import type { SleepSession } from '../../types/vitals';
 
@@ -171,11 +164,8 @@ export interface SleepDetailProps {
 }
 
 export function SleepDetail({ onBack }: SleepDetailProps) {
-  const theme = useTheme();
   const data = useDailyPulseData();
   const session = data.sleep.session;
-
-  const labelStyle = theme.type('labelUppercase');
 
   // Recent nights (last 4) — newest first for the list, the hypnogram
   // reads from `data.sleep.session` directly.
@@ -306,29 +296,12 @@ export function SleepDetail({ onBack }: SleepDetailProps) {
         testID="sleep-detail-insight"
       />
       {recentRows.length > 0 ? (
-        <View>
-          <Text
-            allowFontScaling={false}
-            style={{
-              fontFamily: labelStyle.family,
-              fontSize: labelStyle.size,
-              lineHeight: labelStyle.lineHeight,
-              letterSpacing: labelStyle.letterSpacing,
-              color: theme.colors.text.tertiary,
-              textTransform: 'uppercase',
-              marginHorizontal: 24,
-              marginBottom: 10,
-            }}
-            testID="sleep-detail-recent-eyebrow"
-          >
-            Last seven nights
-          </Text>
-          <RecentReadingsList
-            vital="sleep"
-            readings={recentRows}
-            testID="sleep-detail-recent"
-          />
-        </View>
+        <RecentReadingsSection
+          vital="sleep"
+          eyebrow="Recent nights"
+          readings={recentRows}
+          testID="sleep-detail-recent"
+        />
       ) : null}
     </DetailShell>
   );

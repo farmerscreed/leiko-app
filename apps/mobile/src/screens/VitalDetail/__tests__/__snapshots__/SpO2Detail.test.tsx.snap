@@ -1771,501 +1771,505 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
               Your oxygen saturation held steady through the night with one brief dip around 4 am — nothing unusual. Healthy sleep often shows small, transient dips like this.
             </Text>
           </View>
-          <Text
-            allowFontScaling={false}
-            style={
-              {
-                "color": "#9C9890",
-                "fontFamily": "Inter_500Medium",
-                "fontSize": 11,
-                "letterSpacing": 0.55,
-                "lineHeight": 14,
-                "marginBottom": -4,
-                "paddingHorizontal": 20,
-                "textTransform": "uppercase",
-              }
-            }
-            testID="spo2-detail-readings-eyebrow"
-          >
-            Recent readings
-          </Text>
           <View
-            style={
-              [
-                {
-                  "borderWidth": 0.5,
-                },
-                {
-                  "backgroundColor": "#120C07",
-                  "borderColor": "rgba(255,255,255,0.06)",
-                  "borderRadius": 22,
-                  "marginHorizontal": 20,
-                  "paddingHorizontal": 16,
-                },
-                undefined,
-              ]
-            }
             testID="spo2-detail-readings"
           >
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#9C9890",
+                  "fontFamily": "Inter_500Medium",
+                  "fontSize": 11,
+                  "letterSpacing": 0.55,
+                  "lineHeight": 14,
+                  "marginBottom": 8,
+                  "paddingHorizontal": 20,
+                  "textTransform": "uppercase",
+                }
+              }
+              testID="spo2-detail-readings-eyebrow"
+            >
+              Recent readings
+            </Text>
             <View
-              accessibilityLabel="98%, Just now, 12:30 pm"
-              accessibilityRole="text"
-              accessibilityState={
-                {
-                  "busy": undefined,
-                  "checked": undefined,
-                  "disabled": undefined,
-                  "expanded": undefined,
-                  "selected": undefined,
-                }
-              }
-              accessibilityValue={
-                {
-                  "max": undefined,
-                  "min": undefined,
-                  "now": undefined,
-                  "text": undefined,
-                }
-              }
-              accessible={true}
-              collapsable={false}
-              focusable={true}
-              onBlur={[Function]}
-              onClick={[Function]}
-              onFocus={[Function]}
-              onResponderGrant={[Function]}
-              onResponderMove={[Function]}
-              onResponderRelease={[Function]}
-              onResponderTerminate={[Function]}
-              onResponderTerminationRequest={[Function]}
-              onStartShouldSetResponder={[Function]}
               style={
                 [
                   {
-                    "alignItems": "center",
-                    "flexDirection": "row",
+                    "borderWidth": 0.5,
                   },
                   {
-                    "borderBottomColor": "rgba(255,255,255,0.08)",
-                    "borderBottomWidth": 0.5,
-                    "opacity": 1,
-                    "paddingVertical": 12,
+                    "backgroundColor": "#120C07",
+                    "borderColor": "rgba(255,255,255,0.06)",
+                    "borderRadius": 22,
+                    "marginHorizontal": 20,
+                    "paddingHorizontal": 16,
                   },
+                  undefined,
                 ]
               }
-              testID="spo2-detail-readings-row-spo2-1778239800"
+              testID="spo2-detail-readings-list"
             >
               <View
+                accessibilityLabel="98%, Just now, 12:30 pm"
+                accessibilityRole="text"
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
                 style={
                   [
                     {
-                      "borderRadius": 3,
-                      "height": 32,
-                      "width": 6,
+                      "alignItems": "center",
+                      "flexDirection": "row",
                     },
                     {
-                      "backgroundColor": "#5FA8A8",
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0.5,
+                      "opacity": 1,
+                      "paddingVertical": 12,
                     },
                   ]
                 }
-              />
-              <View
-                style={
-                  {
-                    "flex": 1,
-                    "marginLeft": 12,
-                  }
-                }
+                testID="spo2-detail-readings-list-row-spo2-1778239800"
               >
-                <Text
-                  allowFontScaling={false}
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#5FA8A8",
+                      },
+                    ]
+                  }
+                />
+                <View
                   style={
                     {
-                      "color": "#F5F1EA",
-                      "fontFamily": "InstrumentSerif_400Regular",
-                      "fontSize": 22,
-                      "lineHeight": 28,
+                      "flex": 1,
+                      "marginLeft": 12,
                     }
                   }
                 >
-                  98%
-                </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#F5F1EA",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    98%
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#9C9890",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Just now
+                  </Text>
+                </View>
                 <Text
                   allowFontScaling={false}
                   style={
                     {
                       "color": "#9C9890",
-                      "fontFamily": "Inter_500Medium",
-                      "fontSize": 11,
-                      "letterSpacing": 0.55,
-                      "lineHeight": 14,
-                      "marginTop": 3,
-                      "textTransform": "uppercase",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
                     }
                   }
                 >
-                  Just now
+                  12:30 pm
                 </Text>
               </View>
-              <Text
-                allowFontScaling={false}
-                style={
+              <View
+                accessibilityLabel="96%, Overnight low, last night"
+                accessibilityRole="text"
+                accessibilityState={
                   {
-                    "color": "#9C9890",
-                    "fontFamily": "JetBrainsMono_500Medium",
-                    "fontSize": 12,
-                    "letterSpacing": 0.4,
-                    "lineHeight": 16,
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
                   }
                 }
-              >
-                12:30 pm
-              </Text>
-            </View>
-            <View
-              accessibilityLabel="96%, Overnight low, last night"
-              accessibilityRole="text"
-              accessibilityState={
-                {
-                  "busy": undefined,
-                  "checked": undefined,
-                  "disabled": undefined,
-                  "expanded": undefined,
-                  "selected": undefined,
-                }
-              }
-              accessibilityValue={
-                {
-                  "max": undefined,
-                  "min": undefined,
-                  "now": undefined,
-                  "text": undefined,
-                }
-              }
-              accessible={true}
-              collapsable={false}
-              focusable={true}
-              onBlur={[Function]}
-              onClick={[Function]}
-              onFocus={[Function]}
-              onResponderGrant={[Function]}
-              onResponderMove={[Function]}
-              onResponderRelease={[Function]}
-              onResponderTerminate={[Function]}
-              onResponderTerminationRequest={[Function]}
-              onStartShouldSetResponder={[Function]}
-              style={
-                [
+                accessibilityValue={
                   {
-                    "alignItems": "center",
-                    "flexDirection": "row",
-                  },
-                  {
-                    "borderBottomColor": "rgba(255,255,255,0.08)",
-                    "borderBottomWidth": 0.5,
-                    "opacity": 1,
-                    "paddingVertical": 12,
-                  },
-                ]
-              }
-              testID="spo2-detail-readings-row-spo2-overnight-avg"
-            >
-              <View
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
                 style={
                   [
                     {
-                      "borderRadius": 3,
-                      "height": 32,
-                      "width": 6,
+                      "alignItems": "center",
+                      "flexDirection": "row",
                     },
                     {
-                      "backgroundColor": "#5FA8A8",
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0.5,
+                      "opacity": 1,
+                      "paddingVertical": 12,
                     },
                   ]
                 }
-              />
-              <View
-                style={
-                  {
-                    "flex": 1,
-                    "marginLeft": 12,
-                  }
-                }
+                testID="spo2-detail-readings-list-row-spo2-overnight-avg"
               >
-                <Text
-                  allowFontScaling={false}
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#5FA8A8",
+                      },
+                    ]
+                  }
+                />
+                <View
                   style={
                     {
-                      "color": "#F5F1EA",
-                      "fontFamily": "InstrumentSerif_400Regular",
-                      "fontSize": 22,
-                      "lineHeight": 28,
+                      "flex": 1,
+                      "marginLeft": 12,
                     }
                   }
                 >
-                  96%
-                </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#F5F1EA",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    96%
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#9C9890",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Overnight low
+                  </Text>
+                </View>
                 <Text
                   allowFontScaling={false}
                   style={
                     {
                       "color": "#9C9890",
-                      "fontFamily": "Inter_500Medium",
-                      "fontSize": 11,
-                      "letterSpacing": 0.55,
-                      "lineHeight": 14,
-                      "marginTop": 3,
-                      "textTransform": "uppercase",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
                     }
                   }
                 >
-                  Overnight low
+                  last night
                 </Text>
               </View>
-              <Text
-                allowFontScaling={false}
-                style={
+              <View
+                accessibilityLabel="97%, Awake reading, Fri"
+                accessibilityRole="text"
+                accessibilityState={
                   {
-                    "color": "#9C9890",
-                    "fontFamily": "JetBrainsMono_500Medium",
-                    "fontSize": 12,
-                    "letterSpacing": 0.4,
-                    "lineHeight": 16,
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
                   }
                 }
-              >
-                last night
-              </Text>
-            </View>
-            <View
-              accessibilityLabel="97%, Awake reading, Fri"
-              accessibilityRole="text"
-              accessibilityState={
-                {
-                  "busy": undefined,
-                  "checked": undefined,
-                  "disabled": undefined,
-                  "expanded": undefined,
-                  "selected": undefined,
-                }
-              }
-              accessibilityValue={
-                {
-                  "max": undefined,
-                  "min": undefined,
-                  "now": undefined,
-                  "text": undefined,
-                }
-              }
-              accessible={true}
-              collapsable={false}
-              focusable={true}
-              onBlur={[Function]}
-              onClick={[Function]}
-              onFocus={[Function]}
-              onResponderGrant={[Function]}
-              onResponderMove={[Function]}
-              onResponderRelease={[Function]}
-              onResponderTerminate={[Function]}
-              onResponderTerminationRequest={[Function]}
-              onStartShouldSetResponder={[Function]}
-              style={
-                [
+                accessibilityValue={
                   {
-                    "alignItems": "center",
-                    "flexDirection": "row",
-                  },
-                  {
-                    "borderBottomColor": "rgba(255,255,255,0.08)",
-                    "borderBottomWidth": 0.5,
-                    "opacity": 1,
-                    "paddingVertical": 12,
-                  },
-                ]
-              }
-              testID="spo2-detail-readings-row-spo2-1778236200"
-            >
-              <View
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
                 style={
                   [
                     {
-                      "borderRadius": 3,
-                      "height": 32,
-                      "width": 6,
+                      "alignItems": "center",
+                      "flexDirection": "row",
                     },
                     {
-                      "backgroundColor": "#5FA8A8",
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0.5,
+                      "opacity": 1,
+                      "paddingVertical": 12,
                     },
                   ]
                 }
-              />
-              <View
-                style={
-                  {
-                    "flex": 1,
-                    "marginLeft": 12,
-                  }
-                }
+                testID="spo2-detail-readings-list-row-spo2-1778236200"
               >
-                <Text
-                  allowFontScaling={false}
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#5FA8A8",
+                      },
+                    ]
+                  }
+                />
+                <View
                   style={
                     {
-                      "color": "#F5F1EA",
-                      "fontFamily": "InstrumentSerif_400Regular",
-                      "fontSize": 22,
-                      "lineHeight": 28,
+                      "flex": 1,
+                      "marginLeft": 12,
                     }
                   }
                 >
-                  97%
-                </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#F5F1EA",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    97%
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#9C9890",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Awake reading
+                  </Text>
+                </View>
                 <Text
                   allowFontScaling={false}
                   style={
                     {
                       "color": "#9C9890",
-                      "fontFamily": "Inter_500Medium",
-                      "fontSize": 11,
-                      "letterSpacing": 0.55,
-                      "lineHeight": 14,
-                      "marginTop": 3,
-                      "textTransform": "uppercase",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
                     }
                   }
                 >
-                  Awake reading
+                  Fri
                 </Text>
               </View>
-              <Text
-                allowFontScaling={false}
-                style={
+              <View
+                accessibilityLabel="96%, Awake reading, Fri"
+                accessibilityRole="text"
+                accessibilityState={
                   {
-                    "color": "#9C9890",
-                    "fontFamily": "JetBrainsMono_500Medium",
-                    "fontSize": 12,
-                    "letterSpacing": 0.4,
-                    "lineHeight": 16,
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
                   }
                 }
-              >
-                Fri
-              </Text>
-            </View>
-            <View
-              accessibilityLabel="96%, Awake reading, Fri"
-              accessibilityRole="text"
-              accessibilityState={
-                {
-                  "busy": undefined,
-                  "checked": undefined,
-                  "disabled": undefined,
-                  "expanded": undefined,
-                  "selected": undefined,
-                }
-              }
-              accessibilityValue={
-                {
-                  "max": undefined,
-                  "min": undefined,
-                  "now": undefined,
-                  "text": undefined,
-                }
-              }
-              accessible={true}
-              collapsable={false}
-              focusable={true}
-              onBlur={[Function]}
-              onClick={[Function]}
-              onFocus={[Function]}
-              onResponderGrant={[Function]}
-              onResponderMove={[Function]}
-              onResponderRelease={[Function]}
-              onResponderTerminate={[Function]}
-              onResponderTerminationRequest={[Function]}
-              onStartShouldSetResponder={[Function]}
-              style={
-                [
+                accessibilityValue={
                   {
-                    "alignItems": "center",
-                    "flexDirection": "row",
-                  },
-                  {
-                    "borderBottomColor": "rgba(255,255,255,0.08)",
-                    "borderBottomWidth": 0,
-                    "opacity": 1,
-                    "paddingVertical": 12,
-                  },
-                ]
-              }
-              testID="spo2-detail-readings-row-spo2-1778232600"
-            >
-              <View
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
                 style={
                   [
                     {
-                      "borderRadius": 3,
-                      "height": 32,
-                      "width": 6,
+                      "alignItems": "center",
+                      "flexDirection": "row",
                     },
                     {
-                      "backgroundColor": "#5FA8A8",
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0,
+                      "opacity": 1,
+                      "paddingVertical": 12,
                     },
                   ]
                 }
-              />
-              <View
-                style={
-                  {
-                    "flex": 1,
-                    "marginLeft": 12,
-                  }
-                }
+                testID="spo2-detail-readings-list-row-spo2-1778232600"
               >
-                <Text
-                  allowFontScaling={false}
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#5FA8A8",
+                      },
+                    ]
+                  }
+                />
+                <View
                   style={
                     {
-                      "color": "#F5F1EA",
-                      "fontFamily": "InstrumentSerif_400Regular",
-                      "fontSize": 22,
-                      "lineHeight": 28,
+                      "flex": 1,
+                      "marginLeft": 12,
                     }
                   }
                 >
-                  96%
-                </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#F5F1EA",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    96%
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#9C9890",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Awake reading
+                  </Text>
+                </View>
                 <Text
                   allowFontScaling={false}
                   style={
                     {
                       "color": "#9C9890",
-                      "fontFamily": "Inter_500Medium",
-                      "fontSize": 11,
-                      "letterSpacing": 0.55,
-                      "lineHeight": 14,
-                      "marginTop": 3,
-                      "textTransform": "uppercase",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
                     }
                   }
                 >
-                  Awake reading
+                  Fri
                 </Text>
               </View>
-              <Text
-                allowFontScaling={false}
-                style={
-                  {
-                    "color": "#9C9890",
-                    "fontFamily": "JetBrainsMono_500Medium",
-                    "fontSize": 12,
-                    "letterSpacing": 0.4,
-                    "lineHeight": 16,
-                  }
-                }
-              >
-                Fri
-              </Text>
             </View>
           </View>
         </View>

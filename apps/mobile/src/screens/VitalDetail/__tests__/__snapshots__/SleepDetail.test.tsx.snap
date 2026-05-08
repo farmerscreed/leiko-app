@@ -2186,7 +2186,9 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
               Deep sleep made up about 21% of the night — roughly your usual. We'll keep watching how this connects to your morning readings.
             </Text>
           </View>
-          <View>
+          <View
+            testID="sleep-detail-recent"
+          >
             <Text
               allowFontScaling={false}
               style={
@@ -2196,14 +2198,14 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                   "fontSize": 11,
                   "letterSpacing": 0.55,
                   "lineHeight": 14,
-                  "marginBottom": 10,
-                  "marginHorizontal": 24,
+                  "marginBottom": 8,
+                  "paddingHorizontal": 20,
                   "textTransform": "uppercase",
                 }
               }
               testID="sleep-detail-recent-eyebrow"
             >
-              Last seven nights
+              Recent nights
             </Text>
             <View
               style={
@@ -2221,7 +2223,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                   undefined,
                 ]
               }
-              testID="sleep-detail-recent"
+              testID="sleep-detail-recent-list"
             >
               <View
                 accessibilityLabel="7:42, Last night · 21% deep, now"
@@ -2269,7 +2271,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                     },
                   ]
                 }
-                testID="sleep-detail-recent-row-sleep-1715185080"
+                testID="sleep-detail-recent-list-row-sleep-1715185080"
               >
                 <View
                   style={

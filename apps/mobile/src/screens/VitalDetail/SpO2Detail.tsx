@@ -42,10 +42,8 @@ import { VitalHero } from '../../components/VitalHero';
 import { StatTrio } from '../../components/StatTrio';
 import { VitalTrendChart } from '../../components/VitalTrendChart';
 import { VitalInsightCard } from '../../components/VitalInsightCard';
-import {
-  RecentReadingsList,
-  type RecentReading,
-} from '../../components/RecentReadingsList';
+import { type RecentReading } from '../../components/RecentReadingsList';
+import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { useDailyPulseData } from '../../state/dailyPulse';
 import { useSpO2 } from '../../state/spo2';
 import { spo2Fill } from '../../utils/vitalThemes';
@@ -194,7 +192,8 @@ function buildRecentList(
       time: formatDayShort(s.measuredAtSec),
     });
   }
-  return rows.slice(0, 4);
+  // Pass full list — RecentReadingsSection handles slicing + the picker.
+  return rows;
 }
 
 /** "6:42 am" / "10:08 pm" — locale-light, deterministic. */
@@ -327,9 +326,9 @@ export function SpO2Detail({ onBack }: SpO2DetailProps) {
             testID="spo2-detail-insight"
           />
 
-          <SectionEyebrow text="Recent readings" />
-          <RecentReadingsList
+          <RecentReadingsSection
             vital="spo2"
+            eyebrow="Recent readings"
             readings={recentRows}
             testID="spo2-detail-readings"
           />
@@ -364,29 +363,6 @@ function EmptyHelperLine() {
   );
 }
 
-/** Mono-uppercase section eyebrow above the recent-readings list. */
-function SectionEyebrow({ text }: { text: string }) {
-  const theme = useTheme();
-  const labelStyle = theme.type('labelUppercase');
-  return (
-    <Text
-      allowFontScaling={false}
-      style={{
-        fontFamily: labelStyle.family,
-        fontSize: labelStyle.size,
-        lineHeight: labelStyle.lineHeight,
-        letterSpacing: labelStyle.letterSpacing,
-        color: theme.colors.text.tertiary,
-        textTransform: 'uppercase',
-        paddingHorizontal: 20,
-        marginBottom: -theme.spacing.xs,
-      }}
-      testID="spo2-detail-readings-eyebrow"
-    >
-      {text}
-    </Text>
-  );
-}
 
 const styles = StyleSheet.create({
   emptyHelper: {
