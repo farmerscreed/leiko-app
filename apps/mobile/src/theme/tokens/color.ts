@@ -15,16 +15,51 @@ export const paletteDark = {
     800: '#1A2030',
     750: '#222937',
   },
+  // Warm charcoal palette — Sprint 7.7 design, caregiver-mode home
+  // (`leiko-caregiver-unified.html`). The design's `#0a0908` is
+  // rendered as `warmCharcoal.900`; brighter steps (elev/high) are
+  // computed from oklch(16% / 20% .015 60) for surface depth.
+  warmCharcoal: {
+    900: '#0A0908', // base
+    850: '#120C07', // subtle
+    800: '#1D140D', // elevated
+  },
   bone: { 50: '#F5F1EA', 100: '#ECE9E2' },
   stone: { 300: '#9C9890', 500: '#6B6862' },
   amber: { 400: '#F5B47A', 500: '#E8A063', 600: '#C5824A' },
-  coral: { 500: '#D6745A' },
+  // Coral — caregiver-mode brand accent (Sprint 7.7). Distinct from the
+  // existing `coral.500 #D6745A` used for HR vital chromatic; this is
+  // brighter / warmer to read as the caregiver brand colour against
+  // warm-charcoal surfaces. Resolves the D12 light-mode amber 2:1
+  // contrast issue for caregiver surfaces (memory:
+  // d12_light_mode_amber_contrast).
+  coral: { 500: '#D6745A', warm: '#FF7350' },
   teal: { 500: '#5FA8A8' },
   violet: { 500: '#7C7AAB' },
   sage: { 500: '#7CA56F' },
   success: { 500: '#5BA873' },
   warning: { 500: '#E8A063' },
   crimson: { 700: '#A8403F' },
+  // Per-person rotating accents (Sprint 7.7). Three accents drawn from
+  // the design's three test personas (Mom coral / Dad amber / Aunt
+  // periwinkle). Caregivers with > 3 family members rotate through.
+  person: {
+    1: '#FF7350', // coral (matches Mom in design fixture)
+    2: '#F2A618', // amber (matches Dad)
+    3: '#7B67CC', // periwinkle (matches Aunt Joy / sleep)
+  },
+  // Status semantic colours (Sprint 7.7). Six states drive the
+  // StatusPill + PersonOrb glow / dot. `clear` is success-green,
+  // `urgent` is the same crimson family as `state.urgent`, the rest
+  // are unique caregiver-mode shades from the design.
+  status: {
+    clear: '#61B565', // green
+    watch: '#F2A618', // amber (same as person.2)
+    attention: '#FF7350', // coral (same as person.1 / brand caregiver)
+    urgent: '#EE343B', // bright red — distinct from `crimson.700` for higher salience
+    offline: '#857F7A', // grey
+    sleeping: '#7B67CC', // periwinkle (same as person.3)
+  },
   glass: {
     10: 'rgba(255,255,255,0.04)',
     20: 'rgba(255,255,255,0.08)',
@@ -66,12 +101,21 @@ export interface SemanticColors {
     primary: string;
     primaryHover: string;
     primaryPressed: string;
+    /** Caregiver-mode warm coral accent (Sprint 7.7). Distinct from
+     *  brand.primary (amber) used elsewhere in the app. */
+    coral: string;
   };
   surface: {
     base: string;
     subtle: string;
     elevated: string;
     high: string;
+    /** Caregiver-mode warm-charcoal background (Sprint 7.7). Consumed
+     *  by CaregiverHome only. Light-mode equivalent is intentionally a
+     *  follow-up alongside Sprint 1.6 token cleanup. */
+    warmBase: string;
+    warmSubtle: string;
+    warmElevated: string;
     glassLight: string;
     glassMedium: string;
     glassHeavy: string;
@@ -101,6 +145,22 @@ export interface SemanticColors {
     warning: string;
     urgent: string;
   };
+  /** Per-person rotating accents (Sprint 7.7). Caregivers with > 3
+   *  family members cycle through these three. */
+  person: {
+    1: string;
+    2: string;
+    3: string;
+  };
+  /** Caregiver-mode status semantics (Sprint 7.7). Six states. */
+  status: {
+    clear: string;
+    watch: string;
+    attention: string;
+    urgent: string;
+    offline: string;
+    sleeping: string;
+  };
   focus: { ring: string };
 }
 
@@ -109,12 +169,16 @@ export const semanticColorsDark: SemanticColors = {
     primary: paletteDark.amber[500],
     primaryHover: paletteDark.amber[400],
     primaryPressed: paletteDark.amber[600],
+    coral: paletteDark.coral.warm,
   },
   surface: {
     base: paletteDark.midnight[900],
     subtle: paletteDark.midnight[850],
     elevated: paletteDark.midnight[800],
     high: paletteDark.midnight[750],
+    warmBase: paletteDark.warmCharcoal[900],
+    warmSubtle: paletteDark.warmCharcoal[850],
+    warmElevated: paletteDark.warmCharcoal[800],
     glassLight: paletteDark.glass[10],
     glassMedium: paletteDark.glass[20],
     glassHeavy: paletteDark.glass[30],
@@ -144,6 +208,19 @@ export const semanticColorsDark: SemanticColors = {
     warning: paletteDark.warning[500],
     urgent: paletteDark.crimson[700],
   },
+  person: {
+    1: paletteDark.person[1],
+    2: paletteDark.person[2],
+    3: paletteDark.person[3],
+  },
+  status: {
+    clear: paletteDark.status.clear,
+    watch: paletteDark.status.watch,
+    attention: paletteDark.status.attention,
+    urgent: paletteDark.status.urgent,
+    offline: paletteDark.status.offline,
+    sleeping: paletteDark.status.sleeping,
+  },
   focus: { ring: paletteDark.amber[500] },
 };
 
@@ -153,6 +230,11 @@ export const semanticColorsLight: SemanticColors = {
     // D12 §2.3 doesn't define separate hover/pressed for light — same hex.
     primaryHover: paletteLight.amber[500],
     primaryPressed: paletteLight.amber[500],
+    // Caregiver-mode light variant is intentionally a Sprint 1.6 follow-up
+    // (caregiver home is dark-canonical for v1.0). Reuse the dark-mode
+    // coral so a misuse against light surfaces is at least a known hex
+    // rather than `undefined`.
+    coral: paletteDark.coral.warm,
   },
   surface: {
     base: paletteLight.linen[50],
@@ -160,6 +242,12 @@ export const semanticColorsLight: SemanticColors = {
     elevated: paletteLight.linen[200],
     // D12 §2.4: light mode has no `surface.high` distinction; reuses elevated.
     high: paletteLight.linen[200],
+    // Caregiver warm surfaces — light variant deferred. Reuses dark-mode
+    // hexes as a placeholder; the caregiver home doesn't render in light
+    // mode in v1.0 so this is never visible.
+    warmBase: paletteDark.warmCharcoal[900],
+    warmSubtle: paletteDark.warmCharcoal[850],
+    warmElevated: paletteDark.warmCharcoal[800],
     glassLight: paletteLight.glass[10],
     glassMedium: paletteLight.glass[20],
     glassHeavy: paletteLight.glass[30],
@@ -190,6 +278,21 @@ export const semanticColorsLight: SemanticColors = {
     success: paletteLight.success[500],
     warning: paletteLight.warning[500],
     urgent: paletteLight.crimson[700],
+  },
+  // Person + status reuse the dark-mode hexes — caregiver home is
+  // dark-canonical for v1.0 so these don't render in light mode.
+  person: {
+    1: paletteDark.person[1],
+    2: paletteDark.person[2],
+    3: paletteDark.person[3],
+  },
+  status: {
+    clear: paletteDark.status.clear,
+    watch: paletteDark.status.watch,
+    attention: paletteDark.status.attention,
+    urgent: paletteDark.status.urgent,
+    offline: paletteDark.status.offline,
+    sleeping: paletteDark.status.sleeping,
   },
   focus: { ring: paletteLight.amber[500] },
 };

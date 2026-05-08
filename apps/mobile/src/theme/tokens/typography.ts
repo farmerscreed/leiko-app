@@ -15,6 +15,12 @@ export const fontFamilies = {
   bodySemiBoldItalic: 'Inter_600SemiBold_Italic',
   display: 'Inter_700Bold',
   numeric: 'JetBrainsMono_500Medium',
+  // Editorial serif — used for the caregiver-mode greeting headlines
+  // ("Three you love, checked in.") and the editorial sentences on
+  // person cards. Loaded via @expo-google-fonts/instrument-serif in
+  // App.tsx. Caregiver-mode-scoped per Sprint 7.7 design.
+  editorial: 'InstrumentSerif_400Regular',
+  editorialItalic: 'InstrumentSerif_400Regular_Italic',
 } as const;
 
 export type TypeStyle = {

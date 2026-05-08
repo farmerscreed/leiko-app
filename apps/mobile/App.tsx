@@ -27,6 +27,10 @@ import {
   Inter_900Black,
 } from '@expo-google-fonts/inter';
 import { JetBrainsMono_500Medium } from '@expo-google-fonts/jetbrains-mono';
+import {
+  InstrumentSerif_400Regular,
+  InstrumentSerif_400Regular_Italic,
+} from '@expo-google-fonts/instrument-serif';
 import { ComponentGallery } from './src/dev/ComponentGallery';
 import { DebugLauncher } from './src/dev/DebugLauncher';
 import { RootNavigator } from './src/navigation/RootNavigator';
@@ -43,6 +47,10 @@ export default function App() {
     Inter_700Bold,
     Inter_900Black,
     JetBrainsMono_500Medium,
+    // Editorial serif (Sprint 7.7 caregiver mode). Used for the
+    // greeting headline + person-card editorial sentence.
+    InstrumentSerif_400Regular,
+    InstrumentSerif_400Regular_Italic,
   });
 
   // While fonts are loading, return null so the Expo splash stays visible.
