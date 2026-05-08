@@ -57,12 +57,19 @@ export type SelfBuyerOnboardingStackParamList = {
   Watch: undefined;
 };
 
+// Sprint 8 — Self-Buyer Daily Pulse home replaces the Sprint 4 placeholder.
+// `VitalDetail` is wired here so the constellation tiles can navigate; the
+// real per-vital screens land in Sprint 8.5 (a placeholder is rendered for
+// now). The placeholder route name is kept available so existing tests + dev
+// flows don't break — it is no longer the initial route.
 export type SelfBuyerStackParamList = {
+  SelfBuyerHome: undefined;
   SelfBuyerHomePlaceholder: undefined;
   Pairing: undefined;
   Settings: undefined;
   TakeReading: undefined;
   ReadingDetail: { readingLocalId: string };
+  VitalDetail: { vital: 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity' };
 };
 
 export type AuthScreenProps<R extends keyof AuthStackParamList> = NativeStackScreenProps<

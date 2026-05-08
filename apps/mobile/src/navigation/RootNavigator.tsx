@@ -34,7 +34,9 @@ import { SelfBuyerYouScreen } from '../screens/Onboarding/SelfBuyer/You';
 import { SelfBuyerWatchScreen } from '../screens/Onboarding/SelfBuyer/Watch';
 import { CaregiverHome } from '../screens/Home/CaregiverHome';
 import { ParentReadingsList } from '../screens/Home/ParentReadingsList';
+import { SelfBuyerHome } from '../screens/Home/SelfBuyerHome';
 import { SelfBuyerHomePlaceholder } from '../screens/Placeholders/SelfBuyerHomePlaceholder';
+import { VitalDetailPlaceholder } from '../screens/Placeholders/VitalDetailPlaceholder';
 import { PairingScreen } from '../screens/Pairing/PairingScreen';
 import { SettingsScreen } from '../screens/Settings/SettingsScreen';
 import { TakeReadingScreen } from '../screens/TakeReading/TakeReadingScreen';
@@ -149,8 +151,16 @@ function SelfBuyerOnboardingNavigator() {
 }
 
 function SelfBuyerHomeNavigator() {
+  // Sprint 8 — Self-Buyer Daily Pulse home replaces the placeholder as the
+  // initial route. The placeholder route is kept registered so any in-flight
+  // dev tooling that deep-links to it still resolves; it is no longer
+  // surfaced to the user.
   return (
-    <SelfBuyerStack.Navigator screenOptions={{ headerShown: false }}>
+    <SelfBuyerStack.Navigator
+      initialRouteName="SelfBuyerHome"
+      screenOptions={{ headerShown: false }}
+    >
+      <SelfBuyerStack.Screen name="SelfBuyerHome" component={SelfBuyerHome} />
       <SelfBuyerStack.Screen
         name="SelfBuyerHomePlaceholder"
         component={SelfBuyerHomePlaceholder}
@@ -159,6 +169,7 @@ function SelfBuyerHomeNavigator() {
       <SelfBuyerStack.Screen name="Settings" component={SettingsScreen} />
       <SelfBuyerStack.Screen name="TakeReading" component={TakeReadingScreen} />
       <SelfBuyerStack.Screen name="ReadingDetail" component={ReadingDetailScreen} />
+      <SelfBuyerStack.Screen name="VitalDetail" component={VitalDetailPlaceholder} />
     </SelfBuyerStack.Navigator>
   );
 }

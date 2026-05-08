@@ -1,0 +1,397 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`DaySpine — empty state matches snapshot in the empty state 1`] = `
+<View
+  style={
+    [
+      {
+        "width": "100%",
+      },
+      undefined,
+    ]
+  }
+  testID="spine"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "gap": 12,
+        "marginBottom": 16,
+        "paddingHorizontal": 16,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "backgroundColor": "rgba(255,255,255,0.08)",
+          "flex": 1,
+          "height": 1,
+        }
+      }
+    />
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "Inter_500Medium",
+          "fontSize": 11,
+          "letterSpacing": 0.55,
+          "lineHeight": 14,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Through your day
+    </Text>
+    <View
+      style={
+        {
+          "backgroundColor": "rgba(255,255,255,0.08)",
+          "flex": 1,
+          "height": 1,
+        }
+      }
+    />
+  </View>
+  <Text
+    accessibilityLiveRegion="polite"
+    style={
+      {
+        "color": "#9C9890",
+        "fontFamily": "Inter_400Regular",
+        "fontSize": 12,
+        "lineHeight": 16,
+        "paddingHorizontal": 20,
+        "paddingVertical": 16,
+        "textAlign": "center",
+      }
+    }
+    testID="spine-empty"
+  >
+    Your day will fill in as readings come in.
+  </Text>
+</View>
+`;
+
+exports[`DaySpine — populated matches snapshot in dark mode 1`] = `
+<View
+  style={
+    [
+      {
+        "width": "100%",
+      },
+      undefined,
+    ]
+  }
+  testID="spine"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "gap": 12,
+        "marginBottom": 16,
+        "paddingHorizontal": 16,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "backgroundColor": "rgba(255,255,255,0.08)",
+          "flex": 1,
+          "height": 1,
+        }
+      }
+    />
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "Inter_500Medium",
+          "fontSize": 11,
+          "letterSpacing": 0.55,
+          "lineHeight": 14,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Through your day
+    </Text>
+    <View
+      style={
+        {
+          "backgroundColor": "rgba(255,255,255,0.08)",
+          "flex": 1,
+          "height": 1,
+        }
+      }
+    />
+  </View>
+  <View
+    style={
+      {
+        "paddingHorizontal": 20,
+        "position": "relative",
+      }
+    }
+  >
+    <View
+      accessibilityElementsHidden={true}
+      importantForAccessibility="no-hide-descendants"
+      pointerEvents="none"
+      style={
+        {
+          "backgroundColor": "#FF7350",
+          "bottom": 8,
+          "left": 75.5,
+          "opacity": 0.4,
+          "position": "absolute",
+          "top": 8,
+          "width": 1,
+        }
+      }
+    />
+    <View
+      accessibilityLabel="Last night: A quieter night. 7h 42m · 1 awakening"
+      accessibilityRole="text"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "flex-start",
+          "flexDirection": "row",
+          "opacity": 0.55,
+          "paddingVertical": 12,
+        }
+      }
+      testID="spine-moment-sleep-1"
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 12,
+            "letterSpacing": 0.4,
+            "lineHeight": 16,
+            "paddingTop": 4,
+            "textAlign": "right",
+            "width": 44,
+          }
+        }
+      >
+        Last night
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "paddingTop": 6,
+            "width": 24,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "backgroundColor": "transparent",
+              "borderColor": "#7C7AAB",
+              "borderRadius": 4.5,
+              "borderWidth": 1.5,
+              "height": 9,
+              "width": 9,
+            }
+          }
+        />
+      </View>
+      <View
+        style={
+          {
+            "flex": 1,
+            "paddingTop": 2,
+          }
+        }
+      >
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#F5F1EA",
+              "fontFamily": "InstrumentSerif_400Regular",
+              "fontSize": 22,
+              "lineHeight": 28,
+            }
+          }
+        >
+          A quieter night
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9C9890",
+              "fontFamily": "Inter_400Regular",
+              "fontSize": 12,
+              "lineHeight": 16,
+              "marginTop": 2,
+            }
+          }
+        >
+          7h 42m · 1 awakening
+        </Text>
+      </View>
+    </View>
+    <View
+      accessibilityLabel="6:42a: Morning reading. BP 122/78 · pulse 64"
+      accessibilityRole="text"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "flex-start",
+          "flexDirection": "row",
+          "opacity": 1,
+          "paddingVertical": 12,
+        }
+      }
+      testID="spine-moment-bp-1"
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 12,
+            "letterSpacing": 0.4,
+            "lineHeight": 16,
+            "paddingTop": 4,
+            "textAlign": "right",
+            "width": 44,
+          }
+        }
+      >
+        6:42a
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "paddingTop": 6,
+            "width": 24,
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "backgroundColor": "#E8A063",
+              "borderColor": "#E8A063",
+              "borderRadius": 4.5,
+              "borderWidth": 1.5,
+              "height": 9,
+              "width": 9,
+            }
+          }
+        />
+      </View>
+      <View
+        style={
+          {
+            "flex": 1,
+            "paddingTop": 2,
+          }
+        }
+      >
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#F5F1EA",
+              "fontFamily": "InstrumentSerif_400Regular",
+              "fontSize": 22,
+              "lineHeight": 28,
+            }
+          }
+        >
+          Morning reading
+        </Text>
+        <Text
+          style={
+            {
+              "color": "#9C9890",
+              "fontFamily": "Inter_400Regular",
+              "fontSize": 12,
+              "lineHeight": 16,
+              "marginTop": 2,
+            }
+          }
+        >
+          BP 122/78 · pulse 64
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;

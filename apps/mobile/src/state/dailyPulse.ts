@@ -39,12 +39,16 @@ import type { SleepSession, ActivityDay } from '../types/vitals';
 
 export interface BPSlice {
   latest: { systolic: number; diastolic: number; pulse: number | null } | null;
+  /** unix sec UTC of the latest BP reading; null when no BP exists. */
+  latestSampleSec: number | null;
   classification: Classification | null;
   staleness: VitalStaleness;
 }
 
 export interface HRSlice {
   restingToday: number | null;
+  /** unix sec UTC of the most recent HR sample (any window); null when none. */
+  latestSampleSec: number | null;
   classification: HRClassification | null;
   staleness: VitalStaleness;
 }
@@ -52,6 +56,8 @@ export interface HRSlice {
 export interface SpO2Slice {
   latestPercent: number | null;
   overnightLowsRecent: number[];
+  /** unix sec UTC of the most recent SpO2 sample; null when none. */
+  latestSampleSec: number | null;
   classification: SpO2Classification | null;
   staleness: VitalStaleness;
 }
@@ -65,6 +71,8 @@ export interface SleepSlice {
 export interface ActivitySlice {
   stepsToday: number;
   targetSteps: number;
+  /** unix sec UTC of the most recent activity sample. */
+  latestSampleSec: number | null;
   classification: ActivityClassification | null;
   staleness: VitalStaleness;
 }
@@ -122,6 +130,7 @@ export function composeDailyPulseData(
           pulse: snapshot.bpLatest.pulse,
         }
       : null,
+    latestSampleSec: snapshot.bpLatest?.measuredAtSec ?? null,
     classification: snapshot.bpLatest?.classification ?? null,
     staleness: checkStaleness(
       'bp',
@@ -132,6 +141,7 @@ export function composeDailyPulseData(
 
   const hr: HRSlice = {
     restingToday: snapshot.hrRestingToday,
+    latestSampleSec: snapshot.hrLatestSampleAt,
     classification:
       snapshot.hrRestingToday !== null
         ? classifyHR({
@@ -145,6 +155,7 @@ export function composeDailyPulseData(
   const spo2: SpO2Slice = {
     latestPercent: snapshot.spo2LatestPercent,
     overnightLowsRecent: snapshot.spo2OvernightLowsRecent,
+    latestSampleSec: snapshot.spo2LatestSampleAt,
     classification:
       snapshot.spo2LatestPercent !== null
         ? classifySpO2({
@@ -178,6 +189,7 @@ export function composeDailyPulseData(
   const activity: ActivitySlice = {
     stepsToday,
     targetSteps,
+    latestSampleSec: snapshot.activityToday?.lastSampleAtSec ?? null,
     classification: snapshot.activityToday
       ? classifyActivity({ stepsToday, targetSteps })
       : null,

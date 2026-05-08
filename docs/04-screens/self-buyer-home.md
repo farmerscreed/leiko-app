@@ -1,162 +1,216 @@
-# Screen — Self-Buyer Home / Your Readings
+# Screen — Self-Buyer Home / Daily Pulse
 
-**SUPERSEDES** D8 §4.5 (Home / Family Circle) for the self-buyer track only. Sourced from D8a §6.
+**SUPERSEDES** D8a §6 (the Family Circle reframe → BP-only single-protagonist
+layout) for the constellation pivot. Sourced from D11 (brand repositioning),
+D12 §11.2.3 (DailyPulseHero), D13 §7 (Daily Pulse Hero behaviour), and the
+design bundle linked in `docs/_reference/design-bundles.md` — specifically
+`leiko-home.html` with the 4th "Recents" section swapped for the **Day Spine**
+("Through your day") from `leiko-home-v2.html`.
 
-> The single most consequential UI change in D8a. The Family Circle metaphor is replaced by a single-protagonist layout: your latest reading at the top, your trend immediately below, your weekly snapshot below that. **No cards-per-parent. No "Add a family member" primary affordance.**
+> The screen that defines the brand. The constellation hero is the headline,
+> the Day Spine is the narrative. Six scrolling sections plus a persistent
+> tab bar and a Take-a-Reading FAB.
 
 ---
 
 ## Audience
-Self-buyer (`account_type = 'self_buyer'`). Default tab on app launch (Tab Bar position 1).
+
+Self-buyer (`account_type = 'self_buyer'`). Default tab on app launch (Tab Bar
+position 1).
 
 ## Purpose
-Show the user their own most-recent BP reading and trend at a glance. Designed for someone reckoning with a new diagnosis who wants to actually understand what's happening — not a dashboard.
+
+Show the user their five vitals at a glance, woven into a calm narrative of
+the day so far. The constellation makes BP the headline; the Day Spine turns
+isolated readings into a story; the AI narration ties them together in one
+sentence (placeholder string until Sprint 12.5).
 
 ---
 
-## Layout (D8a §6.1)
+## Section order (top → bottom)
 
-| Element | Spec |
-| --- | --- |
-| Header bar | App title ("Leiko") on the left, settings gear icon on the right |
-| Anomaly Banner (conditional) | If active: full-bleed banner per `docs/10-anomaly-logic.md` §5 — **self-framed copy variant** per D8a §12.1 |
-| **Hero card** | Latest reading. Larger than the equivalent caregiver Reading Card. Uses `type.numeric-xl` (56pt) for BP value. Range chip below. Timestamp. |
-| Trend mini-chart | Last 7 days, BP only, sparkline-style (NOT the full BP Trend Chart). Tap-through to full Trends screen. |
-| Weekly snapshot row | Three small stat tiles: **"Average"**, **"In-range %"**, **"Readings this week"**. Each is a `list.row.data` variant. |
-| Compact Learn card | One contextual education item based on the latest reading (per `docs/08-learn-module.md`). Auto-rotates daily. Single tap opens Learn. |
-| Floating action button (FAB) | **"Take a Reading"** — `button.accent`, bottom-right above tab bar. Triggers the manual-reading walkthrough. |
-| Tab bar | Visible — Home tab active |
-
----
-
-## Hero card (D8a §6.2)
-
-| Region | Content | Token use |
-| --- | --- | --- |
-| Surface | — | `color.surface.subtle` (cream subtle), `radius.m`, padding `spacing.xl` |
-| Top label | "Latest reading" or "Your morning reading" / "Your evening reading" (time-of-day aware) | `type.label`, `color.text.secondary` |
-| BP value | e.g. `128/82` | `type.numeric-xl` (56pt), `color.text.primary`, tabular monospace |
-| Unit | `mmHg` | `type.body-m`, `color.text.secondary`, inline trailing the value |
-| Status chip | In range / Elevated / High (per `docs/10-anomaly-logic.md`) | `pill.success` / `pill.accent` / `pill.urgent` |
-| Timestamp | "This morning at 7:42" / "Today, 4:15 pm" / relative format >24h | `type.caption`, `color.text.secondary` |
-| HR + SpO2 mini stats | e.g. `HR 72 bpm • SpO₂ 97%` | `type.body-s`, `color.text.secondary` |
+1. **Header** — "Tuesday · May 8" eyebrow + "Good morning, Adaeze." greeting + avatar
+2. **Anomaly banner** (conditional) — `AnomalyBanner` per docs/10-anomaly-logic.md §5, **self-framed copy variant** per D8a §12.1
+3. **DailyPulseHero (immersive)** — five concentric vital rings + adaptive central value (D13 §7.2) + ambient glow + AI narration line (placeholder until Sprint 12.5)
+4. **AI narration card** — expandable contextual card under the rings; placeholder strings in Sprint 8 ("Your daily pulse is here.")
+5. **Vital tile strip** — horizontal scroll, five `VitalTile` instances (BP · HR · SpO2 · Sleep · Activity)
+6. **Correlation strip** — `CorrelationStrip` showing sleep × resting HR over the last 7 days
+7. **Through your day** — `DaySpine` vertical timeline of moments derived from real readings + sleep boundaries (the swap; replaces the design's "Recents" history list)
+8. **Tab bar (visual)** — four tabs (Home · Trends · Family · Settings). Sprint 8 wires Home + Settings only; Trends and Family render but route to a "Coming soon" placeholder until Sprints 9 / 10.
+9. **Take-a-Reading FAB** — `button.accent`, anchored above the tab bar, opens the existing TakeReading walkthrough.
 
 ---
 
-## Hero card states (D8a §6.2.1)
+## Adaptive central value (D13 §7.2)
 
-| State | Trigger | Visual |
-| --- | --- | --- |
-| `fresh` | Reading <12h old, in normal range | Default. Status chip = `pill.success` "In range" |
-| `fresh-elevated` | Reading <12h old, classifies as Elevated | Status chip = `pill.accent` "Elevated". Single-line educational nudge below. |
-| `stale` | Reading 12–72h old | Timestamp uses `color.text.secondary`; subtle "Time for a new reading?" caption with FAB-equivalent inline link |
-| `silent` | No reading in >72h | Hero card replaced by an empty-state card with prompt to take a reading |
-| `anomaly-noted` | Reading triggers anomaly logic | Anomaly banner above replaces inline nudge. Status chip = `pill.accent`. |
-| `confirmed-urgent` | ≥180/120 OR three consecutive ≥160/100 | **Crimson** left-edge stripe (4pt). Status chip = `pill.urgent`. **The only place crimson appears in self-buyer home.** |
-| `watch-pending` | No watch paired yet, order is being shipped | Hero card replaced by friendly waiting state showing tracking number if available |
+Pure function `pickCentralValue(data, nowSec)` picks one of four states by
+priority:
 
----
+| Priority | Condition | Format | Label |
+|---|---|---|---|
+| 1 | Fresh BP reading ≤ 8h old | `"128/82"` | `"morning BP"` (before noon local) / `"latest BP"` |
+| 2 | HR sample ≤ 12h old | `"62"` | `"resting HR"` |
+| 3 | Last night's sleep recorded | `"7h 24m"` | `"last night"` |
+| 4 | None of the above | `"—"` | `"no readings yet today"` |
 
-## Verified copy per state (D8a §6.3)
-
-| State | Top label | Status chip | Inline nudge / context |
-| --- | --- | --- | --- |
-| fresh (morning) | "Your morning reading" | "In range" | (none) |
-| fresh (evening) | "Your evening reading" | "In range" | (none) |
-| fresh-elevated | "Latest reading" | "Elevated" | "Worth keeping an eye on." |
-| stale | "Latest reading" | — | "Time for a new reading? Tap below." |
-| silent | "Welcome back" | — | "It's been a few days. Want to take a reading now?" |
-| anomaly-noted | "Latest reading" | "Elevated" | (banner above takes the message; no inline nudge) |
-| confirmed-urgent | "Latest reading" | "High" | "These last few readings are unusually high. We recommend talking to your doctor today." |
-| watch-pending | "Welcome" | — | "Your watch is on its way. We'll let you know when it arrives." |
+Tested in `apps/mobile/src/utils/__tests__/dayMoments.test.ts` (the priority
+function is exported from the same module).
 
 ---
 
-## Empty home — no readings yet (D8a §6.4)
+## DailyPulseHero — adapted states
 
-When the user has paired the watch but has not yet taken a first reading:
+The new constellation hero replaces the old D8a §6.2 hero card. The seven
+"hero states" from the old spec map onto behaviour as follows:
 
-| Element | String |
-| --- | --- |
-| Headline | "Ready when you are." |
-| Body | "Press the side button on your watch and stay still for about a minute. We'll show your reading here." |
-| CTA | "Show me how" — opens reading walkthrough (per `docs/08-learn-module.md`) |
+| Old state | New behaviour |
+|---|---|
+| `fresh` | BP central value, AnomalyBanner absent |
+| `fresh-elevated` | BP central value, calm-concerned AnomalyBanner above |
+| `stale` | central value carries the most recent vital; AINarration card swaps to "Time for a new reading?" |
+| `silent` (>72h) | central value falls through to `—`; AINarration card prompts for first reading |
+| `anomaly-noted` | calm-concerned AnomalyBanner above hero |
+| `confirmed-urgent` | confirmed-urgent AnomalyBanner above hero (no dismiss) |
+| `watch-pending` | hero renders at no-data; AINarration card carries the wait-state copy |
+
+Anomaly severity is sourced from the BP classification tier
+(`in_pattern` / `calm_concerned` / `confirmed_urgent`) on `latestReading`.
 
 ---
 
-## Removed affordances vs caregiver home (D8a §6.5)
+## Through your day — Day Spine (the swap)
 
-- **No "Add a family member" floating button** — equivalent action lives in Settings (`docs/04-screens/settings.md` §"Family Section").
-- **No multi-card scrolling list** — a single hero plus single trend is the entire screen.
-- **No avatar in the header** — the user is on their own home, no need to identify whose data.
-- **No family-side anomaly aggregation logic** — anomaly is always about the user themselves.
+Replaces the design's "Recents" history list. Translates the v2 spine
+visual: vertical thin coral-fading-to-rim line, time label (mono, right-
+aligned, 10pt), colored dot per vital on the spine, serif title, sub-line.
+Past moments at 0.55 opacity.
 
-> **Why a "Take a Reading" FAB on home** (D8a §6.5 callout): caregiver home does NOT have this affordance because caregivers don't take readings — the parent does, on the watch. Self-buyers DO take readings (typically twice a day), and the FAB makes that the most accessible action. It triggers the manual-reading walkthrough — it does **not** start a measurement directly (BP measurement starts on the watch, not the phone).
+Moments are derived (no AI prose) from real data via `deriveDayMoments`:
+
+| Source | Moment title | Sub-line |
+|---|---|---|
+| Last night's sleep session | "Sleep began" / "A quieter night" | `"7h 24m · X awakenings"` |
+| Today's first BP reading | "Morning reading" / "Latest reading" | `"BP {sys}/{dia} · pulse {pulse}"` |
+| Today's resting HR | "Heart resting" | `"{bpm} bpm"` |
+| Today's overnight SpO2 dip if `< 92%` | "A brief oxygen dip" | `"SpO₂ {low}% — back up by morning"` |
+| Today's step count if > 0 | "Moving so far" | `"{steps} steps"` |
+
+All moment strings pass voice rules (no "patient" / "diagnose" / "predict" /
+"dangerous"). Empty state: a single calm placeholder line ("Your day will fill
+in as readings come in.") — never "No data".
+
+---
+
+## Hero card states — voice copy
+
+| State | Eyebrow on hero | Inline AI card body |
+|---|---|---|
+| fresh | "Morning · in pattern" | "Your daily pulse is here." (placeholder until Sprint 12.5) |
+| stale | "Latest reading" | "Time for a new reading? Tap below." |
+| silent | "Welcome back" | "It's been a few days. Want to take a reading now?" |
+| watch-pending | "Welcome" | "Your watch is on its way. We'll let you know when it arrives." |
+
+Anomaly copy — from `AnomalyBanner.title` / `body`:
+
+| Severity | Title | Body |
+|---|---|---|
+| calm-concerned | "Worth a look" | "Three of your readings this week were higher than usual. Might be worth talking to your doctor." |
+| confirmed-urgent | "Talk to your doctor today" | "These last few readings are unusually high. We recommend talking to your doctor today." |
 
 ---
 
 ## Behaviour
 
-- Pull-to-refresh + auto-refresh on app foreground. TanStack Query handles cache + retries.
-- Realtime updates: Supabase Realtime subscription on `public.readings WHERE family_id = (self-buyer's family)`. New readings push into the hero live.
-- Hero tap → Reading Detail (`docs/04-screens/reading-detail.md`).
-- Trend mini-chart tap → Trends screen (`docs/04-screens/trends.md`).
-- FAB tap → Take Reading walkthrough (`docs/04-screens/take-reading.md`).
-- Compact Learn card tap → Learn module (`docs/08-learn-module.md`).
+- Pull-to-refresh + auto-refresh on app foreground via `useFamilyReadings`
+  (re-used from caregiver home; the same Realtime channel covers self-buyers
+  in their own family).
+- Hero tap → opens `ReadingDetail` for the latest BP reading (or no-op when
+  no reading exists).
+- Tile tap → routes to `VitalDetail` (Sprint 8.5 deliverable; Sprint 8 ships
+  a placeholder screen).
+- DaySpine moment tap → opens `ReadingDetail` for the underlying reading
+  (BP moments only; HR/SpO2/Sleep/Activity moments are inert until Sprint 8.5).
+- FAB tap → `TakeReading` walkthrough (existing route, no regression).
+- Tab bar — Home is active; Settings routes to `Settings`; Trends + Family
+  route to a placeholder ("Coming soon — Sprints 9 / 10").
 
 ---
 
-## Hybrid mode (D8a §10.4)
+## Removed affordances vs caregiver home
 
-When the self-buyer invites at least one caregiver and the invitation is accepted:
-
-- Home screen **UNCHANGED** — still "Your readings", still self-protagonist layout. They are not retroactively pushed into the Family Circle metaphor.
-- A subtle indicator on the home header bar (small `avatar.xs` cluster, top-right of the hero card) shows that other people are following — transparency that surveillance is happening.
-- A **first-time toast** appears the first time a caregiver views the data: *"Sarah just looked at today's reading."* — dismissible, **never repeats** per caregiver (D8a §10.4 toast policy).
-
-> **Toast policy for transparency** (D8a §10.4): D5 §3.4 says "Health is shared, not surveilled." The first-view toast is the single concession to that principle in hybrid mode. It does NOT repeat (no toast every time a caregiver opens the app — that creates anxiety on both sides).
+- **No Family Constellation orbs** — single-protagonist, not a family-of-many.
+- **No view toggle** (the constellation IS the view) — caregiver's
+  bird's-eye/detailed toggle does not apply.
+- **No "Add a family member" CTA** — equivalent action lives in Settings.
 
 ---
 
 ## Free vs Plus
 
 Per `docs/09-paywall-and-iap.md`:
-- Free tier sees latest reading + last 7 days. Beyond 7 days requires Plus.
+
+- Free tier sees latest reading + last 7 days of correlation. Beyond 7 days
+  requires Plus.
 - **Latest reading is NEVER paywalled** (D5 §3.4).
-- Anomaly banner is suppressed for free tier (free tier shows reading but no proactive alert push).
-- Per D8a §2.3: **never up-sell on the home screen.** Paywall fires on the 6th reading, not earlier.
+- AnomalyBanner is suppressed for free tier.
+- Per D8a §2.3: **never up-sell on the home screen.** Paywall fires on the
+  6th reading, not earlier.
 
 ---
 
-## Voice rules (D8a §2.3 + §12.1)
+## Voice rules (D8a §2.3 + §12.1 + docs/05-voice-and-claims.md)
 
 - All self-buyer copy is **second-person**: "your reading", not "Mum's reading".
 - Reassuring tone by default. Never countdowns. Never urgency timers.
-- Never "patient", never "user", never "you may have", never "we detected".
+- Forbidden: "patient", "user", "you may have", "we detected", "predict",
+  "diagnose", "dangerous", "critical", "silent killer".
+- Confirmed-urgent uses Tone D direct: "Talk to your doctor today" —
+  never "you must" / "act now" / "before it's too late".
 
 ---
 
-## Anti-patterns (CLAUDE.md + D8a §2.3)
-- **Never streaks, badges, progress rings.** Self-buyers churn on apps that turn their condition into a game.
+## Anti-patterns (CLAUDE.md + D8a §2.3 + D11 §3)
+
+- **No streaks, badges, progress rings.** Self-buyers churn on apps that
+  gamify their condition.
 - **No count badges.**
 - **No fear-based push.**
-- **Don't use red for normal-state UI.** Crimson is only the `confirmed-urgent` left-edge stripe.
+- **Don't use red for normal-state UI.** Crimson is reserved for
+  `confirmed-urgent` AnomalyBanner only.
+- **Don't auto-refresh the constellation aggressively.** Calm-before-clever:
+  the daily-pulse-reveal animation fires once per session.
 
 ---
 
 ## Accessibility
 
-- Hero numeric: `accessibilityLabel` reads as a complete sentence including tier ("Your reading: 128/82 mmHg. In range.").
-- FAB: `accessibilityLabel: "Take a reading"`, hint "Walks you through taking a reading on your watch".
-- VoiceOver order: header → banner (if any) → hero (top label → BP value + chip → timestamp → HR/SpO2) → trend chart → snapshot row → Learn card → FAB.
-- Caregiver-cluster avatar (hybrid mode): announced as "X people follow your readings".
+- Hero exposes a single composed `accessibilityLabel` (per `DailyPulseHero`
+  spec) reading the central value + every ring + the narration as one sentence.
+- FAB: `accessibilityLabel: "Take a reading"`, hint "Walks you through taking
+  a reading on your watch".
+- DaySpine: each moment is a `Pressable` with label
+  `"{time}: {title}. {sub}"`; the vertical spine is decorative (`accessibilityElementsHidden`).
+- Tab bar: each tab is `accessibilityRole="tab"` with the active state surfaced
+  on `accessibilityState={{ selected: ... }}`.
 
 ---
 
 ## Sprint 8 acceptance criteria
-- All 7 hero card states render with correct tokens (`fresh`, `fresh-elevated`, `stale`, `silent`, `anomaly-noted`, `confirmed-urgent`, `watch-pending`).
-- Verified copy strings exact-match D8a §6.3.
-- Realtime new-reading update lands in hero card without manual refresh.
-- FAB routes to take-reading walkthrough.
-- Voice gate passes.
-- Component + integration tests covering all 7 states.
+
+- All 4 D13 §7.2 central-value priority states render correctly
+  (BP-fresh / HR-fallback / sleep-fallback / no-data).
+- All 5 ring states render correctly per vital classification.
+- Daily-pulse-reveal animation fires once per session.
+- Live-pulse animation runs when any vital is currently capturing.
+- AINarration card shows the placeholder string in Sprint 8
+  ("Your daily pulse is here.") — replaced by real generator output in Sprint 12.5.
+- FAB tap → existing TakeReading flow, no regression.
+- Tile tap → navigates to `VitalDetail` placeholder route.
+- DaySpine renders empty state when there are no derivable moments;
+  renders past moments at 0.55 opacity; voice-checked.
+- Anomaly banner renders above hero when latest reading classifies as
+  `calm_concerned` / `confirmed_urgent`.
+- Voice gate passes on every string.
+- Snapshot tests cover all 4 central-value states + dark mode (light mode
+  follow-up — caregiver-warm surfaces are dark-canonical for v1.0 per
+  `apps/mobile/src/theme/tokens/color.ts`).
