@@ -103,6 +103,9 @@ function parent(overrides: Partial<ParentSummary> & { familyId: string; parentDi
     parentYearOfBirth: overrides.parentYearOfBirth ?? 1955,
     latestReading: overrides.latestReading ?? null,
     recentReadings: overrides.recentReadings ?? [],
+    latestHr: overrides.latestHr ?? null,
+    latestSpo2: overrides.latestSpo2 ?? null,
+    latestSleep: overrides.latestSleep ?? null,
   };
 }
 

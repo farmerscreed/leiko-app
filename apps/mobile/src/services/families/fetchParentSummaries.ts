@@ -16,9 +16,10 @@
 // itself doesn't need to filter by user_id.
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../../types/database';
+import type { Database, VitalType } from '../../types/database';
 
 const PER_PARENT_READING_LIMIT = 14; // ~2 weeks of once-daily; powers 7-day sparkline + buffer
+const MULTI_VITAL_LOOKBACK_DAYS = 7; // window for HR / SpO2 / sleep latest-per-vital
 
 export interface ReadingSummary {
   id: string;
@@ -29,15 +30,46 @@ export interface ReadingSummary {
   qualityScore: 'good' | 'fair' | 'suspect' | null;
 }
 
+/** HR latest sample summary — Sprint 7.7b cross-phone read. */
+export interface HrSummary {
+  measuredAt: string;
+  bpm: number;
+}
+
+/** SpO2 latest sample summary — Sprint 7.7b cross-phone read. */
+export interface Spo2Summary {
+  measuredAt: string;
+  /** Average percent across the sample window (0-100). */
+  percent: number;
+}
+
+/** Sleep last-night summary — Sprint 7.7b cross-phone read. */
+export interface SleepSummary {
+  /** Session-end timestamp (used as the "freshness" anchor). */
+  measuredAt: string;
+  /** Total session minutes. */
+  totalMinutes: number;
+  /** Deep-sleep minutes within the session, when reported by the watch. */
+  deepMinutes: number | null;
+  /** Light-sleep minutes within the session. */
+  lightMinutes: number | null;
+}
+
 export interface ParentSummary {
   familyId: string;
   parentDisplayName: string;
   parentRelationship: string;
   parentYearOfBirth: number | null;
-  /** Most recent reading; null if none yet. */
+  /** Most recent BP reading; null if none yet. */
   latestReading: ReadingSummary | null;
   /** Newest-first; up to PER_PARENT_READING_LIMIT entries. Drives the sparkline. */
   recentReadings: ReadingSummary[];
+  /** Latest HR sample within MULTI_VITAL_LOOKBACK_DAYS; null if none. */
+  latestHr: HrSummary | null;
+  /** Latest SpO2 sample within the lookback window; null if none. */
+  latestSpo2: Spo2Summary | null;
+  /** Latest sleep session within the lookback window; null if none. */
+  latestSleep: SleepSummary | null;
 }
 
 export async function fetchParentSummaries(
@@ -89,12 +121,75 @@ export async function fetchParentSummaries(
     }
   }
 
+  // Multi-vitals — Sprint 7.7b. Fetch hr / spo2 / sleep_session within
+  // the lookback window for all families, then keep the latest row per
+  // (family_id, vital_type). Postgres `DISTINCT ON` would express this
+  // server-side but isn't exposed by the supabase-js builder; the
+  // post-fetch dedupe is fine for v1 (3 families × 3 vital types × ~7d
+  // of data = small).
+  const lookbackCutoffIso = new Date(
+    Date.now() - MULTI_VITAL_LOOKBACK_DAYS * 24 * 60 * 60 * 1000,
+  ).toISOString();
+  const trackedVitalTypes: VitalType[] = ['hr', 'spo2', 'sleep_session'];
+  const { data: vitalsRows, error: vitalsErr } = await client
+    .from('vitals_other')
+    .select(
+      'id, family_id, vital_type, measured_at, value_int, value_int_2, value_int_3',
+    )
+    .in('family_id', familyIds)
+    .in('vital_type', trackedVitalTypes)
+    .eq('hidden', false)
+    .gte('measured_at', lookbackCutoffIso)
+    .order('measured_at', { ascending: false });
+
+  if (vitalsErr) throw vitalsErr;
+
+  // Group by (family_id, vital_type) keeping the first (latest) row.
+  type LatestVitalsForFamily = {
+    hr: HrSummary | null;
+    spo2: Spo2Summary | null;
+    sleep_session: SleepSummary | null;
+  };
+  const vitalsByFamily = new Map<string, LatestVitalsForFamily>();
+  for (const row of vitalsRows ?? []) {
+    let bucket = vitalsByFamily.get(row.family_id);
+    if (!bucket) {
+      bucket = { hr: null, spo2: null, sleep_session: null };
+      vitalsByFamily.set(row.family_id, bucket);
+    }
+    if (row.vital_type === 'hr' && bucket.hr === null && row.value_int !== null) {
+      bucket.hr = { measuredAt: row.measured_at, bpm: row.value_int };
+    } else if (
+      row.vital_type === 'spo2' &&
+      bucket.spo2 === null &&
+      row.value_int !== null
+    ) {
+      bucket.spo2 = { measuredAt: row.measured_at, percent: row.value_int };
+    } else if (
+      row.vital_type === 'sleep_session' &&
+      bucket.sleep_session === null &&
+      row.value_int !== null
+    ) {
+      bucket.sleep_session = {
+        measuredAt: row.measured_at,
+        totalMinutes: row.value_int,
+        deepMinutes: row.value_int_2,
+        lightMinutes: row.value_int_3,
+      };
+    }
+  }
+
   const summaries: ParentSummary[] = memberships.map((m) => {
     // Supabase types `families` as a single object via the !inner join,
     // but the runtime can return an array shape if the inferred shape
     // chooses array. Normalise.
     const fam = Array.isArray(m.families) ? m.families[0] : m.families;
     const recent = readingsByFamily.get(m.family_id) ?? [];
+    const vitals = vitalsByFamily.get(m.family_id) ?? {
+      hr: null,
+      spo2: null,
+      sleep_session: null,
+    };
     return {
       familyId: m.family_id,
       parentDisplayName: fam?.parent_display_name ?? '',
@@ -102,6 +197,9 @@ export async function fetchParentSummaries(
       parentYearOfBirth: fam?.parent_year_of_birth ?? null,
       latestReading: recent[0] ?? null,
       recentReadings: recent,
+      latestHr: vitals.hr,
+      latestSpo2: vitals.spo2,
+      latestSleep: vitals.sleep_session,
     };
   });
 

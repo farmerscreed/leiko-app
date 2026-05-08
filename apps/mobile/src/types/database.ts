@@ -102,6 +102,36 @@ export type CreateFamilyArgs = {
   _caregiver_relationship: string;
 };
 
+// Multi-vitals (Sprint 7.5) — table is keyed by (family_id, vital_type,
+// measured_at). Sprint 7.7b is the first client-side reader; the writes
+// flow through the /sync Edge Function (services/sync/postMultiVitals.ts).
+//
+// Encoding per docs/_reference/D13-multi-vitals-constellation-spec.md
+// + supabase/functions/_shared/vital-row-mappers.ts:
+//   hr            → value_int = bpm; value_jsonb = { motion_state, ... }
+//   spo2          → value_int = avg %; value_int_2 = max; value_int_3 = min
+//   sleep_session → value_int = totalMinutes; value_int_2 = deepMinutes;
+//                   value_int_3 = lightMinutes
+//   steps_day     → value_int = total_steps; value_jsonb.day_local
+//   calories_day  → value_int = total_kcal; value_int_2 = activity;
+//                   value_int_3 = bmr
+export type VitalType = 'hr' | 'spo2' | 'sleep_session' | 'steps_day' | 'calories_day';
+
+export type VitalsOtherRow = {
+  id: string;
+  family_id: string;
+  device_id: string | null;
+  vital_type: VitalType;
+  measured_at: string;
+  value_int: number | null;
+  value_int_2: number | null;
+  value_int_3: number | null;
+  value_jsonb: Record<string, unknown> | null;
+  hidden: boolean;
+  hidden_reason: string | null;
+  created_at: string;
+};
+
 // Shape conforms to @supabase/postgrest-js's GenericSchema constraint
 // (Tables / Views / Functions, with Relationships on each table). Without
 // Views + Relationships the postgrest-js client falls back to `any`-typed
@@ -137,6 +167,18 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<ReadingRow>;
+        Relationships: [];
+      };
+      vitals_other: {
+        Row: VitalsOtherRow;
+        // Inserts go through the /sync Edge Function (service_role). RLS
+        // forbids direct client inserts; this Insert type exists only so
+        // the postgrest-js builder typecheck doesn't fall back to never.
+        Insert: Omit<VitalsOtherRow, 'id' | 'created_at'> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<VitalsOtherRow>;
         Relationships: [];
       };
     };

@@ -31,6 +31,9 @@ function summary(partial: Partial<ParentSummary> = {}): ParentSummary {
     parentYearOfBirth: partial.parentYearOfBirth ?? 1955,
     latestReading: partial.latestReading ?? null,
     recentReadings: partial.recentReadings ?? [],
+    latestHr: partial.latestHr ?? null,
+    latestSpo2: partial.latestSpo2 ?? null,
+    latestSleep: partial.latestSleep ?? null,
   };
 }
 
