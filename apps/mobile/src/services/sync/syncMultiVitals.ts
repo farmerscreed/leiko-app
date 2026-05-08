@@ -160,12 +160,13 @@ async function syncSpO2Step(
   nowSec: number,
 ): Promise<number> {
   const todayLocal = dayLocalFromNow(nowSec);
-  const cursor = getVitalCursor(deviceBleId);
-  if (cursor.spo2 === todayLocal) {
-    // Already pulled today — Sprint 7.5 simplification (no intra-day
-    // refresh; the rolling auto-sample covers it on the next reconnect).
-    return 0;
-  }
+  // Bug fix (caught on-device 2026-05-08): the original Sprint 7.5
+  // implementation short-circuited when `cursor.spo2 === todayLocal`,
+  // which locked out same-day re-reads after the very first sync of
+  // the day. Watch SpO2 samples accumulate across the day; the lockout
+  // meant new samples never reached the slice until the next calendar
+  // day. We now always read; the slice dedupes by measuredAtSec so
+  // already-known samples are no-ops.
   const samples = await readSpO2History(device, {
     dayTimestampSec: dayStartSec(nowSec),
   });
@@ -244,8 +245,14 @@ async function syncActivityStep(
   nowSec: number,
 ): Promise<number> {
   const todayLocal = dayLocalFromNow(nowSec);
-  const cursor = getVitalCursor(deviceBleId);
-  if (cursor.activity === todayLocal) return 0;
+  // Bug fix (caught on-device 2026-05-08): the original Sprint 7.5
+  // implementation short-circuited when `cursor.activity === todayLocal`,
+  // which locked out same-day re-reads. The watch's day-step total
+  // grows throughout the day; the lockout meant the first sync of the
+  // day (often with steps=0) was the only chance to capture activity.
+  // The slice dedupes by dayLocal so re-reading + replacing today's
+  // row is the right behaviour. Cursor still advances at the end so
+  // backfill loops (Sprint 7.7+) can reason about "we've seen today".
   const info = await readDayInfo(device, { daysAgo: 0 });
   if (!info.activity) {
     setVitalCursor(deviceBleId, 'activity', todayLocal);

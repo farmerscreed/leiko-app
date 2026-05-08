@@ -24,7 +24,7 @@ import { useActivity } from '../state/activity';
 import { useDailyPulseData } from '../state/dailyPulse';
 import { useSyncOrchestrator } from '../state/syncOrchestrator';
 import { usePairing } from '../state/pairing';
-import { getVitalCursor } from '../services/sync/syncBacklog';
+import { getVitalCursor, resetVitalCursors } from '../services/sync/syncBacklog';
 
 function formatRelative(ms: number | null): string {
   if (ms === null) return '—';
@@ -133,6 +133,44 @@ export function VitalsDebugPanel() {
           }}
         >
           {busy ? 'Syncing…' : 'Force sync now'}
+        </Text>
+      </Pressable>
+
+      {/* Reset cursors → next sync re-pulls every vital from the start
+          of the watch's stored history. Recovery path when MMKV ends up
+          out of step with the watch (e.g. after uninstall + reinstall).
+          Dev-only — never wired into production navigation. */}
+      <Pressable
+        accessibilityRole="button"
+        disabled={busy || !paired}
+        style={[
+          buttonStyle,
+          {
+            backgroundColor: theme.colors.surface.warmElevated,
+            borderWidth: 0.5,
+            borderColor: theme.colors.border.rim,
+            opacity: busy || !paired ? 0.5 : 1,
+          },
+        ]}
+        onPress={async () => {
+          if (!paired) return;
+          setBusy(true);
+          try {
+            resetVitalCursors(paired.bleId);
+            await runSync('manual_force');
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        <Text
+          style={{
+            color: theme.colors.text.primary,
+            fontSize: theme.type('bodyL').size,
+            fontWeight: '600',
+          }}
+        >
+          Reset cursors + re-sync
         </Text>
       </Pressable>
 

@@ -250,22 +250,31 @@ describe('syncMultiVitals — cursor dedup', () => {
     expect(getVitalCursor(DEVICE_BLE_ID).hr).toBe(1737423600);
   });
 
-  it('skips SpO2 read when cursor.spo2 already at today', async () => {
+  it('always re-reads SpO2 even when cursor.spo2 is at today', async () => {
+    // Bug fix 2026-05-08: the old behaviour short-circuited same-day
+    // re-reads, which locked out new SpO2 samples that landed later
+    // in the day. Now the read always fires; the slice dedupes.
     setVitalCursor(DEVICE_BLE_ID, 'spo2', TODAY_LOCAL);
     await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
     });
-    expect(mockReadSpO2History).not.toHaveBeenCalled();
+    expect(mockReadSpO2History).toHaveBeenCalledTimes(1);
   });
 
-  it('skips activity read when cursor.activity already at today', async () => {
+  it('always re-reads activity even when cursor.activity is at today', async () => {
+    // Bug fix 2026-05-08: the watch's day step total grows throughout
+    // the day. Same-day lockout meant the first sync (often steps=0)
+    // was the only chance to capture activity. Now the read always
+    // fires; the slice dedupes by dayLocal so today's row is replaced.
+    // Sleep stays locked out — last night's totals don't change once
+    // captured.
     setVitalCursor(DEVICE_BLE_ID, 'activity', TODAY_LOCAL);
     setVitalCursor(DEVICE_BLE_ID, 'sleep', TODAY_LOCAL);
     await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
     });
-    // readDayInfo would be called for either sleep or activity step;
-    // both cursors at today means neither step calls it.
-    expect(mockReadDayInfo).not.toHaveBeenCalled();
+    // Sleep is still locked out (cursor at today); activity always reads
+    // → readDayInfo fires once for the activity step only.
+    expect(mockReadDayInfo).toHaveBeenCalledTimes(1);
   });
 });

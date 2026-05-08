@@ -167,6 +167,18 @@ export function setLastSyncSec(deviceBleId: string, timestampSec: number): void 
   setVitalCursor(deviceBleId, 'bp', timestampSec);
 }
 
+/** Reset every per-vital cursor for a device back to the empty default
+ * (BP/HR → 0, day-cursors → ''). On the next sync the orchestrator
+ * will re-pull every vital's full available history. Dev-only utility
+ * for recovering when local MMKV got out of step with the watch's
+ * storage (e.g. after an uninstall/reinstall that wiped readings but
+ * the watch still holds the history). */
+export function resetVitalCursors(deviceBleId: string): void {
+  const map = readCursorMap();
+  map[deviceBleId] = { ...EMPTY_CURSOR };
+  writeCursorMap(map);
+}
+
 export interface BacklogResult {
   pulled: number;
   latestTimestampSec: number | null;
