@@ -1,0 +1,553 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ActivityWeeklyBars — render matches snapshot in dark mode 1`] = `
+<View
+  testID="weekly"
+>
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#9C9890",
+        "fontFamily": "Inter_500Medium",
+        "fontSize": 11,
+        "letterSpacing": 0.55,
+        "lineHeight": 14,
+        "marginBottom": 8,
+        "marginHorizontal": 20,
+        "textTransform": "uppercase",
+      }
+    }
+    testID="weekly-section-label"
+  >
+    This week vs goal
+  </Text>
+  <View
+    style={
+      [
+        {
+          "borderWidth": 0.5,
+        },
+        {
+          "backgroundColor": "#120C07",
+          "borderColor": "rgba(255,255,255,0.06)",
+          "borderRadius": 22,
+          "marginHorizontal": 20,
+          "padding": 16,
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "flex-end",
+            "flexDirection": "row",
+            "position": "relative",
+          },
+          {
+            "gap": 8,
+            "height": 120,
+            "paddingBottom": 18,
+          },
+        ]
+      }
+    >
+      <View
+        pointerEvents="none"
+        style={
+          [
+            {
+              "borderStyle": "dashed",
+              "borderTopWidth": 1,
+              "height": 1,
+              "left": 0,
+              "position": "absolute",
+              "right": 0,
+            },
+            {
+              "borderTopColor": "rgba(255,255,255,0.08)",
+              "top": 34.00000000000001,
+            },
+          ]
+        }
+        testID="activity-weekly-bars-goal-line"
+      >
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#9C9890",
+              "fontFamily": "JetBrainsMono_500Medium",
+              "fontSize": 8.5,
+              "letterSpacing": 0.55,
+              "position": "absolute",
+              "right": 0,
+              "textTransform": "uppercase",
+              "top": -14,
+            }
+          }
+        >
+          goal 8k
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "height": "100%",
+            "justifyContent": "flex-end",
+          }
+        }
+        testID="weekly-bar-0"
+      >
+        <View
+          style={
+            {
+              "alignItems": "flex-end",
+              "flex": 1,
+              "flexDirection": "row",
+              "justifyContent": "flex-end",
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            pointerEvents="none"
+            style={
+              [
+                {
+                  "borderRadius": 4,
+                  "transformOrigin": "bottom",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#7CA56F",
+                  "borderColor": "transparent",
+                  "borderWidth": 0,
+                  "height": "35%",
+                  "opacity": 0.55,
+                },
+                {
+                  "transform": [
+                    {
+                      "scaleY": 0,
+                    },
+                  ],
+                },
+              ]
+            }
+          />
+        </View>
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#9C9890",
+              "fontFamily": "JetBrainsMono_500Medium",
+              "fontSize": 8.5,
+              "letterSpacing": 0.55,
+              "marginTop": 4,
+              "textTransform": "uppercase",
+            }
+          }
+        >
+          M
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "height": "100%",
+            "justifyContent": "flex-end",
+          }
+        }
+        testID="weekly-bar-1"
+      >
+        <View
+          style={
+            {
+              "alignItems": "flex-end",
+              "flex": 1,
+              "flexDirection": "row",
+              "justifyContent": "flex-end",
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            pointerEvents="none"
+            style={
+              [
+                {
+                  "borderRadius": 4,
+                  "transformOrigin": "bottom",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#7CA56F",
+                  "borderColor": "transparent",
+                  "borderWidth": 0,
+                  "height": "56.666666666666664%",
+                  "opacity": 0.55,
+                },
+                {
+                  "transform": [
+                    {
+                      "scaleY": 0,
+                    },
+                  ],
+                },
+              ]
+            }
+          />
+        </View>
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#9C9890",
+              "fontFamily": "JetBrainsMono_500Medium",
+              "fontSize": 8.5,
+              "letterSpacing": 0.55,
+              "marginTop": 4,
+              "textTransform": "uppercase",
+            }
+          }
+        >
+          T
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "height": "100%",
+            "justifyContent": "flex-end",
+          }
+        }
+        testID="weekly-bar-2"
+      >
+        <View
+          style={
+            {
+              "alignItems": "flex-end",
+              "flex": 1,
+              "flexDirection": "row",
+              "justifyContent": "flex-end",
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            pointerEvents="none"
+            style={
+              [
+                {
+                  "borderRadius": 4,
+                  "transformOrigin": "bottom",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#7CA56F",
+                  "borderColor": "transparent",
+                  "borderWidth": 0,
+                  "height": "65.83333333333333%",
+                  "opacity": 0.55,
+                },
+                {
+                  "transform": [
+                    {
+                      "scaleY": 0,
+                    },
+                  ],
+                },
+              ]
+            }
+          />
+        </View>
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#9C9890",
+              "fontFamily": "JetBrainsMono_500Medium",
+              "fontSize": 8.5,
+              "letterSpacing": 0.55,
+              "marginTop": 4,
+              "textTransform": "uppercase",
+            }
+          }
+        >
+          W
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "height": "100%",
+            "justifyContent": "flex-end",
+          }
+        }
+        testID="weekly-bar-3"
+      >
+        <View
+          style={
+            {
+              "alignItems": "flex-end",
+              "flex": 1,
+              "flexDirection": "row",
+              "justifyContent": "flex-end",
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            pointerEvents="none"
+            style={
+              [
+                {
+                  "borderRadius": 4,
+                  "transformOrigin": "bottom",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#7CA56F",
+                  "borderColor": "transparent",
+                  "borderWidth": 0,
+                  "height": "45%",
+                  "opacity": 0.55,
+                },
+                {
+                  "transform": [
+                    {
+                      "scaleY": 0,
+                    },
+                  ],
+                },
+              ]
+            }
+          />
+        </View>
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#9C9890",
+              "fontFamily": "JetBrainsMono_500Medium",
+              "fontSize": 8.5,
+              "letterSpacing": 0.55,
+              "marginTop": 4,
+              "textTransform": "uppercase",
+            }
+          }
+        >
+          T
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "height": "100%",
+            "justifyContent": "flex-end",
+          }
+        }
+        testID="weekly-bar-4"
+      >
+        <View
+          style={
+            {
+              "alignItems": "flex-end",
+              "flex": 1,
+              "flexDirection": "row",
+              "justifyContent": "flex-end",
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            pointerEvents="none"
+            style={
+              [
+                {
+                  "borderRadius": 4,
+                  "transformOrigin": "bottom",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#7CA56F",
+                  "borderColor": "transparent",
+                  "borderWidth": 0,
+                  "height": "68.33333333333333%",
+                  "opacity": 1,
+                },
+                {
+                  "transform": [
+                    {
+                      "scaleY": 0,
+                    },
+                  ],
+                },
+              ]
+            }
+          />
+        </View>
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#9C9890",
+              "fontFamily": "JetBrainsMono_500Medium",
+              "fontSize": 8.5,
+              "letterSpacing": 0.55,
+              "marginTop": 4,
+              "textTransform": "uppercase",
+            }
+          }
+        >
+          F
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "height": "100%",
+            "justifyContent": "flex-end",
+          }
+        }
+        testID="weekly-bar-5"
+      >
+        <View
+          style={
+            {
+              "alignItems": "flex-end",
+              "flex": 1,
+              "flexDirection": "row",
+              "justifyContent": "flex-end",
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            pointerEvents="none"
+            style={
+              [
+                {
+                  "borderRadius": 4,
+                  "transformOrigin": "bottom",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#7CA56F",
+                  "borderColor": "transparent",
+                  "borderWidth": 0,
+                  "height": "75.83333333333333%",
+                  "opacity": 1,
+                },
+                {
+                  "transform": [
+                    {
+                      "scaleY": 0,
+                    },
+                  ],
+                },
+              ]
+            }
+          />
+        </View>
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#9C9890",
+              "fontFamily": "JetBrainsMono_500Medium",
+              "fontSize": 8.5,
+              "letterSpacing": 0.55,
+              "marginTop": 4,
+              "textTransform": "uppercase",
+            }
+          }
+        >
+          S
+        </Text>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "height": "100%",
+            "justifyContent": "flex-end",
+          }
+        }
+        testID="weekly-bar-6"
+      >
+        <View
+          style={
+            {
+              "alignItems": "flex-end",
+              "flex": 1,
+              "flexDirection": "row",
+              "justifyContent": "flex-end",
+              "width": "100%",
+            }
+          }
+        >
+          <View
+            pointerEvents="none"
+            style={
+              [
+                {
+                  "borderRadius": 4,
+                  "transformOrigin": "bottom",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#7CA56F",
+                  "borderColor": "#7CA56F",
+                  "borderWidth": 0.5,
+                  "height": "17.833333333333336%",
+                  "opacity": 0.55,
+                },
+                {
+                  "transform": [
+                    {
+                      "scaleY": 0,
+                    },
+                  ],
+                },
+              ]
+            }
+          />
+        </View>
+        <Text
+          allowFontScaling={false}
+          style={
+            {
+              "color": "#F5F1EA",
+              "fontFamily": "JetBrainsMono_500Medium",
+              "fontSize": 8.5,
+              "letterSpacing": 0.55,
+              "marginTop": 4,
+              "textTransform": "uppercase",
+            }
+          }
+        >
+          S
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;

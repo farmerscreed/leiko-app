@@ -1,0 +1,48 @@
+// VitalDetailRouter — Sprint 8.5.
+//
+// Single screen registered in the SelfBuyer navigation stack at the
+// `VitalDetail` route. Reads `route.params.vital` and renders the right
+// per-vital detail screen. Each detail screen is a presentational
+// component that receives `onBack` (and `onSelectReading` for BPDetail);
+// the router owns the navigation hooks so the screens stay testable
+// without a NavigationContainer.
+//
+// Replaces the Sprint 8 `VitalDetailPlaceholder` — the placeholder
+// remains in the codebase under `screens/Placeholders/` for reference
+// but is no longer registered in the navigator.
+
+import { useCallback } from 'react';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { BPDetail } from './BPDetail';
+import { HRDetail } from './HRDetail';
+import { SpO2Detail } from './SpO2Detail';
+import { SleepDetail } from './SleepDetail';
+import { ActivityDetail } from './ActivityDetail';
+import type { SelfBuyerStackParamList } from '../../navigation/types';
+
+export function VitalDetailRouter() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<SelfBuyerStackParamList>>();
+  const route = useRoute<RouteProp<SelfBuyerStackParamList, 'VitalDetail'>>();
+  const onBack = useCallback(() => navigation.goBack(), [navigation]);
+  const onSelectReading = useCallback(
+    (readingLocalId: string) => {
+      navigation.navigate('ReadingDetail', { readingLocalId });
+    },
+    [navigation],
+  );
+
+  switch (route.params.vital) {
+    case 'bp':
+      return <BPDetail onBack={onBack} onSelectReading={onSelectReading} />;
+    case 'hr':
+      return <HRDetail onBack={onBack} />;
+    case 'spo2':
+      return <SpO2Detail onBack={onBack} />;
+    case 'sleep':
+      return <SleepDetail onBack={onBack} />;
+    case 'activity':
+      return <ActivityDetail onBack={onBack} />;
+  }
+}

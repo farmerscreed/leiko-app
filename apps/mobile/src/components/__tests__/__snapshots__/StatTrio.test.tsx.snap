@@ -1,0 +1,212 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`StatTrio matches snapshot 1`] = `
+<View
+  style={
+    [
+      {
+        "flexDirection": "row",
+        "paddingHorizontal": 20,
+      },
+      {
+        "gap": 12,
+      },
+      undefined,
+    ]
+  }
+  testID="trio"
+>
+  <View
+    accessibilityLabel="Resting: 62 bpm avg"
+    accessibilityRole="text"
+    style={
+      [
+        {
+          "borderWidth": 0.5,
+          "flex": 1,
+        },
+        {
+          "backgroundColor": "#120C07",
+          "borderColor": "rgba(255,255,255,0.06)",
+          "borderRadius": 14,
+          "padding": 12,
+        },
+      ]
+    }
+    testID="trio-0"
+  >
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "Inter_500Medium",
+          "fontSize": 11,
+          "letterSpacing": 0.55,
+          "lineHeight": 14,
+          "marginBottom": 4,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Resting
+    </Text>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#F5F1EA",
+          "fontFamily": "InstrumentSerif_400Regular",
+          "fontSize": 22,
+          "lineHeight": 28,
+        }
+      }
+    >
+      62
+    </Text>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 12,
+          "letterSpacing": 0.4,
+          "lineHeight": 16,
+          "marginTop": 4,
+        }
+      }
+    >
+      bpm avg
+    </Text>
+  </View>
+  <View
+    accessibilityLabel="Peak: 142 yesterday run"
+    accessibilityRole="text"
+    style={
+      [
+        {
+          "borderWidth": 0.5,
+          "flex": 1,
+        },
+        {
+          "backgroundColor": "#120C07",
+          "borderColor": "rgba(255,255,255,0.06)",
+          "borderRadius": 14,
+          "padding": 12,
+        },
+      ]
+    }
+    testID="trio-1"
+  >
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "Inter_500Medium",
+          "fontSize": 11,
+          "letterSpacing": 0.55,
+          "lineHeight": 14,
+          "marginBottom": 4,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Peak
+    </Text>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#F5F1EA",
+          "fontFamily": "InstrumentSerif_400Regular",
+          "fontSize": 22,
+          "lineHeight": 28,
+        }
+      }
+    >
+      142
+    </Text>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 12,
+          "letterSpacing": 0.4,
+          "lineHeight": 16,
+          "marginTop": 4,
+        }
+      }
+    >
+      yesterday run
+    </Text>
+  </View>
+  <View
+    accessibilityLabel="Variability: 38 ms · steady"
+    accessibilityRole="text"
+    style={
+      [
+        {
+          "borderWidth": 0.5,
+          "flex": 1,
+        },
+        {
+          "backgroundColor": "#120C07",
+          "borderColor": "rgba(255,255,255,0.06)",
+          "borderRadius": 14,
+          "padding": 12,
+        },
+      ]
+    }
+    testID="trio-2"
+  >
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "Inter_500Medium",
+          "fontSize": 11,
+          "letterSpacing": 0.55,
+          "lineHeight": 14,
+          "marginBottom": 4,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Variability
+    </Text>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#F5F1EA",
+          "fontFamily": "InstrumentSerif_400Regular",
+          "fontSize": 22,
+          "lineHeight": 28,
+        }
+      }
+    >
+      38
+    </Text>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 12,
+          "letterSpacing": 0.4,
+          "lineHeight": 16,
+          "marginTop": 4,
+        }
+      }
+    >
+      ms · steady
+    </Text>
+  </View>
+</View>
+`;

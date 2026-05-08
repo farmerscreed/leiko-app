@@ -1,0 +1,152 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`VitalInsightCard matches snapshot 1`] = `
+<View
+  accessibilityLabel="Leiko about your sleep: You spent more time in deep sleep tonight than the seven-night average."
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "borderWidth": 0.5,
+      },
+      {
+        "backgroundColor": "#120C07",
+        "borderColor": "rgba(255,255,255,0.06)",
+        "borderRadius": 22,
+        "marginHorizontal": 20,
+        "padding": 16,
+      },
+      undefined,
+    ]
+  }
+  testID="insight"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "marginBottom": 10,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 99,
+            "height": 18,
+            "justifyContent": "center",
+            "width": 18,
+          },
+          {
+            "backgroundColor": "#7C7AAB26",
+          },
+        ]
+      }
+    >
+      <RNSVGSvgView
+        align="xMidYMid"
+        bbHeight={11}
+        bbWidth={11}
+        className="sparkle-fill__svg-icon-phosphor"
+        color="#7C7AAB"
+        fill="currentColor"
+        focusable={false}
+        height={11}
+        meetOrSlice={0}
+        minX={0}
+        minY={0}
+        style={
+          [
+            {
+              "backgroundColor": "transparent",
+              "borderWidth": 0,
+            },
+            [
+              undefined,
+              undefined,
+              {},
+            ],
+            {
+              "flex": 0,
+              "height": 11,
+              "width": 11,
+            },
+          ]
+        }
+        testID="phosphor-react-native-sparkle-fill"
+        vbHeight={256}
+        vbWidth={256}
+        width={11}
+      >
+        <RNSVGGroup
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          propList={
+            [
+              "fill",
+            ]
+          }
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4286347947,
+                "type": 0,
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+          >
+            <RNSVGPath
+              d="M208 144a15.78 15.78 0 0 1-10.42 14.94L146 178l-19 51.62a15.92 15.92 0 0 1-29.88 0L78 178l-51.62-19a15.92 15.92 0 0 1 0-29.88L78 110l19-51.62a15.92 15.92 0 0 1 29.88 0L146 110l51.62 19A15.78 15.78 0 0 1 208 144m-56-96h16v16a8 8 0 0 0 16 0V48h16a8 8 0 0 0 0-16h-16V16a8 8 0 0 0-16 0v16h-16a8 8 0 0 0 0 16m88 32h-8v-8a8 8 0 0 0-16 0v8h-8a8 8 0 0 0 0 16h8v8a8 8 0 0 0 16 0v-8h8a8 8 0 0 0 0-16"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGGroup>
+        </RNSVGGroup>
+      </RNSVGSvgView>
+    </View>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#7C7AAB",
+          "fontFamily": "Inter_500Medium",
+          "fontSize": 11,
+          "letterSpacing": 0.55,
+          "lineHeight": 14,
+          "marginLeft": 8,
+          "textTransform": "uppercase",
+        }
+      }
+    >
+      Leiko · about your sleep
+    </Text>
+  </View>
+  <Text
+    style={
+      {
+        "color": "#F5F1EA",
+        "fontFamily": "Inter_400Regular",
+        "fontSize": 15,
+        "lineHeight": 22,
+      }
+    }
+  >
+    You spent more time in deep sleep tonight than the seven-night average.
+  </Text>
+</View>
+`;

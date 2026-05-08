@@ -1,0 +1,521 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`HRZonesCard matches snapshot in dark mode 1`] = `
+<View
+  accessibilityRole="summary"
+  style={
+    [
+      {
+        "borderWidth": 0.5,
+        "marginHorizontal": 20,
+      },
+      {
+        "backgroundColor": "#120C07",
+        "borderColor": "rgba(255,255,255,0.06)",
+        "borderRadius": 22,
+        "padding": 16,
+      },
+      undefined,
+    ]
+  }
+  testID="zones"
+>
+  <Text
+    allowFontScaling={false}
+    style={
+      {
+        "color": "#9C9890",
+        "fontFamily": "Inter_500Medium",
+        "fontSize": 11,
+        "letterSpacing": 0.55,
+        "lineHeight": 14,
+        "marginBottom": 12,
+        "textTransform": "uppercase",
+      }
+    }
+    testID="zones-label"
+  >
+    Time in zones · today
+  </Text>
+  <View
+    accessibilityLabel="Resting zone, < 60 bpm, 18 percent"
+    accessibilityRole="text"
+    style={
+      [
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 12,
+        },
+        {
+          "borderBottomColor": "rgba(255,255,255,0.06)",
+          "borderBottomWidth": 0.5,
+          "paddingVertical": 8,
+        },
+      ]
+    }
+    testID="zones-row-0"
+  >
+    <View
+      style={
+        {
+          "width": 70,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "Inter_400Regular",
+            "fontSize": 15,
+            "lineHeight": 22,
+          }
+        }
+      >
+        Resting
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 9,
+            "letterSpacing": 0.5,
+            "marginTop": 2,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        &lt; 60
+         bpm
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flex": 1,
+        }
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "overflow": "hidden",
+              "width": "100%",
+            },
+            {
+              "backgroundColor": "rgba(255,255,255,0.04)",
+              "borderRadius": 99,
+              "height": 8,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "height": "100%",
+                "transformOrigin": "left center",
+                "width": "100%",
+              },
+              {
+                "backgroundColor": "#D6745A",
+                "borderRadius": 99,
+                "opacity": 0.35,
+              },
+              {
+                "transform": [
+                  {
+                    "scaleX": 0,
+                  },
+                ],
+              },
+            ]
+          }
+        />
+      </View>
+    </View>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 12,
+          "lineHeight": 16,
+          "textAlign": "right",
+          "width": 36,
+        }
+      }
+    >
+      18
+      %
+    </Text>
+  </View>
+  <View
+    accessibilityLabel="Calm zone, 60–80 bpm, 56 percent"
+    accessibilityRole="text"
+    style={
+      [
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 12,
+        },
+        {
+          "borderBottomColor": "rgba(255,255,255,0.06)",
+          "borderBottomWidth": 0.5,
+          "paddingVertical": 8,
+        },
+      ]
+    }
+    testID="zones-row-1"
+  >
+    <View
+      style={
+        {
+          "width": 70,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "Inter_400Regular",
+            "fontSize": 15,
+            "lineHeight": 22,
+          }
+        }
+      >
+        Calm
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 9,
+            "letterSpacing": 0.5,
+            "marginTop": 2,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        60–80
+         bpm
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flex": 1,
+        }
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "overflow": "hidden",
+              "width": "100%",
+            },
+            {
+              "backgroundColor": "rgba(255,255,255,0.04)",
+              "borderRadius": 99,
+              "height": 8,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "height": "100%",
+                "transformOrigin": "left center",
+                "width": "100%",
+              },
+              {
+                "backgroundColor": "#D6745A",
+                "borderRadius": 99,
+                "opacity": 0.6,
+              },
+              {
+                "transform": [
+                  {
+                    "scaleX": 0,
+                  },
+                ],
+              },
+            ]
+          }
+        />
+      </View>
+    </View>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 12,
+          "lineHeight": 16,
+          "textAlign": "right",
+          "width": 36,
+        }
+      }
+    >
+      56
+      %
+    </Text>
+  </View>
+  <View
+    accessibilityLabel="Active zone, 80–110 bpm, 22 percent"
+    accessibilityRole="text"
+    style={
+      [
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 12,
+        },
+        {
+          "borderBottomColor": "rgba(255,255,255,0.06)",
+          "borderBottomWidth": 0.5,
+          "paddingVertical": 8,
+        },
+      ]
+    }
+    testID="zones-row-2"
+  >
+    <View
+      style={
+        {
+          "width": 70,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "Inter_400Regular",
+            "fontSize": 15,
+            "lineHeight": 22,
+          }
+        }
+      >
+        Active
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 9,
+            "letterSpacing": 0.5,
+            "marginTop": 2,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        80–110
+         bpm
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flex": 1,
+        }
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "overflow": "hidden",
+              "width": "100%",
+            },
+            {
+              "backgroundColor": "rgba(255,255,255,0.04)",
+              "borderRadius": 99,
+              "height": 8,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "height": "100%",
+                "transformOrigin": "left center",
+                "width": "100%",
+              },
+              {
+                "backgroundColor": "#D6745A",
+                "borderRadius": 99,
+                "opacity": 0.8,
+              },
+              {
+                "transform": [
+                  {
+                    "scaleX": 0,
+                  },
+                ],
+              },
+            ]
+          }
+        />
+      </View>
+    </View>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 12,
+          "lineHeight": 16,
+          "textAlign": "right",
+          "width": 36,
+        }
+      }
+    >
+      22
+      %
+    </Text>
+  </View>
+  <View
+    accessibilityLabel="Vigorous zone, 110+ bpm, 4 percent"
+    accessibilityRole="text"
+    style={
+      [
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "gap": 12,
+        },
+        {
+          "borderBottomColor": "rgba(255,255,255,0.06)",
+          "borderBottomWidth": 0,
+          "paddingVertical": 8,
+        },
+      ]
+    }
+    testID="zones-row-3"
+  >
+    <View
+      style={
+        {
+          "width": 70,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "Inter_400Regular",
+            "fontSize": 15,
+            "lineHeight": 22,
+          }
+        }
+      >
+        Vigorous
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 9,
+            "letterSpacing": 0.5,
+            "marginTop": 2,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        110+
+         bpm
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flex": 1,
+        }
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "overflow": "hidden",
+              "width": "100%",
+            },
+            {
+              "backgroundColor": "rgba(255,255,255,0.04)",
+              "borderRadius": 99,
+              "height": 8,
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "height": "100%",
+                "transformOrigin": "left center",
+                "width": "100%",
+              },
+              {
+                "backgroundColor": "#D6745A",
+                "borderRadius": 99,
+                "opacity": 1,
+              },
+              {
+                "transform": [
+                  {
+                    "scaleX": 0,
+                  },
+                ],
+              },
+            ]
+          }
+        />
+      </View>
+    </View>
+    <Text
+      allowFontScaling={false}
+      style={
+        {
+          "color": "#9C9890",
+          "fontFamily": "JetBrainsMono_500Medium",
+          "fontSize": 12,
+          "lineHeight": 16,
+          "textAlign": "right",
+          "width": 36,
+        }
+      }
+    >
+      4
+      %
+    </Text>
+  </View>
+</View>
+`;

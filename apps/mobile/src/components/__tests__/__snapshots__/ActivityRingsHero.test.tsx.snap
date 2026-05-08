@@ -1,0 +1,781 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ActivityRingsHero — snapshot matches snapshot in dark mode 1`] = `
+<View
+  accessibilityLabel="Today, 6,250 steps. 100% of 6,000."
+  accessibilityRole="text"
+  style={
+    [
+      {
+        "paddingBottom": 22,
+        "paddingHorizontal": 20,
+        "paddingTop": 12,
+        "position": "relative",
+      },
+      undefined,
+    ]
+  }
+  testID="hero"
+>
+  <View
+    pointerEvents="none"
+    style={
+      [
+        {
+          "borderRadius": 999,
+          "height": 220,
+          "left": "50%",
+          "position": "absolute",
+          "top": 0,
+          "transform": [
+            {
+              "translateX": -140,
+            },
+          ],
+          "width": 280,
+        },
+        {
+          "backgroundColor": "#7CA56F",
+          "opacity": 0.18,
+        },
+      ]
+    }
+  />
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "position": "relative",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 120,
+          "position": "relative",
+          "width": 120,
+        }
+      }
+      testID="hero-rings"
+    >
+      <View
+        style={
+          [
+            {
+              "alignItems": "center",
+              "justifyContent": "center",
+              "position": "absolute",
+            },
+            {
+              "height": 120,
+              "width": 120,
+            },
+          ]
+        }
+      >
+        <View
+          accessibilityRole="progressbar"
+          accessibilityValue={
+            {
+              "max": 1,
+              "min": 0,
+              "now": 1,
+            }
+          }
+          style={
+            [
+              {
+                "height": 120,
+                "opacity": 1,
+                "width": 120,
+              },
+              {
+                "opacity": 1,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+              },
+              undefined,
+            ]
+          }
+          testID="hero-ring-steps"
+        >
+          <RNSVGSvgView
+            bbHeight={120}
+            bbWidth={120}
+            focusable={false}
+            height={120}
+            style={
+              [
+                {
+                  "backgroundColor": "transparent",
+                  "borderWidth": 0,
+                },
+                {
+                  "flex": 0,
+                  "height": 120,
+                  "width": 120,
+                },
+              ]
+            }
+            width={120}
+          >
+            <RNSVGGroup
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            >
+              <RNSVGCircle
+                cx={60}
+                cy={60}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeOpacity",
+                  ]
+                }
+                r={57}
+                stroke={
+                  {
+                    "payload": 4286358895,
+                    "type": 0,
+                  }
+                }
+                strokeOpacity={0.12}
+                strokeWidth={6}
+              />
+              <RNSVGCircle
+                cx={60}
+                cy={60}
+                fill={null}
+                matrix={
+                  [
+                    6.123233995736766e-17,
+                    -1,
+                    1,
+                    6.123233995736766e-17,
+                    -7.105427357601002e-15,
+                    120,
+                  ]
+                }
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeDasharray",
+                    "strokeDashoffset",
+                    "strokeLinecap",
+                  ]
+                }
+                r={57}
+                stroke={
+                  {
+                    "payload": 4286358895,
+                    "type": 0,
+                  }
+                }
+                strokeDasharray={
+                  [
+                    358.1415625092364,
+                    358.1415625092364,
+                  ]
+                }
+                strokeDashoffset={null}
+                strokeLinecap={1}
+                strokeWidth={6}
+              />
+              <RNSVGCircle
+                cx={60}
+                cy={60}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                  ]
+                }
+                r={53}
+                stroke={
+                  {
+                    "payload": 268435455,
+                    "type": 0,
+                  }
+                }
+                strokeWidth={1}
+              />
+            </RNSVGGroup>
+          </RNSVGSvgView>
+        </View>
+      </View>
+      <View
+        style={
+          [
+            {
+              "alignItems": "center",
+              "justifyContent": "center",
+              "position": "absolute",
+            },
+            {
+              "height": 96,
+              "left": 12,
+              "top": 12,
+              "width": 96,
+            },
+          ]
+        }
+      >
+        <View
+          accessibilityRole="progressbar"
+          accessibilityValue={
+            {
+              "max": 1,
+              "min": 0,
+              "now": 0.7,
+            }
+          }
+          style={
+            [
+              {
+                "height": 96,
+                "opacity": 1,
+                "width": 96,
+              },
+              {
+                "opacity": 1,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+              },
+              {
+                "opacity": 0.85,
+              },
+            ]
+          }
+          testID="hero-ring-calories"
+        >
+          <RNSVGSvgView
+            bbHeight={96}
+            bbWidth={96}
+            focusable={false}
+            height={96}
+            style={
+              [
+                {
+                  "backgroundColor": "transparent",
+                  "borderWidth": 0,
+                },
+                {
+                  "flex": 0,
+                  "height": 96,
+                  "width": 96,
+                },
+              ]
+            }
+            width={96}
+          >
+            <RNSVGGroup
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            >
+              <RNSVGCircle
+                cx={48}
+                cy={48}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeOpacity",
+                  ]
+                }
+                r={45.5}
+                stroke={
+                  {
+                    "payload": 4286358895,
+                    "type": 0,
+                  }
+                }
+                strokeOpacity={0.12}
+                strokeWidth={5}
+              />
+              <RNSVGCircle
+                cx={48}
+                cy={48}
+                fill={null}
+                matrix={
+                  [
+                    6.123233995736766e-17,
+                    -1,
+                    1,
+                    6.123233995736766e-17,
+                    0,
+                    96,
+                  ]
+                }
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeDasharray",
+                    "strokeDashoffset",
+                    "strokeLinecap",
+                  ]
+                }
+                r={45.5}
+                stroke={
+                  {
+                    "payload": 4286358895,
+                    "type": 0,
+                  }
+                }
+                strokeDasharray={
+                  [
+                    285.88493147667117,
+                    285.88493147667117,
+                  ]
+                }
+                strokeDashoffset={85.76547944300137}
+                strokeLinecap={1}
+                strokeWidth={5}
+              />
+              <RNSVGCircle
+                cx={48}
+                cy={48}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                  ]
+                }
+                r={42}
+                stroke={
+                  {
+                    "payload": 268435455,
+                    "type": 0,
+                  }
+                }
+                strokeWidth={1}
+              />
+            </RNSVGGroup>
+          </RNSVGSvgView>
+        </View>
+      </View>
+      <View
+        style={
+          [
+            {
+              "alignItems": "center",
+              "justifyContent": "center",
+              "position": "absolute",
+            },
+            {
+              "height": 72,
+              "left": 24,
+              "top": 24,
+              "width": 72,
+            },
+          ]
+        }
+      >
+        <View
+          accessibilityRole="progressbar"
+          accessibilityValue={
+            {
+              "max": 1,
+              "min": 0,
+              "now": 0.9333333333333333,
+            }
+          }
+          style={
+            [
+              {
+                "height": 72,
+                "opacity": 1,
+                "width": 72,
+              },
+              {
+                "opacity": 1,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
+              },
+              {
+                "opacity": 0.7,
+              },
+            ]
+          }
+          testID="hero-ring-move"
+        >
+          <RNSVGSvgView
+            bbHeight={72}
+            bbWidth={72}
+            focusable={false}
+            height={72}
+            style={
+              [
+                {
+                  "backgroundColor": "transparent",
+                  "borderWidth": 0,
+                },
+                {
+                  "flex": 0,
+                  "height": 72,
+                  "width": 72,
+                },
+              ]
+            }
+            width={72}
+          >
+            <RNSVGGroup
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            >
+              <RNSVGCircle
+                cx={36}
+                cy={36}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeOpacity",
+                  ]
+                }
+                r={34}
+                stroke={
+                  {
+                    "payload": 4286358895,
+                    "type": 0,
+                  }
+                }
+                strokeOpacity={0.12}
+                strokeWidth={4}
+              />
+              <RNSVGCircle
+                cx={36}
+                cy={36}
+                fill={null}
+                matrix={
+                  [
+                    6.123233995736766e-17,
+                    -1,
+                    1,
+                    6.123233995736766e-17,
+                    0,
+                    72,
+                  ]
+                }
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                    "strokeDasharray",
+                    "strokeDashoffset",
+                    "strokeLinecap",
+                  ]
+                }
+                r={34}
+                stroke={
+                  {
+                    "payload": 4286358895,
+                    "type": 0,
+                  }
+                }
+                strokeDasharray={
+                  [
+                    213.62830044410595,
+                    213.62830044410595,
+                  ]
+                }
+                strokeDashoffset={14.241886696273726}
+                strokeLinecap={1}
+                strokeWidth={4}
+              />
+              <RNSVGCircle
+                cx={36}
+                cy={36}
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                    "stroke",
+                    "strokeWidth",
+                  ]
+                }
+                r={31}
+                stroke={
+                  {
+                    "payload": 268435455,
+                    "type": 0,
+                  }
+                }
+                strokeWidth={1}
+              />
+            </RNSVGGroup>
+          </RNSVGSvgView>
+        </View>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "flex": 1,
+          "marginLeft": 16,
+          "minWidth": 0,
+        }
+      }
+    >
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 11,
+            "letterSpacing": 0.55,
+            "lineHeight": 14,
+            "marginBottom": 4,
+            "textTransform": "uppercase",
+          }
+        }
+        testID="hero-eyebrow"
+      >
+        Today
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 56,
+            "letterSpacing": -0.5,
+            "lineHeight": 60,
+          }
+        }
+        testID="hero-steps"
+      >
+        6,250
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#7CA56F",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 12,
+            "letterSpacing": 0.5,
+            "lineHeight": 16,
+            "marginTop": 4,
+            "textTransform": "uppercase",
+          }
+        }
+        testID="hero-sub"
+      >
+        steps · 100% of 6,000
+      </Text>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "gap": 10,
+        "justifyContent": "space-between",
+        "marginTop": 16,
+      }
+    }
+    testID="hero-legend"
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+        }
+      }
+      testID="hero-legend-steps"
+    >
+      <View
+        style={
+          [
+            {
+              "borderRadius": 99,
+              "height": 8,
+              "width": 8,
+            },
+            {
+              "backgroundColor": "#7CA56F",
+            },
+          ]
+        }
+      />
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 9,
+            "letterSpacing": 0.55,
+            "marginLeft": 6,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Steps
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "marginLeft": 6,
+          }
+        }
+        testID="hero-legend-steps-value"
+      >
+        6,250
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+        }
+      }
+      testID="hero-legend-calories"
+    >
+      <View
+        style={
+          [
+            {
+              "borderRadius": 99,
+              "height": 8,
+              "width": 8,
+            },
+            {
+              "backgroundColor": "#E8C063",
+            },
+          ]
+        }
+      />
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 9,
+            "letterSpacing": 0.55,
+            "marginLeft": 6,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Calories
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "marginLeft": 6,
+          }
+        }
+        testID="hero-legend-calories-value"
+      >
+        420
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+        }
+      }
+      testID="hero-legend-move"
+    >
+      <View
+        style={
+          [
+            {
+              "borderRadius": 99,
+              "height": 8,
+              "width": 8,
+            },
+            {
+              "backgroundColor": "#E89063",
+            },
+          ]
+        }
+      />
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#9C9890",
+            "fontFamily": "Inter_500Medium",
+            "fontSize": 9,
+            "letterSpacing": 0.55,
+            "marginLeft": 6,
+            "textTransform": "uppercase",
+          }
+        }
+      >
+        Move
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#F5F1EA",
+            "fontFamily": "InstrumentSerif_400Regular",
+            "fontSize": 14,
+            "marginLeft": 6,
+          }
+        }
+        testID="hero-legend-move-value"
+      >
+        28m
+      </Text>
+    </View>
+  </View>
+</View>
+`;

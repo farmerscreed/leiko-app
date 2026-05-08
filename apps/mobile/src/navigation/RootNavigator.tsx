@@ -36,7 +36,7 @@ import { CaregiverHome } from '../screens/Home/CaregiverHome';
 import { ParentReadingsList } from '../screens/Home/ParentReadingsList';
 import { SelfBuyerHome } from '../screens/Home/SelfBuyerHome';
 import { SelfBuyerHomePlaceholder } from '../screens/Placeholders/SelfBuyerHomePlaceholder';
-import { VitalDetailPlaceholder } from '../screens/Placeholders/VitalDetailPlaceholder';
+import { VitalDetailRouter } from '../screens/VitalDetail/VitalDetailRouter';
 import { PairingScreen } from '../screens/Pairing/PairingScreen';
 import { SettingsScreen } from '../screens/Settings/SettingsScreen';
 import { TakeReadingScreen } from '../screens/TakeReading/TakeReadingScreen';
@@ -169,7 +169,7 @@ function SelfBuyerHomeNavigator() {
       <SelfBuyerStack.Screen name="Settings" component={SettingsScreen} />
       <SelfBuyerStack.Screen name="TakeReading" component={TakeReadingScreen} />
       <SelfBuyerStack.Screen name="ReadingDetail" component={ReadingDetailScreen} />
-      <SelfBuyerStack.Screen name="VitalDetail" component={VitalDetailPlaceholder} />
+      <SelfBuyerStack.Screen name="VitalDetail" component={VitalDetailRouter} />
     </SelfBuyerStack.Navigator>
   );
 }

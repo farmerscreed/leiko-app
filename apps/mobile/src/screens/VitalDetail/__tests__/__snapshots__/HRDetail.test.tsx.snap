@@ -1,0 +1,2278 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark mode 1`] = `
+<RNCSafeAreaProvider
+  onInsetsChange={[Function]}
+  style={
+    [
+      {
+        "flex": 1,
+      },
+      undefined,
+    ]
+  }
+>
+  <RNCSafeAreaView
+    edges={
+      {
+        "bottom": "additive",
+        "left": "off",
+        "right": "off",
+        "top": "additive",
+      }
+    }
+    style={
+      [
+        {
+          "flex": 1,
+        },
+        {
+          "backgroundColor": "#0A0908",
+        },
+        undefined,
+      ]
+    }
+    testID="hr-detail"
+  >
+    <View
+      pointerEvents="none"
+      style={
+        [
+          {
+            "height": 360,
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "backgroundColor": "#D6745A",
+            "opacity": 0.08,
+          },
+        ]
+      }
+    />
+    <RCTScrollView
+      contentContainerStyle={
+        [
+          {
+            "flexGrow": 1,
+          },
+          {
+            "paddingBottom": 72,
+          },
+        ]
+      }
+      showsVerticalScrollIndicator={false}
+    >
+      <View>
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "paddingBottom": 4,
+                "paddingHorizontal": 16,
+                "paddingTop": 4,
+              },
+              undefined,
+            ]
+          }
+          testID="hr-detail-header"
+        >
+          <View
+            accessibilityLabel="Back"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            hitSlop={8}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 99,
+                  "borderWidth": 0.5,
+                  "height": 38,
+                  "justifyContent": "center",
+                  "width": 38,
+                },
+                {
+                  "backgroundColor": "#120C07",
+                  "borderColor": "rgba(255,255,255,0.06)",
+                  "opacity": 1,
+                },
+              ]
+            }
+            testID="hr-detail-header-back"
+          >
+            <RNSVGSvgView
+              align="xMidYMid"
+              bbHeight={14}
+              bbWidth={14}
+              fill="none"
+              focusable={false}
+              height={14}
+              meetOrSlice={0}
+              minX={0}
+              minY={0}
+              style={
+                [
+                  {
+                    "backgroundColor": "transparent",
+                    "borderWidth": 0,
+                  },
+                  {
+                    "flex": 0,
+                    "height": 14,
+                    "width": 14,
+                  },
+                ]
+              }
+              vbHeight={24}
+              vbWidth={24}
+              width={14}
+            >
+              <RNSVGGroup
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                  ]
+                }
+              >
+                <RNSVGPath
+                  d="M15 6 L9 12 L15 18"
+                  fill={
+                    {
+                      "payload": 4278190080,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "stroke",
+                      "strokeWidth",
+                      "strokeLinecap",
+                      "strokeLinejoin",
+                    ]
+                  }
+                  stroke={
+                    {
+                      "payload": 4294308330,
+                      "type": 0,
+                    }
+                  }
+                  strokeLinecap={1}
+                  strokeLinejoin={1}
+                  strokeWidth={2}
+                />
+              </RNSVGGroup>
+            </RNSVGSvgView>
+          </View>
+          <Text
+            accessibilityLabel="Heart rate"
+            accessibilityRole="header"
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#D6745A",
+                "fontFamily": "Inter_500Medium",
+                "fontSize": 11,
+                "letterSpacing": 0.55,
+                "lineHeight": 14,
+                "textTransform": "uppercase",
+              }
+            }
+          >
+            HR
+          </Text>
+          <View
+            accessibilityLabel="More options"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": true,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            hitSlop={8}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 99,
+                  "borderWidth": 0.5,
+                  "height": 38,
+                  "justifyContent": "center",
+                  "width": 38,
+                },
+                {
+                  "backgroundColor": "#120C07",
+                  "borderColor": "rgba(255,255,255,0.06)",
+                  "opacity": 0.4,
+                },
+              ]
+            }
+            testID="hr-detail-header-menu"
+          >
+            <RNSVGSvgView
+              align="xMidYMid"
+              bbHeight={6}
+              bbWidth={22}
+              focusable={false}
+              height={6}
+              meetOrSlice={0}
+              minX={0}
+              minY={0}
+              style={
+                [
+                  {
+                    "backgroundColor": "transparent",
+                    "borderWidth": 0,
+                  },
+                  {
+                    "flex": 0,
+                    "height": 6,
+                    "width": 22,
+                  },
+                ]
+              }
+              vbHeight={6}
+              vbWidth={22}
+              width={22}
+            >
+              <RNSVGGroup
+                fill={
+                  {
+                    "payload": 4278190080,
+                    "type": 0,
+                  }
+                }
+              >
+                <RNSVGCircle
+                  cx={3}
+                  cy={3}
+                  fill={
+                    {
+                      "payload": 4288452752,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                  r={1.5}
+                />
+                <RNSVGCircle
+                  cx={11}
+                  cy={3}
+                  fill={
+                    {
+                      "payload": 4288452752,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                  r={1.5}
+                />
+                <RNSVGCircle
+                  cx={19}
+                  cy={3}
+                  fill={
+                    {
+                      "payload": 4288452752,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                  r={1.5}
+                />
+              </RNSVGGroup>
+            </RNSVGSvgView>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "marginTop": 8,
+            }
+          }
+        >
+          <View
+            accessibilityLabel="Now · resting. 64. bpm · within your range"
+            accessibilityRole="text"
+            style={
+              [
+                {
+                  "paddingBottom": 22,
+                  "paddingHorizontal": 20,
+                  "paddingTop": 12,
+                  "position": "relative",
+                },
+                undefined,
+              ]
+            }
+            testID="hr-detail-hero"
+          >
+            <View
+              pointerEvents="none"
+              style={
+                [
+                  {
+                    "borderRadius": 999,
+                    "height": 220,
+                    "left": "50%",
+                    "opacity": 0.18,
+                    "position": "absolute",
+                    "top": 0,
+                    "transform": [
+                      {
+                        "translateX": -140,
+                      },
+                    ],
+                    "width": 280,
+                  },
+                  {
+                    "backgroundColor": "#D6745A",
+                  },
+                  {
+                    "opacity": 0.55,
+                  },
+                ]
+              }
+            />
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "position": "relative",
+                }
+              }
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "height": 108,
+                    "justifyContent": "center",
+                    "width": 108,
+                  }
+                }
+              >
+                <View
+                  accessibilityRole="progressbar"
+                  accessibilityValue={
+                    {
+                      "max": 1,
+                      "min": 0,
+                      "now": 0.3,
+                    }
+                  }
+                  style={
+                    [
+                      {
+                        "height": 108,
+                        "opacity": 1,
+                        "width": 108,
+                      },
+                      {
+                        "opacity": 1,
+                        "transform": [
+                          {
+                            "scale": 1,
+                          },
+                        ],
+                      },
+                      undefined,
+                    ]
+                  }
+                  testID="hr-detail-hero-ring"
+                >
+                  <RNSVGSvgView
+                    bbHeight={108}
+                    bbWidth={108}
+                    focusable={false}
+                    height={108}
+                    style={
+                      [
+                        {
+                          "backgroundColor": "transparent",
+                          "borderWidth": 0,
+                        },
+                        {
+                          "flex": 0,
+                          "height": 108,
+                          "width": 108,
+                        },
+                      ]
+                    }
+                    width={108}
+                  >
+                    <RNSVGGroup
+                      fill={
+                        {
+                          "payload": 4278190080,
+                          "type": 0,
+                        }
+                      }
+                    >
+                      <RNSVGCircle
+                        cx={54}
+                        cy={54}
+                        fill={null}
+                        propList={
+                          [
+                            "fill",
+                            "stroke",
+                            "strokeWidth",
+                            "strokeOpacity",
+                          ]
+                        }
+                        r={51}
+                        stroke={
+                          {
+                            "payload": 4292244570,
+                            "type": 0,
+                          }
+                        }
+                        strokeOpacity={0.12}
+                        strokeWidth={6}
+                      />
+                      <RNSVGCircle
+                        cx={54}
+                        cy={54}
+                        fill={null}
+                        matrix={
+                          [
+                            6.123233995736766e-17,
+                            -1,
+                            1,
+                            6.123233995736766e-17,
+                            0,
+                            108,
+                          ]
+                        }
+                        propList={
+                          [
+                            "fill",
+                            "stroke",
+                            "strokeWidth",
+                            "strokeDasharray",
+                            "strokeDashoffset",
+                            "strokeLinecap",
+                          ]
+                        }
+                        r={51}
+                        stroke={
+                          {
+                            "payload": 4292244570,
+                            "type": 0,
+                          }
+                        }
+                        strokeDasharray={
+                          [
+                            320.4424506661589,
+                            320.4424506661589,
+                          ]
+                        }
+                        strokeDashoffset={224.30971546631122}
+                        strokeLinecap={1}
+                        strokeWidth={6}
+                      />
+                      <RNSVGCircle
+                        cx={54}
+                        cy={54}
+                        fill={null}
+                        propList={
+                          [
+                            "fill",
+                            "stroke",
+                            "strokeWidth",
+                          ]
+                        }
+                        r={47}
+                        stroke={
+                          {
+                            "payload": 268435455,
+                            "type": 0,
+                          }
+                        }
+                        strokeWidth={1}
+                      />
+                    </RNSVGGroup>
+                  </RNSVGSvgView>
+                </View>
+                <View
+                  pointerEvents="none"
+                  style={
+                    {
+                      "alignItems": "center",
+                      "justifyContent": "center",
+                      "position": "absolute",
+                    }
+                  }
+                >
+                  <RNSVGSvgView
+                    align="xMidYMid"
+                    bbHeight={28}
+                    bbWidth={28}
+                    className="heart-straight-duotone__svg-icon-phosphor"
+                    color="#D6745A"
+                    fill="currentColor"
+                    focusable={false}
+                    height={28}
+                    meetOrSlice={0}
+                    minX={0}
+                    minY={0}
+                    style={
+                      [
+                        {
+                          "backgroundColor": "transparent",
+                          "borderWidth": 0,
+                        },
+                        [
+                          undefined,
+                          undefined,
+                          {},
+                        ],
+                        {
+                          "flex": 0,
+                          "height": 28,
+                          "width": 28,
+                        },
+                      ]
+                    }
+                    testID="phosphor-react-native-heart-straight-duotone"
+                    vbHeight={256}
+                    vbWidth={256}
+                    width={28}
+                  >
+                    <RNSVGGroup
+                      fill={
+                        {
+                          "type": 2,
+                        }
+                      }
+                      propList={
+                        [
+                          "fill",
+                        ]
+                      }
+                    >
+                      <RNSVGPath
+                        d="M217.36 133.36 128 224l-89.36-90.64a50 50 0 0 1 70.72-70.72L128 80l18.64-17.36a50 50 0 1 1 70.72 70.72"
+                        fill={
+                          {
+                            "payload": 4292244570,
+                            "type": 0,
+                          }
+                        }
+                        opacity={0.4}
+                        propList={
+                          [
+                            "fill",
+                          ]
+                        }
+                      />
+                      <RNSVGPath
+                        d="M223 57a58.07 58.07 0 0 0-81.92-.1L128 69.05l-13.09-12.19A58 58 0 0 0 33 139l89.35 90.66a8 8 0 0 0 11.4 0L223 139a58 58 0 0 0 0-82m-11.35 70.76L128 212.6l-83.7-84.92a42 42 0 0 1 59.4-59.4l.2.2 18.65 17.35a8 8 0 0 0 10.9 0l18.65-17.35.2-.2a42 42 0 1 1 59.36 59.44Z"
+                        fill={
+                          {
+                            "payload": 4278190080,
+                            "type": 0,
+                          }
+                        }
+                      />
+                    </RNSVGGroup>
+                  </RNSVGSvgView>
+                </View>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                    "marginLeft": 16,
+                    "minWidth": 0,
+                  }
+                }
+              >
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#9C9890",
+                      "fontFamily": "Inter_500Medium",
+                      "fontSize": 11,
+                      "letterSpacing": 0.55,
+                      "lineHeight": 14,
+                      "marginBottom": 4,
+                      "textTransform": "uppercase",
+                    }
+                  }
+                  testID="hr-detail-hero-sub"
+                >
+                  Now · resting
+                </Text>
+                <View
+                  style={
+                    {
+                      "alignItems": "baseline",
+                      "flexDirection": "row",
+                      "flexWrap": "wrap",
+                    }
+                  }
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#F5F1EA",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 56,
+                        "letterSpacing": -0.5,
+                        "lineHeight": 60,
+                      }
+                    }
+                    testID="hr-detail-hero-primary"
+                  >
+                    64
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#9C9890",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.5,
+                      "lineHeight": 16,
+                      "marginTop": 4,
+                    }
+                  }
+                  testID="hr-detail-hero-range"
+                >
+                  bpm · within your range
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "marginTop": 8,
+              "paddingHorizontal": 20,
+            }
+          }
+        >
+          <View
+            accessibilityRole="tablist"
+            style={
+              [
+                {
+                  "borderWidth": 0.5,
+                  "flexDirection": "row",
+                  "gap": 4,
+                },
+                {
+                  "backgroundColor": "#120C07",
+                  "borderColor": "rgba(255,255,255,0.06)",
+                  "borderRadius": 14,
+                  "padding": 4,
+                },
+                undefined,
+              ]
+            }
+            testID="hr-detail-range"
+          >
+            <View
+              accessibilityLabel="7d range"
+              accessibilityRole="tab"
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": true,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                [
+                  {
+                    "flex": 1,
+                    "paddingHorizontal": 12,
+                    "paddingVertical": 9,
+                  },
+                  {
+                    "backgroundColor": "#1D140D",
+                    "borderRadius": 8,
+                    "opacity": 1,
+                  },
+                ]
+              }
+              testID="hr-detail-range-7d"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#F5F1EA",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 13,
+                    "letterSpacing": 0.4,
+                    "lineHeight": 16,
+                    "textAlign": "center",
+                  }
+                }
+              >
+                7d
+              </Text>
+            </View>
+            <View
+              accessibilityLabel="30d range"
+              accessibilityRole="tab"
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": false,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                [
+                  {
+                    "flex": 1,
+                    "paddingHorizontal": 12,
+                    "paddingVertical": 9,
+                  },
+                  {
+                    "backgroundColor": "transparent",
+                    "borderRadius": 8,
+                    "opacity": 1,
+                  },
+                ]
+              }
+              testID="hr-detail-range-30d"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#9C9890",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 13,
+                    "letterSpacing": 0.4,
+                    "lineHeight": 16,
+                    "textAlign": "center",
+                  }
+                }
+              >
+                30d
+              </Text>
+            </View>
+            <View
+              accessibilityLabel="90d range"
+              accessibilityRole="tab"
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": false,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                [
+                  {
+                    "flex": 1,
+                    "paddingHorizontal": 12,
+                    "paddingVertical": 9,
+                  },
+                  {
+                    "backgroundColor": "transparent",
+                    "borderRadius": 8,
+                    "opacity": 1,
+                  },
+                ]
+              }
+              testID="hr-detail-range-90d"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#9C9890",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 13,
+                    "letterSpacing": 0.4,
+                    "lineHeight": 16,
+                    "textAlign": "center",
+                  }
+                }
+              >
+                90d
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "gap": 16,
+              "marginTop": 16,
+            }
+          }
+        >
+          <View
+            style={
+              [
+                {
+                  "flexDirection": "row",
+                  "paddingHorizontal": 20,
+                },
+                {
+                  "gap": 12,
+                },
+                undefined,
+              ]
+            }
+            testID="hr-detail-stats"
+          >
+            <View
+              accessibilityLabel="Resting: 63 bpm avg"
+              accessibilityRole="text"
+              style={
+                [
+                  {
+                    "borderWidth": 0.5,
+                    "flex": 1,
+                  },
+                  {
+                    "backgroundColor": "#120C07",
+                    "borderColor": "rgba(255,255,255,0.06)",
+                    "borderRadius": 14,
+                    "padding": 12,
+                  },
+                ]
+              }
+              testID="hr-detail-stats-0"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#9C9890",
+                    "fontFamily": "Inter_500Medium",
+                    "fontSize": 11,
+                    "letterSpacing": 0.55,
+                    "lineHeight": 14,
+                    "marginBottom": 4,
+                    "textTransform": "uppercase",
+                  }
+                }
+              >
+                Resting
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#F5F1EA",
+                    "fontFamily": "InstrumentSerif_400Regular",
+                    "fontSize": 22,
+                    "lineHeight": 28,
+                  }
+                }
+              >
+                63
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#9C9890",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 12,
+                    "letterSpacing": 0.4,
+                    "lineHeight": 16,
+                    "marginTop": 4,
+                  }
+                }
+              >
+                bpm avg
+              </Text>
+            </View>
+            <View
+              accessibilityLabel="Peak: 78 today"
+              accessibilityRole="text"
+              style={
+                [
+                  {
+                    "borderWidth": 0.5,
+                    "flex": 1,
+                  },
+                  {
+                    "backgroundColor": "#120C07",
+                    "borderColor": "rgba(255,255,255,0.06)",
+                    "borderRadius": 14,
+                    "padding": 12,
+                  },
+                ]
+              }
+              testID="hr-detail-stats-1"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#9C9890",
+                    "fontFamily": "Inter_500Medium",
+                    "fontSize": 11,
+                    "letterSpacing": 0.55,
+                    "lineHeight": 14,
+                    "marginBottom": 4,
+                    "textTransform": "uppercase",
+                  }
+                }
+              >
+                Peak
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#F5F1EA",
+                    "fontFamily": "InstrumentSerif_400Regular",
+                    "fontSize": 22,
+                    "lineHeight": 28,
+                  }
+                }
+              >
+                78
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#9C9890",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 12,
+                    "letterSpacing": 0.4,
+                    "lineHeight": 16,
+                    "marginTop": 4,
+                  }
+                }
+              >
+                today
+              </Text>
+            </View>
+            <View
+              accessibilityLabel="Variability: — ms"
+              accessibilityRole="text"
+              style={
+                [
+                  {
+                    "borderWidth": 0.5,
+                    "flex": 1,
+                  },
+                  {
+                    "backgroundColor": "#120C07",
+                    "borderColor": "rgba(255,255,255,0.06)",
+                    "borderRadius": 14,
+                    "padding": 12,
+                  },
+                ]
+              }
+              testID="hr-detail-stats-2"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#9C9890",
+                    "fontFamily": "Inter_500Medium",
+                    "fontSize": 11,
+                    "letterSpacing": 0.55,
+                    "lineHeight": 14,
+                    "marginBottom": 4,
+                    "textTransform": "uppercase",
+                  }
+                }
+              >
+                Variability
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#F5F1EA",
+                    "fontFamily": "InstrumentSerif_400Regular",
+                    "fontSize": 22,
+                    "lineHeight": 28,
+                  }
+                }
+              >
+                —
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#9C9890",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 12,
+                    "letterSpacing": 0.4,
+                    "lineHeight": 16,
+                    "marginTop": 4,
+                  }
+                }
+              >
+                ms
+              </Text>
+            </View>
+          </View>
+          <View
+            accessibilityLabel="Today · resting HR trend, latest 64, peak 78, low 64"
+            style={
+              {
+                "marginHorizontal": 20,
+              }
+            }
+            testID="hr-detail-trend"
+          >
+            <View
+              style={
+                {
+                  "alignItems": "baseline",
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
+                  "marginBottom": 8,
+                }
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#9C9890",
+                    "fontFamily": "Inter_500Medium",
+                    "fontSize": 11,
+                    "letterSpacing": 0.55,
+                    "lineHeight": 14,
+                    "textTransform": "uppercase",
+                  }
+                }
+                testID="hr-detail-trend-caption"
+              >
+                Today · resting HR
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#9C9890",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 12,
+                    "letterSpacing": 0.4,
+                    "lineHeight": 16,
+                  }
+                }
+                testID="hr-detail-trend-subCaption"
+              >
+                60–95 band
+              </Text>
+            </View>
+            <RNSVGSvgView
+              align="xMidYMid"
+              bbHeight={170}
+              bbWidth="100%"
+              focusable={false}
+              height={170}
+              meetOrSlice={0}
+              minX={0}
+              minY={0}
+              style={
+                [
+                  {
+                    "backgroundColor": "transparent",
+                    "borderWidth": 0,
+                  },
+                  {
+                    "flex": 0,
+                    "height": 170,
+                    "width": "100%",
+                  },
+                ]
+              }
+              testID="hr-detail-trend-svg"
+              vbHeight={170}
+              vbWidth={320}
+              width="100%"
+            >
+              <RNSVGGroup
+                fill={
+                  {
+                    "payload": 4278190080,
+                    "type": 0,
+                  }
+                }
+              >
+                <RNSVGDefs>
+                  <RNSVGLinearGradient
+                    gradient={
+                      [
+                        0,
+                        1305900122,
+                        1,
+                        14054490,
+                      ]
+                    }
+                    gradientTransform={null}
+                    gradientUnits={0}
+                    name="hr-detail-trend-fill"
+                    x1="0"
+                    x2="0"
+                    y1="0"
+                    y2="1"
+                  />
+                </RNSVGDefs>
+                <RNSVGRect
+                  fill={
+                    {
+                      "payload": 4292244570,
+                      "type": 0,
+                    }
+                  }
+                  fillOpacity={0.08}
+                  height={126}
+                  propList={
+                    [
+                      "fill",
+                      "fillOpacity",
+                    ]
+                  }
+                  width={288}
+                  x={16}
+                  y={22}
+                />
+                <RNSVGLine
+                  fill={
+                    {
+                      "payload": 4278190080,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "stroke",
+                      "strokeOpacity",
+                      "strokeDasharray",
+                    ]
+                  }
+                  stroke={
+                    {
+                      "payload": 4294308330,
+                      "type": 0,
+                    }
+                  }
+                  strokeDasharray={
+                    [
+                      "2",
+                      "4",
+                    ]
+                  }
+                  strokeOpacity={0.04}
+                  x1={16}
+                  x2={304}
+                  y1={53.5}
+                  y2={53.5}
+                />
+                <RNSVGLine
+                  fill={
+                    {
+                      "payload": 4278190080,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "stroke",
+                      "strokeOpacity",
+                      "strokeDasharray",
+                    ]
+                  }
+                  stroke={
+                    {
+                      "payload": 4294308330,
+                      "type": 0,
+                    }
+                  }
+                  strokeDasharray={
+                    [
+                      "2",
+                      "4",
+                    ]
+                  }
+                  strokeOpacity={0.04}
+                  x1={16}
+                  x2={304}
+                  y1={85}
+                  y2={85}
+                />
+                <RNSVGLine
+                  fill={
+                    {
+                      "payload": 4278190080,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "stroke",
+                      "strokeOpacity",
+                      "strokeDasharray",
+                    ]
+                  }
+                  stroke={
+                    {
+                      "payload": 4294308330,
+                      "type": 0,
+                    }
+                  }
+                  strokeDasharray={
+                    [
+                      "2",
+                      "4",
+                    ]
+                  }
+                  strokeOpacity={0.04}
+                  x1={16}
+                  x2={304}
+                  y1={116.5}
+                  y2={116.5}
+                />
+                <RNSVGPath
+                  d="M 16 83.2 L 35.2 83.2 L 54.4 83.2 L 73.6 83.2 L 92.8 83.2 L 112 83.2 L 131.2 83.2 L 150.4 83.2 L 169.6 83.2 L 188.8 83.2 L 208 83.2 L 227.2 83.2 L 246.4 112 L 265.6 112 L 284.8 112 L 304 133.6 L 304 148 L 16 148 Z"
+                  fill={
+                    {
+                      "brushRef": "hr-detail-trend-fill",
+                      "type": 1,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                />
+                <RNSVGPath
+                  d="M16 83.2 35.2 83.2 54.4 83.2 73.6 83.2 92.8 83.2 112 83.2 131.2 83.2 150.4 83.2 169.6 83.2 188.8 83.2 208 83.2 227.2 83.2 246.4 112 265.6 112 284.8 112 304 133.6"
+                  fill={null}
+                  propList={
+                    [
+                      "fill",
+                      "stroke",
+                      "strokeWidth",
+                      "strokeDasharray",
+                      "strokeDashoffset",
+                      "strokeLinecap",
+                      "strokeLinejoin",
+                    ]
+                  }
+                  stroke={
+                    {
+                      "payload": 4292244570,
+                      "type": 0,
+                    }
+                  }
+                  strokeDasharray={
+                    [
+                      725,
+                      725,
+                    ]
+                  }
+                  strokeDashoffset={725}
+                  strokeLinecap={1}
+                  strokeLinejoin={1}
+                  strokeWidth={1.6}
+                  testID="hr-detail-trend-line"
+                />
+                <RNSVGCircle
+                  cx={16}
+                  cy={83.2}
+                  fill={
+                    {
+                      "payload": 4278847752,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                      "stroke",
+                      "strokeWidth",
+                    ]
+                  }
+                  r={3.5}
+                  stroke={
+                    {
+                      "payload": 4292244570,
+                      "type": 0,
+                    }
+                  }
+                  strokeWidth={1.5}
+                />
+                <RNSVGText
+                  content={null}
+                  dx={[]}
+                  dy={[]}
+                  fill={
+                    {
+                      "payload": 4294308330,
+                      "type": 0,
+                    }
+                  }
+                  font={
+                    {
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 9,
+                      "letterSpacing": 0.4,
+                      "textAnchor": "middle",
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                  rotate={[]}
+                  x={
+                    [
+                      16,
+                    ]
+                  }
+                  y={
+                    [
+                      75.2,
+                    ]
+                  }
+                >
+                  <RNSVGTSpan
+                    content="78"
+                    dx={[]}
+                    dy={[]}
+                    fill={
+                      {
+                        "payload": 4278190080,
+                        "type": 0,
+                      }
+                    }
+                    font={{}}
+                    rotate={[]}
+                    x={[]}
+                    y={[]}
+                  />
+                </RNSVGText>
+                <RNSVGCircle
+                  cx={304}
+                  cy={133.6}
+                  fill={
+                    {
+                      "payload": 4278847752,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                      "stroke",
+                      "strokeWidth",
+                    ]
+                  }
+                  r={3.5}
+                  stroke={
+                    {
+                      "payload": 4292244570,
+                      "type": 0,
+                    }
+                  }
+                  strokeWidth={1.5}
+                />
+                <RNSVGText
+                  content={null}
+                  dx={[]}
+                  dy={[]}
+                  fill={
+                    {
+                      "payload": 4288452752,
+                      "type": 0,
+                    }
+                  }
+                  font={
+                    {
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 9,
+                      "letterSpacing": 0.4,
+                      "textAnchor": "middle",
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                  rotate={[]}
+                  x={
+                    [
+                      304,
+                    ]
+                  }
+                  y={
+                    [
+                      147.6,
+                    ]
+                  }
+                >
+                  <RNSVGTSpan
+                    content="64"
+                    dx={[]}
+                    dy={[]}
+                    fill={
+                      {
+                        "payload": 4278190080,
+                        "type": 0,
+                      }
+                    }
+                    font={{}}
+                    rotate={[]}
+                    x={[]}
+                    y={[]}
+                  />
+                </RNSVGText>
+                <RNSVGCircle
+                  cx={304}
+                  cy={133.6}
+                  fill={
+                    {
+                      "payload": 4292244570,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                      "stroke",
+                      "strokeWidth",
+                    ]
+                  }
+                  r={3.5}
+                  stroke={
+                    {
+                      "payload": 4278847752,
+                      "type": 0,
+                    }
+                  }
+                  strokeWidth={2}
+                />
+              </RNSVGGroup>
+            </RNSVGSvgView>
+          </View>
+          <View
+            accessibilityRole="summary"
+            style={
+              [
+                {
+                  "borderWidth": 0.5,
+                  "marginHorizontal": 20,
+                },
+                {
+                  "backgroundColor": "#120C07",
+                  "borderColor": "rgba(255,255,255,0.06)",
+                  "borderRadius": 22,
+                  "padding": 16,
+                },
+                undefined,
+              ]
+            }
+            testID="hr-detail-zones"
+          >
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#9C9890",
+                  "fontFamily": "Inter_500Medium",
+                  "fontSize": 11,
+                  "letterSpacing": 0.55,
+                  "lineHeight": 14,
+                  "marginBottom": 12,
+                  "textTransform": "uppercase",
+                }
+              }
+              testID="hr-detail-zones-label"
+            >
+              Time in zones · today
+            </Text>
+            <View
+              accessibilityLabel="Resting zone, < 60 bpm, 0 percent"
+              accessibilityRole="text"
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "gap": 12,
+                  },
+                  {
+                    "borderBottomColor": "rgba(255,255,255,0.06)",
+                    "borderBottomWidth": 0.5,
+                    "paddingVertical": 8,
+                  },
+                ]
+              }
+              testID="hr-detail-zones-row-0"
+            >
+              <View
+                style={
+                  {
+                    "width": 70,
+                  }
+                }
+              >
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#F5F1EA",
+                      "fontFamily": "Inter_400Regular",
+                      "fontSize": 15,
+                      "lineHeight": 22,
+                    }
+                  }
+                >
+                  Resting
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#9C9890",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 9,
+                      "letterSpacing": 0.5,
+                      "marginTop": 2,
+                      "textTransform": "uppercase",
+                    }
+                  }
+                >
+                  &lt; 60
+                   bpm
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                  }
+                }
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "overflow": "hidden",
+                        "width": "100%",
+                      },
+                      {
+                        "backgroundColor": "rgba(255,255,255,0.04)",
+                        "borderRadius": 99,
+                        "height": 8,
+                      },
+                    ]
+                  }
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "height": "100%",
+                          "transformOrigin": "left center",
+                          "width": "100%",
+                        },
+                        {
+                          "backgroundColor": "#D6745A",
+                          "borderRadius": 99,
+                          "opacity": 0.35,
+                        },
+                        {
+                          "transform": [
+                            {
+                              "scaleX": 0,
+                            },
+                          ],
+                        },
+                      ]
+                    }
+                  />
+                </View>
+              </View>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#9C9890",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 12,
+                    "lineHeight": 16,
+                    "textAlign": "right",
+                    "width": 36,
+                  }
+                }
+              >
+                0
+                %
+              </Text>
+            </View>
+            <View
+              accessibilityLabel="Calm zone, 60–80 bpm, 100 percent"
+              accessibilityRole="text"
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "gap": 12,
+                  },
+                  {
+                    "borderBottomColor": "rgba(255,255,255,0.06)",
+                    "borderBottomWidth": 0.5,
+                    "paddingVertical": 8,
+                  },
+                ]
+              }
+              testID="hr-detail-zones-row-1"
+            >
+              <View
+                style={
+                  {
+                    "width": 70,
+                  }
+                }
+              >
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#F5F1EA",
+                      "fontFamily": "Inter_400Regular",
+                      "fontSize": 15,
+                      "lineHeight": 22,
+                    }
+                  }
+                >
+                  Calm
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#9C9890",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 9,
+                      "letterSpacing": 0.5,
+                      "marginTop": 2,
+                      "textTransform": "uppercase",
+                    }
+                  }
+                >
+                  60–80
+                   bpm
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                  }
+                }
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "overflow": "hidden",
+                        "width": "100%",
+                      },
+                      {
+                        "backgroundColor": "rgba(255,255,255,0.04)",
+                        "borderRadius": 99,
+                        "height": 8,
+                      },
+                    ]
+                  }
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "height": "100%",
+                          "transformOrigin": "left center",
+                          "width": "100%",
+                        },
+                        {
+                          "backgroundColor": "#D6745A",
+                          "borderRadius": 99,
+                          "opacity": 0.6,
+                        },
+                        {
+                          "transform": [
+                            {
+                              "scaleX": 0,
+                            },
+                          ],
+                        },
+                      ]
+                    }
+                  />
+                </View>
+              </View>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#9C9890",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 12,
+                    "lineHeight": 16,
+                    "textAlign": "right",
+                    "width": 36,
+                  }
+                }
+              >
+                100
+                %
+              </Text>
+            </View>
+            <View
+              accessibilityLabel="Active zone, 80–110 bpm, 0 percent"
+              accessibilityRole="text"
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "gap": 12,
+                  },
+                  {
+                    "borderBottomColor": "rgba(255,255,255,0.06)",
+                    "borderBottomWidth": 0.5,
+                    "paddingVertical": 8,
+                  },
+                ]
+              }
+              testID="hr-detail-zones-row-2"
+            >
+              <View
+                style={
+                  {
+                    "width": 70,
+                  }
+                }
+              >
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#F5F1EA",
+                      "fontFamily": "Inter_400Regular",
+                      "fontSize": 15,
+                      "lineHeight": 22,
+                    }
+                  }
+                >
+                  Active
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#9C9890",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 9,
+                      "letterSpacing": 0.5,
+                      "marginTop": 2,
+                      "textTransform": "uppercase",
+                    }
+                  }
+                >
+                  80–110
+                   bpm
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                  }
+                }
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "overflow": "hidden",
+                        "width": "100%",
+                      },
+                      {
+                        "backgroundColor": "rgba(255,255,255,0.04)",
+                        "borderRadius": 99,
+                        "height": 8,
+                      },
+                    ]
+                  }
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "height": "100%",
+                          "transformOrigin": "left center",
+                          "width": "100%",
+                        },
+                        {
+                          "backgroundColor": "#D6745A",
+                          "borderRadius": 99,
+                          "opacity": 0.8,
+                        },
+                        {
+                          "transform": [
+                            {
+                              "scaleX": 0,
+                            },
+                          ],
+                        },
+                      ]
+                    }
+                  />
+                </View>
+              </View>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#9C9890",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 12,
+                    "lineHeight": 16,
+                    "textAlign": "right",
+                    "width": 36,
+                  }
+                }
+              >
+                0
+                %
+              </Text>
+            </View>
+            <View
+              accessibilityLabel="Vigorous zone, 110+ bpm, 0 percent"
+              accessibilityRole="text"
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                    "gap": 12,
+                  },
+                  {
+                    "borderBottomColor": "rgba(255,255,255,0.06)",
+                    "borderBottomWidth": 0,
+                    "paddingVertical": 8,
+                  },
+                ]
+              }
+              testID="hr-detail-zones-row-3"
+            >
+              <View
+                style={
+                  {
+                    "width": 70,
+                  }
+                }
+              >
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#F5F1EA",
+                      "fontFamily": "Inter_400Regular",
+                      "fontSize": 15,
+                      "lineHeight": 22,
+                    }
+                  }
+                >
+                  Vigorous
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#9C9890",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 9,
+                      "letterSpacing": 0.5,
+                      "marginTop": 2,
+                      "textTransform": "uppercase",
+                    }
+                  }
+                >
+                  110+
+                   bpm
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                  }
+                }
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "overflow": "hidden",
+                        "width": "100%",
+                      },
+                      {
+                        "backgroundColor": "rgba(255,255,255,0.04)",
+                        "borderRadius": 99,
+                        "height": 8,
+                      },
+                    ]
+                  }
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "height": "100%",
+                          "transformOrigin": "left center",
+                          "width": "100%",
+                        },
+                        {
+                          "backgroundColor": "#D6745A",
+                          "borderRadius": 99,
+                          "opacity": 1,
+                        },
+                        {
+                          "transform": [
+                            {
+                              "scaleX": 0,
+                            },
+                          ],
+                        },
+                      ]
+                    }
+                  />
+                </View>
+              </View>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#9C9890",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 12,
+                    "lineHeight": 16,
+                    "textAlign": "right",
+                    "width": 36,
+                  }
+                }
+              >
+                0
+                %
+              </Text>
+            </View>
+          </View>
+          <View
+            accessibilityLabel="Leiko about your heart rate: Your resting heart rate has settled three points lower than last month. That tracks with the better sleep we've seen — they tend to move together. A calm wake again this morning."
+            accessibilityRole="text"
+            style={
+              [
+                {
+                  "borderWidth": 0.5,
+                },
+                {
+                  "backgroundColor": "#120C07",
+                  "borderColor": "rgba(255,255,255,0.06)",
+                  "borderRadius": 22,
+                  "marginHorizontal": 20,
+                  "padding": 16,
+                },
+                undefined,
+              ]
+            }
+            testID="hr-detail-insight"
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "marginBottom": 10,
+                }
+              }
+            >
+              <View
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "borderRadius": 99,
+                      "height": 18,
+                      "justifyContent": "center",
+                      "width": 18,
+                    },
+                    {
+                      "backgroundColor": "#D6745A26",
+                    },
+                  ]
+                }
+              >
+                <RNSVGSvgView
+                  align="xMidYMid"
+                  bbHeight={11}
+                  bbWidth={11}
+                  className="sparkle-fill__svg-icon-phosphor"
+                  color="#D6745A"
+                  fill="currentColor"
+                  focusable={false}
+                  height={11}
+                  meetOrSlice={0}
+                  minX={0}
+                  minY={0}
+                  style={
+                    [
+                      {
+                        "backgroundColor": "transparent",
+                        "borderWidth": 0,
+                      },
+                      [
+                        undefined,
+                        undefined,
+                        {},
+                      ],
+                      {
+                        "flex": 0,
+                        "height": 11,
+                        "width": 11,
+                      },
+                    ]
+                  }
+                  testID="phosphor-react-native-sparkle-fill"
+                  vbHeight={256}
+                  vbWidth={256}
+                  width={11}
+                >
+                  <RNSVGGroup
+                    fill={
+                      {
+                        "type": 2,
+                      }
+                    }
+                    propList={
+                      [
+                        "fill",
+                      ]
+                    }
+                  >
+                    <RNSVGGroup
+                      fill={
+                        {
+                          "payload": 4292244570,
+                          "type": 0,
+                        }
+                      }
+                      propList={
+                        [
+                          "fill",
+                        ]
+                      }
+                    >
+                      <RNSVGPath
+                        d="M208 144a15.78 15.78 0 0 1-10.42 14.94L146 178l-19 51.62a15.92 15.92 0 0 1-29.88 0L78 178l-51.62-19a15.92 15.92 0 0 1 0-29.88L78 110l19-51.62a15.92 15.92 0 0 1 29.88 0L146 110l51.62 19A15.78 15.78 0 0 1 208 144m-56-96h16v16a8 8 0 0 0 16 0V48h16a8 8 0 0 0 0-16h-16V16a8 8 0 0 0-16 0v16h-16a8 8 0 0 0 0 16m88 32h-8v-8a8 8 0 0 0-16 0v8h-8a8 8 0 0 0 0 16h8v8a8 8 0 0 0 16 0v-8h8a8 8 0 0 0 0-16"
+                        fill={
+                          {
+                            "payload": 4278190080,
+                            "type": 0,
+                          }
+                        }
+                      />
+                    </RNSVGGroup>
+                  </RNSVGGroup>
+                </RNSVGSvgView>
+              </View>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#D6745A",
+                    "fontFamily": "Inter_500Medium",
+                    "fontSize": 11,
+                    "letterSpacing": 0.55,
+                    "lineHeight": 14,
+                    "marginLeft": 8,
+                    "textTransform": "uppercase",
+                  }
+                }
+              >
+                Leiko · about your heart rate
+              </Text>
+            </View>
+            <Text
+              style={
+                {
+                  "color": "#F5F1EA",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 15,
+                  "lineHeight": 22,
+                }
+              }
+            >
+              Your resting heart rate has settled three points lower than last month. That tracks with the better sleep we've seen — they tend to move together. A calm wake again this morning.
+            </Text>
+          </View>
+        </View>
+      </View>
+    </RCTScrollView>
+  </RNCSafeAreaView>
+</RNCSafeAreaProvider>
+`;
