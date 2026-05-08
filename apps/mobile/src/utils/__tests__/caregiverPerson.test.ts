@@ -214,6 +214,174 @@ describe('caregiverPersonFromParent — voice rules in headlines', () => {
   });
 });
 
+describe('caregiverPersonFromParent — vitalStrip formatting (Sprint 7.7b)', () => {
+  it('returns "—" for every vital when no data is available', () => {
+    const p = caregiverPersonFromParent(summary({ latestReading: null }), 0, NOW);
+    expect(p.vitalStrip).toEqual({ bp: '—', hr: '—', spo2: '—', sleep: '—' });
+  });
+
+  it('formats BP from latestReading', () => {
+    const p = caregiverPersonFromParent(
+      summary({
+        latestReading: reading({
+          measuredAt: new Date(NOW - HOUR).toISOString(),
+          systolic: 122,
+          diastolic: 78,
+        }),
+      }),
+      0,
+      NOW,
+    );
+    expect(p.vitalStrip.bp).toBe('122/78');
+  });
+
+  it('formats HR bpm as a plain integer', () => {
+    const p = caregiverPersonFromParent(
+      summary({
+        latestHr: { measuredAt: new Date(NOW - HOUR).toISOString(), bpm: 64 },
+      }),
+      0,
+      NOW,
+    );
+    expect(p.vitalStrip.hr).toBe('64');
+  });
+
+  it('formats SpO2 with a trailing %', () => {
+    const p = caregiverPersonFromParent(
+      summary({
+        latestSpo2: { measuredAt: new Date(NOW - HOUR).toISOString(), percent: 97 },
+      }),
+      0,
+      NOW,
+    );
+    expect(p.vitalStrip.spo2).toBe('97%');
+  });
+
+  it('formats sleep duration as h:mm with zero-padded minutes', () => {
+    const p = caregiverPersonFromParent(
+      summary({
+        latestSleep: {
+          measuredAt: new Date(NOW - HOUR).toISOString(),
+          totalMinutes: 462, // 7h 42m
+          deepMinutes: 100,
+          lightMinutes: 240,
+        },
+      }),
+      0,
+      NOW,
+    );
+    expect(p.vitalStrip.sleep).toBe('7:42');
+  });
+
+  it('formats sleep with under-10 minutes correctly', () => {
+    const p = caregiverPersonFromParent(
+      summary({
+        latestSleep: {
+          measuredAt: new Date(NOW - HOUR).toISOString(),
+          totalMinutes: 365, // 6h 5m
+          deepMinutes: null,
+          lightMinutes: null,
+        },
+      }),
+      0,
+      NOW,
+    );
+    expect(p.vitalStrip.sleep).toBe('6:05');
+  });
+
+  it('mixes "—" placeholders with real data when only some vitals are present', () => {
+    const p = caregiverPersonFromParent(
+      summary({
+        latestReading: reading({ measuredAt: new Date(NOW - HOUR).toISOString() }),
+        latestHr: { measuredAt: new Date(NOW - HOUR).toISOString(), bpm: 60 },
+      }),
+      0,
+      NOW,
+    );
+    expect(p.vitalStrip).toEqual({
+      bp: '122/78',
+      hr: '60',
+      spo2: '—',
+      sleep: '—',
+    });
+  });
+});
+
+describe('caregiverPersonFromParent — sentence (placeholder editorial prose)', () => {
+  const FORBIDDEN = [
+    /patient/i,
+    /diagnose/i,
+    /silent killer/i,
+    /critical/i,
+    /dangerous level/i,
+    /medical advice/i,
+  ];
+  function checkVoice(s: string) {
+    for (const p of FORBIDDEN) expect(s).not.toMatch(p);
+  }
+
+  it('clear sentence is calm + factual', () => {
+    const p = caregiverPersonFromParent(
+      summary({ latestReading: reading({ measuredAt: new Date(NOW - HOUR).toISOString() }) }),
+      0,
+      NOW,
+    );
+    expect(p.sentence).toContain('122/78');
+    expect(p.sentence).toContain('Inside the usual band');
+    checkVoice(p.sentence);
+  });
+
+  it('attention sentence stays in voice', () => {
+    const p = caregiverPersonFromParent(
+      summary({
+        latestReading: reading({
+          measuredAt: new Date(NOW - HOUR).toISOString(),
+          systolic: 165,
+          diastolic: 100,
+        }),
+      }),
+      0,
+      NOW,
+    );
+    expect(p.sentence).toContain('a little above the usual band');
+    checkVoice(p.sentence);
+  });
+
+  it('urgent sentence stays in voice (no fear language)', () => {
+    const p = caregiverPersonFromParent(
+      summary({
+        latestReading: reading({
+          measuredAt: new Date(NOW - HOUR).toISOString(),
+          systolic: 185,
+          diastolic: 125,
+        }),
+      }),
+      0,
+      NOW,
+    );
+    expect(p.sentence).toContain('A calm check-in helps');
+    checkVoice(p.sentence);
+  });
+
+  it('offline sentence is calm + factual', () => {
+    const p = caregiverPersonFromParent(
+      summary({
+        latestReading: reading({ measuredAt: new Date(NOW - 13 * HOUR).toISOString() }),
+      }),
+      0,
+      NOW,
+    );
+    expect(p.sentence).toContain('No reading in the last');
+    checkVoice(p.sentence);
+  });
+
+  it('no-data sentence is calm + factual', () => {
+    const p = caregiverPersonFromParent(summary({ latestReading: null }), 0, NOW);
+    expect(p.sentence).toContain('watch will sync once it pairs');
+    checkVoice(p.sentence);
+  });
+});
+
 describe('caregiverPeopleFromParents — list mapping', () => {
   it('returns one CaregiverPerson per ParentSummary, in order', () => {
     const out = caregiverPeopleFromParents(

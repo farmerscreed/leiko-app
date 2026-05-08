@@ -20,15 +20,40 @@
 // Headline is a deterministic placeholder until Sprint 12.5 wires AI
 // narration. Calm, factual, voice-rule-clean. The legend renders this
 // truncated to one line.
+//
+// Sprint 7.7b additions:
+//   - `sentence` — a longer deterministic placeholder rendered in the
+//     editorial PersonCard's prose paragraph. Same voice rules.
+//   - `vitalStrip` — pre-formatted display strings for the four-vital
+//     row (BP / HR / SpO2 / Sleep). '—' fallback when data is missing.
+//     The data flows through fetchParentSummaries (latestHr / latestSpo2
+//     / latestSleep) which queries vitals_other directly.
 
-import type { ParentSummary } from '../services/families/fetchParentSummaries';
+import type {
+  HrSummary,
+  ParentSummary,
+  SleepSummary,
+  Spo2Summary,
+} from '../services/families/fetchParentSummaries';
 import type { Status } from '../components/StatusPill';
 import { classifyReading } from './classification';
 
 const BP_STALE_THRESHOLD_MS = 12 * 60 * 60 * 1000; // 12h per D13 §6
 const MIN_PER_HR = 60;
+const NO_VALUE = '—';
 
 export type CaregiverAccentSlot = 1 | 2 | 3;
+
+/** Pre-formatted display strings for the editorial PersonCard's
+ *  four-vital row. Each entry is "—" when the underlying data is null
+ *  (caregivers wait for the parent's owning phone to /sync the value
+ *  through to vitals_other). */
+export interface VitalStripLabels {
+  bp: string;
+  hr: string;
+  spo2: string;
+  sleep: string;
+}
 
 export interface CaregiverPerson {
   /** Family id — opaque identifier. */
@@ -43,10 +68,14 @@ export interface CaregiverPerson {
   status: Status;
   /** Pre-formatted BP, e.g. "122/78" or "—" when no reading exists. */
   bpLabel: string;
-  /** Calm, factual one-line headline. Placeholder until Sprint 12.5 AI. */
+  /** One-line factual headline. Placeholder until Sprint 12.5 AI. */
   headline: string;
+  /** Longer editorial prose. Placeholder until Sprint 12.5 AI. */
+  sentence: string;
   /** Display string for the relationship column ("Mom" / "Dad" / "Aunt"). */
   relation: string;
+  /** Pre-formatted four-vital labels for the editorial card row. */
+  vitalStrip: VitalStripLabels;
 }
 
 export function caregiverPersonFromParent(
@@ -59,18 +88,21 @@ export function caregiverPersonFromParent(
   const initial = trimmedName.length > 0 ? trimmedName[0].toUpperCase() : '·';
 
   let status: Status = 'clear';
-  let bpLabel = '—';
+  let bpLabel = NO_VALUE;
   let headline = 'No readings yet';
+  let sentence = 'No readings yet. The watch will sync once it pairs.';
 
   const r = parent.latestReading;
   if (r) {
     const measuredAtMs = Date.parse(r.measuredAt);
     const ageMs = Math.max(0, nowMs - measuredAtMs);
+    const ageLabel = humanizeAge(ageMs);
     bpLabel = `${r.systolic}/${r.diastolic}`;
 
     if (ageMs > BP_STALE_THRESHOLD_MS) {
       status = 'offline';
-      headline = `Last reading ${humanizeAge(ageMs)} ago`;
+      headline = `Last reading ${ageLabel} ago`;
+      sentence = `No reading in the last ${ageLabel}. The watch may be off the wrist.`;
     } else {
       const tier = classifyReading(
         { systolic: r.systolic, diastolic: r.diastolic, pulse: r.pulse },
@@ -80,14 +112,17 @@ export function caregiverPersonFromParent(
         case 'confirmed_urgent':
           status = 'urgent';
           headline = 'A calm check-in helps right now.';
+          sentence = `BP ${bpLabel} ${ageLabel} ago — above the usual range. A calm check-in helps.`;
           break;
         case 'calm_concerned':
           status = 'attention';
           headline = "Worth a chat — pattern's a little off.";
+          sentence = `BP ${bpLabel} ${ageLabel} ago — a little above the usual band.`;
           break;
         case 'in_pattern':
           status = 'clear';
-          headline = `Read ${humanizeAge(ageMs)} ago — in pattern.`;
+          headline = `Read ${ageLabel} ago — in pattern.`;
+          sentence = `BP ${bpLabel} ${ageLabel} ago. Inside the usual band.`;
           break;
       }
     }
@@ -101,8 +136,30 @@ export function caregiverPersonFromParent(
     status,
     bpLabel,
     headline,
+    sentence,
     relation: parent.parentRelationship || 'Family',
+    vitalStrip: formatVitalStrip(bpLabel, parent.latestHr, parent.latestSpo2, parent.latestSleep),
   };
+}
+
+function formatVitalStrip(
+  bpLabel: string,
+  hr: HrSummary | null,
+  spo2: Spo2Summary | null,
+  sleep: SleepSummary | null,
+): VitalStripLabels {
+  return {
+    bp: bpLabel,
+    hr: hr ? String(hr.bpm) : NO_VALUE,
+    spo2: spo2 ? `${spo2.percent}%` : NO_VALUE,
+    sleep: sleep ? formatSleepDuration(sleep.totalMinutes) : NO_VALUE,
+  };
+}
+
+function formatSleepDuration(totalMinutes: number): string {
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  return `${hours}:${mins.toString().padStart(2, '0')}`;
 }
 
 export function caregiverPeopleFromParents(
