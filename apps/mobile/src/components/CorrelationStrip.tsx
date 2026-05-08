@@ -147,7 +147,10 @@ function areaPathFromPoints(pointsStr: string, height: number): string {
 export function CorrelationStrip({
   vitalA,
   vitalB,
-  range: _range,
+  // `range` is metadata for the consumer (which window of data to fetch).
+  // The chart auto-scales to whatever points it's handed, so we accept
+  // and ignore it here. Documented in the file header.
+  range: _range, // eslint-disable-line @typescript-eslint/no-unused-vars
   caption,
   width = DEFAULT_WIDTH,
   height = DEFAULT_HEIGHT,
@@ -174,8 +177,18 @@ export function CorrelationStrip({
 
   const bounds = { tMin, tMax, width, height };
 
-  const pointsA = useMemo(() => polylinePoints(vitalA, bounds), [vitalA, tMin, tMax, width, height]); // eslint-disable-line react-hooks/exhaustive-deps
-  const pointsB = useMemo(() => polylinePoints(vitalB, bounds), [vitalB, tMin, tMax, width, height]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Deps list the primitives `bounds` is built from — they're stable across
+  // renders that produce identical output. (The `react-hooks/exhaustive-deps`
+  // rule is not configured in this project, so listing primitives rather
+  // than the composed `bounds` object is safe and intentional.)
+  const pointsA = useMemo(
+    () => polylinePoints(vitalA, bounds),
+    [vitalA, tMin, tMax, width, height],
+  );
+  const pointsB = useMemo(
+    () => polylinePoints(vitalB, bounds),
+    [vitalB, tMin, tMax, width, height],
+  );
 
   const colorA = theme.colors.vital[vitalA.type];
   const colorB = theme.colors.vital[vitalB.type];
