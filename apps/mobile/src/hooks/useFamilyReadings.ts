@@ -66,14 +66,17 @@ export function useFamilyReadings(): UseFamilyReadingsResult {
 
   useEffect(() => {
     if (!userId || familyIds.length === 0) return;
-    // One channel per family covers BOTH `readings` (BP) and
-    // `vitals_other` (hr / spo2 / sleep_session etc.) — Sprint 7.7b
-    // extended fetchParentSummaries to surface the multi-vitals, and
-    // this hook now invalidates on inserts to either source so the
-    // caregiver home updates live for any vital, not just BP.
-    const channels = familyIds.map((familyId) => {
-      const channel = supabase
-        .channel(`family-readings:${familyId}`)
+    // TWO channels per family — one for `readings` (BP) and one for
+    // `vitals_other` (hr / spo2 / sleep_session). supabase-js (as of
+    // 2.x) rejects multiple `postgres_changes` registrations on a
+    // single channel with "cannot add postgres_changes callback" once
+    // the channel has been subscribed; the documented pattern is one
+    // channel per (table, filter) tuple. Sprint 7.7b shipped this as
+    // a single dual-listener channel and the runtime error was caught
+    // during on-device review (2026-05-08).
+    const channels = familyIds.flatMap((familyId) => {
+      const readingsChannel = supabase
+        .channel(`family-readings:readings:${familyId}`)
         .on(
           'postgres_changes',
           {
@@ -87,6 +90,9 @@ export function useFamilyReadings(): UseFamilyReadingsResult {
             void queryClient.invalidateQueries({ queryKey });
           },
         )
+        .subscribe();
+      const vitalsChannel = supabase
+        .channel(`family-readings:vitals_other:${familyId}`)
         .on(
           'postgres_changes',
           {
@@ -101,7 +107,7 @@ export function useFamilyReadings(): UseFamilyReadingsResult {
           },
         )
         .subscribe();
-      return channel;
+      return [readingsChannel, vitalsChannel];
     });
     return () => {
       for (const channel of channels) {

@@ -5,7 +5,7 @@
 | Sub-sprint | Status |
 | --- | --- |
 | 7.7a — Bird's-eye + drill-in | ✅ Shipped 2026-05-08 |
-| 7.7b — Editorial cards + view toggle + cinematic transition | ⏳ Open |
+| 7.7b — Editorial cards + view toggle + cinematic transition + cross-phone multi-vital wire-up | ✅ Shipped 2026-05-08 |
 
 ## Goal
 Rewrite the Caregiver Home (`src/screens/Home/CaregiverHome.tsx`) to the **Family Constellation** design — a single screen with two view modes:

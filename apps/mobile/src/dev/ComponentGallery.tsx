@@ -22,6 +22,15 @@ import { VitalTile, type VitalTileState } from '../components/VitalTile';
 import { DailyPulseHero, type DailyPulseHeroVitals } from '../components/DailyPulseHero';
 import { CorrelationStrip } from '../components/CorrelationStrip';
 import { AnomalyBanner } from '../components/AnomalyBanner';
+import { Portrait, type PortraitSize } from '../components/Portrait';
+import { StatusPill, type Status } from '../components/StatusPill';
+import { PersonOrb } from '../components/PersonOrb';
+import { ConstellationField, type ConstellationPerson } from '../components/ConstellationField';
+import { ConstellationLegend, type LegendPerson } from '../components/ConstellationLegend';
+import { CaregiverActionBar } from '../components/CaregiverActionBar';
+import { PersonCard } from '../components/PersonCard';
+import { ViewToggle } from '../components/ViewToggle';
+import type { CaregiverViewMode } from '../hooks/useCaregiverViewMode';
 import { useColorModeControl, useTheme, type ThemeMode } from '../theme';
 import { VitalsDebugPanel } from './VitalsDebugPanel';
 
@@ -49,6 +58,42 @@ const MOCK_HERO_VITALS_EMPTY: DailyPulseHeroVitals = {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const T0 = 1_700_000_000_000;
+
+// ─── Sprint 7.7 caregiver fixture (matches the design's three personas) ──────
+const CAREGIVER_FIXTURE_BIRDS: ConstellationPerson[] = [
+  { id: 'mom', initial: 'M', fullName: 'Marian Okeke', accent: '#FF7350', status: 'clear' as Status, bpLabel: '122/78' },
+  { id: 'dad', initial: 'E', fullName: 'Emeka Okeke',  accent: '#F2A618', status: 'attention' as Status, bpLabel: '138/89' },
+  { id: 'aunt', initial: 'J', fullName: 'Joy Adeyemi', accent: '#7B67CC', status: 'sleeping' as Status, bpLabel: '118/74' },
+];
+const CAREGIVER_FIXTURE_LEGEND: LegendPerson[] = [
+  { id: 'mom', fullName: 'Marian Okeke', relation: 'Mom', accent: '#FF7350', status: 'clear' as Status, headline: 'A calm morning.' },
+  { id: 'dad', fullName: 'Emeka Okeke',  relation: 'Dad', accent: '#F2A618', status: 'attention' as Status, headline: "BP is trending up." },
+  { id: 'aunt', fullName: 'Joy Adeyemi', relation: 'Aunt', accent: '#7B67CC', status: 'sleeping' as Status, headline: 'Resting quietly.' },
+];
+const CAREGIVER_FIXTURE_CARDS = [
+  {
+    id: 'mom', accent: '#FF7350', initial: 'M', fullName: 'Marian Okeke', relation: 'Mom', age: 71,
+    status: 'clear' as Status, headline: 'A calm morning.',
+    sentence: 'BP 122/78 a moment ago. Inside the usual band.',
+    vitalStrip: { bp: '122/78', hr: '64', spo2: '98%', sleep: '7:42' },
+    footerLeftLabel: 'Read · 6:42 am',
+  },
+  {
+    id: 'dad', accent: '#F2A618', initial: 'E', fullName: 'Emeka Okeke', relation: 'Dad', age: 74,
+    status: 'attention' as Status, headline: 'BP is trending up.',
+    sentence: 'BP 138/89 a moment ago — a little above the usual band.',
+    vitalStrip: { bp: '138/89', hr: '72', spo2: '96%', sleep: '6:18' },
+    footerLeftLabel: 'Read · 6:51 am',
+  },
+  {
+    id: 'aunt', accent: '#7B67CC', initial: 'J', fullName: 'Joy Adeyemi', relation: 'Aunt', age: 68,
+    status: 'sleeping' as Status, headline: 'Resting quietly.',
+    sentence: 'No reading in the last 3 hr. The watch may be off the wrist.',
+    vitalStrip: { bp: '118/74', hr: '58', spo2: '97%', sleep: 'now' },
+    footerLeftLabel: 'Last reading · 3 hr ago',
+  },
+];
+
 const MOCK_SLEEP_POINTS = Array.from({ length: 7 }, (_, i) => ({
   t: T0 + i * DAY_MS,
   value: 6.5 + Math.sin(i / 1.4) * 1.2,
@@ -72,6 +117,8 @@ export function ComponentGallery({ mode, onModeChange }: Props) {
   // and live-pulse animations replay. Lets a designer review the
   // choreography without restarting the app.
   const [motionKey, setMotionKey] = useState(0);
+  // Sprint 7.7 caregiver-home preview view-mode (bird's-eye ↔ cards).
+  const [caregiverView, setCaregiverView] = useState<CaregiverViewMode>('birds');
 
   const headlineStyle = {
     fontSize: theme.type('headline').size,
@@ -556,6 +603,97 @@ export function ComponentGallery({ mode, onModeChange }: Props) {
           body="Their latest reading was above their usual range. A calm check-in helps."
           cta={{ label: 'Call Mum', onPress: () => undefined }}
         />
+
+        {/* ─── Sprint 7.7 — Caregiver Family Constellation ─────────── */}
+
+        <Text style={sectionTitleStyle}>Sprint 7.7 — caregiver Family Constellation</Text>
+        <Text style={captionStyle}>
+          The full caregiver-home composition. Tap the toggle to switch between
+          bird's-eye orbs and editorial cards. Three-person fixture (Mom clear /
+          Dad attention / Aunt sleeping) — same cast as the design.
+        </Text>
+
+        {/* Toggle + bird's-eye */}
+        <View style={{ marginBottom: theme.spacing.l, alignItems: 'flex-end' }}>
+          <ViewToggle value={caregiverView} onChange={setCaregiverView} />
+        </View>
+
+        {caregiverView === 'birds' ? (
+          <View key={`birds-${motionKey}`}>
+            <ConstellationField
+              people={CAREGIVER_FIXTURE_BIRDS}
+              onSelectPerson={() => undefined}
+            />
+            <View style={{ marginTop: theme.spacing.xl }}>
+              <ConstellationLegend
+                people={CAREGIVER_FIXTURE_LEGEND}
+                onSelectPerson={() => undefined}
+              />
+            </View>
+          </View>
+        ) : (
+          <View key={`cards-${motionKey}`}>
+            {CAREGIVER_FIXTURE_CARDS.map((p) => (
+              <View key={p.id} style={{ marginBottom: theme.spacing.l }}>
+                <PersonCard
+                  accent={p.accent}
+                  initial={p.initial}
+                  fullName={p.fullName}
+                  relation={p.relation}
+                  age={p.age}
+                  status={p.status}
+                  headline={p.headline}
+                  sentence={p.sentence}
+                  vitalStrip={p.vitalStrip}
+                  footerLeftLabel={p.footerLeftLabel}
+                  onPress={() => undefined}
+                />
+              </View>
+            ))}
+          </View>
+        )}
+
+        <View style={{ marginTop: theme.spacing.xl, marginBottom: theme.spacing.xl }}>
+          <CaregiverActionBar count={3} canInvite onInvitePress={() => undefined} />
+        </View>
+
+        {/* Sprint 7.7 component primitives */}
+        <Text style={sectionTitleStyle}>Sprint 7.7 — primitives</Text>
+
+        <Text style={captionStyle}>Portrait — sm / md / lg × three accents</Text>
+        <View style={styles.ringRow}>
+          {(['sm', 'md', 'lg'] as PortraitSize[]).map((size) => (
+            <View key={size} style={{ flexDirection: 'row', gap: 8 }}>
+              <Portrait initial="M" accent="#FF7350" size={size} />
+              <Portrait initial="E" accent="#F2A618" size={size} />
+              <Portrait initial="J" accent="#7B67CC" size={size} />
+            </View>
+          ))}
+        </View>
+
+        <Text style={captionStyle}>StatusPill — six states</Text>
+        <View style={styles.ringRow}>
+          {(['clear', 'watch', 'attention', 'urgent', 'offline', 'sleeping'] as Status[]).map((s) => (
+            <StatusPill key={s} status={s} />
+          ))}
+        </View>
+
+        <Text style={captionStyle}>PersonOrb — six states (single orb)</Text>
+        <View style={styles.ringRow}>
+          {(['clear', 'watch', 'attention', 'urgent', 'offline', 'sleeping'] as Status[]).map((s, i) => (
+            <View key={`orb-${s}-${motionKey}`} style={{ width: 110, alignItems: 'center', marginBottom: theme.spacing.xl }}>
+              <PersonOrb
+                initial="M"
+                accent="#FF7350"
+                status={s}
+                fullName="Marian Okeke"
+                bpLabel="122/78"
+                staggerIndex={i}
+                onPress={() => undefined}
+              />
+            </View>
+          ))}
+        </View>
 
         <VitalsDebugPanel />
 
