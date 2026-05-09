@@ -43,6 +43,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
 import { Button } from '../../components/Button';
+import { HealthPlatformPermissionPrompt } from '../../components/HealthPlatformPermissionPrompt';
 import { CaregiverActionBar } from '../../components/CaregiverActionBar';
 import {
   ConstellationField,
@@ -359,6 +360,12 @@ export function CaregiverHome() {
           </View>
         </>
       ) : null}
+      {/* Sprint 9.5 / Task 8 — Apple Health / Health Connect opt-in
+          (D13 §12.5). Parent (own phone) asked on first home render.
+          The component's account_type gate returns null for caregivers
+          so this mount is safe even though both personas currently
+          route through CaregiverHome (parent-split is a later sprint). */}
+      <HealthPlatformPermissionPrompt />
     </SafeAreaView>
   );
 }

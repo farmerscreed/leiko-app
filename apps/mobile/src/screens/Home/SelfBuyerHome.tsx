@@ -38,6 +38,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
+import { HealthPlatformPermissionPrompt } from '../../components/HealthPlatformPermissionPrompt';
 import { DailyPulseHero, type DailyPulseHeroVitals } from '../../components/DailyPulseHero';
 import { VitalTile } from '../../components/VitalTile';
 import {
@@ -333,6 +334,12 @@ export function SelfBuyerHome() {
           }
         }}
       />
+      {/* Sprint 9.5 / Task 8 — Apple Health / Health Connect opt-in
+          (D13 §12.5). Self-buyer asked at end of onboarding (i.e. on
+          first home render after onboardingComplete flips). The
+          component owns its own visibility — gates on the prompted
+          MMKV flag + skips for caregivers. */}
+      <HealthPlatformPermissionPrompt />
     </SafeAreaView>
   );
 }

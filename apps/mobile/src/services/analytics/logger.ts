@@ -60,7 +60,10 @@ export type AnalyticsEvent =
   | { name: 'health_platform_write_failed'; props?: { vital_type: string; reason: string } }
   | { name: 'health_platform_read_completed'; props?: { inserted: number; duplicates: number; rejected: number } }
   | { name: 'health_platform_read_failed'; props?: { stage: 'platform_read' | 'sync_post'; reason: string } }
-  | { name: 'health_platform_read_skipped'; props?: { trigger: 'foreground' | 'manual' | 'background'; reason: string } };
+  | { name: 'health_platform_read_skipped'; props?: { trigger: 'foreground' | 'manual' | 'background'; reason: string } }
+  | { name: 'health_platform_permission_granted'; props?: { platform: string } }
+  | { name: 'health_platform_permission_dismissed'; props?: { platform: string } }
+  | { name: 'health_platform_permission_skipped'; props?: { platform: string; reason: string } };
 
 type EventName = AnalyticsEvent['name'];
 

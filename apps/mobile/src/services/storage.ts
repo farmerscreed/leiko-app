@@ -87,6 +87,11 @@ export const STORAGE_KEYS = {
   // debounce so a failed fetch doesn't immediately retry on the next
   // foreground transition.
   healthPlatformLastAttempt: 'leiko.health-platform.lastAttemptMs',
+  // Apple Health / Health Connect permission prompt — Sprint 9.5 / Task 8.
+  // 'true' once the user has been shown the in-app opt-in (D13 §12.5),
+  // regardless of whether they accepted or dismissed. We never re-show
+  // automatically — Settings UI in Sprint 10 is the second-chance path.
+  healthPlatformPermissionPrompted: 'leiko.health-platform.permissionPrompted',
   // Per-vital recent caches — Sprint 7.5. Server-acknowledged samples,
   // capped per-slice for the home/Daily Pulse aggregators. Mirrors the
   // recentReadings pattern; see state/hr.ts etc. for the cap constants.
