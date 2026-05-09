@@ -14,6 +14,7 @@
 //   docs/_reference/D14-ambient-ai-architecture.md §9 (conversational surface)
 
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -28,8 +29,28 @@ import { useState } from 'react';
 import { useTheme } from '../../theme';
 import { AIResponseRenderer } from '../../components/AIResponseRenderer';
 import { classifyIntent } from '../../services/ai/intentRouter';
+import { askTierB, type TierBDeferTrigger } from '../../services/ai/tierB';
+import { DEFER_TEMPLATES } from '../../services/ai/deferTemplates';
 import type { IntentMatch } from '../../services/ai/types';
 import type { CaregiverScreenProps, SelfBuyerScreenProps } from '../../navigation/types';
+
+// Voice-clean copy for Tier-B states. Every string passes the voice
+// rules — no fear language, no exclamation points, no clinical
+// authority claims.
+const TIER_B_COPY = {
+  loading: 'Thinking…',
+  error: "I couldn't reach Leiko right now. Try again in a moment.",
+  quotaExceeded:
+    "You've used your AI questions for this month. They reset on the 1st.",
+} as const;
+
+type TierBState =
+  | { kind: 'idle' }
+  | { kind: 'loading' }
+  | { kind: 'ok'; body: string }
+  | { kind: 'defer'; trigger: TierBDeferTrigger }
+  | { kind: 'quota_exceeded' }
+  | { kind: 'error' };
 
 type AskLeikoNavigation =
   | CaregiverScreenProps<'AskLeiko'>
@@ -57,6 +78,7 @@ export function AskLeikoScreen({ navigation }: AskLeikoNavigation) {
     text: string;
     result: IntentMatch;
   } | null>(null);
+  const [tierBState, setTierBState] = useState<TierBState>({ kind: 'idle' });
 
   const onSubmit = () => {
     const trimmed = question.trim();
@@ -64,6 +86,28 @@ export function AskLeikoScreen({ navigation }: AskLeikoNavigation) {
     const result = classifyIntent(trimmed);
     setSubmitted({ text: trimmed, result });
     setQuestion('');
+
+    if (result.responseMode === 'TIER_B_PLACEHOLDER') {
+      setTierBState({ kind: 'loading' });
+      void askTierB({ question: trimmed }).then((r) => {
+        switch (r.status) {
+          case 'ok':
+            setTierBState({ kind: 'ok', body: r.body });
+            break;
+          case 'defer':
+            setTierBState({ kind: 'defer', trigger: r.trigger });
+            break;
+          case 'quota_exceeded':
+            setTierBState({ kind: 'quota_exceeded' });
+            break;
+          case 'error':
+            setTierBState({ kind: 'error' });
+            break;
+        }
+      });
+    } else {
+      setTierBState({ kind: 'idle' });
+    }
   };
 
   return (
@@ -206,12 +250,88 @@ export function AskLeikoScreen({ navigation }: AskLeikoNavigation) {
               >
                 {submitted.text}
               </Text>
-              <AIResponseRenderer
-                result={submitted.result}
-                onArticleOpen={(id) =>
-                  nav.navigate('Article', { articleId: id })
-                }
-              />
+              {tierBState.kind === 'idle' && (
+                <AIResponseRenderer
+                  result={submitted.result}
+                  onArticleOpen={(id) =>
+                    nav.navigate('Article', { articleId: id })
+                  }
+                />
+              )}
+              {tierBState.kind === 'loading' && (
+                <View
+                  testID="ask-leiko-tier-b-loading"
+                  style={{ flexDirection: 'row', alignItems: 'center' }}
+                >
+                  <ActivityIndicator
+                    size="small"
+                    color={theme.colors.text.secondary}
+                    style={{ marginRight: theme.spacing.s }}
+                  />
+                  <Text
+                    style={{
+                      color: theme.colors.text.secondary,
+                      fontSize: bodyStyle.size,
+                      lineHeight: bodyStyle.lineHeight,
+                      fontFamily: bodyStyle.family,
+                    }}
+                  >
+                    {TIER_B_COPY.loading}
+                  </Text>
+                </View>
+              )}
+              {tierBState.kind === 'ok' && (
+                <Text
+                  testID="ask-leiko-tier-b-body"
+                  style={{
+                    color: theme.colors.text.primary,
+                    fontSize: bodyStyle.size,
+                    lineHeight: bodyStyle.lineHeight,
+                    fontFamily: bodyStyle.family,
+                  }}
+                >
+                  {tierBState.body}
+                </Text>
+              )}
+              {tierBState.kind === 'defer' && (
+                <Text
+                  testID={`ask-leiko-tier-b-defer-${tierBState.trigger}`}
+                  style={{
+                    color: theme.colors.text.primary,
+                    fontSize: bodyStyle.size,
+                    lineHeight: bodyStyle.lineHeight,
+                    fontFamily: bodyStyle.family,
+                  }}
+                >
+                  {DEFER_TEMPLATES[tierBState.trigger]}
+                </Text>
+              )}
+              {tierBState.kind === 'quota_exceeded' && (
+                <Text
+                  testID="ask-leiko-tier-b-quota"
+                  style={{
+                    color: theme.colors.text.primary,
+                    fontSize: bodyStyle.size,
+                    lineHeight: bodyStyle.lineHeight,
+                    fontFamily: bodyStyle.family,
+                  }}
+                >
+                  {TIER_B_COPY.quotaExceeded}
+                </Text>
+              )}
+              {tierBState.kind === 'error' && (
+                <Text
+                  testID="ask-leiko-tier-b-error"
+                  style={{
+                    color: theme.colors.text.secondary,
+                    fontSize: bodyStyle.size,
+                    lineHeight: bodyStyle.lineHeight,
+                    fontFamily: bodyStyle.family,
+                  }}
+                >
+                  {TIER_B_COPY.error}
+                </Text>
+              )}
             </View>
           ) : null}
         </ScrollView>

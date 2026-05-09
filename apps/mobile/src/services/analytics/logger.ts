@@ -86,7 +86,14 @@ export type AnalyticsEvent =
   | { name: 'background_sync_registered'; props?: { intervalMin: number } }
   | { name: 'background_sync_unregistered' }
   | { name: 'background_sync_unavailable'; props?: { reason: string } }
-  | { name: 'background_sync_fired'; props?: { result: 'ran' | 'skipped' | 'errored'; reason?: string } };
+  | { name: 'background_sync_fired'; props?: { result: 'ran' | 'skipped' | 'errored'; reason?: string } }
+  // Sprint 12 — Tier-B AI gateway. Body of the LLM response is NEVER
+  // included in props per CLAUDE.md / D14 §13.
+  | { name: 'ai_tier_b_started'; props?: { length: number } }
+  | { name: 'ai_tier_b_ok'; props?: { retries: number; layer1_hits: number; layer2_max_cosine: number } }
+  | { name: 'ai_tier_b_defer'; props?: { trigger: string; reason: string } }
+  | { name: 'ai_tier_b_quota_exceeded' }
+  | { name: 'ai_tier_b_failed'; props?: { reason: string } };
 
 type EventName = AnalyticsEvent['name'];
 
