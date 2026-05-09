@@ -41,6 +41,8 @@ import { AnomalyBanner } from '../../components/AnomalyBanner';
 import { HealthPlatformPermissionPrompt } from '../../components/HealthPlatformPermissionPrompt';
 import { SixthReadingPaywallHost } from '../../components/SixthReadingPaywallHost';
 import { DailyPulseHero, type DailyPulseHeroVitals } from '../../components/DailyPulseHero';
+import { HomeLearnCard } from '../../components/HomeLearnCard';
+import { useSeededLearnCard } from '../../hooks/useSeededLearnCard';
 import { VitalTile } from '../../components/VitalTile';
 import {
   CorrelationStrip,
@@ -86,6 +88,9 @@ export function SelfBuyerHome() {
 
   // ----- Anomaly banner derived from BP tier -------------------------
   const banner = useMemo(() => deriveBanner(data), [data]);
+
+  // ----- Sprint 14: seeded Learn card slot ---------------------------
+  const seededLearn = useSeededLearnCard();
 
   // ----- DaySpine moments --------------------------------------------
   const moments = useMemo(() => deriveDayMoments(data), [data]);
@@ -212,6 +217,19 @@ export function SelfBuyerHome() {
             text={pickNarrationText(central.priority, banner !== null)}
           />
         </View>
+
+        {/* "Worth a read" home-seeded Learn card — Sprint 14. */}
+        {seededLearn.article ? (
+          <HomeLearnCard
+            article={seededLearn.article}
+            onArticleOpen={(id) => {
+              seededLearn.onArticleOpen(id);
+              navigation.navigate('Article', { articleId: id });
+            }}
+            onDismiss={seededLearn.onDismiss}
+            testID="self-buyer-home-learn-card"
+          />
+        ) : null}
 
         {/* Vital tile strip — horizontal scroll. */}
         <ScrollView

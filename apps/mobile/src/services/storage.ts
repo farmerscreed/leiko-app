@@ -125,6 +125,16 @@ export const STORAGE_KEYS = {
   recentSleep: 'leiko.vitals.recent.sleep',
   recentActivity: 'leiko.vitals.recent.activity',
   recentCalories: 'leiko.vitals.recent.calories',
+  // Learn home-card seed tracking — Sprint 14. JSON map keyed by
+  // article id: { [articleId]: { dismissedAt: ms | null, readAt: ms | null } }.
+  // Dismiss hides the card for 30 days; read hides it for 90 days
+  // (per Sprint 14 acceptance criteria + Learn module §5).
+  learnSeedTracking: 'leiko.learn.seedTracking',
+  // First BP reading timestamp — Sprint 14. Unix ms of the user's
+  // first ever BP reading; used as Day-0 anchor for the seeded
+  // onboarding sequence. Set once by the readings store on the
+  // first persisted reading; never overwritten.
+  learnFirstReadingMs: 'leiko.learn.firstReadingMs',
 } as const;
 
 export const supabaseStorage = {
