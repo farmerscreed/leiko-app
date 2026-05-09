@@ -111,3 +111,16 @@ The original spec markdowns in `_specs/` are now duplicated in `docs/_reference/
 | Q-D14-4 | Daily narration cache TTL — 4h or 8h? | 4h — feels fresh, won't break user mental model |
 | Q-D14-5 | Tier-B Plus quota raised 50 → 100/month? | Yes per D14 §1 |
 | Q-D14-6 | Free Tier-B quota: 5/month (vs zero in `docs/07-ai-assistant.md` v1)? | Yes per D14 §1 |
+
+### D15 (Affiliate & Editorial Commerce Strategy) — *added 2026-05-09*
+
+Strategy doc drafted at `docs/_reference/D15-affiliate-strategy.md`. Captures the full Picks + telemedicine + pharmacy + insurance + remittance idea space. Implementation gated on post-Sprint-17 launch — Picks Foundation sprint slots in after launch, then Phase 1 (telemed + pharmacy partnerships), then Phase 2 (insurance + remittance + brand store). See D15 §9 for the full validation checklist.
+
+| # | Question | Default |
+|---|---|---|
+| Q-D15-1 | Section name "Picks" approved? | Pending founder review |
+| Q-D15-2 | Settings → Picks at v1.0 (vs bottom-tab)? | Settings entry per D15 §5.1 |
+| Q-D15-3 | v1.0 categories: BP monitoring + low-sodium kitchen + elder home safety + books/podcasts? | Pending founder review |
+| Q-D15-4 | Editorial curation: founder vs hired writer? | Pending — affects sprint scope |
+| Q-D15-5 | Amazon Associates / Jumia / Konga account holder — LawOne LLC or personal? | LawOne LLC default |
+| Q-D15-6 | Telemed + pharmacy + insurance partner shortlist signed? | Phase 1+ gating |
