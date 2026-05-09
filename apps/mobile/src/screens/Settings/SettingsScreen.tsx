@@ -44,6 +44,8 @@ import {
   acceptFamilyInvite,
   sendFamilyInvite,
 } from '../../services/families/manageInvites';
+import { listCaregivers } from '../../services/families/visibility';
+import { useFamilyReadings } from '../../hooks/useFamilyReadings';
 import { useAuth } from '../../state/auth';
 import { useNotifications } from '../../state/notifications';
 import { usePairing } from '../../state/pairing';
@@ -159,6 +161,7 @@ function formatQuietHours(start: string, end: string): string {
 
 type NavParamList = {
   AuditLog: undefined;
+  CaregiverVisibility: undefined;
   Pairing: undefined;
   Settings: undefined;
 };
@@ -259,6 +262,31 @@ export function SettingsScreen({ navigation }: Props) {
   // only. Parent (own phone) reuses the same surface; self-buyer is the
   // primary case in this codebase.
   const showHealthPlatform = profile?.account_type !== 'caregiver';
+
+  // Hybrid-mode caregiver visibility row gate (D13 §13.2). Self-buyer
+  // only; only shown when at least one caregiver is in the family
+  // circle. Re-fetches when an invite is accepted so the row appears
+  // without requiring a Settings remount.
+  const { parents } = useFamilyReadings();
+  const familyId = parents[0]?.familyId ?? null;
+  const [caregiverCount, setCaregiverCount] = useState<number | null>(null);
+  useEffect(() => {
+    if (!isSelfBuyer || !familyId) {
+      setCaregiverCount(0);
+      return;
+    }
+    let cancelled = false;
+    void listCaregivers(familyId)
+      .then((list) => {
+        if (!cancelled) setCaregiverCount(list.length);
+      })
+      .catch(() => {
+        if (!cancelled) setCaregiverCount(0);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isSelfBuyer, familyId, acceptSuccess]);
 
   const handleForget = useCallback(async () => {
     await forget();
@@ -630,9 +658,23 @@ export function SettingsScreen({ navigation }: Props) {
               setAcceptSuccess(false);
               setAcceptSheetOpen(true);
             }}
-            showDivider={false}
+            showDivider={isSelfBuyer && (caregiverCount ?? 0) > 0}
             testID="settings-family-accept"
           />
+          {isSelfBuyer && (caregiverCount ?? 0) > 0 ? (
+            <ListRow
+              variant="navigation"
+              title="Manage who sees my readings"
+              subtitle={
+                caregiverCount === 1
+                  ? '1 caregiver in your circle.'
+                  : `${caregiverCount ?? 0} caregivers in your circle.`
+              }
+              onPress={() => stackNavigation.navigate('CaregiverVisibility')}
+              showDivider={false}
+              testID="settings-family-visibility"
+            />
+          ) : null}
         </SettingsSection>
 
         {/* Privacy ----------------------------------------------------- */}

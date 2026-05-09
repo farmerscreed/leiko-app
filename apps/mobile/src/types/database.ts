@@ -98,6 +98,16 @@ export type NotificationPreferencesRow = {
   updated_at: string;
 };
 
+// Sprint 10c.2 — per-vital caregiver visibility map (D13 §13.2).
+// null = use defaults (BP/HR/SpO2/Activity = visible, Sleep = hidden).
+export interface VitalVisibility {
+  bp: boolean;
+  hr: boolean;
+  spo2: boolean;
+  sleep: boolean;
+  activity: boolean;
+}
+
 export type FamilyMemberRow = {
   family_id: string;
   user_id: string;
@@ -106,6 +116,7 @@ export type FamilyMemberRow = {
   joined_at: string;
   removed_at: string | null;
   removed_reason: string | null;
+  vital_visibility: VitalVisibility | null;
 };
 
 export type QualityScore = 'good' | 'fair' | 'suspect';

@@ -73,6 +73,24 @@ jest.mock('../../../services/families/manageInvites', () => ({
   acceptFamilyInvite: (...args: unknown[]) => mockAcceptInvite(...args),
 }));
 
+// Sprint 10c.2 — Settings now uses useFamilyReadings to drive the
+// hybrid-mode visibility row gate. Stub it to a single-family fixture
+// so the QueryClientProvider isn't required.
+jest.mock('../../../hooks/useFamilyReadings', () => ({
+  useFamilyReadings: () => ({
+    parents: [{ familyId: 'fam-1' }],
+    isLoading: false,
+    isRefreshing: false,
+    error: null,
+    refresh: jest.fn(),
+  }),
+}));
+
+const mockListCaregivers = jest.fn().mockResolvedValue([]);
+jest.mock('../../../services/families/visibility', () => ({
+  listCaregivers: (...args: unknown[]) => mockListCaregivers(...args),
+}));
+
 // Sprint 10b.2 — Settings now reads usePlusEntitlement (TanStack Query
 // against families) + the AI quota service. Stub the entitlement hook
 // to a free user so the AI section renders the free-tier copy.
@@ -470,6 +488,52 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
     expect(
       screen.getByText("We couldn't find that code. Double-check and try again."),
     ).toBeTruthy();
+  });
+});
+
+describe('<SettingsScreen /> — Manage who sees my readings (Sprint 10c.2)', () => {
+  beforeEach(() => {
+    mockListCaregivers.mockReset();
+  });
+
+  it('hides the visibility row when no caregivers exist', async () => {
+    mockListCaregivers.mockResolvedValue([]);
+    mockProfile = makeProfile({ account_type: 'self_buyer' });
+    renderScreen();
+    await waitFor(() => {
+      expect(mockListCaregivers).toHaveBeenCalled();
+    });
+    expect(screen.queryByTestId('settings-family-visibility')).toBeNull();
+  });
+
+  it('shows the visibility row when at least one caregiver exists', async () => {
+    mockListCaregivers.mockResolvedValue([
+      {
+        userId: 'c-1',
+        displayName: 'Sarah',
+        joinedAt: '2026-05-01T00:00:00Z',
+        visibility: { bp: true, hr: true, spo2: true, sleep: false, activity: true },
+      },
+    ]);
+    mockProfile = makeProfile({ account_type: 'self_buyer' });
+    renderScreen();
+    await waitFor(() => {
+      expect(screen.getByTestId('settings-family-visibility')).toBeTruthy();
+    });
+  });
+
+  it('hides the visibility row for caregivers (only self-buyer surfaces it)', async () => {
+    mockListCaregivers.mockResolvedValue([
+      {
+        userId: 'c-1',
+        displayName: 'Sarah',
+        joinedAt: '2026-05-01T00:00:00Z',
+        visibility: { bp: true, hr: true, spo2: true, sleep: false, activity: true },
+      },
+    ]);
+    mockProfile = makeProfile({ account_type: 'caregiver' });
+    renderScreen();
+    expect(screen.queryByTestId('settings-family-visibility')).toBeNull();
   });
 });
 

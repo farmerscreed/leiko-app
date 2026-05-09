@@ -43,6 +43,7 @@ import { TakeReadingScreen } from '../screens/TakeReading/TakeReadingScreen';
 import { ReadingDetailScreen } from '../screens/ReadingDetail/ReadingDetailScreen';
 import { Trends } from '../screens/Trends/Trends';
 import { AuditLogScreen } from '../screens/AuditLog/AuditLogScreen';
+import { CaregiverVisibilityScreen } from '../screens/CaregiverVisibility/CaregiverVisibilityScreen';
 import { useTheme } from '../theme';
 import { useAuth } from '../state/auth';
 import { useOnboarding } from '../state/onboarding';
@@ -135,6 +136,10 @@ function CaregiverHomeNavigator() {
       <CaregiverStack.Screen name="ReadingDetail" component={ReadingDetailScreen} />
       <CaregiverStack.Screen name="Trends" component={Trends} />
       <CaregiverStack.Screen name="AuditLog" component={AuditLogScreen} />
+      <CaregiverStack.Screen
+        name="CaregiverVisibility"
+        component={CaregiverVisibilityScreen}
+      />
     </CaregiverStack.Navigator>
   );
 }
@@ -181,6 +186,10 @@ function SelfBuyerHomeNavigator() {
       <SelfBuyerStack.Screen name="VitalDetail" component={VitalDetailRouter} />
       <SelfBuyerStack.Screen name="Trends" component={Trends} />
       <SelfBuyerStack.Screen name="AuditLog" component={AuditLogScreen} />
+      <SelfBuyerStack.Screen
+        name="CaregiverVisibility"
+        component={CaregiverVisibilityScreen}
+      />
     </SelfBuyerStack.Navigator>
   );
 }

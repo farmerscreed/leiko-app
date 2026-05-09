@@ -52,6 +52,12 @@ export type CaregiverStackParamList = {
   // Sprint 10b.3 — Activity log read-only viewer (last 90 days of
   // public.audit_log for the actor). Per D6 US-82.
   AuditLog: undefined;
+  // Sprint 10c.2 — hybrid-mode caregiver visibility (D13 §13.2).
+  // Self-buyer's parent-owner family management surface; caregiver-
+  // mode users won't navigate here in v1 (their "shared with caregiver"
+  // settings live elsewhere) but the route is registered in both
+  // stacks so the navigator type unions are symmetric.
+  CaregiverVisibility: undefined;
 };
 
 // Sprint 4 — self-buyer onboarding stack. Five screens per
@@ -84,6 +90,8 @@ export type SelfBuyerStackParamList = {
   Trends: undefined;
   // Sprint 10b.3 — Activity log read-only viewer.
   AuditLog: undefined;
+  // Sprint 10c.2 — hybrid-mode caregiver visibility (D13 §13.2).
+  CaregiverVisibility: undefined;
 };
 
 export type AuthScreenProps<R extends keyof AuthStackParamList> = NativeStackScreenProps<
