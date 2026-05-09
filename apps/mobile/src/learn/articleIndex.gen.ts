@@ -179,6 +179,2234 @@ export const ARTICLES: readonly CompiledArticle[] = [
   },
   {
     "frontmatter": {
+      "id": "activity-002",
+      "title": "Setting a sustainable activity goal",
+      "category": "ACTIVITY",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "activity-001",
+        "corr-002"
+      ],
+      "sources": [
+        "ACSM Physical Activity Guidelines",
+        "Lee IM et al — Step Counts and Mortality in Older Adults (JAMA Internal Medicine)"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A good activity goal is one a person actually meets four or five days a week, every week, for months. The right number depends on where someone is starting from — and the right number is rarely the one any single source claims."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Start from where you are, not from a target"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If your usual day comes in at three thousand steps, a goal of ten thousand is a goal that fails by Thursday. Most people who increase their movement durably do it in two-thousand-step increments — three thousand becomes five thousand becomes seven thousand, across months. The body adapts; the routine forms; the chart trends in one direction."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If your usual day comes in at eight thousand, the next goal is rarely twelve. Pushing the upper end past nine to ten thousand a day, the research suggests, brings smaller and smaller cardiovascular gains. The leverage is at the low end of the range, not the high end."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What the research actually shows for older adults"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A 2019 JAMA Internal Medicine study followed adults in their seventies and found mortality benefits beginning at about 4,400 steps a day, with the curve flattening around 7,500. Other large studies put the flattening around 8,000 to 9,000 for older adults overall. The \"ten thousand\" number remains popular, but the data behind seven to nine thousand is at least as strong for a hypertensive adult."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Younger and more active adults can target higher numbers without losing benefit, but for older adults — and for people focused on blood pressure — the range to think about is six to nine thousand consistent steps a day."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What \"sustainable\" looks like in a week"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A sustainable pattern usually has rhythm and rest:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "text",
+              "value": "Four or five active days a week"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Two or three lower-key days"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "A short walk after dinner counts more than people think"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Pairing the walk to a fixed cue — a meal, a phone call, a coffee — helps the habit hold"
+            }
+          ]
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Rest days are part of consistency, not a break from it. Soreness from harder days settles on quieter ones."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The trend chart in Leiko shows weekly averages. Watch the average across three or four weeks; do not chase the single day."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/activity-002.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "changes-001",
+      "title": "Why morning blood pressure is higher",
+      "category": "CHANGES",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "changes-002",
+        "sleep-003",
+        "corr-001"
+      ],
+      "sources": [
+        "Kario K et al — Morning Blood Pressure Surge",
+        "AHA/ACC 2017 Hypertension Guideline"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Blood pressure follows a daily rhythm. It is at its lowest during the deepest hours of sleep, climbs sharply in the hour after waking, and peaks in the mid-morning. By late afternoon it has settled again. By the time the next morning arrives, the cycle starts over."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "The morning surge is normal"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The rise after waking has a name in clinical research — the morning surge. The body is preparing itself for the day: hormones shift, the heart rate rises, the blood vessels tighten. For most adults the surge is gentle and unremarkable. For some it is sharper."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A larger-than-typical morning surge is one of the patterns researchers and clinicians are most interested in, because it tracks with longer-term cardiovascular risk in some studies. The watch is well-placed to show it: a consistent set of morning readings across weeks tells you what your own surge looks like."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Comparing readings is most useful at the same time of day"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Two readings taken at different times of day can differ by 15 mmHg or more without anything actually being wrong. The right comparison is morning to morning, evening to evening — not yesterday morning to today's mid-afternoon."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If you take a reading every morning at roughly the same time, the trend chart in Leiko shows a fair comparison. Switching the timing day-to-day adds noise that makes the chart harder to read."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "A note on medication timing"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If you take blood pressure medication, the timing matters. Some medications are taken at night specifically to flatten the morning surge — the medication takes effect around the time the surge would otherwise begin. Other medications work differently. Your doctor knows the right pattern for your prescription; the morning chart is useful evidence to bring to the conversation."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/changes-001.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "changes-002",
+      "title": "Stress and blood pressure",
+      "category": "CHANGES",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "changes-001",
+        "numbers-008"
+      ],
+      "sources": [
+        "AHA Scientific Statement on Stress and Cardiovascular Disease",
+        "Liu MY et al — Chronic Stress and Hypertension Meta-analysis"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Stress raises blood pressure within minutes. The link is well-documented and predictable — the harder part is what happens once the stress has passed."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Acute stress lifts the reading right now"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A meeting that runs late, a difficult phone call, a near-miss in traffic — the body's response to any of these moves the reading up by 5 to 20 mmHg in the moment. The body is doing exactly what it is built to do; the heart rate climbs and the vessels tighten so the system can react quickly. Once the stress passes, the reading usually settles within ten to thirty minutes."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The watch will sometimes catch a reading right in the middle of a stress moment. If the number looks unusually high and the morning has been busy or unsettled, sit for a few minutes, breathe slowly, and re-take the reading. The second reading is usually closer to the trend."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Chronic stress is harder to pin down"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Whether ongoing background stress causes sustained high blood pressure on its own is a question the research has not fully settled. Many studies suggest the link, but the picture is muddied by the things stress changes in daily life — sleep, eating, movement, alcohol, caffeine. A person whose stress is high often eats and sleeps differently, and those changes have their own effects on the readings."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "What is clearer: among people who already have higher numbers, stress reduction often shows up in the trend across weeks. People who add a quiet ten minutes to their morning, or learn to breathe slowly through a tense moment, sometimes see their morning numbers settle a few mmHg lower."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The change is gradual. Stress techniques on their own are unlikely to bring high blood pressure all the way down. Many find them part of a wider plan rather than the whole plan."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/changes-002.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "changes-003",
+      "title": "Why blood pressure rises after meals",
+      "category": "CHANGES",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "changes-001",
+        "numbers-008"
+      ],
+      "sources": [
+        "AHA on Postprandial Blood Pressure",
+        "Jansen RW, Lipsitz LA — Postprandial Hypotension"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A reading taken right after a meal is rarely the most useful one. The body is busy: blood is moving toward the digestive system, the heart rate has shifted, and the autonomic system is doing several things at once. The reading reflects the moment, not the trend."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Most adults see a small rise"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "For most people, blood pressure climbs slightly after a meal — especially a large one, a salty one, or one washed down with caffeine. The rise is usually 5 to 10 mmHg in the top number and lasts an hour or two. Then the reading settles."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "This is part of why home BP guidance recommends taking readings either before a meal or about an hour after. A reading thirty minutes after a heavy lunch is not \"wrong\" — it just is not directly comparable to a morning reading on an empty stomach."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Some older adults see the opposite pattern"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A smaller share of older adults experience the reverse: blood pressure drops noticeably after a meal. The clinical name is postprandial hypotension. It is less talked about than the rise, but it is real, and it can leave a person feeling lightheaded for an hour after eating. If you notice that pattern in your readings, mention it at your next visit. Your doctor can suggest small changes — smaller meals more often, less alcohol with meals, more time before standing — that often help."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What the trend looks like"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If you log readings around the same time of day, before meals, the chart shows the steady picture. If your readings drift around meal times, the chart will be noisier and harder to read week to week. Pick a time and stick with it. Most people choose a morning routine before the first meal — that is when the body is in its most predictable state."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A higher post-meal reading does not mean the meal \"caused\" hypertension. It means the body is doing what bodies do."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/changes-003.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "changes-004",
+      "title": "Blood pressure and exercise",
+      "category": "CHANGES",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "activity-001",
+        "activity-002",
+        "corr-002"
+      ],
+      "sources": [
+        "ACSM Guidelines for Exercise Testing and Prescription",
+        "AHA Scientific Statement on Exercise and Hypertension"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Exercise has two distinct effects on blood pressure: a sharp rise during the activity, and a sustained dip in the hour or so afterwards. Both are normal, healthy responses. Knowing the timing matters when reading the trend chart."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "During exercise"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The top number rises sharply during activity — a brisk walk can push it up by 20 to 40 mmHg, and a hard run further. The bottom number stays steadier or barely changes. The body is doing what it is built to do: moving more blood at more pressure to the muscles that need it. A reading taken in the middle of a workout would look alarmingly high without being a problem."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "This is one reason home BP guidance recommends taking readings either before exercise or well after it. Mid-activity readings are noise, not signal."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "After exercise"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Once the activity ends, blood pressure usually drops below baseline for thirty to sixty minutes. Researchers call it post-exercise hypotension. A reading taken twenty minutes after a brisk walk often looks lower than the same person's morning reading. That dip is also normal."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "For accurate trend readings, take blood pressure either before exercise or at least an hour after — closer to two hours after harder workouts. The trend chart only tells the truth when it is comparing similar moments across days."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Across weeks"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The most useful effect of regular movement is not the single-day dip; it is the gradual settling of the resting baseline across weeks of consistent activity. People who add three to five days a week of moderate movement often see their resting numbers drift a few mmHg lower over a couple of months. The change is gradual; the trend chart is the place to watch for it."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Stopping exercise reverses the change at roughly the same speed it arrived. Consistency matters more than intensity."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/changes-004.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "changes-005",
+      "title": "White-coat and masked hypertension",
+      "category": "CHANGES",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "numbers-008",
+        "doctor-001",
+        "doctor-003"
+      ],
+      "sources": [
+        "AHA/ACC 2017 Home Monitoring Section",
+        "ESH 2023 Ambulatory Blood Pressure Monitoring Guideline"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Some people have one set of blood pressure numbers at home and a different set at the doctor's office. The clinical names for the two patterns are white-coat hypertension and masked hypertension. Both are common; both are relevant to home monitoring."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "White-coat hypertension"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "White-coat means readings are higher in clinic than at home. The body is reacting to the visit itself — the unfamiliar room, the conversation, the cuff — and the numbers lift accordingly. Estimates vary, but somewhere between fifteen and thirty percent of people whose clinic readings sit in the higher range show this pattern at home."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A clinic visit may show a number high enough to suggest a tier of high blood pressure that is not actually present in the day-to-day. Without home readings, the clinic number is the only data the doctor has. With home readings, the picture is fuller."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Masked hypertension"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Masked is the opposite — readings are lower in clinic than at home. The clinic visit happens to fall during a calm part of the person's day, so the clinic reading misses what the body is doing the rest of the time. Estimates put this at ten to twenty percent of people, especially in middle-aged adults with otherwise borderline-looking numbers."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Masked hypertension is the more concerning of the two patterns, because the clinic alone does not see it. The home trend reveals it."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Why home readings matter"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Both patterns are why home blood pressure monitoring is now recommended in nearly every major guideline. The trend across two weeks at home tells a clearer story than two clinic readings months apart. The Leiko trend chart exports easily; bringing it to the visit gives your doctor the data they need to read your numbers correctly rather than guess."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If your home readings consistently disagree with your clinic readings — in either direction — that is exactly the conversation worth having at the next visit."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/changes-005.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "changes-006",
+      "title": "Hydration and blood pressure",
+      "category": "CHANGES",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 3,
+      "related_cards": [
+        "changes-001",
+        "numbers-008"
+      ],
+      "sources": [
+        "AHA on Fluid Balance and Blood Pressure",
+        "Watso JC, Farquhar WB — Hydration Status and Cardiovascular Function"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Hydration and blood pressure are linked, but the link is not the simple \"drink more water and your numbers will drop\" story you sometimes hear. The body is adaptive, and the relationship runs in both directions."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Mild dehydration"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Mild dehydration tends to lower blood pressure slightly. The amount of fluid in the system has dropped, so the system runs at slightly less pressure. For a person whose readings already sit in the higher range, mildly dehydrated mornings sometimes look better than well-hydrated ones — not because the underlying reading is lower, but because the body is running a little lighter."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "This is not a way to bring your numbers down. The same dehydration that nudges a reading lower has its own costs — lower energy, headaches, less effective kidneys — and the effect on the reading reverses the moment the body re-hydrates."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Severe dehydration"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Severe dehydration also lowers blood pressure, sometimes sharply. This is not the desirable kind of low — it can leave a person lightheaded, especially when standing, and is one of the things emergency medicine watches for in heat, illness, or after a long workout. If you suspect severe dehydration in yourself or someone you care for, the answer is fluids and a calm pause, not a blood-pressure check."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Consistent hydration is part of an accurate reading"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Drinking water before a reading does not \"fake\" the trend. Consistent hydration across days is part of taking comparable readings — the body in roughly the same state on Monday morning as on Wednesday morning. A reading taken on a hot day after a long walk, with no water for hours, will read differently than a reading on a cool morning at home."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If the chart looks unusually noisy on hot days, on travel days, or during illness, hydration is one of the things moving the line. Watch the trend across calmer weeks."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/changes-006.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "corr-001",
+      "title": "Why sleep and morning blood pressure move together",
+      "category": "CORRELATIONS",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "sleep-003",
+        "changes-001",
+        "corr-003"
+      ],
+      "sources": [
+        "AHA Scientific Statement on Sleep Duration and Cardiovascular Health",
+        "Calhoun DA, Harding SM — Sleep and Hypertension"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Of the cross-vital patterns the watch can show, the link between sleep and morning blood pressure is the strongest and most consistent. Watch the sleep chart and the BP chart side by side across two weeks; the pattern often appears clearly."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "The pattern"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A short or fragmented night tends to lift the next morning's top number by a few mmHg over a person's usual baseline. Across a week of short nights, the lift compounds — the body has not had its usual maintenance window. Once a more-rested night returns, the morning numbers settle."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "This is not an iron rule for any single person on any single morning. Plenty of nights are short for unrelated reasons and the next morning looks fine. The pattern shows up over weeks, not days."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Why the body does this"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Blood vessels relax during deep sleep. Hormones that regulate fluid balance and stress reset overnight. The body uses sleep for vascular maintenance the way it uses sleep for memory and tissue repair. When the maintenance window is short, the next morning often shows it."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What the watch can see"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A correlation in Leiko's view is not a single calculation; it is a pattern across enough nights and mornings to be more than chance. The app uses about two weeks of paired sleep and morning-BP readings before showing a meaningful correlation strength. Below that, the line is too noisy to call."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If the correlation is showing in your chart, that is real information you can take to your doctor. If it isn't showing, that does not mean sleep and BP are unrelated for you — it usually means the watch needs more weeks of paired readings."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "A useful frame for the conversation"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "When a doctor and a person sit down to talk about morning numbers, \"I sleep five to six hours most weeknights and my morning numbers are higher then\" is a much richer starting point than \"my numbers are sometimes high.\" The first is a pattern. The second is a worry."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The trend chart turns the worry into the pattern. That is most of what it is for."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/corr-001.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "corr-002",
+      "title": "Activity and resting heart rate",
+      "category": "CORRELATIONS",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "activity-001",
+        "hr-002",
+        "corr-003"
+      ],
+      "sources": [
+        "ACSM Guidelines for Exercise Testing and Prescription",
+        "Reimers AK et al — Resting Heart Rate and Physical Activity"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Resting heart rate is one of the cleanest places to see fitness change. A consistent week or two of more movement, in a person not already at the high end of fitness, often shows up in the next month's resting numbers as a few beats lower."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "How fitness moves the resting number"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A stronger heart pushes more blood with each contraction. That means the same total volume of blood the body needs at rest can be delivered with fewer beats. The result, on the watch, is a resting baseline that drifts down across weeks of consistent activity."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The change is gradual, not immediate. A single hard workout does not lower the resting baseline; what changes after a single workout is the recovery curve over the next twelve to twenty-four hours. The longer-term drift in the baseline takes consistency."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Stopping movement reverses the change at roughly the same speed. People who travel, get sick, or lose their walking routine for a few weeks often see their resting heart rate climb back to its previous level within a month."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What the trend chart shows"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Open the activity and HR charts together, across a month. A consistent week of higher step counts often pairs with a small but visible dip in the resting line a week or two later. The lag is real — the body adapts after the consistency, not during the first hard day."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Conversely, a week of low movement can pair with a slightly higher resting baseline a week later. The body responds to what the rest of the system is doing, on its own timescale."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What is not a correlation"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A single high-stress day with high resting HR is not a fitness pattern; it is a stress pattern. A single low resting morning after a hard workout is not a fitness gain; it is a recovery dip. The correlation worth watching is the slow drift of the line across weeks, not any single day."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "For people focused on blood pressure, this is doubly useful: the same consistent activity that lowers resting heart rate is one of the few things that nudges resting blood pressure down too."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/corr-002.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "corr-003",
+      "title": "Reading patterns over weeks",
+      "category": "CORRELATIONS",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "numbers-008",
+        "doctor-003"
+      ],
+      "sources": [
+        "AHA/ACC 2017 Home Monitoring Section",
+        "ESH 2023 Ambulatory Blood Pressure Monitoring Guideline"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A single reading is a snapshot. A week is a sketch. A month is a portrait. Each level of the trend tells you something different, and the most useful conversation with a doctor sits at the level of the month — not the morning."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What changes at each timescale"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A reading on a Tuesday morning is one moment of a person's day. It moves with caffeine, sleep, mood, and time of day. Trying to read individual mornings is reading the noise."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A week of mornings, averaged, smooths most of the day-to-day variation. Trends within a week — readings drifting up across five days, or settling across the same period — are usually meaningful. A typical hypertensive adult has weekly averages that vary by three to five mmHg from week to week."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A month of weeks tells a much richer story: the season of life, the consistency of the routine, the shape of the rest of the chart. Comparing this month to last month is where most clinical decisions happen."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What patterns the watch can show"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Three patterns are usually worth noticing across the month:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "strong",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Steady baseline."
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": " Weekly averages within a few mmHg of each other. The body in its usual state."
+            }
+          ],
+          [
+            {
+              "type": "strong",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Gradual rise."
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": " Three or four weeks of small increases that add up. The conversation worth having at the next visit."
+            }
+          ],
+          [
+            {
+              "type": "strong",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Episodic spikes."
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": " A week or two of higher numbers tied to a specific event — illness, travel, a stressful project — that resolve after the event passes."
+            }
+          ]
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Each pattern calls for a different response. A gradual rise across a month is a slow-burning signal. An episodic spike is context, not signal."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Bring the chart, not the reading"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "When a person sits down with a doctor to talk about hypertension, the most useful thing they can bring is the trend chart from the last month or two. The doctor reads the picture in seconds and asks better questions because of it. A printed table of individual readings is much harder to make sense of, and a single reading from yesterday is less useful than the average from the last four weeks."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Watch the picture, not the dot."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/corr-003.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "doctor-001",
+      "title": "What to bring to your doctor visit",
+      "category": "DOCTOR",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "doctor-002",
+        "doctor-003",
+        "corr-003"
+      ],
+      "sources": [
+        "AHA/ACC 2017 Home Monitoring Section",
+        "ESH 2023 Ambulatory Blood Pressure Monitoring Guideline"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A blood pressure visit is short. The doctor has fifteen, maybe twenty minutes. What you bring decides how much of the visit is informative versus catching up. The watch makes most of this preparation a small job."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Your trend chart"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The single most useful thing to bring is the trend chart from the last month or two. The watch's PDF export is built for this — it shows weekly averages, time-of-day patterns, and any sustained shifts in a format the doctor can read in under a minute."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If you have a longer history available, bring a three-month view. Doctors looking at hypertension often want at least one month of home readings before suggesting changes; three months is even better."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "A short list of readings that surprised you"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Two or three specific readings, with the context around each, are far more useful than a printout of every reading. Note what was happening: time of day, recent meal, mood, anything unusual about the moment. The doctor can read those few moments against the trend."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A list of every reading, on the other hand, is hard to make sense of in the time available. The chart already summarises that data."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Your medication list"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Bring everything — the prescribed medications, the supplements, anything taken regularly. Some over-the-counter medications affect blood pressure in ways doctors specifically want to know about. The list helps your doctor see the full picture."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If your medications have changed recently, note when. Timing matters when reading the trend."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Your home cuff, if you have one"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Some doctors check home cuffs for accuracy at the visit by comparing them to the clinic device. If your readings ever look meaningfully different from the clinic's, the cuff calibration is one of the things to rule out."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Your questions, written down"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The visit fills up faster than people expect. A short list of questions on paper or your phone keeps the conversation focused on what you actually want to know. The next card has examples of what to ask."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/doctor-001.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "doctor-002",
+      "title": "Questions worth asking your doctor",
+      "category": "DOCTOR",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "doctor-001",
+        "doctor-003"
+      ],
+      "sources": [
+        "AHA Patient Education Materials on Home BP Monitoring",
+        "Choosing Wisely — ABIM Foundation"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A doctor visit goes faster when the questions are written down. Most people, given a busy moment in a small room, forget two or three of the things they wanted to ask. A short list on a phone or piece of paper changes that."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "A few questions that often help"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "These are the questions that doctors say tend to start the most useful conversations:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "em",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "\"What's a good number for me to aim for?\""
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": " The right target is not always the textbook one — it depends on age, other conditions, and the rest of the picture. Asking puts the conversation in your terms, not just the chart's."
+            }
+          ],
+          [
+            {
+              "type": "em",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "\"What time of day should I take my readings?\""
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": " Different doctors recommend different times. Most prefer mornings before the first medication and meal; some also want an evening reading. Knowing the answer makes the trend chart more useful."
+            }
+          ],
+          [
+            {
+              "type": "em",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "\"Is my home cuff or watch reliable enough for these decisions?\""
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": " Doctors often have a quick way to check; some want the readings done on a specific cuff. Better to know now than to argue later."
+            }
+          ],
+          [
+            {
+              "type": "em",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "\"What does my trend chart actually show you?\""
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": " This is the most useful question to ask once your doctor has looked at the chart for a moment. The answer often contains the most informative observation of the whole visit."
+            }
+          ]
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Questions for when something is changing"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If your numbers have drifted up or down, or your medication is being considered for a change:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "em",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "\"What pattern in my chart led you to this suggestion?\""
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "em",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "\"What would make us reconsider in a few weeks?\""
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "em",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "\"What's the smallest change worth making first?\""
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "em",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "\"How will we know it is working — and how long should we wait before deciding?\""
+                }
+              ]
+            }
+          ]
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Questions about lifestyle"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Most doctors will offer general advice about sleep, salt, movement, and weight. The conversation is more useful when it gets specific:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "em",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "\"Of those, which would matter most for me?\""
+                }
+              ]
+            }
+          ],
+          [
+            {
+              "type": "em",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "\"Is there a target — for sleep hours, for daily steps, for salt grams — that you'd put first?\""
+                }
+              ]
+            }
+          ]
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What is generally not the right question for the doctor"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Specific medication choices, dosage changes, drug interactions, and symptom interpretation are the doctor's territory, not the watch's. Bring the trend; let the clinical decisions sit with the clinician."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/doctor-002.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "doctor-003",
+      "title": "Sharing your trends with your doctor",
+      "category": "DOCTOR",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "doctor-001",
+        "doctor-002",
+        "corr-003"
+      ],
+      "sources": [
+        "AHA/ACC 2017 Home Monitoring Section",
+        "ESH 2023 Ambulatory Blood Pressure Monitoring Guideline"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The watch is most useful at the doctor visit when its data is in a form the doctor can read in seconds. The Leiko trend export is built for that: a one-page summary on top, the chart on the next page, and a clean table for the doctor's own notes."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What the doctor will look at first"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The doctor has a few seconds to size up the chart. The features they tend to look for, in order:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "text",
+              "value": "The average across the last month — one number, the headline of the chart"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "The time-of-day pattern — are mornings reliably higher, are evenings calmer"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Any sustained week-over-week shift, especially in the same direction"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "The variability — is the line steady or is it bouncing"
+            }
+          ]
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If a single piece of paper can answer those four questions, the visit gets useful immediately."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Why home readings change the conversation"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Clinic readings, on their own, are noisy. White-coat readings can lift a clinic number into a tier the person does not actually live in. Masked hypertension can hide a real pattern. Home readings, taken across two or three weeks, give the doctor a fuller picture than two clinic readings months apart."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "In the rooms where home blood pressure monitoring is taken seriously, the home trend is the deciding evidence — for whether to start medication, whether to change a dose, whether to wait another six weeks."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Sharing more than just blood pressure"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The watch tracks heart rate, sleep, activity, and blood oxygen alongside blood pressure. Each of those tells the doctor something useful when the conversation broadens. A doctor looking at a higher-than-usual morning trend will sometimes ask, \"how has sleep been?\" — and an answer with the sleep chart in front of you is much richer than a guess from memory."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The export gives the doctor the option to see all of it. The doctor decides which charts are useful for the conversation."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "A small note on Plus"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The doctor-ready PDF export is part of Plus. Free users see the trend chart in the app and can show it from the phone; Plus users can email or print the export ahead of the visit, the way most doctors prefer."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "The decision still sits with the doctor"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "You bring the data. The doctor decides what it means and what to do. That separation is the right one. The watch helps you have the conversation; the conversation, between you and the clinician who knows you, is where the decisions land."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/doctor-003.mdx"
+  },
+  {
+    "frontmatter": {
       "id": "hr-001",
       "title": "What is resting heart rate?",
       "category": "HR",
@@ -382,6 +2610,464 @@ export const ARTICLES: readonly CompiledArticle[] = [
       }
     ],
     "sourcePath": "apps/mobile/src/learn/articles/hr-001.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "hr-002",
+      "title": "What changes your resting heart rate",
+      "category": "HR",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "hr-001",
+        "hr-003",
+        "corr-002"
+      ],
+      "sources": [
+        "AHA Scientific Statement on Heart Rate",
+        "Cooney MT et al — Resting Heart Rate as a Cardiovascular Risk Factor"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": true,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Resting heart rate moves on two timescales — short and slow. Both show up in your watch trend; recognising which is which makes the chart easier to read."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Short-timescale changes"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Some things move resting heart rate within hours:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "text",
+              "value": "Caffeine — a few extra beats per minute for one to two hours"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Stimulants in some prescribed medications"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Stress, anger, hurry — minutes"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Illness, especially with fever — days"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Dehydration after heat or hard movement — hours"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "A heavy meal — usually thirty to ninety minutes"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Alcohol — six to twenty-four hours, depending on quantity"
+            }
+          ]
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "These show up as spikes on the trend chart, not as a new baseline. The line returns to its usual level within a day or two."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Slow-timescale changes"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Other things move the baseline gradually, across weeks or longer:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "text",
+              "value": "Loss of fitness — heart rate climbs as the cardiovascular system has less work to do"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Gain of fitness — the opposite; a stronger heart at rest pumps more blood per beat and needs fewer beats"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Age — slow upward drift across decades"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Sleep quality — short or fragmented sleep, sustained, often shows up as a higher resting baseline"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Body weight changes"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Long-term changes in stress level"
+            }
+          ]
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "These show up as a gradual rise or fall in the line, not a single spike."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "A pattern worth noticing"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A sustained rise in your resting heart rate — say, ten beats per minute over four to six weeks — without an obvious explanation is worth a mention at your next visit. The same pattern in the other direction is usually the reward of consistent sleep or movement."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Single-day spikes are noise. Trends are signal."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Caffeine deserves its own line"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Caffeine is the change most people notice on the watch and least often think about as a cause. If your morning resting heart rate looks unusually high, the question to ask is \"what time did I take my first coffee yesterday and today?\" Often the answer is the answer."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/hr-002.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "hr-003",
+      "title": "When to talk to your doctor about heart rate",
+      "category": "HR",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "hr-001",
+        "hr-002",
+        "doctor-001"
+      ],
+      "sources": [
+        "AHA Scientific Statement on Heart Rate",
+        "ACC on Bradycardia and Tachycardia Reference Ranges"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": true,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Most heart-rate trends are not a cause for concern. The watch will sometimes catch numbers that look unusually high or low, almost always for an explainable reason. A few patterns are worth bringing to a doctor visit."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "A sustained rise"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If your resting heart rate has drifted up by ten beats per minute or more over four to six weeks, and you cannot link it to caffeine, illness, a stressful period, or a change in fitness — that pattern is worth a mention at your next visit. The doctor will not panic, and neither should you. They will likely ask about sleep, recent illness, medications, and whether anything else has shifted."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The same pattern over a few days, with an explanation behind it, is usually nothing."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Resting numbers far outside the typical range"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "For most healthy adults, resting heart rate sits between 60 and 100 beats per minute. Outside that range, two situations can come up:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "strong",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Below 50, sustained, in a person who is not athletic."
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": " Some athletes sit comfortably in the 40s. Most people do not. A persistent low resting rate, especially with light-headedness on standing, is something a doctor should hear about."
+            }
+          ],
+          [
+            {
+              "type": "strong",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Above 100, sustained."
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": " A consistent resting rate above 100 across many days, not explained by stress or illness, is worth a same-week call."
+            }
+          ]
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Neither situation is automatically an emergency. They are conversations worth having sooner rather than later."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Episodes of irregular rhythm"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If you notice your watch flagging episodes of irregular rhythm — moments where the heartbeat seems to jump, skip, or run away briefly — pay attention to whether they come with the body signals your doctor has reviewed with you. Body signals matter more than the watch's reading. The watch is not built to make a clinical call on rhythm, and the urgency of the situation depends on what your body is telling you, not on the number alone."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If something feels acutely wrong, call your doctor or your local emergency line. They are there for exactly this question."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Bringing the trend to the visit"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The most useful thing the watch gives a doctor is the pattern across weeks. Bring the chart, not the worry."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/hr-003.mdx"
   },
   {
     "frontmatter": {
@@ -611,6 +3297,1143 @@ export const ARTICLES: readonly CompiledArticle[] = [
   },
   {
     "frontmatter": {
+      "id": "numbers-002",
+      "title": "What \"elevated\" means",
+      "category": "NUMBERS",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 120,
+        "systolic_max": 129,
+        "diastolic_min": 0,
+        "diastolic_max": 79
+      },
+      "inline_explainer_priority": 1,
+      "related_cards": [
+        "numbers-001",
+        "numbers-003",
+        "changes-005"
+      ],
+      "sources": [
+        "AHA/ACC 2017 Hypertension Guideline (Whelton et al)",
+        "ESC/ESH 2018 Guidelines for the Management of Arterial Hypertension"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": true,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A reading in the elevated range sits between the in-range mark and the first tier of high blood pressure. The top number is between 120 and 129, and the bottom number is below 80. It is not yet considered high blood pressure — it is a signal that the top number is starting to creep up."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What this range tells you"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The AHA/ACC introduced \"elevated\" as a distinct tier in 2017 to flag readings that are no longer comfortably in range without labelling them as hypertensive. Older guidelines, and some clinical practices today, called this same range \"pre-hypertension\" — different name, same idea."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A single elevated reading is common. Many people see one in any given week. The signal becomes more meaningful when several mornings in a row sit in this range, especially if last month's were not."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What often moves a reading into this range"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Some readings reach this range for a clear reason and return to lower numbers within hours:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "text",
+              "value": "A salty meal in the previous twelve hours"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Caffeine in the previous one to two hours"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Stress, conversation, or hurry in the moment of the reading"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Recent activity that has not yet \"settled\""
+            }
+          ]
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Other times, the trend is gradual — a slow drift up across weeks or months. This is the trend a person watches with a home monitor."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What people often do here"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Most people in this range work with their doctor to focus on lifestyle adjustments first — sleep, salt, regular movement, and weight when relevant. Many find their numbers drift back into the in-range area over a few months. Some do not, and that conversation moves on to other tools."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "What you do is between you and your doctor. The watch is here to surface the pattern across days and weeks, not to make the decision."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/numbers-002.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "numbers-003",
+      "title": "What \"Stage 1\" means",
+      "category": "NUMBERS",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 130,
+        "systolic_max": 139,
+        "diastolic_min": 80,
+        "diastolic_max": 89
+      },
+      "inline_explainer_priority": 1,
+      "related_cards": [
+        "numbers-002",
+        "numbers-004",
+        "doctor-001"
+      ],
+      "sources": [
+        "AHA/ACC 2017 Hypertension Guideline (Whelton et al)",
+        "NICE NG136 — Hypertension in Adults"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": true,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Stage 1 is the first tier of high blood pressure under the AHA/ACC's 2017 thresholds — a top number between 130 and 139, or a bottom number between 80 and 89. The reading is high if either number is in that range."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "A note on which guideline your doctor uses"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Two large guideline bodies disagree about where Stage 1 begins. The AHA and ACC, the leading US bodies, drew the line at 130/80 mmHg in 2017. NICE, the UK guideline body, kept the line at 140/90 mmHg. Your doctor uses whichever the local practice follows; the watch shows you whichever you have set in Settings."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The disagreement is real. The AHA chose a lower number to flag risk earlier; NICE chose a higher number to avoid medicalising readings that often improve with lifestyle. Both can be right depending on the person and the rest of the picture."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What often happens in this range"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "In Stage 1 (under either guideline), the first conversation with most doctors is about lifestyle adjustments — sleep, salt, regular movement, weight where relevant. Many people see their numbers drift down over three to six months without medication. Whether to add medication is a decision the doctor makes with you, looking at the full picture: family history, other conditions, your trend."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "White-coat readings can falsely lift a clinic measurement into this range. Home readings — the kind your watch takes — often give a more representative number. Bringing your home trend to the visit changes what your doctor can see."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "When this is worth raising"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If two or more of your home readings on different days fall in this range, mention it at your next visit. One reading on one morning is rarely enough to act on."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/numbers-003.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "numbers-004",
+      "title": "What \"Stage 2\" means",
+      "category": "NUMBERS",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 140,
+        "systolic_max": 159,
+        "diastolic_min": 90,
+        "diastolic_max": 99
+      },
+      "inline_explainer_priority": 1,
+      "related_cards": [
+        "numbers-003",
+        "numbers-006",
+        "doctor-001",
+        "doctor-002"
+      ],
+      "sources": [
+        "AHA/ACC 2017 Hypertension Guideline (Whelton et al)",
+        "WHO Global Report on Hypertension 2023"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": true,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Stage 2 is the higher tier of high blood pressure — a top number of 140 or above, or a bottom number of 90 or above. Under both the AHA/ACC and the European or UK guidelines, this range is high blood pressure rather than a borderline value."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What often happens in this range"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Most clinicians will recommend medication alongside lifestyle adjustments at this stage. The decision is the doctor's to make with you, and the right plan depends on your trend, your other conditions, and what you have already tried. Many people in this range bring their numbers down with a combination of small daily changes and the right medication. Many also see their morning readings settle within weeks of starting a new plan."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Sustained Stage 2 numbers across months are associated with a higher risk of stroke and heart problems over years. We say that once, factually, because the trend matters. We do not repeat it as a worry; the watch is here to give you and your doctor the data to do something about it."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What home readings add to the conversation"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Clinic readings can be misleadingly high (white-coat) or misleadingly low (masked). A home trend across two weeks often tells a clearer story than two clinic readings months apart. Many doctors specifically ask for home readings when discussing whether to start, change, or hold medication. Bring the trend chart to the next visit — the watch makes this easy."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If your morning numbers consistently sit in this range, that's the conversation worth having soon. If a single reading lands here on a busy or unusual morning, the trend over the next few days will tell you more."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/numbers-004.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "numbers-005",
+      "title": "Why systolic and diastolic each matter",
+      "category": "NUMBERS",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 3,
+      "related_cards": [
+        "numbers-001",
+        "numbers-002"
+      ],
+      "sources": [
+        "AHA/ACC 2017 Hypertension Guideline (Whelton et al)",
+        "ESC/ESH 2018 Guidelines for the Management of Arterial Hypertension"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": true,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A blood pressure reading shows two numbers because the heart does two distinct things every beat — it contracts to push blood out, and it relaxes to fill back up. Each phase has its own pressure on the artery walls."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Top number — when the heart contracts"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The top number is "
+          },
+          {
+            "type": "definition",
+            "term": "systolic",
+            "children": [
+              {
+                "type": "text",
+                "value": "the pressure when your heart contracts and pushes blood out into your arteries"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": ". It is the higher of the two values. The systolic pressure changes most noticeably with stress, exercise, posture, and time of day. It is also the number that drifts upward most reliably with age."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "For most adults, this is the number doctors weight more heavily when deciding whether a reading is high. Nearly all of the long-term outcomes research that defines the BP ranges leans on the systolic number."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Bottom number — when the heart rests"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The bottom number is "
+          },
+          {
+            "type": "definition",
+            "term": "diastolic",
+            "children": [
+              {
+                "type": "text",
+                "value": "the pressure between beats, when the heart fills again before its next contraction"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": ". It is the steadier of the two values, and tends to change less across a single day than the top number does."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "In younger adults, the bottom number can be the first to lift. In older adults, the opposite is more common — the bottom number drops or stays steady while the top number rises. That second pattern has its own name in clinical practice: isolated systolic hypertension. It is common in adults over sixty."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Why both matter for the reading"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A reading is in the higher range if either number is in the higher range. A top number of 145 with a bottom number of 78 is still Stage 2, even though the bottom looks settled. The same is true the other way around — a bottom of 95 with a top of 128 is still high."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Watch both numbers in your trend. The patterns each one tells are different."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/numbers-005.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "numbers-006",
+      "title": "When a high reading is worth a closer look",
+      "category": "NUMBERS",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 160,
+        "systolic_max": 179,
+        "diastolic_min": 100,
+        "diastolic_max": 119
+      },
+      "inline_explainer_priority": 1,
+      "related_cards": [
+        "numbers-007",
+        "numbers-008",
+        "doctor-001",
+        "doctor-002"
+      ],
+      "sources": [
+        "AHA/ACC 2017 Hypertension Guideline (Crisis section)",
+        "Joint National Committee 8 — Hypertension Management"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": true,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Most blood pressure readings, even ones that look high, are not emergencies. A high reading is a piece of information the body offers — what to do with it depends on whether the high reading is a one-off, a sustained trend, or a number that comes with how-you-feel signals from your body."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "A single high reading"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A single reading at 165/105 mmHg, by itself, on an otherwise calm day, is rarely an emergency. The watch may have caught the reading during a busy or stressed moment. The right response in that situation is to sit, breathe slowly for a couple of minutes, and re-take the reading on the same arm. A reading is more reliable when it follows a few minutes of stillness."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If the second reading is meaningfully lower, the first one was a moment, not a trend."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "A pattern of high readings"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "When several readings on different days sit in this range, it is worth a doctor visit — a planned visit, not an emergency-room visit. Bring the trend chart from your watch. The doctor's job is to look at the pattern across days, alongside whatever else they know about you, and decide what to do."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "This is where home readings earn their keep. A trend across two weeks tells a clearer story than two clinic readings months apart."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "When a reading comes with body signals"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A high reading that comes with the kind of urgent symptoms your doctor has already discussed with you is a different situation. Those situations are covered in your doctor's instructions and on the next card; the short answer is that they need urgent care, not a pause-and-retake."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If you are not sure which situation you are in, the safe thing is to call your doctor or your local emergency line. They are there for exactly this."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/numbers-006.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "numbers-007",
+      "title": "Hypertensive urgency vs emergency",
+      "category": "NUMBERS",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 180,
+        "systolic_max": 999,
+        "diastolic_min": 120,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 1,
+      "related_cards": [
+        "numbers-006",
+        "doctor-001",
+        "doctor-002"
+      ],
+      "sources": [
+        "AHA/ACC 2017 Hypertension Guideline (Crisis section)",
+        "Joint National Committee 8 — Hypertension Management"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": true,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "When a reading is at 180/120 mmHg or above, clinicians use two specific words to describe what happens next: urgency, and emergency. Both involve the same range of numbers; the difference is whether the body is signalling something more."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Two clinical terms, one calm explanation"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A hypertensive "
+          },
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "urgency"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": " is a reading at or above 180/120 mmHg without the kind of body signals that suggest the high pressure is causing damage right now. Most urgencies are managed by your doctor on a same-day call or visit, not in an emergency room."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A hypertensive "
+          },
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "emergency"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": " is a reading at or above 180/120 mmHg that comes with the urgent body signals your doctor has discussed with you. An emergency needs urgent care now — call your local emergency line or get to an emergency department directly."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Your doctor knows which signals matter for you. If you have not had that conversation, ask at your next visit. The right time to learn the difference is before you are deciding in the moment."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What to do with a single very high reading on a calm morning"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If the reading is high but you feel completely fine, the watch may have caught a measurement error or a moment of unusual stress. The right response is the same as for any high reading: sit, breathe slowly for several minutes, and re-take on the same arm. If the second reading is meaningfully lower, the first one was a moment."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If both readings sit in this range and you feel fine, call your doctor today — same day, not next week. They will tell you what to do next."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "When in doubt"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If you are not sure whether the reading is an urgency or an emergency, default to calling your doctor or your local emergency line. They are there for exactly this question, and the cost of asking is small. The cost of waiting can be larger."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/numbers-007.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "numbers-008",
+      "title": "Why one high reading is rarely the whole story",
+      "category": "NUMBERS",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "numbers-001",
+        "changes-005",
+        "corr-003"
+      ],
+      "sources": [
+        "AHA/ACC 2017 Home Monitoring Section",
+        "ESC/ESH 2018 Guidelines for the Management of Arterial Hypertension"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": true,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Blood pressure changes through the day. A 20 mmHg swing in the top number across the same day is normal for most healthy adults. A single reading is a snapshot, and a snapshot rarely captures a life."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What can shift a single reading"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Many small things move a reading by 5 to 15 mmHg in either direction:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "text",
+              "value": "A salty meal in the previous twelve hours"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Caffeine in the last one to two hours"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "A full bladder"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "A cold cuff or a tight band"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Sitting cross-legged"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Talking during the reading"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Recent activity that hasn't settled"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "The arm being rested or unrested"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Time of day — the body's own circadian pattern"
+            }
+          ]
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "None of these are reasons to dismiss a high reading. They are reasons to take the next reading carefully and watch the pattern."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "Why two readings are better than one"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Most clinical guidance recommends taking two readings about a minute apart and using the average. The first reading often runs slightly higher than the second — the body settles after the cuff inflates the first time. The watch makes this easy: take a reading, rest for a minute, take a second."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If the two readings are within a few mmHg of each other, both are reliable. If they are very different, take a third. The trend across the three is more useful than any one of them."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What the trend chart does"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The Leiko trend chart shows your readings across days and weeks, smoothed so that one busy morning does not pull the line. That smoothed line is more meaningful than any single dot on it. When you talk to your doctor about your numbers, the line is the conversation — not yesterday's reading."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A high reading is data. A high week is information. A high month is a pattern. Read each level for what it is."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/numbers-008.mdx"
+  },
+  {
+    "frontmatter": {
       "id": "sleep-001",
       "title": "Sleep stages explained",
       "category": "SLEEP",
@@ -799,6 +4622,454 @@ export const ARTICLES: readonly CompiledArticle[] = [
       }
     ],
     "sourcePath": "apps/mobile/src/learn/articles/sleep-001.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "sleep-002",
+      "title": "What affects your sleep score",
+      "category": "SLEEP",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "sleep-001",
+        "sleep-003",
+        "corr-001"
+      ],
+      "sources": [
+        "AASM Sleep Architecture Reference",
+        "Hirshkowitz M et al — National Sleep Foundation Sleep Time Recommendations"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The sleep score on the watch is a single number that summarises four different things the watch is measuring overnight. Knowing what is in the number makes the score easier to read and, when it dips, easier to act on."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "The four things the score reflects"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "Total time asleep"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": " is the largest single contributor. A night of seven hours generally scores higher than a night of five, all else equal. This is the part of the score most people can move directly."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "Continuity"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": " is the next contributor. Shorter awake periods through the night, fewer of them, score better than the same total time broken up across many wakings. The watch counts both how many times you stirred and how long the stirs lasted."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "Heart rate variability during sleep"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": " is the third — a small but real contributor. It is the watch's proxy for how restorative the night was. A heart rate that drops smoothly into a low overnight band tends to score better than one that stays close to daytime numbers."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "strong",
+            "children": [
+              {
+                "type": "text",
+                "value": "Movement-derived stage estimates"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "value": " are the fourth. The watch uses your movement and heart-rate pattern to make a rough guess at how much of the night was deep, light, REM, and awake. The estimate is approximate, not what a sleep lab produces."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What changes the score"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Many ordinary things show up in the score:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "text",
+              "value": "Bedtime and wake time consistency, across a week"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Caffeine after early afternoon"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Alcohol in the evening — almost always lowers the score, even when it speeds the start of sleep"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Eating late, especially heavy meals"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "A warm room, a noisy environment, a busy day"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Stress"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Illness"
+            }
+          ]
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Across weeks, fitness and weight changes also nudge the line."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "How to read the chart"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Look at the trend across a week, not the single night. One bad night is noise. A week of low scores is the signal worth acting on. The score is approximate; the trend is reliable."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If your sleep scores have dropped without an obvious cause and stayed low for two or three weeks, that is worth a conversation with your doctor — especially if you also feel tired in the day."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/sleep-002.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "sleep-003",
+      "title": "Sleep and blood pressure",
+      "category": "SLEEP",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "sleep-001",
+        "sleep-002",
+        "corr-001",
+        "changes-001"
+      ],
+      "sources": [
+        "AHA Scientific Statement on Sleep Duration and Cardiovascular Health",
+        "Calhoun DA, Harding SM — Sleep and Hypertension"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": false,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Of the everyday signals the watch tracks, sleep is the one most reliably linked to morning blood pressure. The link is well-studied, and most people can see it in their own chart within a few weeks."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "The pattern, in plain language"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A short or interrupted night tends to leave the body running with slightly higher pressure the next morning. The size of the bump varies by person, but five to eight studies converge on a similar shape: a single five-hour night, on average, lifts the next morning's top number by two to four mmHg over a person's usual baseline. A run of short nights adds up."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The opposite is also true. A consistent week of seven to eight hours of mostly-uninterrupted sleep tends to bring morning numbers back to baseline."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The watch sees both halves of this pattern. The sleep chart and the BP chart, viewed side by side across two weeks, show the link the way the research does."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "A few things many people find help"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Most of the well-studied changes are unremarkable on their own; they add up:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "text",
+              "value": "A consistent bedtime and wake time, even on weekends"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "A cool, dark, quiet room"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "No caffeine after early afternoon"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Less alcohol in the evening — alcohol speeds the start of sleep but breaks the second half of the night"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Lighter meals later in the evening"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "A wind-down routine in the half hour before bed, away from bright screens"
+            }
+          ]
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "These are observations, not prescriptions. Your readings will tell you what is true for you."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "When to take it past the watch"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If sleep stays short or fragmented across many weeks, with daytime tiredness, snoring loud enough to bother a partner, or morning headaches, the conversation moves beyond what the watch can show. Sleep-disordered breathing — a clinical pattern with its own proper test — is one of the things doctors look for when blood pressure does not respond to the usual changes. The watch can hint at it; the test confirms it."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Bring the sleep chart and the BP chart together to the visit. They are most useful as a pair."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/sleep-003.mdx"
   },
   {
     "frontmatter": {
@@ -995,6 +5266,388 @@ export const ARTICLES: readonly CompiledArticle[] = [
       }
     ],
     "sourcePath": "apps/mobile/src/learn/articles/spo2-001.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "spo2-002",
+      "title": "Why blood oxygen dips at night",
+      "category": "SPO2",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "spo2-001",
+        "spo2-003",
+        "sleep-001"
+      ],
+      "sources": [
+        "AHA on Sleep-Disordered Breathing and Cardiovascular Risk",
+        "FDA Pulse Oximeter Accuracy and Limitations Guidance, 2023"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": true,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Blood oxygen drops slightly during sleep for almost everyone. The body's breathing pattern shifts overnight, and brief, shallow dips of a few percentage points are normal. The watch will sometimes show these dips on the overnight chart."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What is normal at night"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "During the deeper phases of sleep, breathing slows and deepens. The body uses slightly less oxygen and the level on the wrist sensor often reads one to two percent lower than during the day. A reading that briefly touches 92 or 93 percent during sleep is common and rarely meaningful on its own."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "This pattern is well-studied; it is part of why overnight oxygen monitoring is its own clinical specialty rather than a casual home check."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What patterns are worth noticing"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Two overnight patterns are worth raising with a doctor:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "text",
+              "value": "A persistent baseline below 92 percent across many nights"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Repeated, deeper dips below 88 to 90 percent that come and go through the night"
+            }
+          ]
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "These can be a hint that the airway is not staying fully open during sleep — a pattern called sleep-disordered breathing. The clinical name for the most-discussed version is sleep apnea. The watch cannot tell whether the pattern is present; it can only show that the chart looks worth a closer look."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If the overnight chart looks like that across many nights, that is the conversation to bring to your doctor. They have a proper test for it — an overnight study at home or in a sleep lab. The watch is a hint, not the test."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What the watch cannot tell you"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Wrist sensors are imprecise overnight. Movement, body position, and the band's contact with skin all affect the reading. A single low overnight number on a single night is rarely meaningful — the sensor may simply have lost good contact for a few minutes."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If you have an existing respiratory or cardiac condition, do not rely on the watch's overnight chart for any decision about your care. Use the device your doctor recommends."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/spo2-002.mdx"
+  },
+  {
+    "frontmatter": {
+      "id": "spo2-003",
+      "title": "What to share with your doctor about blood oxygen",
+      "category": "SPO2",
+      "audience": [
+        "self_buyer",
+        "caregiver"
+      ],
+      "mode_relevance": [
+        "self",
+        "caregiver",
+        "hybrid"
+      ],
+      "reading_context": {
+        "systolic_min": 0,
+        "systolic_max": 999,
+        "diastolic_min": 0,
+        "diastolic_max": 999
+      },
+      "inline_explainer_priority": 2,
+      "related_cards": [
+        "spo2-001",
+        "spo2-002",
+        "doctor-001"
+      ],
+      "sources": [
+        "AHA on Sleep-Disordered Breathing and Cardiovascular Risk",
+        "FDA Pulse Oximeter Accuracy and Limitations Guidance, 2023"
+      ],
+      "last_reviewed": "2026-05-09",
+      "reviewed_by": null,
+      "clinical_review_required": true,
+      "clinical_reviewed_at": null,
+      "locale_status": {
+        "en": "complete",
+        "yo": "pending",
+        "ig": "pending",
+        "ha": "pending"
+      }
+    },
+    "blocks": [
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The watch's blood-oxygen reading is a wellness reference, not a clinical measurement. That phrase matters: it describes how to share what the chart shows with a doctor without overstating what the device knows. The pattern on the chart is what is useful — not any single number on it."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What the chart shows"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Open the SpO2 view in the app and you can see two things across a window of days:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "text",
+              "value": "The overnight pattern — minimum, average, and how often the line dipped"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "The daytime baseline — usually steadier and closer to 96 to 99 percent"
+            }
+          ]
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A doctor reading those two summaries gets useful context. A doctor handed a single number on a single morning gets very little."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What is worth sharing"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Three patterns are worth raising with a doctor:"
+          }
+        ]
+      },
+      {
+        "type": "list",
+        "ordered": false,
+        "items": [
+          [
+            {
+              "type": "text",
+              "value": "A baseline that has drifted lower across many nights without an explanation"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "Repeated overnight dips into the low 90s or below, especially if you also notice loud snoring, daytime tiredness, or morning headaches at home"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "value": "A daytime baseline that has settled below 95 percent on a person who feels otherwise well"
+            }
+          ]
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If any of these match what you are seeing, bring the trend chart from the app. The watch makes the export straightforward, and the chart will save your doctor several questions."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "What is not worth bringing in"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "A single low reading on a single morning, especially with cold hands or after a busy moment, is almost always a sensor issue. Bringing in a screenshot of one such reading does not help the visit and may distract from the actual trend."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "The same applies during illness — a cold or a chest infection often shows lower numbers for a few days, then settles back to baseline once the illness passes. That is the body doing what it does, not a finding to chase."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "depth": 2,
+        "children": [
+          {
+            "type": "text",
+            "value": "A reminder about what the watch is"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "If you have a respiratory or cardiac condition, the watch is not the device to make decisions on. Use whichever device your doctor recommends — they will know which one suits the situation."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "children": [
+          {
+            "type": "text",
+            "value": "Talk to your doctor about what is right for you."
+          }
+        ]
+      }
+    ],
+    "sourcePath": "apps/mobile/src/learn/articles/spo2-003.mdx"
   }
 ] as const;
 

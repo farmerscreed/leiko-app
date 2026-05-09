@@ -59,10 +59,12 @@ describe('<LearnScreen />', () => {
     expect(screen.getByText('Activity')).toBeTruthy();
   });
 
-  it('hides clusters with zero articles (CHANGES, CULTURAL, etc.)', () => {
+  it('hides clusters that have zero articles in the bundled index', () => {
     render(withProviders(<LearnScreen {...makeProps()} />));
-    expect(screen.queryByText('Why blood pressure changes')).toBeNull();
+    // CULTURAL, DAILY, OTHER are not yet authored at v1.0.
     expect(screen.queryByText('In your kitchen')).toBeNull();
+    expect(screen.queryByText('Daily life and BP')).toBeNull();
+    expect(screen.queryByText('Other numbers on your watch')).toBeNull();
   });
 
   it('cluster row navigates to LearnCluster with the right category', () => {

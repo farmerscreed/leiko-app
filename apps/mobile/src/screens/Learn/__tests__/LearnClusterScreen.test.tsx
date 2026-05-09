@@ -57,7 +57,8 @@ describe('<LearnClusterScreen />', () => {
   });
 
   it('shows empty-cluster copy when no articles exist for the category', () => {
-    render(withProviders(<LearnClusterScreen {...makeProps('CHANGES')} />));
+    // CULTURAL is not authored at v1.0 — use it to exercise the empty path.
+    render(withProviders(<LearnClusterScreen {...makeProps('CULTURAL')} />));
     expect(
       screen.getByText(/Cards in this cluster arrive in the coming releases\./),
     ).toBeTruthy();

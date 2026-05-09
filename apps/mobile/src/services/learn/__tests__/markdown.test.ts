@@ -190,8 +190,10 @@ describe('parseMarkdown — full reference articles', () => {
     .readdirSync(ARTICLES_DIR)
     .filter(f => f.endsWith('.mdx'));
 
-  it('finds all 5 reference articles', () => {
-    expect(files.length).toBe(5);
+  it('finds the full v1.0 article corpus', () => {
+    // 31 = 5 reference + 7 NUMBERS + 6 CHANGES + 2 HR + 2 SPO2 + 2 SLEEP
+    //    + 1 ACTIVITY + 3 CORRELATIONS + 3 DOCTOR.
+    expect(files.length).toBe(31);
   });
 
   for (const f of files) {
