@@ -203,7 +203,7 @@ async function countMonthTierBCalls(
     .from('audit_log')
     .select('*', { count: 'exact', head: true })
     .eq('actor_user_id', userId)
-    .eq('action', 'ai.tier_b_call')
+    .eq('action', 'ai.user_question')
     .gte('occurred_at', startOfMonthIso());
   if (error) {
     console.error('countMonthTierBCalls error', error);
@@ -723,7 +723,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   await writeAuditLog(serviceClient, {
     actorUserId: userId,
     familyId: demo.familyId,
-    action: 'ai.tier_b_call',
+    action: 'ai.user_question',
     metadata: {
       tier: 'B',
       model: HAIKU_MODEL,
