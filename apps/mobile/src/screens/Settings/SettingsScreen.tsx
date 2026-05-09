@@ -21,6 +21,7 @@ import {
   Linking,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -39,6 +40,10 @@ import {
   deleteAccount,
   exportFamilyData,
 } from '../../services/users/accountActions';
+import {
+  acceptFamilyInvite,
+  sendFamilyInvite,
+} from '../../services/families/manageInvites';
 import { useAuth } from '../../state/auth';
 import { useNotifications } from '../../state/notifications';
 import { usePairing } from '../../state/pairing';
@@ -187,6 +192,24 @@ export function SettingsScreen({ navigation }: Props) {
   const [deletePending, setDeletePending] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [exportPaywallOpen, setExportPaywallOpen] = useState(false);
+
+  // Family invite flow.
+  const [inviteSheetOpen, setInviteSheetOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteLabel, setInviteLabel] = useState('');
+  const [invitePermission, setInvitePermission] = useState<'readings' | 'readings_notes'>(
+    'readings',
+  );
+  const [invitePending, setInvitePending] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+
+  const [acceptSheetOpen, setAcceptSheetOpen] = useState(false);
+  const [acceptCode, setAcceptCode] = useState('');
+  const [acceptEmail, setAcceptEmail] = useState('');
+  const [acceptPending, setAcceptPending] = useState(false);
+  const [acceptError, setAcceptError] = useState<string | null>(null);
+  const [acceptSuccess, setAcceptSuccess] = useState(false);
 
   // Vital setup (auto-HR / auto-SpO2 / goals).
   const autoHrEnabled = useVitalSetup((s) => s.autoHrEnabled);
@@ -574,6 +597,42 @@ export function SettingsScreen({ navigation }: Props) {
               testID="settings-notif-quiet-window"
             />
           ) : null}
+        </SettingsSection>
+
+        {/* Family ------------------------------------------------------ */}
+        <SettingsSection title="Family" testID="settings-section-family">
+          <ListRow
+            variant="action"
+            title={isSelfBuyer ? 'Invite a family member' : 'Invite a caregiver'}
+            subtitle={
+              isSelfBuyer
+                ? 'They can see your readings.'
+                : 'They can see your parent’s readings.'
+            }
+            onPress={() => {
+              setInviteEmail('');
+              setInviteLabel('');
+              setInvitePermission('readings');
+              setInviteError(null);
+              setInviteCode(null);
+              setInviteSheetOpen(true);
+            }}
+            testID="settings-family-invite"
+          />
+          <ListRow
+            variant="action"
+            title="I have an invite code"
+            subtitle="Join a family circle someone invited you to."
+            onPress={() => {
+              setAcceptCode('');
+              setAcceptEmail(profile?.email ?? '');
+              setAcceptError(null);
+              setAcceptSuccess(false);
+              setAcceptSheetOpen(true);
+            }}
+            showDivider={false}
+            testID="settings-family-accept"
+          />
         </SettingsSection>
 
         {/* Privacy ----------------------------------------------------- */}
@@ -976,6 +1035,403 @@ export function SettingsScreen({ navigation }: Props) {
               Keep my account
             </Button>
           </View>
+        </View>
+      </BottomSheet>
+
+      {/* Invite a family member */}
+      <BottomSheet
+        visible={inviteSheetOpen}
+        onDismiss={() => setInviteSheetOpen(false)}
+        size="default"
+        title={inviteCode ? 'Invite ready' : 'Invite a family member'}
+        testID="settings-invite-sheet"
+      >
+        <View style={{ paddingHorizontal: theme.spacing.l, paddingBottom: theme.spacing.l }}>
+          {inviteCode ? (
+            <>
+              <Text
+                style={{
+                  color: theme.colors.text.secondary,
+                  fontSize: bodyStyle.size,
+                  lineHeight: bodyStyle.lineHeight,
+                  fontFamily: bodyStyle.family,
+                  marginBottom: theme.spacing.m,
+                }}
+              >
+                Share this code with{' '}
+                {inviteEmail ? inviteEmail : 'them'}. It works for the next 7 days.
+              </Text>
+              <View
+                style={{
+                  alignItems: 'center',
+                  paddingVertical: theme.spacing.l,
+                  borderWidth: 1,
+                  borderColor: theme.colors.border.subtle,
+                  borderRadius: theme.radii.m,
+                  marginBottom: theme.spacing.m,
+                }}
+                accessibilityRole="text"
+                accessibilityLabel={`Invite code, ${inviteCode.split('').join(' ')}`}
+                testID="settings-invite-code"
+              >
+                <Text
+                  style={{
+                    color: theme.colors.text.primary,
+                    fontSize: theme.type('displayM').size,
+                    lineHeight: theme.type('displayM').lineHeight,
+                    fontFamily: theme.type('displayM').family,
+                    fontWeight: '700',
+                    letterSpacing: 4,
+                  }}
+                >
+                  {inviteCode}
+                </Text>
+              </View>
+              <Button
+                variant="primary"
+                onPress={() =>
+                  void Share.share({
+                    title: 'Leiko invite',
+                    message: `Your Leiko invite code is ${inviteCode}. Open Leiko, tap Settings → I have an invite code, and enter ${inviteEmail}.`,
+                  })
+                }
+                accessibilityLabel="Share invite code"
+                testID="settings-invite-share"
+              >
+                Share invite
+              </Button>
+              <View style={{ marginTop: theme.spacing.s }}>
+                <Button
+                  variant="ghost"
+                  onPress={() => setInviteSheetOpen(false)}
+                  accessibilityLabel="Done"
+                  testID="settings-invite-done"
+                >
+                  Done
+                </Button>
+              </View>
+            </>
+          ) : (
+            <>
+              <Text
+                style={{
+                  color: theme.colors.text.secondary,
+                  fontSize: bodyStyle.size,
+                  lineHeight: bodyStyle.lineHeight,
+                  fontFamily: bodyStyle.family,
+                  marginBottom: theme.spacing.m,
+                }}
+              >
+                We&apos;ll create a 6-digit code you can share with them. They enter
+                it in their own Leiko app to join the circle.
+              </Text>
+              <TextInput
+                value={inviteLabel}
+                onChangeText={setInviteLabel}
+                placeholder="Their first name (optional)"
+                placeholderTextColor={theme.colors.text.tertiary}
+                style={{
+                  borderWidth: 1,
+                  borderColor: theme.colors.border.subtle,
+                  borderRadius: theme.radii.m,
+                  paddingHorizontal: theme.spacing.m,
+                  paddingVertical: theme.spacing.s,
+                  color: theme.colors.text.primary,
+                  fontSize: bodyStyle.size,
+                  fontFamily: bodyStyle.family,
+                  marginBottom: theme.spacing.m,
+                }}
+                testID="settings-invite-label-input"
+              />
+              <TextInput
+                value={inviteEmail}
+                onChangeText={setInviteEmail}
+                placeholder="Their email"
+                placeholderTextColor={theme.colors.text.tertiary}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                style={{
+                  borderWidth: 1,
+                  borderColor: theme.colors.border.subtle,
+                  borderRadius: theme.radii.m,
+                  paddingHorizontal: theme.spacing.m,
+                  paddingVertical: theme.spacing.s,
+                  color: theme.colors.text.primary,
+                  fontSize: bodyStyle.size,
+                  fontFamily: bodyStyle.family,
+                  marginBottom: theme.spacing.m,
+                }}
+                testID="settings-invite-email-input"
+              />
+              <View
+                style={{ flexDirection: 'row', gap: theme.spacing.s, marginBottom: theme.spacing.m }}
+              >
+                <Pressable
+                  onPress={() => setInvitePermission('readings')}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: invitePermission === 'readings' }}
+                  style={{
+                    flex: 1,
+                    paddingVertical: theme.spacing.m,
+                    borderRadius: theme.radii.m,
+                    borderWidth: 1,
+                    borderColor:
+                      invitePermission === 'readings'
+                        ? theme.colors.brand.primary
+                        : theme.colors.border.subtle,
+                    backgroundColor:
+                      invitePermission === 'readings'
+                        ? theme.colors.brand.primarySoft
+                        : 'transparent',
+                    alignItems: 'center',
+                  }}
+                  testID="settings-invite-perm-readings"
+                >
+                  <Text
+                    style={{
+                      color: theme.colors.text.primary,
+                      fontSize: theme.type('label').size,
+                      fontFamily: theme.type('label').family,
+                    }}
+                  >
+                    Can see readings
+                  </Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => setInvitePermission('readings_notes')}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: invitePermission === 'readings_notes' }}
+                  style={{
+                    flex: 1,
+                    paddingVertical: theme.spacing.m,
+                    borderRadius: theme.radii.m,
+                    borderWidth: 1,
+                    borderColor:
+                      invitePermission === 'readings_notes'
+                        ? theme.colors.brand.primary
+                        : theme.colors.border.subtle,
+                    backgroundColor:
+                      invitePermission === 'readings_notes'
+                        ? theme.colors.brand.primarySoft
+                        : 'transparent',
+                    alignItems: 'center',
+                  }}
+                  testID="settings-invite-perm-readings-notes"
+                >
+                  <Text
+                    style={{
+                      color: theme.colors.text.primary,
+                      fontSize: theme.type('label').size,
+                      fontFamily: theme.type('label').family,
+                    }}
+                  >
+                    Readings + notes
+                  </Text>
+                </Pressable>
+              </View>
+              {inviteError ? (
+                <Text
+                  style={{
+                    color: theme.colors.text.secondary,
+                    fontSize: theme.type('label').size,
+                    fontFamily: theme.type('label').family,
+                    marginBottom: theme.spacing.m,
+                  }}
+                  testID="settings-invite-error"
+                >
+                  {inviteError}
+                </Text>
+              ) : null}
+              <Button
+                variant="primary"
+                disabled={invitePending || inviteEmail.trim().length === 0}
+                loading={invitePending}
+                onPress={async () => {
+                  setInviteError(null);
+                  setInvitePending(true);
+                  try {
+                    const result = await sendFamilyInvite({
+                      inviteeEmail: inviteEmail.trim(),
+                      inviteeLabel: inviteLabel.trim() || undefined,
+                    });
+                    setInviteCode(result.pairingCode);
+                  } catch (e) {
+                    setInviteError(
+                      e instanceof Error && /not_family_owner/i.test(e.message)
+                        ? 'Only the family owner can send invites.'
+                        : "We couldn't send the invite. Try again in a moment.",
+                    );
+                  } finally {
+                    setInvitePending(false);
+                  }
+                }}
+                accessibilityLabel="Send invite"
+                testID="settings-invite-send"
+              >
+                Send invite
+              </Button>
+              <View style={{ marginTop: theme.spacing.s }}>
+                <Button
+                  variant="ghost"
+                  onPress={() => setInviteSheetOpen(false)}
+                  accessibilityLabel="Cancel"
+                  testID="settings-invite-cancel"
+                >
+                  Cancel
+                </Button>
+              </View>
+            </>
+          )}
+        </View>
+      </BottomSheet>
+
+      {/* Accept invite */}
+      <BottomSheet
+        visible={acceptSheetOpen}
+        onDismiss={() => setAcceptSheetOpen(false)}
+        size="default"
+        title={acceptSuccess ? "You're in" : 'Join a family circle'}
+        testID="settings-accept-sheet"
+      >
+        <View style={{ paddingHorizontal: theme.spacing.l, paddingBottom: theme.spacing.l }}>
+          {acceptSuccess ? (
+            <>
+              <Text
+                style={{
+                  color: theme.colors.text.secondary,
+                  fontSize: bodyStyle.size,
+                  lineHeight: bodyStyle.lineHeight,
+                  fontFamily: bodyStyle.family,
+                  marginBottom: theme.spacing.m,
+                }}
+              >
+                You&apos;ve joined the circle. Their readings will appear on your home screen.
+              </Text>
+              <Button
+                variant="primary"
+                onPress={() => setAcceptSheetOpen(false)}
+                accessibilityLabel="Done"
+                testID="settings-accept-done"
+              >
+                Done
+              </Button>
+            </>
+          ) : (
+            <>
+              <Text
+                style={{
+                  color: theme.colors.text.secondary,
+                  fontSize: bodyStyle.size,
+                  lineHeight: bodyStyle.lineHeight,
+                  fontFamily: bodyStyle.family,
+                  marginBottom: theme.spacing.m,
+                }}
+              >
+                Type the email the inviter used and the 6-digit code they shared with you.
+              </Text>
+              <TextInput
+                value={acceptEmail}
+                onChangeText={setAcceptEmail}
+                placeholder="Your email"
+                placeholderTextColor={theme.colors.text.tertiary}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                style={{
+                  borderWidth: 1,
+                  borderColor: theme.colors.border.subtle,
+                  borderRadius: theme.radii.m,
+                  paddingHorizontal: theme.spacing.m,
+                  paddingVertical: theme.spacing.s,
+                  color: theme.colors.text.primary,
+                  fontSize: bodyStyle.size,
+                  fontFamily: bodyStyle.family,
+                  marginBottom: theme.spacing.m,
+                }}
+                testID="settings-accept-email-input"
+              />
+              <TextInput
+                value={acceptCode}
+                onChangeText={setAcceptCode}
+                placeholder="6-digit code"
+                placeholderTextColor={theme.colors.text.tertiary}
+                keyboardType="number-pad"
+                maxLength={6}
+                style={{
+                  borderWidth: 1,
+                  borderColor: theme.colors.border.subtle,
+                  borderRadius: theme.radii.m,
+                  paddingHorizontal: theme.spacing.m,
+                  paddingVertical: theme.spacing.s,
+                  color: theme.colors.text.primary,
+                  fontSize: bodyStyle.size,
+                  fontFamily: bodyStyle.family,
+                  marginBottom: theme.spacing.m,
+                  letterSpacing: 4,
+                }}
+                testID="settings-accept-code-input"
+              />
+              {acceptError ? (
+                <Text
+                  style={{
+                    color: theme.colors.text.secondary,
+                    fontSize: theme.type('label').size,
+                    fontFamily: theme.type('label').family,
+                    marginBottom: theme.spacing.m,
+                  }}
+                  testID="settings-accept-error"
+                >
+                  {acceptError}
+                </Text>
+              ) : null}
+              <Button
+                variant="primary"
+                disabled={
+                  acceptPending || acceptCode.length !== 6 || acceptEmail.trim().length === 0
+                }
+                loading={acceptPending}
+                onPress={async () => {
+                  setAcceptError(null);
+                  setAcceptPending(true);
+                  try {
+                    await acceptFamilyInvite({
+                      code: acceptCode,
+                      email: acceptEmail.trim(),
+                    });
+                    setAcceptSuccess(true);
+                  } catch (e) {
+                    const msg = e instanceof Error ? e.message : 'unknown';
+                    setAcceptError(
+                      /invitation_not_found/i.test(msg)
+                        ? "We couldn't find that code. Double-check and try again."
+                        : /email_mismatch/i.test(msg)
+                          ? "That email doesn't match the invite."
+                          : /invitation_expired/i.test(msg)
+                            ? 'That code has expired. Ask for a new one.'
+                            : /invitation_already_accepted/i.test(msg)
+                              ? "You're already in this circle."
+                              : "We couldn't join the circle. Try again in a moment.",
+                    );
+                  } finally {
+                    setAcceptPending(false);
+                  }
+                }}
+                accessibilityLabel="Join family circle"
+                testID="settings-accept-join"
+              >
+                Join family circle
+              </Button>
+              <View style={{ marginTop: theme.spacing.s }}>
+                <Button
+                  variant="ghost"
+                  onPress={() => setAcceptSheetOpen(false)}
+                  accessibilityLabel="Cancel"
+                  testID="settings-accept-cancel"
+                >
+                  Cancel
+                </Button>
+              </View>
+            </>
+          )}
         </View>
       </BottomSheet>
 

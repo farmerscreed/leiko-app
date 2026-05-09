@@ -66,6 +66,13 @@ jest.mock('../../../services/users/accountActions', () => ({
   deleteAccount: jest.fn().mockResolvedValue({ deletedAt: '2026-05-09T00:00:00Z' }),
 }));
 
+const mockSendInvite = jest.fn();
+const mockAcceptInvite = jest.fn();
+jest.mock('../../../services/families/manageInvites', () => ({
+  sendFamilyInvite: (...args: unknown[]) => mockSendInvite(...args),
+  acceptFamilyInvite: (...args: unknown[]) => mockAcceptInvite(...args),
+}));
+
 // Sprint 10b.2 — Settings now reads usePlusEntitlement (TanStack Query
 // against families) + the AI quota service. Stub the entitlement hook
 // to a free user so the AI section renders the free-tier copy.
@@ -373,6 +380,96 @@ describe('<SettingsScreen /> — Privacy (Sprint 10b.3)', () => {
     fireEvent.press(screen.getByTestId('settings-privacy-delete'));
     expect(screen.getByTestId('settings-delete-confirm')).toBeTruthy();
     expect(screen.getByTestId('settings-delete-email-input')).toBeTruthy();
+  });
+});
+
+describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
+  beforeEach(() => {
+    mockSendInvite.mockReset();
+    mockAcceptInvite.mockReset();
+  });
+
+  it('renders the invite + accept rows for a caregiver', () => {
+    renderScreen();
+    expect(screen.getByTestId('settings-family-invite')).toBeTruthy();
+    expect(screen.getByTestId('settings-family-accept')).toBeTruthy();
+  });
+
+  it('shows the self-buyer subtitle on the invite row when account_type=self_buyer', () => {
+    mockProfile = makeProfile({ account_type: 'self_buyer' });
+    renderScreen();
+    expect(screen.getByText('They can see your readings.')).toBeTruthy();
+  });
+
+  it('opens the invite sheet, sends the invite, and surfaces the code', async () => {
+    mockSendInvite.mockResolvedValue({
+      invitationId: 'inv-1',
+      pairingCode: '482910',
+      expiresAt: '2026-05-16T00:00:00Z',
+    });
+    renderScreen();
+    fireEvent.press(screen.getByTestId('settings-family-invite'));
+    fireEvent.changeText(screen.getByTestId('settings-invite-email-input'), 'sister@example.com');
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('settings-invite-send'));
+    });
+    await waitFor(() => {
+      expect(mockSendInvite).toHaveBeenCalledWith({
+        inviteeEmail: 'sister@example.com',
+        inviteeLabel: undefined,
+      });
+    });
+    expect(screen.getByTestId('settings-invite-code')).toBeTruthy();
+    expect(screen.getByText('482910')).toBeTruthy();
+  });
+
+  it('surfaces a friendly error when the user is not a family_owner', async () => {
+    mockSendInvite.mockRejectedValue(new Error('not_family_owner'));
+    renderScreen();
+    fireEvent.press(screen.getByTestId('settings-family-invite'));
+    fireEvent.changeText(screen.getByTestId('settings-invite-email-input'), 'sister@example.com');
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('settings-invite-send'));
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('settings-invite-error')).toBeTruthy();
+    });
+    expect(screen.getByText('Only the family owner can send invites.')).toBeTruthy();
+  });
+
+  it('opens the accept sheet, joins the family, and shows the success state', async () => {
+    mockAcceptInvite.mockResolvedValue({ familyId: 'fam-2' });
+    renderScreen();
+    fireEvent.press(screen.getByTestId('settings-family-accept'));
+    fireEvent.changeText(screen.getByTestId('settings-accept-email-input'), 'me@example.com');
+    fireEvent.changeText(screen.getByTestId('settings-accept-code-input'), '482910');
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('settings-accept-join'));
+    });
+    await waitFor(() => {
+      expect(mockAcceptInvite).toHaveBeenCalledWith({
+        code: '482910',
+        email: 'me@example.com',
+      });
+    });
+    expect(screen.getByText("You're in")).toBeTruthy();
+  });
+
+  it('surfaces the not-found error message on a wrong code', async () => {
+    mockAcceptInvite.mockRejectedValue(new Error('invitation_not_found'));
+    renderScreen();
+    fireEvent.press(screen.getByTestId('settings-family-accept'));
+    fireEvent.changeText(screen.getByTestId('settings-accept-email-input'), 'me@example.com');
+    fireEvent.changeText(screen.getByTestId('settings-accept-code-input'), '111111');
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('settings-accept-join'));
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('settings-accept-error')).toBeTruthy();
+    });
+    expect(
+      screen.getByText("We couldn't find that code. Double-check and try again."),
+    ).toBeTruthy();
   });
 });
 

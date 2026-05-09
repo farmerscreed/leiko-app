@@ -74,7 +74,14 @@ export type AnalyticsEvent =
   | { name: 'data_export_completed'; props?: { rowCount: number } }
   | { name: 'data_export_failed'; props?: { reason: string } }
   | { name: 'account_delete_requested'; props?: { confirmed: boolean } }
-  | { name: 'account_delete_failed'; props?: { reason: string } };
+  | { name: 'account_delete_failed'; props?: { reason: string } }
+  // Sprint 10c.1 — Family invite flow.
+  | { name: 'family_invite_send_started' }
+  | { name: 'family_invite_send_completed' }
+  | { name: 'family_invite_send_failed'; props?: { reason: string } }
+  | { name: 'family_invite_accept_started' }
+  | { name: 'family_invite_accept_completed'; props?: { familyId: string } }
+  | { name: 'family_invite_accept_failed'; props?: { reason: string } };
 
 type EventName = AnalyticsEvent['name'];
 
