@@ -53,7 +53,11 @@ export type AnalyticsEvent =
   // categories only; sample VALUES (bpm, percent, steps, etc.) never
   // appear in analytics. Per CLAUDE.md data rule + D13 §5.1.
   | { name: 'vital_persisted'; props?: { vital_type: 'hr' | 'spo2' | 'sleep' | 'activity' | 'calories'; count?: number } }
-  | { name: 'vital_sync_accepted'; props?: { vital_type: 'hr' | 'spo2' | 'sleep' | 'activity' | 'calories'; count: number } };
+  | { name: 'vital_sync_accepted'; props?: { vital_type: 'hr' | 'spo2' | 'sleep' | 'activity' | 'calories'; count: number } }
+  // Sprint 9.5 — Apple Health / Health Connect bridge. Counts only,
+  // never values. Per D13 §13.4 + CLAUDE.md analytics rule.
+  | { name: 'health_platform_write'; props?: { vital_type: 'bp' | 'hr' | 'spo2' | 'sleep' | 'steps' | 'calories'; written: number; rejected: number } }
+  | { name: 'health_platform_write_failed'; props?: { vital_type: string; reason: string } };
 
 type EventName = AnalyticsEvent['name'];
 

@@ -68,6 +68,7 @@ import {
   watchTimestampToUtcSec,
 } from './syncBacklog';
 import { postMultiVitals, isPayloadEmpty } from './postMultiVitals';
+import { forwardMultiVitalsToPlatform } from '../health-platform/syncBridge';
 import { useHR } from '../../state/hr';
 import { useSpO2 } from '../../state/spo2';
 import { useSleep } from '../../state/sleep';
@@ -556,6 +557,11 @@ export async function syncMultiVitals(
       vital_type: 'hr',
       count: response.inserted.hr,
     });
+    // Forward to Apple Health / Health Connect — Sprint 9.5. Fire-and-
+    // forget; the bridge gates on account_type + master/per-vital
+    // toggles, swallows all errors. Uses the same payload we just sent
+    // upstream — HK/HC dedup absorbs any sample we resend on retry.
+    void forwardMultiVitalsToPlatform(payload);
     return {
       ok: Object.keys(errors).length === 0,
       errors,

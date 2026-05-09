@@ -22,6 +22,7 @@ import { mmkv, STORAGE_KEYS } from '../services/storage';
 import { logger } from '../services/analytics/logger';
 import { classifyReading, type Classification } from '../utils/classification';
 import { postReading } from '../services/sync/postReading';
+import { forwardReadingToPlatform } from '../services/health-platform/syncBridge';
 
 const RECENT_READINGS_CAP = 30;
 
@@ -156,6 +157,19 @@ export const useReadings = create<ReadingsState>((set, get) => ({
             syncedIds.add(row.localId);
             newRecentRows.unshift({ ...row, serverId: res.readingId });
             logger.track('reading_sync_success', { duplicate: res.duplicate });
+            // Forward to Apple Health / Health Connect — Sprint 9.5.
+            // Only on first-insert (skip on duplicate to avoid writing the
+            // same sample twice on retry). Fire-and-forget; the bridge
+            // gates on account_type + master/per-vital toggles.
+            if (!res.duplicate) {
+              void forwardReadingToPlatform({
+                measuredAtSec: row.measuredAtSec,
+                systolic: row.systolic,
+                diastolic: row.diastolic,
+                pulse: row.pulse,
+                source: row.source,
+              });
+            }
           } catch (e) {
             lastError = e instanceof Error ? e.message : 'sync failed';
             logger.track('reading_sync_failed', { reason: lastError });
