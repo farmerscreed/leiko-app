@@ -30,6 +30,7 @@ import { connectToUrion, observeBluetoothState } from '../services/ble/bleManage
 import { subscribeToNotifications } from '../services/ble/notify';
 import { syncBacklogToCompletion } from '../services/sync/syncBacklogToCompletion';
 import { syncMultiVitals } from '../services/sync/syncMultiVitals';
+import { applyDeviceConfig } from '../services/sync/applyDeviceConfig';
 import { inferModel } from '../services/sync/postReading';
 import { logger } from '../services/analytics/logger';
 import type { UrionDevice } from '../services/ble/UrionDevice';
@@ -203,6 +204,26 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
     try {
       device = await connectToUrion(paired.bleId);
       set({ status: 'syncing', _device: device });
+
+      // Sprint 10b.2 — flush user-facing Settings to the watch BEFORE
+      // pulling data. setAutoHR / setAutoSpO2 / setUserParams /
+      // setGoals. No-op when the vitalSetup store's dirty flag is
+      // false. Failures are non-fatal: dirty stays true and the next
+      // sync retries; data sync continues regardless.
+      try {
+        const cfgResult = await applyDeviceConfig(device);
+        if (cfgResult.error) {
+          logger.track('sync_failed', {
+            trigger,
+            reason: `device_config:${cfgResult.error}`,
+          });
+        }
+      } catch (e) {
+        logger.track('sync_failed', {
+          trigger,
+          reason: e instanceof Error ? `device_config:${e.message}` : 'device_config:unknown',
+        });
+      }
 
       const result = await syncBacklogToCompletion(device, paired.bleId);
       logger.track('sync_completed', {

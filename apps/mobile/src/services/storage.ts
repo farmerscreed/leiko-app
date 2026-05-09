@@ -92,6 +92,18 @@ export const STORAGE_KEYS = {
   // regardless of whether they accepted or dismissed. We never re-show
   // automatically — Settings UI in Sprint 10 is the second-chance path.
   healthPlatformPermissionPrompted: 'leiko.health-platform.permissionPrompted',
+  // Vital-setup user preferences — Sprint 10b.2. JSON
+  // {autoHrEnabled, autoSpo2Enabled, stepsTarget, sleepTargetMin, dirty}.
+  // Surfaced in Settings → Vital streams + Goals. Orchestrator's
+  // applyDeviceConfig step flushes the values to the watch via
+  // setAutoHR / setAutoSpO2 / setGoals on the next sync run, then
+  // clears dirty.
+  vitalSetup: 'leiko.vitalSetup',
+  // AI Tier-B quota counter cache — Sprint 10b.2. JSON
+  // {monthKey, count, lastReconcileMs}. Settings reads this for the
+  // "X of N questions used this month" surface; the service reconciles
+  // against audit_log on app foreground.
+  aiQuotaCounter: 'leiko.ai.quotaCounter',
   // 6th-reading auto-paywall flag — Sprint 10a. Per D8a §9.1 + docs/09 §3,
   // the paywall fires automatically on the 6th reading "per family per
   // month". Stored as 'YYYY-MM' string of the calendar month it was

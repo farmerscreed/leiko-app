@@ -63,7 +63,11 @@ export type AnalyticsEvent =
   | { name: 'health_platform_read_skipped'; props?: { trigger: 'foreground' | 'manual' | 'background'; reason: string } }
   | { name: 'health_platform_permission_granted'; props?: { platform: string } }
   | { name: 'health_platform_permission_dismissed'; props?: { platform: string } }
-  | { name: 'health_platform_permission_skipped'; props?: { platform: string; reason: string } };
+  | { name: 'health_platform_permission_skipped'; props?: { platform: string; reason: string } }
+  // Sprint 10b.2 — Settings → Vital streams + Goals flush to the watch.
+  // Closes memory/multi_vitals_gap.md "setUserParams + setGoals stubbed".
+  | { name: 'device_config_flushed'; props?: { steps: number } }
+  | { name: 'device_config_failed'; props?: { failedStep: string; completed: number } };
 
 type EventName = AnalyticsEvent['name'];
 

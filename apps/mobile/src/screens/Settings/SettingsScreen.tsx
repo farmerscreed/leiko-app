@@ -1,9 +1,10 @@
-// SettingsScreen — Sprint 10b.1.
+// SettingsScreen — Sprint 10b.1 + 10b.2.
 //
 // Sourced from docs/04-screens/settings.md (D8 §4.11 + D8a §10) — the
-// new Settings hub. Sprint 10b.1 lands the foundation + three sections:
-// Profile, Watch, About + Sign-out. Vital streams / Health Platform /
-// AI quota / Notifications / Privacy land in 10b.2 and 10b.3.
+// new Settings hub. Sprint 10b.1 landed the foundation + Profile +
+// Watch + About + Sign-out. Sprint 10b.2 adds Vital streams + Goals +
+// Apple Health / Health Connect + AI. Notifications + Privacy land
+// in 10b.3.
 //
 // Voice rules (docs/05-voice-and-claims.md): every authored string is
 // sentence-case, plain, never urgent. "Talk to your doctor" not
@@ -15,7 +16,7 @@
 //   • Hypertension chip is opt-in — three states including "Prefer not
 //     to say"; default null leaves the field unset.
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomSheet } from '../../components/BottomSheet';
@@ -25,6 +26,27 @@ import { SettingsSection } from '../../components/SettingsSection';
 import { updateProfile } from '../../services/users/updateProfile';
 import { useAuth } from '../../state/auth';
 import { usePairing } from '../../state/pairing';
+import {
+  SLEEP_TARGET_MAX,
+  SLEEP_TARGET_MIN,
+  SLEEP_TARGET_STEP,
+  STEPS_TARGET_MAX,
+  STEPS_TARGET_MIN,
+  STEPS_TARGET_STEP,
+  useVitalSetup,
+} from '../../state/vitalSetup';
+import { useHealthPlatformToggles } from '../../services/health-platform/toggles';
+import {
+  ALL_READ_KINDS,
+  ALL_WRITE_KINDS,
+  type ReadVitalKind,
+  type WriteVitalKind,
+} from '../../services/health-platform/types';
+import {
+  getQuotaSnapshot,
+  reconcileFromAuditLog,
+} from '../../services/ai/quotaCounter';
+import { usePlusEntitlement } from '../../hooks/usePlusEntitlement';
 import { mmkv, STORAGE_KEYS } from '../../services/storage';
 import { useTheme } from '../../theme';
 import type { CaregiverScreenProps } from '../../navigation/types';
@@ -41,6 +63,50 @@ const HYPERTENSION_LABEL: Record<HypertensionStatus, string> = {
   prefer_not_say: 'Prefer not to say',
 };
 
+const WRITE_VITAL_LABEL: Record<WriteVitalKind, string> = {
+  bp: 'Blood pressure',
+  hr: 'Heart rate',
+  spo2: 'Oxygen',
+  sleep: 'Sleep',
+  steps: 'Steps',
+  calories: 'Calories',
+};
+
+const READ_VITAL_LABEL: Record<ReadVitalKind, string> = {
+  weight: 'Weight',
+  height: 'Height',
+  blood_glucose: 'Blood glucose',
+};
+
+function formatSleepTarget(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m === 0 ? `${h}h` : `${h}h ${m}m`;
+}
+
+function formatStepsTarget(value: number): string {
+  return `${value.toLocaleString('en-US')} steps`;
+}
+
+function buildStepsOptions(): number[] {
+  const out: number[] = [];
+  for (let v = STEPS_TARGET_MIN; v <= STEPS_TARGET_MAX; v += STEPS_TARGET_STEP) {
+    out.push(v);
+  }
+  return out;
+}
+
+function buildSleepOptions(): number[] {
+  const out: number[] = [];
+  for (let v = SLEEP_TARGET_MIN; v <= SLEEP_TARGET_MAX; v += SLEEP_TARGET_STEP) {
+    out.push(v);
+  }
+  return out;
+}
+
+const STEPS_OPTIONS = buildStepsOptions();
+const SLEEP_OPTIONS = buildSleepOptions();
+
 type Props =
   | CaregiverScreenProps<'Settings'>
   | { navigation: { goBack: () => void; navigate: (route: string) => void } };
@@ -48,17 +114,60 @@ type Props =
 export function SettingsScreen({ navigation }: Props) {
   const theme = useTheme();
   const profile = useAuth((s) => s.profile);
+  const userId = useAuth((s) => s.session?.user.id ?? null);
   const refreshProfile = useAuth((s) => s.refreshProfile);
   const signOut = useAuth((s) => s.signOut);
   const pairedDevice = usePairing((s) => s.pairedDevice);
   const forget = usePairing((s) => s.forget);
 
+  // Vital setup (auto-HR / auto-SpO2 / goals).
+  const autoHrEnabled = useVitalSetup((s) => s.autoHrEnabled);
+  const autoSpo2Enabled = useVitalSetup((s) => s.autoSpo2Enabled);
+  const stepsTarget = useVitalSetup((s) => s.stepsTarget);
+  const sleepTargetMin = useVitalSetup((s) => s.sleepTargetMin);
+  const setAutoHr = useVitalSetup((s) => s.setAutoHr);
+  const setAutoSpo2 = useVitalSetup((s) => s.setAutoSpo2);
+  const setStepsTarget = useVitalSetup((s) => s.setStepsTarget);
+  const setSleepTargetMin = useVitalSetup((s) => s.setSleepTargetMin);
+
+  // Health Platform toggles.
+  const hpMaster = useHealthPlatformToggles((s) => s.master);
+  const hpWrite = useHealthPlatformToggles((s) => s.perVitalWrite);
+  const hpRead = useHealthPlatformToggles((s) => s.perVitalRead);
+  const setHpMaster = useHealthPlatformToggles((s) => s.setMaster);
+  const setHpWrite = useHealthPlatformToggles((s) => s.setWriteVital);
+  const setHpRead = useHealthPlatformToggles((s) => s.setReadVital);
+
+  // AI quota — read snapshot synchronously from MMKV cache; reconcile
+  // against audit_log on mount so the surface is fresh.
+  const { tier } = usePlusEntitlement();
+  const [quota, setQuota] = useState(() =>
+    userId ? getQuotaSnapshot(userId, tier) : null,
+  );
+  useEffect(() => {
+    if (!userId) {
+      setQuota(null);
+      return;
+    }
+    setQuota(getQuotaSnapshot(userId, tier));
+    // Best-effort reconcile — failures leave the cached value in place.
+    void reconcileFromAuditLog(userId).then(() => {
+      setQuota(getQuotaSnapshot(userId, tier));
+    }).catch(() => undefined);
+  }, [userId, tier]);
+
   const [confirmingForget, setConfirmingForget] = useState(false);
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
   const [hypertensionSheetOpen, setHypertensionSheetOpen] = useState(false);
   const [hypertensionWriting, setHypertensionWriting] = useState(false);
+  const [picker, setPicker] = useState<'steps' | 'sleep' | null>(null);
 
   const isSelfBuyer = profile?.account_type === 'self_buyer';
+  // Caregivers do not write OR read external vitals (D13 §12.5 + §12.6).
+  // The Apple Health / Health Connect section is therefore self-buyer
+  // only. Parent (own phone) reuses the same surface; self-buyer is the
+  // primary case in this codebase.
+  const showHealthPlatform = profile?.account_type !== 'caregiver';
 
   const handleForget = useCallback(async () => {
     await forget();
@@ -238,6 +347,116 @@ export function SettingsScreen({ navigation }: Props) {
           )}
         </SettingsSection>
 
+        {/* Vital streams ---------------------------------------------- */}
+        <SettingsSection title="Vital streams" testID="settings-section-vitals">
+          <ListRow
+            variant="toggle"
+            title="Auto heart rate"
+            subtitle="Watch samples your heart rate automatically through the day."
+            switchValue={autoHrEnabled}
+            onSwitchChange={setAutoHr}
+            testID="settings-vitals-auto-hr"
+          />
+          <ListRow
+            variant="toggle"
+            title="Auto oxygen"
+            subtitle="Watch samples your oxygen overnight. Off by default to save battery."
+            switchValue={autoSpo2Enabled}
+            onSwitchChange={setAutoSpo2}
+            showDivider={false}
+            testID="settings-vitals-auto-spo2"
+          />
+        </SettingsSection>
+
+        {/* Goals ------------------------------------------------------- */}
+        <SettingsSection title="Goals" testID="settings-section-goals">
+          <ListRow
+            variant="navigation"
+            title="Steps target"
+            value={formatStepsTarget(stepsTarget)}
+            onPress={() => setPicker('steps')}
+            testID="settings-goals-steps"
+          />
+          <ListRow
+            variant="navigation"
+            title="Sleep target"
+            value={formatSleepTarget(sleepTargetMin)}
+            onPress={() => setPicker('sleep')}
+            showDivider={false}
+            testID="settings-goals-sleep"
+          />
+        </SettingsSection>
+
+        {/* Apple Health / Health Connect ------------------------------ */}
+        {showHealthPlatform ? (
+          <SettingsSection
+            title="Apple Health & Health Connect"
+            testID="settings-section-health-platform"
+          >
+            <ListRow
+              variant="toggle"
+              title="Connect to your phone's health app"
+              subtitle="Keeps your numbers in one place across apps."
+              switchValue={hpMaster}
+              onSwitchChange={setHpMaster}
+              showDivider={hpMaster}
+              testID="settings-hp-master"
+            />
+            {hpMaster ? (
+              <>
+                {ALL_WRITE_KINDS.map((kind) => (
+                  <ListRow
+                    key={`write-${kind}`}
+                    variant="toggle"
+                    title={`Share ${WRITE_VITAL_LABEL[kind].toLowerCase()}`}
+                    switchValue={hpWrite[kind] ?? false}
+                    onSwitchChange={(v) => setHpWrite(kind, v)}
+                    testID={`settings-hp-write-${kind}`}
+                  />
+                ))}
+                {ALL_READ_KINDS.map((kind, idx) => (
+                  <ListRow
+                    key={`read-${kind}`}
+                    variant="toggle"
+                    title={`Read ${READ_VITAL_LABEL[kind].toLowerCase()}`}
+                    switchValue={hpRead[kind] ?? false}
+                    onSwitchChange={(v) => setHpRead(kind, v)}
+                    showDivider={idx !== ALL_READ_KINDS.length - 1}
+                    testID={`settings-hp-read-${kind}`}
+                  />
+                ))}
+              </>
+            ) : null}
+          </SettingsSection>
+        ) : null}
+
+        {/* AI ---------------------------------------------------------- */}
+        <SettingsSection title="AI" testID="settings-section-ai">
+          <ListRow
+            variant="data"
+            title="Questions this month"
+            subtitle="Resets on the 1st."
+            value={
+              quota
+                ? `${quota.count} of ${quota.limit}`
+                : '— of —'
+            }
+            testID="settings-ai-quota"
+          />
+          <ListRow
+            variant="data"
+            title="Your tier"
+            value={tier === 'free' || tier === 'past_due' ? 'Free' : 'Plus'}
+            subtitle={
+              tier === 'free' || tier === 'past_due'
+                ? 'Free includes 5 questions a month. Plus brings 100 plus weekly summaries.'
+                : 'Plus brings 100 questions a month, weekly summaries, and a doctor-ready PDF.'
+            }
+            showDivider={false}
+            testID="settings-ai-tier"
+          />
+        </SettingsSection>
+
         {/* About ------------------------------------------------------- */}
         <SettingsSection title="About" testID="settings-section-about">
           <ListRow
@@ -360,6 +579,58 @@ export function SettingsScreen({ navigation }: Props) {
             </Button>
           </View>
         </View>
+      </BottomSheet>
+
+      {/* Steps target picker */}
+      <BottomSheet
+        visible={picker === 'steps'}
+        onDismiss={() => setPicker(null)}
+        size="tall"
+        title="Daily steps target"
+        testID="settings-steps-sheet"
+      >
+        <ScrollView>
+          {STEPS_OPTIONS.map((value, idx) => (
+            <ListRow
+              key={value}
+              variant="select"
+              title={formatStepsTarget(value)}
+              selected={stepsTarget === value}
+              onPress={() => {
+                setStepsTarget(value);
+                setPicker(null);
+              }}
+              showDivider={idx !== STEPS_OPTIONS.length - 1}
+              testID={`settings-steps-option-${value}`}
+            />
+          ))}
+        </ScrollView>
+      </BottomSheet>
+
+      {/* Sleep target picker */}
+      <BottomSheet
+        visible={picker === 'sleep'}
+        onDismiss={() => setPicker(null)}
+        size="tall"
+        title="Sleep target"
+        testID="settings-sleep-sheet"
+      >
+        <ScrollView>
+          {SLEEP_OPTIONS.map((value, idx) => (
+            <ListRow
+              key={value}
+              variant="select"
+              title={formatSleepTarget(value)}
+              selected={sleepTargetMin === value}
+              onPress={() => {
+                setSleepTargetMin(value);
+                setPicker(null);
+              }}
+              showDivider={idx !== SLEEP_OPTIONS.length - 1}
+              testID={`settings-sleep-option-${value}`}
+            />
+          ))}
+        </ScrollView>
       </BottomSheet>
 
       {/* Hypertension chip (D8a §10.1) — self-buyer only */}
