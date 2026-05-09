@@ -25,7 +25,7 @@
 // Reassuring tone by default; calm-concerned tone only when the
 // underlying classification calls for it.
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import {
   Pressable,
   RefreshControl,
@@ -38,6 +38,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
+import { AskLeikoSheet } from '../../components/AskLeikoSheet';
 import { HealthPlatformPermissionPrompt } from '../../components/HealthPlatformPermissionPrompt';
 import { SixthReadingPaywallHost } from '../../components/SixthReadingPaywallHost';
 import { DailyPulseHero, type DailyPulseHeroVitals } from '../../components/DailyPulseHero';
@@ -91,6 +92,9 @@ export function SelfBuyerHome() {
 
   // ----- Sprint 14: seeded Learn card slot ---------------------------
   const seededLearn = useSeededLearnCard();
+
+  // ----- Sprint 12 follow-up: Ask Leiko bottom sheet ----------------
+  const [askLeikoVisible, setAskLeikoVisible] = useState(false);
 
   // ----- DaySpine moments --------------------------------------------
   const moments = useMemo(() => deriveDayMoments(data), [data]);
@@ -329,16 +333,19 @@ export function SelfBuyerHome() {
         </View>
       </ScrollView>
 
-      {/* Take a Reading FAB — anchored above the tab bar. */}
-      <SelfBuyerFAB
+      {/* Sprint 12 follow-up — floating "Ask Leiko" replaces the
+          previous Take-a-reading "+" FAB. Take a reading moves to
+          the centre tab-bar slot below. */}
+      <AskLeikoFAB
         theme={theme}
-        onPress={() => navigation.navigate('TakeReading')}
+        onPress={() => setAskLeikoVisible(true)}
       />
 
-      {/* Visual tab bar — Home / Trends / Learn / Settings.
-          Family was dropped from the self-buyer tab bar in 10c.2:
-          family management for the rare hybrid-mode user lives in
-          Settings → Family. Learn is a placeholder until Sprint 13/14. */}
+      {/* Visual tab bar — Home / Trends / [+] Take a reading / Learn /
+          Settings. The "+" is a centre stage button for the primary
+          self-buyer action; the four side tabs are the orientation
+          spine. Family was dropped in 10c.2 — it lives in Settings
+          for the rare hybrid-mode user. */}
       <SelfBuyerTabBar
         theme={theme}
         onSelect={(tab) => {
@@ -351,11 +358,20 @@ export function SelfBuyerHome() {
             case 'trends':
               navigation.navigate('Trends');
               return;
+            case 'take_reading':
+              navigation.navigate('TakeReading');
+              return;
             case 'learn':
               navigation.navigate('Learn');
               return;
           }
         }}
+      />
+
+      <AskLeikoSheet
+        visible={askLeikoVisible}
+        onDismiss={() => setAskLeikoVisible(false)}
+        onArticleOpen={(id) => navigation.navigate('Article', { articleId: id })}
       />
       {/* Sprint 9.5 / Task 8 — Apple Health / Health Connect opt-in
           (D13 §12.5). Self-buyer asked at end of onboarding (i.e. on
@@ -508,31 +524,38 @@ function NarrationCard({ theme, text }: NarrationCardProps) {
   );
 }
 
-interface SelfBuyerFABProps {
+interface AskLeikoFABProps {
   theme: Theme;
   onPress: () => void;
 }
 
-function SelfBuyerFAB({ theme, onPress }: SelfBuyerFABProps) {
+// Sprint 12 follow-up — replaces SelfBuyerFAB ("+"). Tapping opens
+// the AskLeikoSheet bottom sheet. Take-a-reading moved to the
+// centre tab-bar slot. The shape (round, brand-coral, anchored above
+// the tab bar) is preserved so the affordance reads as the same
+// "primary action" surface — only the action changed.
+function AskLeikoFAB({ theme, onPress }: AskLeikoFABProps) {
+  const labelStyle = theme.type('labelUppercase');
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel="Take a reading"
-      accessibilityHint="Walks you through taking a reading on your watch"
+      accessibilityLabel="Ask Leiko"
+      accessibilityHint="Opens a popup to ask a question about your numbers"
       onPress={onPress}
-      testID="self-buyer-home-fab"
+      testID="self-buyer-home-ask-leiko-fab"
       style={({ pressed }) => ({
         position: 'absolute',
         right: theme.spacing.xl,
         bottom: theme.spacing.xxxxl + theme.spacing.xl,
-        width: 56,
         height: 56,
-        borderRadius: 99,
+        paddingHorizontal: theme.spacing.l,
+        borderRadius: 28,
         backgroundColor: pressed
           ? theme.colors.brand.primaryPressed
           : theme.colors.brand.coral,
         alignItems: 'center',
         justifyContent: 'center',
+        flexDirection: 'row',
         ...theme.elevation.medium.ios,
         ...theme.elevation.medium.android,
       })}
@@ -540,13 +563,16 @@ function SelfBuyerFAB({ theme, onPress }: SelfBuyerFABProps) {
       <Text
         allowFontScaling={false}
         style={{
-          fontFamily: theme.fontFamilies.display,
-          fontSize: 28,
-          lineHeight: 28,
+          fontFamily: labelStyle.family,
+          fontSize: labelStyle.size,
+          lineHeight: labelStyle.lineHeight,
+          letterSpacing: labelStyle.letterSpacing,
+          textTransform: 'uppercase',
           color: theme.colors.text.onBrand,
+          fontWeight: '500',
         }}
       >
-        +
+        Ask Leiko
       </Text>
     </Pressable>
   );
@@ -554,9 +580,14 @@ function SelfBuyerFAB({ theme, onPress }: SelfBuyerFABProps) {
 
 // Sprint 10c.2 polish — IA review: self-buyers' mental model is
 // "understand my numbers", not family. Family management lives in
-// Settings (where it belongs for the rare hybrid-mode user). The 4th
-// tab now hosts Learn — Sprint 13/14 will ship the real cards.
-type SelfBuyerTab = 'home' | 'trends' | 'learn' | 'settings';
+// Settings.
+//
+// Sprint 12 follow-up — Take a reading moved to a centre stage slot
+// between Trends and Learn. The "+" button is rendered with a
+// distinct elevated treatment so it reads as the primary action; the
+// four side tabs (Home / Trends / Learn / Settings) form the
+// orientation spine.
+type SelfBuyerTab = 'home' | 'trends' | 'take_reading' | 'learn' | 'settings';
 
 interface SelfBuyerTabBarProps {
   theme: Theme;
@@ -564,12 +595,14 @@ interface SelfBuyerTabBarProps {
 }
 
 function SelfBuyerTabBar({ theme, onSelect }: SelfBuyerTabBarProps) {
-  const tabs: Array<{ id: SelfBuyerTab; label: string; active: boolean }> = [
+  const sideTabs: Array<{ id: SelfBuyerTab; label: string; active: boolean }> = [
     { id: 'home', label: 'Home', active: true },
     { id: 'trends', label: 'Trends', active: false },
     { id: 'learn', label: 'Learn', active: false },
     { id: 'settings', label: 'Settings', active: false },
   ];
+  const leftSide = sideTabs.slice(0, 2);
+  const rightSide = sideTabs.slice(2);
   const labelStyle = theme.type('labelUppercase');
   return (
     <View
@@ -586,14 +619,85 @@ function SelfBuyerTabBar({ theme, onSelect }: SelfBuyerTabBarProps) {
         borderColor: theme.colors.border.rim,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-around',
+        justifyContent: 'space-between',
         paddingHorizontal: theme.spacing.s,
         ...theme.elevation.high.ios,
         ...theme.elevation.high.android,
       }}
       testID="self-buyer-home-tab-bar"
     >
-      {tabs.map((t) => (
+      {leftSide.map((t) => (
+        <Pressable
+          key={t.id}
+          onPress={() => onSelect(t.id)}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: t.active }}
+          accessibilityLabel={t.label}
+          hitSlop={8}
+          testID={`self-buyer-home-tab-${t.id}`}
+          style={({ pressed }) => ({
+            paddingHorizontal: theme.spacing.l,
+            paddingVertical: theme.spacing.s,
+            borderRadius: 16,
+            opacity: pressed ? 0.7 : 1,
+          })}
+        >
+          <Text
+            allowFontScaling={false}
+            style={{
+              fontFamily: labelStyle.family,
+              fontSize: labelStyle.size,
+              lineHeight: labelStyle.lineHeight,
+              letterSpacing: labelStyle.letterSpacing,
+              textTransform: 'uppercase',
+              color: t.active
+                ? theme.colors.brand.coral
+                : theme.colors.text.tertiary,
+            }}
+          >
+            {t.label}
+          </Text>
+        </Pressable>
+      ))}
+
+      {/* Centre stage — Take a reading. Distinct round elevated
+          button (D11 premium-precise; brand-coral primary). Sits
+          BETWEEN Trends (left) and Learn (right). */}
+      <Pressable
+        onPress={() => onSelect('take_reading')}
+        accessibilityRole="button"
+        accessibilityLabel="Take a reading"
+        accessibilityHint="Walks you through taking a reading on your watch"
+        hitSlop={8}
+        testID="self-buyer-home-tab-take_reading"
+        style={({ pressed }) => ({
+          width: 52,
+          height: 52,
+          borderRadius: 26,
+          backgroundColor: pressed
+            ? theme.colors.brand.primaryPressed
+            : theme.colors.brand.coral,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginHorizontal: theme.spacing.s,
+          ...theme.elevation.medium.ios,
+          ...theme.elevation.medium.android,
+        })}
+      >
+        <Text
+          allowFontScaling={false}
+          style={{
+            fontFamily: theme.fontFamilies.display,
+            fontSize: 26,
+            lineHeight: 26,
+            color: theme.colors.text.onBrand,
+          }}
+        >
+          +
+        </Text>
+      </Pressable>
+
+      {rightSide.map((t) => (
         <Pressable
           key={t.id}
           onPress={() => onSelect(t.id)}

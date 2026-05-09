@@ -414,6 +414,13 @@ describe('<CaregiverHome /> — view toggle (Sprint 7.7b)', () => {
   });
 });
 
+describe('<CaregiverHome /> — Ask Leiko (Sprint 12 follow-up)', () => {
+  it('renders the floating Ask Leiko button', () => {
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-ask-leiko-fab')).toBeTruthy();
+  });
+});
+
 describe('<CaregiverHome /> — voice rules', () => {
   it.each([
     'Your family circle is quiet for now',

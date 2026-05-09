@@ -332,10 +332,21 @@ describe('SelfBuyerHome — navigation wiring', () => {
     });
   });
 
-  it('FAB tap → navigates to TakeReading', () => {
+  // Sprint 12 follow-up: the floating "+" → "Take a reading" FAB was
+  // replaced with a floating "Ask Leiko" affordance. Take a reading
+  // moved to the centre tab-bar slot. The old testID
+  // 'self-buyer-home-fab' no longer exists.
+  it('Take-a-reading centre tab → navigates to TakeReading', () => {
     render(withProviders(<SelfBuyerHome />));
-    fireEvent.press(screen.getByTestId('self-buyer-home-fab'));
+    fireEvent.press(screen.getByTestId('self-buyer-home-tab-take_reading'));
     expect(mockNavigate).toHaveBeenCalledWith('TakeReading');
+  });
+
+  it('Ask Leiko FAB exists on the home screen', () => {
+    render(withProviders(<SelfBuyerHome />));
+    // Tapping opens the sheet; full open-sheet rendering is exercised
+    // in the AskLeikoBody / AskLeikoScreen tests.
+    expect(screen.getByTestId('self-buyer-home-ask-leiko-fab')).toBeTruthy();
   });
 
   it('vital tile tap → navigates to VitalDetail', () => {
@@ -373,6 +384,8 @@ describe('SelfBuyerHome — visual tab bar (option c — visual only)', () => {
     render(withProviders(<SelfBuyerHome />));
     expect(screen.getByTestId('self-buyer-home-tab-home')).toBeTruthy();
     expect(screen.getByTestId('self-buyer-home-tab-trends')).toBeTruthy();
+    // Sprint 12 follow-up — centre stage "+" Take a reading slot.
+    expect(screen.getByTestId('self-buyer-home-tab-take_reading')).toBeTruthy();
     // Sprint 10c.2 polish — Family tab dropped in favour of Learn; family
     // management lives in Settings → Family for the rare hybrid-mode case.
     expect(screen.getByTestId('self-buyer-home-tab-learn')).toBeTruthy();

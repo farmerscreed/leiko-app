@@ -42,6 +42,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
+import { AskLeikoSheet } from '../../components/AskLeikoSheet';
 import { Button } from '../../components/Button';
 import { HealthPlatformPermissionPrompt } from '../../components/HealthPlatformPermissionPrompt';
 import { SixthReadingPaywallHost } from '../../components/SixthReadingPaywallHost';
@@ -117,6 +118,9 @@ export function CaregiverHome() {
   );
 
   const anomaly = useMemo(() => pickAnomalyForBanner(mergedPeople), [mergedPeople]);
+
+  // Sprint 12 follow-up — Ask Leiko bottom sheet visibility.
+  const [askLeikoVisible, setAskLeikoVisible] = useState(false);
 
   const handlePersonPress = useCallback(
     (id: string) => {
@@ -376,7 +380,72 @@ export function CaregiverHome() {
         accountType="caregiver"
         familyId={merged[0]?.familyId ?? null}
       />
+
+      {/* Sprint 12 follow-up — floating Ask Leiko button. Caregivers
+          benefit from the same single-tap question affordance the
+          self-buyer Home gained. The sheet hosts the same surface as
+          the AskLeiko route. */}
+      <CaregiverAskLeikoFAB
+        theme={theme}
+        onPress={() => setAskLeikoVisible(true)}
+      />
+      <AskLeikoSheet
+        visible={askLeikoVisible}
+        onDismiss={() => setAskLeikoVisible(false)}
+        onArticleOpen={(id) => navigation.navigate('Article', { articleId: id })}
+      />
     </SafeAreaView>
+  );
+}
+
+interface CaregiverAskLeikoFABProps {
+  theme: Theme;
+  onPress: () => void;
+}
+
+function CaregiverAskLeikoFAB({ theme, onPress }: CaregiverAskLeikoFABProps) {
+  const labelStyle = theme.type('labelUppercase');
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Ask Leiko"
+      accessibilityHint="Opens a popup to ask a question about your circle's numbers"
+      onPress={onPress}
+      testID="caregiver-home-ask-leiko-fab"
+      style={({ pressed }) => ({
+        position: 'absolute',
+        right: theme.spacing.xl,
+        // Caregiver Home doesn't have its own tab bar, so the FAB sits
+        // a comfortable thumb-distance above the safe-area bottom.
+        bottom: theme.spacing.xxxxl,
+        height: 56,
+        paddingHorizontal: theme.spacing.l,
+        borderRadius: 28,
+        backgroundColor: pressed
+          ? theme.colors.brand.primaryPressed
+          : theme.colors.brand.coral,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row',
+        ...theme.elevation.medium.ios,
+        ...theme.elevation.medium.android,
+      })}
+    >
+      <Text
+        allowFontScaling={false}
+        style={{
+          fontFamily: labelStyle.family,
+          fontSize: labelStyle.size,
+          lineHeight: labelStyle.lineHeight,
+          letterSpacing: labelStyle.letterSpacing,
+          textTransform: 'uppercase',
+          color: theme.colors.text.onBrand,
+          fontWeight: '500',
+        }}
+      >
+        Ask Leiko
+      </Text>
+    </Pressable>
   );
 }
 
