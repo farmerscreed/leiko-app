@@ -13,6 +13,8 @@
       "infoPlist": {
         "NSBluetoothAlwaysUsageDescription": "Leiko uses Bluetooth to talk to your watch and sync readings.",
         "NSBluetoothPeripheralUsageDescription": "Leiko uses Bluetooth to talk to your watch.",
+        "NSHealthShareUsageDescription": "Leiko reads weight, height, and blood-glucose entries from Apple Health so your readings stay alongside other vitals you already track.",
+        "NSHealthUpdateUsageDescription": "Leiko writes your blood-pressure, heart-rate, oxygen-saturation, sleep, steps, and active-energy readings to Apple Health so they appear alongside your other vitals.",
         "UIBackgroundModes": [
           "bluetooth-central"
         ]
@@ -24,7 +26,16 @@
         "android.permission.BLUETOOTH_SCAN",
         "android.permission.BLUETOOTH_CONNECT",
         "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"
+        "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE",
+        "android.permission.health.READ_WEIGHT",
+        "android.permission.health.READ_HEIGHT",
+        "android.permission.health.READ_BLOOD_GLUCOSE",
+        "android.permission.health.WRITE_BLOOD_PRESSURE",
+        "android.permission.health.WRITE_HEART_RATE",
+        "android.permission.health.WRITE_OXYGEN_SATURATION",
+        "android.permission.health.WRITE_SLEEP",
+        "android.permission.health.WRITE_STEPS",
+        "android.permission.health.WRITE_ACTIVE_CALORIES_BURNED"
       ]
     },
     "plugins": [
