@@ -1,4 +1,4 @@
-/* global module */
+/* global module, jest */
 // Manual mock for @kingstinct/react-native-healthkit — auto-loaded by Jest
 // because it sits at __mocks__/@kingstinct/react-native-healthkit.js adjacent
 // to node_modules. Provides JS-only stubs so the unified

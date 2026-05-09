@@ -1,4 +1,4 @@
-/* global module */
+/* global module, jest */
 // Manual mock for react-native-health-connect — auto-loaded by Jest because
 // it sits in __mocks__ adjacent to node_modules. Provides JS-only stubs so
 // the unified services/health-platform/ surface can be exercised under both
