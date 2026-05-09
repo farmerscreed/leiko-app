@@ -225,6 +225,42 @@ create unique index vitals_dedupe on public.vitals_other (device_id, vital_type,
 create index vitals_family_time   on public.vitals_other (family_id, vital_type, measured_at desc);
 ```
 
+### external_vitals (Apple Health / Health Connect read namespace)
+Read-path snapshots of values pulled from Apple HealthKit or Android Health Connect — typically weight from a connected scale, height for BMR context, blood glucose from a CGM. **Never** integrated into Leiko's anomaly engine (D13 §12.6); surfaced on Trends as a separate series so the user keeps their numbers "in one place" without us claiming clinical responsibility for the source.
+
+```sql
+create type public.external_vital_platform as enum ('apple_health','health_connect');
+create type public.external_vital_type as enum ('weight','height','blood_glucose');
+
+create table public.external_vitals (
+  id              uuid primary key default gen_random_uuid(),
+  family_id       uuid not null references public.families(id) on delete restrict,
+  user_id         uuid not null references public.users(id) on delete cascade,
+  source_platform public.external_vital_platform not null,
+  source_origin   text not null,                -- HK sourceBundleId or HC dataOrigin.packageName
+  vital_type      public.external_vital_type not null,
+  measured_at     timestamptz not null,
+  value_numeric   numeric not null check (value_numeric > 0),
+  value_unit      text not null check (value_unit in (
+                    'kg','lb','m','cm','in','mg/dL','mmol/L'
+                  )),
+  hidden          boolean not null default false,
+  hidden_reason   text,
+  hidden_by_user_id uuid references public.users(id),
+  hidden_at       timestamptz,
+  created_at      timestamptz not null default now()
+);
+
+create unique index external_vitals_dedupe
+  on public.external_vitals (user_id, source_platform, source_origin, vital_type, measured_at);
+create index external_vitals_family_time
+  on public.external_vitals (family_id, user_id, vital_type, measured_at desc) where hidden = false;
+```
+
+**Write model** (Sprint 9.5 / Task 7): the device-side health-platform read path POSTs to a future `/sync-external-vitals` Edge Function which inserts via `service_role`. Clients NEVER insert directly — the "service inserts external vitals" RLS policy enforces this. Members SELECT via `is_family_member`, may soft-hide their own rows, and a BEFORE UPDATE trigger blocks any edit to physiological columns post-insert (same posture as `readings`).
+
+**Round-trip prevention**: the client filters HK/HC samples whose `sourceBundleId` / `packageName` matches our own bundle id before POSTing — Leiko's own writes never round-trip back into `external_vitals`.
+
 ### subscriptions (denormalised RevenueCat state)
 ```sql
 create table public.subscriptions (
@@ -419,7 +455,7 @@ create policy "self-leave"            on public.family_members
 ```
 
 ### Reading-related child tables
-`reading_comments`, `vitals_other` follow the family-scoped pattern: members read, members write own, author edits own.
+`reading_comments`, `vitals_other`, `external_vitals` follow the family-scoped pattern: members read; for `external_vitals` only `service_role` inserts (the `/sync-external-vitals` Edge Function), and members may soft-hide their own rows.
 
 `reading_notes` adds the visibility filter (D8a §7.3):
 ```sql
@@ -464,6 +500,7 @@ create policy "service inserts audit"    on public.audit_log
 | users (account) | `deleted_at` | After 30-day grace | 30 days grace, then anonymised; 7 years for required audit trail |
 | readings (watch) | `hidden`, `hidden_reason`, `hidden_at` | **Never** (forbidden by RLS) | Until family_owner deletes account |
 | readings (manual) | `hidden` / direct delete | Allowed (own author) | Same |
+| external_vitals | `hidden`, `hidden_reason`, `hidden_by_user_id`, `hidden_at` | Forbidden (no for-delete policy) | Until family_owner deletes account; platform owns source of truth |
 | family_members | `removed_at`, `removed_reason` | Never | Persisted for audit even after removal |
 | devices | `unpaired_at` | Never | Persisted; same row may re-pair after factory reset |
 | invitations | `cancelled_at` | Allowed after 90 days expiry | 90 days then purged by `/retention` cron |
