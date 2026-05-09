@@ -44,6 +44,9 @@ import { ReadingDetailScreen } from '../screens/ReadingDetail/ReadingDetailScree
 import { Trends } from '../screens/Trends/Trends';
 import { AuditLogScreen } from '../screens/AuditLog/AuditLogScreen';
 import { CaregiverVisibilityScreen } from '../screens/CaregiverVisibility/CaregiverVisibilityScreen';
+import { FamilyMembersScreen } from '../screens/FamilyMembers/FamilyMembersScreen';
+import { LearnScreen } from '../screens/Learn/LearnScreen';
+import { DebugLauncher } from '../dev/DebugLauncher';
 import { useTheme } from '../theme';
 import { useAuth } from '../state/auth';
 import { useOnboarding } from '../state/onboarding';
@@ -55,7 +58,26 @@ import {
   stopHealthPlatformBackgroundFetch,
 } from '../services/health-platform/backgroundFetch';
 import { configurePurchases } from '../services/purchases';
+import {
+  defineBackgroundSyncTask,
+  startBackgroundSync,
+  stopBackgroundSync,
+} from '../services/sync/backgroundSync';
 import { inferModel, setDeviceMetaProvider } from '../services/sync/postReading';
+
+// Define the OS-scheduled background-sync task once at module load.
+// TaskManager rejects redefinition, and module load is the only
+// guaranteed pre-render hook. The runner reads the orchestrator's
+// runSync at fire time — not at definition time — so the latest
+// orchestrator instance handles the wake-up.
+defineBackgroundSyncTask(async () => {
+  try {
+    const result = await useSyncOrchestrator.getState().runSync('background');
+    return result === 'ran' ? 'ran' : 'skipped';
+  } catch {
+    return 'errored';
+  }
+});
 
 // Wire postReading's device-meta provider once at app boot. The
 // pairing store can't be imported by postReading directly without
@@ -140,6 +162,11 @@ function CaregiverHomeNavigator() {
         name="CaregiverVisibility"
         component={CaregiverVisibilityScreen}
       />
+      <CaregiverStack.Screen
+        name="FamilyMembers"
+        component={FamilyMembersScreen}
+      />
+      <CaregiverStack.Screen name="Learn" component={LearnScreen} />
     </CaregiverStack.Navigator>
   );
 }
@@ -190,6 +217,11 @@ function SelfBuyerHomeNavigator() {
         name="CaregiverVisibility"
         component={CaregiverVisibilityScreen}
       />
+      <SelfBuyerStack.Screen
+        name="FamilyMembers"
+        component={FamilyMembersScreen}
+      />
+      <SelfBuyerStack.Screen name="Learn" component={LearnScreen} />
     </SelfBuyerStack.Navigator>
   );
 }
@@ -254,9 +286,15 @@ export function RootNavigator() {
     // when EXPO_PUBLIC_RC_API_KEY_* env vars aren't set; the auth
     // store calls identifyPurchaser separately on session change.
     void configurePurchases();
+    // Sprint 10c.2 polish — register the OS-scheduled watch sync.
+    // No-ops when expo-background-fetch / expo-task-manager aren't
+    // present (dev workspace without the native side). The dev-client
+    // APK rebuild pulls them in.
+    void startBackgroundSync();
     return () => {
       stopOrchestrator();
       stopHealthPlatformBackgroundFetch();
+      void stopBackgroundSync();
     };
   }, [
     hydrate,
@@ -283,6 +321,9 @@ export function RootNavigator() {
   return (
     <QueryClientProvider client={queryClient}>
       <NavigationContainer>{content}</NavigationContainer>
+      {/* Sprint 10c.2 polish — DEV-only floating sync-debug launcher.
+          Production builds strip __DEV__; the component returns null. */}
+      <DebugLauncher />
     </QueryClientProvider>
   );
 }

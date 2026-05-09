@@ -1,5 +1,15 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+// Sprint 10c.2 polish — bump minSdk to 26 (Android 8.0 Oreo) because
+// androidx.health.connect:connect-client (transitively pulled by
+// react-native-health-connect) requires it. Expo's default is 24;
+// overriding here. Devices below API 26 (~3% of Android in 2024) can't
+// install the app, which is acceptable for a wellness-grade BP product
+// where the watch already implies a modern phone.
+ext {
+  minSdkVersion = 26
+}
+
 buildscript {
   repositories {
     google()

@@ -53,6 +53,18 @@ import {
 
 export type BottomSheetSize = 'compact' | 'default' | 'tall' | 'full';
 
+/**
+ * Surface treatment for the sheet floor.
+ *
+ *   'solid'  — opaque surface.elevated. Default. Reads as a discrete
+ *              card; the brand voice (premium-precise, Aesop test)
+ *              favours this for forms, lists and most settings sheets.
+ *   'glass'  — material.glass.heavy + BlurView (D12 §11.1). Use when
+ *              seeing the underlying context matters — confirmation
+ *              moments, anomaly dispatchers, dialogs over the chart.
+ */
+export type BottomSheetSurface = 'solid' | 'glass';
+
 interface BottomSheetProps {
   visible: boolean;
   onDismiss: () => void;
@@ -63,6 +75,8 @@ interface BottomSheetProps {
    * an explicit primary action ("OK, I've called").
    */
   confirmedUrgent?: boolean;
+  /** Surface treatment — defaults to 'solid'. */
+  surface?: BottomSheetSurface;
   title?: string;
   children: ReactNode;
   testID?: string;
@@ -93,6 +107,7 @@ export function BottomSheet({
   onDismiss,
   size = 'default',
   confirmedUrgent = false,
+  surface = 'glass',
   title,
   children,
   testID,
@@ -175,20 +190,29 @@ export function BottomSheet({
 
   if (!mounted) return null;
 
-  // Surface container: sized + rounded + clipped (so the BlurView clips to
-  // the rounded top corners). No background — BlurView fills it.
+  const isSolid = surface === 'solid';
+
+  // Solid sheets get a heavier elevation so the lift reads against
+  // dense underlying content; glass relies on its blur for the lift.
+  const elev = isSolid ? theme.elevation.high : theme.elevation.medium;
+
+  // Surface container: sized + rounded + clipped. Solid mode paints
+  // surface.elevated directly; glass mode leaves the background empty
+  // and lets the BlurView + glass floor render over it.
   const surfaceContainerStyle: ViewStyle = {
     borderTopLeftRadius: theme.radii.l,
     borderTopRightRadius: theme.radii.l,
     overflow: 'hidden',
     ...(dimension.height !== undefined ? { height: dimension.height } : {}),
     ...(dimension.maxHeight !== undefined ? { maxHeight: dimension.maxHeight } : {}),
-    ...theme.elevation.medium.ios,
-    ...theme.elevation.medium.android,
+    ...(isSolid ? { backgroundColor: theme.colors.surface.elevated } : {}),
+    ...elev.ios,
+    ...elev.android,
   };
 
   // Glass floor — sits behind the BlurView so Android < 12 (where blur
   // doesn't render) still shows an intentional translucent surface.
+  // Only used when surface='glass'.
   const glassFloorStyle: ViewStyle = {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: theme.colors.surface.glassHeavy,
@@ -249,8 +273,16 @@ export function BottomSheet({
           <GestureDetector gesture={panGesture}>
             <Animated.View style={[styles.sheetWrapper, animatedSheetStyle]}>
               <View style={surfaceContainerStyle}>
-                <View style={glassFloorStyle} />
-                <BlurView intensity={80} tint={blurTint} style={StyleSheet.absoluteFill} />
+                {isSolid ? null : (
+                  <>
+                    <View style={glassFloorStyle} />
+                    <BlurView
+                      intensity={80}
+                      tint={blurTint}
+                      style={StyleSheet.absoluteFill}
+                    />
+                  </>
+                )}
                 <View style={contentPaddingStyle}>
                   <View
                     style={[

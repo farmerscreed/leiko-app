@@ -373,7 +373,9 @@ describe('SelfBuyerHome — visual tab bar (option c — visual only)', () => {
     render(withProviders(<SelfBuyerHome />));
     expect(screen.getByTestId('self-buyer-home-tab-home')).toBeTruthy();
     expect(screen.getByTestId('self-buyer-home-tab-trends')).toBeTruthy();
-    expect(screen.getByTestId('self-buyer-home-tab-family')).toBeTruthy();
+    // Sprint 10c.2 polish — Family tab dropped in favour of Learn; family
+    // management lives in Settings → Family for the rare hybrid-mode case.
+    expect(screen.getByTestId('self-buyer-home-tab-learn')).toBeTruthy();
     expect(screen.getByTestId('self-buyer-home-tab-settings')).toBeTruthy();
   });
 });

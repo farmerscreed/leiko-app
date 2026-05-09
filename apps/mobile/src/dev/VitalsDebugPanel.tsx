@@ -13,7 +13,7 @@
 // When Sprint 7.7 lands and the new vitals get a real production UI,
 // this file can be deleted in one commit; nothing else imports from it.
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, type TextStyle, type ViewStyle } from 'react-native';
 import { useTheme } from '../theme';
 import { useReadings } from '../state/readings';
@@ -25,6 +25,61 @@ import { useDailyPulseData } from '../state/dailyPulse';
 import { useSyncOrchestrator } from '../state/syncOrchestrator';
 import { usePairing } from '../state/pairing';
 import { getVitalCursor, resetVitalCursors } from '../services/sync/syncBacklog';
+import { peekRecent } from '../services/analytics/logger';
+
+// Sync-related events worth showing on the timeline. Anything else
+// from the analytics ring buffer is filtered out so the panel reads
+// as a focused sync log.
+const TIMELINE_EVENTS = new Set([
+  'sync_started',
+  'sync_completed',
+  'sync_skipped',
+  'sync_failed',
+  'background_sync_registered',
+  'background_sync_fired',
+  'background_sync_unavailable',
+  'device_config_flushed',
+  'device_config_failed',
+  'reading_sync_success',
+  'reading_sync_failed',
+  'ble_disconnected',
+]);
+
+function filterTimeline(
+  events: Array<{ name: string; props: unknown; ts: number }>,
+): Array<{ name: string; props: unknown; ts: number }> {
+  return events
+    .filter((e) => TIMELINE_EVENTS.has(e.name))
+    .slice(-12)
+    .reverse();
+}
+
+function summarizeProps(name: string, props: unknown): string {
+  if (!props || typeof props !== 'object') return '';
+  const p = props as Record<string, unknown>;
+  if (name === 'sync_started') return String(p.trigger ?? '');
+  if (name === 'sync_completed')
+    return `pulled ${p.pulled ?? 0} · ${p.batches ?? 0} batches`;
+  if (name === 'sync_skipped') return `${p.trigger ?? ''} → ${p.reason ?? ''}`;
+  if (name === 'sync_failed') return `${p.trigger ?? ''} · ${p.reason ?? ''}`;
+  if (name === 'background_sync_registered') return `every ${p.intervalMin ?? '?'}m`;
+  if (name === 'background_sync_fired') return `result=${p.result ?? '?'}`;
+  if (name === 'background_sync_unavailable') return String(p.reason ?? '');
+  if (name === 'device_config_flushed') return `${p.steps ?? 0} steps`;
+  if (name === 'device_config_failed') return String(p.failedStep ?? '');
+  if (name === 'reading_sync_success') return p.duplicate ? 'dupe' : 'new';
+  if (name === 'reading_sync_failed') return String(p.reason ?? '');
+  if (name === 'ble_disconnected') return String(p.reason ?? '');
+  return '';
+}
+
+function formatTime(ms: number): string {
+  const d = new Date(ms);
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  return `${hh}:${mm}:${ss}`;
+}
 
 function formatRelative(ms: number | null): string {
   if (ms === null) return '—';
@@ -64,6 +119,22 @@ export function VitalsDebugPanel() {
 
   const [busy, setBusy] = useState(false);
   const cursor = paired ? getVitalCursor(paired.bleId) : null;
+
+  // Sync timeline — auto-refreshes from the analytics ring buffer
+  // every 2s while the panel is mounted. Shows the last 12 sync-
+  // adjacent events newest-first so the developer can verify
+  // foreground / background / live-notify cadence.
+  const [timeline, setTimeline] = useState<Array<{
+    name: string;
+    props: unknown;
+    ts: number;
+  }>>(() => filterTimeline(peekRecent(60)));
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTimeline(filterTimeline(peekRecent(60)));
+    }, 2000);
+    return () => clearInterval(id);
+  }, []);
 
   const titleStyle: TextStyle = {
     fontSize: theme.type('title').size,
@@ -222,6 +293,54 @@ export function VitalsDebugPanel() {
             </View>
           </>
         ) : null}
+      </View>
+
+      {/* Sync timeline — last 12 sync-adjacent events from the
+          analytics ring buffer. Auto-refreshes every 2s. */}
+      <Text style={[labelStyle, { marginBottom: theme.spacing.s }]}>Sync timeline</Text>
+      <View style={cardStyle}>
+        {timeline.length === 0 ? (
+          <View style={rowStyle}>
+            <Text style={[labelStyle, { color: theme.colors.text.tertiary }]}>
+              No sync events yet — waiting for first trigger.
+            </Text>
+          </View>
+        ) : (
+          timeline.map((entry, idx) => (
+            <View
+              key={`${entry.ts}-${idx}`}
+              style={[
+                rowStyle,
+                {
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  paddingVertical: 6,
+                },
+              ]}
+            >
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                }}
+              >
+                <Text style={[valueStyle, { flex: 1 }]}>{entry.name}</Text>
+                <Text style={labelStyle}>{formatTime(entry.ts)}</Text>
+              </View>
+              {summarizeProps(entry.name, entry.props) ? (
+                <Text
+                  style={[
+                    labelStyle,
+                    { color: theme.colors.text.tertiary, marginTop: 2 },
+                  ]}
+                >
+                  {summarizeProps(entry.name, entry.props)}
+                </Text>
+              ) : null}
+            </View>
+          ))
+        )}
       </View>
 
       {/* Per-vital sections */}

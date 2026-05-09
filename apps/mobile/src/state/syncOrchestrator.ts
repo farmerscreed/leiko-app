@@ -55,7 +55,13 @@ export type SyncTrigger =
   | 'app_foreground'
   | 'bt_ready'
   | 'manual_force'
-  | 'live_notify';
+  | 'live_notify'
+  // Sprint 10c.2 polish — OS-scheduled background wake-up. Fired by
+  // services/sync/backgroundSync.ts via expo-background-fetch /
+  // BGTaskScheduler / WorkManager. Promoted from v1.1 to v1.0 so the
+  // app stays "always populated" even when users go a day or two
+  // without opening it.
+  | 'background';
 
 export type SyncStatus =
   | 'idle'

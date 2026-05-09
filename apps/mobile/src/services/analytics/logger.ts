@@ -40,7 +40,7 @@ export type AnalyticsEvent =
   | { name: 'take_reading_failed'; props?: { reason: string } }
   // Sprint 7 — sync orchestrator. Counts + categories only; the reading
   // values themselves never appear in events (CLAUDE.md data rule).
-  | { name: 'sync_started'; props?: { trigger: 'cold_start' | 'app_foreground' | 'bt_ready' | 'manual_force' | 'live_notify' } }
+  | { name: 'sync_started'; props?: { trigger: 'cold_start' | 'app_foreground' | 'bt_ready' | 'manual_force' | 'live_notify' | 'background' } }
   | { name: 'sync_completed'; props?: { trigger: string; batches: number; hitBatchCap: boolean; pulled: number } }
   | { name: 'sync_skipped'; props?: { trigger: string; reason: 'no_paired_device' | 'take_reading_active' | 'too_recent' | 'already_running' } }
   | { name: 'sync_failed'; props?: { trigger: string; reason: string } }
@@ -81,7 +81,12 @@ export type AnalyticsEvent =
   | { name: 'family_invite_send_failed'; props?: { reason: string } }
   | { name: 'family_invite_accept_started' }
   | { name: 'family_invite_accept_completed'; props?: { familyId: string } }
-  | { name: 'family_invite_accept_failed'; props?: { reason: string } };
+  | { name: 'family_invite_accept_failed'; props?: { reason: string } }
+  // Sprint 10c.2 polish — OS-scheduled background sync lifecycle.
+  | { name: 'background_sync_registered'; props?: { intervalMin: number } }
+  | { name: 'background_sync_unregistered' }
+  | { name: 'background_sync_unavailable'; props?: { reason: string } }
+  | { name: 'background_sync_fired'; props?: { result: 'ran' | 'skipped' | 'errored'; reason?: string } };
 
 type EventName = AnalyticsEvent['name'];
 
@@ -117,6 +122,13 @@ export function track<N extends EventName>(name: N, props?: EventProps<N>): void
   const queue = readQueue();
   queue.push(entry);
   writeQueue(queue);
+}
+
+/** Read the most-recent N events without draining. Used by the dev
+ *  debug panel for the sync-event timeline. Returns oldest-first. */
+export function peekRecent(n: number): Array<{ name: EventName; props: unknown; ts: number }> {
+  const queue = readQueue();
+  return queue.slice(-n);
 }
 
 export function drainQueue(): Array<{ name: EventName; props: unknown; ts: number }> {

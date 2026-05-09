@@ -317,8 +317,10 @@ export function SelfBuyerHome() {
         onPress={() => navigation.navigate('TakeReading')}
       />
 
-      {/* Visual tab bar — Home active. Settings wired. Trends wired
-          (Sprint 9). Family routes to a placeholder until Sprint 10. */}
+      {/* Visual tab bar — Home / Trends / Learn / Settings.
+          Family was dropped from the self-buyer tab bar in 10c.2:
+          family management for the rare hybrid-mode user lives in
+          Settings → Family. Learn is a placeholder until Sprint 13/14. */}
       <SelfBuyerTabBar
         theme={theme}
         onSelect={(tab) => {
@@ -331,8 +333,8 @@ export function SelfBuyerHome() {
             case 'trends':
               navigation.navigate('Trends');
               return;
-            case 'family':
-              navigation.navigate('VitalDetail', { vital: 'bp' });
+            case 'learn':
+              navigation.navigate('Learn');
               return;
           }
         }}
@@ -532,7 +534,11 @@ function SelfBuyerFAB({ theme, onPress }: SelfBuyerFABProps) {
   );
 }
 
-type SelfBuyerTab = 'home' | 'trends' | 'family' | 'settings';
+// Sprint 10c.2 polish — IA review: self-buyers' mental model is
+// "understand my numbers", not family. Family management lives in
+// Settings (where it belongs for the rare hybrid-mode user). The 4th
+// tab now hosts Learn — Sprint 13/14 will ship the real cards.
+type SelfBuyerTab = 'home' | 'trends' | 'learn' | 'settings';
 
 interface SelfBuyerTabBarProps {
   theme: Theme;
@@ -543,7 +549,7 @@ function SelfBuyerTabBar({ theme, onSelect }: SelfBuyerTabBarProps) {
   const tabs: Array<{ id: SelfBuyerTab; label: string; active: boolean }> = [
     { id: 'home', label: 'Home', active: true },
     { id: 'trends', label: 'Trends', active: false },
-    { id: 'family', label: 'Family', active: false },
+    { id: 'learn', label: 'Learn', active: false },
     { id: 'settings', label: 'Settings', active: false },
   ];
   const labelStyle = theme.type('labelUppercase');

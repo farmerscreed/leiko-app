@@ -162,6 +162,7 @@ function formatQuietHours(start: string, end: string): string {
 type NavParamList = {
   AuditLog: undefined;
   CaregiverVisibility: undefined;
+  FamilyMembers: undefined;
   Pairing: undefined;
   Settings: undefined;
 };
@@ -327,14 +328,18 @@ export function SettingsScreen({ navigation }: Props) {
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
-          { paddingBottom: theme.spacing.xxxl },
+          { paddingBottom: theme.spacing.xxxxl },
         ]}
       >
-        {/* Header bar — Back + title */}
+        {/* Header bar — Back + title.
+            Generous breathing room around the title; Settings is a
+            destination, not a transient sheet. Tighter kerning gives
+            the display-weight title a more confident "premium" feel. */}
         <View
           style={{
-            paddingHorizontal: theme.spacing.l,
-            paddingTop: theme.spacing.l,
+            paddingHorizontal: theme.spacing.xl,
+            paddingTop: theme.spacing.m,
+            paddingBottom: theme.spacing.xl,
           }}
         >
           <Pressable
@@ -343,13 +348,14 @@ export function SettingsScreen({ navigation }: Props) {
             accessibilityLabel="Back"
             hitSlop={theme.spacing.m}
             testID="settings-back"
-            style={{ alignSelf: 'flex-start', marginBottom: theme.spacing.l }}
+            style={{ alignSelf: 'flex-start', marginBottom: theme.spacing.xxl }}
           >
             <Text
               style={{
                 color: theme.colors.brand.primary,
                 fontSize: bodyStyle.size,
                 fontFamily: bodyStyle.family,
+                fontWeight: '500',
               }}
             >
               Back
@@ -363,6 +369,7 @@ export function SettingsScreen({ navigation }: Props) {
               lineHeight: headlineStyle.lineHeight,
               fontWeight: headlineStyle.weight as '700',
               fontFamily: headlineStyle.family,
+              letterSpacing: -0.6,
             }}
           >
             Settings
@@ -630,6 +637,21 @@ export function SettingsScreen({ navigation }: Props) {
         {/* Family ------------------------------------------------------ */}
         <SettingsSection title="Family" testID="settings-section-family">
           <ListRow
+            variant="navigation"
+            title="Family members"
+            subtitle={
+              caregiverCount === null
+                ? 'Loading…'
+                : caregiverCount === 0
+                  ? 'Just you for now.'
+                  : caregiverCount === 1
+                    ? '1 caregiver in your circle.'
+                    : `${caregiverCount} caregivers in your circle.`
+            }
+            onPress={() => stackNavigation.navigate('FamilyMembers')}
+            testID="settings-family-members"
+          />
+          <ListRow
             variant="action"
             title={isSelfBuyer ? 'Invite a family member' : 'Invite a caregiver'}
             subtitle={
@@ -815,6 +837,7 @@ export function SettingsScreen({ navigation }: Props) {
         visible={confirmingForget}
         onDismiss={() => setConfirmingForget(false)}
         size="compact"
+        surface="solid"
         title="Forget this watch?"
         testID="settings-forget-sheet"
       >
@@ -856,6 +879,7 @@ export function SettingsScreen({ navigation }: Props) {
         visible={confirmingSignOut}
         onDismiss={() => setConfirmingSignOut(false)}
         size="compact"
+        surface="solid"
         title="Sign out?"
         testID="settings-signout-sheet"
       >
@@ -897,6 +921,7 @@ export function SettingsScreen({ navigation }: Props) {
         visible={picker === 'steps'}
         onDismiss={() => setPicker(null)}
         size="tall"
+        surface="solid"
         title="Daily steps target"
         testID="settings-steps-sheet"
       >
@@ -923,6 +948,7 @@ export function SettingsScreen({ navigation }: Props) {
         visible={picker === 'sleep'}
         onDismiss={() => setPicker(null)}
         size="tall"
+        surface="solid"
         title="Sleep target"
         testID="settings-sleep-sheet"
       >
@@ -949,6 +975,7 @@ export function SettingsScreen({ navigation }: Props) {
         visible={quietHoursSheetOpen}
         onDismiss={() => setQuietHoursSheetOpen(false)}
         size="default"
+        surface="solid"
         title="Quiet window"
         testID="settings-quiet-hours-sheet"
       >
@@ -993,6 +1020,7 @@ export function SettingsScreen({ navigation }: Props) {
         visible={deleteSheetOpen}
         onDismiss={() => setDeleteSheetOpen(false)}
         size="default"
+        surface="solid"
         title="Delete your account"
         testID="settings-delete-sheet"
       >
@@ -1085,6 +1113,7 @@ export function SettingsScreen({ navigation }: Props) {
         visible={inviteSheetOpen}
         onDismiss={() => setInviteSheetOpen(false)}
         size="default"
+        surface="solid"
         title={inviteCode ? 'Invite ready' : 'Invite a family member'}
         testID="settings-invite-sheet"
       >
@@ -1223,7 +1252,7 @@ export function SettingsScreen({ navigation }: Props) {
                         : theme.colors.border.subtle,
                     backgroundColor:
                       invitePermission === 'readings'
-                        ? theme.colors.brand.primarySoft
+                        ? theme.colors.brand.primary
                         : 'transparent',
                     alignItems: 'center',
                   }}
@@ -1231,9 +1260,13 @@ export function SettingsScreen({ navigation }: Props) {
                 >
                   <Text
                     style={{
-                      color: theme.colors.text.primary,
+                      color:
+                        invitePermission === 'readings'
+                          ? theme.colors.text.onBrand
+                          : theme.colors.text.secondary,
                       fontSize: theme.type('label').size,
                       fontFamily: theme.type('label').family,
+                      fontWeight: invitePermission === 'readings' ? '600' : '400',
                     }}
                   >
                     Can see readings
@@ -1254,7 +1287,7 @@ export function SettingsScreen({ navigation }: Props) {
                         : theme.colors.border.subtle,
                     backgroundColor:
                       invitePermission === 'readings_notes'
-                        ? theme.colors.brand.primarySoft
+                        ? theme.colors.brand.primary
                         : 'transparent',
                     alignItems: 'center',
                   }}
@@ -1262,9 +1295,13 @@ export function SettingsScreen({ navigation }: Props) {
                 >
                   <Text
                     style={{
-                      color: theme.colors.text.primary,
+                      color:
+                        invitePermission === 'readings_notes'
+                          ? theme.colors.text.onBrand
+                          : theme.colors.text.secondary,
                       fontSize: theme.type('label').size,
                       fontFamily: theme.type('label').family,
+                      fontWeight: invitePermission === 'readings_notes' ? '600' : '400',
                     }}
                   >
                     Readings + notes
@@ -1332,6 +1369,7 @@ export function SettingsScreen({ navigation }: Props) {
         visible={acceptSheetOpen}
         onDismiss={() => setAcceptSheetOpen(false)}
         size="default"
+        surface="solid"
         title={acceptSuccess ? "You're in" : 'Join a family circle'}
         testID="settings-accept-sheet"
       >
@@ -1490,6 +1528,7 @@ export function SettingsScreen({ navigation }: Props) {
         visible={hypertensionSheetOpen}
         onDismiss={() => setHypertensionSheetOpen(false)}
         size="compact"
+        surface="solid"
         title="Diagnosed with hypertension?"
         testID="settings-hypertension-sheet"
       >

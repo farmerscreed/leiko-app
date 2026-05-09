@@ -58,6 +58,13 @@ export type CaregiverStackParamList = {
   // settings live elsewhere) but the route is registered in both
   // stacks so the navigator type unions are symmetric.
   CaregiverVisibility: undefined;
+  // Sprint 10c.2 polish — read-only list of every member of the
+  // active family circle, reached from Settings → Family.
+  FamilyMembers: undefined;
+  // Sprint 10c.2 polish — Learn placeholder. Sprint 13/14 ships the
+  // real Learn cards. Registered in both stacks for symmetry; the
+  // self-buyer tab bar is the primary entry point.
+  Learn: undefined;
 };
 
 // Sprint 4 — self-buyer onboarding stack. Five screens per
@@ -92,6 +99,10 @@ export type SelfBuyerStackParamList = {
   AuditLog: undefined;
   // Sprint 10c.2 — hybrid-mode caregiver visibility (D13 §13.2).
   CaregiverVisibility: undefined;
+  // Sprint 10c.2 polish — family members read-only list.
+  FamilyMembers: undefined;
+  // Sprint 10c.2 polish — Learn tab destination (placeholder until 13/14).
+  Learn: undefined;
 };
 
 export type AuthScreenProps<R extends keyof AuthStackParamList> = NativeStackScreenProps<

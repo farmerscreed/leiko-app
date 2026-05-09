@@ -109,12 +109,17 @@ export function ListRow({
     opacity: disabled ? theme.opacity.disabled : theme.opacity.full,
   };
 
+  // Premium polish (Sprint 10c.2 polish pass): row titles get a
+  // medium weight (500) — bodyL's default 400 reads too casual against
+  // the rest of the brand voice. Subtitles drop to text.tertiary +
+  // slight tracking for a more refined supporting tier.
   const titleTextStyle: TextStyle = {
     fontSize: titleStyle.size,
     lineHeight: titleStyle.lineHeight,
-    fontFamily: titleStyle.family,
-    fontWeight: titleStyle.weight as TextStyle['fontWeight'],
+    fontFamily: theme.fontFamilies.bodyMedium,
+    fontWeight: '500',
     color: titleColor,
+    letterSpacing: -0.1,
   };
 
   const subtitleTextStyle: TextStyle = {
@@ -122,8 +127,9 @@ export function ListRow({
     lineHeight: subtitleStyle.lineHeight,
     fontFamily: subtitleStyle.family,
     fontWeight: subtitleStyle.weight as TextStyle['fontWeight'],
-    color: theme.colors.text.secondary,
-    marginTop: 2,
+    color: theme.colors.text.tertiary,
+    marginTop: 3,
+    letterSpacing: 0.1,
   };
 
   const dividerStyle: ViewStyle = {
@@ -255,17 +261,14 @@ function renderTrailing(args: TrailingArgs): ReactNode {
   const { variant, value, selected, theme } = args;
 
   if (variant === 'navigation') {
-    // Phosphor CaretRight deferred — Unicode '›' (U+203A) at type.bodyL,
-    // muted. Replace with <CaretRight /> when the icon library lands.
-    // Note: we deliberately don't set accessibilityElementsHidden here.
-    // The parent Pressable's accessibilityLabel shadows descendant text for
-    // screen readers, AND `accessibilityElementsHidden` would also hide the
-    // node from React Native Testing Library's queries by default.
-    const t = theme.type('bodyL');
+    // Phosphor CaretRight deferred — Unicode '›' (U+203A). Polished to
+    // bodyM size + tertiary opacity so the chevron supports rather
+    // than competes with the row title.
+    const t = theme.type('bodyM');
     const style: TextStyle = {
       fontSize: t.size,
       lineHeight: t.lineHeight,
-      color: theme.colors.text.secondary,
+      color: theme.colors.text.tertiary,
     };
     return (
       <Text style={style} testID="listrow-chevron">
@@ -275,14 +278,16 @@ function renderTrailing(args: TrailingArgs): ReactNode {
   }
 
   if (variant === 'data' && value) {
-    const t = theme.type('bodyL');
+    // Polished: smaller (bodyM not bodyL) + secondary color so the
+    // value is supporting info, not co-equal to the title.
+    const t = theme.type('bodyM');
     const numeric = isNumericValue(value);
     const style: TextStyle = {
       fontSize: t.size,
       lineHeight: t.lineHeight,
       fontFamily: numeric ? theme.fontFamilies.numeric : t.family,
-      fontWeight: t.weight as TextStyle['fontWeight'],
-      color: theme.colors.text.primary,
+      fontWeight: '400',
+      color: theme.colors.text.secondary,
       textAlign: 'right',
     };
     return (

@@ -16,7 +16,12 @@
         "NSHealthShareUsageDescription": "Leiko reads weight, height, and blood-glucose entries from Apple Health so your readings stay alongside other vitals you already track.",
         "NSHealthUpdateUsageDescription": "Leiko writes your blood-pressure, heart-rate, oxygen-saturation, sleep, steps, and active-energy readings to Apple Health so they appear alongside your other vitals.",
         "UIBackgroundModes": [
-          "bluetooth-central"
+          "bluetooth-central",
+          "fetch",
+          "processing"
+        ],
+        "BGTaskSchedulerPermittedIdentifiers": [
+          "leiko.sync.backgroundFetch"
         ]
       }
     },
@@ -27,6 +32,8 @@
         "android.permission.BLUETOOTH_CONNECT",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE",
+        "android.permission.WAKE_LOCK",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.health.READ_WEIGHT",
         "android.permission.health.READ_HEIGHT",
         "android.permission.health.READ_BLOOD_GLUCOSE",

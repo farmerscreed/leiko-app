@@ -75,11 +75,11 @@ import {
 
 type Nav = NativeStackNavigationProp<CaregiverStackParamList>;
 
-// Sprint 7.7a wires invite capacity off — `family_owner` capability
-// + Plus tier check land alongside Settings work in Sprint 10. Until
-// then the "+ Add someone" affordance never renders and the bar shows
-// just the count.
-const CAN_INVITE_FOR_NOW = false;
+// Sprint 10c.2 polish — invite capacity is now on, gated by the
+// caregiver-mode account type. The "+ Add someone" affordance routes
+// to Settings → Family where the invite sheet lives. A future polish
+// can also gate this on Plus tier + capacity remaining.
+const CAN_INVITE_FOR_NOW = true;
 
 // Cinematic-transition timing. Outgoing view scales+fades out; incoming
 // scales+fades in. ~320ms total — short enough to feel snappy, long
@@ -356,6 +356,7 @@ export function CaregiverHome() {
             <CaregiverActionBar
               count={merged.length}
               canInvite={CAN_INVITE_FOR_NOW}
+              onInvitePress={() => navigation.navigate('Settings')}
               testID="caregiver-home-action-bar"
             />
           </View>

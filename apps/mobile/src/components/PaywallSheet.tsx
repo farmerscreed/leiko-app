@@ -182,6 +182,7 @@ export function PaywallSheet({
       visible={visible}
       onDismiss={onDismiss}
       size="full"
+      surface="solid"
       title="Leiko Plus"
       testID={testID ?? `paywall-sheet:${trigger}`}
     >
@@ -239,16 +240,39 @@ export function PaywallSheet({
               periodChipBase,
               {
                 backgroundColor:
-                  period === 'annual' ? theme.colors.brand.primarySoft : 'transparent',
+                  period === 'annual' ? theme.colors.brand.primary : 'transparent',
                 borderColor:
                   period === 'annual' ? theme.colors.brand.primary : theme.colors.border.subtle,
               },
             ]}
           >
-            <Text style={[labelStyle, { color: theme.colors.text.tertiary }]}>
+            <Text
+              style={[
+                labelStyle,
+                {
+                  color:
+                    period === 'annual'
+                      ? theme.colors.text.onBrand
+                      : theme.colors.text.tertiary,
+                  fontWeight: period === 'annual' ? '600' : '400',
+                },
+              ]}
+            >
               Best value · save 33%
             </Text>
-            <Text style={[bodyStyle, { color: theme.colors.text.primary, marginTop: theme.spacing.xs }]}>
+            <Text
+              style={[
+                bodyStyle,
+                {
+                  color:
+                    period === 'annual'
+                      ? theme.colors.text.onBrand
+                      : theme.colors.text.primary,
+                  marginTop: theme.spacing.xs,
+                  fontWeight: period === 'annual' ? '700' : '600',
+                },
+              ]}
+            >
               {annualPrice} / year
             </Text>
           </Pressable>
@@ -262,16 +286,39 @@ export function PaywallSheet({
               periodChipBase,
               {
                 backgroundColor:
-                  period === 'monthly' ? theme.colors.brand.primarySoft : 'transparent',
+                  period === 'monthly' ? theme.colors.brand.primary : 'transparent',
                 borderColor:
                   period === 'monthly' ? theme.colors.brand.primary : theme.colors.border.subtle,
               },
             ]}
           >
-            <Text style={[labelStyle, { color: theme.colors.text.tertiary }]}>
+            <Text
+              style={[
+                labelStyle,
+                {
+                  color:
+                    period === 'monthly'
+                      ? theme.colors.text.onBrand
+                      : theme.colors.text.tertiary,
+                  fontWeight: period === 'monthly' ? '600' : '400',
+                },
+              ]}
+            >
               Monthly
             </Text>
-            <Text style={[bodyStyle, { color: theme.colors.text.primary, marginTop: theme.spacing.xs }]}>
+            <Text
+              style={[
+                bodyStyle,
+                {
+                  color:
+                    period === 'monthly'
+                      ? theme.colors.text.onBrand
+                      : theme.colors.text.primary,
+                  marginTop: theme.spacing.xs,
+                  fontWeight: period === 'monthly' ? '700' : '600',
+                },
+              ]}
+            >
               {monthlyPrice} / month
             </Text>
           </Pressable>
