@@ -48,6 +48,10 @@ import { useOnboarding } from '../state/onboarding';
 import { usePairing } from '../state/pairing';
 import { useReadings } from '../state/readings';
 import { useSyncOrchestrator } from '../state/syncOrchestrator';
+import {
+  startHealthPlatformBackgroundFetch,
+  stopHealthPlatformBackgroundFetch,
+} from '../services/health-platform/backgroundFetch';
 import { inferModel, setDeviceMetaProvider } from '../services/sync/postReading';
 
 // Wire postReading's device-meta provider once at app boot. The
@@ -229,8 +233,13 @@ export function RootNavigator() {
     // Sprint 7: register the sync orchestrator's AppState + BT
     // listeners and fire the cold-start sync. Idempotent.
     startOrchestrator();
+    // Sprint 9.5 / Task 7: register the health-platform read trigger.
+    // Fires on every app foreground; internally debounced to 24h.
+    // Caregiver / master-off / no-toggles short-circuit silently.
+    startHealthPlatformBackgroundFetch();
     return () => {
       stopOrchestrator();
+      stopHealthPlatformBackgroundFetch();
     };
   }, [
     hydrate,

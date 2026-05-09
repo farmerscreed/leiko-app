@@ -74,6 +74,19 @@ export const STORAGE_KEYS = {
   // Settings UI ships in Sprint 10 (D13 §12.5 "Settings has master
   // toggle ... + per-vital granular toggles").
   healthPlatformToggles: 'leiko.health-platform.toggles',
+  // Apple Health / Health Connect read cursor — Sprint 9.5 / Task 7.
+  // unix-sec timestamp of the last successful background fetch. The
+  // fetcher reads samples since this timestamp; on success it advances
+  // to "now". '' / unset means "no successful fetch yet — backfill the
+  // last 30 days on first run." Single global cursor (not per-vital)
+  // because the read window is identical across weight / height /
+  // glucose; per-vital sub-cursoring would buy nothing.
+  healthPlatformReadCursor: 'leiko.health-platform.readCursorSec',
+  // Last fetch attempt wall-clock — Sprint 9.5 / Task 7. Independent of
+  // readCursor (which advances ONLY on success). Used by the 24h
+  // debounce so a failed fetch doesn't immediately retry on the next
+  // foreground transition.
+  healthPlatformLastAttempt: 'leiko.health-platform.lastAttemptMs',
   // Per-vital recent caches — Sprint 7.5. Server-acknowledged samples,
   // capped per-slice for the home/Daily Pulse aggregators. Mirrors the
   // recentReadings pattern; see state/hr.ts etc. for the cap constants.
