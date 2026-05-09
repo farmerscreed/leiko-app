@@ -69,6 +69,9 @@ export type CaregiverStackParamList = {
   LearnCluster: { category: import('../services/learn/types').ArticleCategory };
   // Sprint 13 — full article reader. articleId matches frontmatter.id.
   Article: { articleId: string };
+  // Sprint 11 — minimal "Ask Leiko" surface for the local intent
+  // router. Sprint 12 layers Tier-B over the Tier-B placeholder.
+  AskLeiko: undefined;
 };
 
 // Sprint 4 — self-buyer onboarding stack. Five screens per
@@ -113,6 +116,9 @@ export type SelfBuyerStackParamList = {
   LearnCluster: { category: import('../services/learn/types').ArticleCategory };
   // Sprint 13 — full article reader. articleId matches frontmatter.id.
   Article: { articleId: string };
+  // Sprint 11 — minimal "Ask Leiko" surface for the local intent
+  // router. Sprint 12 layers Tier-B over the Tier-B placeholder.
+  AskLeiko: undefined;
 };
 
 export type AuthScreenProps<R extends keyof AuthStackParamList> = NativeStackScreenProps<

@@ -48,6 +48,7 @@ import { FamilyMembersScreen } from '../screens/FamilyMembers/FamilyMembersScree
 import { LearnScreen } from '../screens/Learn/LearnScreen';
 import { LearnClusterScreen } from '../screens/Learn/LearnClusterScreen';
 import { ArticleScreen } from '../screens/Learn/ArticleScreen';
+import { AskLeikoScreen } from '../screens/AskLeiko/AskLeikoScreen';
 import { DebugLauncher } from '../dev/DebugLauncher';
 import { useTheme } from '../theme';
 import { useAuth } from '../state/auth';
@@ -171,6 +172,7 @@ function CaregiverHomeNavigator() {
       <CaregiverStack.Screen name="Learn" component={LearnScreen} />
       <CaregiverStack.Screen name="LearnCluster" component={LearnClusterScreen} />
       <CaregiverStack.Screen name="Article" component={ArticleScreen} />
+      <CaregiverStack.Screen name="AskLeiko" component={AskLeikoScreen} />
     </CaregiverStack.Navigator>
   );
 }
@@ -228,6 +230,7 @@ function SelfBuyerHomeNavigator() {
       <SelfBuyerStack.Screen name="Learn" component={LearnScreen} />
       <SelfBuyerStack.Screen name="LearnCluster" component={LearnClusterScreen} />
       <SelfBuyerStack.Screen name="Article" component={ArticleScreen} />
+      <SelfBuyerStack.Screen name="AskLeiko" component={AskLeikoScreen} />
     </SelfBuyerStack.Navigator>
   );
 }

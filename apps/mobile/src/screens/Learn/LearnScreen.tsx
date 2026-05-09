@@ -185,6 +185,17 @@ export function LearnScreen({ navigation }: LearnNavigation) {
           </SettingsSection>
         )}
 
+        {/* Sprint 11 — Ask Leiko entry */}
+        <SettingsSection title="Have a question?" testID="learn-ask">
+          <ListRow
+            variant="navigation"
+            title="Ask Leiko"
+            subtitle="Plain-language answers, with a Learn card when one fits."
+            onPress={() => nav.navigate('AskLeiko')}
+            testID="learn-ask-leiko-row"
+          />
+        </SettingsSection>
+
         {/* Cluster grid */}
         {clusters.map(({ category, articles }) => (
           <SettingsSection
