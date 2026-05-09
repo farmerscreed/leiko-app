@@ -43,6 +43,7 @@ import {
   type WriteResultPerVital,
   type WriteVitalKind,
 } from '../types';
+import { buildHCSleepStages } from '../sleep-stages';
 
 const WRITE_RECORD_TYPES: Record<WriteVitalKind, RecordType> = {
   bp: 'BloodPressure',
@@ -196,10 +197,19 @@ export const nativeAdapter: HealthPlatformAdapter = {
     return insertSafely(records);
   },
 
-  // Task 6 — wires sleep-stages.ts to map our SleepSession shape onto
-  // HC SleepSessionRecord with stage subrecords. Until then, no-op.
-  async writeSleep() {
-    return EMPTY_RESULT;
+  async writeSleep(sessions) {
+    if (sessions.length === 0) return EMPTY_RESULT;
+    const records: HealthConnectRecord[] = sessions.map((session) => ({
+      recordType: 'SleepSession',
+      startTime: isoFromSec(session.sessionStartSec),
+      endTime: isoFromSec(session.sessionEndSec),
+      stages: buildHCSleepStages(session).map((b) => ({
+        startTime: isoFromSec(b.startTimeSec),
+        endTime: isoFromSec(b.endTimeSec),
+        stage: b.stage,
+      })),
+    }));
+    return insertSafely(records);
   },
 
   async writeSteps(days) {

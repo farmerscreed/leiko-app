@@ -15,13 +15,20 @@
 // then writeSleep returns EMPTY_RESULT — the orchestrator (Task 5)
 // treats that as "no rows written" and moves on.
 
+import { Platform } from 'react-native';
 import {
   isHealthDataAvailableAsync,
   queryQuantitySamples,
   requestAuthorization,
+  saveCategorySample,
   saveCorrelationSample,
   saveQuantitySample,
 } from '@kingstinct/react-native-healthkit';
+import {
+  buildHKSleepSamples,
+  downgradeForLegacyIOS,
+  type HKSleepSample,
+} from '../sleep-stages';
 import {
   EMPTY_RESULT,
   LEIKO_BUNDLE_ID,
@@ -217,10 +224,36 @@ export const nativeAdapter: HealthPlatformAdapter = {
     );
   },
 
-  // Task 6 — wires sleep-stages.ts to map our SleepSession shape onto
-  // HK category samples. Until then, no-op.
-  async writeSleep() {
-    return EMPTY_RESULT;
+  async writeSleep(sessions) {
+    if (sessions.length === 0) return EMPTY_RESULT;
+    // iOS 16 introduced asleepCore/Deep/REM subtypes; on 15.x we fold
+    // those down to the legacy `asleep` value. ADR-0005 keeps the
+    // deployment target at SDK 54's default (15.1) so this matters.
+    const iosMajor = parseInt(String(Platform.Version), 10);
+    const downgrade = Number.isNaN(iosMajor) ? false : iosMajor < 16;
+
+    let written = 0;
+    let rejected = 0;
+    let firstError: string | undefined;
+    for (const session of sessions) {
+      const raw = buildHKSleepSamples(session);
+      const samples: HKSleepSample[] = downgrade ? downgradeForLegacyIOS(raw) : raw;
+      for (const s of samples) {
+        try {
+          await saveCategorySample(
+            'HKCategoryTypeIdentifierSleepAnalysis' as never,
+            s.value as never,
+            new Date(s.startSec * 1000),
+            new Date(s.endSec * 1000),
+          );
+          written += 1;
+        } catch (err) {
+          rejected += 1;
+          if (!firstError) firstError = (err as Error).message;
+        }
+      }
+    }
+    return firstError ? { written, rejected, firstError } : { written, rejected };
   },
 
   writeSteps(days) {
