@@ -70,6 +70,29 @@ jest.mock('../../hooks/useFamilyReadings', () => ({
   }),
 }));
 
+// Sprint 10a — the SixthReadingPaywallHost mounted on SelfBuyerHome
+// pulls usePlusEntitlement (TanStack Query against families). Stub to
+// a Plus user so the auto-paywall short-circuits and the test surface
+// stays focused on the home screen content.
+jest.mock('../../hooks/usePlusEntitlement', () => ({
+  usePlusEntitlement: () => ({
+    tier: 'plus',
+    isPlus: true,
+    isLoading: false,
+    refetch: jest.fn().mockResolvedValue(undefined),
+  }),
+  isPlusTier: (t: string) => ['plus', 'plus_trial', 'plus_grace'].includes(t),
+}));
+
+// Sprint 10a — readings store: SixthReadingPaywallHost reads pending
+// + recent for its month-count check. Stub both to empty.
+jest.mock('../../state/readings', () => ({
+  useReadings: (selector?: (s: unknown) => unknown) => {
+    const state = { pending: [], recent: [], latest: () => null };
+    return selector ? selector(state) : state;
+  },
+}));
+
 jest.mock('../../state/auth', () => ({
   useAuth: (selector?: (s: unknown) => unknown) => {
     const state = {

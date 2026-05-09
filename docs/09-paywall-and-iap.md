@@ -29,7 +29,7 @@ CANONICAL for Sprint 10 (paywall plumbing) and Sprint 17 (store metadata). Sourc
 | Full historical readings (30 days+) | — | ✅ |
 | Monthly + multi-month trends | — | ✅ |
 | Anomaly detection (push notifications) | — | ✅ |
-| AI assistant Tier B (pattern explanation) | — | ✅ (50 / month) |
+| AI assistant Tier B (pattern explanation) | 5 / month | ✅ (100 / month) |
 | AI assistant Tier C (weekly summary) | — | ✅ (4 / month auto) |
 | Share with doctor (PDF export) | — | ✅ |
 | CSV export | — | ✅ |

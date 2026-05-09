@@ -1,30 +1,42 @@
-// PaywallSheet — Sprint 9 minimal entry point for Leiko Plus prompts.
+// PaywallSheet — Sprint 10a wires the real RevenueCat trial-start flow.
 //
 // Sourced from docs/09-paywall-and-iap.md §3 (paywall screen anatomy)
-// and D8a §9.3-9.4 (account_type-switched headline + value bullets).
+// and D8a §9.3-9.5 (account_type-switched headline + value bullets +
+// price block).
 //
-// Sprint 9 scope is the *trigger*: when a free user taps a Plus-only
-// surface (Trends >7d range chip, "Save as PDF for my doctor"), this
-// sheet rises with the right copy, dismisses politely, and does NOT
-// attempt to start a purchase. Sprint 10 swaps the primary CTA for the
-// real RevenueCat trial-start flow + product price block.
+// Sprint 10a additions on top of the Sprint 9 stub:
+//   • Monthly / annual period toggle, with annual highlighted as the
+//     recommended choice (per D8a §9.5 "annual is highlighted as
+//     recommended").
+//   • Live price strings sourced from the RevenueCat offerings query
+//     (services/purchases). Falls back to the locked $4.99 / $39.99
+//     copy from docs/09 §1 when the SDK isn't available (dev workspace
+//     without RC keys, or first run before configure resolves).
+//   • Primary CTA calls purchasePeriod() and resolves with a quiet
+//     "we couldn't start the trial" message on user-cancel / store
+//     error. The webhook is the authoritative entitlement path —
+//     the sheet refetches the entitlement query on success so the
+//     Plus surface unblocks immediately rather than waiting for
+//     Realtime.
+//   • Restore CTA for users who bought on another device.
 //
-// Design notes:
-//   • Reuses the shared BottomSheet (D12 §11.1 glass + spring rise).
-//   • Headline + bullets switch on `accountType` per D8a §9.3-9.4.
-//     Self-buyer leads with the doctor-PDF value prop because that's
-//     the most compelling self-buyer ask (per D8a §9.4 callout).
-//   • "Maybe later" dismiss is dignified — no countdown, no "are you
-//     sure", no ?guilt UI (CLAUDE.md anti-pattern + D5 §3.4).
-//   • The "Try free for 7 days" button is rendered for visual parity
-//     with the eventual paywall but in Sprint 9 it just dismisses the
-//     sheet (Sprint 10 hooks it to RevenueCat). Marked accessibility-
-//     hint accordingly so screen-reader users know it's stubbed.
+// Voice: every string passes docs/05-voice-and-claims.md. No urgency,
+// no countdown, no "limited time" framing. Cancellation language is
+// dignified ("Maybe later", no penalty UX).
 
-import { Text, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
 import { useTheme } from '../theme';
+import { usePlusEntitlement } from '../hooks/usePlusEntitlement';
+import {
+  fetchOfferings,
+  purchasePeriod,
+  restorePurchases,
+  type OfferingsSnapshot,
+  type PurchasePeriod,
+} from '../services/purchases';
 import type { AccountType } from '../types/database';
 
 export type PaywallTrigger =
@@ -41,8 +53,7 @@ export interface PaywallSheetProps {
   onDismiss: () => void;
   /** Switches headline + value-bullet copy per D8a §9.3-9.4. */
   accountType: AccountType;
-  /** Source of the trigger — feeds analytics + future routing.
-   *  Currently used only for the testID; Sprint 10 logs it. */
+  /** Source of the trigger — feeds analytics + future routing. */
   trigger: PaywallTrigger;
   testID?: string;
 }
@@ -53,10 +64,13 @@ interface PaywallCopy {
   bullets: string[];
 }
 
+// Locked fallback strings from docs/09 §1. The store will report
+// region-correct numbers; these are the canonical USD anchors that
+// ship in marketing/legal copy.
+const FALLBACK_PRICE_MONTHLY = '$4.99';
+const FALLBACK_PRICE_ANNUAL = '$39.99';
+
 function copyForMode(accountType: AccountType): PaywallCopy {
-  // Self-buyer leads with the PDF / explanation / full history bullets
-  // per D8a §9.4. Caregiver leads with multi-caregiver / weekly summary
-  // / share-with-doctor.
   if (accountType === 'self_buyer') {
     return {
       headline: 'Understand your numbers',
@@ -69,9 +83,6 @@ function copyForMode(accountType: AccountType): PaywallCopy {
       ],
     };
   }
-  // 'caregiver' OR 'parent'. Parent users won't normally see this sheet
-  // (they're read-only large-text mode), but when they do — for example
-  // a hybrid-mode flow — caregiver copy is the safe default.
   return {
     headline: 'Stay close, every day',
     body:
@@ -93,28 +104,90 @@ export function PaywallSheet({
 }: PaywallSheetProps) {
   const theme = useTheme();
   const copy = copyForMode(accountType);
+  const { refetch: refetchEntitlement } = usePlusEntitlement();
+
+  const [period, setPeriod] = useState<PurchasePeriod>('annual');
+  const [offerings, setOfferings] = useState<OfferingsSnapshot>({
+    monthly: null,
+    annual: null,
+  });
+  const [pending, setPending] = useState<'idle' | 'purchasing' | 'restoring'>('idle');
+  const [error, setError] = useState<string | null>(null);
+
+  // Pull the live offerings once when the sheet opens. No-op when RC
+  // isn't configured — the fallback copy carries the canonical price.
+  useEffect(() => {
+    if (!visible) return;
+    let cancelled = false;
+    void fetchOfferings().then((snap) => {
+      if (!cancelled) setOfferings(snap);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [visible]);
+
+  const monthlyPrice = offerings.monthly?.priceString ?? FALLBACK_PRICE_MONTHLY;
+  const annualPrice = offerings.annual?.priceString ?? FALLBACK_PRICE_ANNUAL;
+
+  const onPrimaryPress = useCallback(async () => {
+    if (pending !== 'idle') return;
+    setError(null);
+    setPending('purchasing');
+    try {
+      await purchasePeriod(period);
+      // The webhook is the source of truth, but it may be a few seconds
+      // out. Refetch the entitlement so the gated surface unblocks
+      // immediately on the user's next interaction.
+      await refetchEntitlement();
+      onDismiss();
+    } catch {
+      setError("We couldn't start your trial. Tap to try again, or pick a different option.");
+    } finally {
+      setPending('idle');
+    }
+  }, [period, pending, refetchEntitlement, onDismiss]);
+
+  const onRestorePress = useCallback(async () => {
+    if (pending !== 'idle') return;
+    setError(null);
+    setPending('restoring');
+    try {
+      await restorePurchases();
+      await refetchEntitlement();
+      onDismiss();
+    } catch {
+      setError("We couldn't find a previous Leiko Plus on this account.");
+    } finally {
+      setPending('idle');
+    }
+  }, [pending, refetchEntitlement, onDismiss]);
 
   const headlineStyle = theme.type('headline');
   const bodyStyle = theme.type('bodyL');
   const bulletStyle = theme.type('bodyL');
   const labelStyle = theme.type('label');
 
+  const periodChipBase = {
+    flex: 1,
+    paddingVertical: theme.spacing.m,
+    borderRadius: theme.radii.m,
+    borderWidth: 1,
+    alignItems: 'center' as const,
+  };
+
   return (
     <BottomSheet
       visible={visible}
       onDismiss={onDismiss}
-      size="tall"
+      size="full"
       title="Leiko Plus"
       testID={testID ?? `paywall-sheet:${trigger}`}
     >
       <View style={{ paddingHorizontal: theme.spacing.l, paddingBottom: theme.spacing.xl }}>
-        {/* Headline */}
+        {/* Hero — headline + body */}
         <View style={{ marginTop: theme.spacing.l }}>
-          <View
-            accessibilityRole="header"
-            accessibilityLabel={copy.headline}
-          >
-            {/* RN 0.81 typography — pass typography style + colour */}
+          <View accessibilityRole="header" accessibilityLabel={copy.headline}>
             <Text style={[headlineStyle, { color: theme.colors.text.primary }]}>
               {copy.headline}
             </Text>
@@ -145,45 +218,133 @@ export function PaywallSheet({
               >
                 {'•'}
               </Text>
-              <Text
-                style={[
-                  bulletStyle,
-                  { color: theme.colors.text.primary, flex: 1 },
-                ]}
-              >
+              <Text style={[bulletStyle, { color: theme.colors.text.primary, flex: 1 }]}>
                 {bullet}
               </Text>
             </View>
           ))}
         </View>
 
-        {/* CTA stack */}
+        {/* Price block — monthly / annual toggle. Annual is highlighted
+            as recommended per D8a §9.5. */}
+        <View style={{ marginTop: theme.spacing.xl, flexDirection: 'row', gap: theme.spacing.m }}>
+          <Pressable
+            onPress={() => setPeriod('annual')}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: period === 'annual' }}
+            accessibilityLabel={`Annual plan, ${annualPrice} per year — saves 33%`}
+            testID="paywall-sheet:period-annual"
+            style={[
+              periodChipBase,
+              {
+                backgroundColor:
+                  period === 'annual' ? theme.colors.brand.primarySoft : 'transparent',
+                borderColor:
+                  period === 'annual' ? theme.colors.brand.primary : theme.colors.border.subtle,
+              },
+            ]}
+          >
+            <Text style={[labelStyle, { color: theme.colors.text.tertiary }]}>
+              Best value · save 33%
+            </Text>
+            <Text style={[bodyStyle, { color: theme.colors.text.primary, marginTop: theme.spacing.xs }]}>
+              {annualPrice} / year
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setPeriod('monthly')}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: period === 'monthly' }}
+            accessibilityLabel={`Monthly plan, ${monthlyPrice} per month`}
+            testID="paywall-sheet:period-monthly"
+            style={[
+              periodChipBase,
+              {
+                backgroundColor:
+                  period === 'monthly' ? theme.colors.brand.primarySoft : 'transparent',
+                borderColor:
+                  period === 'monthly' ? theme.colors.brand.primary : theme.colors.border.subtle,
+              },
+            ]}
+          >
+            <Text style={[labelStyle, { color: theme.colors.text.tertiary }]}>
+              Monthly
+            </Text>
+            <Text style={[bodyStyle, { color: theme.colors.text.primary, marginTop: theme.spacing.xs }]}>
+              {monthlyPrice} / month
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Primary CTA — try free for 7 days */}
         <View style={{ marginTop: theme.spacing.xl }}>
-          {/* Sprint 10 will swap onPress for the RevenueCat trial-start.
-              Sprint 9 dismisses the sheet so the flow is testable end-to-
-              end without a real purchase. */}
           <Button
             variant="primary"
-            onPress={onDismiss}
+            onPress={onPrimaryPress}
+            loading={pending === 'purchasing'}
+            disabled={pending !== 'idle'}
             accessibilityLabel="Try Leiko Plus free for seven days"
-            accessibilityHint="The trial sign-up flow lands in the next sprint."
             testID="paywall-sheet:cta-trial"
           >
             Try Leiko Plus free for 7 days
           </Button>
-          <View style={{ marginTop: theme.spacing.m, alignItems: 'center' }}>
-            <Button
-              variant="ghost"
+
+          {/* Quiet error surface — voice-passing, no scolding */}
+          {error ? (
+            <View style={{ marginTop: theme.spacing.m }}>
+              <Text
+                style={[labelStyle, { color: theme.colors.text.secondary, textAlign: 'center' }]}
+                testID="paywall-sheet:error"
+              >
+                {error}
+              </Text>
+            </View>
+          ) : null}
+
+          {/* Restore + dismiss row */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: theme.spacing.m,
+            }}
+          >
+            <Pressable
+              onPress={onRestorePress}
+              disabled={pending !== 'idle'}
+              accessibilityLabel="Restore a previous Leiko Plus purchase"
+              testID="paywall-sheet:cta-restore"
+              hitSlop={8}
+            >
+              {pending === 'restoring' ? (
+                <ActivityIndicator color={theme.colors.brand.primary} />
+              ) : (
+                <Text
+                  style={[labelStyle, { color: theme.colors.brand.primarySoft }]}
+                >
+                  Restore purchase
+                </Text>
+              )}
+            </Pressable>
+            <Pressable
               onPress={onDismiss}
+              disabled={pending !== 'idle'}
               accessibilityLabel="Maybe later"
               testID="paywall-sheet:cta-dismiss"
+              hitSlop={8}
             >
-              Maybe later
-            </Button>
+              <Text
+                style={[labelStyle, { color: theme.colors.brand.primarySoft }]}
+              >
+                Maybe later
+              </Text>
+            </Pressable>
           </View>
         </View>
 
-        {/* Legal footer — voice-passing, no urgency */}
+        {/* Legal footer — voice-passing, no urgency. Apple's auto-renew
+            disclosure is a hard requirement at App Store submission. */}
         <View style={{ marginTop: theme.spacing.l, alignItems: 'center' }}>
           <Text style={[labelStyle, { color: theme.colors.text.tertiary, textAlign: 'center' }]}>
             Subscriptions auto-renew. Manage anytime in Settings.
@@ -193,4 +354,3 @@ export function PaywallSheet({
     </BottomSheet>
   );
 }
-

@@ -39,6 +39,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
 import { HealthPlatformPermissionPrompt } from '../../components/HealthPlatformPermissionPrompt';
+import { SixthReadingPaywallHost } from '../../components/SixthReadingPaywallHost';
 import { DailyPulseHero, type DailyPulseHeroVitals } from '../../components/DailyPulseHero';
 import { VitalTile } from '../../components/VitalTile';
 import {
@@ -69,8 +70,10 @@ export function SelfBuyerHome() {
   const theme = useTheme();
   const navigation = useNavigation<Nav>();
   const profile = useAuth((s) => s.profile);
-  const { isRefreshing, refresh } = useFamilyReadings();
+  const { parents, isRefreshing, refresh } = useFamilyReadings();
   const data = useDailyPulseData();
+  // Sprint 10a — drives the 6th-reading auto-paywall mount below.
+  const familyId = parents[0]?.familyId ?? null;
 
   // ----- Adaptive central value (D13 §7.2) ---------------------------
   const central = useMemo(() => pickCentralValue(data), [data]);
@@ -340,6 +343,9 @@ export function SelfBuyerHome() {
           component owns its own visibility — gates on the prompted
           MMKV flag + skips for caregivers. */}
       <HealthPlatformPermissionPrompt />
+      {/* Sprint 10a — D8a §9.1 6th-reading auto-paywall. Self-buyer
+          variant: same trigger logic, copy switches by account_type. */}
+      <SixthReadingPaywallHost accountType="self_buyer" familyId={familyId} />
     </SafeAreaView>
   );
 }

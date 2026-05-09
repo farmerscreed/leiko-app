@@ -24,6 +24,7 @@ import { create } from 'zustand';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 import { mmkv, STORAGE_KEYS } from '../services/storage';
+import { identifyPurchaser, logoutPurchaser } from '../services/purchases';
 import type { AccountType, UserRow } from '../types/database';
 
 type Status = 'loading' | 'unauthenticated' | 'authenticated';
@@ -144,6 +145,9 @@ export const useAuth = create<AuthState>((set, get) => ({
   async signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+    // Best-effort: clear the RevenueCat subscriber so a different user
+    // signing in on the same device doesn't inherit entitlements.
+    void logoutPurchaser();
     set({ session: null, profile: null, status: 'unauthenticated' });
   },
 
@@ -154,5 +158,14 @@ export const useAuth = create<AuthState>((set, get) => ({
     }
     const profile = await fetchProfile(session.user.id);
     set({ session, profile, status: 'authenticated' });
+    // Identify with RevenueCat once we have the profile. The webhook is
+    // the source of truth for entitlement; this call only ties future
+    // purchase events to the right Supabase user.
+    if (profile) {
+      void identifyPurchaser(profile.id, {
+        accountType: profile.account_type,
+        familyId: mmkv.getString(STORAGE_KEYS.currentFamilyId) ?? null,
+      });
+    }
   },
 }));

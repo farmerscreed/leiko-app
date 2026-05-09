@@ -52,6 +52,7 @@ import {
   startHealthPlatformBackgroundFetch,
   stopHealthPlatformBackgroundFetch,
 } from '../services/health-platform/backgroundFetch';
+import { configurePurchases } from '../services/purchases';
 import { inferModel, setDeviceMetaProvider } from '../services/sync/postReading';
 
 // Wire postReading's device-meta provider once at app boot. The
@@ -237,6 +238,10 @@ export function RootNavigator() {
     // Fires on every app foreground; internally debounced to 24h.
     // Caregiver / master-off / no-toggles short-circuit silently.
     startHealthPlatformBackgroundFetch();
+    // Sprint 10a: configure RevenueCat once per app session. No-ops
+    // when EXPO_PUBLIC_RC_API_KEY_* env vars aren't set; the auth
+    // store calls identifyPurchaser separately on session change.
+    void configurePurchases();
     return () => {
       stopOrchestrator();
       stopHealthPlatformBackgroundFetch();

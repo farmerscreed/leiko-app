@@ -58,9 +58,23 @@ jest.mock('../../state/pairing', () => ({
 
 jest.mock('../../state/readings', () => ({
   useReadings: (selector?: (s: unknown) => unknown) => {
-    const state = { latest: () => null };
+    const state = { latest: () => null, pending: [], recent: [] };
     return selector ? selector(state) : state;
   },
+}));
+
+// Sprint 10a — the SixthReadingPaywallHost mounted on CaregiverHome
+// pulls usePlusEntitlement (TanStack Query against families). These
+// tests don't need a live entitlement; stub to a Plus user so the
+// auto-paywall short-circuits and the component never opens.
+jest.mock('../../hooks/usePlusEntitlement', () => ({
+  usePlusEntitlement: () => ({
+    tier: 'plus',
+    isPlus: true,
+    isLoading: false,
+    refetch: jest.fn().mockResolvedValue(undefined),
+  }),
+  isPlusTier: (t: string) => ['plus', 'plus_trial', 'plus_grace'].includes(t),
 }));
 
 jest.mock('@react-navigation/native', () => ({

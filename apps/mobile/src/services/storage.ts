@@ -92,6 +92,13 @@ export const STORAGE_KEYS = {
   // regardless of whether they accepted or dismissed. We never re-show
   // automatically — Settings UI in Sprint 10 is the second-chance path.
   healthPlatformPermissionPrompted: 'leiko.health-platform.permissionPrompted',
+  // 6th-reading auto-paywall flag — Sprint 10a. Per D8a §9.1 + docs/09 §3,
+  // the paywall fires automatically on the 6th reading "per family per
+  // month". Stored as 'YYYY-MM' string of the calendar month it was
+  // last surfaced for the given family. Compared on every readings tick
+  // by hooks/useSixthReadingTrigger.ts; surfacing once per (family,
+  // month) prevents nag.
+  sixthReadingShown: 'leiko.paywall.sixthReading',
   // Per-vital recent caches — Sprint 7.5. Server-acknowledged samples,
   // capped per-slice for the home/Daily Pulse aggregators. Mirrors the
   // recentReadings pattern; see state/hr.ts etc. for the cap constants.

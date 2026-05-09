@@ -44,6 +44,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
 import { Button } from '../../components/Button';
 import { HealthPlatformPermissionPrompt } from '../../components/HealthPlatformPermissionPrompt';
+import { SixthReadingPaywallHost } from '../../components/SixthReadingPaywallHost';
 import { CaregiverActionBar } from '../../components/CaregiverActionBar';
 import {
   ConstellationField,
@@ -366,6 +367,14 @@ export function CaregiverHome() {
           so this mount is safe even though both personas currently
           route through CaregiverHome (parent-split is a later sprint). */}
       <HealthPlatformPermissionPrompt />
+      {/* Sprint 10a — D8a §9.1 6th-reading auto-paywall. Fires once per
+          family per month for free users; no-ops on Plus tiers. The
+          host component is the only paywall mount on home — Trends
+          owns its own paywall state for the explicit triggers. */}
+      <SixthReadingPaywallHost
+        accountType="caregiver"
+        familyId={merged[0]?.familyId ?? null}
+      />
     </SafeAreaView>
   );
 }
