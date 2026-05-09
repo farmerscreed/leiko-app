@@ -17,14 +17,30 @@
 //     to say"; default null leaves the field unset.
 
 import { useCallback, useEffect, useState } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BottomSheet } from '../../components/BottomSheet';
 import { Button } from '../../components/Button';
 import { ListRow } from '../../components/ListRow';
+import { PaywallSheet } from '../../components/PaywallSheet';
 import { SettingsSection } from '../../components/SettingsSection';
 import { updateProfile } from '../../services/users/updateProfile';
+import {
+  deleteAccount,
+  exportFamilyData,
+} from '../../services/users/accountActions';
 import { useAuth } from '../../state/auth';
+import { useNotifications } from '../../state/notifications';
 import { usePairing } from '../../state/pairing';
 import {
   SLEEP_TARGET_MAX,
@@ -111,14 +127,66 @@ type Props =
   | CaregiverScreenProps<'Settings'>
   | { navigation: { goBack: () => void; navigate: (route: string) => void } };
 
+// Quiet-hours preset windows. Each is the (start, end) pair that the
+// routing layer (Sprint 15) will compare against the recipient's
+// local clock. Custom intervals deferred until a date-picker library
+// is added; presets cover the common windows.
+const QUIET_HOURS_PRESETS: Array<{ label: string; start: string; end: string }> = [
+  { label: '10:00 PM to 7:00 AM', start: '22:00', end: '07:00' },
+  { label: '10:00 PM to 8:00 AM', start: '22:00', end: '08:00' },
+  { label: '11:00 PM to 6:00 AM', start: '23:00', end: '06:00' },
+  { label: '9:00 PM to 7:00 AM', start: '21:00', end: '07:00' },
+  { label: 'Midnight to 8:00 AM', start: '00:00', end: '08:00' },
+];
+
+function formatQuietHours(start: string, end: string): string {
+  // Friendly label using "AM/PM" — only used in Settings; routing
+  // logic operates on the raw HH:MM strings.
+  const friendly = (hhmm: string): string => {
+    const [h, m] = hhmm.split(':').map(Number);
+    if (Number.isNaN(h) || Number.isNaN(m)) return hhmm;
+    const suffix = h >= 12 ? 'PM' : 'AM';
+    const hour12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    return `${hour12}:${String(m).padStart(2, '0')} ${suffix}`;
+  };
+  return `${friendly(start)} to ${friendly(end)}`;
+}
+
+type NavParamList = {
+  AuditLog: undefined;
+  Pairing: undefined;
+  Settings: undefined;
+};
+
 export function SettingsScreen({ navigation }: Props) {
   const theme = useTheme();
+  const stackNavigation = useNavigation<NativeStackNavigationProp<NavParamList>>();
   const profile = useAuth((s) => s.profile);
   const userId = useAuth((s) => s.session?.user.id ?? null);
   const refreshProfile = useAuth((s) => s.refreshProfile);
   const signOut = useAuth((s) => s.signOut);
   const pairedDevice = usePairing((s) => s.pairedDevice);
   const forget = usePairing((s) => s.forget);
+
+  // Notifications.
+  const notif = useNotifications();
+  const flushNotifs = useNotifications((s) => s.flushToSupabase);
+  useEffect(() => {
+    if (userId) {
+      void flushNotifs(userId);
+    }
+  }, [userId, flushNotifs, notif.dailySummary, notif.weeklySummary, notif.anomalyNotifications,
+      notif.watchStatus, notif.familyActivity, notif.subscriptionAccount, notif.marketing,
+      notif.quietHoursEnabled, notif.quietHoursStart, notif.quietHoursEnd]);
+
+  const [quietHoursSheetOpen, setQuietHoursSheetOpen] = useState(false);
+  const [exportPending, setExportPending] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [deleteSheetOpen, setDeleteSheetOpen] = useState(false);
+  const [deleteEmail, setDeleteEmail] = useState('');
+  const [deletePending, setDeletePending] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [exportPaywallOpen, setExportPaywallOpen] = useState(false);
 
   // Vital setup (auto-HR / auto-SpO2 / goals).
   const autoHrEnabled = useVitalSetup((s) => s.autoHrEnabled);
@@ -430,6 +498,148 @@ export function SettingsScreen({ navigation }: Props) {
           </SettingsSection>
         ) : null}
 
+        {/* Notifications --------------------------------------------- */}
+        <SettingsSection title="Notifications" testID="settings-section-notifications">
+          <ListRow
+            variant="toggle"
+            title="Daily summary"
+            subtitle="A morning recap of yesterday."
+            switchValue={notif.dailySummary}
+            onSwitchChange={(v) => notif.set('dailySummary', v)}
+            testID="settings-notif-daily"
+          />
+          <ListRow
+            variant="toggle"
+            title="Weekly summary"
+            subtitle="Plus only — sent every Sunday."
+            switchValue={notif.weeklySummary}
+            onSwitchChange={(v) => notif.set('weeklySummary', v)}
+            testID="settings-notif-weekly"
+          />
+          <ListRow
+            variant="toggle"
+            title="Anomaly notifications"
+            subtitle="Plus only — calm-concerned and urgent reads."
+            switchValue={notif.anomalyNotifications}
+            onSwitchChange={(v) => notif.set('anomalyNotifications', v)}
+            testID="settings-notif-anomaly"
+          />
+          <ListRow
+            variant="toggle"
+            title="Watch status"
+            subtitle="Sync issues and battery low."
+            switchValue={notif.watchStatus}
+            onSwitchChange={(v) => notif.set('watchStatus', v)}
+            testID="settings-notif-watch"
+          />
+          <ListRow
+            variant="toggle"
+            title="Family activity"
+            subtitle="When someone in your circle joins or leaves a note."
+            switchValue={notif.familyActivity}
+            onSwitchChange={(v) => notif.set('familyActivity', v)}
+            testID="settings-notif-family"
+          />
+          <ListRow
+            variant="toggle"
+            title="Subscription and account"
+            subtitle="Renewals, trial reminders, account changes."
+            switchValue={notif.subscriptionAccount}
+            onSwitchChange={(v) => notif.set('subscriptionAccount', v)}
+            testID="settings-notif-subscription"
+          />
+          <ListRow
+            variant="toggle"
+            title="Marketing"
+            subtitle="Tips and product updates. Off by default."
+            switchValue={notif.marketing}
+            onSwitchChange={(v) => notif.set('marketing', v)}
+            testID="settings-notif-marketing"
+          />
+          <ListRow
+            variant="toggle"
+            title="Quiet hours"
+            subtitle="Hold most notifications overnight."
+            switchValue={notif.quietHoursEnabled}
+            onSwitchChange={(v) => notif.set('quietHoursEnabled', v)}
+            testID="settings-notif-quiet-toggle"
+          />
+          {notif.quietHoursEnabled ? (
+            <ListRow
+              variant="navigation"
+              title="Quiet window"
+              value={formatQuietHours(notif.quietHoursStart, notif.quietHoursEnd)}
+              onPress={() => setQuietHoursSheetOpen(true)}
+              showDivider={false}
+              testID="settings-notif-quiet-window"
+            />
+          ) : null}
+        </SettingsSection>
+
+        {/* Privacy ----------------------------------------------------- */}
+        <SettingsSection title="Privacy and data" testID="settings-section-privacy">
+          <ListRow
+            variant="action"
+            title="Export my data"
+            subtitle={
+              tier === 'free' || tier === 'past_due'
+                ? 'Available with Leiko Plus.'
+                : 'Sends a CSV you can save or email.'
+            }
+            onPress={async () => {
+              if (tier === 'free' || tier === 'past_due') {
+                setExportPaywallOpen(true);
+                return;
+              }
+              setExportError(null);
+              setExportPending(true);
+              try {
+                await exportFamilyData();
+              } catch {
+                setExportError("We couldn't prepare your export. Try again in a moment.");
+              } finally {
+                setExportPending(false);
+              }
+            }}
+            disabled={exportPending}
+            testID="settings-privacy-export"
+          />
+          {exportError ? (
+            <View style={{ paddingHorizontal: theme.spacing.l, marginTop: theme.spacing.s }}>
+              <Text
+                style={{
+                  color: theme.colors.text.secondary,
+                  fontSize: theme.type('label').size,
+                  fontFamily: theme.type('label').family,
+                }}
+                testID="settings-privacy-export-error"
+              >
+                {exportError}
+              </Text>
+            </View>
+          ) : null}
+          <ListRow
+            variant="navigation"
+            title="Activity log"
+            subtitle="The last 90 days of activity on your account."
+            onPress={() => stackNavigation.navigate('AuditLog')}
+            testID="settings-privacy-audit-log"
+          />
+          <ListRow
+            variant="action"
+            title="Delete my account"
+            subtitle="Your readings will be removed after 30 days."
+            destructive
+            onPress={() => {
+              setDeleteEmail('');
+              setDeleteError(null);
+              setDeleteSheetOpen(true);
+            }}
+            showDivider={false}
+            testID="settings-privacy-delete"
+          />
+        </SettingsSection>
+
         {/* AI ---------------------------------------------------------- */}
         <SettingsSection title="AI" testID="settings-section-ai">
           <ListRow
@@ -632,6 +842,150 @@ export function SettingsScreen({ navigation }: Props) {
           ))}
         </ScrollView>
       </BottomSheet>
+
+      {/* Quiet-hours preset picker */}
+      <BottomSheet
+        visible={quietHoursSheetOpen}
+        onDismiss={() => setQuietHoursSheetOpen(false)}
+        size="default"
+        title="Quiet window"
+        testID="settings-quiet-hours-sheet"
+      >
+        <View style={{ paddingBottom: theme.spacing.l }}>
+          <Text
+            style={{
+              color: theme.colors.text.secondary,
+              fontSize: bodyStyle.size,
+              fontFamily: bodyStyle.family,
+              paddingHorizontal: theme.spacing.l,
+              marginBottom: theme.spacing.m,
+            }}
+          >
+            Anomaly and medication notifications still come through during quiet hours.
+          </Text>
+          {QUIET_HOURS_PRESETS.map((preset, idx) => {
+            const selected =
+              notif.quietHoursStart === preset.start && notif.quietHoursEnd === preset.end;
+            return (
+              <ListRow
+                key={preset.label}
+                variant="select"
+                title={preset.label}
+                selected={selected}
+                onPress={() => {
+                  notif.setMany({
+                    quietHoursStart: preset.start,
+                    quietHoursEnd: preset.end,
+                  });
+                  setQuietHoursSheetOpen(false);
+                }}
+                showDivider={idx !== QUIET_HOURS_PRESETS.length - 1}
+                testID={`settings-quiet-option-${preset.start}-${preset.end}`}
+              />
+            );
+          })}
+        </View>
+      </BottomSheet>
+
+      {/* Delete account confirmation — type your email */}
+      <BottomSheet
+        visible={deleteSheetOpen}
+        onDismiss={() => setDeleteSheetOpen(false)}
+        size="default"
+        title="Delete your account"
+        testID="settings-delete-sheet"
+      >
+        <View style={{ paddingHorizontal: theme.spacing.l, paddingBottom: theme.spacing.l }}>
+          <Text
+            style={{
+              color: theme.colors.text.secondary,
+              fontSize: bodyStyle.size,
+              lineHeight: bodyStyle.lineHeight,
+              fontFamily: bodyStyle.family,
+              marginBottom: theme.spacing.m,
+            }}
+          >
+            Your readings will be removed after 30 days. To confirm, type the email on your account.
+          </Text>
+          <TextInput
+            value={deleteEmail}
+            onChangeText={setDeleteEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            placeholder={profile?.email ?? 'your email'}
+            placeholderTextColor={theme.colors.text.tertiary}
+            style={{
+              borderWidth: 1,
+              borderColor: theme.colors.border.subtle,
+              borderRadius: theme.radii.m,
+              paddingHorizontal: theme.spacing.m,
+              paddingVertical: theme.spacing.s,
+              color: theme.colors.text.primary,
+              fontSize: bodyStyle.size,
+              fontFamily: bodyStyle.family,
+              marginBottom: theme.spacing.m,
+            }}
+            testID="settings-delete-email-input"
+          />
+          {deleteError ? (
+            <Text
+              style={{
+                color: theme.colors.text.secondary,
+                fontSize: theme.type('label').size,
+                fontFamily: theme.type('label').family,
+                marginBottom: theme.spacing.m,
+              }}
+              testID="settings-delete-error"
+            >
+              {deleteError}
+            </Text>
+          ) : null}
+          <Button
+            variant="destructive"
+            disabled={deletePending || deleteEmail.trim().length === 0}
+            loading={deletePending}
+            onPress={async () => {
+              setDeleteError(null);
+              setDeletePending(true);
+              try {
+                await deleteAccount(deleteEmail.trim());
+                setDeleteSheetOpen(false);
+                await signOut();
+              } catch (e) {
+                setDeleteError(
+                  e instanceof Error && e.message === 'email_mismatch'
+                    ? 'That email does not match the one on your account.'
+                    : "We couldn't delete your account. Try again in a moment.",
+                );
+              } finally {
+                setDeletePending(false);
+              }
+            }}
+            accessibilityLabel="Delete my account"
+            testID="settings-delete-confirm"
+          >
+            Delete my account
+          </Button>
+          <View style={{ marginTop: theme.spacing.s }}>
+            <Button
+              variant="ghost"
+              onPress={() => setDeleteSheetOpen(false)}
+              accessibilityLabel="Keep my account"
+              testID="settings-delete-cancel"
+            >
+              Keep my account
+            </Button>
+          </View>
+        </View>
+      </BottomSheet>
+
+      {/* Export paywall — for free users tapping Export my data */}
+      <PaywallSheet
+        visible={exportPaywallOpen}
+        onDismiss={() => setExportPaywallOpen(false)}
+        accountType={profile?.account_type ?? 'caregiver'}
+        trigger="csv_export"
+      />
 
       {/* Hypertension chip (D8a §10.1) — self-buyer only */}
       <BottomSheet

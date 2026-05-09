@@ -80,6 +80,24 @@ export type FamilyRow = {
   updated_at: string;
 };
 
+// Sprint 10b.3 — notification_preferences row (migration 0009).
+export type NotificationPreferencesRow = {
+  user_id: string;
+  daily_summary: boolean;
+  weekly_summary: boolean;
+  anomaly_notifications: boolean;
+  watch_status: boolean;
+  family_activity: boolean;
+  subscription_account: boolean;
+  marketing: boolean;
+  quiet_hours_enabled: boolean;
+  quiet_hours_start: string;
+  quiet_hours_end: string;
+  anomaly_bypass_quiet: boolean;
+  medication_bypass_quiet: boolean;
+  updated_at: string;
+};
+
 export type FamilyMemberRow = {
   family_id: string;
   user_id: string;
@@ -237,6 +255,14 @@ export type Database = {
           computed_at?: string;
         };
         Update: Partial<CorrelationRow>;
+        Relationships: [];
+      };
+      notification_preferences: {
+        Row: NotificationPreferencesRow;
+        Insert: Omit<NotificationPreferencesRow, 'updated_at'> & {
+          updated_at?: string;
+        };
+        Update: Partial<NotificationPreferencesRow>;
         Relationships: [];
       };
     };

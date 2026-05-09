@@ -39,13 +39,18 @@ import type { TrendsRange } from '../../utils/trends-aggregate';
 import type { VitalType } from '../../components/VitalRing';
 import type { CorrelationRow, AccountType } from '../../types/database';
 
-const RANGES: TrendsRange[] = ['7d', '30d', '90d', '1y'];
+// 'all_time' is appended only for self-buyers (D8a §9.5). Caregiver
+// mode never shows the chip, so the per-mode RANGES below is filtered
+// at render time.
+const CAREGIVER_RANGES: TrendsRange[] = ['7d', '30d', '90d', '1y'];
+const SELF_BUYER_RANGES: TrendsRange[] = ['7d', '30d', '90d', '1y', 'all_time'];
 const FREE_RANGE: TrendsRange = '7d';
 const RANGE_LABELS: Record<TrendsRange, string> = {
   '7d': '7D',
   '30d': '30D',
   '90d': '90D',
   '1y': '1Y',
+  all_time: 'All',
 };
 
 const ALL_VITALS: VitalType[] = ['bp', 'hr', 'spo2', 'sleep', 'activity'];
@@ -104,7 +109,11 @@ export function Trends() {
   const onRangeTap = useCallback(
     (next: TrendsRange) => {
       if (next !== FREE_RANGE && !isPlus) {
-        setPaywall({ visible: true, trigger: 'range_extension' });
+        // 'all_time' is the self-buyer-only trigger per D8a §9.5; the
+        // other gated chips fire 'range_extension'.
+        const trigger: PaywallTrigger =
+          next === 'all_time' ? 'all_time_range' : 'range_extension';
+        setPaywall({ visible: true, trigger });
         return;
       }
       setRange(next);
@@ -172,7 +181,7 @@ export function Trends() {
           testID="trends-range-row"
           label="Range"
         >
-          {RANGES.map((r) => (
+          {(accountType === 'self_buyer' ? SELF_BUYER_RANGES : CAREGIVER_RANGES).map((r) => (
             <Pill
               key={r}
               variant={range === r ? 'accent' : 'outline'}

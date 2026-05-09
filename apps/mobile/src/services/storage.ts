@@ -92,6 +92,12 @@ export const STORAGE_KEYS = {
   // regardless of whether they accepted or dismissed. We never re-show
   // automatically — Settings UI in Sprint 10 is the second-chance path.
   healthPlatformPermissionPrompted: 'leiko.health-platform.permissionPrompted',
+  // Notification preferences — Sprint 10b.3. JSON mirror of the
+  // public.notification_preferences row for the signed-in user. MMKV
+  // is the offline source of truth; supabase write is best-effort.
+  // The row defaults are spec-driven (docs/04-screens/settings.md
+  // §Notifications + D13 §11.3); see state/notifications.ts.
+  notificationPrefs: 'leiko.notifications.prefs',
   // Vital-setup user preferences — Sprint 10b.2. JSON
   // {autoHrEnabled, autoSpo2Enabled, stepsTarget, sleepTargetMin, dirty}.
   // Surfaced in Settings → Vital streams + Goals. Orchestrator's

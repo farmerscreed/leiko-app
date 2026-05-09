@@ -19,13 +19,21 @@
 
 import type { ReadingRow, VitalsOtherRow } from '../types/database';
 
-export type TrendsRange = '7d' | '30d' | '90d' | '1y';
+// Sprint 10b.3 — 'all_time' lifts the lower bound entirely. Self-buyer
+// only per D8a §9.5; routed through the paywall for free users with
+// trigger='all_time_range' (see PaywallSheet). The aggregator is
+// unbounded — useTrendsData passes a far-past start.
+export type TrendsRange = '7d' | '30d' | '90d' | '1y' | 'all_time';
 
 export const TRENDS_RANGE_DAYS: Record<TrendsRange, number> = {
   '7d': 7,
   '30d': 30,
   '90d': 90,
   '1y': 365,
+  // ~50 years — practically unbounded for any user we'll have. Picking
+  // a real number rather than null keeps callers' Date arithmetic
+  // simple and the SQL .gte() filter satisfied.
+  all_time: 365 * 50,
 };
 
 export type VitalKind = 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity';

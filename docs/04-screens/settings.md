@@ -2,90 +2,130 @@
 
 Sourced from D8 §4.11 + D6 US-78 / US-82 / US-84 / US-87 / US-88, with **AMENDS** per D8a §10 for the self-buyer track. The hub for every preference, every data control, every account-management action.
 
+> **Implementation status**: Sprint 10 ships Settings across three sub-sessions. 10b.1 + 10b.2 + 10b.3 each delivered a vertical slice. The order below matches what's on screen today.
+
 ---
 
 ## Audience
-Both (different sub-sets per persona).
+Both (different sub-sets per persona). Self-buyer carries extra rows (hypertension chip, Apple Health / Health Connect surface). Caregivers do not see the Apple Health / Health Connect section per D13 §12.6.
 
 ## Purpose
-- Profile management
-- Notification preferences (per-category + quiet hours)
-- Accessibility (large-text mode, reduced-motion override)
-- Subscription (Plus status, billing portal deep link)
-- Privacy (export data, delete account, view audit log)
-- About (version, terms, privacy policy)
+- Profile management (D8a §10.1)
+- Watch state + Forget (Sprint 5 surface, preserved)
+- Vital streams + Goals — toggles flushed to the watch via the orchestrator
+- Apple Health / Health Connect — master + per-vital read/write toggles (D13 §12.5)
+- AI quota + tier explainer (D14 §14.1)
+- Notification preferences + quiet hours (D13 §11.3)
+- Privacy + data — export, activity log, delete account (D6 US-82, US-88)
+- About (version, terms, privacy, help)
+- Account (sign out)
 
 ---
 
 ## Layout
 
-A single scroll view of `ListRow` components grouped by section. Each section header is `type.label` Bold, `color.text.secondary`, `spacing.l` above + `spacing.s` below.
+A single scroll view of `<SettingsSection>` blocks, each composed of `<ListRow>` rows (D8 §3.5). Section headers follow `type.label` Bold, `color.text.secondary`, `spacing.l` above + `spacing.s` below.
 
-### Profile section
-- `ListRow` `data` — Name (display_name from `public.users`)
-- `ListRow` `data` — Photo
-- `ListRow` `data` — Timezone (IANA, auto-detected, override-able)
-- `ListRow` `data` — **Year of birth** (self-buyer mode per D8a §10.1 — editable here; in caregiver mode this field belongs to the parent record)
-- `ListRow` `toggle` (3-state) — **"Diagnosed with hypertension?"** (self-buyer only, per D8a §10.1) — Yes / No / Prefer not to say. Captured optionally in onboarding (D6 US-7); editable here.
+Sections render in this order:
 
-### Notifications section (D6 US-78)
-- `ListRow` `toggle` — Daily summary
-- `ListRow` `toggle` — Weekly summary (Plus)
-- `ListRow` `toggle` — Anomaly notifications (Plus)
-- `ListRow` `toggle` — Watch status
-- `ListRow` `toggle` — Family activity
-- `ListRow` `toggle` — Subscription / account
-- `ListRow` `toggle` — Marketing (default OFF)
-- `ListRow` `navigation` — Quiet hours → opens sheet with start/end time pickers (default 22:00–07:00 caregiver-local)
-- Note: per `docs/11-push-notifications.md`, Anomaly + Medication can be set to bypass quiet hours; explained in-line.
+1. Profile
+2. Watch
+3. Vital streams
+4. Goals
+5. Apple Health & Health Connect — *self-buyer only*
+6. Notifications
+7. Privacy and data
+8. AI
+9. About
+10. Account
 
-### Accessibility section
-- `ListRow` `toggle` — Large-text mode (parent profile)
-- `ListRow` `toggle` — Reduced motion override (forces reduced-motion behaviour even if OS setting is off)
-- `ListRow` `toggle` — Audio readout for readings (self-buyer / parent only)
+### Profile section (Sprint 10b.1)
+- `data` — Name (display_name from `public.users`)
+- `data` — Photo (placeholder until upload flow lands)
+- `data` — Timezone (auto-detected; editable lands in a follow-up)
+- `data` — Year of birth
+- `select` — **"Diagnosed with hypertension?"** (self-buyer only, per D8a §10.1) — Yes / No / Prefer not to say. Opens a 3-state BottomSheet that writes via `services/users/updateProfile` and refreshes the auth-store `profile`.
 
-### Subscription section (D6 US-71)
-- `ListRow` `data` — Current plan ("Free" / "Plus monthly" / "Plus annual" / "Plus trial")
-- `ListRow` `data` — Next billing date (Plus only)
-- `ListRow` `navigation` — "Manage subscription" → deep-links to OS subscription settings (Apple / Google)
-- `ListRow` `navigation` — "Switch to annual" (monthly subscribers only) — RevenueCat swap
+> Voice note (Sprint 10b.1): "Diagnosed with hypertension?" is the spec verbatim. The voice-rule forbid-list on `diagnose / diagnosis / diagnostic` targets Leiko-as-diagnostic-tool claims, not user-history questions about an existing doctor diagnosis. If a copy-lint test lands later, this prompt should be explicitly scoped out.
 
-### Family section
+### Watch section (Sprint 5 + 10b.1)
+**Paired**:
+- `data` — Watch name + mac suffix (subtitle), value="Connected"
+- `data` — Last sync (formatted "Just now" / "5 min ago" / "3 h ago" / "2 d ago" from MMKV `lastSyncByDevice`)
+- `action` — Pair another watch → navigates to Pairing
+- `action` `destructive` — Forget this watch → BottomSheet confirm (preserved from Sprint 5)
 
-**Caregiver mode** — family management primarily lives on the home screen; this section is supplementary:
-- `ListRow` `navigation` — "Family members" → opens family list with invite / role / remove actions
-- `ListRow` `data` — Capacity ("3 of 5 caregivers" — Plus = 5; Free = 1)
-- `ListRow` `action` — "Invite a caregiver" → opens invite sheet with email + 6-digit code generation (per CLAUDE.md "Family invites use email + 6-digit code, never URL tokens")
+**Empty**:
+- `data` — "No watch paired yet" + subtitle
+- `action` — Pair a watch → navigates to Pairing
 
-**Self-buyer mode (ADDS per D8a §10.2)** — family management lives ONLY in Settings:
-- `ListRow` `data` — **"Family members"**: shows count of invited caregivers — *"None yet"* / *"1 person follows your readings"* / *"Sarah, John follow your readings"*
-- `ListRow` `action` — **"Invite a family member"** → opens the invite-flow bottom sheet (D8a §10.3, below)
-- `ListRow` `navigation` — **"Manage who sees my readings"** (visible only when at least one caregiver is invited) → list of caregivers with per-caregiver toggles for "share readings" and "share notes"
+### Vital streams section (Sprint 10b.2)
+- `toggle` — Auto heart rate (wired to `setAutoHR` via the orchestrator's `applyDeviceConfig` step). Default ON.
+- `toggle` — Auto oxygen (wired to `setAutoSpO2`). Default OFF (battery).
 
-#### Invite-flow bottom sheet (D8a §10.3, self-buyer only)
+The store (`state/vitalSetup.ts`) is MMKV-backed with a `dirty` flag; the orchestrator flushes the four BLE setters (`setAutoHR`, `setAutoSpO2`, `setUserParams`, `setGoals`) to the watch on every sync run and clears the flag on success.
 
-| Element | Spec |
-| --- | --- |
-| Surface | `BottomSheet` (D8 §3.7), `color.surface.elevated` |
-| Headline | "Invite someone to follow your readings" |
-| Body | "They'll see your readings and trends. They won't see your private notes or your subscription." |
-| Inputs | `input.text` "Their first name" + `input.text` or `input.email` "Their email or phone" |
-| Permission level chip group | "Can see readings" (default) / "Can see readings and add notes" — single-select chips |
-| Primary CTA | `button.primary` "Send invite" |
-| Secondary | `button.ghost` "Cancel" |
+### Goals section (Sprint 10b.2)
+- `navigation` — Steps target (default 6,000 per Q-D13-1) → BottomSheet picker, 2,000–20,000 in 1,000-step increments.
+- `navigation` — Sleep target (default 8h) → BottomSheet picker, 6h–10h in 30-min increments.
 
-### Privacy section (D6 US-82 / US-88)
-- `ListRow` `navigation` — "Export my data (CSV)" — Plus only; free tier shows paywall trigger
-- `ListRow` `navigation` — "What data do you collect?" — opens an in-app explainer (no external link)
-- `ListRow` `navigation` — "Audit log" — opens last 90 days of `public.audit_log` for this user
-- `ListRow` `action` `destructive` — "Delete account" — opens confirmation flow with 30-day grace explanation
+Goal writes flow through `setGoals`. `setUserParams` runs in the same orchestrator step using profile demographics (gender, year_of_birth → age, height_cm, weight_kg). When demographics are incomplete, `setUserParams` is skipped — the watch keeps its previous values.
 
-### About section
-- `ListRow` `data` — App version (e.g. "1.0.0 (build 42)")
-- `ListRow` `navigation` — "Terms of service" — opens in-app webview at `https://leiko.app/terms`
-- `ListRow` `navigation` — "Privacy policy" — `https://leiko.app/privacy`
-- `ListRow` `navigation` — "Help" — opens email composer to `support@leiko.app`
-- `ListRow` `action` — "Sign out" — friendly when irreversible: "Yes, sign me out everywhere"
+### Apple Health & Health Connect section (Sprint 10b.2)
+Self-buyer (and parent / hybrid) only. Per D13 §12.5:
+- `toggle` — Master "Connect to your phone's health app". OFF by default (opt-in).
+- When ON: per-vital write toggles (BP / HR / SpO2 / Sleep / Steps / Calories) + per-vital read toggles (Weight / Height / Blood glucose).
+
+State lives in the existing `useHealthPlatformToggles` store (Sprint 9.5). Settings is the surfacer; the bridge service writes/reads.
+
+### Notifications section (Sprint 10b.3)
+Per D13 §11.3 + the new `notification_preferences` table (migration 0009). Eight rows:
+
+- `toggle` — Daily summary
+- `toggle` — Weekly summary (Plus only at runtime — toggle is settable but the routing layer skips for free)
+- `toggle` — Anomaly notifications (Plus only at runtime)
+- `toggle` — Watch status
+- `toggle` — Family activity
+- `toggle` — Subscription and account
+- `toggle` — Marketing (default OFF — opt-in per D6)
+- `toggle` — Quiet hours (default ON, 22:00–07:00 caregiver-local)
+
+When quiet hours are ON, an additional `navigation` row exposes the quiet window. Tapping opens a BottomSheet with five preset windows (10 PM–7 AM, 10 PM–8 AM, 11 PM–6 AM, 9 PM–7 AM, midnight–8 AM). Custom windows defer until a date-picker library is added.
+
+Anomaly + medication notifications can override quiet hours. The Settings copy explains this inline; the override flag lives on the `notification_preferences` row (`anomaly_bypass_quiet`, `medication_bypass_quiet`).
+
+All toggles are MMKV-first (offline source of truth) and best-effort sync to `public.notification_preferences` on every change.
+
+### Privacy and data section (Sprint 10b.3)
+- `action` — **Export my data** — Plus-gated. Free users see the paywall (`csv_export` trigger). Plus users invoke `/export-data` Edge Function which returns a CSV; the client opens the native Share sheet so the user can email / save / AirDrop. Native file save (via expo-file-system) is a polish follow-up.
+- `navigation` — **Activity log** → opens `AuditLogScreen`, the last 90 days of `public.audit_log` for the actor (RLS-permitted self read).
+- `action` `destructive` — **Delete my account** — opens a BottomSheet that requires the user to type their email. Calls `/delete-account` Edge Function which sets `users.deleted_at = now()` and writes an audit-log entry, then signs the user out.
+
+> **Hardening deferred to Sprint 17**: full OTP reauthentication (the spec calls for it), restore-grace screen for the 30-day window, and the hard-delete cron that purges expired soft-deletes. The 30-day grace exists on paper today; a row is just orphaned until the cron lands.
+
+### AI section (Sprint 10b.2)
+- `data` — Questions this month — count + tier limit, e.g. "0 of 5" (free) or "12 of 100" (Plus). Resets on the 1st. Backed by `services/ai/quotaCounter.ts` which queries `audit_log` for `ai.user_question` rows in the calendar month, MMKV-cached + monotone within month.
+- `data` — Your tier — explainer copy varies by free vs Plus. Reads `usePlusEntitlement().tier`.
+
+The counter sits at zero until AI Tier-B ships in Sprint 11.
+
+### About section (Sprint 10b.1)
+- `data` — App version
+- `navigation` — Terms of service → `Linking.openURL('https://leiko.app/terms')`
+- `navigation` — Privacy policy → `Linking.openURL('https://leiko.app/privacy')`
+- `action` — Help → `Linking.openURL('mailto:support@leiko.app')`
+
+### Account section (Sprint 10b.1)
+- `action` `destructive` — Sign out → BottomSheet confirm → `useAuth.signOut()` (which also calls `logoutPurchaser` per Sprint 10a).
+
+---
+
+## Family management
+
+Family invite flow + hybrid-mode "Manage who sees my readings" lands in **10c**, not in this screen. Sprint 10c will add a Family section above About:
+
+- Caregiver mode: family member list, invite caregiver action.
+- Self-buyer mode (D8a §10.2-§10.3): "Family members" data row, "Invite a family member" action, "Manage who sees my readings" navigation when at least one caregiver is invited.
 
 ---
 
@@ -93,68 +133,49 @@ A single scroll view of `ListRow` components grouped by section. Each section he
 
 Per `docs/05-voice-and-claims.md`:
 - **Direct tone** in this section — Settings exists to give the user control.
-- Section headers are noun phrases ("Notifications", "Privacy & data").
-- Destructive actions explain what will happen, not what is irreversible: *"Delete account — your readings will be removed after 30 days."*
-- Quiet-hours explainer: *"During quiet hours, only urgent and medication notifications come through. Everything else waits until morning."*
+- Section headers are noun phrases ("Profile", "Notifications", "Privacy and data").
+- Destructive actions explain what will happen, not what is irreversible: *"Your readings will be removed after 30 days."*
+- Cancellation is dignified — Forget watch sheet, sign-out sheet, and delete sheet all preserve "Maybe later" / "Stay signed in" / "Keep my account" escape hatches.
 
 ---
 
 ## Behaviour
 
-- All toggles are MMKV-first, then synced to Supabase preferences.
-- Quiet-hours selector picks two times via `react-native` time picker; saves on dismiss.
-- "Manage subscription" deep links to OS settings (`Linking.openURL('itms-apps://')` on iOS, Play Store equivalent on Android).
-- "Delete account" flows: OTP confirmation → 30-day grace → restore-grace screen if the user signs back in within 30 days → permanent delete after 30 days.
+- All toggles are MMKV-first (synchronous read for instant render) and best-effort sync to Supabase.
+- Watch-bound settings (HR / SpO2 toggles, goal targets, demographics) flush on the next sync run via the orchestrator's `applyDeviceConfig` step.
+- Quiet-hours selector picks from preset windows; saves on dismiss.
+- Subscription state syncs from `families.subscription_status` via the live `usePlusEntitlement` hook (Sprint 10a).
 
 ---
 
 ## Anti-patterns (CLAUDE.md)
-- **Cancellation is dignified** (D5 §3.4): no "are you sure?" dark-pattern guilt screens. Just clear copy + confirmation.
-- **Don't auto-fill medical data fields based on prior values** — applies to manual reading entry from Settings if exposed there (it isn't currently — manual entry lives in `take-reading.md`).
+- **Cancellation is dignified** (D5 §3.4): no "are you sure?" dark-pattern guilt screens.
+- **Don't auto-fill medical data fields based on prior values** — applies to manual reading entry from Settings if exposed there (currently it isn't — manual entry lives in `take-reading.md`).
 
 ---
 
 ## Accessibility
 
-- Each section header: `accessibilityRole: "header"`.
-- Each toggle: `accessibilityRole: "switch"`, `accessibilityState: { checked: boolean }`.
+- Each section header carries `accessibilityRole="header"`.
+- Each toggle: `accessibilityRole="switch"`, `accessibilityState: { checked: boolean }`.
 - Destructive actions: `accessibilityHint` describes consequence ("Deletes your account after a 30-day grace period").
 - Quiet-hours selector: full screen-reader support for time picker.
 
 ---
 
-## Sprint 10 acceptance criteria
-- All sections render with correct tokens.
-- All toggles persist to MMKV + Supabase.
-- Quiet-hours selector saves correctly.
-- Subscription state reflects RevenueCat webhook updates within 5s of change (test with sandbox events).
-- Family invite generates a valid 6-digit code and email.
-- Delete-account flow writes audit log entry and routes to grace screen.
-- Voice gate passes.
-- Component + integration tests covering at least 5 toggles + the family invite flow + the delete flow.
+## Sprint 10 acceptance state
+
+| Criterion | State (as of 10b.3) |
+| --- | --- |
+| Settings shows all sections per the new spec, in both modes | ✅ except the Family section (10c) |
+| Per-vital toggles change state on watch + Health Platform | ✅ orchestrator flushes via `applyDeviceConfig` |
+| Sleep-hidden-by-default for hybrid-mode caregiver visibility | ❌ — 10c |
+| AI quota counter accurate against `audit_log` egress events | ✅ infrastructure complete; sits at 0 until Tier-B ships |
+| Voice gate passes on every authored string | ✅ (with the documented "Diagnosed" hypertension scope) |
 
 ---
 
 ## Removed Settings (self-buyer mode, D8a §10.6)
 
 - **"Watch shipping & tracking"** (D7 ADR-014) appears only briefly during the watch-pending window. Once the user pairs the watch, this disappears — self-buyers don't need a permanent shipping section.
-- **"Parent quiet hours"** timezone setting from caregiver Settings is REPLACED by **"My quiet hours"** — the self-buyer manages their own quiet hours, no separate parent timezone.
-
----
-
-## Subscription section (D8a §10.5)
-
-- **UNCHANGED** structurally
-- **AMENDS**: copy lines reflect self-buyer-relevant features (PDF export, full history, plain-language explanations) instead of "share with up to 5 caregivers".
-
----
-
-## Hybrid-mode behaviour summary (D8a §10.4)
-
-When the self-buyer invites at least one caregiver and the invitation is accepted:
-
-- Home screen **UNCHANGED** — still self-protagonist (`docs/04-screens/self-buyer-home.md` "Hybrid mode").
-- Reading detail gains a **second notes channel**: "Family notes" (visible to invited caregivers) alongside the unchanged private "My notes".
-- Settings → Family Members count updates.
-- Subtle indicator on the home header bar (small `avatar.xs` cluster) shows that other people are following — transparency that surveillance is happening.
-- A first-time toast appears the first time a caregiver views the data: *"Sarah just looked at today's reading."* — dismissible, **never repeats** per caregiver.
+- **"Parent quiet hours"** timezone setting from caregiver Settings is REPLACED by **"Quiet hours"** — the user manages their own quiet hours, no separate parent timezone.

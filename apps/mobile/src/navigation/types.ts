@@ -49,6 +49,9 @@ export type CaregiverStackParamList = {
   // be wired into a tab-bar follow-up; the route is registered now so
   // navigation.navigate('Trends') resolves from any caregiver screen.
   Trends: undefined;
+  // Sprint 10b.3 — Activity log read-only viewer (last 90 days of
+  // public.audit_log for the actor). Per D6 US-82.
+  AuditLog: undefined;
 };
 
 // Sprint 4 — self-buyer onboarding stack. Five screens per
@@ -79,6 +82,8 @@ export type SelfBuyerStackParamList = {
   // export. The Self-Buyer Home tab bar's "Trends" entry routes here
   // (was a placeholder in Sprint 8).
   Trends: undefined;
+  // Sprint 10b.3 — Activity log read-only viewer.
+  AuditLog: undefined;
 };
 
 export type AuthScreenProps<R extends keyof AuthStackParamList> = NativeStackScreenProps<

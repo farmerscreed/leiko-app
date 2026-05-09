@@ -46,6 +46,7 @@ export type PaywallTrigger =
   | 'tier_b_query'           // AI assistant — first Tier-B query attempt
   | 'anomaly_optin'          // Home — tap proactive-alerts opt-in
   | 'sixth_reading'          // Auto-fire on 6th reading per identity
+  | 'csv_export'             // Settings — tap "Export my data"
   | 'add_caregiver';         // Settings — tap "+ Add caregiver" past limit
 
 export interface PaywallSheetProps {

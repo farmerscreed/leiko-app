@@ -55,6 +55,17 @@ jest.mock('../../../services/users/updateProfile', () => ({
   updateProfile: (...args: unknown[]) => mockUpdateProfile(...args),
 }));
 
+// Sprint 10b.3 — Settings now uses @react-navigation/native useNavigation
+// for the AuditLog nav. Stub it.
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
+}));
+
+jest.mock('../../../services/users/accountActions', () => ({
+  exportFamilyData: jest.fn().mockResolvedValue({ rowCount: 0 }),
+  deleteAccount: jest.fn().mockResolvedValue({ deletedAt: '2026-05-09T00:00:00Z' }),
+}));
+
 // Sprint 10b.2 — Settings now reads usePlusEntitlement (TanStack Query
 // against families) + the AI quota service. Stub the entitlement hook
 // to a free user so the AI section renders the free-tier copy.
@@ -312,6 +323,56 @@ describe('<SettingsScreen /> — AI section (Sprint 10b.2)', () => {
     renderScreen();
     expect(screen.getByTestId('settings-ai-quota')).toBeTruthy();
     expect(screen.getByTestId('settings-ai-tier')).toBeTruthy();
+  });
+});
+
+describe('<SettingsScreen /> — Notifications (Sprint 10b.3)', () => {
+  beforeEach(() => {
+    jest.requireActual('../../../state/notifications').useNotifications.getState().__resetForTest();
+  });
+
+  it('renders the seven category toggles + quiet-hours toggle', () => {
+    renderScreen();
+    expect(screen.getByTestId('settings-notif-daily')).toBeTruthy();
+    expect(screen.getByTestId('settings-notif-weekly')).toBeTruthy();
+    expect(screen.getByTestId('settings-notif-anomaly')).toBeTruthy();
+    expect(screen.getByTestId('settings-notif-watch')).toBeTruthy();
+    expect(screen.getByTestId('settings-notif-family')).toBeTruthy();
+    expect(screen.getByTestId('settings-notif-subscription')).toBeTruthy();
+    expect(screen.getByTestId('settings-notif-marketing')).toBeTruthy();
+    expect(screen.getByTestId('settings-notif-quiet-toggle')).toBeTruthy();
+  });
+
+  it('shows the quiet-window row only when quiet hours are enabled', () => {
+    renderScreen();
+    expect(screen.getByTestId('settings-notif-quiet-window')).toBeTruthy();
+    jest.requireActual('../../../state/notifications').useNotifications.getState().set('quietHoursEnabled', false);
+  });
+
+  it('marketing defaults to OFF (D6 opt-in)', () => {
+    const state = jest.requireActual('../../../state/notifications').useNotifications.getState();
+    expect(state.marketing).toBe(false);
+  });
+});
+
+describe('<SettingsScreen /> — Privacy (Sprint 10b.3)', () => {
+  it('shows Export with the Plus-required subtitle for free users', () => {
+    renderScreen();
+    expect(screen.getByTestId('settings-privacy-export')).toBeTruthy();
+    expect(screen.getByText('Available with Leiko Plus.')).toBeTruthy();
+  });
+
+  it('shows Activity log nav row + Delete account destructive row', () => {
+    renderScreen();
+    expect(screen.getByTestId('settings-privacy-audit-log')).toBeTruthy();
+    expect(screen.getByTestId('settings-privacy-delete')).toBeTruthy();
+  });
+
+  it('opens the delete sheet on Delete account tap', () => {
+    renderScreen();
+    fireEvent.press(screen.getByTestId('settings-privacy-delete'));
+    expect(screen.getByTestId('settings-delete-confirm')).toBeTruthy();
+    expect(screen.getByTestId('settings-delete-email-input')).toBeTruthy();
   });
 });
 

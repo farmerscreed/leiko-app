@@ -67,7 +67,14 @@ export type AnalyticsEvent =
   // Sprint 10b.2 — Settings → Vital streams + Goals flush to the watch.
   // Closes memory/multi_vitals_gap.md "setUserParams + setGoals stubbed".
   | { name: 'device_config_flushed'; props?: { steps: number } }
-  | { name: 'device_config_failed'; props?: { failedStep: string; completed: number } };
+  | { name: 'device_config_failed'; props?: { failedStep: string; completed: number } }
+  // Sprint 10b.3 — Settings → Notifications + Privacy.
+  | { name: 'notification_prefs_sync_failed'; props?: { reason: string } }
+  | { name: 'data_export_started'; props?: { tier: string } }
+  | { name: 'data_export_completed'; props?: { rowCount: number } }
+  | { name: 'data_export_failed'; props?: { reason: string } }
+  | { name: 'account_delete_requested'; props?: { confirmed: boolean } }
+  | { name: 'account_delete_failed'; props?: { reason: string } };
 
 type EventName = AnalyticsEvent['name'];
 

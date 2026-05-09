@@ -215,7 +215,13 @@ describe('rangeStartIso', () => {
   });
 
   it('honours the days table for each range', () => {
-    expect(TRENDS_RANGE_DAYS).toEqual({ '7d': 7, '30d': 30, '90d': 90, '1y': 365 });
+    expect(TRENDS_RANGE_DAYS).toEqual({
+      '7d': 7,
+      '30d': 30,
+      '90d': 90,
+      '1y': 365,
+      all_time: 365 * 50,
+    });
   });
 });
 
