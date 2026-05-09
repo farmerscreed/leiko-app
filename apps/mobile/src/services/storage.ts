@@ -67,6 +67,13 @@ export const STORAGE_KEYS = {
   pendingSleep: 'leiko.vitals.pending.sleep',
   pendingActivity: 'leiko.vitals.pending.activity',
   pendingCalories: 'leiko.vitals.pending.calories',
+  // Apple Health / Health Connect toggle state — Sprint 9.5. JSON
+  // {master, perVitalWrite, perVitalRead}. Default: master OFF + all
+  // children OFF (D13 §12.5 "opt-in, default off"). The
+  // services/health-platform/toggles.ts store reads/writes this key;
+  // Settings UI ships in Sprint 10 (D13 §12.5 "Settings has master
+  // toggle ... + per-vital granular toggles").
+  healthPlatformToggles: 'leiko.health-platform.toggles',
   // Per-vital recent caches — Sprint 7.5. Server-acknowledged samples,
   // capped per-slice for the home/Daily Pulse aggregators. Mirrors the
   // recentReadings pattern; see state/hr.ts etc. for the cap constants.
