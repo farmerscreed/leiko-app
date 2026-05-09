@@ -32,17 +32,57 @@ export function VitalDetailRouter() {
     },
     [navigation],
   );
+  const onArticleOpen = useCallback(
+    (articleId: string) => {
+      navigation.navigate('Article', { articleId });
+    },
+    [navigation],
+  );
+  const onLearnOpen = useCallback(() => {
+    navigation.navigate('Learn');
+  }, [navigation]);
 
   switch (route.params.vital) {
     case 'bp':
-      return <BPDetail onBack={onBack} onSelectReading={onSelectReading} />;
+      return (
+        <BPDetail
+          onBack={onBack}
+          onSelectReading={onSelectReading}
+          onArticleOpen={onArticleOpen}
+          onLearnOpen={onLearnOpen}
+        />
+      );
     case 'hr':
-      return <HRDetail onBack={onBack} />;
+      return (
+        <HRDetail
+          onBack={onBack}
+          onArticleOpen={onArticleOpen}
+          onLearnOpen={onLearnOpen}
+        />
+      );
     case 'spo2':
-      return <SpO2Detail onBack={onBack} />;
+      return (
+        <SpO2Detail
+          onBack={onBack}
+          onArticleOpen={onArticleOpen}
+          onLearnOpen={onLearnOpen}
+        />
+      );
     case 'sleep':
-      return <SleepDetail onBack={onBack} />;
+      return (
+        <SleepDetail
+          onBack={onBack}
+          onArticleOpen={onArticleOpen}
+          onLearnOpen={onLearnOpen}
+        />
+      );
     case 'activity':
-      return <ActivityDetail onBack={onBack} />;
+      return (
+        <ActivityDetail
+          onBack={onBack}
+          onArticleOpen={onArticleOpen}
+          onLearnOpen={onLearnOpen}
+        />
+      );
   }
 }

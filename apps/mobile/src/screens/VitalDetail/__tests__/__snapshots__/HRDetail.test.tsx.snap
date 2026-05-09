@@ -2270,6 +2270,61 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
               Your resting heart rate has settled three points lower than last month. That tracks with the better sleep we've seen — they tend to move together. A calm wake again this morning.
             </Text>
           </View>
+          <View
+            accessibilityHint="Opens explanation sheet"
+            accessibilityLabel="What does this mean? Opens explanation sheet."
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            hitSlop={12}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignSelf": "center",
+                "paddingVertical": 8,
+              }
+            }
+            testID="hr-detail-explainer-anchor"
+          >
+            <Text
+              style={
+                {
+                  "color": "#E8A063",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 15,
+                  "fontWeight": "500",
+                }
+              }
+            >
+              What does this mean?
+            </Text>
+          </View>
         </View>
       </View>
     </RCTScrollView>

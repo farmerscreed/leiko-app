@@ -42,6 +42,7 @@ import { VitalHero } from '../../components/VitalHero';
 import { StatTrio } from '../../components/StatTrio';
 import { VitalTrendChart } from '../../components/VitalTrendChart';
 import { VitalInsightCard } from '../../components/VitalInsightCard';
+import { VitalExplainerAnchor } from '../../components/VitalExplainerAnchor';
 import { type RecentReading } from '../../components/RecentReadingsList';
 import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { useDailyPulseData } from '../../state/dailyPulse';
@@ -53,6 +54,8 @@ import type { SpO2Sample } from '../../types/vitals';
 
 export interface SpO2DetailProps {
   onBack: () => void;
+  onArticleOpen?: (articleId: string) => void;
+  onLearnOpen?: () => void;
 }
 
 // Design fallback — used only when the user has no real overnight samples
@@ -212,7 +215,7 @@ function formatDayShort(sec: number): string {
   return d.toLocaleDateString(undefined, { weekday: 'short' });
 }
 
-export function SpO2Detail({ onBack }: SpO2DetailProps) {
+export function SpO2Detail({ onBack, onArticleOpen, onLearnOpen }: SpO2DetailProps) {
   const data = useDailyPulseData();
   const spo2Pending = useSpO2((s) => s.pending);
   const spo2Recent = useSpO2((s) => s.recent);
@@ -324,6 +327,13 @@ export function SpO2Detail({ onBack }: SpO2DetailProps) {
             vital="spo2"
             body={range.insight}
             testID="spo2-detail-insight"
+          />
+
+          <VitalExplainerAnchor
+            context={{ type: 'spo2', latestSpO2: latestPercent ?? null }}
+            onArticleOpen={onArticleOpen}
+            onLearnOpen={onLearnOpen}
+            testID="spo2-detail-explainer-anchor"
           />
 
           <RecentReadingsSection

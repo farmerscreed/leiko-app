@@ -13,7 +13,7 @@
 //     review gating for production builds)
 
 import type {
-  Article,
+  ArticleFrontmatter,
   Audience,
   ModeRelevance,
   ReadingContext,
@@ -21,21 +21,30 @@ import type {
 } from './types';
 import { bpTier } from './types';
 
+// Filters operate on anything that exposes a `frontmatter` field —
+// both the parser's Article (with raw body string) and the build
+// pipeline's CompiledArticle (with AST blocks). The runtime calls
+// these from screens that hold CompiledArticle[]; tests + the build
+// script work with Article[]. The frontmatter is the only field the
+// filters touch, so the generic `T` keeps both consumers honest
+// without a structural cast.
+type WithFrontmatter = { frontmatter: ArticleFrontmatter };
+
 // -----------------------------------------------------------------
 // Audience + mode filters.
 // -----------------------------------------------------------------
 
-export function filterByAudience(
-  articles: Article[],
+export function filterByAudience<T extends WithFrontmatter>(
+  articles: T[],
   audience: Audience,
-): Article[] {
+): T[] {
   return articles.filter(a => a.frontmatter.audience.includes(audience));
 }
 
-export function filterByModeRelevance(
-  articles: Article[],
+export function filterByModeRelevance<T extends WithFrontmatter>(
+  articles: T[],
   mode: ModeRelevance,
-): Article[] {
+): T[] {
   return articles.filter(a => a.frontmatter.mode_relevance.includes(mode));
 }
 
@@ -57,10 +66,10 @@ export interface ClinicalReviewOptions {
   dev?: boolean;
 }
 
-export function filterByClinicalReviewGate(
-  articles: Article[],
+export function filterByClinicalReviewGate<T extends WithFrontmatter>(
+  articles: T[],
   options: ClinicalReviewOptions = {},
-): Article[] {
+): T[] {
   if (options.dev) return articles;
   return articles.filter(a => {
     const fm = a.frontmatter;
@@ -74,7 +83,7 @@ export function filterByClinicalReviewGate(
  * "[unreviewed]" badge. Dev-only — the production gate strips these
  * articles entirely.
  */
-export function isUnreviewedClusterA(article: Article): boolean {
+export function isUnreviewedClusterA(article: WithFrontmatter): boolean {
   return (
     article.frontmatter.clinical_review_required &&
     article.frontmatter.clinical_reviewed_at === null
@@ -107,10 +116,10 @@ export function readingContextMatches(
   );
 }
 
-export function filterByReadingContext(
-  articles: Article[],
+export function filterByReadingContext<T extends WithFrontmatter>(
+  articles: T[],
   reading: BPReading,
-): Article[] {
+): T[] {
   return articles.filter(a =>
     readingContextMatches(reading, a.frontmatter.reading_context),
   );
@@ -131,18 +140,18 @@ export function filterByReadingContext(
 //      tier-specific card.
 // -----------------------------------------------------------------
 
-export interface SelectInlineExplainerOptions {
+export interface SelectInlineExplainerOptions<T extends WithFrontmatter> {
   reading: BPReading;
-  articles: Article[];
+  articles: T[];
   /** Max 2 by default — matches the spec. */
   max?: number;
   /** Production gate. Defaults to false (hide unreviewed). */
   dev?: boolean;
 }
 
-export function selectInlineExplainerArticles(
-  options: SelectInlineExplainerOptions,
-): Article[] {
+export function selectInlineExplainerArticles<T extends WithFrontmatter>(
+  options: SelectInlineExplainerOptions<T>,
+): T[] {
   const max = options.max ?? 2;
   const tier = bpTier(options.reading);
 
@@ -159,7 +168,7 @@ export function selectInlineExplainerArticles(
     matchesTier(a, tier),
   );
 
-  const picks: Article[] = [];
+  const picks: T[] = [];
   // For higher-tier readings, lead with a tier-specific card; for
   // lower tiers, lead with the always-candidate priority-1 card.
   if (tier === 'crisis' || tier === 'stage2') {
@@ -180,7 +189,7 @@ export function selectInlineExplainerArticles(
  * Future expansion: explicit tier metadata on the frontmatter, once
  * we have enough authored cards to need it.
  */
-function matchesTier(article: Article, tier: BPTier): boolean {
+function matchesTier(article: WithFrontmatter, tier: BPTier): boolean {
   const ctx = article.frontmatter.reading_context;
   const isGlobal =
     ctx.systolic_min === 0 &&
@@ -206,12 +215,65 @@ function matchesTier(article: Article, tier: BPTier): boolean {
   }
 }
 
-function pushUnique(into: Article[], from: Article[], cap: number): void {
+function pushUnique<T extends WithFrontmatter>(
+  into: T[],
+  from: T[],
+  cap: number,
+): void {
   for (const a of from) {
     if (into.length >= cap) return;
     if (into.some(x => x.frontmatter.id === a.frontmatter.id)) continue;
     into.push(a);
   }
+}
+
+// -----------------------------------------------------------------
+// Per-vital explainer selection (Sprint 13 task 5).
+//
+// For non-BP vitals the Inline Explainer surfaces the cluster's
+// priority-1 article plus one supporting card. There is no tier
+// mapping for HR / SpO2 / Sleep / Activity at v1.0 — every reading
+// surfaces the same intro card; the related row carries the depth.
+// -----------------------------------------------------------------
+
+export type ExplainerVital = 'hr' | 'spo2' | 'sleep' | 'activity';
+
+const VITAL_TO_CATEGORY: Record<ExplainerVital, import('./types').ArticleCategory> = {
+  hr: 'HR',
+  spo2: 'SPO2',
+  sleep: 'SLEEP',
+  activity: 'ACTIVITY',
+};
+
+export interface SelectExplainerForVitalOptions<T extends WithFrontmatter> {
+  vital: ExplainerVital;
+  articles: T[];
+  /** Max 2 by default — matches the Inline Explainer card slot count. */
+  max?: number;
+  /** Production gate. Defaults to false (hide unreviewed). */
+  dev?: boolean;
+}
+
+export function selectExplainerForVital<T extends WithFrontmatter>(
+  options: SelectExplainerForVitalOptions<T>,
+): T[] {
+  const max = options.max ?? 2;
+  const category = VITAL_TO_CATEGORY[options.vital];
+  const reviewed = filterByClinicalReviewGate(options.articles, {
+    dev: options.dev,
+  });
+  const inCluster = reviewed.filter(a => a.frontmatter.category === category);
+
+  // Tier-1 articles first, then the rest of the cluster as supporting
+  // cards. Stable order — the lower id wins when priorities tie.
+  const tier1 = inCluster.filter(
+    a => a.frontmatter.inline_explainer_priority === 1,
+  );
+  const others = inCluster.filter(
+    a => a.frontmatter.inline_explainer_priority !== 1,
+  );
+
+  return [...tier1, ...others].slice(0, max);
 }
 
 // -----------------------------------------------------------------
@@ -226,9 +288,9 @@ function pushUnique(into: Article[], from: Article[], cap: number): void {
  * "Never auto-translate at runtime via machine translation. Fallback
  *  to English with a banner."
  */
-export function resolveLocale(
-  article: Article,
-  preferred: keyof Article['frontmatter']['locale_status'],
+export function resolveLocale<T extends WithFrontmatter>(
+  article: T,
+  preferred: keyof ArticleFrontmatter['locale_status'],
 ): { locale: string; isFallback: boolean } {
   const status = article.frontmatter.locale_status[preferred];
   if (status === 'complete') {

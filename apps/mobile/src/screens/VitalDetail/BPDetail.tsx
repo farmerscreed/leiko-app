@@ -39,6 +39,7 @@ import { type RecentReading } from '../../components/RecentReadingsList';
 import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { VitalInsightCard } from '../../components/VitalInsightCard';
 import { BPTwinLineChart } from '../../components/BPTwinLineChart';
+import { VitalExplainerAnchor } from '../../components/VitalExplainerAnchor';
 import { useDailyPulseData } from '../../state/dailyPulse';
 import { useReadings, type LocalReading } from '../../state/readings';
 import { bpFillFromTier } from '../../utils/vitalThemes';
@@ -220,9 +221,20 @@ export interface BPDetailProps {
   onBack: () => void;
   /** Wired by the router so a tap on a recent-readings row opens ReadingDetail. */
   onSelectReading?: (localId: string) => void;
+  /** Wired by the router so the InlineExplainer's related-card row can
+   *  navigate to a specific article. */
+  onArticleOpen?: (articleId: string) => void;
+  /** Wired by the router so the InlineExplainer's "Read more in Learn"
+   *  CTA can route to the Learn home. */
+  onLearnOpen?: () => void;
 }
 
-export function BPDetail({ onBack, onSelectReading }: BPDetailProps) {
+export function BPDetail({
+  onBack,
+  onSelectReading,
+  onArticleOpen,
+  onLearnOpen,
+}: BPDetailProps) {
   const theme = useTheme();
   const data = useDailyPulseData();
   const recentReadings = useReadings((s) => s.recent);
@@ -385,6 +397,21 @@ export function BPDetail({ onBack, onSelectReading }: BPDetailProps) {
         body={isEmpty ? INSIGHT_BODY_EMPTY : INSIGHT_BODY_DEFAULT}
         testID="bp-detail-insight"
       />
+
+      {!isEmpty && data.bp.latest ? (
+        <VitalExplainerAnchor
+          context={{
+            type: 'bp',
+            reading: {
+              systolic: data.bp.latest.systolic,
+              diastolic: data.bp.latest.diastolic,
+            },
+          }}
+          onArticleOpen={onArticleOpen}
+          onLearnOpen={onLearnOpen}
+          testID="bp-detail-explainer-anchor"
+        />
+      ) : null}
 
       {!isEmpty ? (
         <RecentReadingsSection

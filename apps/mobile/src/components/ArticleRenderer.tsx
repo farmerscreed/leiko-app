@@ -231,7 +231,10 @@ interface InlineRunProps {
   onCardLinkPress?: (cardId: string) => void;
 }
 
-function InlineRun({ nodes, onCardLinkPress }: InlineRunProps): ReactNode {
+/** Render a flat list of InlineNodes. Exported so the
+ *  InlineExplainer (sprint 13 task 5) can render an article's lead
+ *  paragraph inline without re-walking the full article. */
+export function InlineRun({ nodes, onCardLinkPress }: InlineRunProps): ReactNode {
   return (
     <>
       {nodes.map((node, idx) => (

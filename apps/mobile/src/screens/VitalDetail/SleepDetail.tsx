@@ -28,6 +28,7 @@ import { StatTrio, type StatTrioItem } from '../../components/StatTrio';
 import { type RecentReading } from '../../components/RecentReadingsList';
 import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { VitalInsightCard } from '../../components/VitalInsightCard';
+import { VitalExplainerAnchor } from '../../components/VitalExplainerAnchor';
 import {
   CorrelationStrip,
   type VitalSeries,
@@ -161,9 +162,11 @@ function buildSleepScoreSeries(
 
 export interface SleepDetailProps {
   onBack: () => void;
+  onArticleOpen?: (articleId: string) => void;
+  onLearnOpen?: () => void;
 }
 
-export function SleepDetail({ onBack }: SleepDetailProps) {
+export function SleepDetail({ onBack, onArticleOpen, onLearnOpen }: SleepDetailProps) {
   const data = useDailyPulseData();
   const session = data.sleep.session;
 
@@ -294,6 +297,12 @@ export function SleepDetail({ onBack }: SleepDetailProps) {
         vital="sleep"
         body={insightBody(session)}
         testID="sleep-detail-insight"
+      />
+      <VitalExplainerAnchor
+        context={{ type: 'sleep' }}
+        onArticleOpen={onArticleOpen}
+        onLearnOpen={onLearnOpen}
+        testID="sleep-detail-explainer-anchor"
       />
       {recentRows.length > 0 ? (
         <RecentReadingsSection

@@ -34,6 +34,7 @@ import { VitalHero } from '../../components/VitalHero';
 import { StatTrio } from '../../components/StatTrio';
 import { VitalTrendChart } from '../../components/VitalTrendChart';
 import { VitalInsightCard } from '../../components/VitalInsightCard';
+import { VitalExplainerAnchor } from '../../components/VitalExplainerAnchor';
 import {
   CorrelationStrip,
   type VitalSeries,
@@ -195,9 +196,11 @@ const INSIGHT_BODY_EMPTY =
 
 export interface HRDetailProps {
   onBack: () => void;
+  onArticleOpen?: (articleId: string) => void;
+  onLearnOpen?: () => void;
 }
 
-export function HRDetail({ onBack }: HRDetailProps) {
+export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) {
   const data = useDailyPulseData();
   const restingToday = data.hr.restingToday;
 
@@ -334,6 +337,13 @@ export function HRDetail({ onBack }: HRDetailProps) {
         vital="hr"
         body={hasData ? INSIGHT_BODY_HAS_DATA : INSIGHT_BODY_EMPTY}
         testID="hr-detail-insight"
+      />
+
+      <VitalExplainerAnchor
+        context={{ type: 'hr', restingHr: restingToday ?? null }}
+        onArticleOpen={onArticleOpen}
+        onLearnOpen={onLearnOpen}
+        testID="hr-detail-explainer-anchor"
       />
     </DetailShell>
   );

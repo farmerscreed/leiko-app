@@ -41,6 +41,7 @@ import {
 import { DetailShell } from '../../components/DetailShell';
 import { StatTrio } from '../../components/StatTrio';
 import { VitalInsightCard } from '../../components/VitalInsightCard';
+import { VitalExplainerAnchor } from '../../components/VitalExplainerAnchor';
 import { type RecentReading } from '../../components/RecentReadingsList';
 import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { ActivityRingsHero } from '../../components/ActivityRingsHero';
@@ -55,6 +56,8 @@ export interface ActivityDetailProps {
   onBack: () => void;
   /** Sprint 10 wires real persistence; Sprint 8.5 callers may override. */
   onGoalChange?: (newGoal: number) => void;
+  onArticleOpen?: (articleId: string) => void;
+  onLearnOpen?: () => void;
 }
 
 const DAY_INITIALS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -68,7 +71,12 @@ const PLACEHOLDER_INSIGHT_EMPTY =
 
 const EMPTY_HERO_MESSAGE = 'Start moving to see your day fill in.';
 
-export function ActivityDetail({ onBack, onGoalChange }: ActivityDetailProps) {
+export function ActivityDetail({
+  onBack,
+  onGoalChange,
+  onArticleOpen,
+  onLearnOpen,
+}: ActivityDetailProps) {
   const data = useDailyPulseData();
   const recentStepsRows = useActivity((s) => s.recentSteps);
   const pendingStepsRows = useActivity((s) => s.pendingSteps);
@@ -196,6 +204,13 @@ export function ActivityDetail({ onBack, onGoalChange }: ActivityDetailProps) {
           vital="activity"
           body={isEmpty ? PLACEHOLDER_INSIGHT_EMPTY : PLACEHOLDER_INSIGHT_POPULATED}
           testID="activity-detail-insight"
+        />
+
+        <VitalExplainerAnchor
+          context={{ type: 'activity' }}
+          onArticleOpen={onArticleOpen}
+          onLearnOpen={onLearnOpen}
+          testID="activity-detail-explainer-anchor"
         />
 
         {!isEmpty ? (

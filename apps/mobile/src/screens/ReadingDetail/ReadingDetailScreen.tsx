@@ -15,8 +15,10 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, type RouteProp } from '@react-navigation/native';
+import { useState } from 'react';
 import { Button } from '../../components/Button';
 import { Pill } from '../../components/Pill';
+import { InlineExplainer } from '../../components/InlineExplainer';
 import { useTheme } from '../../theme';
 import { useReadings } from '../../state/readings';
 import { useAuth } from '../../state/auth';
@@ -25,8 +27,15 @@ import {
   tierPillVariant,
 } from '../../utils/classification';
 
-type Props =
-  | { navigation: { goBack: () => void } };
+type Props = {
+  navigation: {
+    goBack: () => void;
+    /** Optional. When supplied, the Inline Explainer's related-card and
+     *  "Read more in Learn" CTAs route through it. Tests + Sprint-6
+     *  callers that don't pass it still get the explainer locally. */
+    navigate?: (screen: string, params?: unknown) => void;
+  };
+};
 
 type ReadingDetailParams = { readingLocalId: string };
 
@@ -86,6 +95,7 @@ export function ReadingDetailScreen({ navigation }: Props) {
 
   const isSelf = accountType === 'self_buyer';
   const tier = reading.classification.tier;
+  const [explainerOpen, setExplainerOpen] = useState(false);
 
   return (
     <SafeAreaView
@@ -188,11 +198,7 @@ export function ReadingDetailScreen({ navigation }: Props) {
           accessibilityLabel="What does this mean? Opens explanation sheet."
           accessibilityHint="Opens explanation sheet"
           testID="reading-detail-anchor-meaning"
-          // No-op until Sprint 13. Stays interactive-looking; tap is a
-          // no-op rather than disabled so the reader doesn't think it's
-          // broken — the test asserts the button is present + the
-          // handler doesn't throw.
-          onPress={() => undefined}
+          onPress={() => setExplainerOpen(true)}
           style={{
             alignSelf: 'center',
             marginTop: theme.spacing.s,
@@ -258,6 +264,23 @@ export function ReadingDetailScreen({ navigation }: Props) {
           {isSelf ? 'Note for my doctor' : 'Add a note'}
         </Button>
       </ScrollView>
+
+      <InlineExplainer
+        visible={explainerOpen}
+        onDismiss={() => setExplainerOpen(false)}
+        context={{
+          type: 'bp',
+          reading: { systolic: reading.systolic, diastolic: reading.diastolic },
+        }}
+        onArticleOpen={
+          navigation.navigate
+            ? (id) => navigation.navigate?.('Article', { articleId: id })
+            : undefined
+        }
+        onLearnOpen={
+          navigation.navigate ? () => navigation.navigate?.('Learn') : undefined
+        }
+      />
     </SafeAreaView>
   );
 }
