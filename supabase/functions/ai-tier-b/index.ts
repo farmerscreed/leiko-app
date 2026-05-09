@@ -70,6 +70,30 @@ const ANTHROPIC_VERSION = '2023-06-01';
 const MAX_OUTPUT_TOKENS = 200;
 const REQUEST_TIMEOUT_MS = 12_000;
 const SAMPLE_RATE = 0.10;
+// Layer 2 budget. The Supabase.ai gte-small model can cold-start
+// slowly (≥ 30s on local edge runtime first call). When that happens
+// we skip Layer 2 for THIS request rather than blow past the mobile
+// 12s timeout — Layer 1 + the system prompt still gate the response.
+const LAYER2_TIMEOUT_MS = 3_000;
+
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(
+      () => reject(new Error(`${label}: timed out after ${ms}ms`)),
+      ms,
+    );
+    p.then(
+      (v) => {
+        clearTimeout(t);
+        resolve(v);
+      },
+      (err) => {
+        clearTimeout(t);
+        reject(err);
+      },
+    );
+  });
+}
 
 // D14 §14.1
 const FREE_TIER_B_MONTHLY = 5;
@@ -626,10 +650,29 @@ Deno.serve(async (req: Request): Promise<Response> => {
   }
 
   if (embedder) {
-    const layer2 = await scanLayer2(candidate, embedder);
-    layer2Cosine = layer2.maxCosine;
-    layer2Matched = layer2.matchedPhrase;
-    if (!layer2.passes) {
+    let layer2;
+    try {
+      layer2 = await withTimeout(
+        scanLayer2(candidate, embedder),
+        LAYER2_TIMEOUT_MS,
+        'layer2',
+      );
+    } catch (err) {
+      // Cold-start or transient failure — skip Layer 2 for this
+      // request and proceed with Layer 1 + system-prompt as the
+      // response gate. Subsequent requests in the same warm isolate
+      // should embed in <50ms. We don't write an audit row for the
+      // skip — D14 §15's vocabulary doesn't include a "guard layer
+      // unavailable" action and inventing one would diverge from the
+      // canonical list. The console warn is enough for dev triage.
+      console.warn('layer2 skipped:', (err as Error).message);
+      layer2 = null;
+    }
+    if (layer2) {
+      layer2Cosine = layer2.maxCosine;
+      layer2Matched = layer2.matchedPhrase;
+    }
+    if (layer2 && !layer2.passes) {
       await writeAuditLog(serviceClient, {
         actorUserId: userId,
         familyId: demo.familyId,
