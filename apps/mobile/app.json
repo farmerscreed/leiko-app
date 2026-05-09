@@ -28,7 +28,9 @@
       ]
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "@kingstinct/react-native-healthkit",
+      "react-native-health-connect"
     ]
   }
 }
