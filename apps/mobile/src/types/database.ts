@@ -24,6 +24,15 @@ export type SubscriptionStatus =
   | 'plus_grace'
   | 'past_due';
 
+// Sprint 10b.1 (migration 0008): optional profile demographics that
+// feed Settings → Profile and the BLE setUserParams writer (per
+// memory/multi_vitals_gap.md "setUserParams + setGoals stubbed").
+export type Gender = 'female' | 'male' | 'nonbinary' | 'prefer_not_say';
+
+// D8a §10.1 — self-buyer-only Profile chip; optional in onboarding,
+// editable in Settings. Caregiver / parent rows leave this null.
+export type HypertensionStatus = 'yes' | 'no' | 'prefer_not_say';
+
 export type UserRow = {
   id: string;
   email: string | null;
@@ -34,6 +43,11 @@ export type UserRow = {
   year_of_birth: number | null;
   account_type: AccountType;
   marketing_opt_in: boolean;
+  // Sprint 10b.1 demographics (nullable).
+  gender: Gender | null;
+  height_cm: number | null;
+  weight_kg: number | null;
+  hypertension_status: HypertensionStatus | null;
   deleted_at: string | null;
   created_at: string;
   updated_at: string;
@@ -46,6 +60,10 @@ export type UserUpdate = {
   timezone?: string;
   year_of_birth?: number | null;
   marketing_opt_in?: boolean;
+  gender?: Gender | null;
+  height_cm?: number | null;
+  weight_kg?: number | null;
+  hypertension_status?: HypertensionStatus | null;
 };
 
 export type FamilyRow = {

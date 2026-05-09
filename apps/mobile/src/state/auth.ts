@@ -45,6 +45,10 @@ interface AuthState {
   verifyOtp: (email: string, token: string) => Promise<void>;
   signOut: () => Promise<void>;
 
+  /** Refresh the profile from Supabase. Settings → Profile edits call
+   *  this after a successful update so derived UI re-renders. */
+  refreshProfile: () => Promise<void>;
+
   // Test surface — public for jest only. Not called by app code.
   _setSession: (session: Session | null) => Promise<void>;
 }
@@ -140,6 +144,13 @@ export const useAuth = create<AuthState>((set, get) => ({
     // The fork choice has now been committed to the database — drop
     // it from MMKV so a future signed-out state doesn't replay it.
     if (data.session) get().clearPendingAccountType();
+  },
+
+  async refreshProfile() {
+    const session = get().session;
+    if (!session) return;
+    const profile = await fetchProfile(session.user.id);
+    set({ profile });
   },
 
   async signOut() {
