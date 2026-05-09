@@ -157,6 +157,20 @@ function parseResponse(data: unknown): TierBResult {
   }
 }
 
+// Hard client-side timeout. If supabase.functions.invoke hasn't
+// returned in this window we give up so the UI never hangs on the
+// "Thinking…" state forever. The Edge Function side has its own
+// shorter budget, but a stuck network path between phone and Kong
+// would otherwise leave the JS promise pending until the OS-level
+// fetch timeout (~75–120s on Android/iOS).
+const ASK_TIER_B_CLIENT_TIMEOUT_MS = 12_000;
+
+function timeoutAfter(ms: number): Promise<never> {
+  return new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('client_timeout')), ms),
+  );
+}
+
 /**
  * Fire a Tier-B query. Returns a discriminated union — never throws.
  * Logs an analytics breadcrumb at start + completion (the body of the
@@ -178,16 +192,20 @@ export async function askTierB(
   let raw: unknown;
   let invokeErr: { message: string } | null = null;
   try {
-    const res = await client.functions.invoke('ai-tier-b', {
-      body: { question: trimmed },
-    });
+    const res = await Promise.race([
+      client.functions.invoke('ai-tier-b', { body: { question: trimmed } }),
+      timeoutAfter(ASK_TIER_B_CLIENT_TIMEOUT_MS),
+    ]);
     raw = res.data;
     invokeErr = res.error
       ? { message: res.error.message ?? 'unknown' }
       : null;
   } catch (err) {
-    logger.track('ai_tier_b_failed', { reason: 'network_error' });
-    return { status: 'error', error: 'network_error' };
+    const reason = (err as Error).message === 'client_timeout'
+      ? 'client_timeout'
+      : 'network_error';
+    logger.track('ai_tier_b_failed', { reason });
+    return { status: 'error', error: reason };
   }
 
   if (invokeErr) {
