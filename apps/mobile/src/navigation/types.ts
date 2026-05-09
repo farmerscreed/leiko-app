@@ -61,10 +61,14 @@ export type CaregiverStackParamList = {
   // Sprint 10c.2 polish — read-only list of every member of the
   // active family circle, reached from Settings → Family.
   FamilyMembers: undefined;
-  // Sprint 10c.2 polish — Learn placeholder. Sprint 13/14 ships the
-  // real Learn cards. Registered in both stacks for symmetry; the
-  // self-buyer tab bar is the primary entry point.
+  // Sprint 10c.2 polish — Learn home (cluster grid). Sprint 13
+  // promotes this from a placeholder to the real cluster grid backed
+  // by the precompiled article index.
   Learn: undefined;
+  // Sprint 13 — article-list view for a single cluster.
+  LearnCluster: { category: import('../services/learn/types').ArticleCategory };
+  // Sprint 13 — full article reader. articleId matches frontmatter.id.
+  Article: { articleId: string };
 };
 
 // Sprint 4 — self-buyer onboarding stack. Five screens per
@@ -101,8 +105,14 @@ export type SelfBuyerStackParamList = {
   CaregiverVisibility: undefined;
   // Sprint 10c.2 polish — family members read-only list.
   FamilyMembers: undefined;
-  // Sprint 10c.2 polish — Learn tab destination (placeholder until 13/14).
+  // Sprint 10c.2 polish — Learn tab destination. Sprint 13 promotes
+  // this to the real cluster grid backed by the precompiled article
+  // index.
   Learn: undefined;
+  // Sprint 13 — article-list view for a single cluster.
+  LearnCluster: { category: import('../services/learn/types').ArticleCategory };
+  // Sprint 13 — full article reader. articleId matches frontmatter.id.
+  Article: { articleId: string };
 };
 
 export type AuthScreenProps<R extends keyof AuthStackParamList> = NativeStackScreenProps<

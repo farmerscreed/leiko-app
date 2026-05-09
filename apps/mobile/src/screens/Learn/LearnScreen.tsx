@@ -1,55 +1,113 @@
-// LearnScreen — Sprint 10c.2 polish placeholder.
+// LearnScreen — Sprint 13 task 4 part 2.
 //
-// Self-buyer's 4th tab (replacing the dead "Family" tab per brand IA
-// review — self-buyers' mental model is "understand my numbers", not
-// family). Sprint 13/14 ships real Learn cards (Cluster A/B/C). Until
-// then, this is a calm coming-soon surface with three teaser topics so
-// the slot doesn't read empty.
+// The Learn tab destination. Cluster grid + featured row at the top
+// per docs/08-learn-module.md §4 (Surface A) and §8 (default home
+// order: featured → clusters → "more coming soon" footer).
 //
-// Voice rules (docs/05-voice-and-claims.md):
-//   • "What's a normal reading?" — answer-first, plain language.
-//   • No fear language ("dangerous", "silent killer" forbidden).
-//   • "Talk to your doctor" preferred over "consult a healthcare provider".
+// Replaces the Sprint 10 placeholder with the real surface backed by
+// the precompiled articleIndex.gen.ts. Empty clusters are hidden
+// until articles arrive.
+//
+// Voice rules (docs/05-voice-and-claims.md): plain-language, observation-
+// only, no fear hooks. Cluster names match docs/_reference/D9-editorial.md
+// §3 + D14 §10.1.
 
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useMemo } from 'react';
 import { ListRow } from '../../components/ListRow';
 import { SettingsSection } from '../../components/SettingsSection';
 import { useTheme } from '../../theme';
-import type { CaregiverScreenProps } from '../../navigation/types';
+import { ARTICLES } from '../../learn/articleIndex.gen';
+import { filterByClinicalReviewGate } from '../../services/learn/filters';
+import type { ArticleCategory } from '../../services/learn/types';
+import type { CaregiverScreenProps, SelfBuyerScreenProps } from '../../navigation/types';
 
-interface Teaser {
-  title: string;
-  body: string;
-}
+type LearnNavigation =
+  | CaregiverScreenProps<'Learn'>
+  | SelfBuyerScreenProps<'Learn'>
+  | {
+      navigation: {
+        goBack: () => void;
+        navigate: (screen: string, params?: unknown) => void;
+      };
+    };
 
-const TEASERS: Teaser[] = [
-  {
-    title: 'What is a normal blood pressure?',
-    body: 'Most adults sit between 90/60 and 120/80. Your number is a snapshot — context matters.',
-  },
-  {
-    title: 'Why morning readings are usually higher',
-    body: 'BP follows your circadian rhythm. The first reading after waking is often the highest of the day.',
-  },
-  {
-    title: 'What the second number means',
-    body: 'Diastolic is the pressure between heartbeats. It tells a different story than the top number.',
-  },
-  {
-    title: 'How sleep moves your morning numbers',
-    body: 'Short or restless sleep often nudges morning BP up. Your weekly trend tells the real story.',
-  },
+const CLUSTER_DISPLAY_NAMES: Record<ArticleCategory, string> = {
+  NUMBERS: 'Understanding your numbers',
+  CHANGES: 'Why blood pressure changes',
+  HR: 'Heart rate',
+  SPO2: 'Blood oxygen',
+  SLEEP: 'Sleep',
+  ACTIVITY: 'Activity',
+  CORRELATIONS: 'Patterns across vitals',
+  OTHER: 'Other numbers on your watch',
+  DAILY: 'Daily life and BP',
+  CULTURAL: 'In your kitchen',
+  DOCTOR: 'Conversations with your doctor',
+};
+
+// Order matches docs/08-learn-module.md §8: NUMBERS first, multi-vital
+// clusters next (the headline of D14), then the supporting categories.
+const CLUSTER_ORDER: ArticleCategory[] = [
+  'NUMBERS',
+  'CHANGES',
+  'HR',
+  'SPO2',
+  'SLEEP',
+  'ACTIVITY',
+  'CORRELATIONS',
+  'DAILY',
+  'CULTURAL',
+  'DOCTOR',
+  'OTHER',
 ];
 
-type Props =
-  | CaregiverScreenProps<'Learn'>
-  | { navigation: { goBack: () => void } };
-
-export function LearnScreen({ navigation }: Props) {
+export function LearnScreen({ navigation }: LearnNavigation) {
   const theme = useTheme();
   const headlineStyle = theme.type('displayM');
   const bodyStyle = theme.type('bodyL');
+  const subtitleStyle = theme.type('bodyM');
+
+  // The two stacks register the same Learn route. TypeScript can't
+  // unify the typed `navigate` signatures across CaregiverStackParamList
+  // and SelfBuyerStackParamList, so we narrow at the call site.
+  const nav = navigation as {
+    goBack: () => void;
+    navigate: (screen: string, params?: unknown) => void;
+  };
+
+  const visibleArticles = useMemo(
+    () =>
+      filterByClinicalReviewGate(
+        ARTICLES.map(a => ({ frontmatter: a.frontmatter, body: '' })),
+        // Dev mode shows clinical-review-pending Cluster A so the
+        // founder can walk articles before the advisor signs.
+        { dev: __DEV__ },
+      ),
+    [],
+  );
+
+  const visibleIds = useMemo(
+    () => new Set(visibleArticles.map(a => a.frontmatter.id)),
+    [visibleArticles],
+  );
+
+  // Featured = the canonical first card per Learn module §8.1.
+  const featured = ARTICLES.find(
+    a => a.frontmatter.id === 'numbers-001' && visibleIds.has('numbers-001'),
+  );
+
+  // Build cluster groupings, hiding empty clusters.
+  const clusters = useMemo(() => {
+    return CLUSTER_ORDER.map(category => {
+      const articles = ARTICLES.filter(
+        a =>
+          a.frontmatter.category === category && visibleIds.has(a.frontmatter.id),
+      );
+      return { category, articles };
+    }).filter(c => c.articles.length > 0);
+  }, [visibleIds]);
 
   return (
     <SafeAreaView
@@ -66,7 +124,7 @@ export function LearnScreen({ navigation }: Props) {
           }}
         >
           <Pressable
-            onPress={() => navigation.goBack()}
+            onPress={() => nav.goBack()}
             accessibilityRole="button"
             accessibilityLabel="Back"
             hitSlop={theme.spacing.m}
@@ -110,40 +168,72 @@ export function LearnScreen({ navigation }: Props) {
           </Text>
         </View>
 
-        <SettingsSection title="Coming soon" first testID="learn-coming-soon">
-          {TEASERS.map((teaser, idx) => (
+        {/* Featured card */}
+        {featured && (
+          <SettingsSection title="Start here" first testID="learn-featured">
             <ListRow
-              key={teaser.title}
-              variant="data"
-              title={teaser.title}
-              subtitle={teaser.body}
-              showDivider={idx !== TEASERS.length - 1}
-              testID={`learn-teaser-${idx}`}
+              variant="navigation"
+              title={featured.frontmatter.title}
+              subtitle="The single card every reader starts with."
+              onPress={() =>
+                nav.navigate('Article', {
+                  articleId: featured.frontmatter.id,
+                })
+              }
+              testID="learn-featured-numbers-001"
             />
-          ))}
-        </SettingsSection>
+          </SettingsSection>
+        )}
 
+        {/* Cluster grid */}
+        {clusters.map(({ category, articles }) => (
+          <SettingsSection
+            key={category}
+            title={CLUSTER_DISPLAY_NAMES[category]}
+            testID={`learn-cluster-${category.toLowerCase()}`}
+          >
+            <ListRow
+              variant="navigation"
+              title={`${articles.length} article${articles.length === 1 ? '' : 's'}`}
+              subtitle={previewSubtitle(articles)}
+              onPress={() =>
+                nav.navigate('LearnCluster', { category })
+              }
+              testID={`learn-cluster-${category.toLowerCase()}-row`}
+            />
+          </SettingsSection>
+        ))}
+
+        {/* "More coming soon" footer per Learn module §8.4 */}
         <View
           style={{
             paddingHorizontal: theme.spacing.xl,
-            marginTop: theme.spacing.xxl,
+            marginTop: theme.spacing.xxxl,
           }}
         >
           <Text
             style={{
               color: theme.colors.text.tertiary,
-              fontSize: theme.type('bodyS').size,
-              lineHeight: theme.type('bodyS').lineHeight,
-              fontFamily: theme.type('bodyS').family,
+              fontSize: subtitleStyle.size,
+              lineHeight: subtitleStyle.lineHeight,
+              fontFamily: subtitleStyle.family,
               textAlign: 'center',
             }}
           >
-            Full guides arrive in the next release. Talk to your doctor for personal questions about your readings.
+            More cards arrive in the coming releases. Talk to your doctor for personal questions about your readings.
           </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+function previewSubtitle(
+  articles: ReadonlyArray<{ frontmatter: { title: string } }>,
+): string {
+  if (articles.length === 0) return '';
+  if (articles.length === 1) return articles[0].frontmatter.title;
+  return `${articles[0].frontmatter.title} · +${articles.length - 1} more`;
 }
 
 const styles = StyleSheet.create({

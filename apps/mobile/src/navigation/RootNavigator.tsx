@@ -46,6 +46,8 @@ import { AuditLogScreen } from '../screens/AuditLog/AuditLogScreen';
 import { CaregiverVisibilityScreen } from '../screens/CaregiverVisibility/CaregiverVisibilityScreen';
 import { FamilyMembersScreen } from '../screens/FamilyMembers/FamilyMembersScreen';
 import { LearnScreen } from '../screens/Learn/LearnScreen';
+import { LearnClusterScreen } from '../screens/Learn/LearnClusterScreen';
+import { ArticleScreen } from '../screens/Learn/ArticleScreen';
 import { DebugLauncher } from '../dev/DebugLauncher';
 import { useTheme } from '../theme';
 import { useAuth } from '../state/auth';
@@ -167,6 +169,8 @@ function CaregiverHomeNavigator() {
         component={FamilyMembersScreen}
       />
       <CaregiverStack.Screen name="Learn" component={LearnScreen} />
+      <CaregiverStack.Screen name="LearnCluster" component={LearnClusterScreen} />
+      <CaregiverStack.Screen name="Article" component={ArticleScreen} />
     </CaregiverStack.Navigator>
   );
 }
@@ -222,6 +226,8 @@ function SelfBuyerHomeNavigator() {
         component={FamilyMembersScreen}
       />
       <SelfBuyerStack.Screen name="Learn" component={LearnScreen} />
+      <SelfBuyerStack.Screen name="LearnCluster" component={LearnClusterScreen} />
+      <SelfBuyerStack.Screen name="Article" component={ArticleScreen} />
     </SelfBuyerStack.Navigator>
   );
 }
