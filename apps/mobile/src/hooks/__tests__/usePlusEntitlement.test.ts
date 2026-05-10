@@ -118,7 +118,14 @@ describe('usePlusEntitlement — TanStack Query', () => {
       { wrapper: ({ children }) => withQueryClient(children) },
     );
     await waitFor(() => {
-      expect(client.channel).toHaveBeenCalledWith('families:fam-1');
+      // Sprint 12.5 fix: channel name now suffixed with useId() per
+      // consumer to prevent the "cannot add postgres_changes
+      // callbacks" crash when multiple components mount the hook
+      // simultaneously. We don't pin the suffix value (React's
+      // useId is opaque), just the prefix.
+      expect(client.channel).toHaveBeenCalled();
+      const arg = (client.channel as jest.Mock).mock.calls[0][0] as string;
+      expect(arg.startsWith('families:fam-1:')).toBe(true);
     });
   });
 });

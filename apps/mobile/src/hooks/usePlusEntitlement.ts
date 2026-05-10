@@ -33,7 +33,7 @@
 //   The default `client` parameter is the singleton supabase client.
 //   Tests pass an injected client via the legacy `__test__` re-export.
 
-import { useEffect } from 'react';
+import { useEffect, useId } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase as defaultSupabase } from '../services/supabase';
@@ -90,6 +90,14 @@ export function usePlusEntitlement(
 ): PlusEntitlement {
   const userId = useAuth((s) => s.session?.user.id ?? null);
   const queryClient = useQueryClient();
+  // Per-consumer id — supabase-js rejects a second postgres_changes
+  // registration on a channel that's already subscribed, so the
+  // channel name MUST be unique per consumer. Without this, mounting
+  // a second usePlusEntitlement caller on the same screen (e.g. via
+  // useDailyNarration) crashes with "cannot add postgres_changes
+  // callbacks for realtime:families…". Same fix useFamilyReadings
+  // applied in Sprint 7.7b.
+  const subscriberId = useId();
 
   const query = useQuery({
     queryKey: [ENTITLEMENT_KEY, userId],
@@ -109,7 +117,7 @@ export function usePlusEntitlement(
   useEffect(() => {
     if (!familyId) return;
     const channel = client
-      .channel(`families:${familyId}`)
+      .channel(`families:${familyId}:${subscriberId}`)
       .on(
         'postgres_changes' as never,
         {
@@ -126,7 +134,7 @@ export function usePlusEntitlement(
     return () => {
       void client.removeChannel(channel);
     };
-  }, [client, familyId, queryClient, userId]);
+  }, [client, familyId, queryClient, userId, subscriberId]);
 
   const tier: SubscriptionStatus = query.data?.tier ?? 'free';
   return {
