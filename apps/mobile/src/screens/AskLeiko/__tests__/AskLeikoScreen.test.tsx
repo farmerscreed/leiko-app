@@ -200,7 +200,9 @@ describe('<AskLeikoScreen />', () => {
       fireEvent.press(screen.getByTestId('ask-leiko-send'));
     });
     await waitFor(() => {
-      expect(screen.getByTestId('ask-leiko-tier-b-error')).toBeTruthy();
+      // Sprint 14.5: error testID is now suffixed with the mapped kind.
+      // Generic invoke_failed maps to 'generic'.
+      expect(screen.getByTestId('ask-leiko-tier-b-error-generic')).toBeTruthy();
     });
   });
 });

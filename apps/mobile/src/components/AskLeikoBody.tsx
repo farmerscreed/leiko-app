@@ -33,12 +33,26 @@ export const ASK_LEIKO_COPY = {
   placeholder: 'What is blood pressure?',
   send: 'Send',
   loading: 'Thinking…',
+  // Generic fallback. Used for unknown errors + transport-level
+  // failures (network, client timeout, unhandled HTTP codes).
   error: "I couldn't reach Leiko right now. Try again in a moment.",
   // Verbatim from D14 §14.2.
   quotaExceeded:
     "You've used your AI questions for this month. They reset on the 1st.",
+  // Specific server-error copy. Each maps to a known status code from
+  // the ai-tier-b Edge Function; anything else falls through to
+  // ASK_LEIKO_COPY.error above.
+  errorNoFamily: 'Finish setting up Leiko first to ask questions.',
+  errorNoSession: 'Sign in again to ask Leiko.',
+  errorQuestionTooLong: 'That question is a bit long — try shortening it.',
   youAsked: 'You asked',
 } as const;
+
+type TierBErrorKind =
+  | 'generic'
+  | 'no_family'
+  | 'no_session'
+  | 'question_too_long';
 
 type TierBState =
   | { kind: 'idle' }
@@ -46,7 +60,38 @@ type TierBState =
   | { kind: 'ok'; body: string }
   | { kind: 'defer'; trigger: TierBDeferTrigger }
   | { kind: 'quota_exceeded' }
-  | { kind: 'error' };
+  | { kind: 'error'; reason: TierBErrorKind };
+
+// Map a server error code to the user-facing kind. Anything not in
+// the map falls through to 'generic'. The mapping lives here (UI
+// layer) rather than in tierB.ts because it's a presentation concern;
+// tierB returns the raw server code, the UI decides what to show.
+function mapServerErrorToKind(error: string): TierBErrorKind {
+  switch (error) {
+    case 'no_family':
+      return 'no_family';
+    case 'no_session':
+    case 'unauthorized':
+      return 'no_session';
+    case 'question_too_long':
+      return 'question_too_long';
+    default:
+      return 'generic';
+  }
+}
+
+function copyForErrorKind(kind: TierBErrorKind): string {
+  switch (kind) {
+    case 'no_family':
+      return ASK_LEIKO_COPY.errorNoFamily;
+    case 'no_session':
+      return ASK_LEIKO_COPY.errorNoSession;
+    case 'question_too_long':
+      return ASK_LEIKO_COPY.errorQuestionTooLong;
+    case 'generic':
+      return ASK_LEIKO_COPY.error;
+  }
+}
 
 export interface AskLeikoBodyProps {
   /** Called when an EDUCATE response surface taps a Learn card link. */
@@ -87,7 +132,7 @@ export function AskLeikoBody({ onArticleOpen, testID }: AskLeikoBodyProps) {
             setTierBState({ kind: 'quota_exceeded' });
             break;
           case 'error':
-            setTierBState({ kind: 'error' });
+            setTierBState({ kind: 'error', reason: mapServerErrorToKind(r.error) });
             break;
         }
       });
@@ -260,7 +305,7 @@ export function AskLeikoBody({ onArticleOpen, testID }: AskLeikoBodyProps) {
           )}
           {tierBState.kind === 'error' && (
             <Text
-              testID="ask-leiko-tier-b-error"
+              testID={`ask-leiko-tier-b-error-${tierBState.reason}`}
               style={{
                 color: theme.colors.text.secondary,
                 fontSize: bodyStyle.size,
@@ -268,7 +313,7 @@ export function AskLeikoBody({ onArticleOpen, testID }: AskLeikoBodyProps) {
                 fontFamily: bodyStyle.family,
               }}
             >
-              {ASK_LEIKO_COPY.error}
+              {copyForErrorKind(tierBState.reason)}
             </Text>
           )}
         </View>
