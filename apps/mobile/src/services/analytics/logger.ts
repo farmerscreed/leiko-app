@@ -97,7 +97,11 @@ export type AnalyticsEvent =
   // Sprint 14.5 — self-buyer family auto-provision (legacy backfill).
   | { name: 'family_auto_provision_started' }
   | { name: 'family_auto_provision_completed' }
-  | { name: 'family_auto_provision_failed'; props?: { reason: string } };
+  | { name: 'family_auto_provision_failed'; props?: { reason: string } }
+  // Sprint 12.5 — ambient AI narrations. tier identifies the path
+  // ('A' = local template, 'B' = Tier-B LLM via Edge Function).
+  // Body NEVER appears in props per CLAUDE.md / D14 §13.
+  | { name: 'daily_narration_generated'; props?: { tier: string; template_id: string } };
 
 type EventName = AnalyticsEvent['name'];
 

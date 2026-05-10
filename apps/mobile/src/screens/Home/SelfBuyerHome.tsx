@@ -45,6 +45,7 @@ import { DailyPulseHero, type DailyPulseHeroVitals } from '../../components/Dail
 import { HomeLearnCard } from '../../components/HomeLearnCard';
 import { useSeededLearnCard } from '../../hooks/useSeededLearnCard';
 import { useEnsureSelfBuyerFamily } from '../../hooks/useEnsureSelfBuyerFamily';
+import { useDailyNarration } from '../../hooks/useDailyNarration';
 import { VitalTile } from '../../components/VitalTile';
 import {
   CorrelationStrip,
@@ -65,10 +66,6 @@ import {
 import type { SelfBuyerStackParamList } from '../../navigation/types';
 
 type Nav = NativeStackNavigationProp<SelfBuyerStackParamList>;
-
-// Sprint 8 ships a placeholder narration string; Sprint 12.5 (ambient
-// AI) replaces this with a real Tier-A/B generator output.
-const PLACEHOLDER_AI_NARRATION = 'Your daily pulse is here.';
 
 export function SelfBuyerHome() {
   const theme = useTheme();
@@ -102,6 +99,13 @@ export function SelfBuyerHome() {
 
   // ----- Sprint 12 follow-up: Ask Leiko bottom sheet ----------------
   const [askLeikoVisible, setAskLeikoVisible] = useState(false);
+
+  // ----- Sprint 12.5: ambient AI daily narration --------------------
+  // Replaces the Sprint 8 PLACEHOLDER_AI_NARRATION strings with a
+  // real Tier-A template from Sprint 11's library, slot-substituted
+  // with the actual vital values. Tier-B novel-pattern path lands
+  // in session 2.
+  const dailyNarration = useDailyNarration();
 
   // ----- DaySpine moments --------------------------------------------
   const moments = useMemo(() => deriveDayMoments(data), [data]);
@@ -225,7 +229,11 @@ export function SelfBuyerHome() {
         >
           <NarrationCard
             theme={theme}
-            text={pickNarrationText(central.priority, banner !== null)}
+            text={
+              banner !== null
+                ? "We've noticed a pattern. Your numbers below tell the rest of the story."
+                : dailyNarration.text
+            }
           />
         </View>
 
@@ -877,27 +885,6 @@ function deriveBanner(
     };
   }
   return null;
-}
-
-function pickNarrationText(
-  priority: 'bp' | 'hr' | 'sleep' | 'none',
-  hasAnomaly: boolean,
-): string {
-  // Sprint 12.5 replaces these with the real ambient-AI generator.
-  // Keep them voice-rule clean and Reassuring/Calm-concerned per priority.
-  if (hasAnomaly) {
-    return "We've noticed a pattern. Your numbers below tell the rest of the story.";
-  }
-  switch (priority) {
-    case 'bp':
-      return PLACEHOLDER_AI_NARRATION;
-    case 'hr':
-      return 'No reading yet today. Your heart and night so far are below.';
-    case 'sleep':
-      return "Last night's rest is in. A reading will round out the picture.";
-    case 'none':
-      return "It's been quiet. Take a reading whenever you're ready.";
-  }
 }
 
 function buildHeader(displayName: string | undefined): {
