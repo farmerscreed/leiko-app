@@ -101,7 +101,8 @@ export type AnalyticsEvent =
   // Sprint 12.5 — ambient AI narrations. tier identifies the path
   // ('A' = local template, 'B' = Tier-B LLM via Edge Function).
   // Body NEVER appears in props per CLAUDE.md / D14 §13.
-  | { name: 'daily_narration_generated'; props?: { tier: string; template_id: string } };
+  | { name: 'daily_narration_generated'; props?: { tier: string; template_id: string } }
+  | { name: 'reading_paragraph_generated'; props?: { tier: string; template_id: string } };
 
 type EventName = AnalyticsEvent['name'];
 

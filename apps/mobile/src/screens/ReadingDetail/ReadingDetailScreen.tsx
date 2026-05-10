@@ -22,6 +22,7 @@ import { InlineExplainer } from '../../components/InlineExplainer';
 import { useTheme } from '../../theme';
 import { useReadings } from '../../state/readings';
 import { useAuth } from '../../state/auth';
+import { useReadingParagraph } from '../../hooks/useReadingParagraph';
 import {
   tierChipText,
   tierPillVariant,
@@ -96,6 +97,11 @@ export function ReadingDetailScreen({ navigation }: Props) {
   const isSelf = accountType === 'self_buyer';
   const tier = reading.classification.tier;
   const [explainerOpen, setExplainerOpen] = useState(false);
+
+  // Sprint 12.5 session 2 — Tier-A contextual paragraph. Renders
+  // synchronously above the chart as the screen's editorial layer.
+  // Tier-B novel-pattern path lands later via an Edge Function.
+  const paragraph = useReadingParagraph(reading);
 
   return (
     <SafeAreaView
@@ -192,6 +198,29 @@ export function ReadingDetailScreen({ navigation }: Props) {
         <View style={{ alignItems: 'center', marginBottom: theme.spacing.s }}>
           <Pill variant={tierPillVariant(tier)}>{tierChipText(tier)}</Pill>
         </View>
+
+        {paragraph ? (
+          <View
+            testID="reading-detail-paragraph"
+            style={{
+              marginTop: theme.spacing.l,
+              marginBottom: theme.spacing.l,
+              paddingHorizontal: theme.spacing.s,
+            }}
+          >
+            <Text
+              style={{
+                color: theme.colors.text.primary,
+                fontSize: bodyM.size,
+                lineHeight: bodyM.lineHeight,
+                fontFamily: bodyM.family,
+                textAlign: 'center',
+              }}
+            >
+              {paragraph.text}
+            </Text>
+          </View>
+        ) : null}
 
         <Pressable
           accessibilityRole="button"
