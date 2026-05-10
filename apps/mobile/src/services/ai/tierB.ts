@@ -189,69 +189,28 @@ export async function askTierB(
   }
 
   logger.track('ai_tier_b_started', { length: trimmed.length });
-
-  // Bypass supabase-js's functions.invoke — live phone testing (Sprint
-  // 12 follow-up) showed identical /sync requests landing on the Edge
-  // Function while ai-tier-b never arrived. Raw fetch over the same
-  // adb-reverse path lands consistently. We still pull the access
-  // token from the supabase auth session so the Edge Function's
-  // userClient.auth.getUser() validates the same JWT it would have
-  // had via invoke.
-  const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !anonKey) {
-    logger.track('ai_tier_b_failed', { reason: 'env_missing' });
-    return { status: 'error', error: 'env_missing' };
-  }
-
-  let accessToken: string | null = null;
-  try {
-    const session = await Promise.race([
-      client.auth.getSession(),
-      timeoutAfter(2_000),
-    ]);
-    accessToken = session.data.session?.access_token ?? null;
-  } catch {
-    logger.track('ai_tier_b_failed', { reason: 'session_timeout' });
-    return { status: 'error', error: 'session_timeout' };
-  }
-  if (!accessToken) {
-    logger.track('ai_tier_b_failed', { reason: 'no_session' });
-    return { status: 'error', error: 'no_session' };
-  }
-
   let raw: unknown;
+  let invokeErr: { message: string } | null = null;
   try {
     const res = await Promise.race([
-      fetch(`${supabaseUrl}/functions/v1/ai-tier-b`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-          apikey: anonKey,
-        },
-        body: JSON.stringify({ question: trimmed }),
-      }),
+      client.functions.invoke('ai-tier-b', { body: { question: trimmed } }),
       timeoutAfter(ASK_TIER_B_CLIENT_TIMEOUT_MS),
     ]);
-    if (!res.ok && res.status !== 200) {
-      // Non-2xx body still parses as JSON for our error responses
-      // (Edge Function returns { status: 'error', error: ... }).
-      try {
-        raw = await res.json();
-      } catch {
-        logger.track('ai_tier_b_failed', { reason: `http_${res.status}` });
-        return { status: 'error', error: `http_${res.status}` };
-      }
-    } else {
-      raw = await res.json();
-    }
+    raw = res.data;
+    invokeErr = res.error
+      ? { message: res.error.message ?? 'unknown' }
+      : null;
   } catch (err) {
     const reason = (err as Error).message === 'client_timeout'
       ? 'client_timeout'
       : 'network_error';
     logger.track('ai_tier_b_failed', { reason });
     return { status: 'error', error: reason };
+  }
+
+  if (invokeErr) {
+    logger.track('ai_tier_b_failed', { reason: invokeErr.message });
+    return { status: 'error', error: 'invoke_failed', detail: invokeErr.message };
   }
 
   const parsed = parseResponse(raw);
