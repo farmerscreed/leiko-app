@@ -62,8 +62,8 @@ describe('buildTheme — colorMode dimension (D12 §2.4)', () => {
     expect(buildTheme('dark', 'caregiver', false).colors.brand.primary).toBe('#E8A063');
   });
 
-  it('light mode resolves brand.primary to amber-500 (same accent both modes)', () => {
-    expect(buildTheme('light', 'caregiver', false).colors.brand.primary).toBe('#E8A063');
+  it('light mode resolves brand.primary to the darker amber-500 (Sprint 14.5 contrast fix)', () => {
+    expect(buildTheme('light', 'caregiver', false).colors.brand.primary).toBe('#B4742E');
   });
 
   it('dark mode resolves surface.base to midnight-900', () => {

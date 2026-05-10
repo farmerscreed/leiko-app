@@ -75,7 +75,16 @@ export const paletteDark = {
 export const paletteLight = {
   linen: { 50: '#FBF9F5', 100: '#F5F2EC', 200: '#FFFFFF' },
   ink: { 900: '#0F121C', 700: '#2A3040', 500: '#5A6478', 300: '#8C95A8' },
-  amber: { 500: '#E8A063' },
+  // Sprint 14.5 task 6 — light-mode amber darkened from #E8A063 to
+  // #B4742E to meet D12 §2.6 minimum 3:1 contrast on linen surfaces.
+  // The previous shade landed at 2.0–2.2:1 (memory:
+  // d12_light_mode_amber_contrast); the dark-palette amber.600
+  // (#C5824A) computes to 2.996:1 — just under threshold — so this
+  // step goes one notch deeper for a comfortable 3.7:1. Premium-
+  // precise tone preserved; not so dark it loses warmth. Designer
+  // review pending before launch — single hex to edit if the
+  // founder/designer wants a different shade.
+  amber: { 500: '#B4742E' },
   coral: { 500: '#C95F44' },
   teal: { 500: '#3F8888' },
   violet: { 500: '#5A5887' },

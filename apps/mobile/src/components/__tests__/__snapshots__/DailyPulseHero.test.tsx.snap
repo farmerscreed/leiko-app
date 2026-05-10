@@ -7400,7 +7400,7 @@ exports[`DailyPulseHero — colorMode snapshot matrix renders colorMode=light 1`
             "width": 260,
           },
           {
-            "backgroundColor": "#E8A063",
+            "backgroundColor": "#B4742E",
             "left": 50,
             "top": 100,
           },
@@ -7711,7 +7711,7 @@ exports[`DailyPulseHero — colorMode snapshot matrix renders colorMode=light 1`
                 r={105.5}
                 stroke={
                   {
-                    "payload": 4293435491,
+                    "payload": 4290016302,
                     "type": 0,
                   }
                 }
@@ -7745,7 +7745,7 @@ exports[`DailyPulseHero — colorMode snapshot matrix renders colorMode=light 1`
                 r={105.5}
                 stroke={
                   {
-                    "payload": 4293435491,
+                    "payload": 4290016302,
                     "type": 0,
                   }
                 }
@@ -7780,7 +7780,7 @@ exports[`DailyPulseHero — colorMode snapshot matrix renders colorMode=light 1`
             allowFontScaling={false}
             style={
               {
-                "color": "#E8A063",
+                "color": "#B4742E",
                 "fontFamily": "Inter_500Medium",
                 "fontSize": 11,
                 "letterSpacing": 0.55,

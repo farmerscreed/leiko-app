@@ -37,7 +37,9 @@ describe('color — raw palette light (D12 §2.3)', () => {
   it('matches D12 §2.3 hex values exactly', () => {
     expect(paletteLight.linen[50]).toBe('#FBF9F5');
     expect(paletteLight.ink[900]).toBe('#0F121C');
-    expect(paletteLight.amber[500]).toBe('#E8A063');
+    // Sprint 14.5 task 6 — light-mode amber darkened to meet D12
+    // §2.6 contrast minimum on linen. Dark-mode amber stays.
+    expect(paletteLight.amber[500]).toBe('#B4742E');
     expect(paletteLight.coral[500]).toBe('#C95F44');
     expect(paletteLight.crimson[700]).toBe('#8C2D2D');
   });
@@ -48,8 +50,8 @@ describe('color — semantic resolver (D12 §2.4)', () => {
     expect(getSemanticColors('dark').brand.primary).toBe('#E8A063');
   });
 
-  it('light mode resolves brand.primary to amber-500 (same accent both modes)', () => {
-    expect(getSemanticColors('light').brand.primary).toBe('#E8A063');
+  it('light mode resolves brand.primary to the darker amber-500 (Sprint 14.5 contrast fix)', () => {
+    expect(getSemanticColors('light').brand.primary).toBe('#B4742E');
   });
 
   it('dark mode reserves urgent for crimson-700 only', () => {
@@ -213,5 +215,43 @@ describe('icon (D12 §10)', () => {
     expect(phosphorIconName.aiNarration).toBe('SparkleIcon');
     expect(phosphorIconName.anomalyConfirmedUrgent).toBe('WarningCircleIcon');
     expect(phosphorIconName.chevronTrailing).toBe('CaretRightIcon');
+  });
+});
+
+// Sprint 14.5 task 6 — D12 §2.6 minimum-contrast assertion. The
+// previous light-mode amber (#E8A063) landed at 2.0–2.2:1 on linen
+// surfaces; the contrast lint here pins the new shade above 3:1.
+describe('color — light-mode contrast (D12 §2.6)', () => {
+  // Standard sRGB→linear→relative-luminance per WCAG.
+  function relativeLuminance(hex: string): number {
+    const v = hex.replace('#', '');
+    const r = parseInt(v.slice(0, 2), 16) / 255;
+    const g = parseInt(v.slice(2, 4), 16) / 255;
+    const b = parseInt(v.slice(4, 6), 16) / 255;
+    const lin = (c: number) =>
+      c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+  }
+  function contrastRatio(a: string, b: string): number {
+    const la = relativeLuminance(a);
+    const lb = relativeLuminance(b);
+    const [hi, lo] = la > lb ? [la, lb] : [lb, la];
+    return (hi + 0.05) / (lo + 0.05);
+  }
+
+  it('brand.primary against linen-50 meets D12 §2.6 minimum 3:1', () => {
+    const ratio = contrastRatio(
+      semanticColorsLight.brand.primary,
+      paletteLight.linen[50],
+    );
+    expect(ratio).toBeGreaterThanOrEqual(3);
+  });
+
+  it('brand.primary against linen-100 meets D12 §2.6 minimum 3:1', () => {
+    const ratio = contrastRatio(
+      semanticColorsLight.brand.primary,
+      paletteLight.linen[100],
+    );
+    expect(ratio).toBeGreaterThanOrEqual(3);
   });
 });

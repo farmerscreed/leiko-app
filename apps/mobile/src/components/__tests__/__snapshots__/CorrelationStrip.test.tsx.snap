@@ -245,7 +245,7 @@ exports[`CorrelationStrip — colorMode snapshot matrix renders range=7d colorMo
         d="M 4,92 L 4,31.07692307692308 L 56,58.15384615384616 L 108,78.46153846153847 L 160,4 L 212,44.61538461538462 L 264,92 L 316,71.69230769230768 L 316,92 Z"
         fill={
           {
-            "payload": 4293435491,
+            "payload": 4290016302,
             "type": 0,
           }
         }
@@ -271,7 +271,7 @@ exports[`CorrelationStrip — colorMode snapshot matrix renders range=7d colorMo
         }
         stroke={
           {
-            "payload": 4293435491,
+            "payload": 4290016302,
             "type": 0,
           }
         }
