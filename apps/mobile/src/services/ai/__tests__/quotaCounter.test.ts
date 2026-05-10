@@ -47,9 +47,12 @@ describe('incrementLocal', () => {
 
 describe('reconcileFromAuditLog', () => {
   function buildClient(count: number) {
+    // Sprint 12.5: chain switched from .eq('action', ...) to
+    // .in('action', [...]) so the counter sweeps both ai.user_question
+    // AND ai.daily_narration into the monthly Tier-B quota.
     const gte = jest.fn().mockResolvedValue({ count, error: null });
-    const eq2 = jest.fn().mockReturnValue({ gte });
-    const eq1 = jest.fn().mockReturnValue({ eq: eq2 });
+    const inEq = jest.fn().mockReturnValue({ gte });
+    const eq1 = jest.fn().mockReturnValue({ in: inEq });
     const select = jest.fn().mockReturnValue({ eq: eq1 });
     return { from: jest.fn().mockReturnValue({ select }) };
   }

@@ -126,7 +126,11 @@ export async function reconcileFromAuditLog(
     // Ask for an exact head-only count — we don't need the rows, just the cardinality.
     .select('id', { count: 'exact', head: true })
     .eq('actor_user_id', userId)
-    .eq('action', 'ai.user_question')
+    // D14 §14.1: BOTH user_question (Sprint 12) AND daily_narration
+    // (Sprint 12.5) count against the monthly Tier-B quota. Tier-C
+    // surfaces (weekly_summary / monthly_baseline / doctor_prep) are
+    // auto-generated and don't count against the user-asked quota.
+    .in('action', ['ai.user_question', 'ai.daily_narration'])
     .gte('occurred_at', since);
   if (error) throw error;
   const fresh = count ?? 0;
