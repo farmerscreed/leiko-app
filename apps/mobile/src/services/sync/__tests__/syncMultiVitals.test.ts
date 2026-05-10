@@ -36,6 +36,16 @@ jest.mock('../../ble/commands/readSpO2History', () => ({
 jest.mock('../../ble/commands/readDayInfo', () => ({
   readDayInfo: (...args: unknown[]) => mockReadDayInfo(...args),
 }));
+// Sprint 14.5 task 5 — applyDeviceConfig is called inside
+// syncMultiVitals before the parallel pull. Default mock no-ops so
+// existing tests don't have to set up vitalSetup state.
+const mockApplyDeviceConfig: jest.Mock = jest.fn().mockResolvedValue({
+  ran: false,
+  steps: [],
+});
+jest.mock('../applyDeviceConfig', () => ({
+  applyDeviceConfig: (...args: unknown[]) => mockApplyDeviceConfig(...args),
+}));
 jest.mock('../postMultiVitals', () => ({
   postMultiVitals: (payload: unknown) => mockPostMultiVitals(payload),
   isPayloadEmpty: jest.requireActual('../postMultiVitals').isPayloadEmpty,
@@ -551,5 +561,48 @@ describe('computeBackfillDayList', () => {
       '2025-01-20',
       '2025-01-21',
     ]);
+  });
+});
+
+// Sprint 14.5 task 5 — applyDeviceConfig is the dirty-tracked
+// writer that flushes Settings → watch (auto-HR / auto-SpO2 / user
+// params / goals) on each sync. Closes the Sprint 7.5 stub.
+describe('syncMultiVitals — applyDeviceConfig wiring (Sprint 14.5)', () => {
+  beforeEach(() => {
+    mockReadHRHistory.mockResolvedValue([]);
+    mockReadSpO2History.mockResolvedValue([]);
+    mockReadDayInfo.mockResolvedValue({ sleep: null, activity: null, calories: null });
+    mockPostMultiVitals.mockReset();
+    mockApplyDeviceConfig.mockReset();
+    mockApplyDeviceConfig.mockResolvedValue({ ran: false, steps: [] });
+  });
+
+  it('calls applyDeviceConfig before the parallel pull', async () => {
+    await syncMultiVitals(fakeDevice, 'AA:BB:CC:DD:EE:FF', { bleId: 'AA:BB:CC:DD:EE:FF', macSuffix: '0fee', name: 'U16', model: 'U16H' });
+    expect(mockApplyDeviceConfig).toHaveBeenCalledTimes(1);
+    expect(mockApplyDeviceConfig).toHaveBeenCalledWith(fakeDevice);
+    // The pull steps still ran — config flush isn't a hard gate.
+    expect(mockReadHRHistory).toHaveBeenCalled();
+    expect(mockReadSpO2History).toHaveBeenCalled();
+    expect(mockReadDayInfo).toHaveBeenCalled();
+  });
+
+  it('surfaces applyDeviceConfig.error in errors.deviceConfig but does not abort the pull', async () => {
+    mockApplyDeviceConfig.mockResolvedValue({
+      ran: true,
+      steps: ['autoHr'],
+      error: 'autoSpo2 failed: ble timeout',
+    });
+    const result = await syncMultiVitals(fakeDevice, 'AA:BB:CC:DD:EE:FF', { bleId: 'AA:BB:CC:DD:EE:FF', macSuffix: '0fee', name: 'U16', model: 'U16H' });
+    expect(result.errors.deviceConfig).toBe('autoSpo2 failed: ble timeout');
+    expect(mockReadHRHistory).toHaveBeenCalled();
+    expect(mockReadSpO2History).toHaveBeenCalled();
+  });
+
+  it('an applyDeviceConfig throw is caught and recorded — pull still runs', async () => {
+    mockApplyDeviceConfig.mockRejectedValue(new Error('unexpected snapshot crash'));
+    const result = await syncMultiVitals(fakeDevice, 'AA:BB:CC:DD:EE:FF', { bleId: 'AA:BB:CC:DD:EE:FF', macSuffix: '0fee', name: 'U16', model: 'U16H' });
+    expect(result.errors.deviceConfig).toBe('unexpected snapshot crash');
+    expect(mockReadHRHistory).toHaveBeenCalled();
   });
 });

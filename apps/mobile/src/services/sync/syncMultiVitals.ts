@@ -68,6 +68,7 @@ import {
   watchTimestampToUtcSec,
 } from './syncBacklog';
 import { postMultiVitals, isPayloadEmpty } from './postMultiVitals';
+import { applyDeviceConfig } from './applyDeviceConfig';
 import { forwardMultiVitalsToPlatform } from '../health-platform/syncBridge';
 import { useHR } from '../../state/hr';
 import { useSpO2 } from '../../state/spo2';
@@ -458,8 +459,25 @@ export async function syncMultiVitals(
   const errors: Record<string, string> = {};
   const pulled = { hr: 0, spo2: 0, sleep: 0, activity: 0 };
 
-  // Steps 2-3 — dirty-tracked writers. Stubbed for Sprint 7.5: always
-  // returns false (no-op) until Settings UI lands.
+  // Steps 2-3 — dirty-tracked writers (D13 §3.3). Closes the Sprint
+  // 7.5 stub: applyDeviceConfig flushes vitalSetup + profile state to
+  // the watch (auto-HR / auto-SpO2 / user params / goals). It's a
+  // best-effort step — failures don't abort the data pull. The
+  // dirty-flag stays true on partial failure so the next sync retries.
+  try {
+    const cfg = await applyDeviceConfig(device);
+    if (cfg.error) {
+      // Already logged inside applyDeviceConfig; surface as a step
+      // error in the result so the caller sees it without it
+      // poisoning the per-vital error map.
+      errors.deviceConfig = cfg.error;
+    }
+  } catch (e) {
+    // Defensive: applyDeviceConfig is supposed to never throw, but if
+    // an unexpected error escapes (e.g. profile snapshot crash), log
+    // and continue.
+    errors.deviceConfig = e instanceof Error ? e.message : String(e);
+  }
 
   // Steps 5-8 — three branches in parallel. Per-vital error isolation
   // via Promise.allSettled. Sleep + activity share readDayInfo, so

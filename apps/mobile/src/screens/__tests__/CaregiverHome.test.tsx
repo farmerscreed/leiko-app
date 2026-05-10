@@ -454,14 +454,14 @@ describe('<CaregiverHome /> — seeded Learn card (Sprint 14.5 task 3)', () => {
       {
         id: 'fam-1',
         fullName: 'Marian Okeke',
-        accent: '#E8A063',
+        accentIndex: 1,
         initial: 'M',
         relation: 'Mom',
-        status: 'in-pattern',
+        status: 'clear',
+        bpLabel: '122/78',
         headline: 'In pattern',
         sentence: 'morning numbers steady',
         vitalStrip: { bp: '122/78', hr: '64', spo2: '97', sleep: '7.5h' },
-        footerLeftLabel: '7:42 am',
       },
     ];
     const useSeededLearnCard = jest.requireMock('../../hooks/useSeededLearnCard')
