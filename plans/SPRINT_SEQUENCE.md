@@ -74,8 +74,11 @@ Sprint 12.5 is the sprint that delivers on D11's *ambient pulse intelligence* cl
 |---|---|---|---|---|
 | 13 | **13** | Learn Surface A + B (Multi-Vital) | EDITED | `sprint-13-learn-a-b.md` |
 | 14 | **14** | Learn Surface C (Multi-Vital Seeding) | EDITED | `sprint-14-learn-c.md` |
+| 14.5 | **14.5** | Deferred Follow-ups (cleanup pass) | NEW | `sprint-14-5-deferred-followups.md` |
 | 15 | **15** | Push + Multi-Vital Anomaly Engine | REWRITTEN | `sprint-15-push-anomaly.md` |
 | 16 | **16** | Offline + Error States (Multi-Vital) | EDITED | `sprint-16-offline-error-states.md` |
+
+Sprint 14.5 is a deliberate cleanup pass inserted before Sprint 12.5 to close the orphan items that accumulated across sprints 7.5 / 9 / 12 / 14 (BLE writer stubs, pg_cron schedule, caregiver Learn-seed, error-mapping polish, amber token fix). Bundling them keeps the Sprint 12.5 → 17 critical path uncluttered.
 
 ---
 
