@@ -93,7 +93,11 @@ export type AnalyticsEvent =
   | { name: 'ai_tier_b_ok'; props?: { retries: number; layer1_hits: number; layer2_max_cosine: number } }
   | { name: 'ai_tier_b_defer'; props?: { trigger: string; reason: string } }
   | { name: 'ai_tier_b_quota_exceeded' }
-  | { name: 'ai_tier_b_failed'; props?: { reason: string } };
+  | { name: 'ai_tier_b_failed'; props?: { reason: string } }
+  // Sprint 14.5 — self-buyer family auto-provision (legacy backfill).
+  | { name: 'family_auto_provision_started' }
+  | { name: 'family_auto_provision_completed' }
+  | { name: 'family_auto_provision_failed'; props?: { reason: string } };
 
 type EventName = AnalyticsEvent['name'];
 

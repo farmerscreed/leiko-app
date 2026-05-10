@@ -44,6 +44,7 @@ import { SixthReadingPaywallHost } from '../../components/SixthReadingPaywallHos
 import { DailyPulseHero, type DailyPulseHeroVitals } from '../../components/DailyPulseHero';
 import { HomeLearnCard } from '../../components/HomeLearnCard';
 import { useSeededLearnCard } from '../../hooks/useSeededLearnCard';
+import { useEnsureSelfBuyerFamily } from '../../hooks/useEnsureSelfBuyerFamily';
 import { VitalTile } from '../../components/VitalTile';
 import {
   CorrelationStrip,
@@ -92,6 +93,12 @@ export function SelfBuyerHome() {
 
   // ----- Sprint 14: seeded Learn card slot ---------------------------
   const seededLearn = useSeededLearnCard();
+
+  // ----- Sprint 14.5: backfill family for legacy self-buyers ---------
+  // Idempotent — no-ops once a membership row exists. Fires only for
+  // accounts that predate Sprint 4 onboarding (rare in prod, common
+  // for dev test users).
+  useEnsureSelfBuyerFamily();
 
   // ----- Sprint 12 follow-up: Ask Leiko bottom sheet ----------------
   const [askLeikoVisible, setAskLeikoVisible] = useState(false);
