@@ -56,12 +56,27 @@ jest.mock('../../state/pairing', () => ({
   },
 }));
 
-jest.mock('../../state/readings', () => ({
-  useReadings: (selector?: (s: unknown) => unknown) => {
-    const state = { latest: () => null, pending: [], recent: [] };
-    return selector ? selector(state) : state;
-  },
+// Sprint 14.5 task 3 — Caregiver Home renders the home-seeded
+// Learn card via this hook. Default the mock to "no card available"
+// so the existing 20+ tests don't depend on Learn-corpus state;
+// the dedicated test below flips it to assert the slot renders.
+jest.mock('../../hooks/useSeededLearnCard', () => ({
+  useSeededLearnCard: jest.fn(() => ({
+    article: null,
+    onArticleOpen: jest.fn(),
+    onDismiss: jest.fn(),
+  })),
 }));
+
+jest.mock('../../state/readings', () => {
+  const state = { latest: () => null, pending: [], recent: [] };
+  const useReadings = (selector?: (s: unknown) => unknown) =>
+    selector ? selector(state) : state;
+  // Sprint 14.5 task 3 — useSeededLearnCard reads useReadings.getState()
+  // for the priority-cascade decision. Mirror the zustand surface.
+  useReadings.getState = () => state;
+  return { useReadings };
+});
 
 // Sprint 10a — the SixthReadingPaywallHost mounted on CaregiverHome
 // pulls usePlusEntitlement (TanStack Query against families). These
@@ -418,6 +433,69 @@ describe('<CaregiverHome /> — Ask Leiko (Sprint 12 follow-up)', () => {
   it('renders the floating Ask Leiko button', () => {
     render(withProviders(<CaregiverHome />));
     expect(screen.getByTestId('caregiver-home-ask-leiko-fab')).toBeTruthy();
+  });
+});
+
+describe('<CaregiverHome /> — seeded Learn card (Sprint 14.5 task 3)', () => {
+  // The card sits inside the bird's-eye view, which only renders
+  // when merged.length > 0 (i.e. the caregiver has at least one
+  // person on the constellation). Set up minimal populated state
+  // here so the bird's-eye block — and thus the Learn slot — paints.
+  beforeEach(() => {
+    mockHookResult.parents = [
+      parent({
+        familyId: 'fam-1',
+        parentDisplayName: 'Marian Okeke',
+        parentRelationship: 'Mom',
+        latestReading: reading({ id: 'r-mom', systolic: 122, diastolic: 78 }),
+      }),
+    ];
+    mockHookResult.people = [
+      {
+        id: 'fam-1',
+        fullName: 'Marian Okeke',
+        accent: '#E8A063',
+        initial: 'M',
+        relation: 'Mom',
+        status: 'in-pattern',
+        headline: 'In pattern',
+        sentence: 'morning numbers steady',
+        vitalStrip: { bp: '122/78', hr: '64', spo2: '97', sleep: '7.5h' },
+        footerLeftLabel: '7:42 am',
+      },
+    ];
+    const useSeededLearnCard = jest.requireMock('../../hooks/useSeededLearnCard')
+      .useSeededLearnCard as jest.Mock;
+    useSeededLearnCard.mockReturnValue({
+      article: {
+        id: 'numbers-001',
+        frontmatter: {
+          id: 'numbers-001',
+          title: 'What is blood pressure?',
+          summary: 'A short answer.',
+          audience: ['caregiver'],
+          category: 'bp',
+          read_time_min: 1,
+        },
+        // HomeLearnCard's extractExcerpt iterates blocks; provide a
+        // minimal AST so the iterator doesn't throw.
+        blocks: [
+          { kind: 'paragraph', children: [{ kind: 'text', value: 'A short answer.' }] },
+        ],
+      },
+      onArticleOpen: jest.fn(),
+      onDismiss: jest.fn(),
+    });
+  });
+  afterEach(() => {
+    const useSeededLearnCard = jest.requireMock('../../hooks/useSeededLearnCard')
+      .useSeededLearnCard as jest.Mock;
+    useSeededLearnCard.mockReturnValue({ article: null, onArticleOpen: jest.fn(), onDismiss: jest.fn() });
+  });
+
+  it('renders the home-seeded Learn card when the hook returns one', () => {
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-learn-card')).toBeTruthy();
   });
 });
 

@@ -43,6 +43,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
 import { AskLeikoSheet } from '../../components/AskLeikoSheet';
+import { HomeLearnCard } from '../../components/HomeLearnCard';
+import { useSeededLearnCard } from '../../hooks/useSeededLearnCard';
 import { Button } from '../../components/Button';
 import { HealthPlatformPermissionPrompt } from '../../components/HealthPlatformPermissionPrompt';
 import { SixthReadingPaywallHost } from '../../components/SixthReadingPaywallHost';
@@ -121,6 +123,11 @@ export function CaregiverHome() {
 
   // Sprint 12 follow-up — Ask Leiko bottom sheet visibility.
   const [askLeikoVisible, setAskLeikoVisible] = useState(false);
+
+  // Sprint 14.5 task 3 — home-seeded "Worth a read" Learn card. Same
+  // priority cascade as Self-Buyer Home; renders below the
+  // constellation legend (bird's-eye view).
+  const seededLearn = useSeededLearnCard();
 
   const handlePersonPress = useCallback(
     (id: string) => {
@@ -304,6 +311,25 @@ export function CaregiverHome() {
                     testID="caregiver-home-legend"
                   />
                 </View>
+
+                {/* Sprint 14.5 task 3 — "Worth a read" home-seeded
+                    Learn card. Renders inside the bird's-eye scroll
+                    so it sits under the legend and never overlays
+                    the constellation. Same priority-cascade hook as
+                    Self-Buyer Home. */}
+                {seededLearn.article ? (
+                  <View style={{ marginTop: theme.spacing.xl }}>
+                    <HomeLearnCard
+                      article={seededLearn.article}
+                      onArticleOpen={(id) => {
+                        seededLearn.onArticleOpen(id);
+                        navigation.navigate('Article', { articleId: id });
+                      }}
+                      onDismiss={seededLearn.onDismiss}
+                      testID="caregiver-home-learn-card"
+                    />
+                  </View>
+                ) : null}
               </Animated.View>
             ) : null}
             {showCards ? (
