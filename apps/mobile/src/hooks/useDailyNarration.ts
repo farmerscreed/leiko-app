@@ -33,6 +33,16 @@ import {
 
 const FOUR_HOURS_SEC = 4 * 60 * 60;
 
+/**
+ * Bump this when narration LOGIC changes in a way that would make
+ * pre-existing cached rows wrong. Pre-bump rows read as a cache miss
+ * and regenerate. Live phone testing showed this matters: the
+ * sentence-leading capitalisation fix (commit 182753b) was correct
+ * in code but stale cache rows kept serving lowercase output for
+ * the rest of the 4h TTL.
+ */
+const CACHE_FORMAT_VERSION = 2;
+
 interface CachedNarration {
   text: string;
   templateId: string;
@@ -46,6 +56,8 @@ interface CachedNarration {
    * even after the watch syncs.
    */
   hadNullCentral?: boolean;
+  /** Format version. Missing or stale → treat as cache miss. */
+  formatVersion?: number;
 }
 
 function cacheKey(userId: string, date: string): string {
@@ -61,6 +73,7 @@ function readCache(key: string, nowSec: number): CachedNarration | null {
       return null;
     }
     if (nowSec - parsed.generatedAtSec > FOUR_HOURS_SEC) return null;
+    if (parsed.formatVersion !== CACHE_FORMAT_VERSION) return null;
     return parsed;
   } catch {
     return null;
@@ -162,6 +175,7 @@ export function useDailyNarration(
       tier: result.tier,
       generatedAtSec: nowSec,
       hadNullCentral: !hasAnyVital,
+      formatVersion: CACHE_FORMAT_VERSION,
     });
     logger.track('daily_narration_generated', {
       tier: result.tier,
