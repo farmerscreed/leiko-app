@@ -271,7 +271,11 @@ describe('syncBacklog — incremental sync', () => {
   });
 
   it('returns pulled=0 and leaves cursor unchanged when nothing new', async () => {
-    setLastSyncSec('AA:BB:CC:DD:E4:F2', 1737400000);
+    // Recent cursor (yesterday) — the watch genuinely has no new
+    // readings, but the cursor is fresh enough that Option C's
+    // stale-cursor-reset branch must NOT fire.
+    const recentCursor = Math.floor(Date.now() / 1000) - 86400;
+    setLastSyncSec('AA:BB:CC:DD:E4:F2', recentCursor);
     const device = new MockDevice({ id: 'AA:BB:CC:DD:E4:F2', name: null });
     const wrapper = new UrionDevice(device);
     await wrapper.startNotify();
@@ -283,7 +287,7 @@ describe('syncBacklog — incremental sync', () => {
     const result = await promise;
     expect(result.pulled).toBe(0);
     expect(result.latestTimestampSec).toBeNull();
-    expect(getLastSyncSec('AA:BB:CC:DD:E4:F2')).toBe(1737400000);
+    expect(getLastSyncSec('AA:BB:CC:DD:E4:F2')).toBe(recentCursor);
     await flushMicrotasks();
     expect(readingsCount()).toBe(0);
   });
@@ -341,5 +345,89 @@ describe('syncBacklog — stale-cursor recovery (Sprint 12.5.1)', () => {
     expect(result.pulled).toBe(1);
     // Cursor advanced normally, no recovery snap.
     expect(getLastSyncSec(dev)).toBe(1737300000);
+  });
+});
+
+describe('syncBacklog — Option C: long-stale cursor + empty watch response', () => {
+  // The 2026-05-11 Lagos trace: cursor at 1706519978 (~2 years old in
+  // raw watch seconds), watch returned terminator on every BP query
+  // (BP history register empty). Without auto-reset the user was
+  // stuck — Commit 2's recovery only fires when readings come back.
+  it('resets the cursor to 0 and re-pulls when the cursor is older than 6 months and the watch is empty', async () => {
+    const dev = 'AA:BB:CC:DD:E4:F2';
+    // Cursor set to a value ~2 years in the past. The freshness check
+    // compares cursor to current Unix sec; raw watch sec is close
+    // enough to real Unix sec for this purpose (the test's mock device
+    // doesn't model the China-firmware offset).
+    const longAgo = Math.floor(Date.now() / 1000) - 365 * 86400; // 1 year ago
+    setLastSyncSec(dev, longAgo);
+
+    const device = new MockDevice({ id: dev, name: null });
+    const wrapper = new UrionDevice(device);
+    await wrapper.startNotify();
+
+    const promise = syncBacklog(wrapper, dev, { skipSetTime: true });
+    await new Promise((r) => setImmediate(r));
+    // First query (with stale cursor) — watch returns terminator.
+    device.__pushNotify(bytesToBase64(term()));
+    // The recovery kicks in, retries with since=0. Watch returns 3
+    // readings the user didn't know they had access to.
+    await new Promise((r) => setImmediate(r));
+    device.__pushNotify(bytesToBase64(bpResp(1778500000, 128, 82, 70)));
+    device.__pushNotify(bytesToBase64(bpResp(1778510000, 124, 80, 72)));
+    device.__pushNotify(bytesToBase64(bpResp(1778520000, 126, 81, 74)));
+    device.__pushNotify(bytesToBase64(term()));
+
+    const result = await promise;
+    expect(result.pulled).toBe(3);
+    expect(result.latestTimestampSec).toBe(1778520000);
+    expect(getLastSyncSec(dev)).toBe(1778520000);
+    await flushMicrotasks();
+    expect(readingsCount()).toBe(3);
+  });
+
+  it('exits cleanly when the watch is genuinely empty (no infinite retry)', async () => {
+    // Same stale-cursor scenario, but the watch has zero BP history.
+    // The recovery branch resets the cursor + retries once, gets
+    // terminator again, returns pulled=0. No loop.
+    const dev = 'AA:BB:CC:DD:E4:F2';
+    const longAgo = Math.floor(Date.now() / 1000) - 365 * 86400;
+    setLastSyncSec(dev, longAgo);
+
+    const device = new MockDevice({ id: dev, name: null });
+    const wrapper = new UrionDevice(device);
+    await wrapper.startNotify();
+
+    const promise = syncBacklog(wrapper, dev, { skipSetTime: true });
+    await new Promise((r) => setImmediate(r));
+    device.__pushNotify(bytesToBase64(term()));
+    await new Promise((r) => setImmediate(r));
+    device.__pushNotify(bytesToBase64(term()));
+
+    const result = await promise;
+    expect(result.pulled).toBe(0);
+    expect(result.latestTimestampSec).toBeNull();
+    // Cursor was reset to 0 by the recovery branch.
+    expect(getLastSyncSec(dev)).toBe(0);
+  });
+
+  it('does NOT reset a recent cursor that just happens to be empty', async () => {
+    // Last sync was yesterday — watch genuinely has no new readings.
+    // Recovery must NOT trip; cursor stays put.
+    const dev = 'AA:BB:CC:DD:E4:F2';
+    const yesterday = Math.floor(Date.now() / 1000) - 86400;
+    setLastSyncSec(dev, yesterday);
+
+    const device = new MockDevice({ id: dev, name: null });
+    const wrapper = new UrionDevice(device);
+    await wrapper.startNotify();
+
+    const promise = syncBacklog(wrapper, dev, { skipSetTime: true });
+    await new Promise((r) => setImmediate(r));
+    device.__pushNotify(bytesToBase64(term()));
+
+    const result = await promise;
+    expect(result.pulled).toBe(0);
+    expect(getLastSyncSec(dev)).toBe(yesterday);
   });
 });

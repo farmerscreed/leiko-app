@@ -35,6 +35,17 @@ const BATCH_SIZE = 50;
 // Sprint 12.5.1 temporary — strip when the BLE active-sync fix lands.
 const BLE_TRACE = true;
 
+// Cursor-staleness threshold for the Option C recovery branch. If the
+// cursor is older than this AND the watch returns zero packets, we
+// suspect the cursor was set in a long-ago session against state the
+// watch no longer holds (clock change, ring-buffer eviction past the
+// boundary, firmware reset). Reset to 0 and re-pull — at worst the
+// next sync re-ingests one batch; at best we recover access to the
+// watch's current storage. 180 days is comfortably wider than any
+// realistic cuff cycle but tight enough that a normal user who synced
+// last month doesn't trip the reset.
+const CURSOR_STALENESS_THRESHOLD_SEC = 180 * 24 * 60 * 60;
+
 // Watch firmware timezone quirk — per docs/_reference/U16PRO_protocol_en.pdf
 // §4.5.5: the watch ALWAYS treats its wall clock as China-local
 // (UTC+8) when serialising reading timestamps to Unix-seconds,
@@ -206,14 +217,14 @@ export async function syncBacklog(
       // best-effort; clock will be wrong but reads still work
     }
   }
-  const lastSync = getLastSyncSec(deviceBleId);
+  let lastSync = getLastSyncSec(deviceBleId);
   if (BLE_TRACE) {
     console.log(
       `[ble-trace] syncBacklog enter deviceBleId=${deviceBleId} ` +
         `lastSync=${lastSync} (raw watch sec)`,
     );
   }
-  const readings = await readBPHistory(device, {
+  let readings = await readBPHistory(device, {
     sinceTimestampSec: lastSync,
     direction: 'oldest_first',
     count: BATCH_SIZE,
@@ -225,6 +236,46 @@ export async function syncBacklog(
         `packet(s); first.ts=${readings[0]?.timestampSec ?? 'n/a'} ` +
         `last.ts=${readings[readings.length - 1]?.timestampSec ?? 'n/a'}`,
     );
+  }
+  // Option C — auto-recover from a long-stale cursor when the watch
+  // also returns nothing. The Sprint 2 sibling branch below (Commit 2)
+  // only fires when readings come back AND every one is filtered out;
+  // this branch handles the case where the watch returns zero packets
+  // and the cursor is older than ~6 months. Resets cursor to 0 (= "no
+  // anchor, return latest COUNT" per U16PRO §4.5) and re-pulls in this
+  // same call so the user doesn't have to wait for another sync cycle.
+  // If the watch is genuinely empty (no BP history at all), the retry
+  // also returns zero and we exit normally — no infinite loop.
+  if (readings.length === 0 && lastSync > 0) {
+    const nowUnixSec = Math.floor(Date.now() / 1000);
+    const cursorAgeSec = nowUnixSec - lastSync;
+    if (cursorAgeSec > CURSOR_STALENESS_THRESHOLD_SEC) {
+      console.log(
+        `[sync-backlog] cursor ${lastSync} is ${Math.round(cursorAgeSec / 86400)}d old ` +
+          `+ watch returned 0 packets; resetting cursor → 0 and retrying`,
+      );
+      logger.track('ble_cursor_reset', {
+        deviceBleId,
+        previousCursor: lastSync,
+        newCursor: 0,
+        gapSeconds: cursorAgeSec,
+      });
+      setLastSyncSec(deviceBleId, 0);
+      lastSync = 0;
+      readings = await readBPHistory(device, {
+        sinceTimestampSec: 0,
+        direction: 'oldest_first',
+        count: BATCH_SIZE,
+        timeoutMs: options.timeoutMs ?? 10_000,
+      });
+      if (BLE_TRACE) {
+        console.log(
+          `[ble-trace] syncBacklog post-reset readBPHistory returned ${readings.length} ` +
+            `packet(s); first.ts=${readings[0]?.timestampSec ?? 'n/a'} ` +
+            `last.ts=${readings[readings.length - 1]?.timestampSec ?? 'n/a'}`,
+        );
+      }
+    }
   }
   if (readings.length === 0) {
     return { pulled: 0, latestTimestampSec: null };
