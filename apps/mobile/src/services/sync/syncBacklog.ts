@@ -27,9 +27,13 @@ import { readBPHistory } from '../ble/commands/readBPHistory';
 import { setTime } from '../ble/commands/setTime';
 import type { UrionDevice } from '../ble/UrionDevice';
 import { useReadings } from '../../state/readings';
+import { logger } from '../analytics/logger';
 import type { VitalSyncCursor } from '../../types/vitals';
 
 const BATCH_SIZE = 50;
+
+// Sprint 12.5.1 temporary — strip when the BLE active-sync fix lands.
+const BLE_TRACE = true;
 
 // Watch firmware timezone quirk — per docs/_reference/U16PRO_protocol_en.pdf
 // §4.5.5: the watch ALWAYS treats its wall clock as China-local
@@ -203,23 +207,63 @@ export async function syncBacklog(
     }
   }
   const lastSync = getLastSyncSec(deviceBleId);
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncBacklog enter deviceBleId=${deviceBleId} ` +
+        `lastSync=${lastSync} (raw watch sec)`,
+    );
+  }
   const readings = await readBPHistory(device, {
     sinceTimestampSec: lastSync,
     direction: 'oldest_first',
     count: BATCH_SIZE,
     timeoutMs: options.timeoutMs ?? 10_000,
   });
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncBacklog readBPHistory returned ${readings.length} ` +
+        `packet(s); first.ts=${readings[0]?.timestampSec ?? 'n/a'} ` +
+        `last.ts=${readings[readings.length - 1]?.timestampSec ?? 'n/a'}`,
+    );
+  }
   if (readings.length === 0) {
     return { pulled: 0, latestTimestampSec: null };
   }
-  // De-dupe: when lastSync > 0, the watch may include the cursor
+  // Stale-cursor recovery — see the trace from 2026-05-11 Lagos
+  // session that motivated this. If every returned packet is ≤ the
+  // stored cursor, the cursor was set during a prior sync to a value
+  // the watch no longer has. Causes seen: firmware ring-buffer
+  // eviction of the prior-newest reading, watch clock change between
+  // sessions, manual delete on the watch face. The cursor is
+  // monotonic so we can't naturally recover; snap it back to one
+  // raw-second below the watch's current newest so this same sync
+  // surfaces every reading the watch still holds.
+  const maxRawTs = readings.reduce(
+    (acc, r) => (r.timestampSec > acc ? r.timestampSec : acc),
+    0,
+  );
+  let effectiveCursor = lastSync;
+  if (lastSync > 0 && maxRawTs < lastSync) {
+    effectiveCursor = maxRawTs - 1;
+    console.log(
+      `[sync-backlog] cursor stuck (lastSync=${lastSync} > watch newest=${maxRawTs}); resetting to ${effectiveCursor}`,
+    );
+    logger.track('ble_cursor_reset', {
+      deviceBleId,
+      previousCursor: lastSync,
+      newCursor: effectiveCursor,
+      gapSeconds: lastSync - maxRawTs,
+    });
+    setLastSyncSec(deviceBleId, effectiveCursor);
+  }
+  // De-dupe: when effectiveCursor > 0, the watch may include the cursor
   // record itself (boundary semantics vary by firmware). Filter out
   // anything ≤ cursor so we don't double-add a row that's already
   // in the readings store.
-  const fresh = lastSync > 0
-    ? readings.filter((r) => r.timestampSec > lastSync)
+  const fresh = effectiveCursor > 0
+    ? readings.filter((r) => r.timestampSec > effectiveCursor)
     : readings;
-  let newest = lastSync;
+  let newest = effectiveCursor;
   const addPending = useReadings.getState().addPendingReading;
   for (const r of fresh) {
     addPending({
@@ -234,7 +278,14 @@ export async function syncBacklog(
     // sinceTimestampSec request matches the watch's storage format.
     if (r.timestampSec > newest) newest = r.timestampSec;
   }
-  if (newest > lastSync) setLastSyncSec(deviceBleId, newest);
+  if (newest > effectiveCursor) setLastSyncSec(deviceBleId, newest);
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncBacklog exit pulled=${fresh.length} ` +
+        `(filtered from ${readings.length}); cursor ${lastSync} → ${newest}` +
+        (effectiveCursor !== lastSync ? ` (recovered via ${effectiveCursor})` : ''),
+    );
+  }
   // Per-row addPendingReading already emits reading_persisted with
   // the correct tier; no batch-summary event needed (the count is
   // derivable from the row events).

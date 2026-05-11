@@ -288,3 +288,58 @@ describe('syncBacklog — incremental sync', () => {
     expect(readingsCount()).toBe(0);
   });
 });
+
+describe('syncBacklog — stale-cursor recovery (Sprint 12.5.1)', () => {
+  // Repro of the 2026-05-11 Lagos trace: cursor at 1778237863, watch's
+  // newest returned record at 1778237706, 157s gap. Every packet ≤
+  // cursor → silently dropped. Fix: detect-and-recover.
+  it('resets the cursor when the watch returned only readings ≤ lastSync', async () => {
+    const dev = 'AA:BB:CC:DD:E4:F2';
+    setLastSyncSec(dev, 1778237863);
+    const device = new MockDevice({ id: dev, name: 'Leiko Watch' });
+    const wrapper = new UrionDevice(device);
+    await wrapper.startNotify();
+
+    const promise = syncBacklog(wrapper, dev, { skipSetTime: true });
+    await new Promise((r) => setImmediate(r));
+    // Watch's newest = 1778237706 (157s before the cursor); plus an
+    // older record. Cursor is jammed.
+    device.__pushNotify(bytesToBase64(bpResp(1778237706, 128, 82, 70)));
+    device.__pushNotify(bytesToBase64(bpResp(1777375048, 122, 79, 65)));
+    device.__pushNotify(bytesToBase64(term()));
+
+    const result = await promise;
+    // Recovery: cursor snaps to (watch_newest - 1), so this run
+    // surfaces the watch's current newest BP. The older record was
+    // already ingested in a prior sync (that's how the cursor got
+    // ahead in the first place); it stays filtered out.
+    expect(result.pulled).toBe(1);
+    expect(result.latestTimestampSec).toBe(1778237706);
+    // Cursor lands on the newest record's raw_ts.
+    expect(getLastSyncSec(dev)).toBe(1778237706);
+    await flushMicrotasks();
+    expect(readingsCount()).toBe(1);
+  });
+
+  it('does not reset when the cursor is correctly positioned ahead of stale records', async () => {
+    // Cursor sits between the firmware-echoed cursor record and a real
+    // newer reading. This is the normal incremental-sync case and must
+    // not trip the recovery branch.
+    const dev = 'AA:BB:CC:DD:E4:F2';
+    setLastSyncSec(dev, 1737200000);
+    const device = new MockDevice({ id: dev, name: null });
+    const wrapper = new UrionDevice(device);
+    await wrapper.startNotify();
+
+    const promise = syncBacklog(wrapper, dev, { skipSetTime: true });
+    await new Promise((r) => setImmediate(r));
+    device.__pushNotify(bytesToBase64(bpResp(1737200000, 138, 91, 103)));
+    device.__pushNotify(bytesToBase64(bpResp(1737300000, 122, 78, 72)));
+    device.__pushNotify(bytesToBase64(term()));
+
+    const result = await promise;
+    expect(result.pulled).toBe(1);
+    // Cursor advanced normally, no recovery snap.
+    expect(getLastSyncSec(dev)).toBe(1737300000);
+  });
+});

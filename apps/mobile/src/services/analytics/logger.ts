@@ -41,6 +41,10 @@ export type AnalyticsEvent =
   // backlog. Distinct from `watch` to measure how often this path fires.
   | { name: 'take_reading_received'; props?: { source: 'watch' | 'manual' | 'watch_post_disconnect' } }
   | { name: 'take_reading_failed'; props?: { reason: string } }
+  // Sprint 12.5.1 — stale BP cursor recovery in syncBacklog. Fired when
+  // the watch's newest stored BP is older than our cursor (firmware
+  // ring-buffer eviction, watch clock change, manual delete on watch).
+  | { name: 'ble_cursor_reset'; props?: { deviceBleId: string; previousCursor: number; newCursor: number; gapSeconds: number } }
   // Sprint 7 — sync orchestrator. Counts + categories only; the reading
   // values themselves never appear in events (CLAUDE.md data rule).
   | { name: 'sync_started'; props?: { trigger: 'cold_start' | 'app_foreground' | 'bt_ready' | 'manual_force' | 'live_notify' | 'background' } }
