@@ -293,11 +293,15 @@ describe('syncBacklog — incremental sync', () => {
   });
 });
 
-describe('syncBacklog — stale-cursor recovery (Sprint 12.5.1)', () => {
-  // Repro of the 2026-05-11 Lagos trace: cursor at 1778237863, watch's
-  // newest returned record at 1778237706, 157s gap. Every packet ≤
-  // cursor → silently dropped. Fix: detect-and-recover.
-  it('resets the cursor when the watch returned only readings ≤ lastSync', async () => {
+describe('syncBacklog — DIR=1 protocol semantics (post Sprint 12.5.1)', () => {
+  // Per U16PRO_protocol_en.pdf §4.5 + 2026-05-12 trace: DIR=1 returns
+  // records OLDER than TS, walking from the watch's latest backward.
+  // When the cursor matches or exceeds the watch's stored max, the
+  // watch responds with records older than the cursor — those are
+  // already-ingested rows (per our local store invariant). The right
+  // behaviour is to filter them out and report pulled=0, NOT to "snap
+  // the cursor back" (which created the infinite walk-backward bug).
+  it('reports pulled=0 when every returned record is ≤ cursor (already-ingested)', async () => {
     const dev = 'AA:BB:CC:DD:E4:F2';
     setLastSyncSec(dev, 1778237863);
     const device = new MockDevice({ id: dev, name: 'Leiko Watch' });
@@ -306,29 +310,24 @@ describe('syncBacklog — stale-cursor recovery (Sprint 12.5.1)', () => {
 
     const promise = syncBacklog(wrapper, dev, { skipSetTime: true });
     await new Promise((r) => setImmediate(r));
-    // Watch's newest = 1778237706 (157s before the cursor); plus an
-    // older record. Cursor is jammed.
+    // Watch returns records strictly older than our cursor — normal
+    // DIR=1 behaviour, not a "stuck cursor".
     device.__pushNotify(bytesToBase64(bpResp(1778237706, 128, 82, 70)));
     device.__pushNotify(bytesToBase64(bpResp(1777375048, 122, 79, 65)));
     device.__pushNotify(bytesToBase64(term()));
 
     const result = await promise;
-    // Recovery: cursor snaps to (watch_newest - 1), so this run
-    // surfaces the watch's current newest BP. The older record was
-    // already ingested in a prior sync (that's how the cursor got
-    // ahead in the first place); it stays filtered out.
-    expect(result.pulled).toBe(1);
-    expect(result.latestTimestampSec).toBe(1778237706);
-    // Cursor lands on the newest record's raw_ts.
-    expect(getLastSyncSec(dev)).toBe(1778237706);
+    expect(result.pulled).toBe(0);
+    // Cursor STAYS PUT — must not walk backward.
+    expect(getLastSyncSec(dev)).toBe(1778237863);
     await flushMicrotasks();
-    expect(readingsCount()).toBe(1);
+    expect(readingsCount()).toBe(0);
   });
 
-  it('does not reset when the cursor is correctly positioned ahead of stale records', async () => {
-    // Cursor sits between the firmware-echoed cursor record and a real
-    // newer reading. This is the normal incremental-sync case and must
-    // not trip the recovery branch.
+  it('still ingests genuinely-new readings when cursor lags behind', async () => {
+    // Normal incremental sync — cursor < watch's latest; the watch
+    // returns records between cursor and latest. Filter passes only
+    // those strictly newer than cursor.
     const dev = 'AA:BB:CC:DD:E4:F2';
     setLastSyncSec(dev, 1737200000);
     const device = new MockDevice({ id: dev, name: null });
@@ -337,13 +336,13 @@ describe('syncBacklog — stale-cursor recovery (Sprint 12.5.1)', () => {
 
     const promise = syncBacklog(wrapper, dev, { skipSetTime: true });
     await new Promise((r) => setImmediate(r));
+    // Cursor-boundary echo + a genuinely-newer reading.
     device.__pushNotify(bytesToBase64(bpResp(1737200000, 138, 91, 103)));
     device.__pushNotify(bytesToBase64(bpResp(1737300000, 122, 78, 72)));
     device.__pushNotify(bytesToBase64(term()));
 
     const result = await promise;
     expect(result.pulled).toBe(1);
-    // Cursor advanced normally, no recovery snap.
     expect(getLastSyncSec(dev)).toBe(1737300000);
   });
 });

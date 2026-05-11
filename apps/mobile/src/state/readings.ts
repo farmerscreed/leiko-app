@@ -100,6 +100,38 @@ function persist(state: { pending: LocalReading[]; recent: LocalReading[] }) {
   mmkv.set(STORAGE_KEYS.recentReadings, JSON.stringify(state.recent));
 }
 
+/** Identity tuple for a reading. Two rows with the same source + device +
+ *  measured-at second are the same physical reading regardless of localId.
+ *  Manual entries are deduped on the same triple (deviceBleId is null). */
+function readingKey(r: LocalReading): string {
+  return `${r.source}|${r.deviceBleId ?? ''}|${r.measuredAtSec}`;
+}
+
+/** Walk pending+recent in order; keep the FIRST occurrence of each
+ *  readingKey. Recent is canonical for already-synced rows, so we walk
+ *  it first. */
+export function dedupeReadings(
+  pending: LocalReading[],
+  recent: LocalReading[],
+): { pending: LocalReading[]; recent: LocalReading[] } {
+  const seen = new Set<string>();
+  const dedupedRecent: LocalReading[] = [];
+  for (const r of recent) {
+    const k = readingKey(r);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    dedupedRecent.push(r);
+  }
+  const dedupedPending: LocalReading[] = [];
+  for (const r of pending) {
+    const k = readingKey(r);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    dedupedPending.push(r);
+  }
+  return { pending: dedupedPending, recent: dedupedRecent };
+}
+
 export const useReadings = create<ReadingsState>((set, get) => ({
   pending: [],
   recent: [],
@@ -109,10 +141,34 @@ export const useReadings = create<ReadingsState>((set, get) => ({
   hydrate: () => {
     const pending = readJson<LocalReading[]>(STORAGE_KEYS.pendingReadings, []);
     const recent = readJson<LocalReading[]>(STORAGE_KEYS.recentReadings, []);
-    set({ pending, recent });
+    // One-shot dedupe — Sprint 12.5.1. Earlier syncBacklog runs (before
+    // we understood DIR=1's "records older than TS" semantics) could
+    // pile up duplicates from repeated cursor-walks-backward cycles.
+    // Identity = (source, deviceBleId, measuredAtSec). Keep the FIRST
+    // occurrence (it carries the original capturedAtMs / classification).
+    const { pending: dedupedPending, recent: dedupedRecent } = dedupeReadings(pending, recent);
+    if (
+      dedupedPending.length !== pending.length ||
+      dedupedRecent.length !== recent.length
+    ) {
+      persist({ pending: dedupedPending, recent: dedupedRecent });
+    }
+    set({ pending: dedupedPending, recent: dedupedRecent });
   },
 
   addPendingReading: (input) => {
+    // Sprint 12.5.1 — dedupe at ingest. The watch's readBPHistory
+    // happily returns the same record on multiple syncs (e.g. when
+    // the cursor walks across the same ts), and the prior Commit-2
+    // recovery branch made that worse. Identity = (source, device,
+    // measuredAtSec). If a row already exists, return it as-is.
+    const key = `${input.source}|${input.deviceBleId ?? ''}|${input.measuredAtSec}`;
+    const existing =
+      get().pending.find((r) => readingKey(r) === key) ??
+      get().recent.find((r) => readingKey(r) === key);
+    if (existing) {
+      return existing;
+    }
     const classification = classifyReading(
       { systolic: input.systolic, diastolic: input.diastolic, pulse: input.pulse },
       null, // cold-start; baseline computation deferred to Sprint 15
