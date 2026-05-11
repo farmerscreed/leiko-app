@@ -32,9 +32,6 @@ import type { VitalSyncCursor } from '../../types/vitals';
 
 const BATCH_SIZE = 50;
 
-// Sprint 12.5.1 temporary — strip when the BLE active-sync fix lands.
-const BLE_TRACE = true;
-
 // Cursor-staleness threshold for the Option C recovery branch. If the
 // cursor is older than this AND the watch returns zero packets, we
 // suspect the cursor was set in a long-ago session against state the
@@ -218,34 +215,20 @@ export async function syncBacklog(
     }
   }
   let lastSync = getLastSyncSec(deviceBleId);
-  if (BLE_TRACE) {
-    console.log(
-      `[ble-trace] syncBacklog enter deviceBleId=${deviceBleId} ` +
-        `lastSync=${lastSync} (raw watch sec)`,
-    );
-  }
   let readings = await readBPHistory(device, {
     sinceTimestampSec: lastSync,
     direction: 'oldest_first',
     count: BATCH_SIZE,
     timeoutMs: options.timeoutMs ?? 10_000,
   });
-  if (BLE_TRACE) {
-    console.log(
-      `[ble-trace] syncBacklog readBPHistory returned ${readings.length} ` +
-        `packet(s); first.ts=${readings[0]?.timestampSec ?? 'n/a'} ` +
-        `last.ts=${readings[readings.length - 1]?.timestampSec ?? 'n/a'}`,
-    );
-  }
-  // Option C — auto-recover from a long-stale cursor when the watch
-  // also returns nothing. The Sprint 2 sibling branch below (Commit 2)
-  // only fires when readings come back AND every one is filtered out;
-  // this branch handles the case where the watch returns zero packets
-  // and the cursor is older than ~6 months. Resets cursor to 0 (= "no
-  // anchor, return latest COUNT" per U16PRO §4.5) and re-pulls in this
-  // same call so the user doesn't have to wait for another sync cycle.
-  // If the watch is genuinely empty (no BP history at all), the retry
-  // also returns zero and we exit normally — no infinite loop.
+  // Sprint 12.5.1 Option C — auto-recover from a long-stale cursor
+  // when the watch also returns nothing. Per U16PRO §4.5, the watch
+  // returns the 0xFFFFFFFF terminator when DIR=1's TS anchor cannot
+  // be found in storage (e.g. cursor older than the oldest record
+  // still on the watch, OR cursor never matched any real record).
+  // Reset to 0 — the documented "no anchor, return latest CC" path —
+  // and re-pull in this same call. One-shot: if the retry also
+  // returns zero, the watch is genuinely empty and we exit.
   if (readings.length === 0 && lastSync > 0) {
     const nowUnixSec = Math.floor(Date.now() / 1000);
     const cursorAgeSec = nowUnixSec - lastSync;
@@ -268,33 +251,16 @@ export async function syncBacklog(
         count: BATCH_SIZE,
         timeoutMs: options.timeoutMs ?? 10_000,
       });
-      if (BLE_TRACE) {
-        console.log(
-          `[ble-trace] syncBacklog post-reset readBPHistory returned ${readings.length} ` +
-            `packet(s); first.ts=${readings[0]?.timestampSec ?? 'n/a'} ` +
-            `last.ts=${readings[readings.length - 1]?.timestampSec ?? 'n/a'}`,
-        );
-      }
     }
   }
   if (readings.length === 0) {
     return { pulled: 0, latestTimestampSec: null };
   }
-  // De-dupe: when lastSync > 0, the watch may include the cursor
-  // record itself (boundary semantics vary by firmware). Filter out
-  // anything ≤ cursor so we don't double-add a row that's already
-  // in the readings store.
-  //
-  // Sprint 12.5.1 — the "snap cursor back when maxRawTs < lastSync"
-  // recovery branch that lived here was REMOVED. It misread the
-  // U16PRO §4.5 DIR=1 semantics: DIR=1 returns records OLDER than
-  // TS (verified by the 2026-05-12 trace: TS=1778513800 returned
-  // first.ts=1778512464, last.ts=1777651728 — all < TS). That's
-  // the protocol working correctly, not a stuck cursor; snapping
-  // the cursor backward created a feedback loop that walked the
-  // cursor through the watch's history one record per sync,
-  // ingesting hundreds of duplicates. Long-stale cursor recovery
-  // lives below (the readings.length === 0 branch + cursor > 180d).
+  // De-dupe by cursor: when lastSync > 0, DIR=1 returns records OLDER
+  // than the cursor (verified empirically + per U16PRO §4.5). We only
+  // want records strictly newer than lastSync; anything ≤ cursor was
+  // already ingested in a prior sync and addPendingReading would
+  // dedupe it anyway, but filtering here avoids the redundant work.
   const fresh = lastSync > 0
     ? readings.filter((r) => r.timestampSec > lastSync)
     : readings;
@@ -314,12 +280,6 @@ export async function syncBacklog(
     if (r.timestampSec > newest) newest = r.timestampSec;
   }
   if (newest > lastSync) setLastSyncSec(deviceBleId, newest);
-  if (BLE_TRACE) {
-    console.log(
-      `[ble-trace] syncBacklog exit pulled=${fresh.length} ` +
-        `(filtered from ${readings.length}); cursor ${lastSync} → ${newest}`,
-    );
-  }
   // Per-row addPendingReading already emits reading_persisted with
   // the correct tier; no batch-summary event needed (the count is
   // derivable from the row events).

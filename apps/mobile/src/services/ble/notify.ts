@@ -31,9 +31,6 @@
 import type { ParsedPacket } from './io';
 import type { UrionDevice } from './UrionDevice';
 
-// Sprint 12.5.1 temporary — strip when the BLE active-sync fix lands.
-const BLE_TRACE = true;
-
 export type NotificationKind =
   | 'hr'
   | 'bp'
@@ -88,13 +85,6 @@ export function subscribeToNotifications(
   return device.onNotify((packet) => {
     if (packet.command !== 0x73) return;
     const kind = classifyNotification(packet);
-    if (BLE_TRACE) {
-      const raw = packet.payload[0];
-      console.log(
-        `[ble-trace] 0x73 kindByte=0x${raw.toString(16).padStart(2, '0')} ` +
-          `classified=${kind ?? 'null'}`,
-      );
-    }
     switch (kind) {
       case 'bp':
         handlers.onBP?.();
