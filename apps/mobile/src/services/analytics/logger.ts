@@ -36,7 +36,10 @@ export type AnalyticsEvent =
   | { name: 'reading_sync_success'; props?: { duplicate: boolean } }
   | { name: 'reading_sync_failed'; props?: { reason: string } }
   | { name: 'take_reading_started'; props?: { trigger: 'fab' | 'manual_sheet' } }
-  | { name: 'take_reading_received'; props?: { source: 'watch' | 'manual' } }
+  // `watch_post_disconnect` — the watch severed BLE during cuff inflate
+  // (Sprint 12.5.1 fix); we reconnected and pulled the new reading from
+  // backlog. Distinct from `watch` to measure how often this path fires.
+  | { name: 'take_reading_received'; props?: { source: 'watch' | 'manual' | 'watch_post_disconnect' } }
   | { name: 'take_reading_failed'; props?: { reason: string } }
   // Sprint 7 — sync orchestrator. Counts + categories only; the reading
   // values themselves never appear in events (CLAUDE.md data rule).

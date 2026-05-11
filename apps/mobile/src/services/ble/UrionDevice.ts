@@ -20,6 +20,15 @@ import {
 
 export type NotifyHandler = (packet: ParsedPacket) => void;
 
+// Sprint 12.5.1 temporary — strip when the BLE active-sync fix lands.
+// Logs every notify packet's cmd + first 4 payload bytes so we can
+// diagnose whether the watch fires 0x73 on result-completion.
+const BLE_TRACE = true;
+
+function hex2(n: number): string {
+  return n.toString(16).padStart(2, '0');
+}
+
 export class CommandTimeoutError extends Error {
   constructor(public readonly command: number, public readonly timeoutMs: number) {
     super(`Command 0x${command.toString(16)} timed out after ${timeoutMs}ms`);
@@ -57,9 +66,21 @@ export class UrionDevice {
         if (!value) return;
         try {
           const packet = parsePacket(base64ToBytes(value));
+          if (BLE_TRACE) {
+            const p = packet.payload;
+            console.log(
+              `[ble-trace] notify cmd=0x${hex2(packet.command)} ` +
+                `payload[0..3]=${hex2(p[0] ?? 0)} ${hex2(p[1] ?? 0)} ` +
+                `${hex2(p[2] ?? 0)} ${hex2(p[3] ?? 0)} ` +
+                `listeners=${this.listeners.size}`,
+            );
+          }
           for (const l of this.listeners) l(packet);
         } catch (e) {
           if (e instanceof CrcError) {
+            if (BLE_TRACE) {
+              console.log(`[ble-trace] CRC fail deviceId=${this.id}`);
+            }
             logger.track('ble_crc_fail', { deviceId: this.id });
             return;
           }

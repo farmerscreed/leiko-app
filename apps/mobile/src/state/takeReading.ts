@@ -35,6 +35,13 @@ export type TakeReadingPhase =
   | 'idle'
   | 'connecting'
   | 'waiting_for_watch'
+  // The Urion U16 firmware deliberately severs BLE while the cuff is
+  // inflating — the pump's current draw browns out the radio. We
+  // observe a clean `onDisconnected` ~5–20s after the user presses
+  // the BP button, the watch completes the measurement on its own,
+  // then becomes reconnectable. This phase covers the reconnect +
+  // pull window. Empirically verified Lagos 2026-05-11 with U19M_013C.
+  | 'reconnecting'
   | 'fetching'
   | 'success'
   | 'failure';
@@ -61,6 +68,16 @@ const FRIENDLY: Record<TakeReadingError['code'], string> = {
 const WATCH_TIMEOUT_MS = 90_000;
 const FETCH_TIMEOUT_MS = 10_000;
 
+// Mid-measurement reconnect window. The watch's cuff inflate-measure-
+// deflate cycle is ~30–45s; the radio becomes reconnectable a few
+// seconds after the cuff fully deflates. RECONNECT_FIRST_DELAY_MS
+// gives the watch time to settle before the first attempt; subsequent
+// attempts cover the long tail.
+const RECONNECT_FIRST_DELAY_MS = 5_000;
+const RECONNECT_ATTEMPT_INTERVAL_MS = 5_000;
+const RECONNECT_ATTEMPT_TIMEOUT_MS = 10_000;
+const RECONNECT_MAX_ATTEMPTS = 6;
+
 interface TakeReadingState {
   phase: TakeReadingPhase;
   error: TakeReadingError | null;
@@ -86,6 +103,7 @@ interface TakeReadingState {
   // `get()`; intentionally omitted from PublicTakeReadingState.
   _onBPReady: () => Promise<void>;
   _teardownDevice: () => Promise<void>;
+  _reconnectAndPull: () => Promise<void>;
 }
 
 function nowSec(): number {
@@ -141,21 +159,30 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
           void get()._onBPReady();
         },
       });
-      // If the GATT link drops while we're still waiting (watch went
-      // out of range, OS BT stack hiccup, stock Urion app jumped in),
-      // fail loudly instead of sitting on the spinner until the 90s
-      // watch_timeout fires.
+      // If the GATT link drops while we're still waiting, it's almost
+      // always because the watch's cuff is now inflating and the
+      // firmware deliberately severed BLE to protect the radio from
+      // the pump's current draw. Don't fail — switch to the
+      // reconnecting phase and pick up the new reading on the other
+      // side of the measurement.
       const unsubDisconnect = device.onDisconnected(() => {
         if (get().phase !== 'waiting_for_watch') return;
-        console.log('[take-reading] device disconnected mid-wait');
+        console.log(
+          '[take-reading] device disconnected mid-wait — assuming BP measurement in progress',
+        );
         if (get()._watchTimer) clearTimeout(get()._watchTimer!);
+        // The listener subscriptions are bound to the now-dead device.
+        // Drop them; _reconnectAndPull will create fresh ones if needed.
+        const u = get()._unsubscribeNotify;
+        if (u) u();
         set({
-          phase: 'failure',
-          error: { code: 'connect_failed', friendly: FRIENDLY.connect_failed },
+          phase: 'reconnecting',
+          error: null,
           _device: null,
           _unsubscribeNotify: null,
           _watchTimer: null,
         });
+        void get()._reconnectAndPull();
       });
       // Wrap the original unsub to also clear the disconnect listener.
       const wrappedUnsub = () => {
@@ -280,6 +307,85 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
     }
     set({ _device: null, _unsubscribeNotify: null, _watchTimer: null });
   },
+
+  // INTERNAL — fired from the mid-wait onDisconnected handler when we
+  // suspect the watch is mid-measurement. Waits for the cuff cycle to
+  // finish, then retries reconnect + syncBacklog until the new reading
+  // surfaces or the attempt ladder is exhausted.
+  _reconnectAndPull: async () => {
+    const paired = usePairing.getState().pairedDevice;
+    if (!paired) {
+      set({
+        phase: 'failure',
+        error: { code: 'no_paired_device', friendly: FRIENDLY.no_paired_device },
+      });
+      return;
+    }
+    // First, let the watch finish measuring. Reconnecting before the
+    // cuff fully deflates often returns AUTH_FAIL or a stale GATT
+    // handle that disconnects again within a second.
+    await new Promise((r) => setTimeout(r, RECONNECT_FIRST_DELAY_MS));
+
+    for (let attempt = 1; attempt <= RECONNECT_MAX_ATTEMPTS; attempt++) {
+      // User cancelled while we were waiting.
+      if (get().phase !== 'reconnecting') return;
+      console.log(
+        `[take-reading] reconnect attempt ${attempt}/${RECONNECT_MAX_ATTEMPTS}`,
+      );
+      try {
+        const device = await connectToUrion(paired.bleId, {
+          timeoutMs: RECONNECT_ATTEMPT_TIMEOUT_MS,
+        });
+        if (get().phase !== 'reconnecting') {
+          // Cancelled during the connect call.
+          try { await device.disconnect(); } catch { /* fine */ }
+          return;
+        }
+        console.log('[take-reading] reconnected; pulling new reading');
+        set({ phase: 'fetching', _device: device });
+        const before = useReadings.getState().latest();
+        const result = await syncBacklog(device, paired.bleId, {
+          timeoutMs: FETCH_TIMEOUT_MS,
+        });
+        if (result.pulled === 0) {
+          // We reconnected but the watch had nothing new. Either the
+          // user never pressed the BP button, or the measurement
+          // failed on the watch itself (cuff misfit). Surface the
+          // no-reading friendly rather than the network-style one.
+          logger.track('take_reading_failed', { reason: 'no_reading_after_reconnect' });
+          set({
+            phase: 'failure',
+            error: { code: 'no_reading', friendly: FRIENDLY.no_reading },
+          });
+          void get()._teardownDevice();
+          return;
+        }
+        const after = useReadings.getState().latest();
+        const newest = after && after !== before ? after : before;
+        logger.track('take_reading_received', { source: 'watch_post_disconnect' });
+        set({
+          phase: 'success',
+          lastReadingId: newest?.localId ?? null,
+        });
+        void get()._teardownDevice();
+        return;
+      } catch (e) {
+        const reason = e instanceof Error ? e.message : 'unknown';
+        console.log(`[take-reading] reconnect attempt ${attempt} failed: ${reason}`);
+        if (attempt < RECONNECT_MAX_ATTEMPTS) {
+          await new Promise((r) => setTimeout(r, RECONNECT_ATTEMPT_INTERVAL_MS));
+        }
+      }
+    }
+    // Every attempt failed.
+    logger.track('take_reading_failed', { reason: 'reconnect_exhausted' });
+    if (get().phase === 'reconnecting') {
+      set({
+        phase: 'failure',
+        error: { code: 'connect_failed', friendly: FRIENDLY.connect_failed },
+      });
+    }
+  },
 }));
 
 // TS: the store has private _ methods used internally. Augment the
@@ -291,4 +397,5 @@ export type PublicTakeReadingState = Omit<
   | '_watchTimer'
   | '_onBPReady'
   | '_teardownDevice'
+  | '_reconnectAndPull'
 >;

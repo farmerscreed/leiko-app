@@ -93,6 +93,9 @@ export function TakeReadingScreen({ navigation }: Props) {
         />
       );
       break;
+    case 'reconnecting':
+      body = <ReconnectingView />;
+      break;
     case 'fetching':
       body = <FetchingView />;
       break;
@@ -236,6 +239,23 @@ function WaitingForWatchView({
       >
         Cancel
       </Button>
+    </View>
+  );
+}
+
+function ReconnectingView() {
+  const theme = useTheme();
+  return (
+    <View
+      testID="take-reading-reconnecting"
+      accessibilityLiveRegion="polite"
+      accessibilityLabel="Picking up the new reading"
+    >
+      <Headline>One moment</Headline>
+      <Body>Picking up the new reading from your watch.</Body>
+      <View style={{ alignItems: 'center', marginVertical: theme.spacing.xxl }}>
+        <ActivityIndicator size="large" color={theme.colors.brand.primary} />
+      </View>
     </View>
   );
 }
