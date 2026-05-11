@@ -93,7 +93,10 @@ function formatBpWeekAvg(weekAvgSys: number | null, weekAvgDia: number | null): 
 }
 
 function formatHrResting(restingBpm: number | null): string {
-  return restingBpm !== null ? `${restingBpm}` : '—';
+  // Round at the boundary — rollingMinAverage in state/hr.ts returns
+  // a float, and unrounded values leak into both the home hero AND
+  // the narration template's {hr_resting} slot.
+  return restingBpm !== null ? `${Math.round(restingBpm)}` : '—';
 }
 
 function formatSleepTotal(totalMinutes: number | null): string {

@@ -276,7 +276,7 @@ export function SelfBuyerHome() {
           />
           <VitalTile
             vitalType="hr"
-            value={data.hr.restingToday !== null ? String(data.hr.restingToday) : '—'}
+            value={data.hr.restingToday !== null ? String(Math.round(data.hr.restingToday)) : '—'}
             secondary="bpm resting"
             ringFill={heroVitals.hr.fill}
             state={data.hr.restingToday !== null ? 'normal' : 'no-data'}
@@ -782,8 +782,10 @@ export function buildHeroVitals(
     },
     hr: {
       fill: hrFill,
+      // rollingMinAverage returns float; round at every display
+      // boundary so the hero / tiles never show "63.3333…".
       display:
-        data.hr.restingToday !== null ? String(data.hr.restingToday) : '—',
+        data.hr.restingToday !== null ? String(Math.round(data.hr.restingToday)) : '—',
       unit: 'bpm',
     },
     spo2: {
@@ -930,8 +932,13 @@ function buildCorrelation(
 }
 
 function formatSleepHm(totalMinutes: number): string {
-  const h = Math.floor(totalMinutes / 60);
-  const m = totalMinutes % 60;
+  // totalMinutes can be a float (computed from session start/end +
+  // summed stage minutes). Round at the boundary so the tile never
+  // shows "7h 24.5m" — fixed-width font + the layout assumes
+  // integer minutes.
+  const total = Math.round(totalMinutes);
+  const h = Math.floor(total / 60);
+  const m = total % 60;
   return `${h}h ${m}m`;
 }
 

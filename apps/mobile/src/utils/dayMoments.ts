@@ -80,8 +80,12 @@ export function pickCentralValue(
   if (data.hr.restingToday !== null && data.hr.latestSampleSec !== null) {
     const ageSec = nowSec - data.hr.latestSampleSec;
     if (ageSec >= 0 && ageSec <= HR_FRESH_WINDOW_SEC) {
+      // rollingMinAverage returns a float; the central display is
+      // an integer bpm — round at the display boundary so the hero
+      // never shows "63.3333..." (which also breaks the hero's
+      // fixed-width font sizing).
       return {
-        value: String(data.hr.restingToday),
+        value: String(Math.round(data.hr.restingToday)),
         label: 'resting HR',
         priority: 'hr',
       };
@@ -255,8 +259,13 @@ export function deriveDayMoments(
 
 /** "7h 24m" formatter for sleep durations (D13 §7.2 example format). */
 export function formatSleepDuration(totalMinutes: number): string {
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
+  // Round at the boundary — totalMinutes can be a float when it's
+  // computed from session start/end timestamps + summed transitions.
+  // Without rounding the display turns into "7h 24.5m" and the
+  // central-value font sizing breaks.
+  const total = Math.round(totalMinutes);
+  const hours = Math.floor(total / 60);
+  const minutes = total % 60;
   return `${hours}h ${minutes}m`;
 }
 
