@@ -100,62 +100,65 @@ describe('mid-measurement disconnect (Sprint 12.5.1)', () => {
     expect(useTakeReading.getState().error).toBeNull();
   });
 
-  it('reconnects, pulls the new reading, and lands on success', async () => {
-    // Initial connect + backlog return nothing (waiting for the user).
+  it('polls until the watch finally stores the new reading, then lands on success', async () => {
+    // Initial connect + backlog return nothing.
     const beginPromise = useTakeReading.getState().begin();
     await Promise.resolve();
     await Promise.resolve();
     await beginPromise;
 
-    // Set up the reconnect attempt to return a fresh device + a real
-    // pulled reading. addPendingReading's return shape only needs the
-    // localId for the success path; latest() picks up the new row.
+    // After reconnect: first two readBPHistory polls return pulled=0
+    // (watch still measuring), third returns the new reading.
     const newReading = {
       localId: 'local-xyz',
       systolic: 124,
       diastolic: 80,
       pulse: 70,
     };
-    mockUseReadingsLatest.mockReturnValueOnce(null); // before
-    mockUseReadingsLatest.mockReturnValueOnce(newReading); // after
     mockConnectToUrion.mockResolvedValueOnce(fakeDevice());
-    mockSyncBacklog.mockResolvedValueOnce({
-      pulled: 1,
-      latestTimestampSec: 1778500000,
-    });
+    mockSyncBacklog
+      .mockResolvedValueOnce({ pulled: 0, latestTimestampSec: null })
+      .mockResolvedValueOnce({ pulled: 0, latestTimestampSec: null })
+      .mockResolvedValueOnce({ pulled: 1, latestTimestampSec: 1778500000 });
+    // latest() snapshot before/after each poll:
+    mockUseReadingsLatest
+      .mockReturnValueOnce(null)          // poll 1 before
+      .mockReturnValueOnce(null)          // poll 2 before
+      .mockReturnValueOnce(null)          // poll 3 before
+      .mockReturnValueOnce(newReading);   // poll 3 after
 
     onDisconnectedCallbacks[0]();
     expect(useTakeReading.getState().phase).toBe('reconnecting');
 
-    // Drain the FIRST_DELAY_MS sleep.
-    await jest.advanceTimersByTimeAsync(5_000);
-    // Drain the connect + syncBacklog microtasks.
-    await Promise.resolve();
-    await Promise.resolve();
-    await Promise.resolve();
+    // Walk the timeline: 15s initial delay + 3 polls × 8s.
+    await jest.runAllTimersAsync();
 
-    expect(mockConnectToUrion).toHaveBeenCalledTimes(2);
+    expect(mockConnectToUrion).toHaveBeenCalledTimes(2); // initial + 1 reconnect
+    expect(mockSyncBacklog).toHaveBeenCalledTimes(4);     // initial + 3 polls
     expect(useTakeReading.getState().phase).toBe('success');
     expect(useTakeReading.getState().lastReadingId).toBe('local-xyz');
   });
 
-  it('falls through to failure when every reconnect attempt fails', async () => {
+  it('falls through to no_reading when the 90s budget exhausts with no new reading', async () => {
     const beginPromise = useTakeReading.getState().begin();
     await Promise.resolve();
     await Promise.resolve();
     await beginPromise;
 
-    // Every subsequent reconnect attempt rejects.
-    mockConnectToUrion.mockRejectedValue(new Error('connect timeout'));
+    // Every reconnect succeeds but every poll returns pulled=0 — the
+    // watch never stores a fresh reading. After the budget exhausts
+    // the flow should surface no_reading (the connection itself was
+    // fine).
+    mockConnectToUrion.mockResolvedValue(fakeDevice());
+    mockSyncBacklog.mockResolvedValue({ pulled: 0, latestTimestampSec: null });
+    mockUseReadingsLatest.mockReturnValue(null);
 
     onDisconnectedCallbacks[0]();
     expect(useTakeReading.getState().phase).toBe('reconnecting');
 
-    // Walk the attempt ladder: 5s initial wait + 6 attempts ×
-    // 5s back-off. Run timers in full to drain the loop.
     await jest.runAllTimersAsync();
 
     expect(useTakeReading.getState().phase).toBe('failure');
-    expect(useTakeReading.getState().error?.code).toBe('connect_failed');
+    expect(useTakeReading.getState().error?.code).toBe('no_reading');
   });
 });

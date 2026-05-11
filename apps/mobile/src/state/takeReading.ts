@@ -68,15 +68,25 @@ const FRIENDLY: Record<TakeReadingError['code'], string> = {
 const WATCH_TIMEOUT_MS = 90_000;
 const FETCH_TIMEOUT_MS = 10_000;
 
-// Mid-measurement reconnect window. The watch's cuff inflate-measure-
-// deflate cycle is ~30–45s; the radio becomes reconnectable a few
-// seconds after the cuff fully deflates. RECONNECT_FIRST_DELAY_MS
-// gives the watch time to settle before the first attempt; subsequent
-// attempts cover the long tail.
-const RECONNECT_FIRST_DELAY_MS = 5_000;
-const RECONNECT_ATTEMPT_INTERVAL_MS = 5_000;
+// Mid-measurement reconnect window. The Urion BP cycle (inflate →
+// measure → deflate → store) runs ~30–45s end-to-end. BLE drops at
+// peak inflate (~5–15s into the cycle), so a naive 5s reconnect lands
+// us mid-measurement when the watch's BP-history register is still
+// empty — it sends back the 0xFFFFFFFF terminator (confirmed by the
+// 2026-05-11 Lagos trace: terminator returned 130ms after every read,
+// no actual reading until the cycle completed).
+//
+// Strategy: wait 15s after the disconnect for the cuff to deflate,
+// then enter a poll-and-wait loop. Hold the GATT connection alive
+// across polls (avoids re-pairing overhead) and re-poll every 8s. If
+// the connection drops mid-poll (it shouldn't, but BLE), tear down
+// the dead handle and reconnect on the next iteration. Total budget
+// 90s — covers the longest plausible remainder of a cuff cycle plus
+// slack for a slow watch.
+const RECONNECT_FIRST_DELAY_MS = 15_000;
+const RECONNECT_POLL_INTERVAL_MS = 8_000;
 const RECONNECT_ATTEMPT_TIMEOUT_MS = 10_000;
-const RECONNECT_MAX_ATTEMPTS = 6;
+const RECONNECT_TOTAL_BUDGET_MS = 90_000;
 
 interface TakeReadingState {
   phase: TakeReadingPhase;
@@ -309,9 +319,13 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
   },
 
   // INTERNAL — fired from the mid-wait onDisconnected handler when we
-  // suspect the watch is mid-measurement. Waits for the cuff cycle to
-  // finish, then retries reconnect + syncBacklog until the new reading
-  // surfaces or the attempt ladder is exhausted.
+  // suspect the watch is mid-measurement. Holds the GATT connection
+  // open across multiple readBPHistory polls within a 90s budget so we
+  // can catch the new reading whenever the watch finally stores it.
+  // The watch may not emit 0x73 0x02 on completion (the Lagos trace
+  // only ever saw 0x73 0x0c battery), so polling is the primary
+  // mechanism — but we keep the 0x73 subscription live in parallel
+  // and short-circuit if it does fire.
   _reconnectAndPull: async () => {
     const paired = usePairing.getState().pairedDevice;
     if (!paired) {
@@ -321,70 +335,115 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
       });
       return;
     }
-    // First, let the watch finish measuring. Reconnecting before the
-    // cuff fully deflates often returns AUTH_FAIL or a stale GATT
-    // handle that disconnects again within a second.
+    // Wait for the cuff cycle to finish before the first attempt.
+    // Reconnecting mid-cuff returns terminator on every readBPHistory
+    // because the watch hasn't stored the new reading yet.
     await new Promise((r) => setTimeout(r, RECONNECT_FIRST_DELAY_MS));
 
-    for (let attempt = 1; attempt <= RECONNECT_MAX_ATTEMPTS; attempt++) {
-      // User cancelled while we were waiting.
-      if (get().phase !== 'reconnecting') return;
-      console.log(
-        `[take-reading] reconnect attempt ${attempt}/${RECONNECT_MAX_ATTEMPTS}`,
-      );
-      try {
-        const device = await connectToUrion(paired.bleId, {
-          timeoutMs: RECONNECT_ATTEMPT_TIMEOUT_MS,
-        });
-        if (get().phase !== 'reconnecting') {
-          // Cancelled during the connect call.
-          try { await device.disconnect(); } catch { /* fine */ }
+    const startMs = Date.now();
+    let device: UrionDevice | null = null;
+    let unsubLiveNotify: (() => void) | null = null;
+    let liveNotifyHit = false;
+
+    const teardownLocal = async () => {
+      if (unsubLiveNotify) { unsubLiveNotify(); unsubLiveNotify = null; }
+      if (device) {
+        try { await device.disconnect(); } catch { /* fine */ }
+        device = null;
+      }
+    };
+
+    while (Date.now() - startMs < RECONNECT_TOTAL_BUDGET_MS) {
+      // User cancelled (closed the sheet, etc.).
+      if (get().phase !== 'reconnecting' && get().phase !== 'fetching') {
+        await teardownLocal();
+        return;
+      }
+
+      // (Re-)establish connection if we don't have one.
+      if (!device) {
+        const elapsedS = Math.round((Date.now() - startMs) / 1000);
+        console.log(
+          `[take-reading] reconnect attempt @${elapsedS}s into ${RECONNECT_TOTAL_BUDGET_MS / 1000}s budget`,
+        );
+        try {
+          device = await connectToUrion(paired.bleId, {
+            timeoutMs: RECONNECT_ATTEMPT_TIMEOUT_MS,
+          });
+        } catch (e) {
+          const reason = e instanceof Error ? e.message : 'unknown';
+          console.log(`[take-reading] reconnect failed: ${reason}; retrying`);
+          await new Promise((r) => setTimeout(r, RECONNECT_POLL_INTERVAL_MS));
+          continue;
+        }
+        if (get().phase !== 'reconnecting' && get().phase !== 'fetching') {
+          await teardownLocal();
           return;
         }
-        console.log('[take-reading] reconnected; pulling new reading');
+        console.log('[take-reading] reconnected; entering poll window');
         set({ phase: 'fetching', _device: device });
+        // If the watch DOES emit 0x73 0x02 during the poll window,
+        // bias the next iteration to pull immediately.
+        unsubLiveNotify = subscribeToNotifications(device, {
+          onBP: () => {
+            console.log('[take-reading] 0x73 0x02 fired during poll window');
+            liveNotifyHit = true;
+          },
+        });
+      }
+
+      // Poll readBPHistory. pulled > 0 means the watch finally has
+      // the new reading stored; pulled === 0 means it's still mid-
+      // measurement (or the user never pressed the button).
+      try {
         const before = useReadings.getState().latest();
         const result = await syncBacklog(device, paired.bleId, {
           timeoutMs: FETCH_TIMEOUT_MS,
+          skipSetTime: true, // already set on the connect handshake
         });
-        if (result.pulled === 0) {
-          // We reconnected but the watch had nothing new. Either the
-          // user never pressed the BP button, or the measurement
-          // failed on the watch itself (cuff misfit). Surface the
-          // no-reading friendly rather than the network-style one.
-          logger.track('take_reading_failed', { reason: 'no_reading_after_reconnect' });
+        if (result.pulled > 0) {
+          const after = useReadings.getState().latest();
+          const newest = after && after !== before ? after : before;
+          logger.track('take_reading_received', { source: 'watch_post_disconnect' });
           set({
-            phase: 'failure',
-            error: { code: 'no_reading', friendly: FRIENDLY.no_reading },
+            phase: 'success',
+            lastReadingId: newest?.localId ?? null,
           });
-          void get()._teardownDevice();
+          await teardownLocal();
+          set({ _device: null, _unsubscribeNotify: null });
           return;
         }
-        const after = useReadings.getState().latest();
-        const newest = after && after !== before ? after : before;
-        logger.track('take_reading_received', { source: 'watch_post_disconnect' });
-        set({
-          phase: 'success',
-          lastReadingId: newest?.localId ?? null,
-        });
-        void get()._teardownDevice();
-        return;
-      } catch (e) {
-        const reason = e instanceof Error ? e.message : 'unknown';
-        console.log(`[take-reading] reconnect attempt ${attempt} failed: ${reason}`);
-        if (attempt < RECONNECT_MAX_ATTEMPTS) {
-          await new Promise((r) => setTimeout(r, RECONNECT_ATTEMPT_INTERVAL_MS));
+        // No reading yet. Wait, then re-poll. If a live notify fired
+        // while we were here, skip the wait and poll again immediately.
+        if (!liveNotifyHit) {
+          await new Promise((r) => setTimeout(r, RECONNECT_POLL_INTERVAL_MS));
+        } else {
+          liveNotifyHit = false;
         }
+      } catch (e) {
+        // syncBacklog throwing usually means the connection just died
+        // (readBPHistory timed out because the radio fell over). Drop
+        // the handle and let the loop reconnect.
+        const reason = e instanceof Error ? e.message : 'unknown';
+        console.log(`[take-reading] poll syncBacklog threw: ${reason}; resetting`);
+        await teardownLocal();
+        await new Promise((r) => setTimeout(r, RECONNECT_POLL_INTERVAL_MS));
       }
     }
-    // Every attempt failed.
-    logger.track('take_reading_failed', { reason: 'reconnect_exhausted' });
-    if (get().phase === 'reconnecting') {
+
+    // Budget exhausted without a new reading. Either the user never
+    // pressed the BP button, the cuff failed on the watch, or the
+    // cycle took longer than expected. Surface the no-reading friendly
+    // (it's the closest match — the connection itself was fine).
+    logger.track('take_reading_failed', { reason: 'reconnect_poll_exhausted' });
+    if (get().phase === 'reconnecting' || get().phase === 'fetching') {
       set({
         phase: 'failure',
-        error: { code: 'connect_failed', friendly: FRIENDLY.connect_failed },
+        error: { code: 'no_reading', friendly: FRIENDLY.no_reading },
       });
     }
+    await teardownLocal();
+    set({ _device: null, _unsubscribeNotify: null });
   },
 }));
 
