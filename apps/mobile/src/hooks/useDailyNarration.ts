@@ -38,6 +38,14 @@ interface CachedNarration {
   templateId: string;
   tier: 'A' | 'B';
   generatedAtSec: number;
+  /**
+   * Whether the cached body was produced with `centralVital === null`
+   * (i.e. the "returning.no-data-today" fallback path). Tracked so we
+   * can invalidate the cache the moment any vital data arrives —
+   * otherwise the first-render "no-data" template would stick for 4h
+   * even after the watch syncs.
+   */
+  hadNullCentral?: boolean;
 }
 
 function cacheKey(userId: string, date: string): string {
@@ -120,8 +128,21 @@ export function useDailyNarration(
     const date = data.todayDateLocal;
     const key = cacheKey(userId, date);
 
+    // Has the data store populated ANY vital yet? Used both to set
+    // the cache flag below AND to invalidate a stale no-data row.
+    const hasAnyVital =
+      data.bp.latest !== null ||
+      data.hr.restingToday !== null ||
+      data.sleep.session !== null ||
+      data.activity.stepsToday > 0 ||
+      data.spo2.latestPercent !== null;
+
     const cached = readCache(key, nowSec);
-    if (cached) {
+    // Cache-invalidation rule: a cache row written while centralVital
+    // was null gets discarded the moment any vital arrives. Without
+    // this, "watch hasn't synced today" sticks for 4h even after the
+    // watch syncs minutes later.
+    if (cached && !(cached.hadNullCentral === true && hasAnyVital)) {
       return {
         text: cached.text,
         templateId: cached.templateId,
@@ -140,6 +161,7 @@ export function useDailyNarration(
       templateId: result.templateId,
       tier: result.tier,
       generatedAtSec: nowSec,
+      hadNullCentral: !hasAnyVital,
     });
     logger.track('daily_narration_generated', {
       tier: result.tier,

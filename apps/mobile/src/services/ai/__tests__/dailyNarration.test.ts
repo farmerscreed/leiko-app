@@ -66,6 +66,23 @@ it('renderNarration leaves unknown slots intact', () => {
   expect(out).toBe('Mum {nonsense_slot} test');
 });
 
+it('renderNarration capitalises the first letter at the sentence start', () => {
+  const slots = buildNarrationSlots({ data: makeData(), parentLabel: 'biebele' });
+  const out = renderNarration("{parent_label}'s watch hasn't synced today.", slots);
+  // display_name 'biebele' (user-typed lowercase) becomes a proper
+  // sentence-leading capital — the user's stored label is preserved
+  // elsewhere; sentence-case is a display concern.
+  expect(out.startsWith('Biebele')).toBe(true);
+});
+
+it('renderNarration leaves mid-sentence content untouched', () => {
+  const slots = buildNarrationSlots({ data: makeData(), parentLabel: 'biebele' });
+  // The OTHER appearance of parent_label later in a sentence keeps
+  // the user's casing — we only capitalise the leading character.
+  const out = renderNarration("Hello {parent_label}.", slots);
+  expect(out).toBe('Hello biebele.');
+});
+
 it('renderNarration handles slots that produce em-dash placeholders cleanly', () => {
   const data = makeData({
     bp: {

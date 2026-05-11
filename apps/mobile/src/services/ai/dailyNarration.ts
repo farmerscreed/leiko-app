@@ -46,15 +46,25 @@ export interface NarrationSlots {
  * from the slots map. Unknown slots are left in place as-is so a
  * mismatch is loud during development rather than silently shipping
  * partial copy.
+ *
+ * Post-substitution: capitalise the first letter of the rendered
+ * string. Every Sprint 11 template leads with a slot (`{parent_label}`
+ * or `{parent_label}'s …`), and `display_name` is stored as the user
+ * typed it during onboarding — `biebele` lowercased gets rendered as
+ * a lowercase sentence-leading character which fails sentence-case
+ * (D11 §3.4). This handles the case purely at the display boundary;
+ * the stored name stays user-controlled.
  */
 export function renderNarration(
   template: string,
   slots: NarrationSlots,
 ): string {
-  return template.replace(/\{([a-z_]+)\}/g, (match, key: string) => {
+  const substituted = template.replace(/\{([a-z_]+)\}/g, (match, key: string) => {
     const value = (slots as unknown as Record<string, string>)[key];
     return typeof value === 'string' && value.length > 0 ? value : match;
   });
+  if (substituted.length === 0) return substituted;
+  return substituted.charAt(0).toUpperCase() + substituted.slice(1);
 }
 
 // ── Slot value derivers ───────────────────────────────────────────────
