@@ -304,6 +304,7 @@ export function DailyPulseHero({
 
   const labelStyle = theme.type('labelUppercase');
   const numericHero = theme.type('numericHero');
+  const numericXl = theme.type('numericXl');
   const numericM = theme.type('numericM');
   const captionStyle = theme.type('caption');
   const bpColor = theme.colors.vital.bp;
@@ -436,12 +437,21 @@ export function DailyPulseHero({
               </Text>
               <Text
                 allowFontScaling={false}
+                numberOfLines={1}
+                adjustsFontSizeToFit
                 style={{
                   fontFamily: theme.fontFamilies.editorial,
-                  fontSize: numericHero.size,
-                  lineHeight: numericHero.lineHeight,
+                  // Adaptive sizing — numericHero (80pt) is sized for
+                  // short values like "63" or "124/79". Mixed-unit
+                  // strings ("10h 44m") overflow the ring inner; drop
+                  // to numericXl (56pt) for anything > 5 chars so the
+                  // value stays centred + readable.
+                  fontSize: central.value.length > 5 ? numericXl.size : numericHero.size,
+                  lineHeight: central.value.length > 5 ? numericXl.lineHeight : numericHero.lineHeight,
                   color: theme.colors.text.primary,
                   letterSpacing: -0.5,
+                  textAlign: 'center',
+                  maxWidth: BP_DIAMETER - 24,
                 }}
                 testID={testID ? `${testID}-bp-value` : undefined}
               >
