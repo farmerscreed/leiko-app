@@ -50,6 +50,19 @@ try {
 }
 Write-Status 'Supabase local on :54321' $supaOk $(if (-not $supaOk) { 'Run `supabase start` in another terminal.' })
 
+# 3b. Edge Functions runtime alive? When `supabase functions serve`
+# dies mid-session, Kong returns 503 "name resolution failed" and
+# every AI surface times out with "I couldn't reach Leiko". Detect
+# the dead-runtime state separately from Kong-up state so the founder
+# knows to restart `supabase functions serve`.
+$efOk = $false
+try {
+    $ef = Invoke-WebRequest -Uri 'http://localhost:54321/functions/v1/ai-tier-b' `
+        -Method Options -TimeoutSec 3 -UseBasicParsing -ErrorAction Stop
+    $efOk = $ef.StatusCode -eq 200
+} catch { $efOk = $false }
+Write-Status 'Edge Functions runtime' $efOk $(if (-not $efOk) { 'Run `supabase functions serve --env-file supabase/functions/.env` in another terminal.' })
+
 # 4. adb reverse forwards.
 & adb reverse tcp:8081 tcp:8081 | Out-Null
 & adb reverse tcp:54321 tcp:54321 | Out-Null
@@ -59,7 +72,7 @@ $has54321 = ($reverse | Select-String -Pattern 'tcp:54321').Count -ge 1
 Write-Status 'adb reverse tcp:8081 (Metro)' $has8081
 Write-Status 'adb reverse tcp:54321 (Supabase)' $has54321
 
-if (-not ($phoneOk -and $metroOk -and $supaOk -and $has8081 -and $has54321)) {
+if (-not ($phoneOk -and $metroOk -and $supaOk -and $efOk -and $has8081 -and $has54321)) {
     Write-Host ''
     Write-Host 'Fix the [!!] items above, then re-run this script.' -ForegroundColor Yellow
     exit 1
