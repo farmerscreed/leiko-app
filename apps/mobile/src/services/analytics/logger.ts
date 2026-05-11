@@ -102,7 +102,9 @@ export type AnalyticsEvent =
   // ('A' = local template, 'B' = Tier-B LLM via Edge Function).
   // Body NEVER appears in props per CLAUDE.md / D14 §13.
   | { name: 'daily_narration_generated'; props?: { tier: string; template_id: string } }
-  | { name: 'reading_paragraph_generated'; props?: { tier: string; template_id: string } };
+  | { name: 'reading_paragraph_generated'; props?: { tier: string; template_id: string } }
+  // Sprint 12.5 fix — readings seeded from server when local is empty.
+  | { name: 'readings_hydrated_from_server'; props?: { count: number } };
 
 type EventName = AnalyticsEvent['name'];
 

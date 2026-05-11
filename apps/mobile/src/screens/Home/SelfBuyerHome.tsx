@@ -46,6 +46,7 @@ import { HomeLearnCard } from '../../components/HomeLearnCard';
 import { useSeededLearnCard } from '../../hooks/useSeededLearnCard';
 import { useEnsureSelfBuyerFamily } from '../../hooks/useEnsureSelfBuyerFamily';
 import { useDailyNarration } from '../../hooks/useDailyNarration';
+import { useHydrateReadingsFromServer } from '../../hooks/useHydrateReadingsFromServer';
 import { VitalTile } from '../../components/VitalTile';
 import {
   CorrelationStrip,
@@ -96,6 +97,12 @@ export function SelfBuyerHome() {
   // accounts that predate Sprint 4 onboarding (rare in prod, common
   // for dev test users).
   useEnsureSelfBuyerFamily();
+
+  // ----- Sprint 12.5 fix: server → local readings recovery -----------
+  // Self-heals an empty local store after reinstall / MMKV clear by
+  // pulling the family's last 30 server-side readings. No-ops when
+  // local already has data. See useHydrateReadingsFromServer.
+  useHydrateReadingsFromServer();
 
   // ----- Sprint 12 follow-up: Ask Leiko bottom sheet ----------------
   const [askLeikoVisible, setAskLeikoVisible] = useState(false);

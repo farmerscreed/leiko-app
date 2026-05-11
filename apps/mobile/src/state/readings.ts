@@ -62,6 +62,14 @@ interface ReadingsState {
   latest: () => LocalReading | null;
   /** Lookup by localId (UI deep-link). */
   byLocalId: (id: string) => LocalReading | null;
+  /**
+   * Sprint 12.5 fix — seed recent from server rows. Used on Home
+   * first paint when MMKV is empty but the server has readings
+   * (typical after a reinstall or MMKV clear). Idempotent: dedupes
+   * by serverId, never touches pending, never re-adds a row whose
+   * serverId already exists in recent.
+   */
+  seedRecentFromServer: (rows: LocalReading[]) => number;
   /** Test/utility: drop all rows (does NOT clear MMKV — use clearAll for that). */
   reset: () => void;
 }
@@ -217,6 +225,26 @@ export const useReadings = create<ReadingsState>((set, get) => ({
       get().recent.find((r) => r.localId === id) ??
       null
     );
+  },
+
+  seedRecentFromServer: (rows) => {
+    const existing = get().recent;
+    const existingServerIds = new Set(
+      existing.map((r) => r.serverId).filter((id): id is string => id !== null),
+    );
+    const newRows = rows.filter(
+      (r) => r.serverId !== null && !existingServerIds.has(r.serverId),
+    );
+    if (newRows.length === 0) return 0;
+    // Merge + sort newest-first by measuredAtSec. Persist to MMKV
+    // so subsequent app launches don't re-fetch.
+    const merged = [...newRows, ...existing].sort(
+      (a, b) => b.measuredAtSec - a.measuredAtSec,
+    );
+    const pending = get().pending;
+    set({ recent: merged });
+    persist({ pending, recent: merged });
+    return newRows.length;
   },
 
   reset: () => {
