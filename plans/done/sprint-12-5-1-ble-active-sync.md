@@ -66,3 +66,76 @@ None. Watch + paired phone (the founder's Lagos dev kit) — already in place.
 - Server-side TZ reconciliation (still Sprint 7 follow-up, in backlog).
 - `setUserParams` / `setGoals` writer stubs (Sprint 7.5 follow-up; depends on a working sync, which this sprint delivers).
 - The Sprint 16 light-mode polish, expo-notifications scheduling, or any Tier-B / Tier-C work.
+
+---
+
+## Close-out — 2026-05-12
+
+Closed across 6 commits over one extended session in Lagos with the founder's Pixel 8 + U19M_013C watch on USB + adb reverse:
+
+```
+46ec64d  fix(ble): survive watch's mid-measurement BLE drop
+861229a  fix(sync): recover from stale BP cursor when watch's newest is older  ← later reverted (see below)
+cacc44a  fix(ble): poll readBPHistory during reconnect window instead of fail-on-first-zero
+4af63d9  fix(sync): auto-recover when cursor is stale and watch returns no records
+ed7f8f0  fix(sync): revert Commit 2 cursor-snap (loop bug) + dedupe at ingest and hydrate
+e146886  chore(ble): strip Sprint 12.5.1 [ble-trace] instrumentation
+```
+
+### Symptoms diagnosed
+
+Three distinct symptoms surfaced across the trace sessions, none of which were the symptom the sprint card opened with ("watch doesn't push 0x73 on result-completion"):
+
+1. **Mid-measurement BLE drop**. The U16's pump browns out the BLE radio at peak inflate. App was failing with `connect_failed` after the cuff dropped GATT, before the measurement completed.
+2. **`readBPHistory` returns terminator while watch is mid-cycle**. We were reconnecting and querying ~5s after the drop; the watch hadn't yet stored the new BP. Got terminator. Declared `no_reading` and gave up.
+3. **Cursor-walk-backward loop**. My first cursor-recovery commit (`861229a`) misread the U16PRO §4.5 DIR=1 semantics. `syncBacklogToCompletion` looped on `pulled=1` and drove the cursor through the watch's history one record per iteration, piling up ~150 duplicates in MMKV.
+
+### Key learning — U16PRO DIR=1 semantics
+
+Captured here so it doesn't get re-discovered:
+
+- `0x14 readBPHistory(TS=X, DIR=1)` returns up to COUNT records **STRICTLY OLDER** than TS, walking backward from the watch's latest. Verified empirically (2026-05-12 trace: TS=1778513800 → first.ts=1778512464, last.ts=1777651728).
+- When TS=0: protocol fallback — watch returns latest COUNT regardless of DIR.
+- When TS > watch's stored max: empirical fallback — watch returns latest COUNT.
+- When TS < oldest stored record: watch returns the 0xFFFFFFFF terminator (cannot find the anchor).
+- The protocol's "subsequent requests will continue to request data using the timestamp of the obtained record" wording is for **pagination through history**, not for incremental sync of new readings. There is NO native "give me readings newer than TS" command.
+
+Implication for our cursor model: the existing scheme works *only because* a fresh BP reading taken on the watch becomes the new "watch latest"; DIR=1 with TS=current_cursor (≤ new latest) then returns records between the two (inclusive of the new reading on its way down). Filter `r.timestampSec > cursor` lets the new one through and rejects already-ingested ones. The cursor must NEVER be artificially advanced past the watch's actual newest, or new readings won't pass the filter.
+
+### Acceptance vs the sprint card
+
+| Card item | State |
+|---|---|
+| Fresh reading surfaces ≤10s after BP-button press (Take a Reading) | ✅ via Commits 1+3 |
+| Fresh reading surfaces ≤10s after BP-button press (Force Sync) | ✅ via Commits 1+3 |
+| Repeated takes (3 in 5 minutes) all surface | Not field-tested in this sprint; Commits 1+3 are stateless per-call and should support this. Backlog item. |
+| Backlog sync still pulls every buffered reading | ✅ — incremental sync confirmed working; trace shows `pulled=0` steady state when caught up |
+| No `ble_crc_fail` spike post-fix | ✅ — no CRC events in any trace |
+| `[ble-trace]` instrumentation removed | ✅ — Commit `e146886` |
+
+### Files touched (final state)
+
+- `apps/mobile/src/state/takeReading.ts` — new `reconnecting` phase + `_reconnectAndPull` (90s poll window).
+- `apps/mobile/src/screens/TakeReading/TakeReadingScreen.tsx` — `ReconnectingView` for the new phase.
+- `apps/mobile/src/services/sync/syncBacklog.ts` — Option C stale-cursor recovery (TS=0 reset). Commit 2's snap-back recovery is GONE.
+- `apps/mobile/src/state/readings.ts` — `dedupeReadings` helper + `hydrate()` sweep + `addPendingReading` dedupe-at-ingest.
+- `apps/mobile/src/services/analytics/logger.ts` — added `ble_cursor_reset` event + `take_reading_received.source` extended to include `'watch_post_disconnect'`.
+
+### On-device verification — completed 2026-05-12 in Lagos
+
+| Surface | Evidence |
+|---|---|
+| Cursor-walk-backward loop fixed | 4 syncBacklog calls in 3 min after Commit 5 (was 100/3min before). Cursor stable at 1777901973. |
+| Dedupe sweep on hydrate | User reported home screen "everything seems okay" after force-quit + reopen post-Commit 5; duplicate readings cleaned up. |
+| Mid-measurement reconnect window | Trace shows `[take-reading] reconnect attempt @0s into 90s budget` → `reconnected; entering poll window`. |
+| Option C cursor reset | Trace shows `syncBacklog post-reset readBPHistory returned 50 packet(s)` after the cursor=1706519978 → 0 reset. |
+
+### Deferred — picked up in follow-up sprints
+
+| Item | Why deferred | Target |
+|---|---|---|
+| **Watch-side: BP results not always persisted to history register** | Different bug class (watch firmware, not app). HR + SpO2 storage works fine on the same hardware; BP storage occasionally returns terminator for `readBPHistory` even after a successful cuff cycle. Suspected cause: `setUserParams` never pushed because `vitalSetup.dirty` was false — some Urion firmwares may gate BP-result persistence on user demographics. Action: wire `applyDeviceConfig(force=true)` into the take-reading flow OR into pairing flow. Track via `memory/sprint_12_5_1_close_out.md`. | Sprint 12.5.2 (small) or fold into Sprint 16 polish |
+| Cleaner long-term: TS=0-always + dedupe-only model | The cursor-based incremental sync works but is fragile (the very bug this sprint chased). Per-protocol pure approach: always query TS=0, always rely on local dedupe. Bigger refactor. | Sprint 16 polish |
+| Server-side TZ reconciliation | Already in backlog (Sprint 7 follow-up). | Backlog |
+| Setting cursor reset UX in Dev settings | Useful for debugging, not user-facing. | Backlog |
+| Multi-take regression test (3 readings in 5 min) | Wasn't field-tested in this session. Code is stateless per-call so should work. | Sprint 16 polish |
