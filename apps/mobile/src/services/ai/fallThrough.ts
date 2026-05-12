@@ -22,7 +22,8 @@ export type FallThroughSurface =
   | 'daily_narration'
   | 'reading_paragraph'
   | 'weekly_summary'
-  | 'vital_insight';
+  | 'vital_insight'
+  | 'trends_narrative';
 
 export type CascadeSource = 'tier_b' | 'tier_a' | 'deterministic';
 
@@ -62,6 +63,8 @@ export const DETERMINISTIC_COPY: Record<FallThroughSurface, string> = {
     "Here's your week. The pattern becomes clearer after a few weeks of readings.",
   vital_insight:
     "Patterns appear after a few days of readings. Talk to your doctor for anything specific.",
+  trends_narrative:
+    "Your readings are saved. The pattern becomes clearer over a few weeks.",
 };
 
 // ── AskLeiko orchestrator ────────────────────────────────────────────
@@ -127,8 +130,12 @@ export interface SingleStringCascadeInput {
    * If the Tier-B path errors INSIDE the function, the caller is
    * responsible for catching and returning null. The cascade trusts
    * the return value.
+   *
+   * Omit entirely (undefined) when the surface has no Tier-B path
+   * wired yet — the cascade skips straight to Tier-A WITHOUT emitting
+   * a degradation event, since that's the normal flow, not a failure.
    */
-  tierB: () => Promise<string | null>;
+  tierB?: () => Promise<string | null>;
   /**
    * Compute Tier-A. Return null when no template matches the input.
    */
@@ -160,18 +167,25 @@ export async function runSingleStringCascade(
   const deterministic =
     input.deterministic ?? DETERMINISTIC_COPY[input.surface];
 
-  // Tier-B.
+  // Tier-B. Optional: if the caller omits `tierB`, the cascade skips
+  // straight to Tier-A WITHOUT logging a degradation — the surface
+  // just doesn't use Tier-B today (e.g. trends_narrative pre-Tier-B
+  // wiring).
+  let tierBAttempted = false;
   let tierBBody: string | null = null;
   let tierBReason = 'unavailable';
-  try {
-    tierBBody = await input.tierB();
-    if (tierBBody === null) tierBReason = 'returned_null';
-  } catch (e) {
-    tierBBody = null;
-    tierBReason = e instanceof Error ? e.message : 'unknown';
-  }
-  if (tierBBody !== null && tierBBody.length > 0) {
-    return { source: 'tier_b', body: tierBBody };
+  if (input.tierB) {
+    tierBAttempted = true;
+    try {
+      tierBBody = await input.tierB();
+      if (tierBBody === null) tierBReason = 'returned_null';
+    } catch (e) {
+      tierBBody = null;
+      tierBReason = e instanceof Error ? e.message : 'unknown';
+    }
+    if (tierBBody !== null && tierBBody.length > 0) {
+      return { source: 'tier_b', body: tierBBody };
+    }
   }
 
   // Tier-A.
@@ -183,16 +197,22 @@ export async function runSingleStringCascade(
     tierBReason = e instanceof Error ? `tier_a:${e.message}` : tierBReason;
   }
   if (tierAResult !== null && tierAResult.length > 0) {
-    logger.track('ai_degraded_fall_through', {
-      surface: input.surface,
-      from: 'tier_b',
-      to: 'tier_a',
-      reason: tierBReason,
-    });
+    // Only log the Tier-B → Tier-A step-down when Tier-B was actually
+    // attempted. If it was intentionally skipped (no tierB callback),
+    // landing on Tier-A is the normal flow, not a degradation.
+    if (tierBAttempted) {
+      logger.track('ai_degraded_fall_through', {
+        surface: input.surface,
+        from: 'tier_b',
+        to: 'tier_a',
+        reason: tierBReason,
+      });
+    }
     return { source: 'tier_a', body: tierAResult };
   }
 
-  // Deterministic — last resort.
+  // Deterministic — last resort. Always logged: Tier-A returned null
+  // is a real degradation regardless of whether Tier-B was attempted.
   logger.track('ai_degraded_fall_through', {
     surface: input.surface,
     from: 'tier_a',

@@ -108,7 +108,13 @@ export type AnalyticsEvent =
   | {
       name: 'ai_degraded_fall_through';
       props?: {
-        surface: 'ask_leiko' | 'daily_narration' | 'reading_paragraph' | 'weekly_summary' | 'vital_insight';
+        surface:
+          | 'ask_leiko'
+          | 'daily_narration'
+          | 'reading_paragraph'
+          | 'weekly_summary'
+          | 'vital_insight'
+          | 'trends_narrative';
         from: 'tier_b' | 'tier_a';
         to: 'tier_a' | 'deterministic';
         reason: string;

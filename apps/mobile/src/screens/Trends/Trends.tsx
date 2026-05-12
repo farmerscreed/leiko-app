@@ -1,17 +1,31 @@
-// Trends — Sprint 9 / D13 §10 + docs/04-screens/trends.md.
+// Trends v2 — "The Letter".
 //
-// Multi-vital trends + correlation cards + doctor-PDF export. Layered
-// over useTrendsData (the data fetch + aggregator) and useTrendsCorrelations
-// (the latest meaningful correlation rows). The chart and the paywall
-// sheet are presentational; this screen does the wiring.
+// Narrative-led redesign sourced from `plans/trends-v2-design-brief.md`
+// and the founder-approved Option A "The Letter" mockup in the design
+// canvas bundle. The screen flips the visual hierarchy from Trends v1:
 //
-// Voice rules per docs/05-voice-and-claims.md — every user-visible
-// string here passes the voice gate. No "patient", "diagnose",
-// "predict", "dangerous", "critical", "silent killer".
+//   1. Header                     (Back · brand eyebrow · "Your trends")
+//   2. Range chips                (recessive, top of scroll)
+//   3. Letter hero                (eyebrow + serif paragraph + freshness)
+//   4. Evidence card              (focal vital — BP for v1.0 — chart)
+//   5. Ask Leiko affordance       (calm pill, opens AskLeikoSheet)
+//   6. Cited footnote rail        (numbered correlation cards)
+//   7. See everything toggle      (chevron + label + thin rule)
+//      └── Expansion panel        (today's MultiVitalChart + toggles)
+//   8. Weekly summary placeholder (dashed-border card)
+//   9. Doctor inline link         (centred, soft underline)
+//
+// The doctor-PDF CTA from v1 is REMOVED. Trends v2 owns only the
+// inline link in #9; the PDF flow lives on the new "For your doctor"
+// screen (Sprint 16+ follow-up).
+//
+// Voice rules (docs/05-voice-and-claims.md): every authored string
+// goes through `lintVoiceText` in the component tests. The dynamic
+// narrative passes through `generateTrendsNarrative`, which itself
+// composes voice-clean templates.
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -19,14 +33,22 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Card } from '../../components/Card';
+import { Pill } from '../../components/Pill';
 import {
   MultiVitalChart,
   type MultiVitalSeries,
 } from '../../components/MultiVitalChart';
-import { Pill } from '../../components/Pill';
-import { Button } from '../../components/Button';
 import { PaywallSheet, type PaywallTrigger } from '../../components/PaywallSheet';
+import { EmptyState } from '../../components/EmptyState';
+import { LoadingState } from '../../components/LoadingState';
+import { ErrorState } from '../../components/ErrorState';
+import { TrendsLetterHero } from '../../components/TrendsLetterHero';
+import { TrendsEvidenceCard } from '../../components/TrendsEvidenceCard';
+import { TrendsAskAffordance } from '../../components/TrendsAskAffordance';
+import { TrendsCitedSection } from '../../components/TrendsCitedSection';
+import { TrendsSeeEverythingToggle } from '../../components/TrendsSeeEverythingToggle';
+import { TrendsWeeklySummaryCard } from '../../components/TrendsWeeklySummaryCard';
+import { TrendsDoctorInlineLink } from '../../components/TrendsDoctorInlineLink';
 import {
   useTrendsCorrelations,
   useTrendsData,
@@ -35,13 +57,11 @@ import { usePlusEntitlement } from '../../hooks/usePlusEntitlement';
 import { useFamilyReadings } from '../../hooks/useFamilyReadings';
 import { useAuth } from '../../state/auth';
 import { useTheme, type Theme } from '../../theme';
+import { generateTrendsNarrative } from '../../services/ai/trendsNarration';
 import type { TrendsRange } from '../../utils/trends-aggregate';
 import type { VitalType } from '../../components/VitalRing';
-import type { CorrelationRow, AccountType } from '../../types/database';
+import type { AccountType } from '../../types/database';
 
-// 'all_time' is appended only for self-buyers (D8a §9.5). Caregiver
-// mode never shows the chip, so the per-mode RANGES below is filtered
-// at render time.
 const CAREGIVER_RANGES: TrendsRange[] = ['7d', '30d', '90d', '1y'];
 const SELF_BUYER_RANGES: TrendsRange[] = ['7d', '30d', '90d', '1y', 'all_time'];
 const FREE_RANGE: TrendsRange = '7d';
@@ -51,6 +71,13 @@ const RANGE_LABELS: Record<TrendsRange, string> = {
   '90d': '90D',
   '1y': '1Y',
   all_time: 'All',
+};
+const RANGE_WORD: Record<TrendsRange, string> = {
+  '7d': '7 days',
+  '30d': '30 days',
+  '90d': '90 days',
+  '1y': 'year',
+  all_time: 'time on Leiko',
 };
 
 const ALL_VITALS: VitalType[] = ['bp', 'hr', 'spo2', 'sleep', 'activity'];
@@ -69,31 +96,39 @@ const VITAL_CHIP_LABEL: Record<VitalType, string> = {
   activity: 'Activity',
 };
 
-const CORRELATION_TYPE_EYEBROW: Record<CorrelationRow['correlation_type'], string> = {
-  sleep_x_morning_bp: 'Sleep · Blood pressure',
-  activity_x_resting_hr: 'Activity · Heart rate',
-  spo2_dip_x_sleep_score: 'SpO2 · Sleep',
-};
-
 interface PaywallState {
   visible: boolean;
   trigger: PaywallTrigger;
 }
 
+// ─── Freshness formatting ─────────────────────────────────────────────
+
+function formatFreshness(computedAtMs: number, nowMs: number): string {
+  const ageMs = Math.max(0, nowMs - computedAtMs);
+  const m = Math.round(ageMs / 60_000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.round(h / 24);
+  if (d < 7) return `${d}d ago`;
+  return 'last week';
+}
+
+// ─── Screen ───────────────────────────────────────────────────────────
+
 export function Trends() {
   const theme = useTheme();
   const profile = useAuth((s) => s.profile);
   const accountType: AccountType = profile?.account_type ?? 'caregiver';
+  const parentLabel = profile?.display_name ?? 'Mum';
 
-  // Family scope: pick the first family the user is in. Sprint 10+ adds
-  // a per-parent picker for the caregiver mode; Sprint 9 ships the
-  // single-family path which covers self-buyer fully and caregiver
-  // single-parent (the most common case).
   const { parents, isRefreshing, refresh } = useFamilyReadings();
   const familyId = parents[0]?.familyId ?? null;
   const userId = useAuth((s) => s.session?.user.id ?? null);
 
   const [range, setRange] = useState<TrendsRange>(FREE_RANGE);
+  const [expanded, setExpanded] = useState(false);
   const [visible, setVisible] = useState<Record<VitalType, boolean>>(
     () => ({ ...DEFAULT_VISIBLE }),
   );
@@ -106,11 +141,32 @@ export function Trends() {
   const trends = useTrendsData(familyId, range);
   const correlations = useTrendsCorrelations(familyId, userId);
 
+  // Narrative — Sprint 16 cascade. Refetches when range / data /
+  // correlations change. The cascade guarantees a non-null body.
+  const [narrative, setNarrative] = useState<{
+    body: string;
+    computedAtMs: number;
+  } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void generateTrendsNarrative({
+      data: trends.data,
+      correlations: correlations.correlations,
+      range,
+      accountType,
+      parentLabel,
+    }).then((r) => {
+      if (cancelled) return;
+      setNarrative({ body: r.body, computedAtMs: Date.now() });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [trends.data, correlations.correlations, range, accountType, parentLabel]);
+
   const onRangeTap = useCallback(
     (next: TrendsRange) => {
       if (next !== FREE_RANGE && !isPlus) {
-        // 'all_time' is the self-buyer-only trigger per D8a §9.5; the
-        // other gated chips fire 'range_extension'.
         const trigger: PaywallTrigger =
           next === 'all_time' ? 'all_time_range' : 'range_extension';
         setPaywall({ visible: true, trigger });
@@ -125,31 +181,42 @@ export function Trends() {
     setVisible((prev) => ({ ...prev, [kind]: !prev[kind] }));
   }, []);
 
-  const onExportTap = useCallback(() => {
-    if (!isPlus) {
-      setPaywall({ visible: true, trigger: 'pdf_export' });
-      return;
-    }
-    // Sprint 9: the PDF preview sheet itself lands in P4 wiring; for
-    // Sprint 9 acceptance the trigger flow + paywall gate are the
-    // testable surfaces. Sprint 10 wires the navigation step.
-  }, [isPlus]);
-
   const dismissPaywall = useCallback(
     () => setPaywall((prev) => ({ ...prev, visible: false })),
     [],
   );
+
+  const onAskTrend = useCallback(() => {
+    // Sprint 16 cascade-protected: AskLeiko is the existing
+    // conversational surface. Deep-linked navigation is wired by the
+    // navigator. For v1.0 this fires a no-op when the navigator
+    // didn't pass an onAsk handler — the affordance still tests as
+    // present without forcing screen tests to mock navigation.
+    // (Hook into screen-level navigation in a follow-up patch.)
+  }, []);
+
+  const onOpenDoctorScreen = useCallback(() => {
+    // Same pattern as onAskTrend — deep-link to "For your doctor"
+    // (the new screen). Wiring lands when the screen ships; v1.0 is
+    // a no-op press to keep the surface visible.
+  }, []);
 
   const series = useMemo<MultiVitalSeries[]>(
     () => buildSeries(trends.data, visible),
     [trends.data, visible],
   );
 
-  const hasAnyData = series.some(
-    (s) => s.visible && s.values.length > 0,
-  );
+  const bpSummary = trends.data?.summary.bp;
+  const hasBpData = (bpSummary?.count ?? 0) >= 3;
 
   const headerTitle = accountType === 'self_buyer' ? 'Your trends' : 'Trends';
+  const eyebrow = `A letter from Leiko · ${RANGE_WORD[range]}`;
+  const freshnessCaption = narrative
+    ? `Based on your last ${RANGE_WORD[range]} · last computed ${formatFreshness(
+        narrative.computedAtMs,
+        Date.now(),
+      )}`
+    : undefined;
 
   return (
     <SafeAreaView
@@ -175,121 +242,104 @@ export function Trends() {
       >
         <Header theme={theme} title={headerTitle} />
 
-        {/* Range chips — 7d free, others Plus-gated */}
-        <ChipRow
+        <RangeChipsRow
           theme={theme}
-          testID="trends-range-row"
-          label="Range"
-        >
-          {(accountType === 'self_buyer' ? SELF_BUYER_RANGES : CAREGIVER_RANGES).map((r) => (
-            <Pill
-              key={r}
-              variant={range === r ? 'accent' : 'outline'}
-              selected={range === r}
-              onPress={() => onRangeTap(r)}
-              testID={`trends-range:${r}`}
-            >
-              {RANGE_LABELS[r]}
-            </Pill>
-          ))}
-        </ChipRow>
+          accountType={accountType}
+          active={range}
+          isPlus={isPlus}
+          onRangeTap={onRangeTap}
+        />
 
-        {/* Vital toggle — five chips with current visibility */}
-        <ChipRow
-          theme={theme}
-          testID="trends-vitals-row"
-          label="Vitals"
-        >
-          {ALL_VITALS.map((v) => (
-            <Pill
-              key={v}
-              variant={visible[v] ? 'accent' : 'outline'}
-              selected={visible[v]}
-              onPress={() => onVitalToggle(v)}
-              testID={`trends-toggle:${v}`}
-            >
-              {VITAL_CHIP_LABEL[v]}
-            </Pill>
-          ))}
-        </ChipRow>
-
-        {/* Chart card — empty / loading / error / default states */}
-        <View
-          style={{
-            paddingHorizontal: theme.spacing.l,
-            marginTop: theme.spacing.l,
-          }}
-        >
-          <Card>
-            {trends.isLoading ? (
-              <ChartLoading theme={theme} />
-            ) : trends.error ? (
-              <ChartError theme={theme} onRetry={refresh} />
-            ) : !hasAnyData ? (
-              <ChartEmpty theme={theme} />
-            ) : (
-              <MultiVitalChart
-                series={series}
-                caption="This range"
-                subCaption={RANGE_LABELS[range]}
-                testID="trends-chart"
-              />
-            )}
-          </Card>
-        </View>
-
-        {/* Correlation cards — only meaningful, capped at 3 */}
-        {correlations.correlations.length > 0 ? (
-          <View
-            style={{
-              paddingHorizontal: theme.spacing.l,
-              marginTop: theme.spacing.l,
-            }}
-            testID="trends-correlations"
-          >
-            {correlations.correlations.map((c) => (
-              <CorrelationCard
-                key={c.id}
-                theme={theme}
-                row={c}
-                testID={`trends-correlation:${c.correlation_type}`}
-              />
-            ))}
+        {trends.isLoading && !narrative ? (
+          <LoadingState
+            caption="Reading the last few weeks."
+            testID="trends-loading"
+            style={{ marginTop: theme.spacing.xl }}
+          />
+        ) : trends.error ? (
+          <View style={{ marginTop: theme.spacing.xl }}>
+            <ErrorState
+              onRetry={refresh}
+              testID="trends-error"
+              title="We couldn't read your trends just now."
+              body="Pull to refresh, or try again in a moment."
+            />
           </View>
-        ) : null}
+        ) : !hasBpData ? (
+          <View style={{ marginTop: theme.spacing.xl }}>
+            <EmptyState
+              title="Trends will appear here next week"
+              body="We need a few days of readings before we can show a pattern."
+              testID="trends-empty"
+            />
+          </View>
+        ) : (
+          <>
+            <TrendsLetterHero
+              body={narrative?.body ?? ''}
+              eyebrow={eyebrow}
+              freshnessCaption={freshnessCaption}
+              testID="trends-letter"
+            />
 
-        {/* Weekly summary placeholder card — Sprint 12.5 swaps the body */}
-        <View
-          style={{
-            paddingHorizontal: theme.spacing.l,
-            marginTop: theme.spacing.l,
-          }}
-        >
-          <WeeklySummaryPlaceholder theme={theme} />
-        </View>
+            <View style={{ marginTop: theme.spacing.l }}>
+              <TrendsEvidenceCard
+                vital="bp"
+                title="Blood pressure · morning"
+                latestValue={
+                  bpSummary?.avgSys && bpSummary?.avgDia
+                    ? `${Math.round(bpSummary.avgSys)}/${Math.round(bpSummary.avgDia)}`
+                    : '—'
+                }
+                series={(trends.data?.series.bp ?? []).map((p) => p.sys)}
+                yRange={[90, 150]}
+                healthyBand={[110, 130]}
+                axisStart={trends.data?.series.bp[0]?.day ?? ''}
+                axisEnd={
+                  trends.data?.series.bp[
+                    trends.data.series.bp.length - 1
+                  ]?.day ?? ''
+                }
+                testID="trends-evidence"
+              />
+            </View>
 
-        {/* Doctor PDF CTA */}
-        <View
-          style={{
-            paddingHorizontal: theme.spacing.l,
-            marginTop: theme.spacing.xl,
-          }}
-        >
-          <Button
-            variant={accountType === 'self_buyer' ? 'secondary' : 'primary'}
-            onPress={onExportTap}
-            testID="trends-export-cta"
-            accessibilityHint={
-              isPlus
-                ? 'Opens the doctor-ready PDF preview.'
-                : 'Opens the Leiko Plus paywall.'
-            }
-          >
-            {accountType === 'self_buyer'
-              ? 'Save as PDF for my doctor'
-              : 'Share with your doctor'}
-          </Button>
-        </View>
+            <View style={{ marginTop: theme.spacing.m }}>
+              <TrendsAskAffordance
+                onPress={onAskTrend}
+                testID="trends-ask"
+              />
+            </View>
+
+            <TrendsCitedSection
+              rows={correlations.correlations}
+              testID="trends-cited"
+            />
+
+            <TrendsSeeEverythingToggle
+              open={expanded}
+              onToggle={() => setExpanded((v) => !v)}
+              testID="trends-see-everything"
+            />
+            {expanded ? (
+              <ExpansionPanel
+                theme={theme}
+                series={series}
+                visible={visible}
+                onToggle={onVitalToggle}
+                rangeLabel={RANGE_LABELS[range]}
+              />
+            ) : null}
+
+            <TrendsWeeklySummaryCard testID="trends-weekly-summary" />
+          </>
+        )}
+
+        <TrendsDoctorInlineLink
+          accountType={accountType}
+          onPress={onOpenDoctorScreen}
+          testID="trends-doctor-link"
+        />
       </ScrollView>
 
       <PaywallSheet
@@ -314,9 +364,15 @@ function Header({ theme, title }: { theme: Theme; title: string }) {
       }}
     >
       <Text
+        accessibilityRole="header"
         style={[
-          theme.type('headline'),
-          { color: theme.colors.text.primary },
+          {
+            fontFamily: theme.fontFamilies.editorial,
+            fontSize: 30,
+            lineHeight: 34,
+            color: theme.colors.text.primary,
+            letterSpacing: -0.4,
+          },
         ]}
         testID="trends-header-title"
       >
@@ -326,233 +382,105 @@ function Header({ theme, title }: { theme: Theme; title: string }) {
   );
 }
 
-function ChipRow({
+function RangeChipsRow({
   theme,
-  label,
-  children,
-  testID,
+  accountType,
+  active,
+  isPlus,
+  onRangeTap,
 }: {
   theme: Theme;
-  label: string;
-  children: React.ReactNode;
-  testID?: string;
+  accountType: AccountType;
+  active: TrendsRange;
+  isPlus: boolean;
+  onRangeTap: (r: TrendsRange) => void;
 }) {
+  const ranges =
+    accountType === 'self_buyer' ? SELF_BUYER_RANGES : CAREGIVER_RANGES;
   return (
     <View
       style={{
         paddingTop: theme.spacing.m,
         paddingHorizontal: theme.spacing.l,
+        flexDirection: 'row',
+        gap: theme.spacing.xs,
       }}
-      testID={testID}
+      testID="trends-range-row"
     >
-      <Text
-        accessibilityLabel={label}
-        style={[
-          theme.type('label'),
-          {
-            color: theme.colors.text.tertiary,
-            textTransform: 'uppercase',
-            letterSpacing: 0.6,
-            marginBottom: theme.spacing.xs,
-          },
-        ]}
-      >
-        {label}
-      </Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ columnGap: theme.spacing.s }}
-      >
-        {children}
-      </ScrollView>
+      {ranges.map((r) => {
+        const isActive = active === r;
+        const locked = r !== FREE_RANGE && !isPlus;
+        return (
+          <Pill
+            key={r}
+            variant={isActive ? 'accent' : 'outline'}
+            selected={isActive}
+            onPress={() => onRangeTap(r)}
+            testID={`trends-range:${r}`}
+            accessibilityLabel={locked ? `${RANGE_LABELS[r]} (Plus only)` : RANGE_LABELS[r]}
+          >
+            {locked ? `${RANGE_LABELS[r]} ·` : RANGE_LABELS[r]}
+          </Pill>
+        );
+      })}
     </View>
   );
 }
 
-function ChartLoading({ theme }: { theme: Theme }) {
-  return (
-    <View style={{ padding: theme.spacing.l, alignItems: 'center' }}>
-      <ActivityIndicator color={theme.colors.brand.primary} />
-      <Text
-        style={[
-          theme.type('bodyM'),
-          {
-            color: theme.colors.text.tertiary,
-            marginTop: theme.spacing.s,
-          },
-        ]}
-        testID="trends-chart-loading"
-      >
-        Loading your trend.
-      </Text>
-    </View>
-  );
-}
-
-function ChartError({
+function ExpansionPanel({
   theme,
-  onRetry,
+  series,
+  visible,
+  onToggle,
+  rangeLabel,
 }: {
   theme: Theme;
-  onRetry: () => void;
+  series: MultiVitalSeries[];
+  visible: Record<VitalType, boolean>;
+  onToggle: (kind: VitalType) => void;
+  rangeLabel: string;
 }) {
   return (
     <View
-      style={{ padding: theme.spacing.l, alignItems: 'center' }}
-      testID="trends-chart-error"
+      style={{
+        marginHorizontal: theme.spacing.l,
+        marginTop: theme.spacing.m,
+        padding: theme.spacing.m,
+        borderRadius: theme.radii.l,
+        backgroundColor: theme.colors.surface.warmElevated,
+        borderColor: theme.colors.border.subtle,
+        borderWidth: StyleSheet.hairlineWidth,
+      }}
+      testID="trends-expansion"
     >
-      <Text
-        style={[
-          theme.type('bodyL'),
-          { color: theme.colors.text.primary, textAlign: 'center' },
-        ]}
-      >
-        We couldn't load your trends just now.
-      </Text>
-      <View style={{ marginTop: theme.spacing.m }}>
-        <Button variant="ghost" onPress={onRetry} testID="trends-retry">
-          Try again
-        </Button>
-      </View>
-    </View>
-  );
-}
-
-function ChartEmpty({ theme }: { theme: Theme }) {
-  return (
-    <View
-      style={{ padding: theme.spacing.l }}
-      testID="trends-chart-empty"
-    >
-      <Text
-        style={[
-          theme.type('headline'),
-          { color: theme.colors.text.primary, textAlign: 'center' },
-        ]}
-      >
-        Trends will appear here next week
-      </Text>
-      <Text
-        style={[
-          theme.type('bodyM'),
-          {
-            color: theme.colors.text.secondary,
-            textAlign: 'center',
-            marginTop: theme.spacing.s,
-          },
-        ]}
-      >
-        We need a few days of readings before we can show a pattern.
-      </Text>
-    </View>
-  );
-}
-
-function CorrelationCard({
-  theme,
-  row,
-  testID,
-}: {
-  theme: Theme;
-  row: CorrelationRow;
-  testID?: string;
-}) {
-  return (
-    <View style={{ marginTop: theme.spacing.s }} testID={testID}>
-      <Card>
-        <View style={{ padding: theme.spacing.l }}>
-          <Text
-            style={[
-              theme.type('label'),
-              {
-                color: theme.colors.text.tertiary,
-                textTransform: 'uppercase',
-                letterSpacing: 0.6,
-              },
-            ]}
-            testID={testID ? `${testID}-eyebrow` : undefined}
-          >
-            {CORRELATION_TYPE_EYEBROW[row.correlation_type]}
-          </Text>
-          {row.narrative_short ? (
-            <Text
-              style={[
-                theme.type('headline'),
-                {
-                  color: theme.colors.text.primary,
-                  marginTop: theme.spacing.xs,
-                },
-              ]}
-              testID={testID ? `${testID}-headline` : undefined}
-            >
-              {row.narrative_short}
-            </Text>
-          ) : null}
-          {row.narrative_long ? (
-            <Text
-              style={[
-                theme.type('bodyM'),
-                {
-                  color: theme.colors.text.secondary,
-                  marginTop: theme.spacing.s,
-                },
-              ]}
-              testID={testID ? `${testID}-body` : undefined}
-            >
-              {row.narrative_long}
-            </Text>
-          ) : null}
-          <Text
-            style={[
-              theme.type('label'),
-              {
-                color: theme.colors.text.tertiary,
-                marginTop: theme.spacing.s,
-              },
-            ]}
-            testID={testID ? `${testID}-stat` : undefined}
-          >
-            Over the last {row.window_days} days · n={row.sample_n ?? 0}
-          </Text>
-        </View>
-      </Card>
-    </View>
-  );
-}
-
-function WeeklySummaryPlaceholder({ theme }: { theme: Theme }) {
-  return (
-    <Card>
       <View
-        style={{ padding: theme.spacing.l }}
-        testID="trends-weekly-summary-placeholder"
+        style={{
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: theme.spacing.xs,
+          marginBottom: theme.spacing.m,
+        }}
       >
-        <Text
-          style={[
-            theme.type('label'),
-            {
-              color: theme.colors.text.tertiary,
-              textTransform: 'uppercase',
-              letterSpacing: 0.6,
-            },
-          ]}
-        >
-          This week
-        </Text>
-        <Text
-          style={[
-            theme.type('bodyM'),
-            {
-              color: theme.colors.text.secondary,
-              marginTop: theme.spacing.s,
-            },
-          ]}
-        >
-          Your first weekly summary will appear next Sunday.
-        </Text>
+        {ALL_VITALS.map((v) => (
+          <Pill
+            key={v}
+            variant={visible[v] ? 'accent' : 'outline'}
+            selected={visible[v]}
+            onPress={() => onToggle(v)}
+            testID={`trends-toggle:${v}`}
+          >
+            {VITAL_CHIP_LABEL[v]}
+          </Pill>
+        ))}
       </View>
-    </Card>
+
+      <MultiVitalChart
+        series={series}
+        caption="This range"
+        subCaption={rangeLabel}
+        testID="trends-chart"
+      />
+    </View>
   );
 }
 
@@ -571,9 +499,6 @@ function buildSeries(
       days: [],
     }));
   }
-  // BP series uses the systolic mean as the primary line. Diastolic
-  // could be a secondary line in a future iteration; for v1.0 the
-  // multi-vital chart shows ONE line per vital.
   const bp = {
     kind: 'bp' as const,
     visible: visible.bp,

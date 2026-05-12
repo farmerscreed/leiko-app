@@ -1,15 +1,16 @@
-// Trends — Sprint 9 integration tests.
+// Trends v2 — "The Letter" integration tests.
 //
-// Mocks the hooks that the screen depends on at the module boundary
-// so these stay screen-level integration tests (not data-store tests).
-// Pattern mirrors BPDetail.test.tsx — mocks per-hook, swap data per
-// test via let-binding the mock state.
+// Mocks the hooks the screen depends on at the module boundary so
+// these stay screen-level tests, not data-store tests. Pattern
+// mirrors BPDetail.test.tsx.
 
 import { type ReactNode } from 'react';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '../../../theme';
 import { Trends } from '../Trends';
+import { TRENDS_ASK_LABEL } from '../../../components/TrendsAskAffordance';
+import { TRENDS_WEEKLY_BODY } from '../../../components/TrendsWeeklySummaryCard';
 import type { TrendsData } from '../../../utils/trends-aggregate';
 import type {
   CorrelationRow,
@@ -183,157 +184,227 @@ beforeEach(() => {
   mockFamilyId = 'family-1';
 });
 
-describe('Trends — base render', () => {
-  it('renders the self-buyer header copy', () => {
-    render(withProviders(<Trends />));
+async function renderAndAwaitNarrative(): Promise<void> {
+  render(withProviders(<Trends />));
+  await waitFor(() => {
+    expect(screen.queryByTestId('trends-letter-paragraph')).not.toBeNull();
+  });
+}
+
+describe('Trends v2 — header + range chips', () => {
+  it('renders the self-buyer header copy', async () => {
+    await renderAndAwaitNarrative();
     expect(screen.getByTestId('trends-header-title').props.children).toBe(
       'Your trends',
     );
   });
 
-  it('switches the header for caregivers', () => {
+  it('switches the header for caregivers', async () => {
     mockAccountType = 'caregiver';
-    render(withProviders(<Trends />));
+    await renderAndAwaitNarrative();
     expect(screen.getByTestId('trends-header-title').props.children).toBe(
       'Trends',
     );
   });
 
-  it('renders all 4 range chips and all 5 vital toggle chips', () => {
-    render(withProviders(<Trends />));
+  it('renders all 4 range chips for caregiver mode', async () => {
+    mockAccountType = 'caregiver';
+    await renderAndAwaitNarrative();
     for (const r of ['7d', '30d', '90d', '1y'] as const) {
       expect(screen.getByTestId(`trends-range:${r}`)).toBeTruthy();
     }
+  });
+
+  it('renders the all-time chip for self-buyer mode', async () => {
+    await renderAndAwaitNarrative();
+    expect(screen.getByTestId('trends-range:all_time')).toBeTruthy();
+  });
+});
+
+describe('Trends v2 — the letter narrative', () => {
+  it('renders the eyebrow + paragraph + freshness when BP data is present', async () => {
+    await renderAndAwaitNarrative();
+    expect(screen.getByTestId('trends-letter-eyebrow')).toBeTruthy();
+    expect(screen.getByTestId('trends-letter-paragraph')).toBeTruthy();
+    expect(screen.getByTestId('trends-letter-freshness')).toBeTruthy();
+  });
+
+  it('renders the focal evidence chart for BP', async () => {
+    await renderAndAwaitNarrative();
+    expect(screen.getByTestId('trends-evidence')).toBeTruthy();
+    expect(screen.getByTestId('trends-evidence-title')).toBeTruthy();
+    expect(screen.getByTestId('trends-evidence-value').props.children).toBe(
+      '123/81',
+    );
+  });
+
+  it('renders the Ask affordance pill', async () => {
+    await renderAndAwaitNarrative();
+    expect(screen.getByTestId('trends-ask')).toBeTruthy();
+    expect(screen.getByTestId('trends-ask-label').props.children).toBe(
+      TRENDS_ASK_LABEL,
+    );
+  });
+});
+
+describe('Trends v2 — paywall', () => {
+  it('opens the paywall sheet when a free user taps a >7d range chip', async () => {
+    await renderAndAwaitNarrative();
+    fireEvent.press(screen.getByTestId('trends-range:30d'));
+    expect(screen.getByText('Understand your numbers')).toBeTruthy();
+  });
+
+  it('does NOT open the paywall when a Plus user taps a >7d range chip', async () => {
+    mockIsPlus = true;
+    await renderAndAwaitNarrative();
+    fireEvent.press(screen.getByTestId('trends-range:30d'));
+    expect(screen.queryByText('Understand your numbers')).toBeNull();
+  });
+
+  it('uses caregiver paywall copy when account_type is caregiver', async () => {
+    mockAccountType = 'caregiver';
+    await renderAndAwaitNarrative();
+    fireEvent.press(screen.getByTestId('trends-range:30d'));
+    expect(screen.getByText('Stay close, every day')).toBeTruthy();
+  });
+
+  it('uses the all-time trigger for the all_time chip', async () => {
+    await renderAndAwaitNarrative();
+    fireEvent.press(screen.getByTestId('trends-range:all_time'));
+    // PaywallSheet surfaces the same self-buyer headline for either trigger.
+    expect(screen.getByText('Understand your numbers')).toBeTruthy();
+  });
+});
+
+describe('Trends v2 — see everything expansion', () => {
+  it('is collapsed by default — the multi-vital chart is not rendered', async () => {
+    await renderAndAwaitNarrative();
+    expect(screen.queryByTestId('trends-expansion')).toBeNull();
+  });
+
+  it('reveals the multi-vital chart + toggle pills when tapped', async () => {
+    await renderAndAwaitNarrative();
+    fireEvent.press(screen.getByTestId('trends-see-everything'));
+    expect(screen.getByTestId('trends-expansion')).toBeTruthy();
     for (const v of ['bp', 'hr', 'spo2', 'sleep', 'activity'] as const) {
       expect(screen.getByTestId(`trends-toggle:${v}`)).toBeTruthy();
     }
   });
 
-  it('renders the multi-vital chart when data is present', () => {
-    render(withProviders(<Trends />));
-    expect(screen.getByTestId('trends-chart-svg')).toBeTruthy();
-  });
-
-  it('renders the weekly summary placeholder copy', () => {
-    render(withProviders(<Trends />));
+  it('exposes a button role with expanded state on the toggle', async () => {
+    await renderAndAwaitNarrative();
+    const toggle = screen.getByTestId('trends-see-everything');
+    expect(toggle.props.accessibilityRole).toBe('button');
+    expect(toggle.props.accessibilityState).toEqual({ expanded: false });
+    fireEvent.press(toggle);
     expect(
-      screen.getByText('Your first weekly summary will appear next Sunday.'),
-    ).toBeTruthy();
+      screen.getByTestId('trends-see-everything').props.accessibilityState,
+    ).toEqual({ expanded: true });
   });
 });
 
-describe('Trends — paywall triggers', () => {
-  it('opens the paywall sheet when a free user taps a >7d range chip', () => {
-    render(withProviders(<Trends />));
-    fireEvent.press(screen.getByTestId('trends-range:30d'));
-    // PaywallSheet renders the self-buyer headline when visible.
-    expect(screen.getByText('Understand your numbers')).toBeTruthy();
-  });
-
-  it('opens the paywall sheet when a free user taps the export CTA', () => {
-    render(withProviders(<Trends />));
-    fireEvent.press(screen.getByTestId('trends-export-cta'));
-    expect(screen.getByText('Understand your numbers')).toBeTruthy();
-  });
-
-  it('does NOT open the paywall when a Plus user taps a >7d range chip', () => {
-    mockIsPlus = true;
-    render(withProviders(<Trends />));
-    fireEvent.press(screen.getByTestId('trends-range:30d'));
-    expect(screen.queryByText('Understand your numbers')).toBeNull();
-  });
-
-  it('uses caregiver paywall copy when account_type is caregiver', () => {
-    mockAccountType = 'caregiver';
-    render(withProviders(<Trends />));
-    fireEvent.press(screen.getByTestId('trends-range:30d'));
-    expect(screen.getByText('Stay close, every day')).toBeTruthy();
-  });
-});
-
-describe('Trends — vital toggles', () => {
-  it('toggles a vital live without re-fetching data', () => {
-    // The mock returns the same trendsData object every render — the
-    // chart's visibility flips because the chip toggles local state,
-    // not because new data was fetched. Asserting that the SVG line
-    // disappears proves the local-toggle path.
-    render(withProviders(<Trends />));
-    expect(screen.getByTestId('trends-chart-line-bp')).toBeTruthy();
-    fireEvent.press(screen.getByTestId('trends-toggle:bp'));
-    expect(screen.queryByTestId('trends-chart-line-bp')).toBeNull();
-  });
-});
-
-describe('Trends — empty / loading / error states', () => {
-  it('shows the empty-state copy when no data is present', () => {
+describe('Trends v2 — empty / loading / error', () => {
+  it('shows the empty state when no BP data is present', async () => {
     mockTrendsData = emptyTrends();
     render(withProviders(<Trends />));
-    expect(screen.getByText('Trends will appear here next week')).toBeTruthy();
+    await waitFor(() => {
+      expect(screen.queryByTestId('trends-empty')).not.toBeNull();
+    });
+    expect(screen.queryByTestId('trends-letter-paragraph')).toBeNull();
   });
 
-  it('shows the loading indicator while the query is in flight', () => {
+  it('shows the loading state while the query is in flight and narrative is absent', () => {
     mockTrendsLoading = true;
     mockTrendsData = undefined;
     render(withProviders(<Trends />));
-    expect(screen.getByTestId('trends-chart-loading')).toBeTruthy();
+    expect(screen.getByTestId('trends-loading')).toBeTruthy();
   });
 
-  it('shows the error state with a Try again CTA when the query fails', () => {
+  it('shows the error state with a Try again CTA when the query fails', async () => {
     mockTrendsLoading = false;
     mockTrendsError = new Error('network');
     mockTrendsData = undefined;
     render(withProviders(<Trends />));
-    expect(screen.getByTestId('trends-chart-error')).toBeTruthy();
-    expect(screen.getByTestId('trends-retry')).toBeTruthy();
+    await waitFor(() => {
+      expect(screen.queryByTestId('trends-error')).not.toBeNull();
+    });
+    expect(screen.getByTestId('trends-error-retry')).toBeTruthy();
   });
 });
 
-describe('Trends — correlation cards', () => {
-  it('renders a card per meaningful correlation (capped at 3)', () => {
+describe('Trends v2 — cited footnote rail', () => {
+  it('renders a numbered footnote per meaningful correlation', async () => {
     mockCorrelations = [
       makeCorrelation('sleep_x_morning_bp', -0.9),
       makeCorrelation('activity_x_resting_hr', -0.5),
-      makeCorrelation('spo2_dip_x_sleep_score', 0.4),
     ];
-    render(withProviders(<Trends />));
-    expect(
-      screen.getByTestId('trends-correlation:sleep_x_morning_bp'),
-    ).toBeTruthy();
-    expect(
-      screen.getByTestId('trends-correlation:activity_x_resting_hr'),
-    ).toBeTruthy();
-    expect(
-      screen.getByTestId('trends-correlation:spo2_dip_x_sleep_score'),
-    ).toBeTruthy();
+    await renderAndAwaitNarrative();
+    expect(screen.getByTestId('trends-cited')).toBeTruthy();
+    expect(screen.getByTestId('trends-cited-1')).toBeTruthy();
+    expect(screen.getByTestId('trends-cited-2')).toBeTruthy();
+    expect(screen.getByTestId('trends-cited-1-numeral').props.children).toBe(1);
+    expect(screen.getByTestId('trends-cited-2-numeral').props.children).toBe(2);
   });
 
-  it('renders nothing in the correlation slot when no meaningful rows exist', () => {
+  it('renders nothing when no meaningful correlations exist', async () => {
     mockCorrelations = [];
-    render(withProviders(<Trends />));
-    expect(screen.queryByTestId('trends-correlations')).toBeNull();
+    await renderAndAwaitNarrative();
+    expect(screen.queryByTestId('trends-cited')).toBeNull();
   });
 
-  it('shows the per-card narrative + sample-size disclosure', () => {
+  it('labels strong correlations as Strong', async () => {
     mockCorrelations = [makeCorrelation('sleep_x_morning_bp', -0.9)];
-    render(withProviders(<Trends />));
-    expect(
-      screen.getByText('Poor sleep ↔ +5 mmHg morning systolic'),
-    ).toBeTruthy();
-    expect(screen.getByText('Over the last 30 days · n=24')).toBeTruthy();
+    await renderAndAwaitNarrative();
+    expect(screen.getByTestId('trends-cited-1-strength').props.children).toBe(
+      'Strong',
+    );
+  });
+
+  it('labels weak correlations as Gentle', async () => {
+    mockCorrelations = [makeCorrelation('spo2_dip_x_sleep_score', 0.2)];
+    await renderAndAwaitNarrative();
+    expect(screen.getByTestId('trends-cited-1-strength').props.children).toBe(
+      'Gentle',
+    );
   });
 });
 
-describe('Trends — export CTA copy by account_type', () => {
-  it('reads "Save as PDF for my doctor" in self-buyer mode', () => {
-    render(withProviders(<Trends />));
-    expect(screen.getByText('Save as PDF for my doctor')).toBeTruthy();
+describe('Trends v2 — weekly summary placeholder + doctor inline link', () => {
+  it('renders the weekly summary placeholder body copy', async () => {
+    await renderAndAwaitNarrative();
+    expect(
+      screen.getByTestId('trends-weekly-summary-body').props.children,
+    ).toBe(TRENDS_WEEKLY_BODY);
   });
 
-  it('reads "Share with your doctor" in caregiver mode', () => {
-    mockAccountType = 'caregiver';
-    render(withProviders(<Trends />));
-    expect(screen.getByText('Share with your doctor')).toBeTruthy();
+  it('reads "for your doctor" in self-buyer mode', async () => {
+    await renderAndAwaitNarrative();
+    expect(
+      screen.getByTestId('trends-doctor-link-label').props.children,
+    ).toBe('Want to put this together for your doctor?');
   });
+
+  it('reads "for their doctor" in caregiver mode', async () => {
+    mockAccountType = 'caregiver';
+    await renderAndAwaitNarrative();
+    expect(
+      screen.getByTestId('trends-doctor-link-label').props.children,
+    ).toBe('Want to put this together for their doctor?');
+  });
+
+  it('does NOT render a PDF export CTA anywhere on Trends', async () => {
+    await renderAndAwaitNarrative();
+    expect(screen.queryByTestId('trends-export-cta')).toBeNull();
+    expect(screen.queryByText('Save as PDF for my doctor')).toBeNull();
+    expect(screen.queryByText('Share with your doctor')).toBeNull();
+  });
+});
+
+// Silence the React act-warning during the async narrative effect when
+// a test never explicitly waits — calling act once at module teardown
+// flushes any trailing microtask. Some tests above use waitFor instead.
+afterEach(async () => {
+  await act(async () => {});
 });
 
 // ────────────────────────────────────────────────────────────────────
