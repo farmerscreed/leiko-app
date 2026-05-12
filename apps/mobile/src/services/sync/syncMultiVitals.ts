@@ -91,6 +91,10 @@ import type {
   SleepStage,
 } from '../../types/vitals';
 
+// BLE_TRACE — Sprint 16.5a Phase A forensic-capture instrumentation.
+// See apps/mobile/src/services/ble/UrionDevice.ts for the convention.
+const BLE_TRACE = typeof __DEV__ !== 'undefined' && __DEV__;
+
 const APP_VERSION = '0.0.1'; // bumped via package.json on release
 const HR_DEFAULT_WINDOW_SEC = 30 * 60;
 const SPO2_DEFAULT_WINDOW_SEC = 60 * 60;
@@ -259,6 +263,12 @@ async function syncHRStep(
     alwaysIncludeToday: true,
   });
 
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncMultiVitals.hr enter cursor.hr=${cursor.hr} days=[${days.join(',')}]`,
+    );
+  }
+
   const addPending = useHR.getState().addPending;
   let newestRaw = cursor.hr;
   let totalPulled = 0;
@@ -267,6 +277,11 @@ async function syncHRStep(
     const samples = await readHRHistory(device, {
       dayTimestampSec: unixSecFromDayLocal(day),
     });
+    if (BLE_TRACE) {
+      console.log(
+        `[ble-trace] syncMultiVitals.hr day=${day} readHRHistory returned ${samples.length} samples`,
+      );
+    }
     // Sample-level dedup: keep only samples newer than cursor.hr.
     const fresh =
       cursor.hr > 0
@@ -292,6 +307,11 @@ async function syncHRStep(
   if (newestRaw > cursor.hr) {
     setVitalCursor(deviceBleId, 'hr', newestRaw);
   }
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncMultiVitals.hr exit totalPulled=${totalPulled} newestRaw=${newestRaw}`,
+    );
+  }
   return totalPulled;
 }
 
@@ -312,6 +332,12 @@ async function syncSpO2Step(
     alwaysIncludeToday: true,
   });
 
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncMultiVitals.spo2 enter cursor.spo2=${cursor.spo2 || '(empty)'} days=[${days.join(',')}]`,
+    );
+  }
+
   const addPending = useSpO2.getState().addPending;
   let totalPulled = 0;
 
@@ -319,6 +345,11 @@ async function syncSpO2Step(
     const samples = await readSpO2History(device, {
       dayTimestampSec: unixSecFromDayLocal(day),
     });
+    if (BLE_TRACE) {
+      console.log(
+        `[ble-trace] syncMultiVitals.spo2 day=${day} readSpO2History returned ${samples.length} samples`,
+      );
+    }
     for (const s of samples) {
       const sample: SpO2Sample = {
         measuredAtSec: watchTimestampToUtcSec(s.timestampSec),
@@ -335,6 +366,9 @@ async function syncSpO2Step(
     totalPulled += samples.length;
     // Advance per-day so a mid-loop failure leaves a resumable cursor.
     setVitalCursor(deviceBleId, 'spo2', day);
+  }
+  if (BLE_TRACE) {
+    console.log(`[ble-trace] syncMultiVitals.spo2 exit totalPulled=${totalPulled}`);
   }
   return totalPulled;
 }
@@ -371,12 +405,27 @@ async function syncDayInfoStep(
     new Set<string>([...sleepDays, ...activityDays]),
   ).sort();
 
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncMultiVitals.dayInfo enter ` +
+        `cursor.sleep=${cursor.sleep || '(empty)'} cursor.activity=${cursor.activity || '(empty)'} ` +
+        `allDays=[${allDays.join(',')}]`,
+    );
+  }
+
   let sleepCount = 0;
   let activityCount = 0;
 
   for (const day of allDays) {
     const daysAgo = countDaysBetween(day, todayLocal);
     const info = await readDayInfo(device, { daysAgo });
+    if (BLE_TRACE) {
+      console.log(
+        `[ble-trace] syncMultiVitals.dayInfo day=${day} daysAgo=${daysAgo} ` +
+          `activity=${info.activity ? `steps=${info.activity.totalSteps}` : 'null'} ` +
+          `sleep=${info.sleep ? `min=${info.sleep.totalMinutes}` : 'null'}`,
+      );
+    }
 
     if (sleepDaySet.has(day)) {
       if (info.sleep && info.sleep.totalMinutes > 0) {
@@ -448,6 +497,11 @@ async function syncDayInfoStep(
     }
   }
 
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncMultiVitals.dayInfo exit sleepCount=${sleepCount} activityCount=${activityCount}`,
+    );
+  }
   return { sleep: sleepCount, activity: activityCount };
 }
 

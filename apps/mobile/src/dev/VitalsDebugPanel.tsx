@@ -24,8 +24,15 @@ import { useActivity } from '../state/activity';
 import { useDailyPulseData } from '../state/dailyPulse';
 import { useSyncOrchestrator } from '../state/syncOrchestrator';
 import { usePairing } from '../state/pairing';
-import { getVitalCursor, resetVitalCursors } from '../services/sync/syncBacklog';
+import { useAuth } from '../state/auth';
+import { useVitalSetup } from '../state/vitalSetup';
+import {
+  getVitalCursor,
+  resetVitalCursors,
+  watchTimestampToUtcSec,
+} from '../services/sync/syncBacklog';
 import { peekRecent } from '../services/analytics/logger';
+import { useCaptureStats } from './captureStats';
 
 // Sync-related events worth showing on the timeline. Anything else
 // from the analytics ring buffer is filtered out so the panel reads
@@ -95,6 +102,23 @@ function formatSec(sec: number | null | undefined): string {
   return formatRelative(sec * 1000);
 }
 
+/** Humanise a RAW watch-firmware second cursor (bp / hr) as "Nd ago".
+ *  Applies the UTC+8 shift so the displayed age reflects true elapsed
+ *  time, not the raw on-watch encoding. */
+function formatCursorRawSec(rawSec: number): string {
+  if (!rawSec) return '—';
+  return formatRelative(watchTimestampToUtcSec(rawSec) * 1000);
+}
+
+/** Humanise a 'YYYY-MM-DD' day-cursor (spo2 / sleep / activity) as
+ *  "Nd ago" against today UTC. Empty string → "—". */
+function formatCursorDay(day: string): string {
+  if (!day) return '—';
+  const ms = new Date(`${day}T00:00:00Z`).getTime();
+  if (!Number.isFinite(ms)) return day;
+  return formatRelative(ms);
+}
+
 export function VitalsDebugPanel() {
   const theme = useTheme();
   const paired = usePairing((s) => s.pairedDevice);
@@ -102,6 +126,12 @@ export function VitalsDebugPanel() {
   const ortLastSyncAt = useSyncOrchestrator((s) => s.lastSyncAt);
   const ortError = useSyncOrchestrator((s) => s.lastError);
   const runSync = useSyncOrchestrator((s) => s.runSync);
+  const profile = useAuth((s) => s.profile);
+  const vsDirty = useVitalSetup((s) => s.dirty);
+  const vsAutoHr = useVitalSetup((s) => s.autoHrEnabled);
+  const vsAutoSpo2 = useVitalSetup((s) => s.autoSpo2Enabled);
+  const notifyKindCounts = useCaptureStats((s) => s.notifyKindCounts);
+  const resetCaptureStats = useCaptureStats((s) => s.reset);
 
   const dp = useDailyPulseData();
   const bpPending = useReadings((s) => s.pending.length);
@@ -244,6 +274,98 @@ export function VitalsDebugPanel() {
           Reset cursors + re-sync
         </Text>
       </Pressable>
+
+      {/* Capture Status — Sprint 16.5a Phase A. Read-only summary of
+          the state that determines whether a capture session will
+          produce useful traces: paired device, profile demographics,
+          dirty-flag, and the running 0x73 byte tally. No buttons here
+          (the existing Force Sync + Reset cursors above cover the
+          mutations a session needs). */}
+      <Text style={[labelStyle, { marginBottom: theme.spacing.s }]}>
+        Capture status
+      </Text>
+      <View style={cardStyle}>
+        <View style={rowStyle}>
+          <Text style={labelStyle}>Profile completeness</Text>
+          <Text style={valueStyle}>
+            {profile
+              ? `yob=${profile.year_of_birth ? 'y' : '✗'} ` +
+                `gender=${profile.gender ? 'y' : '✗'} ` +
+                `h=${profile.height_cm ? 'y' : '✗'} ` +
+                `w=${profile.weight_kg ? 'y' : '✗'}`
+              : '— no profile'}
+          </Text>
+        </View>
+        <View style={rowStyle}>
+          <Text style={labelStyle}>vitalSetup.dirty</Text>
+          <Text style={valueStyle}>{vsDirty ? 'true (will flush)' : 'false (gated)'}</Text>
+        </View>
+        <View style={rowStyle}>
+          <Text style={labelStyle}>auto-HR / auto-SpO2</Text>
+          <Text style={valueStyle}>
+            {vsAutoHr ? 'on' : 'off'} / {vsAutoSpo2 ? 'on' : 'off'}
+          </Text>
+        </View>
+        <View style={rowStyle}>
+          <Text style={labelStyle}>cursor.bp age</Text>
+          <Text style={valueStyle}>
+            {cursor ? formatCursorRawSec(cursor.bp) : '—'}
+          </Text>
+        </View>
+        <View style={rowStyle}>
+          <Text style={labelStyle}>cursor.hr age</Text>
+          <Text style={valueStyle}>
+            {cursor ? formatCursorRawSec(cursor.hr) : '—'}
+          </Text>
+        </View>
+        <View style={rowStyle}>
+          <Text style={labelStyle}>cursor.spo2 age</Text>
+          <Text style={valueStyle}>
+            {cursor ? formatCursorDay(cursor.spo2) : '—'}
+          </Text>
+        </View>
+        <View style={rowStyle}>
+          <Text style={labelStyle}>cursor.sleep age</Text>
+          <Text style={valueStyle}>
+            {cursor ? formatCursorDay(cursor.sleep) : '—'}
+          </Text>
+        </View>
+        <View style={rowStyle}>
+          <Text style={labelStyle}>cursor.activity age</Text>
+          <Text style={valueStyle}>
+            {cursor ? formatCursorDay(cursor.activity) : '—'}
+          </Text>
+        </View>
+        {/* 0x73 byte tally — flag any byte showing up that we don't
+            currently map. Mapped today: 0x01 hr, 0x02 bp, 0x03 spo2,
+            0x04 steps, 0x07 sports, 0x09 dnd, 0x0c battery, 0x10 sleep
+            session complete. Anything else = un-mapped → trace candidate. */}
+        <View style={[rowStyle, { alignItems: 'flex-start' }]}>
+          <Text style={labelStyle}>0x73 bytes seen</Text>
+          <View style={{ flex: 1, alignItems: 'flex-end' }}>
+            {Object.keys(notifyKindCounts).length === 0 ? (
+              <Text style={valueStyle}>none yet</Text>
+            ) : (
+              Object.entries(notifyKindCounts)
+                .sort(([a], [b]) => Number(a) - Number(b))
+                .map(([byte, count]) => (
+                  <Text key={byte} style={valueStyle}>
+                    0x{Number(byte).toString(16).padStart(2, '0')} × {count}
+                  </Text>
+                ))
+            )}
+          </View>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => resetCaptureStats()}
+          style={{ paddingVertical: 6, alignItems: 'flex-end' }}
+        >
+          <Text style={[labelStyle, { color: theme.colors.text.tertiary }]}>
+            Tap to clear byte tally
+          </Text>
+        </Pressable>
+      </View>
 
       {/* Orchestrator + paired device + cursor */}
       <View style={cardStyle}>

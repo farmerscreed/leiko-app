@@ -38,6 +38,10 @@ import { getVitalSetup, useVitalSetup } from '../../state/vitalSetup';
 import { useAuth } from '../../state/auth';
 import type { UserRow } from '../../types/database';
 
+// BLE_TRACE — Sprint 16.5a Phase A forensic-capture instrumentation.
+// See apps/mobile/src/services/ble/UrionDevice.ts for the convention.
+const BLE_TRACE = typeof __DEV__ !== 'undefined' && __DEV__;
+
 export interface DeviceConfigResult {
   ran: boolean;
   /** Names of steps that succeeded — useful for partial-failure logs. */
@@ -73,7 +77,20 @@ export async function applyDeviceConfig(
   const setters = opts.setters ?? DEFAULT_SETTERS;
 
   if (!opts.force && !setup.dirty) {
+    if (BLE_TRACE) {
+      console.log(
+        '[ble-trace] applyDeviceConfig skipped — dirty=false force=false',
+      );
+    }
     return { ran: false, steps: [] };
+  }
+
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] applyDeviceConfig start — force=${opts.force ?? false} dirty=${setup.dirty} ` +
+        `autoHR=${setup.autoHrEnabled} autoSpO2=${setup.autoSpo2Enabled} ` +
+        `hasDemographics=${profile ? hasDemographics(profile) : false}`,
+    );
   }
 
   const steps: string[] = [];
@@ -82,6 +99,7 @@ export async function applyDeviceConfig(
   try {
     await setters.setAutoHR(device, setup.autoHrEnabled);
     steps.push('autoHr');
+    if (BLE_TRACE) console.log('[ble-trace] applyDeviceConfig step=autoHr ok');
   } catch (e) {
     return failPartial(steps, 'autoHr', e);
   }
@@ -90,6 +108,7 @@ export async function applyDeviceConfig(
   try {
     await setters.setAutoSpO2(device, setup.autoSpo2Enabled);
     steps.push('autoSpo2');
+    if (BLE_TRACE) console.log('[ble-trace] applyDeviceConfig step=autoSpo2 ok');
   } catch (e) {
     return failPartial(steps, 'autoSpo2', e);
   }
@@ -114,9 +133,16 @@ export async function applyDeviceConfig(
         hrAlarmBpm: 0,
       });
       steps.push('userParams');
+      if (BLE_TRACE) console.log('[ble-trace] applyDeviceConfig step=userParams ok');
     } catch (e) {
       return failPartial(steps, 'userParams', e);
     }
+  } else if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] applyDeviceConfig step=userParams SKIPPED ` +
+        `(profile=${profile ? 'present' : 'null'}, hasDemographics=false). ` +
+        'Watch will not receive demographics this cycle.',
+    );
   }
 
   // 4. setGoals ---------------------------------------------------------------
@@ -132,6 +158,7 @@ export async function applyDeviceConfig(
       exerciseTargetMinutes: 30,
     });
     steps.push('goals');
+    if (BLE_TRACE) console.log('[ble-trace] applyDeviceConfig step=goals ok');
   } catch (e) {
     return failPartial(steps, 'goals', e);
   }
@@ -139,6 +166,11 @@ export async function applyDeviceConfig(
   // All four packets succeeded — clear dirty so the next no-config sync
   // skips this step entirely.
   useVitalSetup.getState().clearDirty();
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] applyDeviceConfig done — steps=${steps.length} [${steps.join(',')}]`,
+    );
+  }
   logger.track('device_config_flushed', { steps: steps.length });
   return { ran: true, steps };
 }

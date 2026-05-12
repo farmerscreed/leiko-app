@@ -29,6 +29,10 @@ import { ParsedPacket, buildPacket } from '../io';
 import { CommandTimeoutError, type UrionDevice } from '../UrionDevice';
 import { readUint32LE, writeUint32LE } from './readBPHistory';
 
+// BLE_TRACE — Sprint 16.5a Phase A forensic-capture instrumentation.
+// See apps/mobile/src/services/ble/UrionDevice.ts for the convention.
+const BLE_TRACE = typeof __DEV__ !== 'undefined' && __DEV__;
+
 export interface SpO2HistorySample {
   /** RAW watch-firmware seconds (pre-firmware-shift). */
   timestampSec: number;
@@ -87,6 +91,12 @@ export async function readSpO2History(
         totalPackets = packet.payload[1];
         const intervalMinutes = packet.payload[2];
         intervalSec = intervalMinutes * 60;
+        if (BLE_TRACE) {
+          console.log(
+            `[ble-trace] readSpO2History index totalPackets=${totalPackets} ` +
+              `intervalMinutes=${intervalMinutes} (assumed 60 in slice config)`,
+          );
+        }
         if (totalPackets <= 1) {
           finish(() => resolve([]));
         }

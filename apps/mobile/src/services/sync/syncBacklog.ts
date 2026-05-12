@@ -30,6 +30,10 @@ import { useReadings } from '../../state/readings';
 import { logger } from '../analytics/logger';
 import type { VitalSyncCursor } from '../../types/vitals';
 
+// BLE_TRACE — Sprint 16.5a Phase A forensic-capture instrumentation.
+// See apps/mobile/src/services/ble/UrionDevice.ts for the convention.
+const BLE_TRACE = typeof __DEV__ !== 'undefined' && __DEV__;
+
 const BATCH_SIZE = 50;
 
 // Cursor-staleness threshold for the Option C recovery branch. If the
@@ -215,12 +219,24 @@ export async function syncBacklog(
     }
   }
   let lastSync = getLastSyncSec(deviceBleId);
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncBacklog enter deviceBleId=${deviceBleId} lastSync=${lastSync} (raw watch sec)`,
+    );
+  }
   let readings = await readBPHistory(device, {
     sinceTimestampSec: lastSync,
     direction: 'oldest_first',
     count: BATCH_SIZE,
     timeoutMs: options.timeoutMs ?? 10_000,
   });
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncBacklog readBPHistory returned ${readings.length} packet(s); ` +
+        `first.ts=${readings[0]?.timestampSec ?? 'n/a'} ` +
+        `last.ts=${readings[readings.length - 1]?.timestampSec ?? 'n/a'}`,
+    );
+  }
   // Sprint 12.5.1 Option C — auto-recover from a long-stale cursor
   // when the watch also returns nothing. Per U16PRO §4.5, the watch
   // returns the 0xFFFFFFFF terminator when DIR=1's TS anchor cannot
@@ -280,6 +296,12 @@ export async function syncBacklog(
     if (r.timestampSec > newest) newest = r.timestampSec;
   }
   if (newest > lastSync) setLastSyncSec(deviceBleId, newest);
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncBacklog exit pulled=${fresh.length} ` +
+        `(filtered from ${readings.length}); cursor ${lastSync} → ${newest}`,
+    );
+  }
   // Per-row addPendingReading already emits reading_persisted with
   // the correct tier; no batch-summary event needed (the count is
   // derivable from the row events).

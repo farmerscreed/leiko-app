@@ -30,6 +30,11 @@
 
 import type { ParsedPacket } from './io';
 import type { UrionDevice } from './UrionDevice';
+import { useCaptureStats } from '../../dev/captureStats';
+
+// BLE_TRACE — Sprint 16.5a Phase A forensic-capture instrumentation.
+// See apps/mobile/src/services/ble/UrionDevice.ts for the convention.
+const BLE_TRACE = typeof __DEV__ !== 'undefined' && __DEV__;
 
 export type NotificationKind =
   | 'hr'
@@ -85,6 +90,14 @@ export function subscribeToNotifications(
   return device.onNotify((packet) => {
     if (packet.command !== 0x73) return;
     const kind = classifyNotification(packet);
+    if (BLE_TRACE) {
+      const raw = packet.payload[0];
+      console.log(
+        `[ble-trace] 0x73 kindByte=0x${raw.toString(16).padStart(2, '0')} ` +
+          `classified=${kind ?? 'null'}`,
+      );
+      useCaptureStats.getState().recordNotifyKind(raw);
+    }
     switch (kind) {
       case 'bp':
         handlers.onBP?.();
