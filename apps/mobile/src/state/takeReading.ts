@@ -27,6 +27,7 @@ import { connectToUrion } from '../services/ble/bleManager';
 import { subscribeToNotifications } from '../services/ble/notify';
 import type { UrionDevice } from '../services/ble/UrionDevice';
 import { syncBacklog } from '../services/sync/syncBacklog';
+import { applyDeviceConfig } from '../services/sync/applyDeviceConfig';
 import { logger } from '../services/analytics/logger';
 import { usePairing } from './pairing';
 import { useReadings, type LocalReading } from './readings';
@@ -144,8 +145,34 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
 
     try {
       const device = await connectToUrion(paired.bleId);
-      console.log('[take-reading] connected; running backlog sync');
+      console.log('[take-reading] connected; flushing device config + backlog sync');
       set({ _device: device });
+      // Sprint 12.5.2 — force-push user params + auto-HR/SpO2 + goals
+      // before the BP measurement. Some Urion firmwares gate BP-result
+      // persistence on having valid demographics (gender/age/h/w),
+      // and the orchestrator's normal `applyDeviceConfig` call is
+      // dirty-flag-gated — it skips when the user hasn't touched
+      // Settings, which is most users at first take. Force=true
+      // overrides that. setUserParams itself still no-ops when the
+      // profile lacks demographics, so this is safe for users
+      // mid-onboarding.
+      try {
+        const cfgResult = await applyDeviceConfig(device, { force: true });
+        if (cfgResult.error) {
+          console.log(
+            `[take-reading] applyDeviceConfig partial-failed: ${cfgResult.error}`,
+          );
+        } else {
+          console.log(
+            `[take-reading] applyDeviceConfig steps=${cfgResult.steps.length}`,
+          );
+        }
+      } catch (e) {
+        // Non-fatal — the watch keeps whatever config it had. The
+        // BP measurement still works on the user side; this is best-
+        // effort housekeeping.
+        console.log('[take-reading] applyDeviceConfig threw:', e);
+      }
       // Cursor-aware backfill: pull anything captured on the watch
       // since the last successful sync. Silent (no UI change) — the
       // user still sees the waiting_for_watch view and presses the

@@ -12,6 +12,7 @@ type NotifyHandlers = { onBP?: () => void };
 
 const mockConnectToUrion: jest.Mock = jest.fn();
 const mockSyncBacklog: jest.Mock = jest.fn();
+const mockApplyDeviceConfig: jest.Mock = jest.fn();
 const mockSubscribeToNotifications: jest.Mock = jest.fn(() => () => undefined);
 const mockUseReadingsLatest: jest.Mock = jest.fn(() => null);
 const mockAddPendingReading: jest.Mock = jest.fn();
@@ -33,6 +34,11 @@ jest.mock('../../services/ble/notify', () => ({
 jest.mock('../../services/sync/syncBacklog', () => ({
   syncBacklog: (device: unknown, bleId: string, opts?: unknown) =>
     mockSyncBacklog(device, bleId, opts),
+}));
+
+jest.mock('../../services/sync/applyDeviceConfig', () => ({
+  applyDeviceConfig: (device: unknown, opts?: unknown) =>
+    mockApplyDeviceConfig(device, opts),
 }));
 
 jest.mock('../../services/analytics/logger', () => ({
@@ -76,11 +82,58 @@ beforeEach(() => {
   useTakeReading.getState().reset();
   mockConnectToUrion.mockResolvedValue(fakeDevice());
   mockSyncBacklog.mockResolvedValue({ pulled: 0, latestTimestampSec: null });
+  mockApplyDeviceConfig.mockResolvedValue({ ran: true, steps: ['autoHr', 'autoSpo2', 'goals'] });
   mockUseReadingsLatest.mockReturnValue(null);
 });
 
 afterEach(() => {
   jest.useRealTimers();
+});
+
+describe('device-config flush on connect (Sprint 12.5.2)', () => {
+  it('calls applyDeviceConfig with force:true after connect, before subscribing for BP-ready', async () => {
+    const beginPromise = useTakeReading.getState().begin();
+    await Promise.resolve();
+    await Promise.resolve();
+    await beginPromise;
+
+    expect(mockApplyDeviceConfig).toHaveBeenCalledTimes(1);
+    const [, opts] = mockApplyDeviceConfig.mock.calls[0];
+    expect(opts).toMatchObject({ force: true });
+    // applyDeviceConfig is called BEFORE the subscribe step — the
+    // watch must have demographics before the user presses the BP
+    // button. Subscribe registers exactly once on the same connect.
+    expect(mockSubscribeToNotifications).toHaveBeenCalledTimes(1);
+    expect(useTakeReading.getState().phase).toBe('waiting_for_watch');
+  });
+
+  it('does not block the take-reading flow when applyDeviceConfig throws', async () => {
+    mockApplyDeviceConfig.mockRejectedValueOnce(new Error('config flush failed'));
+    const beginPromise = useTakeReading.getState().begin();
+    await Promise.resolve();
+    await Promise.resolve();
+    await beginPromise;
+
+    // Reach waiting_for_watch regardless of the config flush failure.
+    expect(useTakeReading.getState().phase).toBe('waiting_for_watch');
+    expect(useTakeReading.getState().error).toBeNull();
+    expect(mockSyncBacklog).toHaveBeenCalled();
+  });
+
+  it('does not block the take-reading flow when applyDeviceConfig returns a partial-failure result', async () => {
+    mockApplyDeviceConfig.mockResolvedValueOnce({
+      ran: true,
+      steps: ['autoHr'],
+      error: 'userParams: setTimeout',
+    });
+    const beginPromise = useTakeReading.getState().begin();
+    await Promise.resolve();
+    await Promise.resolve();
+    await beginPromise;
+
+    expect(useTakeReading.getState().phase).toBe('waiting_for_watch');
+    expect(useTakeReading.getState().error).toBeNull();
+  });
 });
 
 describe('mid-measurement disconnect (Sprint 12.5.1)', () => {
