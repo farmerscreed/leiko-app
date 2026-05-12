@@ -606,14 +606,18 @@ exports[`Reduced motion — end-state snapshots DailyPulseHero constellation ren
             Blood pressure
           </Text>
           <Text
+            adjustsFontSizeToFit={true}
             allowFontScaling={false}
+            numberOfLines={1}
             style={
               {
                 "color": "#F5F1EA",
                 "fontFamily": "InstrumentSerif_400Regular",
-                "fontSize": 80,
+                "fontSize": 56,
                 "letterSpacing": -0.5,
-                "lineHeight": 80,
+                "lineHeight": 60,
+                "maxWidth": 196,
+                "textAlign": "center",
               }
             }
             testID="hero-bp-value"

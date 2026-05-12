@@ -18,9 +18,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import {
-  KeyboardAvoidingView,
   Linking,
-  Platform,
   Pressable,
   ScrollView,
   Share,
@@ -1656,34 +1654,30 @@ function ProfileFieldSheet({
       title={field ? PROFILE_FIELD_TITLE[field] : undefined}
       testID="settings-profile-field-sheet"
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: theme.spacing.l,
+          paddingBottom: theme.spacing.xxl,
+        }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          contentContainerStyle={{
-            paddingHorizontal: theme.spacing.l,
-            paddingBottom: theme.spacing.xxl,
-          }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {field === 'yob' && profile && (
-            <YobBody initial={profile.year_of_birth} onSave={onSave} />
-          )}
-          {field === 'gender' && profile && (
-            <GenderBody initial={profile.gender} onSave={onSave} />
-          )}
-          {field === 'height' && profile && (
-            <HeightBody initial={profile.height_cm} onSave={onSave} />
-          )}
-          {field === 'weight' && profile && (
-            <WeightBody initial={profile.weight_kg} onSave={onSave} />
-          )}
-          {field === 'timezone' && profile && (
-            <TimezoneBody initial={profile.timezone} onSave={onSave} />
-          )}
-        </ScrollView>
-      </KeyboardAvoidingView>
+        {field === 'yob' && profile && (
+          <YobBody initial={profile.year_of_birth} onSave={onSave} />
+        )}
+        {field === 'gender' && profile && (
+          <GenderBody initial={profile.gender} onSave={onSave} />
+        )}
+        {field === 'height' && profile && (
+          <HeightBody initial={profile.height_cm} onSave={onSave} />
+        )}
+        {field === 'weight' && profile && (
+          <WeightBody initial={profile.weight_kg} onSave={onSave} />
+        )}
+        {field === 'timezone' && profile && (
+          <TimezoneBody initial={profile.timezone} onSave={onSave} />
+        )}
+      </ScrollView>
     </BottomSheet>
   );
 }
@@ -1742,7 +1736,7 @@ function YobBody({
         value={value}
         onChangeText={(t) => { setValue(t); setError(null); }}
         placeholder="1980"
-        placeholderTextColor={theme.colors.text.secondary}
+        placeholderTextColor={theme.colors.text.tertiary}
         style={fieldInputStyle(theme)}
         autoFocus
       />
@@ -1922,7 +1916,7 @@ function HeightBody({
           value={cm}
           onChangeText={(t) => { setCm(t); setError(null); }}
           placeholder="170"
-          placeholderTextColor={theme.colors.text.secondary}
+          placeholderTextColor={theme.colors.text.tertiary}
           style={fieldInputStyle(theme)}
           autoFocus
         />
@@ -1936,7 +1930,7 @@ function HeightBody({
               value={ft}
               onChangeText={(t) => { setFt(t); setError(null); }}
               placeholder="5"
-              placeholderTextColor={theme.colors.text.secondary}
+              placeholderTextColor={theme.colors.text.tertiary}
               style={fieldInputStyle(theme)}
               autoFocus
             />
@@ -1950,7 +1944,7 @@ function HeightBody({
               value={inches}
               onChangeText={(t) => { setInches(t); setError(null); }}
               placeholder="9"
-              placeholderTextColor={theme.colors.text.secondary}
+              placeholderTextColor={theme.colors.text.tertiary}
               style={fieldInputStyle(theme)}
             />
             <Text style={fieldUnitLabel(theme)}>in</Text>
@@ -2045,7 +2039,7 @@ function WeightBody({
           setError(null);
         }}
         placeholder={unit === 'kg' ? '70' : '155'}
-        placeholderTextColor={theme.colors.text.secondary}
+        placeholderTextColor={theme.colors.text.tertiary}
         style={fieldInputStyle(theme)}
         autoFocus
       />

@@ -27,7 +27,6 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Modal,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -266,7 +265,13 @@ export function BottomSheet({
           />
         </Animated.View>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          // iOS: padding lets the sheet rise smoothly with the
+          // keyboard. Android: padding also works (no-op for non-text
+          // sheets, lifts the sheet when an input is focused). Using
+          // `undefined` on Android was a no-op that left the keyboard
+          // covering text inputs inside compact sheets — Sprint 12.5.2
+          // ran into this with the per-field profile editor.
+          behavior="padding"
           style={styles.kbAvoid}
           pointerEvents="box-none"
         >

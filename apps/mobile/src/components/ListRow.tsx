@@ -297,22 +297,49 @@ function renderTrailing(args: TrailingArgs): ReactNode {
     );
   }
 
-  if (variant === 'select' && selected) {
-    // Phosphor Check deferred — Unicode '✓' (U+2713) at type.bodyL,
-    // brand primary. Replace with <Check /> when the icon library lands.
-    // The parent Pressable's accessibilityLabel covers screen readers; we
-    // skip accessibilityElementsHidden so the testID stays queryable.
-    const t = theme.type('bodyL');
-    const style: TextStyle = {
-      fontSize: t.size,
-      lineHeight: t.lineHeight,
+  if (variant === 'select') {
+    // Select rows used as "edit this field" entries (Settings → Profile)
+    // need to surface the current value alongside the title — without
+    // it, the user can't tell which fields are filled vs empty. We
+    // render value text + an optional check (for picker rows where
+    // `selected` represents an active choice in a multi-choice list).
+    // Phosphor Check deferred — Unicode '✓' (U+2713). Replace when the
+    // icon library lands.
+    const valueType = theme.type('bodyM');
+    const checkType = theme.type('bodyL');
+    const valueStyle: TextStyle = {
+      fontSize: valueType.size,
+      lineHeight: valueType.lineHeight,
+      fontFamily: isNumericValue(value ?? '')
+        ? theme.fontFamilies.numeric
+        : valueType.family,
+      color: theme.colors.text.secondary,
+      textAlign: 'right',
+      // Reserve space so very long values truncate rather than push
+      // the title off-screen on small phones.
+      maxWidth: 180,
+    };
+    const checkStyle: TextStyle = {
+      fontSize: checkType.size,
+      lineHeight: checkType.lineHeight,
       color: theme.colors.brand.primary,
       fontWeight: '600',
+      marginLeft: value ? 8 : 0,
     };
+    if (!value && !selected) return null;
     return (
-      <Text style={style} testID="listrow-check">
-        {'✓'}
-      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        {value ? (
+          <Text style={valueStyle} numberOfLines={1} testID="listrow-value">
+            {value}
+          </Text>
+        ) : null}
+        {selected ? (
+          <Text style={checkStyle} testID="listrow-check">
+            {'✓'}
+          </Text>
+        ) : null}
+      </View>
     );
   }
 
