@@ -130,6 +130,19 @@ jest.mock('../../../hooks/useFamilyReadings', () => ({
   }),
 }));
 
+// Trends v2 uses useNavigation to deep-link to "For your doctor".
+// Tests don't mount a NavigationContainer; mock the hook to a no-op.
+jest.mock('@react-navigation/native', () => {
+  const actual = jest.requireActual('@react-navigation/native');
+  return {
+    ...actual,
+    useNavigation: () => ({
+      navigate: jest.fn(),
+      goBack: jest.fn(),
+    }),
+  };
+});
+
 jest.mock('../../../state/auth', () => ({
   useAuth: (selector?: (s: unknown) => unknown) => {
     const fakeProfile: UserRow = {

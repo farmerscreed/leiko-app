@@ -49,6 +49,10 @@ export type CaregiverStackParamList = {
   // be wired into a tab-bar follow-up; the route is registered now so
   // navigation.navigate('Trends') resolves from any caregiver screen.
   Trends: undefined;
+  // Trends v2 follow-up — the doctor-PDF prep flow moved off Trends
+  // into its own dedicated screen. Entry points: Settings → "For
+  // your doctor", and Trends inline link near the bottom.
+  ForYourDoctor: { range?: 'all_time' | '7d' | '30d' | '90d' | '1y' } | undefined;
   // Sprint 10b.3 — Activity log read-only viewer (last 90 days of
   // public.audit_log for the actor). Per D6 US-82.
   AuditLog: undefined;
@@ -102,6 +106,10 @@ export type SelfBuyerStackParamList = {
   // export. The Self-Buyer Home tab bar's "Trends" entry routes here
   // (was a placeholder in Sprint 8).
   Trends: undefined;
+  // Trends v2 follow-up — the doctor-PDF prep flow moved off Trends
+  // into its own dedicated screen. Entry points: Settings → "For
+  // your doctor", and Trends inline link near the bottom.
+  ForYourDoctor: { range?: 'all_time' | '7d' | '30d' | '90d' | '1y' } | undefined;
   // Sprint 10b.3 — Activity log read-only viewer.
   AuditLog: undefined;
   // Sprint 10c.2 — hybrid-mode caregiver visibility (D13 §13.2).

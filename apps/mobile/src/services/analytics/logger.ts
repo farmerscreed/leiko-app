@@ -159,7 +159,11 @@ export type AnalyticsEvent =
       };
     }
   | { name: 'anomaly_banner_dismissed'; props?: { vital: 'bp' | 'hr' | 'spo2' } }
-  | { name: 'anomaly_banner_tapped'; props?: { vital: 'bp' | 'hr' | 'spo2'; tier: 'calm_concerned' | 'confirmed_urgent' } };
+  | { name: 'anomaly_banner_tapped'; props?: { vital: 'bp' | 'hr' | 'spo2'; tier: 'calm_concerned' | 'confirmed_urgent' } }
+  // "For your doctor" PDF prep flow — Trends v2 follow-up.
+  | { name: 'doctor_pdf_requested'; props?: { range: '7d' | '30d' | '90d' | '1y' } }
+  | { name: 'doctor_pdf_generated'; props?: { bytes: number } }
+  | { name: 'doctor_pdf_failed'; props?: { reason: string } };
 
 type EventName = AnalyticsEvent['name'];
 

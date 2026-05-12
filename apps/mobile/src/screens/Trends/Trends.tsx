@@ -33,6 +33,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Pill } from '../../components/Pill';
 import {
   MultiVitalChart,
@@ -61,6 +63,14 @@ import { generateTrendsNarrative } from '../../services/ai/trendsNarration';
 import type { TrendsRange } from '../../utils/trends-aggregate';
 import type { VitalType } from '../../components/VitalRing';
 import type { AccountType } from '../../types/database';
+import type {
+  CaregiverStackParamList,
+  SelfBuyerStackParamList,
+} from '../../navigation/types';
+
+type AnyNav = NativeStackNavigationProp<
+  CaregiverStackParamList | SelfBuyerStackParamList
+>;
 
 const CAREGIVER_RANGES: TrendsRange[] = ['7d', '30d', '90d', '1y'];
 const SELF_BUYER_RANGES: TrendsRange[] = ['7d', '30d', '90d', '1y', 'all_time'];
@@ -119,6 +129,7 @@ function formatFreshness(computedAtMs: number, nowMs: number): string {
 
 export function Trends() {
   const theme = useTheme();
+  const navigation = useNavigation<AnyNav>();
   const profile = useAuth((s) => s.profile);
   const accountType: AccountType = profile?.account_type ?? 'caregiver';
   const parentLabel = profile?.display_name ?? 'Mum';
@@ -196,10 +207,14 @@ export function Trends() {
   }, []);
 
   const onOpenDoctorScreen = useCallback(() => {
-    // Same pattern as onAskTrend — deep-link to "For your doctor"
-    // (the new screen). Wiring lands when the screen ships; v1.0 is
-    // a no-op press to keep the surface visible.
-  }, []);
+    // Deep-link to "For your doctor" with the current Trends range
+    // pre-selected. "all_time" doesn't have a PDF analogue; the
+    // doctor screen's `pdfRangeFromTrendsRange` falls back when
+    // necessary. The cast satisfies both stacks' type unions.
+    (navigation as unknown as {
+      navigate: (screen: 'ForYourDoctor', params?: { range?: TrendsRange }) => void;
+    }).navigate('ForYourDoctor', { range });
+  }, [navigation, range]);
 
   const series = useMemo<MultiVitalSeries[]>(
     () => buildSeries(trends.data, visible),

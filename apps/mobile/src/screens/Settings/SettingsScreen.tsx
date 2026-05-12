@@ -183,6 +183,7 @@ type NavParamList = {
   AuditLog: undefined;
   CaregiverVisibility: undefined;
   FamilyMembers: undefined;
+  ForYourDoctor: { range?: '7d' | '30d' | '90d' | '1y' | 'all_time' } | undefined;
   Pairing: undefined;
   Settings: undefined;
 };
@@ -792,6 +793,18 @@ export function SettingsScreen({ navigation }: Props) {
               testID="settings-family-visibility"
             />
           ) : null}
+        </SettingsSection>
+
+        {/* Share ------------------------------------------------------ */}
+        <SettingsSection title="Share" testID="settings-section-share">
+          <ListRow
+            variant="navigation"
+            title={isSelfBuyer ? 'For your doctor' : 'For their doctor'}
+            subtitle="A summary you can hand to a doctor visit."
+            onPress={() => stackNavigation.navigate('ForYourDoctor')}
+            showDivider={false}
+            testID="settings-for-your-doctor"
+          />
         </SettingsSection>
 
         {/* Privacy ----------------------------------------------------- */}
