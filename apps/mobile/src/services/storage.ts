@@ -140,6 +140,17 @@ export const STORAGE_KEYS = {
   // (the answer itself lives in notification_preferences.anomaly_bypass_quiet).
   // We never re-prompt automatically; Settings is the second-chance path.
   anomalyBypassAffirmAnswered: 'leiko.notifications.anomalyBypassAffirmAnswered',
+  // Sprint 16 — first-failure timestamp for the sync orchestrator.
+  // Unix ms of the FIRST consecutive failure since the last success.
+  // Cleared on any successful runSync. Drives the 24h reassurance
+  // banner on Home (renders when now - lastSyncFailedAt > 24h).
+  lastSyncFailedAt: 'leiko.sync.lastSyncFailedAt',
+  // Sprint 16 — per-vital failure counters + nextRetryAt for
+  // exponential backoff inside syncMultiVitals. JSON shape:
+  //   { hr: { count: number; nextRetryAtMs: number },
+  //     spo2: { ... }, sleep: { ... }, activity: { ... } }
+  // Cleared per-vital on success.
+  vitalFailureCounters: 'leiko.sync.vitalFailureCounters',
 } as const;
 
 export const supabaseStorage = {

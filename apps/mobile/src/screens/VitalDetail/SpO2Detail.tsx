@@ -48,6 +48,8 @@ import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { useDailyPulseData } from '../../state/dailyPulse';
 import { useSpO2 } from '../../state/spo2';
 import { spo2Fill } from '../../utils/vitalThemes';
+import { checkStaleness } from '../../utils/classification';
+import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import { useTheme } from '../../theme';
 import type { ClassificationTier } from '../../utils/classification';
 import type { SpO2Sample } from '../../types/vitals';
@@ -223,6 +225,14 @@ export function SpO2Detail({ onBack, onArticleOpen, onLearnOpen }: SpO2DetailPro
   const latestPercent = data.spo2.latestPercent;
   const tier = data.spo2.classification?.tier ?? null;
   const isEmpty = latestPercent === null;
+  // Sprint 16 — per D13 §6.6, stale when latest SpO2 is older than 8h.
+  const spo2Staleness = isEmpty
+    ? 'no_data'
+    : checkStaleness('spo2', data.spo2.latestSampleSec);
+  const spo2StaleCaption =
+    spo2Staleness === 'stale'
+      ? formatStalenessCaption(data.spo2.latestSampleSec)
+      : null;
   const range = copyForTier(tier);
 
   const allSamples = useMemo(
@@ -269,7 +279,8 @@ export function SpO2Detail({ onBack, onArticleOpen, onLearnOpen }: SpO2DetailPro
           primary={latestPercent === null ? '—' : String(latestPercent)}
           secondary={latestPercent === null ? undefined : '%'}
           sub={
-            isEmpty ? 'No oxygen samples yet' : 'Now · oxygen saturation'
+            spo2StaleCaption ??
+            (isEmpty ? 'No oxygen samples yet' : 'Now · oxygen saturation')
           }
           range={range.hero}
           ringFill={spo2Fill(latestPercent)}

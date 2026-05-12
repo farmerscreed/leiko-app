@@ -32,6 +32,10 @@ import { syncBacklogToCompletion } from '../services/sync/syncBacklogToCompletio
 import { syncMultiVitals } from '../services/sync/syncMultiVitals';
 import { applyDeviceConfig } from '../services/sync/applyDeviceConfig';
 import { inferModel } from '../services/sync/postReading';
+import {
+  clearSyncFailure,
+  markSyncFailure,
+} from '../services/sync/syncFailureTracker';
 import { logger } from '../services/analytics/logger';
 import type { UrionDevice } from '../services/ble/UrionDevice';
 import { usePairing } from './pairing';
@@ -200,6 +204,9 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
     if (!paired) {
       logger.track('sync_skipped', { trigger, reason: 'no_paired_device' });
       // Still mark a successful "run" — local pending was flushed.
+      // Clears the 24h reassurance banner since the local-pending leg
+      // succeeded.
+      clearSyncFailure();
       set({ lastSyncAt: nowMs(), lastError: null });
       return 'ran';
     }
@@ -286,6 +293,9 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
         });
       }, IDLE_DISCONNECT_MS);
 
+      // Sprint 16: a successful sync clears the failure streak that
+      // drives the 24h reassurance banner.
+      clearSyncFailure();
       set({
         status: 'live',
         _unsubNotify: unsub,
@@ -297,6 +307,10 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
     } catch (e) {
       const reason = e instanceof Error ? e.message : 'unknown';
       logger.track('sync_failed', { trigger, reason });
+      // Sprint 16: mark the first failure in the streak so the 24h
+      // reassurance banner can fire after a day of repeated misses.
+      // Idempotent on the second+ failure.
+      markSyncFailure();
       // Best-effort cleanup of any half-open device.
       if (device) {
         try {

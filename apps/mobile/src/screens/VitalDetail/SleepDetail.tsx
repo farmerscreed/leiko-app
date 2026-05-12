@@ -38,6 +38,8 @@ import { useDailyPulseData } from '../../state/dailyPulse';
 import { useSleep } from '../../state/sleep';
 import { useReadings } from '../../state/readings';
 import { sleepFill } from '../../utils/vitalThemes';
+import { checkStaleness } from '../../utils/classification';
+import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import type { SleepSession } from '../../types/vitals';
 
 // ---------------------------------------------------------------------------
@@ -226,7 +228,14 @@ export function SleepDetail({ onBack, onArticleOpen, onLearnOpen }: SleepDetailP
   // ---- Hero ------------------------------------------------------------
   const totalMinutes = session.totalMinutes;
   const heroPrimary = formatHm(totalMinutes);
-  const heroSub = bedTimeSub(session.sessionStartSec);
+  // Sprint 16 — per D13 §6.6, stale when no sleep session in last 24h.
+  // The wake-up reference is sessionEndSec — that's the freshness signal.
+  const sleepStaleness = checkStaleness('sleep', session.sessionEndSec);
+  const sleepStaleCaption =
+    sleepStaleness === 'stale'
+      ? formatStalenessCaption(session.sessionEndSec)
+      : null;
+  const heroSub = sleepStaleCaption ?? bedTimeSub(session.sessionStartSec);
   const heroRange = rangeCopyForSleepScore(session.sleepScore);
 
   // ---- Stat trio: deep / rem / light, formatted "h:mm" + percent --------

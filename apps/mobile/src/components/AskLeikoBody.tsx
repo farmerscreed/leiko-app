@@ -26,6 +26,7 @@ import { AIResponseRenderer } from './AIResponseRenderer';
 import { classifyIntent } from '../services/ai/intentRouter';
 import { askTierB, type TierBDeferTrigger } from '../services/ai/tierB';
 import { DEFER_TEMPLATES } from '../services/ai/deferTemplates';
+import { mapAskLeikoTierBResult } from '../services/ai/fallThrough';
 import type { IntentMatch } from '../services/ai/types';
 
 export const ASK_LEIKO_COPY = {
@@ -33,23 +34,20 @@ export const ASK_LEIKO_COPY = {
   placeholder: 'What is blood pressure?',
   send: 'Send',
   loading: 'Thinking…',
-  // Generic fallback. Used for unknown errors + transport-level
-  // failures (network, client timeout, unhandled HTTP codes).
-  error: "I couldn't reach Leiko right now. Try again in a moment.",
   // Verbatim from D14 §14.2.
   quotaExceeded:
     "You've used your AI questions for this month. They reset on the 1st.",
-  // Specific server-error copy. Each maps to a known status code from
-  // the ai-tier-b Edge Function; anything else falls through to
-  // ASK_LEIKO_COPY.error above.
+  // Structural-error copy — the user can fix these. Soft Tier-B errors
+  // (network, client_timeout, unhandled codes) are silenced by the
+  // Sprint 16 cascade in services/ai/fallThrough.ts and rendered as a
+  // calm deterministic body (DETERMINISTIC_COPY.ask_leiko).
   errorNoFamily: 'Finish setting up Leiko first to ask questions.',
   errorNoSession: 'Sign in again to ask Leiko.',
   errorQuestionTooLong: 'That question is a bit long — try shortening it.',
   youAsked: 'You asked',
 } as const;
 
-type TierBErrorKind =
-  | 'generic'
+type TierBStructuralErrorKind =
   | 'no_family'
   | 'no_session'
   | 'question_too_long';
@@ -57,16 +55,19 @@ type TierBErrorKind =
 type TierBState =
   | { kind: 'idle' }
   | { kind: 'loading' }
-  | { kind: 'ok'; body: string }
+  | { kind: 'ok'; body: string; degraded: boolean }
   | { kind: 'defer'; trigger: TierBDeferTrigger }
   | { kind: 'quota_exceeded' }
-  | { kind: 'error'; reason: TierBErrorKind };
+  | { kind: 'error'; reason: TierBStructuralErrorKind };
 
-// Map a server error code to the user-facing kind. Anything not in
-// the map falls through to 'generic'. The mapping lives here (UI
-// layer) rather than in tierB.ts because it's a presentation concern;
-// tierB returns the raw server code, the UI decides what to show.
-function mapServerErrorToKind(error: string): TierBErrorKind {
+// Map a server error code to the user-facing structural kind. Only
+// structural errors (the user can fix them) reach this function —
+// soft errors are already silenced by the fall-through cascade and
+// rendered as `kind: 'ok'` with deterministic copy. Defaults to
+// `no_session` because the only way for an unknown structural code
+// to slip through is if the server adds one we don't know about,
+// and "sign in again" is the safest blanket suggestion.
+function mapStructuralError(error: string): TierBStructuralErrorKind {
   switch (error) {
     case 'no_family':
       return 'no_family';
@@ -76,11 +77,11 @@ function mapServerErrorToKind(error: string): TierBErrorKind {
     case 'question_too_long':
       return 'question_too_long';
     default:
-      return 'generic';
+      return 'no_session';
   }
 }
 
-function copyForErrorKind(kind: TierBErrorKind): string {
+function copyForStructuralError(kind: TierBStructuralErrorKind): string {
   switch (kind) {
     case 'no_family':
       return ASK_LEIKO_COPY.errorNoFamily;
@@ -88,8 +89,6 @@ function copyForErrorKind(kind: TierBErrorKind): string {
       return ASK_LEIKO_COPY.errorNoSession;
     case 'question_too_long':
       return ASK_LEIKO_COPY.errorQuestionTooLong;
-    case 'generic':
-      return ASK_LEIKO_COPY.error;
   }
 }
 
@@ -121,18 +120,31 @@ export function AskLeikoBody({ onArticleOpen, testID }: AskLeikoBodyProps) {
     if (result.responseMode === 'TIER_B_PLACEHOLDER') {
       setTierBState({ kind: 'loading' });
       void askTierB({ question: trimmed }).then((r) => {
-        switch (r.status) {
+        const outcome = mapAskLeikoTierBResult(r);
+        if (outcome.source === 'deterministic') {
+          // Soft Tier-B failure — silent fall-through to deterministic
+          // copy (Sprint 16 acceptance: never show an AI error).
+          setTierBState({ kind: 'ok', body: outcome.body, degraded: true });
+          return;
+        }
+        switch (outcome.status) {
           case 'ok':
-            setTierBState({ kind: 'ok', body: r.body });
+            setTierBState({ kind: 'ok', body: outcome.body, degraded: false });
             break;
           case 'defer':
-            setTierBState({ kind: 'defer', trigger: r.trigger });
+            setTierBState({
+              kind: 'defer',
+              trigger: outcome.trigger as TierBDeferTrigger,
+            });
             break;
           case 'quota_exceeded':
             setTierBState({ kind: 'quota_exceeded' });
             break;
-          case 'error':
-            setTierBState({ kind: 'error', reason: mapServerErrorToKind(r.error) });
+          case 'structural_error':
+            setTierBState({
+              kind: 'error',
+              reason: mapStructuralError(outcome.reason),
+            });
             break;
         }
       });
@@ -266,7 +278,11 @@ export function AskLeikoBody({ onArticleOpen, testID }: AskLeikoBodyProps) {
           )}
           {tierBState.kind === 'ok' && (
             <Text
-              testID="ask-leiko-tier-b-body"
+              testID={
+                tierBState.degraded
+                  ? 'ask-leiko-tier-b-degraded'
+                  : 'ask-leiko-tier-b-body'
+              }
               style={{
                 color: theme.colors.text.primary,
                 fontSize: bodyStyle.size,
@@ -313,7 +329,7 @@ export function AskLeikoBody({ onArticleOpen, testID }: AskLeikoBodyProps) {
                 fontFamily: bodyStyle.family,
               }}
             >
-              {copyForErrorKind(tierBState.reason)}
+              {copyForStructuralError(tierBState.reason)}
             </Text>
           )}
         </View>

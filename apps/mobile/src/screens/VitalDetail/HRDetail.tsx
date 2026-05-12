@@ -44,6 +44,8 @@ import { useDailyPulseData } from '../../state/dailyPulse';
 import { useHR } from '../../state/hr';
 import { useSleep } from '../../state/sleep';
 import { hrFill } from '../../utils/vitalThemes';
+import { checkStaleness } from '../../utils/classification';
+import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import type { HRSample, SleepSession } from '../../types/vitals';
 
 const SECONDS_PER_DAY = 24 * 60 * 60;
@@ -254,11 +256,21 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
   const hasData = restingToday !== null;
   const hasZoneData = zones.some((z) => z.pct > 0);
 
+  // Sprint 16 — per D13 §6.6, surface a stale caption when the latest
+  // HR sample is older than 6h.
+  const staleness = hasData
+    ? checkStaleness('hr', data.hr.latestSampleSec, nowSec)
+    : 'no_data';
+  const staleCaption =
+    staleness === 'stale'
+      ? formatStalenessCaption(data.hr.latestSampleSec, nowSec)
+      : null;
+
   // Hero copy — voice-rule clean. "Within your range" lifts from the
   // design source; the empty-state copy is plain language with no fear
   // framing per docs/05-voice-and-claims.md.
   const heroPrimary = hasData ? String(Math.round(restingToday!)) : '—';
-  const heroSub = hasData ? 'Now · resting' : 'Heart rate';
+  const heroSub = staleCaption ?? (hasData ? 'Now · resting' : 'Heart rate');
   const heroRange = hasData
     ? 'bpm · within your range'
     : 'Wear the watch to start tracking your heart rate.';

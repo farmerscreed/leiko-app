@@ -44,7 +44,11 @@ import { useDailyPulseData } from '../../state/dailyPulse';
 import { useReadings, type LocalReading } from '../../state/readings';
 import { bpFillFromTier } from '../../utils/vitalThemes';
 import { useTheme } from '../../theme';
-import type { ClassificationTier } from '../../utils/classification';
+import {
+  checkStaleness,
+  type ClassificationTier,
+} from '../../utils/classification';
+import { formatStalenessCaption } from '../../utils/stalenessCaption';
 
 // ---------------------------------------------------------------------------
 // Voice-clean copy
@@ -248,6 +252,15 @@ export function BPDetail({
   const tier = data.bp.classification?.tier ?? null;
   const ringFill = bpFillFromTier(tier);
   const isEmpty = data.bp.latest === null;
+  // Sprint 16 — per D13 §6.6, surface a stale caption when the last
+  // BP reading is older than 36h. Empty state takes precedence.
+  const staleness = isEmpty
+    ? 'no_data'
+    : checkStaleness('bp', data.bp.latestSampleSec);
+  const isStale = staleness === 'stale';
+  const staleCaption = isStale
+    ? formatStalenessCaption(data.bp.latestSampleSec)
+    : null;
 
   // ----- Hero block ---------------------------------------------------
   const hero = isEmpty ? (
@@ -265,9 +278,10 @@ export function BPDetail({
       primary={String(data.bp.latest!.systolic)}
       secondary={`/ ${data.bp.latest!.diastolic}`}
       sub={
-        data.bp.latestSampleSec !== null
+        staleCaption ??
+        (data.bp.latestSampleSec !== null
           ? formatHeroTime(data.bp.latestSampleSec)
-          : 'Latest'
+          : 'Latest')
       }
       range={rangeCopyForTier(tier)}
       ringFill={ringFill}

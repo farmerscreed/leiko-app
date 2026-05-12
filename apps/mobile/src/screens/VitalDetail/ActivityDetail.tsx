@@ -48,6 +48,8 @@ import { ActivityRingsHero } from '../../components/ActivityRingsHero';
 import { ActivityWeeklyBars } from '../../components/ActivityWeeklyBars';
 import { ActivityGoalSheet } from '../../components/ActivityGoalSheet';
 import { useDailyPulseData } from '../../state/dailyPulse';
+import { checkStaleness } from '../../utils/classification';
+import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import { useActivity } from '../../state/activity';
 import { useTheme } from '../../theme';
 import type { ActivityDay } from '../../types/vitals';
@@ -98,6 +100,16 @@ export function ActivityDetail({
 
   // ----- Empty state detection ---------------------------------------
   const isEmpty = stepsToday === 0 && last7.values.every((v) => v === 0);
+
+  // Sprint 16 — per D13 §6.6, stale when no step sync in last 6h. The
+  // latest activity-day's `lastSampleAtSec` is the freshness signal.
+  const activityStaleness = isEmpty
+    ? 'no_data'
+    : checkStaleness('activity', data.activity.latestSampleSec);
+  const activityStaleCaption =
+    activityStaleness === 'stale'
+      ? formatStalenessCaption(data.activity.latestSampleSec)
+      : null;
 
   // ----- Stat trio ---------------------------------------------------
   const dailyAvg = useMemo(() => {
@@ -164,6 +176,7 @@ export function ActivityDetail({
             moveMinutes={moveMinutesToday}
             empty={isEmpty}
             emptyMessage={isEmpty ? EMPTY_HERO_MESSAGE : undefined}
+            staleCaption={activityStaleCaption}
             testID="activity-detail-hero"
           />
         }

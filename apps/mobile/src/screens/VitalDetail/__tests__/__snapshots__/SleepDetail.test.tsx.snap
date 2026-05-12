@@ -361,7 +361,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
           }
         >
           <View
-            accessibilityLabel="Last night · in bed 5:18 PM. 7:42hrs. Roughly in line with your usual"
+            accessibilityLabel="Last sync Thu. 7:42hrs. Roughly in line with your usual"
             accessibilityRole="text"
             style={
               [
@@ -674,7 +674,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                   }
                   testID="sleep-detail-hero-sub"
                 >
-                  Last night · in bed 5:18 PM
+                  Last sync Thu
                 </Text>
                 <View
                   style={

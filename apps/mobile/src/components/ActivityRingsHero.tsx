@@ -83,6 +83,11 @@ export interface ActivityRingsHeroProps {
   /** Welcome line shown only when `empty=true`. Voice-checked at the
    *  call site. */
   emptyMessage?: string;
+  /** Sprint 16 — calm "Last sync 4h ago" caption surfaced when the
+   *  activity vital crosses D13 §6.6's 6h staleness threshold. Shown
+   *  below the step count in tertiary text. Voice-checked at the
+   *  call site. */
+  staleCaption?: string | null;
   testID?: string;
   style?: StyleProp<ViewStyle>;
 }
@@ -94,6 +99,7 @@ export function ActivityRingsHero({
   moveMinutes = null,
   empty = false,
   emptyMessage,
+  staleCaption,
   testID,
   style,
 }: ActivityRingsHeroProps) {
@@ -269,6 +275,21 @@ export function ActivityRingsHero({
               testID={testID ? `${testID}-empty-message` : undefined}
             >
               {emptyMessage}
+            </Text>
+          ) : null}
+          {!empty && staleCaption ? (
+            <Text
+              allowFontScaling={false}
+              style={{
+                fontFamily: captionStyle.family,
+                fontSize: captionStyle.size,
+                lineHeight: captionStyle.lineHeight,
+                color: theme.colors.text.tertiary,
+                marginTop: theme.spacing.xs,
+              }}
+              testID={testID ? `${testID}-stale-caption` : undefined}
+            >
+              {staleCaption}
             </Text>
           ) : null}
         </View>

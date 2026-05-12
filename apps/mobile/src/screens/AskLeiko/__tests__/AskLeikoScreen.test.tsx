@@ -189,7 +189,7 @@ describe('<AskLeikoScreen />', () => {
     expect(text).toContain('reset');
   });
 
-  it('Tier-B error renders the error copy', async () => {
+  it('Tier-B soft error falls through to the deterministic body (Sprint 16)', async () => {
     askTierBMock.mockResolvedValueOnce({ status: 'error', error: 'invoke_failed' });
     render(withProviders(<AskLeikoScreen {...makeProps()} />));
     fireEvent.changeText(
@@ -200,9 +200,10 @@ describe('<AskLeikoScreen />', () => {
       fireEvent.press(screen.getByTestId('ask-leiko-send'));
     });
     await waitFor(() => {
-      // Sprint 14.5: error testID is now suffixed with the mapped kind.
-      // Generic invoke_failed maps to 'generic'.
-      expect(screen.getByTestId('ask-leiko-tier-b-error-generic')).toBeTruthy();
+      // Sprint 16: soft Tier-B errors degrade silently to a calm
+      // deterministic body. The error UI is never shown.
+      expect(screen.getByTestId('ask-leiko-tier-b-degraded')).toBeTruthy();
     });
+    expect(screen.queryByTestId('ask-leiko-tier-b-error-generic')).toBeNull();
   });
 });

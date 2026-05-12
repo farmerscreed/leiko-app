@@ -43,6 +43,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
 import { ScreenAnomalyBanner } from '../../components/ScreenAnomalyBanner';
+import { SyncReassuranceBanner } from '../../components/SyncReassuranceBanner';
 import { QuietHoursAffirmSheet } from '../../components/QuietHoursAffirmSheet';
 import { useQuietHoursAffirm } from '../../hooks/useQuietHoursAffirm';
 import { AskLeikoSheet } from '../../components/AskLeikoSheet';
@@ -265,6 +266,11 @@ export function CaregiverHome() {
           theme={theme}
           onSettingsPress={() => navigation.navigate('Settings')}
         />
+
+        {/* Sprint 16 — calm reassurance banner after 24h of failed
+            /sync. Owning phone vs caregiver phone: this mounts on
+            BOTH, since either device can hit a long offline streak. */}
+        <SyncReassuranceBanner testID="caregiver-home-sync-reassurance" />
 
         {/* Sprint 15 — server-driven anomaly banner. Most-severe across
             all family members and all 5 vitals. The legacy local-tier

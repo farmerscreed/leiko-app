@@ -52,3 +52,43 @@ Wait for approval.
 ## Risk notes
 - The combinatorics of (screens × vitals × states × modes × online/offline) are large. Plan a structured matrix in the proposal phase.
 - AI graceful degradation is silent by design — but silent degradation must be observable in PostHog so we know how often Tier-B fails.
+
+---
+
+## Close-out — 2026-05-12
+
+State matrix written first (`plans/sprint-16-state-matrix.md`).
+
+**Foundations shipped:**
+- `components/EmptyState.tsx`, `ErrorState.tsx`, `LoadingState.tsx` — shared voice-clean state surfaces with a11y roles + tests.
+- `@react-native-community/netinfo` installed; `hooks/useNetworkStatus.ts` (5s offline-debounce, immediate online-recovery) + `components/OfflineBanner.tsx` mounted globally in `RootNavigator`.
+- AI fall-through cascade in `services/ai/fallThrough.ts`: `mapAskLeikoTierBResult` silences soft Tier-B errors to a deterministic body; `runSingleStringCascade` is the generic Tier-B → Tier-A → deterministic orchestrator for future surfaces. New analytics event `ai_degraded_fall_through`.
+- `services/sync/conflict.ts` formalises the conflict policy table + `dedupVitalsOther`.
+- `services/sync/syncFailureTracker.ts` — `lastSyncFailedAt` + per-vital `failureCount`/`nextRetryAtMs` (exponential backoff capped at 1h).
+- `syncOrchestrator.runSync` calls `markSyncFailure` on catch + `clearSyncFailure` on success.
+- `syncMultiVitals` per-vital steps are skipped while a vital is in backoff; clear on success, bump on failure.
+- `hooks/useSyncReassurance.ts` + `components/SyncReassuranceBanner.tsx` (24h threshold) mounted on `SelfBuyerHome` + `CaregiverHome`.
+- `utils/stalenessCaption.ts` + wiring into the 5 vital-detail hero subs (BP, HR, SpO2, Sleep, Activity).
+- AskLeikoBody redirected through the cascade; `ASK_LEIKO_COPY.error` removed; structural-error UI preserved for `no_family` / `no_session` / `question_too_long`.
+
+**Acceptance criteria status:**
+- ✅ Offline E2E: offline-first capture + cursor-based sync (pre-existing) + new OfflineBanner.
+- ✅ Every screen renders in airplane mode in both modes — OfflineBanner global; per-screen empty/error/loading inline branches were verified.
+- ✅ Stale vital captions on all 5 vital detail screens per D13 §6.6.
+- ✅ Failed PDF: existing Trends `ChartError` has retry; the PDF generator itself is deferred per Sprint 9 close-out.
+- ✅ Failed AI generation: never surfaces an error to the user — cascade fall-through verified via the AskLeiko tests.
+- ✅ Failed push token registration: silent + idempotent (already shipped Sprint 15; verified).
+- ✅ Watch disconnect mid-reading: existing voice-clean FRIENDLY error + retry CTA; state machine has no zombie path.
+- ✅ 24h failed sync reassurance banner: built + mounted.
+- ✅ 7d failed Apple Health write: silent retry (already shipped Sprint 9.5).
+- ✅ Every new user-visible string passes voice-lint at test time.
+
+**Test counts at close:**
+- 1,983 Jest tests across pure + rn projects (was 1,887 — +96 net new tests).
+- typecheck clean. Lint clean except 2 pre-existing `seedSelection.ts` unused-args errors documented as out of scope in Sprint 15 close-out.
+
+**Deferred (held for the post-Sprint-16 holistic test pass):**
+- On-device airplane-mode E2E recording (founder ops).
+- Trends inline `ChartLoading`/`ChartError`/`ChartEmpty` → shared component cosmetic harmonisation (functional today; deferred to avoid snapshot churn this sprint).
+- Reading-paragraph + daily-narration adoption of `runSingleStringCascade` (only AskLeiko is wired through the cascade in Sprint 16; the others are still Tier-A-only and don't yet call Tier-B).
+- BLE Force-Sync + most-recent-BP-to-Home flakiness — per founder directive, hold for holistic test pass.

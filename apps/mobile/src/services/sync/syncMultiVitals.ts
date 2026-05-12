@@ -69,6 +69,11 @@ import {
 } from './syncBacklog';
 import { postMultiVitals, isPayloadEmpty } from './postMultiVitals';
 import { applyDeviceConfig } from './applyDeviceConfig';
+import {
+  bumpVitalFailure,
+  clearVitalFailure,
+  isVitalBackoffActive,
+} from './syncFailureTracker';
 import { forwardMultiVitalsToPlatform } from '../health-platform/syncBridge';
 import { useHR } from '../../state/hr';
 import { useSpO2 } from '../../state/spo2';
@@ -479,29 +484,71 @@ export async function syncMultiVitals(
     errors.deviceConfig = e instanceof Error ? e.message : String(e);
   }
 
+  // Sprint 16 — per-vital exponential backoff. A vital whose previous
+  // sync failed waits for `nextRetryAtMs` (in syncFailureTracker)
+  // before being attempted again. Healthy vitals keep running normally.
+  const nowMs = nowSec * 1000;
+  const hrBackedOff = isVitalBackoffActive('hr', nowMs);
+  const spo2BackedOff = isVitalBackoffActive('spo2', nowMs);
+  const dayInfoBackedOff =
+    isVitalBackoffActive('sleep', nowMs) &&
+    isVitalBackoffActive('activity', nowMs);
+
   // Steps 5-8 — three branches in parallel. Per-vital error isolation
   // via Promise.allSettled. Sleep + activity share readDayInfo, so
   // they're merged into one branch (1 BLE round-trip per day instead
-  // of 2 across multi-day backfill).
+  // of 2 across multi-day backfill). A vital in backoff resolves to
+  // `null` and records a `backed_off` error without changing the
+  // failure counter.
+  const hrPromise: Promise<number | null> = hrBackedOff
+    ? Promise.resolve(null)
+    : syncHRStep(device, deviceBleId, nowSec, options);
+  const spo2Promise: Promise<number | null> = spo2BackedOff
+    ? Promise.resolve(null)
+    : syncSpO2Step(device, deviceBleId, nowSec, options);
+  const dayInfoPromise: Promise<{ sleep: number; activity: number } | null> =
+    dayInfoBackedOff
+      ? Promise.resolve(null)
+      : syncDayInfoStep(device, deviceBleId, nowSec, options);
+
   const [hrR, spo2R, dayInfoR] = await Promise.allSettled([
-    syncHRStep(device, deviceBleId, nowSec, options),
-    syncSpO2Step(device, deviceBleId, nowSec, options),
-    syncDayInfoStep(device, deviceBleId, nowSec, options),
+    hrPromise,
+    spo2Promise,
+    dayInfoPromise,
   ]);
   if (hrR.status === 'fulfilled') {
-    pulled.hr = hrR.value;
+    if (hrR.value === null) {
+      errors.hr = 'backed_off';
+    } else {
+      pulled.hr = hrR.value;
+      clearVitalFailure('hr');
+    }
   } else {
     errors.hr = hrR.reason instanceof Error ? hrR.reason.message : String(hrR.reason);
+    bumpVitalFailure('hr', nowMs);
   }
   if (spo2R.status === 'fulfilled') {
-    pulled.spo2 = spo2R.value;
+    if (spo2R.value === null) {
+      errors.spo2 = 'backed_off';
+    } else {
+      pulled.spo2 = spo2R.value;
+      clearVitalFailure('spo2');
+    }
   } else {
     errors.spo2 =
       spo2R.reason instanceof Error ? spo2R.reason.message : String(spo2R.reason);
+    bumpVitalFailure('spo2', nowMs);
   }
   if (dayInfoR.status === 'fulfilled') {
-    pulled.sleep = dayInfoR.value.sleep;
-    pulled.activity = dayInfoR.value.activity;
+    if (dayInfoR.value === null) {
+      errors.sleep = 'backed_off';
+      errors.activity = 'backed_off';
+    } else {
+      pulled.sleep = dayInfoR.value.sleep;
+      pulled.activity = dayInfoR.value.activity;
+      clearVitalFailure('sleep');
+      clearVitalFailure('activity');
+    }
   } else {
     const msg =
       dayInfoR.reason instanceof Error
@@ -510,6 +557,8 @@ export async function syncMultiVitals(
     // The merged step covers both vitals; surface the failure under both.
     errors.sleep = msg;
     errors.activity = msg;
+    bumpVitalFailure('sleep', nowMs);
+    bumpVitalFailure('activity', nowMs);
   }
 
   // Build the batched payload from the slices' pending arrays.

@@ -87,6 +87,10 @@ beforeEach(() => {
   jest.clearAllMocks();
   // Reset the MMKV-backed cursor + slice state.
   mmkv.remove(STORAGE_KEYS.lastSyncByDevice);
+  // Sprint 16 — clear per-vital failure counters so a prior test's
+  // induced failure does not put a vital into backoff for the next.
+  mmkv.remove(STORAGE_KEYS.vitalFailureCounters);
+  mmkv.remove(STORAGE_KEYS.lastSyncFailedAt);
   useHR.getState().reset();
   useSpO2.getState().reset();
   useSleep.getState().reset();

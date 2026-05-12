@@ -39,6 +39,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
 import { ScreenAnomalyBanner } from '../../components/ScreenAnomalyBanner';
+import { SyncReassuranceBanner } from '../../components/SyncReassuranceBanner';
 import { QuietHoursAffirmSheet } from '../../components/QuietHoursAffirmSheet';
 import { useQuietHoursAffirm } from '../../hooks/useQuietHoursAffirm';
 import { AskLeikoSheet } from '../../components/AskLeikoSheet';
@@ -182,6 +183,11 @@ export function SelfBuyerHome() {
           name={headerText.name}
           onAvatarPress={() => navigation.navigate('Settings')}
         />
+
+        {/* Sprint 16 — calm reassurance banner after 24h of failed
+            /sync. Renders only when the failure-tracker reports a
+            streak past the threshold; otherwise null. */}
+        <SyncReassuranceBanner testID="self-buyer-home-sync-reassurance" />
 
         {/* Sprint 15 — server-driven anomaly banner (most-severe-wins
             across BP/HR/SpO2). Renders nothing when there's no

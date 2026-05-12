@@ -101,6 +101,19 @@ export type AnalyticsEvent =
   | { name: 'ai_tier_b_defer'; props?: { trigger: string; reason: string } }
   | { name: 'ai_tier_b_quota_exceeded' }
   | { name: 'ai_tier_b_failed'; props?: { reason: string } }
+  // Sprint 16 — AI fall-through cascade. Emitted on every step-down
+  // (Tier-B → Tier-A or → deterministic, Tier-A → deterministic).
+  // `from`/`to` identify the cascade stages; `reason` carries the
+  // upstream failure code without ever including the response body.
+  | {
+      name: 'ai_degraded_fall_through';
+      props?: {
+        surface: 'ask_leiko' | 'daily_narration' | 'reading_paragraph' | 'weekly_summary' | 'vital_insight';
+        from: 'tier_b' | 'tier_a';
+        to: 'tier_a' | 'deterministic';
+        reason: string;
+      };
+    }
   // Sprint 14.5 — self-buyer family auto-provision (legacy backfill).
   | { name: 'family_auto_provision_started' }
   | { name: 'family_auto_provision_completed' }

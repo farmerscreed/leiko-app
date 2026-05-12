@@ -50,6 +50,7 @@ import { LearnClusterScreen } from '../screens/Learn/LearnClusterScreen';
 import { ArticleScreen } from '../screens/Learn/ArticleScreen';
 import { AskLeikoScreen } from '../screens/AskLeiko/AskLeikoScreen';
 import { DebugLauncher } from '../dev/DebugLauncher';
+import { OfflineBanner } from '../components/OfflineBanner';
 import { useTheme } from '../theme';
 import { useAuth } from '../state/auth';
 import { useOnboarding } from '../state/onboarding';
@@ -347,6 +348,12 @@ export function RootNavigator() {
           in for it in tests. Cast here so NavigationContainer's
           stricter ref shape accepts it. */}
       <NavigationContainer ref={navigationRef as never}>{content}</NavigationContainer>
+      {/* Sprint 16 — global offline banner. Renders only when the
+          network-status hook (5s debounce on offline transitions)
+          reports an unambiguous offline state. Mounted outside the
+          NavigationContainer so it overlays every screen including
+          the auth + onboarding stacks. */}
+      <OfflineBanner testID="root-offline-banner" />
       {/* Sprint 10c.2 polish — DEV-only floating sync-debug launcher.
           Production builds strip __DEV__; the component returns null. */}
       <DebugLauncher />
