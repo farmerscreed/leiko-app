@@ -135,6 +135,11 @@ export const STORAGE_KEYS = {
   // onboarding sequence. Set once by the readings store on the
   // first persisted reading; never overwritten.
   learnFirstReadingMs: 'leiko.learn.firstReadingMs',
+  // Sprint 15 — one-shot guard for the quiet-hours-override affirm
+  // sheet. 'true' once the user has explicitly answered either way
+  // (the answer itself lives in notification_preferences.anomaly_bypass_quiet).
+  // We never re-prompt automatically; Settings is the second-chance path.
+  anomalyBypassAffirmAnswered: 'leiko.notifications.anomalyBypassAffirmAnswered',
 } as const;
 
 export const supabaseStorage = {

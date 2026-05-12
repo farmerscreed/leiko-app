@@ -42,6 +42,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
+import { ScreenAnomalyBanner } from '../../components/ScreenAnomalyBanner';
+import { QuietHoursAffirmSheet } from '../../components/QuietHoursAffirmSheet';
+import { useQuietHoursAffirm } from '../../hooks/useQuietHoursAffirm';
 import { AskLeikoSheet } from '../../components/AskLeikoSheet';
 import { HomeLearnCard } from '../../components/HomeLearnCard';
 import { useSeededLearnCard } from '../../hooks/useSeededLearnCard';
@@ -263,6 +266,14 @@ export function CaregiverHome() {
           onSettingsPress={() => navigation.navigate('Settings')}
         />
 
+        {/* Sprint 15 — server-driven anomaly banner. Most-severe across
+            all family members and all 5 vitals. The legacy local-tier
+            adapter `anomaly` remains as a fallback when the server has
+            no event yet. */}
+        <View style={{ marginTop: theme.spacing.l }}>
+          <ScreenAnomalyBanner />
+        </View>
+
         {anomaly ? (
           <View style={{ marginTop: theme.spacing.l }}>
             <AnomalyBanner
@@ -420,8 +431,15 @@ export function CaregiverHome() {
         onDismiss={() => setAskLeikoVisible(false)}
         onArticleOpen={(id) => navigation.navigate('Article', { articleId: id })}
       />
+      <QuietHoursAffirmSlot />
     </SafeAreaView>
   );
+}
+
+// Sprint 15 — one-shot quiet-hours-override affirm sheet.
+function QuietHoursAffirmSlot() {
+  const { visible, dismiss } = useQuietHoursAffirm();
+  return <QuietHoursAffirmSheet visible={visible} onDone={dismiss} />;
 }
 
 interface CaregiverAskLeikoFABProps {

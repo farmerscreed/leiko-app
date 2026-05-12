@@ -33,9 +33,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DetailHeader } from './DetailHeader';
+import { ScreenAnomalyBanner } from './ScreenAnomalyBanner';
 import { TimeRangePills, type TrendRange } from './TimeRangePills';
 import { useTheme } from '../theme';
 import type { VitalType } from './VitalRing';
+import type { AnomalyVital } from '../state/anomalies';
+
+function vitalForBanner(vital: VitalType): AnomalyVital | null {
+  if (vital === 'bp' || vital === 'hr' || vital === 'spo2') return vital;
+  return null;
+}
 
 export interface DetailShellProps {
   vital: VitalType;
@@ -109,6 +116,23 @@ export function DetailShell({
           onMenuPress={onMenuPress}
           testID={testID ? `${testID}-header` : undefined}
         />
+        {/* Sprint 15 — per-vital anomaly banner. Sleep + activity
+            never produce events so this renders nothing for those
+            screens. */}
+        {(() => {
+          const bv = vitalForBanner(vital);
+          if (!bv) return null;
+          return (
+            <View
+              style={{
+                marginTop: theme.spacing.s,
+                paddingHorizontal: theme.spacing.xl,
+              }}
+            >
+              <ScreenAnomalyBanner vital={bv} />
+            </View>
+          );
+        })()}
         <View style={{ marginTop: theme.spacing.s }}>{hero}</View>
         <View
           style={{

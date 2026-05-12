@@ -76,16 +76,92 @@ export type FamilyRow = {
   subscription_status: SubscriptionStatus;
   subscription_renewal_date: string | null;
   created_by: string;
+  // Sprint 15 — per-family anomaly sensitivity multiplier (migration 0016).
+  anomaly_sensitivity: number;
   created_at: string;
   updated_at: string;
 };
 
+// Sprint 15 — push notification token row (migration 0001 + Sprint 15 use).
+export type PushTokenRow = {
+  user_id: string;
+  device_id: string;
+  expo_token: string;
+  apns_token: string | null;
+  fcm_token: string | null;
+  platform: 'ios' | 'android' | 'web';
+  app_version: string | null;
+  os_version: string | null;
+  last_seen_at: string;
+};
+
+// Sprint 15 — anomaly_events row (migration 0016).
+export type AnomalyVitalKind = 'bp' | 'hr' | 'spo2';
+export type AnomalyTierLabel = 'calm_concerned' | 'confirmed_urgent';
+export type AnomalyPushOutcome =
+  | 'sent'
+  | 'suppressed_quiet_hours'
+  | 'suppressed_opt_out'
+  | 'suppressed_dedup'
+  | 'suppressed_rate_limit'
+  | 'failed';
+export type AnomalyEventRow = {
+  id: string;
+  user_id: string;
+  family_id: string;
+  vital_kind: AnomalyVitalKind;
+  tier: AnomalyTierLabel;
+  reason: string;
+  reading_id: string | null;
+  vital_row_id: string | null;
+  triggered_at: string;
+  push_sent_at: string | null;
+  push_outcome: AnomalyPushOutcome | null;
+  push_dispatch_attempts: number;
+  acknowledged_at: string | null;
+  acknowledged_by_user_id: string | null;
+  feedback_thumb: -1 | 0 | 1;
+  feedback_by_user_id: string | null;
+  feedback_at: string | null;
+  created_at: string;
+};
+
+// Sprint 15 — bp_baselines + hr_baselines (migration 0016).
+export type BpBaselineRow = {
+  user_id: string;
+  family_id: string;
+  sys_mean: number;
+  dia_mean: number;
+  pulse_mean: number | null;
+  sigma_sys: number;
+  sigma_dia: number;
+  sigma_pulse: number | null;
+  days_of_data: number;
+  reading_count: number;
+  computed_at: string;
+  updated_at: string;
+};
+
+export type HrBaselineRow = {
+  user_id: string;
+  family_id: string;
+  median_bpm: number;
+  days_of_data: number;
+  sample_count: number;
+  computed_at: string;
+  updated_at: string;
+};
+
 // Sprint 10b.3 — notification_preferences row (migration 0009).
+// Sprint 15 — extended with per-vital anomaly toggles (migration 0017).
 export type NotificationPreferencesRow = {
   user_id: string;
   daily_summary: boolean;
   weekly_summary: boolean;
   anomaly_notifications: boolean;
+  anomaly_bp: boolean;
+  anomaly_hr: boolean;
+  anomaly_spo2: boolean;
   watch_status: boolean;
   family_activity: boolean;
   subscription_account: boolean;
@@ -274,6 +350,46 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<NotificationPreferencesRow>;
+        Relationships: [];
+      };
+      // Sprint 15 — push notification token + anomaly engine tables.
+      push_tokens: {
+        Row: PushTokenRow;
+        Insert: Omit<PushTokenRow, 'last_seen_at'> & {
+          last_seen_at?: string;
+        };
+        Update: Partial<PushTokenRow>;
+        Relationships: [];
+      };
+      anomaly_events: {
+        Row: AnomalyEventRow;
+        Insert: Omit<
+          AnomalyEventRow,
+          | 'id'
+          | 'triggered_at'
+          | 'created_at'
+          | 'push_dispatch_attempts'
+          | 'feedback_thumb'
+        > & {
+          id?: string;
+          triggered_at?: string;
+          created_at?: string;
+          push_dispatch_attempts?: number;
+          feedback_thumb?: -1 | 0 | 1;
+        };
+        Update: Partial<AnomalyEventRow>;
+        Relationships: [];
+      };
+      bp_baselines: {
+        Row: BpBaselineRow;
+        Insert: BpBaselineRow;
+        Update: Partial<BpBaselineRow>;
+        Relationships: [];
+      };
+      hr_baselines: {
+        Row: HrBaselineRow;
+        Insert: HrBaselineRow;
+        Update: Partial<HrBaselineRow>;
         Relationships: [];
       };
     };

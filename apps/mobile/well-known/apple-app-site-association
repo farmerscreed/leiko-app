@@ -1,0 +1,24 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["TEAMID.com.leiko.app"],
+        "components": [
+          { "/": "/r/*", "comment": "Reading detail deep link" },
+          { "/": "/v/*", "comment": "Vital detail deep link" },
+          { "/": "/home", "comment": "App home" },
+          { "/": "/weekly", "comment": "Weekly view" },
+          { "/": "/settings", "comment": "Settings" },
+          { "/": "/settings/devices", "comment": "Device settings" },
+          { "/": "/settings/subscription", "comment": "Subscription settings" },
+          { "/": "/family", "comment": "Family members" },
+          { "/": "/pair/*", "comment": "Pairing handoff (pair.leiko.app)" }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["TEAMID.com.leiko.app"]
+  }
+}

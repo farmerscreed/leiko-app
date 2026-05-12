@@ -205,8 +205,10 @@ export function SettingsScreen({ navigation }: Props) {
       void flushNotifs(userId);
     }
   }, [userId, flushNotifs, notif.dailySummary, notif.weeklySummary, notif.anomalyNotifications,
+      notif.anomalyBp, notif.anomalyHr, notif.anomalySpo2,
       notif.watchStatus, notif.familyActivity, notif.subscriptionAccount, notif.marketing,
-      notif.quietHoursEnabled, notif.quietHoursStart, notif.quietHoursEnd]);
+      notif.quietHoursEnabled, notif.quietHoursStart, notif.quietHoursEnd,
+      notif.anomalyBypassQuiet]);
 
   const [quietHoursSheetOpen, setQuietHoursSheetOpen] = useState(false);
   const [exportPending, setExportPending] = useState(false);
@@ -630,6 +632,38 @@ export function SettingsScreen({ navigation }: Props) {
             onSwitchChange={(v) => notif.set('anomalyNotifications', v)}
             testID="settings-notif-anomaly"
           />
+          {/* Sprint 15 — per-vital opt-outs. Gated visually on the
+              umbrella anomaly_notifications toggle: when it's off, the
+              per-vital toggles are hidden (the umbrella overrides them
+              server-side anyway). */}
+          {notif.anomalyNotifications ? (
+            <>
+              <ListRow
+                variant="toggle"
+                title="Blood pressure"
+                subtitle="Worth-a-look and urgent BP notices."
+                switchValue={notif.anomalyBp}
+                onSwitchChange={(v) => notif.set('anomalyBp', v)}
+                testID="settings-notif-anomaly-bp"
+              />
+              <ListRow
+                variant="toggle"
+                title="Heart rate"
+                subtitle="3-day trend and out-of-range resting heart rate."
+                switchValue={notif.anomalyHr}
+                onSwitchChange={(v) => notif.set('anomalyHr', v)}
+                testID="settings-notif-anomaly-hr"
+              />
+              <ListRow
+                variant="toggle"
+                title="Blood oxygen"
+                subtitle="Low overnight oxygen patterns."
+                switchValue={notif.anomalySpo2}
+                onSwitchChange={(v) => notif.set('anomalySpo2', v)}
+                testID="settings-notif-anomaly-spo2"
+              />
+            </>
+          ) : null}
           <ListRow
             variant="toggle"
             title="Watch status"
@@ -671,14 +705,27 @@ export function SettingsScreen({ navigation }: Props) {
             testID="settings-notif-quiet-toggle"
           />
           {notif.quietHoursEnabled ? (
-            <ListRow
-              variant="navigation"
-              title="Quiet window"
-              value={formatQuietHours(notif.quietHoursStart, notif.quietHoursEnd)}
-              onPress={() => setQuietHoursSheetOpen(true)}
-              showDivider={false}
-              testID="settings-notif-quiet-window"
-            />
+            <>
+              <ListRow
+                variant="navigation"
+                title="Quiet window"
+                value={formatQuietHours(notif.quietHoursStart, notif.quietHoursEnd)}
+                onPress={() => setQuietHoursSheetOpen(true)}
+                testID="settings-notif-quiet-window"
+              />
+              {/* Sprint 15 — urgent override affirmation. Default is
+                  "Hold for morning". The user can flip to "Reach me
+                  anyway" if they want urgent BP/HR/SpO2 to wake them. */}
+              <ListRow
+                variant="toggle"
+                title="Urgent overrides quiet"
+                subtitle="Send confirmed-urgent notices even during quiet hours."
+                switchValue={notif.anomalyBypassQuiet}
+                onSwitchChange={(v) => notif.set('anomalyBypassQuiet', v)}
+                showDivider={false}
+                testID="settings-notif-anomaly-bypass"
+              />
+            </>
           ) : null}
         </SettingsSection>
 

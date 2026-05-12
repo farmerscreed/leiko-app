@@ -111,7 +111,36 @@ export type AnalyticsEvent =
   | { name: 'daily_narration_generated'; props?: { tier: string; template_id: string } }
   | { name: 'reading_paragraph_generated'; props?: { tier: string; template_id: string } }
   // Sprint 12.5 fix — readings seeded from server when local is empty.
-  | { name: 'readings_hydrated_from_server'; props?: { count: number } };
+  | { name: 'readings_hydrated_from_server'; props?: { count: number } }
+  // Sprint 15 — push notification lifecycle. Token is opaque; no PHI.
+  | { name: 'push_permission_prompted'; props?: { granted: boolean } }
+  | { name: 'push_permission_denied' }
+  | { name: 'push_token_registered'; props?: { platform: 'ios' | 'android' | 'web' } }
+  | { name: 'push_token_fetch_failed'; props?: { reason: string } }
+  | { name: 'push_token_upsert_failed'; props?: { reason: string } }
+  | { name: 'push_token_unregister_failed'; props?: { reason: string } }
+  | { name: 'push_received'; props?: { category: string } }
+  | { name: 'push_opened'; props?: { category: string; deepLink: string } }
+  // Sprint 15 — anomaly events. Reading values NEVER appear here.
+  // tier is the classification; vital identifies which engine fired.
+  | {
+      name: 'anomaly_fired';
+      props?: {
+        vital: 'bp' | 'hr' | 'spo2';
+        tier: 'calm_concerned' | 'confirmed_urgent';
+        reason: string;
+      };
+    }
+  | {
+      name: 'anomaly_feedback';
+      props?: {
+        vital: 'bp' | 'hr' | 'spo2';
+        tier: 'calm_concerned' | 'confirmed_urgent';
+        thumb: -1 | 1;
+      };
+    }
+  | { name: 'anomaly_banner_dismissed'; props?: { vital: 'bp' | 'hr' | 'spo2' } }
+  | { name: 'anomaly_banner_tapped'; props?: { vital: 'bp' | 'hr' | 'spo2'; tier: 'calm_concerned' | 'confirmed_urgent' } };
 
 type EventName = AnalyticsEvent['name'];
 

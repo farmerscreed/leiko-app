@@ -357,6 +357,14 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
           style={
             {
               "marginTop": 8,
+              "paddingHorizontal": 20,
+            }
+          }
+        />
+        <View
+          style={
+            {
+              "marginTop": 8,
             }
           }
         >

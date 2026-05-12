@@ -23,6 +23,12 @@ export interface NotificationPrefs {
   dailySummary: boolean;
   weeklySummary: boolean;
   anomalyNotifications: boolean;
+  /** Sprint 15 — per-vital anomaly opt-outs. Each is gated by
+   *  anomalyNotifications: when the umbrella is off, the per-vital
+   *  toggles have no effect. */
+  anomalyBp: boolean;
+  anomalyHr: boolean;
+  anomalySpo2: boolean;
   watchStatus: boolean;
   familyActivity: boolean;
   subscriptionAccount: boolean;
@@ -39,6 +45,9 @@ const DEFAULTS: NotificationPrefs = {
   dailySummary: true,
   weeklySummary: true,
   anomalyNotifications: true,
+  anomalyBp: true,
+  anomalyHr: true,
+  anomalySpo2: true,
   watchStatus: true,
   familyActivity: true,
   subscriptionAccount: true,
@@ -46,7 +55,9 @@ const DEFAULTS: NotificationPrefs = {
   quietHoursEnabled: true,
   quietHoursStart: '22:00',
   quietHoursEnd: '07:00',
-  anomalyBypassQuiet: true,
+  // Sprint 15 — default flipped from true to false. Users now affirm
+  // the quiet-hours override via the onboarding step.
+  anomalyBypassQuiet: false,
   medicationBypassQuiet: true,
 };
 
@@ -71,6 +82,9 @@ function toRow(userId: string, p: NotificationPrefs): NotificationPreferencesIns
     daily_summary: p.dailySummary,
     weekly_summary: p.weeklySummary,
     anomaly_notifications: p.anomalyNotifications,
+    anomaly_bp: p.anomalyBp,
+    anomaly_hr: p.anomalyHr,
+    anomaly_spo2: p.anomalySpo2,
     watch_status: p.watchStatus,
     family_activity: p.familyActivity,
     subscription_account: p.subscriptionAccount,
@@ -129,6 +143,9 @@ export const useNotifications = create<NotificationStore>((set, get) => {
         dailySummary: get().dailySummary,
         weeklySummary: get().weeklySummary,
         anomalyNotifications: get().anomalyNotifications,
+        anomalyBp: get().anomalyBp,
+        anomalyHr: get().anomalyHr,
+        anomalySpo2: get().anomalySpo2,
         watchStatus: get().watchStatus,
         familyActivity: get().familyActivity,
         subscriptionAccount: get().subscriptionAccount,

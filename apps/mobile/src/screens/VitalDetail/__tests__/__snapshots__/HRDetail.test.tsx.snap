@@ -357,6 +357,14 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
           style={
             {
               "marginTop": 8,
+              "paddingHorizontal": 20,
+            }
+          }
+        />
+        <View
+          style={
+            {
+              "marginTop": 8,
             }
           }
         >

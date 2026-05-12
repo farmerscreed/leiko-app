@@ -19,6 +19,7 @@ import { useState } from 'react';
 import { Button } from '../../components/Button';
 import { Pill } from '../../components/Pill';
 import { InlineExplainer } from '../../components/InlineExplainer';
+import { ScreenAnomalyBanner } from '../../components/ScreenAnomalyBanner';
 import { useTheme } from '../../theme';
 import { useReadings } from '../../state/readings';
 import { useAuth } from '../../state/auth';
@@ -162,6 +163,12 @@ export function ReadingDetailScreen({ navigation }: Props) {
           {formatTimestamp(reading.measuredAtSec)}
           {reading.serverId === null ? ' · Pending sync' : ''}
         </Text>
+
+        {/* Sprint 15 — anomaly banner scoped to this reading. Renders
+            nothing when there's no event for this serverId. */}
+        <View style={{ marginBottom: theme.spacing.l }}>
+          <ScreenAnomalyBanner readingServerId={reading.serverId ?? undefined} />
+        </View>
 
         <View
           style={{

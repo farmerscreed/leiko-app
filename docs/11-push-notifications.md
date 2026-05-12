@@ -1,190 +1,151 @@
 # 11 — Push Notifications
 
-CANONICAL for Sprint 15. Sourced from D7 §8 (categories, deep links, body templates) and D8a §12 (voice/push categories). Voice rules from `docs/05-voice-and-claims.md`.
+CANONICAL for Sprint 15+. Sourced from D7 §8, D8a §12, D13 §11.3, and the voice rules in `docs/05-voice-and-claims.md` + `docs/_reference/D11-brand-repositioning.md` §3.
+
+Single egress: every push from Leiko goes through the `send-push` Edge Function. The mobile app never talks to Expo / APNs / FCM directly.
 
 ---
 
-## 1. Categories (D7 §8.1, with D8a §12.2 ADDS)
+## 1. Categories
 
-| Category | iOS Category ID | Android Channel | Default | Quiet hours |
-| --- | --- | --- | --- | --- |
-| Daily summary | `leiko.daily_summary` | `daily-summary` (DEFAULT importance) | On | Suppressed |
-| Weekly summary | `leiko.weekly_summary` | `weekly-summary` (DEFAULT) | On (Plus) | Suppressed |
-| Anomaly | `leiko.anomaly` | `anomaly` (HIGH) | On (Plus) | Honored unless user opts to override |
-| Watch status | `leiko.device` | `device` (LOW) | On | Suppressed |
-| Family activity | `leiko.family` | `family` (DEFAULT) | On | Suppressed |
-| **Hybrid caregiver joined** (D8a §12.2 ADDS — self-buyer only) | `leiko.hybrid` | `hybrid` (DEFAULT) | On | Suppressed |
-| Medication reminder | `leiko.medication` | `medication` (HIGH) | On (parent) | **Always honored** (medication is time-bound) |
-| Subscription / account | `leiko.account` | `account` (LOW) | On | Suppressed |
-| Marketing | `leiko.marketing` | `marketing` (LOW) | **OFF by default** (D5 §3.4) | Suppressed |
+| Category | Default | Quiet hours |
+|---|---|---|
+| Daily summary | On | Suppressed |
+| Weekly summary | On (Plus) | Suppressed |
+| Anomaly — BP | On (Plus) | Honoured unless user opts in (per tier) |
+| Anomaly — HR | On (Plus) | Honoured unless user opts in (per tier) |
+| Anomaly — SpO2 | On (Plus) | Honoured unless user opts in (per tier) |
+| Watch status | On | Suppressed |
+| Family activity | On | Suppressed |
+| Subscription / account | On | Suppressed |
+| Marketing | **Off by default** | Suppressed |
 
----
+The umbrella `anomaly_notifications` toggle is a kill-switch — when off, the three per-vital toggles have no effect.
 
-## 2. Quiet hours (D7 §8.2)
+Sleep + Activity have no anomaly toggles. They never push.
 
-- **Default 22:00–07:00 caregiver-local-time.**
-- Configurable in Settings (D6 US-78) per category.
-- During quiet hours, only **Anomaly + Medication** categories may fire (and Anomaly only if user opts in).
-- Other categories are **batched** and delivered at end-of-quiet-hours. If same category has > 1 deferred, the app collapses into a single *"3 family events overnight"* notification.
-- **Per-category 24h rate limit: max 3 notifications per category.** Excess batched.
+Per-category 24h rate limit: 3 max for non-urgent. Confirmed-urgent bypasses the rate limit.
 
 ---
 
-## 3. Deep linking targets (D7 §8.3)
+## 2. Quiet hours
+
+- **Default 22:00–07:00 in the recipient's IANA timezone.**
+- Configurable in Settings → Notifications.
+- During quiet hours, the only category that may fire is **anomaly + confirmed-urgent AND `anomaly_bypass_quiet = true`**. Everything else is suppressed (not deferred — the next eligible event re-fires its own copy if still relevant).
+- `anomaly_bypass_quiet` defaults to **false** (per migration 0017). Users explicitly affirm via the one-shot `QuietHoursAffirmSheet` on first Home render. Settings is the second-chance toggle.
+
+---
+
+## 3. Deep link table (D7 §8.3, D13 §11.3)
 
 | Category | URL | Target screen |
-| --- | --- | --- |
-| Daily summary | `leiko://home` | Caregiver home dashboard |
-| Weekly summary | `leiko://weekly` | Weekly view (D6 US-52) |
-| Anomaly | `leiko://reading/{reading_id}` | Reading detail (D6 US-24) |
-| Watch status | `leiko://settings/devices` | Device settings (D6 US-84) |
-| Family activity | `leiko://family` | Family screen (D6 US-47) |
-| Medication reminder | `leiko://parent/medication/{med_id}` | Parent medication detail |
-| Subscription | `leiko://settings/subscription` | Subscription settings |
+|---|---|---|
+| Daily summary | `leiko://home` | Caregiver / Self-Buyer home |
+| Weekly summary | `leiko://weekly` | Trends (weekly view) |
+| Anomaly — BP | `leiko://reading/{reading_id}` | Reading Detail |
+| Anomaly — HR / SpO2 | `leiko://vital/{kind}` | Vital Detail |
+| Watch status | `leiko://settings/devices` | Settings (devices section) |
+| Family activity | `leiko://family` | Family Members |
+| Subscription | `leiko://settings/subscription` | Settings (subscription section) |
 | Marketing | `leiko://home` | Home (no targeted deep link to avoid abuse) |
 
-### Universal links / App Links (REQUIRED)
-Universal Links (iOS) and App Links (Android) must be set up at the `leiko.app` domain so `https://leiko.app/*` and `https://pair.leiko.app/*` paths can deep-link into the app.
+### Universal Links / App Links (REQUIRED)
+- Apple's `apple-app-site-association` template at `apps/mobile/well-known/apple-app-site-association`.
+- Android's `assetlinks.json` template at `apps/mobile/well-known/assetlinks.json`.
 
-- Apple's `apple-app-site-association` checked into `apps/mobile/well-known/`.
-- Android's `assetlinks.json` checked into the same path.
+Before App Store / Play submission:
+1. Replace `TEAMID` with the Apple Developer Team ID.
+2. Replace the SHA-256 fingerprint placeholders in `assetlinks.json` with Play App Signing's certificate hash.
+3. Host both at `https://leiko.app/.well-known/*` so iOS + Android can verify ownership.
 
-Required because the parent's WhatsApp link will be a regular `https` URL, not a `leiko://` URI.
+The app declares Associated Domains (iOS) and intent filters (Android) for `leiko.app` and `pair.leiko.app` in `apps/mobile/app.json`.
 
 ---
 
-## 4. Notification body templates (D7 §8.4)
+## 4. Body templates
 
-Templates live in `apps/mobile/src/i18n/notifications/{locale}.ts`. Each is `function(payload) => string`. The copy-lint linter (`docs/05-voice-and-claims.md`) runs over template outputs in CI by feeding synthetic payloads and asserting no forbidden claim is produced.
+Server-side source of truth: `supabase/functions/_shared/notification-templates.ts`. Renders one of three account_type variants (`caregiver` / `self_buyer` / `parent`) per recipient. Every rendered string passes the Deno-side `voice-lint-push` filter in CI; hard-hit failure drops the push.
 
-### English (en) — caregiver variants
-```ts
-// apps/mobile/src/i18n/notifications/en/caregiver.ts
-export const caregiverNotifications = {
-  daily_summary: (p: { parent: string; sys: number; dia: number; time: string; sleepH: number }) =>
-    `Good morning. ${p.parent}'s reading was ${p.sys}/${p.dia} ${p.time}. She slept ${p.sleepH} hours.`,
+Length budget per body: ≤ 120 chars iOS / ≤ 180 chars Android. Title: ≤ 60 chars.
 
-  daily_no_reading: (p: { parent: string }) =>
-    `No readings from ${p.parent} yesterday. Want to check in?`,
+Example renders:
 
-  anomaly_single: (p: { parent: string; sys: number; dia: number }) =>
-    `${p.parent}'s reading just now was higher than usual: ${p.sys}/${p.dia}. We've added it to her log.`,
+```
+[caregiver  · BP crisis_absolute]
+  Please call Mum
+  Mum's reading just now was very high. We recommend reaching out today.
 
-  anomaly_morning_trend: (p: { parent: string }) =>
-    `${p.parent}'s morning readings have been higher this week. Worth a check-in when you can.`,
+[caregiver  · BP stage2_sustained_60min]
+  Please call Mum
+  Three high readings for Mum in the last hour. We recommend reaching out now.
 
-  weekly_summary: (p: { parent: string; body: string }) =>
-    p.body, // body is the AI-generated first sentence; lint runs in CI before send
+[self_buyer · HR confirmed_urgent (extreme_value)]
+  Please call your doctor
+  Your resting heart rate is outside its usual range. We recommend talking to your doctor today.
 
-  watch_low_battery: (p: { parent: string; pct: number }) =>
-    `${p.parent}'s watch battery is at ${p.pct}%. She'll need to charge it soon.`,
-};
+[caregiver  · SpO2 overnight_dip_sustained]
+  Please call Mum
+  Mum's overnight oxygen has dipped low three nights running. Worth a call to her doctor today.
 ```
 
-### English (en) — self-buyer variants (D8a §12.2 SUPERSEDES)
-
-All eight push categories have self-buyer template variants. Each respects the same quiet hours and length limits (≤120 chars iOS).
-
-```ts
-// apps/mobile/src/i18n/notifications/en/self-buyer.ts
-export const selfBuyerNotifications = {
-  // daily-summary
-  daily_summary_title: () => `Your morning reading`,
-  daily_summary_body: (p: { sys: number; dia: number }) =>
-    `${p.sys}/${p.dia}, in range. Have a good day.`,
-
-  // anomaly-noted
-  anomaly_noted_title: () => `Worth a look`,
-  anomaly_noted_body: () =>
-    `Three readings this week were higher than usual. Might be worth a quiet check-in with your doctor.`,
-
-  // confirmed-urgent
-  confirmed_urgent_title: () => `Please call your doctor`,
-  confirmed_urgent_body: () =>
-    `Three high readings in the last hour. We recommend reaching out today.`,
-
-  // missed-reading
-  missed_reading_title: () => `It's been a few days`,
-  missed_reading_body: () =>
-    `Take a moment to check in with a reading when you can.`,
-
-  // hybrid-caregiver-joined (ADDS — only fires after a self-buyer invites a caregiver)
-  hybrid_caregiver_joined_title: (p: { caregiver: string }) =>
-    `${p.caregiver} accepted your invite`,
-  hybrid_caregiver_joined_body: (p: { caregiver: string }) =>
-    `She can now see your readings.`,
-
-  // subscription-billing — UNCHANGED
-  subscription_renewing_title: () => `Subscription renewing`,
-  subscription_renewing_body: () => `Leiko will renew tomorrow for $4.99/month.`,
-
-  // watch-shipped — UNCHANGED
-  watch_shipped_title: () => `Your watch is on the way`,
-  watch_shipped_body: (p: { tracking: string; eta: string }) =>
-    `Tracking #${p.tracking}: arriving ${p.eta}.`,
-
-  // family-invite (n/a in self-buyer-only mode; used in hybrid)
-  // parent-pairing-handoff (n/a in self-buyer mode — the self-buyer pairs themselves)
-};
-```
-
-### Routing rule
-
-The push composer selects the variant by the **recipient's** `account_type`:
-- `caregiver` → `caregiverNotifications.*`
-- `self_buyer` → `selfBuyerNotifications.*`
-- `parent` → caregiver-style with appropriate adaptations (rare — parent users typically don't receive notifications about themselves)
-
-### Voice rules
-- Per `docs/05-voice-and-claims.md`: never "alert", "warning", "critical", all-caps. Never emoji-driven urgency.
-- Body length: **≤ 120 chars iOS, ≤ 180 chars Android** (hard fail in copy-lint).
-- Even confirmed-urgent stays calm: *"Three high readings in the last hour. We recommend reaching out to Dad now."*
+Voice rules: never "alert", "warning", "critical", all-caps, multiple `!`. Calm before clever.
 
 ---
 
-## 5. Routing table (calm-concerned vs confirmed-urgent)
+## 5. iOS interruption levels
 
-| Anomaly source (`docs/10-anomaly-logic.md`) | Category | Title | Body template |
-| --- | --- | --- | --- |
-| Calm-concerned: single outlier | `leiko.anomaly` | "Worth a look" | `anomaly_single` |
-| Calm-concerned: morning trend | `leiko.anomaly` | "Worth a look" | `anomaly_morning_trend` |
-| Calm-concerned: weekly trend (3+ in 7d) | `leiko.weekly_summary` | "Mum's week" | (emphasised paragraph in weekly summary, not a separate push) |
-| Confirmed-urgent: Stage 2 sustained | `leiko.anomaly` (HIGH; bypasses quiet hours **only if user opted in**) | "Please call Mum" | "Three high readings in the last hour. We recommend reaching out now." |
-| Confirmed-urgent: Crisis (≥180/120) | `leiko.anomaly` (HIGH; bypasses quiet hours) | "Please call Mum" | "Mum's reading just now was very high — sys ≥ 180 or dia ≥ 120. We recommend reaching out now." |
+| Tier | iOS interruptionLevel | Notes |
+|---|---|---|
+| All non-urgent | `active` | Respects DND, surfaces in normal stream. |
+| Anomaly confirmed-urgent | `time-sensitive` | Surfaces above DND-suppressed default-priority notices; **does not bypass DND or ringer**. |
 
-**Quiet-hours override behaviour**: even confirmed-urgent only bypasses quiet hours if the user explicitly opted to allow it during onboarding. Default is **respect quiet hours even for urgent** — caregiver gets the push at 07:00 instead of 03:00. Per CLAUDE.md anti-pattern: "Add fear-based push notifications" (forbidden).
+**Critical Alerts (`com.apple.developer.usernotifications.critical-alerts`) are intentionally NOT used.** Critical Alerts bypass Do-Not-Disturb and ringer; Leiko's brand voice (D11 §3, CLAUDE.md) is calm-before-clever, not fear-based. Confirmed-urgent gets time-sensitive instead, which respects DND.
 
----
-
-## 6. Token storage (D7 §3.2.13)
-
-`public.push_tokens` stores both the Expo token AND the underlying APNs/FCM token (per the D7 §2.5 future-migration mitigation). Schema in `docs/01-data-model.md`.
-
-- Re-register on every app foreground (token can rotate).
-- Soft-purge tokens unseen > 60 days (a cron job in `/retention`).
+Android: anomaly channel is `HIGH` importance (heads-up). Confirmed-urgent uses `priority: 'high'` on the Expo message envelope.
 
 ---
 
-## 7. Delivery telemetry
+## 6. Token registration
+
+- `expo-notifications` `getExpoPushTokenAsync()` is called once at app boot (after auth), and on every foreground.
+- Token + platform + per-install `device_id` (UUID persisted in MMKV) upsert into `public.push_tokens` keyed by `(user_id, device_id)`.
+- Native APNs/FCM token (when available) is stored alongside for the future migration off Expo Push API.
+- Tokens unseen > 60 days are soft-purged by a retention cron (Sprint 17 follow-up).
+
+---
+
+## 7. Per-push pipeline (Sprint 15)
+
+`send-push` runs each request through:
+
+1. Recipient lookup + `notification_preferences` + tokens.
+2. Per-category opt-out + per-vital opt-out gates.
+3. Template render via recipient's `account_type`.
+4. Voice-lint over title + body. **Hard hit → drop, log to audit_log.**
+5. Length check (Android 180 cap).
+6. Quiet-hours check in recipient's timezone (cross-midnight aware).
+7. Per-category 24h rate limit (urgent bypasses).
+8. Expo Push API POST.
+9. `audit_log` row: `push.sent` or `push.suppressed` with category + outcome + (anomaly only) vital_kind + tier + anomaly_event_id. **No reading values.**
+
+PostHog events fire mobile-side from the response handler.
+
+---
+
+## 8. Delivery telemetry
 
 Per `docs/13-testing-standard.md`:
 - Push delivery success rate ≥ 98% (alert < 95% over 1h).
 - Anomaly false-positive rate ≤ 15% thumbs-down (alert > 25% week-over-week).
-- All push events emit a PostHog event `push.{category}.{outcome}` with NO PHI in metadata.
+- All push events emit a PostHog event (mobile-side from the tap listener; server-side via audit_log).
+- PHI rule: reading values NEVER in metadata.
 
 ---
 
-## 8. Sprint 15 acceptance bar (excerpt)
+## 9. Open items
 
-- All 8 categories registered with iOS Notification Service Extension + Android Notification Channels.
-- Quiet-hours logic correctly suppresses + batches; tested with frozen-clock fixtures.
-- All templates pass copy-lint with synthetic payloads.
-- Universal Links + App Links verified on iOS + Android.
-- Anomaly → push deep-link round-trip works on both platforms.
-
----
-
-## 9. Open notification questions
-- Localised quiet-hour defaults (e.g. earlier 21:00 in Lagos, later 22:00 in NJ) — defer to v1.1.
+- Localised quiet-hour defaults (e.g. earlier 21:00 in Lagos) — defer to v1.1.
 - Snooze-for-1-hour affordance on anomaly notifications — defer.
 - Apple Live Activities for in-progress reading — defer to v1.2.
+- APNs `.p8` + FCM service account credentials — founder action; sandbox-only until provided.

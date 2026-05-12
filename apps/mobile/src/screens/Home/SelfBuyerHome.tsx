@@ -38,6 +38,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
+import { ScreenAnomalyBanner } from '../../components/ScreenAnomalyBanner';
+import { QuietHoursAffirmSheet } from '../../components/QuietHoursAffirmSheet';
+import { useQuietHoursAffirm } from '../../hooks/useQuietHoursAffirm';
 import { AskLeikoSheet } from '../../components/AskLeikoSheet';
 import { HealthPlatformPermissionPrompt } from '../../components/HealthPlatformPermissionPrompt';
 import { SixthReadingPaywallHost } from '../../components/SixthReadingPaywallHost';
@@ -179,6 +182,20 @@ export function SelfBuyerHome() {
           name={headerText.name}
           onAvatarPress={() => navigation.navigate('Settings')}
         />
+
+        {/* Sprint 15 — server-driven anomaly banner (most-severe-wins
+            across BP/HR/SpO2). Renders nothing when there's no
+            unacknowledged event. The legacy local-tier banner below
+            still renders as a fallback so cold-start clients without a
+            server event yet still see the calm-concerned cue. */}
+        <View
+          style={{
+            paddingHorizontal: theme.spacing.l,
+            marginTop: theme.spacing.l,
+          }}
+        >
+          <ScreenAnomalyBanner />
+        </View>
 
         {banner ? (
           <View
@@ -404,8 +421,17 @@ export function SelfBuyerHome() {
       {/* Sprint 10a — D8a §9.1 6th-reading auto-paywall. Self-buyer
           variant: same trigger logic, copy switches by account_type. */}
       <SixthReadingPaywallHost accountType="self_buyer" familyId={familyId} />
+      <QuietHoursAffirmSlot />
     </SafeAreaView>
   );
+}
+
+// Sprint 15 — one-shot quiet-hours-override affirm sheet. Slotted at
+// end of the screen tree so it overlays the home content. The hook
+// gates on the MMKV one-shot flag.
+function QuietHoursAffirmSlot() {
+  const { visible, dismiss } = useQuietHoursAffirm();
+  return <QuietHoursAffirmSheet visible={visible} onDone={dismiss} />;
 }
 
 // =============================================================================

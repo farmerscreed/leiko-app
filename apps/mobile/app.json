@@ -10,6 +10,10 @@
     "ios": {
       "bundleIdentifier": "com.leiko.app",
       "supportsTablet": false,
+      "associatedDomains": [
+        "applinks:leiko.app",
+        "applinks:pair.leiko.app"
+      ],
       "infoPlist": {
         "NSBluetoothAlwaysUsageDescription": "Leiko uses Bluetooth to talk to your watch and sync readings.",
         "NSBluetoothPeripheralUsageDescription": "Leiko uses Bluetooth to talk to your watch.",
@@ -18,7 +22,8 @@
         "UIBackgroundModes": [
           "bluetooth-central",
           "fetch",
-          "processing"
+          "processing",
+          "remote-notification"
         ],
         "BGTaskSchedulerPermittedIdentifiers": [
           "leiko.sync.backgroundFetch"
@@ -34,6 +39,7 @@
         "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE",
         "android.permission.WAKE_LOCK",
         "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.POST_NOTIFICATIONS",
         "android.permission.health.READ_WEIGHT",
         "android.permission.health.READ_HEIGHT",
         "android.permission.health.READ_BLOOD_GLUCOSE",
@@ -43,10 +49,22 @@
         "android.permission.health.WRITE_SLEEP",
         "android.permission.health.WRITE_STEPS",
         "android.permission.health.WRITE_ACTIVE_CALORIES_BURNED"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            { "scheme": "https", "host": "leiko.app" },
+            { "scheme": "https", "host": "pair.leiko.app" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
       ]
     },
     "plugins": [
       "expo-font",
+      "expo-notifications",
       "@kingstinct/react-native-healthkit",
       "react-native-health-connect"
     ]

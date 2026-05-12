@@ -357,6 +357,14 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
           style={
             {
               "marginTop": 8,
+              "paddingHorizontal": 20,
+            }
+          }
+        />
+        <View
+          style={
+            {
+              "marginTop": 8,
             }
           }
         >

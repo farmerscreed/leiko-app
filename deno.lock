@@ -54,6 +54,8 @@
             "npm:expo-blur@~15.0.8",
             "npm:expo-font@~14.0.11",
             "npm:expo-haptics@~15.0.8",
+            "npm:expo-linking@~8.0.12",
+            "npm:expo-notifications@~0.32.17",
             "npm:expo-status-bar@3.0.9",
             "npm:expo-task-manager@~14.0.9",
             "npm:expo@54.0.33",

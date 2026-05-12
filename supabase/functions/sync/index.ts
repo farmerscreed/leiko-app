@@ -253,8 +253,14 @@ async function handleLegacy(
     );
   }
 
+  const newReadingId = insertReading.data.id as string;
+  // Fire detect-anomaly inline — legacy single-reading path mirrors
+  // the multi-vitals BP trigger so behaviour is identical regardless
+  // of which payload shape the client sent.
+  await triggerDetectAnomalyBatch(familyId, [newReadingId]);
+
   const resp: LegacyResponse = {
-    readingId: insertReading.data.id as string,
+    readingId: newReadingId,
     deviceId,
     duplicate: false,
   };
@@ -280,18 +286,20 @@ async function handleMultiVitals(
   // BP — different table (readings), but follows the same accept-then-
   // bulk-upsert pattern. Inserts use `ignoreDuplicates` against the
   // (device_id, measured_at) unique index → idempotent retry.
+  const newBpReadingIds: string[] = [];
   if (payload.bpReadings?.length) {
     const { accepted, rejected } = validateBPReadings(payload.bpReadings);
     counts.rejected.bp = rejected.length;
     await logRejected(serviceClient, familyId, userId, 'bp', rejected);
     if (accepted.length > 0) {
       const rows = mapBPReadings(accepted, familyId, deviceId);
-      const { inserted, duplicates, errored } = await insertReadings(serviceClient, rows);
-      if (errored) {
-        return json({ error: 'bp_insert_failed', detail: errored }, 500);
+      const result = await insertReadings(serviceClient, rows);
+      if (result.errored) {
+        return json({ error: 'bp_insert_failed', detail: result.errored }, 500);
       }
-      counts.inserted.bp = inserted;
-      counts.duplicates.bp = duplicates;
+      counts.inserted.bp = result.inserted;
+      counts.duplicates.bp = result.duplicates;
+      if (result.insertedReadingIds) newBpReadingIds.push(...result.insertedReadingIds);
     }
   }
 
@@ -362,8 +370,46 @@ async function handleMultiVitals(
     }
   }
 
+  // Fire detect-anomaly for every newly inserted BP reading. Sprint 15:
+  // BP runs on the hot path; HR/SpO2 trends live on the nightly cron.
+  // Awaited so the response can carry tier info back to the client.
+  if (newBpReadingIds.length > 0) {
+    await triggerDetectAnomalyBatch(familyId, newBpReadingIds);
+  }
+
   const resp: MultiVitalsResponse = { deviceId, ...counts };
   return json(resp, 200);
+}
+
+// ────────────────────────────────────────────────────────────────────
+// detect-anomaly trigger — Sprint 15.
+//
+// One internal HTTP call per newly inserted BP reading. Fan-out is
+// awaited in parallel so the /sync response stays below the 5-second
+// latency budget from docs/10-anomaly-logic.md §2 even on a 24h
+// backfill sync (typical BP volume: 1-3 readings, ceiling ~20).
+
+async function triggerDetectAnomalyBatch(
+  familyId: string,
+  readingIds: string[],
+): Promise<void> {
+  const baseUrl = Deno.env.get('SUPABASE_URL')!;
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const calls = readingIds.map((readingId) =>
+    fetch(`${baseUrl}/functions/v1/detect-anomaly`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${serviceKey}`,
+      },
+      body: JSON.stringify({
+        mode: 'reading_inserted',
+        familyId,
+        readingId,
+      }),
+    }).catch(() => undefined),
+  );
+  await Promise.all(calls);
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -378,25 +424,32 @@ interface InsertSummary {
   inserted: number;
   duplicates: number;
   errored: string | null;
+  insertedReadingIds?: string[];
 }
 
 async function insertReadings(
   serviceClient: SupabaseClient,
   rows: ReturnType<typeof mapBPReadings>,
 ): Promise<InsertSummary> {
-  // We need both the inserted count and the duplicate count — the
-  // ignoreDuplicates path returns nothing for skipped rows, so we count
-  // by selecting back what's there.
-  const { error, count } = await serviceClient
+  // We need both the inserted count and the inserted ids — the latter
+  // feeds the post-insert detect-anomaly trigger. ignoreDuplicates +
+  // .select() yields only newly inserted rows; skipped duplicates are
+  // counted by subtraction (rows.length - insertedRows.length).
+  const { error, data } = await serviceClient
     .from('readings')
     .upsert(rows, {
       onConflict: 'device_id,measured_at',
       ignoreDuplicates: true,
-      count: 'exact',
-    });
+    })
+    .select('id');
   if (error) return { inserted: 0, duplicates: 0, errored: error.message };
-  const inserted = count ?? 0;
-  return { inserted, duplicates: rows.length - inserted, errored: null };
+  const insertedRows = data ?? [];
+  return {
+    inserted: insertedRows.length,
+    duplicates: rows.length - insertedRows.length,
+    errored: null,
+    insertedReadingIds: insertedRows.map((r) => r.id as string),
+  };
 }
 
 async function insertVitalRows(

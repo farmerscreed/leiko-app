@@ -67,6 +67,12 @@ import {
   stopBackgroundSync,
 } from '../services/sync/backgroundSync';
 import { inferModel, setDeviceMetaProvider } from '../services/sync/postReading';
+import {
+  configureNotificationHandler,
+  registerForPushNotifications,
+} from '../services/notifications';
+import { startNotificationListeners } from '../services/notifications/listeners';
+import { navigationRef } from './navigationRef';
 
 // Define the OS-scheduled background-sync task once at module load.
 // TaskManager rejects redefinition, and module load is the only
@@ -300,10 +306,18 @@ export function RootNavigator() {
     // present (dev workspace without the native side). The dev-client
     // APK rebuild pulls them in.
     void startBackgroundSync();
+    // Sprint 15 — push notifications. Configure the foreground display
+    // behaviour + Android channels first (idempotent), then register
+    // for a token once the auth session is hydrated. Listener handles
+    // tap → deep-link routing.
+    void configureNotificationHandler();
+    void registerForPushNotifications();
+    const notifListeners = startNotificationListeners();
     return () => {
       stopOrchestrator();
       stopHealthPlatformBackgroundFetch();
       void stopBackgroundSync();
+      notifListeners.stop();
     };
   }, [
     hydrate,
@@ -329,7 +343,10 @@ export function RootNavigator() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <NavigationContainer>{content}</NavigationContainer>
+      {/* navigationRef is typed loosely so jest-expo's mock can stand
+          in for it in tests. Cast here so NavigationContainer's
+          stricter ref shape accepts it. */}
+      <NavigationContainer ref={navigationRef as never}>{content}</NavigationContainer>
       {/* Sprint 10c.2 polish — DEV-only floating sync-debug launcher.
           Production builds strip __DEV__; the component returns null. */}
       <DebugLauncher />

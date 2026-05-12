@@ -1,171 +1,119 @@
 # 10 — Anomaly Logic
 
-CANONICAL for Sprint 15. Sourced from D6 §5.11 (US-91 to US-95) and D8a §6 (anomaly banner UI). Voice rules from `docs/05-voice-and-claims.md` apply.
+CANONICAL for Sprint 15+. Extended from BP-only (Sprint 6) to multi-vital per `docs/_reference/D13-multi-vitals-constellation-spec.md` §11. Voice rules from `docs/05-voice-and-claims.md` and `docs/_reference/D11-brand-repositioning.md` §3 apply.
 
 > **Hard rule** (D3 + CLAUDE.md): the anomaly engine surfaces a **statistical outlier**, never a clinical diagnosis. Language is descriptive ("higher than usual"), never diagnostic ("hypertensive crisis"). Detection logic is statistical, not clinical.
 
 ---
 
-## 1. Three anomaly tiers
+## 1. Per-vital anomaly rules (D13 §11.1)
 
-The engine emits one of three classifications per ingest:
+| Vital | Calm-Concerned | Confirmed-Urgent |
+|---|---|---|
+| **BP** | Single reading > 150 sys OR > 95 dia AND > 2σ outlier (with ≥14-day baseline). Cold-start fallback: > 160 sys OR > 100 dia OR > 130 pulse. | ≥ 180/120 single reading (crisis-absolute) OR 3 readings > 160/100 in a rolling 60 minutes (stage2_sustained_60min). |
+| **HR** | Resting HR > baseline + 15 bpm for 3 consecutive days (baseline_3day_trend) OR > 100 bpm at rest sustained (sustained_high_at_rest). | < 40 bpm OR > 130 bpm sustained at rest (extreme_value). |
+| **SpO2** | Latest spot reading 90–94 OR latest overnight low 88–89 (sample_or_overnight_borderline). | Overnight low < 88 sustained 3+ nights (overnight_dip_sustained). |
+| **Sleep** | **Never produces a banner or push** — score classification informs the ring colour on Vital Detail only. | Never. |
+| **Activity** | **Never produces a banner or push.** | Never. |
 
-| Tier | Trigger | UI surface | Push? |
-| --- | --- | --- | --- |
-| In-range | Reading within ± 2σ of the parent's 14-day baseline AND below absolute thresholds | Reading shown calmly. No banner. | Daily summary only |
-| **Calm-concerned** | Statistical outlier (outside ± 2σ) OR exceeds soft thresholds (sys > 150 / dia > 95 / pulse > 120) | **Amber-accent banner** on home + Reading Detail. Body in Tone C (calm-concerned). | Yes — calm-concerned push category |
-| **Confirmed-urgent** | Stage-2-sustained pattern (≥ 3 readings in 60 min above sys 160 or dia 100) OR Crisis range (sys ≥ 180 OR dia ≥ 120) | **Crimson** banner — the only place crimson appears | Yes — confirmed-urgent push category |
-
-**Crimson is reserved for confirmed-urgent ONLY.** Per `docs/02-design-tokens.md` §1.3: "Crimson — 0% on a normal screen. Only when a confirmed clinical threshold is breached." Removing crimson by default IS the design default.
-
----
-
-## 2. Detection algorithm (D6 US-91)
-
-### Baseline computation
-- Per parent (NOT per family), rolling window of last 14 days.
-- Eligible readings: `hidden = false AND source = 'watch' AND quality_score IN ('good','fair')` (uses `readings_for_baseline` index from `docs/01-data-model.md`).
-- Compute `baseline_sys`, `baseline_dia`, `baseline_pulse` (means) and `sigma_sys`, `sigma_dia`, `sigma_pulse` (population std dev).
-
-### Outlier classification
-Pseudocode (runs server-side on reading ingest, target latency < 5s from sync to classification):
-
-```ts
-function classifyReading(r: Reading, baseline: Baseline | null): Classification {
-  // Cold-start path: no baseline yet
-  if (!baseline || baseline.daysOfData < 14) {
-    if (r.systolic >= 180 || r.diastolic >= 120) return { kind: 'confirmed_urgent', reason: 'crisis_absolute' };
-    if (r.systolic > 160 || r.diastolic > 100 || (r.pulse ?? 0) > 130) return { kind: 'calm_concerned', reason: 'absolute_cold_start' };
-    return { kind: 'in_range', reason: 'cold_start' };
-  }
-
-  // Hot path: with baseline
-  if (r.systolic >= 180 || r.diastolic >= 120) {
-    return { kind: 'confirmed_urgent', reason: 'crisis_absolute' };
-  }
-
-  const sysOutlier = Math.abs(r.systolic - baseline.sys) > 2 * baseline.sigmaSys;
-  const diaOutlier = Math.abs(r.diastolic - baseline.dia) > 2 * baseline.sigmaDia;
-  const pulseOutlier = r.pulse != null && Math.abs(r.pulse - baseline.pulse) > 2 * baseline.sigmaPulse;
-
-  const exceedsSoft = r.systolic > 150 || r.diastolic > 95 || (r.pulse ?? 0) > 120;
-
-  if ((sysOutlier || diaOutlier || pulseOutlier) && exceedsSoft) {
-    return { kind: 'calm_concerned', reason: 'outlier_and_soft_threshold' };
-  }
-  return { kind: 'in_range', reason: 'within_baseline' };
-}
-```
-
-### Sustained-pattern escalation (Confirmed-urgent path B)
-Independently from per-reading classification, a **rolling 60-minute window** counts the parent's last hour of readings:
-
-```ts
-function checkSustainedPattern(recent: Reading[]): boolean {
-  // recent = readings in last 60 min, ordered desc
-  const stage2Hits = recent.filter(r => r.systolic > 160 || r.diastolic > 100).length;
-  return stage2Hits >= 3;
-}
-```
-
-If true → emit `confirmed_urgent` with `reason: 'stage2_sustained_60min'`.
-
-### Weekly-trend escalation (D6 US-94)
-The weekly summary job (Tier C, Sunday 18:00 caregiver-local-time) counts anomalies in the last 7 days. **3+ anomalies in 7 days** triggers an emphasised paragraph in the summary push:
-
-> "Three readings this week were notably higher than Mom's usual range. This is worth a call to her doctor — would you like help drafting a message?"
-
-Per D3: *"would you like help drafting a message"* is acceptable. *"Call 911"* is not. *"Tell her doctor immediately"* is not.
+Sleep + activity exclusion is enforced in code by `producesAnomalyEvent(vital, tier)` in `supabase/functions/_shared/classification.ts` and mirrored on the mobile side by the `pickMostSevere*` selectors.
 
 ---
 
-## 3. False-positive control (D6 US-93)
+## 2. Detection flow
 
-### Deduplication
-After an anomaly fires, **the next anomaly within 4 hours is suppressed** (no new push, no new banner — but the reading itself is still saved and visible).
+### 2.1 BP — hot path (`/sync` → `detect-anomaly` inline)
 
-### Context-aware sensitivity
-If the parent is in a known elevated context — caregiver manually annotated *"Mom was stressed"* via the comment thread, OR the parent self-flagged the reading as "I just exercised" — sensitivity is reduced for the next 24h. Specifically: the `2σ` outlier threshold becomes `2.5σ`, soft thresholds raise by 5 mmHg.
+After every successful BP insert, `/sync` calls `detect-anomaly` with `{ mode: 'reading_inserted', familyId, readingId }`. The function:
 
-### Per-family tuning
-Caregiver thumbs-down feedback (D6 US-65) on anomaly notifications adjusts the per-family sensitivity gradually. Implementation: a per-family `anomaly_sensitivity` float (0.8 to 1.5) multiplies the `σ` threshold. Default 1.0; thumbs-down nudges +0.05; thumbs-up nudges −0.02 (asymmetric — fewer false positives is more important than catching every outlier).
+1. Resolves the analysis subject (parent in caregiver mode, the user themselves in self-buyer / parent modes) via `families.parent_user_id` with fallback to `family_owner`.
+2. Loads the user's `bp_baselines` row + the family's `anomaly_sensitivity`.
+3. Runs `classifyBP(reading, baseline, sensitivity)` — see `_shared/classification.ts`.
+4. Runs `checkSustainedPattern(recent, now)` over the parent's last 60 minutes of readings; if 3+ are at Stage 2, escalates to `confirmed_urgent { reason: 'stage2_sustained_60min' }`.
+5. Dedup: if the most recent unrelated `anomaly_events` row for `(user_id, vital_kind='bp')` is within 4 hours AND the new tier is calm-concerned, suppress (per docs/10 §3). Confirmed-urgent always fires.
+6. Writes the event + dispatches `send-push` once per recipient.
 
-### Anomaly false-positive metric
-Per `docs/13-testing-standard.md`:
+Latency budget: < 5s from `/sync` ack to event row.
+
+### 2.2 HR + SpO2 — nightly path (pg_cron → `detect-anomaly` cron)
+
+Migration `0018_pg_cron_detect_anomaly.sql` schedules `detect-anomaly` with `{ mode: 'cron' }` at 03:00 UTC. The function iterates families with recent data:
+
+- **HR**: recomputes `hr_baselines.median_bpm` over the previous 14 days of `motion_state='rest'` samples; evaluates `classifyHR({ restingBpmToday, restingBpmRecent })`; writes an event if calm or urgent and dedup permits.
+- **SpO2**: collects the previous 5 nights of `min(value_int_3)` per UTC day from `vitals_other` SpO2 rows; runs `classifySpO2({ latestPercent, overnightLowsRecent })`; writes an event for `confirmed_urgent` (3-night dip) or `calm_concerned` (single 88–89 overnight).
+
+The cron also keeps `bp_baselines` fresh so the hot path can use a current baseline.
+
+---
+
+## 3. False-positive control
+
+### 3.1 Deduplication
+After a calm-concerned anomaly fires, the next one for the same `(user_id, vital_kind)` within **4 hours** is suppressed. The reading itself is still saved and visible; only the second push/event is dropped. Confirmed-urgent does NOT dedup — crisis-absolute fires even if a recent event existed.
+
+### 3.2 Per-family sensitivity
+`public.families.anomaly_sensitivity` is a `numeric(3,2)` per-family multiplier on the σ threshold (default 1.00, clamped 0.80–1.50). Thumbs-down on a banner nudges it +0.05 (less sensitive); thumbs-up nudges it −0.02 (more sensitive). Asymmetric — fewer false positives is more important than catching every outlier.
+
+### 3.3 False-positive metric
 - Target: ≤ 15% thumbs-down on anomaly notifications.
 - Alert threshold: > 25% week-over-week.
 
----
-
-## 4. Notification copy (D6 US-92)
-
-The anomaly notification body uses one of three pre-approved templates:
-
-| # | Template | Selection logic |
-| --- | --- | --- |
-| 1 | "Mom's reading just now was higher than usual: [SYS]/[DIA]. We've added it to her log." | Single outlier |
-| 2 | "Mom's morning reading was elevated: [SYS]/[DIA]. The past few mornings have been higher than her usual range." | Morning trend (3+ mornings in 7 days are calm-concerned) |
-| 3 | "A few of Mom's readings this week have trended higher. Worth a check-in when you can." | Weekly trend (3+ anomalies in 7 days, batched to weekly summary) |
-
-For confirmed-urgent (per `docs/05-voice-and-claims.md` Tone D — Direct):
-
-> "Three high readings in the last hour. We recommend reaching out to Dad now."
-
-Per the voice rules:
-- Title pattern: *"Worth a look"* (calm-concerned) or *"Please call Mum"* (confirmed-urgent).
-- Body ≤ 120 chars iOS, ≤ 180 Android.
-- Never "alert", "warning", "critical", or all-caps.
+Tracked in PostHog via the `anomaly_feedback` event in `apps/mobile/src/services/analytics/logger.ts`. No PHI in metadata — only `{ vital, tier, thumb }`.
 
 ---
 
-## 5. Banner UI (D8a §6)
+## 4. Banner UI
 
-### Calm-concerned banner
-- Background: `color.state.warning` (amber #E89F4F)
-- Foreground: `color.text.primary` (navy)
-- Animation: gentle fade-in, `motion.normal` (200ms), `ease.decelerate`. **Never pulsing or attention-grabbing.** Per CLAUDE.md anti-pattern: "Animate anomaly banners aggressively. Calm-before-clever."
-- Persistent until acknowledged or until next reading clears the trend.
-- Tap target: opens Reading Detail with Inline Explainer pre-expanded (Surface B from `docs/08-learn-module.md`).
-- Always includes a *"Why does this happen?"* link to a Learn card per the anomaly→card map below.
+See `docs/03-components/anomaly-banner.md` for the component (Sprint 7.6 ships the primitive; Sprint 15 wires it). The mobile-side wiring:
 
-### Confirmed-urgent banner
-- Background: `color.state.urgent` (crimson #8C2D2D)
-- Foreground: `color.text.on-brand` (white)
-- Animation: hard cut in (no fade) under reduced motion; `motion.normal` fade under default. Still calm.
-- Pinned to top of home AND Reading Detail.
-- Persistent until acknowledged AND a reading inside Stage 1 or below has been recorded.
-
-### Anomaly → Learn card map (from `docs/08-learn-module.md` §7)
-
-| Anomaly | Linked card(s) |
-| --- | --- |
-| Calm-concerned: 3 of 5 readings elevated | `numbers-002` + `changes-002` |
-| Calm-concerned: missed readings 3+ days | `numbers-001` |
-| Confirmed-urgent: Stage 2 sustained | `numbers-004` + `doctor-002` |
-| Confirmed-urgent: Crisis (≥180/120) | `numbers-007` + `doctor-002` |
+- `ScreenAnomalyBanner` (`apps/mobile/src/components/ScreenAnomalyBanner.tsx`) — most-severe-wins selector, renders nothing when no event. Wired on Home (caregiver + self-buyer), Reading Detail, and per-vital Detail screens (via `DetailShell`).
+- Copy lives in `apps/mobile/src/utils/anomalyBannerCopy.ts`. Voice-lint runs over every (vital × tier × recipient) combination in CI.
+- Tap → navigate to Reading Detail (BP) or Vital Detail (HR/SpO2). Dismiss (calm-concerned only) writes `acknowledged_at` and removes the row from the selector. Confirmed-urgent has no dismiss action; only an explicit "see the reading" path.
 
 ---
 
-## 6. Feature gate (D6 US-95)
+## 5. Push routing (D13 §11.3)
 
-- **Free tier** sees the reading on the dashboard but **no proactive anomaly push**. An unobtrusive note on home: *"Get proactive alerts with Leiko Plus"* (links to paywall).
+| Trigger | Push? | In-app banner? | Quiet hours respected? |
+|---|---|---|---|
+| BP calm-concerned (single) | No | Yes | n/a |
+| BP calm-concerned (trend) | Yes | Yes | Yes |
+| BP confirmed-urgent | Yes | Yes | Honoured unless user opted in |
+| HR calm-concerned (3-day trend) | Yes | Yes | Yes |
+| HR confirmed-urgent | Yes | Yes | Honoured unless user opted in |
+| SpO2 calm-concerned | Yes | Yes | Yes |
+| SpO2 confirmed-urgent (3-night trend) | Yes | Yes | Honoured unless user opted in |
+| Sleep / Activity | No | No | n/a |
+
+Quiet-hours override defaults to **off** — users explicitly affirm via the one-shot sheet on first home render (`QuietHoursAffirmSheet`). Settings → Notifications is the second-chance path.
+
+iOS confirmed-urgent uses `interruptionLevel: 'time-sensitive'` (respects DND but surfaces above default). **Critical Alerts are explicitly not used** — they bypass DND and ringer, and Leiko is not a fear-language brand.
+
+---
+
+## 6. Feature gate
+
+- **Free tier** sees the reading on the dashboard but **no proactive anomaly push**. An unobtrusive note on home: *"Get proactive notices with Leiko Plus"* (links to paywall).
 - **Plus tier** receives anomaly pushes per category preferences (`docs/11-push-notifications.md`).
 - The reading itself is never paywalled — only the proactive notification.
 
 ---
 
-## 7. Testing requirements (Sprint 15)
+## 7. Testing requirements
 
 Per `docs/13-testing-standard.md`:
 
-- **Unit tests** for `classifyReading`, `checkSustainedPattern` — boundary cases at sys=149/150/151, dia=94/95/96, sigma boundaries, cold-start path.
-- **Integration test**: a reading-ingest E2E that captures a synthetic reading, confirms anomaly fires within 5s, push payload uses the right template, and the banner renders with correct token colors.
-- **Voice test**: forbidden-claim linter runs over all anomaly templates and AI escalation strings.
-- **False-positive test**: a fixture of 200 historical reading sequences with hand-labeled "should anomaly fire?" — measure precision and recall against the labels.
+- **Unit tests** for `classifyBP`, `classifyHR`, `classifySpO2`, `checkSustainedPattern`, `computeBpBaseline`, `computeHrMedian`, `producesAnomalyEvent`, `shouldDedupAnomaly` — boundary cases at sys=149/150/151, bpm=39/40/130/131, SpO2=87/88/89/90, sigma boundaries, cold-start path. Both Deno tests (`_shared/classification.test.ts`) and Jest tests (`apps/mobile/src/utils/__tests__/classification*.test.ts`).
+- **Banner voice test**: every (vital × tier × recipient) combo runs through `voiceLint`/`voice-lint-push` in CI. Fails closed.
+- **Quiet-hours boundary test** in `supabase/functions/send-push/quiet-hours.test.ts` — DST, midnight-cross window, per-timezone (UTC, Lagos UTC+1, NJ UTC-5).
+- **False-positive test** (Sprint 16 follow-up): fixture of 200 hand-labelled BP sequences asserts precision/recall against the labels.
 
 ---
 
-## 8. Open anomaly questions
-- Should the engine treat manual readings the same as watch readings? Currently yes (any source counted) — flagged for clinical advisor review.
-- Pulse-only anomalies (sys/dia normal but pulse spike) — spec says fire calm-concerned; clinical advisor to validate threshold of 120.
-- Pediatric / pregnancy thresholds — out of scope per IFU (engine returns `in_range` and a soft warning to remove watch from non-target user).
+## 8. Schema reference
+
+- `public.anomaly_events` (migration 0016) — one row per fired anomaly. Immutability trigger protects identity columns; only ack + push + feedback columns may be updated.
+- `public.bp_baselines` / `public.hr_baselines` (migration 0016) — per-user rolling baselines. Refreshed nightly.
+- `public.families.anomaly_sensitivity` (migration 0016) — per-family multiplier.
+- `public.notification_preferences.{anomaly_bp,anomaly_hr,anomaly_spo2}` (migration 0017) — per-vital opt-outs.
+- `public.notification_preferences.anomaly_bypass_quiet` default flipped to FALSE in migration 0017; existing rows preserved.
