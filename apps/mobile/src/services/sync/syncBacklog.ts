@@ -1,4 +1,4 @@
-// syncBacklog — Sprint 6 cursor-aware fetch.
+// syncBacklog — Sprint 6 building block; cursor semantics rewired in Sprint 16.5a.
 //
 // On any successful BLE connect we run an incremental backlog pull:
 // the watch buffers measurements while the app is closed (typical
@@ -6,21 +6,39 @@
 // in the room), and we should surface every reading that's accumulated
 // since the last successful sync.
 //
-// Sprint 6 ships the building block; Sprint 7's caregiver-home will
-// own the orchestrator (when to run this — cold start, foreground,
-// BT_READY transition, etc.).
+// Sprint 6 ships the building block; Sprint 7's caregiver-home owns
+// the orchestrator (cold start, foreground, BT_READY, etc.).
 //
-// Cursor model — per docs/_reference/U16PRO_protocol_en.pdf §4.5:
-//   - lastSync = 0  → first sync; pull "latest 50" with TS=0, DIR=0/1
-//   - lastSync > 0  → incremental; pull readings newer than lastSync
-//                     with TS=lastSync, DIR=1 (backtrack from latest
-//                     stopping at TS, return up to 50 newer ones)
+// QUERY MODEL — empirically verified 2026-05-12 (Sprint 16.5a Phase A):
+//   The Sprint 6 cursor model used `readBPHistory(TS=lastSync, DIR=1)`
+//   for incremental sync, assuming DIR=1 means "walk from latest
+//   stopping at TS, returning newer-than-TS records." That's WRONG.
+//   The empirical behaviour of DIR=1 is: return records strictly OLDER
+//   than TS. Cursor-anchored queries therefore can NEVER return records
+//   ≥ cursor — every BP cycle taken since the previous sync was
+//   permanently invisible until a cursor reset.
+//
+//   Five captured traces 2026-05-12 (plans/captures/2026-05-12-capture-notes.md)
+//   prove this end-to-end: with cursor=1778598235, the watch returned
+//   first.ts=1778597282 (953s OLDER than cursor) even when fresh BP
+//   cycles had landed in the watch's transferable register.
+//
+//   The fix: always query TS=0 (per protocol §4.5: "TS=0 returns
+//   latest COUNT records, DIR ignored"). The in-memory `lastSync`
+//   stays as a filter-only marker — it keeps the addPending writes
+//   to records newer than the previous high-watermark. addPendingReading's
+//   identity-dedupe (source, deviceBleId, measuredAtSec) handles the
+//   already-ingested records that come back in every batch.
+//
+//   Cost: 50 × 16-byte packets per sync ≈ 800 bytes BLE traffic. The
+//   filter saves the dedupe-overhead for the in-memory case.
 //
 // Single-batch syncBacklog stays the building block (used by the
 // take-reading-sheet flow). Sprint 7 adds syncBacklogToCompletion
-// below, which loops the cursor until the watch returns an empty
-// page — needed when the watch has been buffering for >50 readings
-// (parent's phone offline for a week scenario, intent memo §6.2).
+// below; with TS=0 the loop self-terminates after one iteration
+// (no new records on the second pass; filter rejects everything;
+// pulled=0; loop exits). Deep historical backfill (records older
+// than the latest 50) is a separate concern handled in Phase 16.5c.
 
 import { mmkv, STORAGE_KEYS } from '../storage';
 import { readBPHistory } from '../ble/commands/readBPHistory';
@@ -221,11 +239,15 @@ export async function syncBacklog(
   let lastSync = getLastSyncSec(deviceBleId);
   if (BLE_TRACE) {
     console.log(
-      `[ble-trace] syncBacklog enter deviceBleId=${deviceBleId} lastSync=${lastSync} (raw watch sec)`,
+      `[ble-trace] syncBacklog enter deviceBleId=${deviceBleId} lastSync=${lastSync} (filter-only; query is TS=0)`,
     );
   }
+  // Always query TS=0 — see file header for the rationale. The watch
+  // returns its latest COUNT records (DIR is ignored when TS=0); the
+  // in-memory `lastSync` filter below keeps just the ones we haven't
+  // seen yet.
   let readings = await readBPHistory(device, {
-    sinceTimestampSec: lastSync,
+    sinceTimestampSec: 0,
     direction: 'oldest_first',
     count: BATCH_SIZE,
     timeoutMs: options.timeoutMs ?? 10_000,

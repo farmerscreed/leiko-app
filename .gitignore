@@ -60,6 +60,8 @@ logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+# Sprint 16.5a Phase A bench captures — versioned for replay in 16.5b.
+!tools/ble-mock/captured-traces/**/*.log
 
 # Env
 .env
