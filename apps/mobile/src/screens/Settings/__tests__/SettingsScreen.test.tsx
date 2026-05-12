@@ -169,12 +169,16 @@ beforeEach(() => {
 });
 
 describe('<SettingsScreen /> — Profile', () => {
-  it('renders the four profile data rows for a caregiver', () => {
+  it('renders the six profile rows for a caregiver', () => {
     renderScreen();
     expect(screen.getByTestId('settings-profile-name')).toBeTruthy();
-    expect(screen.getByTestId('settings-profile-photo')).toBeTruthy();
-    expect(screen.getByTestId('settings-profile-timezone')).toBeTruthy();
     expect(screen.getByTestId('settings-profile-yob')).toBeTruthy();
+    expect(screen.getByTestId('settings-profile-gender')).toBeTruthy();
+    expect(screen.getByTestId('settings-profile-height')).toBeTruthy();
+    expect(screen.getByTestId('settings-profile-weight')).toBeTruthy();
+    expect(screen.getByTestId('settings-profile-timezone')).toBeTruthy();
+    // Photo row removed in Sprint 12.5.2 pending image-picker work.
+    expect(screen.queryByTestId('settings-profile-photo')).toBeNull();
     // Hypertension chip is self-buyer only.
     expect(screen.queryByTestId('settings-profile-hypertension')).toBeNull();
   });
@@ -199,6 +203,133 @@ describe('<SettingsScreen /> — Profile', () => {
       });
     });
     expect(mockRefreshProfile).toHaveBeenCalled();
+  });
+});
+
+describe('<SettingsScreen /> — Profile field editor (Sprint 12.5.2)', () => {
+  it('opens the year-of-birth sheet when the yob row is tapped + saves a single-field patch', async () => {
+    mockProfile = makeProfile({ year_of_birth: null });
+    renderScreen();
+    fireEvent.press(screen.getByTestId('settings-profile-yob'));
+    expect(screen.getByTestId('settings-demographics-yob')).toBeTruthy();
+    // The other field inputs should NOT be visible — this is a focused sheet.
+    expect(screen.queryByTestId('settings-demographics-gender-male')).toBeNull();
+    expect(screen.queryByTestId('settings-demographics-height')).toBeNull();
+    expect(screen.queryByTestId('settings-demographics-weight')).toBeNull();
+    fireEvent.changeText(screen.getByTestId('settings-demographics-yob'), '1980');
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('settings-demographics-save'));
+    });
+    await waitFor(() => {
+      expect(mockUpdateProfile).toHaveBeenCalledWith('user-1', { year_of_birth: 1980 });
+    });
+    expect(mockRefreshProfile).toHaveBeenCalled();
+  });
+
+  it('opens the gender sheet and saves immediately on pill tap', async () => {
+    mockProfile = makeProfile({ gender: null });
+    renderScreen();
+    fireEvent.press(screen.getByTestId('settings-profile-gender'));
+    expect(screen.getByTestId('settings-demographics-gender-male')).toBeTruthy();
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('settings-demographics-gender-male'));
+    });
+    await waitFor(() => {
+      expect(mockUpdateProfile).toHaveBeenCalledWith('user-1', { gender: 'male' });
+    });
+  });
+
+  it('saves height in cm when the cm unit is selected', async () => {
+    mockProfile = makeProfile({ height_cm: null });
+    renderScreen();
+    fireEvent.press(screen.getByTestId('settings-profile-height'));
+    fireEvent.changeText(screen.getByTestId('settings-demographics-height'), '175');
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('settings-demographics-save'));
+    });
+    await waitFor(() => {
+      expect(mockUpdateProfile).toHaveBeenCalledWith('user-1', { height_cm: 175 });
+    });
+  });
+
+  it('saves height converted from feet+inches when the ft unit is selected', async () => {
+    mockProfile = makeProfile({ height_cm: null });
+    renderScreen();
+    fireEvent.press(screen.getByTestId('settings-profile-height'));
+    fireEvent.press(screen.getByTestId('settings-demographics-height-unit-ft'));
+    fireEvent.changeText(screen.getByTestId('settings-demographics-height-ft'), '5');
+    fireEvent.changeText(screen.getByTestId('settings-demographics-height-in'), '9');
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('settings-demographics-save'));
+    });
+    // 5'9" = 60+9 = 69 inches × 2.54 = 175.26 → rounds to 175.
+    await waitFor(() => {
+      expect(mockUpdateProfile).toHaveBeenCalledWith('user-1', { height_cm: 175 });
+    });
+  });
+
+  it('saves weight in kg when the kg unit is selected', async () => {
+    mockProfile = makeProfile({ weight_kg: null });
+    renderScreen();
+    fireEvent.press(screen.getByTestId('settings-profile-weight'));
+    fireEvent.changeText(screen.getByTestId('settings-demographics-weight'), '78');
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('settings-demographics-save'));
+    });
+    await waitFor(() => {
+      expect(mockUpdateProfile).toHaveBeenCalledWith('user-1', { weight_kg: 78 });
+    });
+  });
+
+  it('saves weight converted from lbs when the lbs unit is selected', async () => {
+    mockProfile = makeProfile({ weight_kg: null });
+    renderScreen();
+    fireEvent.press(screen.getByTestId('settings-profile-weight'));
+    fireEvent.press(screen.getByTestId('settings-demographics-weight-unit-lbs'));
+    fireEvent.changeText(screen.getByTestId('settings-demographics-weight'), '155');
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('settings-demographics-save'));
+    });
+    // 155 lbs ÷ 2.2046 = 70.31 → rounds to 70.
+    await waitFor(() => {
+      expect(mockUpdateProfile).toHaveBeenCalledWith('user-1', { weight_kg: 70 });
+    });
+  });
+
+  it('rejects out-of-range year of birth', async () => {
+    renderScreen();
+    fireEvent.press(screen.getByTestId('settings-profile-yob'));
+    fireEvent.changeText(screen.getByTestId('settings-demographics-yob'), '1800');
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('settings-demographics-save'));
+    });
+    expect(screen.getByTestId('settings-demographics-error')).toBeTruthy();
+    expect(mockUpdateProfile).not.toHaveBeenCalled();
+  });
+
+  it('rejects out-of-range height', async () => {
+    renderScreen();
+    fireEvent.press(screen.getByTestId('settings-profile-height'));
+    fireEvent.changeText(screen.getByTestId('settings-demographics-height'), '5');
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('settings-demographics-save'));
+    });
+    expect(screen.getByTestId('settings-demographics-error')).toBeTruthy();
+    expect(mockUpdateProfile).not.toHaveBeenCalled();
+  });
+
+  it('persists timezone via the "use device timezone" button', async () => {
+    mockProfile = makeProfile({ timezone: 'UTC' });
+    renderScreen();
+    fireEvent.press(screen.getByTestId('settings-profile-timezone'));
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('settings-demographics-timezone-use-device'));
+    });
+    await waitFor(() => {
+      expect(mockUpdateProfile).toHaveBeenCalledWith('user-1', expect.objectContaining({
+        timezone: expect.any(String),
+      }));
+    });
   });
 });
 

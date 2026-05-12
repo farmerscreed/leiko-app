@@ -18,7 +18,9 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import {
+  KeyboardAvoidingView,
   Linking,
+  Platform,
   Pressable,
   ScrollView,
   Share,
@@ -70,10 +72,15 @@ import {
   reconcileFromAuditLog,
 } from '../../services/ai/quotaCounter';
 import { usePlusEntitlement } from '../../hooks/usePlusEntitlement';
-import { mmkv, STORAGE_KEYS } from '../../services/storage';
+import {
+  getLastSyncSec,
+  watchTimestampToUtcSec,
+} from '../../services/sync/syncBacklog';
 import { useTheme } from '../../theme';
 import type { CaregiverScreenProps } from '../../navigation/types';
-import type { HypertensionStatus } from '../../types/database';
+import type { Gender, HypertensionStatus, UserRow, UserUpdate } from '../../types/database';
+
+type ProfileField = 'yob' | 'gender' | 'height' | 'weight' | 'timezone';
 
 // App version is embedded at build time. Bump in lockstep with
 // app.json + package.json on every version commit. Showing "build" as
@@ -85,6 +92,21 @@ const HYPERTENSION_LABEL: Record<HypertensionStatus, string> = {
   no: 'No',
   prefer_not_say: 'Prefer not to say',
 };
+
+const GENDER_LABEL: Record<Gender, string> = {
+  female: 'Female',
+  male: 'Male',
+  nonbinary: 'Non-binary',
+  prefer_not_say: 'Prefer not to say',
+};
+
+const CURRENT_YEAR = new Date().getFullYear();
+const YEAR_OF_BIRTH_MIN = 1900;
+const YEAR_OF_BIRTH_MAX = CURRENT_YEAR;
+const HEIGHT_CM_MIN = 50;
+const HEIGHT_CM_MAX = 250;
+const WEIGHT_KG_MIN = 20;
+const WEIGHT_KG_MAX = 300;
 
 const WRITE_VITAL_LABEL: Record<WriteVitalKind, string> = {
   bp: 'Blood pressure',
@@ -254,6 +276,7 @@ export function SettingsScreen({ navigation }: Props) {
   const [confirmingForget, setConfirmingForget] = useState(false);
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
   const [hypertensionSheetOpen, setHypertensionSheetOpen] = useState(false);
+  const [editingField, setEditingField] = useState<ProfileField | null>(null);
   const [hypertensionWriting, setHypertensionWriting] = useState(false);
   const [picker, setPicker] = useState<'steps' | 'sleep' | null>(null);
 
@@ -310,6 +333,16 @@ export function SettingsScreen({ navigation }: Props) {
       } finally {
         setHypertensionWriting(false);
       }
+    },
+    [profile, refreshProfile],
+  );
+
+  const handleFieldSave = useCallback(
+    async (patch: UserUpdate) => {
+      if (!profile) return;
+      await updateProfile(profile.id, patch);
+      await refreshProfile();
+      setEditingField(null);
     },
     [profile, refreshProfile],
   );
@@ -385,22 +418,39 @@ export function SettingsScreen({ navigation }: Props) {
             testID="settings-profile-name"
           />
           <ListRow
-            variant="data"
-            title="Photo"
-            value={profile?.photo_url ? 'Set' : 'Not set'}
-            testID="settings-profile-photo"
-          />
-          <ListRow
-            variant="data"
-            title="Timezone"
-            value={profile?.timezone ?? '—'}
-            testID="settings-profile-timezone"
-          />
-          <ListRow
-            variant="data"
+            variant="select"
             title="Year of birth"
             value={profile?.year_of_birth ? String(profile.year_of_birth) : 'Not set'}
+            onPress={() => setEditingField('yob')}
             testID="settings-profile-yob"
+          />
+          <ListRow
+            variant="select"
+            title="Gender"
+            value={profile?.gender ? GENDER_LABEL[profile.gender] : 'Not set'}
+            onPress={() => setEditingField('gender')}
+            testID="settings-profile-gender"
+          />
+          <ListRow
+            variant="select"
+            title="Height"
+            value={formatHeightForRow(profile?.height_cm ?? null)}
+            onPress={() => setEditingField('height')}
+            testID="settings-profile-height"
+          />
+          <ListRow
+            variant="select"
+            title="Weight"
+            value={formatWeightForRow(profile?.weight_kg ?? null)}
+            onPress={() => setEditingField('weight')}
+            testID="settings-profile-weight"
+          />
+          <ListRow
+            variant="select"
+            title="Timezone"
+            value={profile?.timezone ?? 'Not set'}
+            onPress={() => setEditingField('timezone')}
+            testID="settings-profile-timezone"
           />
           {isSelfBuyer ? (
             <ListRow
@@ -1557,7 +1607,741 @@ export function SettingsScreen({ navigation }: Props) {
           ))}
         </View>
       </BottomSheet>
+
+      {/* Per-field profile editor — one focused sheet per tapped row.
+          The Urion watch uses these to calibrate BP measurements; without
+          them, some firmwares don't persist BP results to the history
+          register that the app reads via 0x14. Sprint 12.5.2. */}
+      <ProfileFieldSheet
+        field={editingField}
+        profile={profile}
+        onDismiss={() => setEditingField(null)}
+        onSave={handleFieldSave}
+      />
     </SafeAreaView>
+  );
+}
+
+// ---------------------------------------------------------------------
+// Profile field editor — one focused sheet per tapped row
+
+interface ProfileFieldSheetProps {
+  field: ProfileField | null;
+  profile: UserRow | null;
+  onDismiss: () => void;
+  onSave: (patch: UserUpdate) => Promise<void>;
+}
+
+const PROFILE_FIELD_TITLE: Record<ProfileField, string> = {
+  yob: 'Year of birth',
+  gender: 'Gender',
+  height: 'Height',
+  weight: 'Weight',
+  timezone: 'Timezone',
+};
+
+function ProfileFieldSheet({
+  field,
+  profile,
+  onDismiss,
+  onSave,
+}: ProfileFieldSheetProps): React.ReactElement {
+  const theme = useTheme();
+  return (
+    <BottomSheet
+      visible={field !== null}
+      onDismiss={onDismiss}
+      size="compact"
+      surface="solid"
+      title={field ? PROFILE_FIELD_TITLE[field] : undefined}
+      testID="settings-profile-field-sheet"
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 24}
+      >
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: theme.spacing.l,
+            paddingBottom: theme.spacing.xxl,
+          }}
+          keyboardShouldPersistTaps="handled"
+        >
+          {field === 'yob' && profile && (
+            <YobBody initial={profile.year_of_birth} onSave={onSave} />
+          )}
+          {field === 'gender' && profile && (
+            <GenderBody initial={profile.gender} onSave={onSave} />
+          )}
+          {field === 'height' && profile && (
+            <HeightBody initial={profile.height_cm} onSave={onSave} />
+          )}
+          {field === 'weight' && profile && (
+            <WeightBody initial={profile.weight_kg} onSave={onSave} />
+          )}
+          {field === 'timezone' && profile && (
+            <TimezoneBody initial={profile.timezone} onSave={onSave} />
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </BottomSheet>
+  );
+}
+
+// Row formatters — what shows up in the Settings list before the user taps.
+function formatHeightForRow(cm: number | null): string {
+  if (cm === null) return 'Not set';
+  return `${cm} cm`;
+}
+
+function formatWeightForRow(kg: number | null): string {
+  if (kg === null) return 'Not set';
+  return `${Math.round(kg)} kg`;
+}
+
+// ---------------------------------------------------------------------
+// Per-field body components
+
+function YobBody({
+  initial,
+  onSave,
+}: {
+  initial: number | null;
+  onSave: (patch: UserUpdate) => Promise<void>;
+}): React.ReactElement {
+  const theme = useTheme();
+  const [value, setValue] = useState(initial ? String(initial) : '');
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const onSubmit = async () => {
+    const trimmed = value.trim();
+    if (trimmed === '') {
+      setSaving(true);
+      try { await onSave({ year_of_birth: null }); } finally { setSaving(false); }
+      return;
+    }
+    const n = Number.parseInt(trimmed, 10);
+    if (!Number.isFinite(n) || n < YEAR_OF_BIRTH_MIN || n > YEAR_OF_BIRTH_MAX) {
+      setError(`Year of birth must be between ${YEAR_OF_BIRTH_MIN} and ${YEAR_OF_BIRTH_MAX}.`);
+      return;
+    }
+    setSaving(true);
+    try { await onSave({ year_of_birth: n }); } finally { setSaving(false); }
+  };
+  return (
+    <FieldFormScaffold
+      helper="The year you were born — used to calibrate watch readings."
+      error={error}
+      saving={saving}
+      onSubmit={onSubmit}
+    >
+      <TextInput
+        accessibilityLabel="Year of birth"
+        testID="settings-demographics-yob"
+        keyboardType="number-pad"
+        value={value}
+        onChangeText={(t) => { setValue(t); setError(null); }}
+        placeholder="1980"
+        placeholderTextColor={theme.colors.text.secondary}
+        style={fieldInputStyle(theme)}
+        autoFocus
+      />
+    </FieldFormScaffold>
+  );
+}
+
+function GenderBody({
+  initial,
+  onSave,
+}: {
+  initial: Gender | null;
+  onSave: (patch: UserUpdate) => Promise<void>;
+}): React.ReactElement {
+  const theme = useTheme();
+  const [value, setValue] = useState<Gender | null>(initial);
+  const [saving, setSaving] = useState(false);
+  const submit = async (next: Gender) => {
+    setValue(next);
+    setSaving(true);
+    try { await onSave({ gender: next }); } finally { setSaving(false); }
+  };
+  return (
+    <View>
+      <Text
+        style={{
+          color: theme.colors.text.secondary,
+          fontSize: theme.type('bodyM').size,
+          lineHeight: theme.type('bodyM').lineHeight,
+          fontFamily: theme.type('bodyM').family,
+          marginBottom: theme.spacing.l,
+        }}
+      >
+        Tap to choose — your selection saves immediately.
+      </Text>
+      <View style={{ marginBottom: theme.spacing.s }}>
+        <View style={{ flexDirection: 'row' }}>
+          {(['female', 'male'] as Gender[]).map((g, i) => (
+            <GenderPill
+              key={g}
+              value={g}
+              selected={value === g}
+              onPress={() => void submit(g)}
+              marginRight={i === 0 ? theme.spacing.s : 0}
+            />
+          ))}
+        </View>
+        <View style={{ flexDirection: 'row', marginTop: theme.spacing.s }}>
+          {(['nonbinary', 'prefer_not_say'] as Gender[]).map((g, i) => (
+            <GenderPill
+              key={g}
+              value={g}
+              selected={value === g}
+              onPress={() => void submit(g)}
+              marginRight={i === 0 ? theme.spacing.s : 0}
+            />
+          ))}
+        </View>
+      </View>
+      {saving ? (
+        <Text
+          style={{
+            color: theme.colors.text.secondary,
+            fontSize: theme.type('bodyM').size,
+            fontFamily: theme.type('bodyM').family,
+            marginTop: theme.spacing.l,
+          }}
+        >
+          Saving…
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
+function HeightBody({
+  initial,
+  onSave,
+}: {
+  initial: number | null;
+  onSave: (patch: UserUpdate) => Promise<void>;
+}): React.ReactElement {
+  const theme = useTheme();
+  const [unit, setUnit] = useState<'cm' | 'ft'>('cm');
+  const [cm, setCm] = useState(initial !== null ? String(initial) : '');
+  const initFtIn = initial !== null ? cmToFtIn(initial) : null;
+  const [ft, setFt] = useState(initFtIn ? String(initFtIn.ft) : '');
+  const [inches, setInches] = useState(initFtIn ? String(initFtIn.inches) : '');
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const switchUnit = (next: 'cm' | 'ft') => {
+    if (next === unit) return;
+    if (next === 'ft') {
+      const n = Number.parseInt(cm, 10);
+      if (Number.isFinite(n)) {
+        const r = cmToFtIn(n);
+        setFt(String(r.ft));
+        setInches(String(r.inches));
+      }
+    } else {
+      const ftN = Number.parseInt(ft, 10);
+      const inN = Number.parseInt(inches, 10) || 0;
+      if (Number.isFinite(ftN)) setCm(String(ftInToCm(ftN, inN)));
+    }
+    setUnit(next);
+    setError(null);
+  };
+
+  const onSubmit = async () => {
+    let resolved: number | null = null;
+    if (unit === 'cm') {
+      const trimmed = cm.trim();
+      if (trimmed === '') {
+        resolved = null;
+      } else {
+        const n = Number.parseInt(trimmed, 10);
+        if (!Number.isFinite(n)) {
+          setError('Height must be a whole number in centimetres.');
+          return;
+        }
+        resolved = n;
+      }
+    } else {
+      const ftRaw = ft.trim();
+      const inRaw = inches.trim();
+      if (ftRaw === '' && inRaw === '') {
+        resolved = null;
+      } else {
+        const ftN = Number.parseInt(ftRaw || '0', 10);
+        const inN = Number.parseInt(inRaw || '0', 10);
+        if (!Number.isFinite(ftN) || !Number.isFinite(inN)) {
+          setError('Height must be whole numbers in feet and inches.');
+          return;
+        }
+        if (inN < 0 || inN > 11) {
+          setError('Inches must be between 0 and 11.');
+          return;
+        }
+        resolved = ftInToCm(ftN, inN);
+      }
+    }
+    if (resolved !== null && (resolved < HEIGHT_CM_MIN || resolved > HEIGHT_CM_MAX)) {
+      setError(
+        unit === 'cm'
+          ? `Height should be between ${HEIGHT_CM_MIN} and ${HEIGHT_CM_MAX} cm.`
+          : `Height should be between ${Math.floor(HEIGHT_CM_MIN / CM_PER_FOOT)}' and ${Math.floor(HEIGHT_CM_MAX / CM_PER_FOOT)}'.`,
+      );
+      return;
+    }
+    setSaving(true);
+    try { await onSave({ height_cm: resolved }); } finally { setSaving(false); }
+  };
+
+  return (
+    <FieldFormScaffold
+      helper="Your height. Switch units anytime — we store the canonical value."
+      error={error}
+      saving={saving}
+      onSubmit={onSubmit}
+    >
+      <View style={{ marginBottom: theme.spacing.m }}>
+        <FieldHeader
+          label="Unit"
+          unitA="cm"
+          unitB="ft"
+          selected={unit}
+          onSelect={(u) => switchUnit(u as 'cm' | 'ft')}
+          testIDPrefix="settings-demographics-height-unit"
+        />
+      </View>
+      {unit === 'cm' ? (
+        <TextInput
+          accessibilityLabel="Height in centimetres"
+          testID="settings-demographics-height"
+          keyboardType="number-pad"
+          value={cm}
+          onChangeText={(t) => { setCm(t); setError(null); }}
+          placeholder="170"
+          placeholderTextColor={theme.colors.text.secondary}
+          style={fieldInputStyle(theme)}
+          autoFocus
+        />
+      ) : (
+        <View style={{ flexDirection: 'row' }}>
+          <View style={{ flex: 1, marginRight: theme.spacing.s }}>
+            <TextInput
+              accessibilityLabel="Height feet"
+              testID="settings-demographics-height-ft"
+              keyboardType="number-pad"
+              value={ft}
+              onChangeText={(t) => { setFt(t); setError(null); }}
+              placeholder="5"
+              placeholderTextColor={theme.colors.text.secondary}
+              style={fieldInputStyle(theme)}
+              autoFocus
+            />
+            <Text style={fieldUnitLabel(theme)}>ft</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <TextInput
+              accessibilityLabel="Height inches"
+              testID="settings-demographics-height-in"
+              keyboardType="number-pad"
+              value={inches}
+              onChangeText={(t) => { setInches(t); setError(null); }}
+              placeholder="9"
+              placeholderTextColor={theme.colors.text.secondary}
+              style={fieldInputStyle(theme)}
+            />
+            <Text style={fieldUnitLabel(theme)}>in</Text>
+          </View>
+        </View>
+      )}
+    </FieldFormScaffold>
+  );
+}
+
+function WeightBody({
+  initial,
+  onSave,
+}: {
+  initial: number | null;
+  onSave: (patch: UserUpdate) => Promise<void>;
+}): React.ReactElement {
+  const theme = useTheme();
+  const [unit, setUnit] = useState<'kg' | 'lbs'>('kg');
+  const [kg, setKg] = useState(initial !== null ? String(Math.round(initial)) : '');
+  const [lbs, setLbs] = useState(initial !== null ? String(kgToLbs(initial)) : '');
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const switchUnit = (next: 'kg' | 'lbs') => {
+    if (next === unit) return;
+    if (next === 'lbs') {
+      const n = Number.parseFloat(kg);
+      if (Number.isFinite(n)) setLbs(String(kgToLbs(n)));
+    } else {
+      const n = Number.parseFloat(lbs);
+      if (Number.isFinite(n)) setKg(String(lbsToKg(n)));
+    }
+    setUnit(next);
+    setError(null);
+  };
+
+  const onSubmit = async () => {
+    const raw = (unit === 'kg' ? kg : lbs).trim();
+    let resolved: number | null = null;
+    if (raw === '') {
+      resolved = null;
+    } else {
+      const n = Number.parseFloat(raw);
+      if (!Number.isFinite(n)) {
+        setError(
+          unit === 'kg'
+            ? 'Weight must be a whole number in kilograms.'
+            : 'Weight must be a whole number in pounds.',
+        );
+        return;
+      }
+      resolved = unit === 'kg' ? Math.round(n) : lbsToKg(n);
+    }
+    if (resolved !== null && (resolved < WEIGHT_KG_MIN || resolved > WEIGHT_KG_MAX)) {
+      setError(
+        unit === 'kg'
+          ? `Weight should be between ${WEIGHT_KG_MIN} and ${WEIGHT_KG_MAX} kg.`
+          : `Weight should be between ${kgToLbs(WEIGHT_KG_MIN)} and ${kgToLbs(WEIGHT_KG_MAX)} lbs.`,
+      );
+      return;
+    }
+    setSaving(true);
+    try { await onSave({ weight_kg: resolved }); } finally { setSaving(false); }
+  };
+
+  return (
+    <FieldFormScaffold
+      helper="Your weight. Switch units anytime — we store the canonical value."
+      error={error}
+      saving={saving}
+      onSubmit={onSubmit}
+    >
+      <View style={{ marginBottom: theme.spacing.m }}>
+        <FieldHeader
+          label="Unit"
+          unitA="kg"
+          unitB="lbs"
+          selected={unit}
+          onSelect={(u) => switchUnit(u as 'kg' | 'lbs')}
+          testIDPrefix="settings-demographics-weight-unit"
+        />
+      </View>
+      <TextInput
+        accessibilityLabel={unit === 'kg' ? 'Weight in kilograms' : 'Weight in pounds'}
+        testID="settings-demographics-weight"
+        keyboardType="number-pad"
+        value={unit === 'kg' ? kg : lbs}
+        onChangeText={(t) => {
+          if (unit === 'kg') setKg(t);
+          else setLbs(t);
+          setError(null);
+        }}
+        placeholder={unit === 'kg' ? '70' : '155'}
+        placeholderTextColor={theme.colors.text.secondary}
+        style={fieldInputStyle(theme)}
+        autoFocus
+      />
+    </FieldFormScaffold>
+  );
+}
+
+function TimezoneBody({
+  initial,
+  onSave,
+}: {
+  initial: string | null;
+  onSave: (patch: UserUpdate) => Promise<void>;
+}): React.ReactElement {
+  const theme = useTheme();
+  const deviceTz =
+    typeof Intl !== 'undefined' && Intl.DateTimeFormat
+      ? Intl.DateTimeFormat().resolvedOptions().timeZone
+      : 'UTC';
+  const [saving, setSaving] = useState(false);
+  const useDevice = async () => {
+    setSaving(true);
+    try { await onSave({ timezone: deviceTz }); } finally { setSaving(false); }
+  };
+  const isCurrent = initial === deviceTz;
+  return (
+    <View>
+      <Text
+        style={{
+          color: theme.colors.text.secondary,
+          fontSize: theme.type('bodyM').size,
+          lineHeight: theme.type('bodyM').lineHeight,
+          fontFamily: theme.type('bodyM').family,
+          marginBottom: theme.spacing.l,
+        }}
+      >
+        Your timezone controls when "today" starts for your trends. Right
+        now it&apos;s set to {initial ?? 'not set'}.
+      </Text>
+      <Button
+        variant="primary"
+        onPress={() => void useDevice()}
+        accessibilityLabel={`Use my device's time zone, ${deviceTz}`}
+        testID="settings-demographics-timezone-use-device"
+        loading={saving}
+        disabled={isCurrent}
+      >
+        {isCurrent ? `Already set to ${deviceTz}` : `Use my device's time zone (${deviceTz})`}
+      </Button>
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------
+// Profile field editor — shared scaffolding
+
+function FieldFormScaffold({
+  helper,
+  error,
+  saving,
+  onSubmit,
+  children,
+}: {
+  helper: string;
+  error: string | null;
+  saving: boolean;
+  onSubmit: () => Promise<void>;
+  children: React.ReactNode;
+}): React.ReactElement {
+  const theme = useTheme();
+  return (
+    <View>
+      <Text
+        style={{
+          color: theme.colors.text.secondary,
+          fontSize: theme.type('bodyM').size,
+          lineHeight: theme.type('bodyM').lineHeight,
+          fontFamily: theme.type('bodyM').family,
+          marginBottom: theme.spacing.l,
+        }}
+      >
+        {helper}
+      </Text>
+      {children}
+      {error ? (
+        <Text
+          accessibilityLiveRegion="polite"
+          testID="settings-demographics-error"
+          style={{
+            color: theme.colors.state.urgent,
+            fontSize: theme.type('bodyM').size,
+            fontFamily: theme.type('bodyM').family,
+            marginTop: theme.spacing.s,
+            marginBottom: theme.spacing.l,
+          }}
+        >
+          {error}
+        </Text>
+      ) : null}
+      <Button
+        variant="primary"
+        onPress={() => void onSubmit()}
+        accessibilityLabel="Save"
+        testID="settings-demographics-save"
+        loading={saving}
+        style={{ marginTop: theme.spacing.l }}
+      >
+        Save
+      </Button>
+    </View>
+  );
+}
+
+function fieldInputStyle(theme: ReturnType<typeof useTheme>) {
+  const bodyStyle = theme.type('bodyL');
+  return {
+    borderWidth: 1,
+    borderColor: theme.colors.border.default,
+    borderRadius: theme.radii.s,
+    paddingHorizontal: theme.spacing.l,
+    paddingVertical: theme.spacing.m,
+    color: theme.colors.text.primary,
+    fontSize: bodyStyle.size,
+    fontFamily: bodyStyle.family,
+  } as const;
+}
+
+function fieldUnitLabel(theme: ReturnType<typeof useTheme>) {
+  const labelStyle = theme.type('label');
+  return {
+    color: theme.colors.text.secondary,
+    fontSize: labelStyle.size,
+    fontFamily: labelStyle.family,
+    marginTop: theme.spacing.xs,
+  } as const;
+}
+
+// ---------------------------------------------------------------------
+// Unit-conversion helpers — used by HeightBody and WeightBody.
+
+// 1 ft = 30.48 cm exactly; 1 in = 2.54 cm exactly. Standard NIST.
+const CM_PER_INCH = 2.54;
+const CM_PER_FOOT = 30.48;
+// 1 kg = 2.2046226218 lbs.
+const LBS_PER_KG = 2.2046226218;
+
+function cmToFtIn(cm: number): { ft: number; inches: number } {
+  const totalInches = cm / CM_PER_INCH;
+  const ft = Math.floor(totalInches / 12);
+  const inches = Math.round(totalInches - ft * 12);
+  // Inches can round up to 12 — promote to the next foot.
+  if (inches === 12) return { ft: ft + 1, inches: 0 };
+  return { ft, inches };
+}
+
+function ftInToCm(ft: number, inches: number): number {
+  return Math.round(ft * CM_PER_FOOT + inches * CM_PER_INCH);
+}
+
+function kgToLbs(kg: number): number {
+  return Math.round(kg * LBS_PER_KG);
+}
+
+function lbsToKg(lbs: number): number {
+  return Math.round(lbs / LBS_PER_KG);
+}
+
+
+// ---------------------------------------------------------------------
+// Demographics sheet — sub-components
+
+function GenderPill({
+  value,
+  selected,
+  onPress,
+  marginRight,
+}: {
+  value: Gender;
+  selected: boolean;
+  onPress: () => void;
+  marginRight: number;
+}): React.ReactElement {
+  const theme = useTheme();
+  const bodyStyle = theme.type('bodyL');
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={GENDER_LABEL[value]}
+      accessibilityState={{ selected }}
+      testID={`settings-demographics-gender-${value}`}
+      style={({ pressed }) => ({
+        flex: 1,
+        marginRight,
+        borderWidth: 1,
+        borderColor: selected ? theme.colors.brand.primary : theme.colors.border.default,
+        backgroundColor: selected ? theme.colors.brand.primary : 'transparent',
+        borderRadius: theme.radii.s,
+        paddingHorizontal: theme.spacing.m,
+        paddingVertical: theme.spacing.m,
+        alignItems: 'center',
+        justifyContent: 'center',
+        opacity: pressed ? 0.7 : 1,
+      })}
+    >
+      <Text
+        numberOfLines={1}
+        style={{
+          color: selected ? theme.colors.text.onBrand : theme.colors.text.primary,
+          fontSize: bodyStyle.size,
+          fontFamily: bodyStyle.family,
+          fontWeight: selected ? '600' : '400',
+        }}
+      >
+        {GENDER_LABEL[value]}
+      </Text>
+    </Pressable>
+  );
+}
+
+function FieldHeader({
+  label,
+  unitA,
+  unitB,
+  selected,
+  onSelect,
+  testIDPrefix,
+}: {
+  label: string;
+  unitA: string;
+  unitB: string;
+  selected: string;
+  onSelect: (unit: string) => void;
+  testIDPrefix: string;
+}): React.ReactElement {
+  const theme = useTheme();
+  const labelStyle = theme.type('label');
+  const unitChip = (unit: string, isSelected: boolean): React.ReactElement => (
+    <Pressable
+      key={unit}
+      onPress={() => onSelect(unit)}
+      accessibilityRole="button"
+      accessibilityLabel={`${label} in ${unit}`}
+      accessibilityState={{ selected: isSelected }}
+      testID={`${testIDPrefix}-${unit}`}
+      style={({ pressed }) => ({
+        paddingHorizontal: theme.spacing.m,
+        paddingVertical: theme.spacing.xs,
+        borderRadius: theme.radii.s,
+        backgroundColor: isSelected ? theme.colors.brand.primary : 'transparent',
+        opacity: pressed ? 0.7 : 1,
+      })}
+    >
+      <Text
+        style={{
+          color: isSelected ? theme.colors.text.onBrand : theme.colors.text.secondary,
+          fontSize: labelStyle.size,
+          fontFamily: labelStyle.family,
+          fontWeight: isSelected ? '600' : '500',
+        }}
+      >
+        {unit}
+      </Text>
+    </Pressable>
+  );
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: theme.spacing.xs,
+      }}
+    >
+      <Text
+        style={{
+          color: theme.colors.text.secondary,
+          fontSize: labelStyle.size,
+          fontFamily: labelStyle.family,
+        }}
+      >
+        {label}
+      </Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          borderWidth: 1,
+          borderColor: theme.colors.border.default,
+          borderRadius: theme.radii.s,
+          padding: 2,
+        }}
+      >
+        {unitChip(unitA, selected === unitA)}
+        {unitChip(unitB, selected === unitB)}
+      </View>
+    </View>
   );
 }
 
@@ -1566,23 +2350,24 @@ export function SettingsScreen({ navigation }: Props) {
 
 function useLastSyncDisplay(bleId: string | null): string {
   if (!bleId) return '—';
-  const raw = mmkv.getString(STORAGE_KEYS.lastSyncByDevice);
-  if (!raw) return 'Not yet synced';
-  try {
-    const map = JSON.parse(raw) as Record<string, number>;
-    const sec = map[bleId];
-    if (!sec) return 'Not yet synced';
-    const ms = sec * 1000;
-    const minutesAgo = Math.floor((Date.now() - ms) / 60_000);
-    if (minutesAgo < 1) return 'Just now';
-    if (minutesAgo < 60) return `${minutesAgo} min ago`;
-    const hours = Math.floor(minutesAgo / 60);
-    if (hours < 24) return `${hours} h ago`;
-    const days = Math.floor(hours / 24);
-    return `${days} d ago`;
-  } catch {
-    return '—';
-  }
+  // Pre-Sprint 7.5 the cursor map was Record<string, number> (Unix sec);
+  // Sprint 7.5 widened entries to a VitalSyncCursor object. The previous
+  // implementation here multiplied the raw object by 1000, yielding NaN
+  // and "NaN d ago". `getLastSyncSec` normalises both shapes and returns
+  // the BP cursor in RAW watch seconds; convert to actual UTC via
+  // watchTimestampToUtcSec so the "ago" math doesn't drift by the
+  // China-firmware offset.
+  const rawWatchSec = getLastSyncSec(bleId);
+  if (!rawWatchSec) return 'Not yet synced';
+  const utcMs = watchTimestampToUtcSec(rawWatchSec) * 1000;
+  const minutesAgo = Math.floor((Date.now() - utcMs) / 60_000);
+  if (minutesAgo < 0) return 'Just now';
+  if (minutesAgo < 1) return 'Just now';
+  if (minutesAgo < 60) return `${minutesAgo} min ago`;
+  const hours = Math.floor(minutesAgo / 60);
+  if (hours < 24) return `${hours} h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} d ago`;
 }
 
 const styles = StyleSheet.create({
