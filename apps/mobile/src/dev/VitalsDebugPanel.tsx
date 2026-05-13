@@ -28,7 +28,7 @@ import { useAuth } from '../state/auth';
 import { useVitalSetup } from '../state/vitalSetup';
 import {
   getVitalCursor,
-  resetVitalCursors,
+  setVitalCursor,
   watchTimestampToUtcSec,
 } from '../services/sync/syncBacklog';
 import { peekRecent } from '../services/analytics/logger';
@@ -250,10 +250,15 @@ export function VitalsDebugPanel() {
         </Text>
       </Pressable>
 
-      {/* Reset cursors → next sync re-pulls every vital from the start
-          of the watch's stored history. Recovery path when MMKV ends up
-          out of step with the watch (e.g. after uninstall + reinstall).
-          Dev-only — never wired into production navigation. */}
+      {/* Sprint 16.5c — multi-vital reset.
+          Resets HR / SpO2 / Sleep / Activity cursors and clears their
+          MMKV slices, then runs a manual_force sync. The next sync's
+          backfill pulls firstSyncDays (7) of each vital, so the user
+          recovers full history. BP cursor is intentionally NOT reset
+          — zeroing it triggers a flood of one-per-record legacy /sync
+          POSTs (Sprint 16.5b's diagnosed root cause) that can starve
+          the multi-vitals POST. Dev-only — never wired into production
+          navigation. */}
       <Pressable
         accessibilityRole="button"
         disabled={busy || !paired}
@@ -270,7 +275,17 @@ export function VitalsDebugPanel() {
           if (!paired) return;
           setBusy(true);
           try {
-            resetVitalCursors(paired.bleId);
+            // All four non-BP cursors.
+            setVitalCursor(paired.bleId, 'hr', 0);
+            setVitalCursor(paired.bleId, 'spo2', '');
+            setVitalCursor(paired.bleId, 'sleep', '');
+            setVitalCursor(paired.bleId, 'activity', '');
+            // Clear all four slices so old (e.g. wrong-timestamp)
+            // rows drop and the post-fix data takes their place.
+            useHR.getState().reset();
+            useSpO2.getState().reset();
+            useSleep.getState().reset();
+            useActivity.getState().reset();
             await runSync('manual_force');
           } finally {
             setBusy(false);
@@ -284,7 +299,7 @@ export function VitalsDebugPanel() {
             fontWeight: '600',
           }}
         >
-          Reset cursors + re-sync
+          Reset HR/SpO2/Sleep/Activity + re-sync
         </Text>
       </Pressable>
 

@@ -37,6 +37,16 @@ interface SleepState {
   lastNightSession: (nowSec?: number) => SleepSession | null;
   /** Last N nights of completed sessions, oldest first. */
   recentSessions: (nowSec?: number, nights?: number) => SleepSession[];
+  /**
+   * Sprint 16.5c — seed historical sessions from the server. The U16PRO
+   * watch's day-info storage rolls over after a few days, so a reset
+   * + re-sync re-pulls only the most recent night from the device. The
+   * server retains every session the family ever synced; this method
+   * accepts that authoritative list and merges it into `recent`,
+   * dedup-ing by `sessionStartSec` (same key the watch-side path uses).
+   * Returns the number of NEW sessions added (not duplicates).
+   */
+  seedFromServer: (sessions: SleepSession[]) => number;
   reset: () => void;
 }
 
@@ -136,6 +146,28 @@ export const useSleep = create<SleepState>((set, get) => ({
     return all
       .filter((s) => s.sessionEndSec >= cutoffSec && s.sessionEndSec <= now)
       .sort((a, b) => a.sessionStartSec - b.sessionStartSec);
+  },
+
+  seedFromServer: (sessions) => {
+    if (sessions.length === 0) return 0;
+    const existing = get().recent;
+    const existingKeys = new Set(existing.map((s) => String(s.sessionStartSec)));
+    const pendingKeys = new Set(
+      get().pending.map((s) => String(s.sessionStartSec)),
+    );
+    const newRows = sessions.filter((s) => {
+      const key = String(s.sessionStartSec);
+      return !existingKeys.has(key) && !pendingKeys.has(key);
+    });
+    if (newRows.length === 0) return 0;
+    const merged = dedupRecent(
+      [...newRows, ...existing].sort(
+        (a, b) => b.sessionStartSec - a.sessionStartSec,
+      ),
+    ).slice(0, RECENT_SESSIONS_CAP);
+    set({ recent: merged });
+    persistRecent(merged);
+    return newRows.length;
   },
 
   reset: () => {

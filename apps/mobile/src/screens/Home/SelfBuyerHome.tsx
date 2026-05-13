@@ -51,6 +51,7 @@ import { useSeededLearnCard } from '../../hooks/useSeededLearnCard';
 import { useEnsureSelfBuyerFamily } from '../../hooks/useEnsureSelfBuyerFamily';
 import { useDailyNarration } from '../../hooks/useDailyNarration';
 import { useHydrateReadingsFromServer } from '../../hooks/useHydrateReadingsFromServer';
+import { useHydrateSleepFromServer } from '../../hooks/useHydrateSleepFromServer';
 import { VitalTile } from '../../components/VitalTile';
 import {
   CorrelationStrip,
@@ -107,6 +108,12 @@ export function SelfBuyerHome() {
   // pulling the family's last 30 server-side readings. No-ops when
   // local already has data. See useHydrateReadingsFromServer.
   useHydrateReadingsFromServer();
+  // Sprint 16.5c — same pattern for sleep. The watch's day-info
+  // storage rolls over after a few days, so a re-sync only re-pulls
+  // last night even when the server has 30+ historical sessions.
+  // This hook tops up the sleep slice from the server when local has
+  // < FETCH_LIMIT rows.
+  useHydrateSleepFromServer();
 
   // ----- Sprint 12 follow-up: Ask Leiko bottom sheet ----------------
   const [askLeikoVisible, setAskLeikoVisible] = useState(false);
