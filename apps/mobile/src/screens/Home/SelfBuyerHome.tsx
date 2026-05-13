@@ -52,6 +52,7 @@ import { useEnsureSelfBuyerFamily } from '../../hooks/useEnsureSelfBuyerFamily';
 import { useDailyNarration } from '../../hooks/useDailyNarration';
 import { useHydrateReadingsFromServer } from '../../hooks/useHydrateReadingsFromServer';
 import { useHydrateSleepFromServer } from '../../hooks/useHydrateSleepFromServer';
+import { useHydrateActivityFromServer } from '../../hooks/useHydrateActivityFromServer';
 import { VitalTile } from '../../components/VitalTile';
 import {
   CorrelationStrip,
@@ -114,6 +115,10 @@ export function SelfBuyerHome() {
   // This hook tops up the sleep slice from the server when local has
   // < FETCH_LIMIT rows.
   useHydrateSleepFromServer();
+  // Sprint 16.5e — same pattern for steps + calories. Same watch
+  // rollover; without this the ActivityDetail screen + the activity
+  // tile show only today's row after a few days of normal use.
+  useHydrateActivityFromServer();
 
   // ----- Sprint 12 follow-up: Ask Leiko bottom sheet ----------------
   const [askLeikoVisible, setAskLeikoVisible] = useState(false);
