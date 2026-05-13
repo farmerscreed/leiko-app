@@ -51,7 +51,16 @@ export interface VitalSetup {
 
 const DEFAULTS: VitalSetup = {
   autoHrEnabled: true,
-  autoSpo2Enabled: false,
+  // Sprint 16.5b — flipped from false to true. Pre-16.5b most users never
+  // saw SpO2 data because the watch wasn't sampling unless they explicitly
+  // toggled this in Settings → Vital Streams. Battery cost is small (~1
+  // sample per hour); the data gap is large (no overnight SpO2 lows for
+  // anomaly engine, no SpO2 trend for AI). Phase A scenario 1 confirmed
+  // 11 SpO2 samples per hour when on. Voice-claim review note: enabling
+  // by default means we tell users "we measure your blood oxygen" — keep
+  // that copy aligned with docs/05-voice-and-claims.md when the Settings
+  // surface is rebuilt in Phase 16.5c.
+  autoSpo2Enabled: true,
   stepsTarget: 6000,
   sleepTargetMin: 480,
   dirty: false,

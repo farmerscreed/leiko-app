@@ -12,10 +12,10 @@ beforeEach(() => {
 });
 
 describe('useVitalSetup — defaults', () => {
-  it('starts with autoHr=true, autoSpo2=false, steps=6000, sleep=480, dirty=false', () => {
+  it('starts with autoHr=true, autoSpo2=true (Sprint 16.5b), steps=6000, sleep=480, dirty=false', () => {
     const s = getVitalSetup();
     expect(s.autoHrEnabled).toBe(true);
-    expect(s.autoSpo2Enabled).toBe(false);
+    expect(s.autoSpo2Enabled).toBe(true);
     expect(s.stepsTarget).toBe(6000);
     expect(s.sleepTargetMin).toBe(480);
     expect(s.dirty).toBe(false);
@@ -31,9 +31,9 @@ describe('setters', () => {
   });
 
   it('flips autoSpo2 and marks dirty', () => {
-    useVitalSetup.getState().setAutoSpo2(true);
+    useVitalSetup.getState().setAutoSpo2(false);
     const s = getVitalSetup();
-    expect(s.autoSpo2Enabled).toBe(true);
+    expect(s.autoSpo2Enabled).toBe(false);
     expect(s.dirty).toBe(true);
   });
 
