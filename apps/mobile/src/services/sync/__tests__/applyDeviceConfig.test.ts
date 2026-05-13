@@ -87,7 +87,8 @@ describe('applyDeviceConfig', () => {
     expect(r.ran).toBe(true);
     expect(r.steps).toEqual(['autoHr', 'autoSpo2', 'userParams', 'goals']);
     expect(setters.setAutoHR).toHaveBeenCalledWith(fakeDevice, false);
-    expect(setters.setAutoSpO2).toHaveBeenCalledWith(fakeDevice, false);
+    // Sprint 16.5b — Auto-SpO2 default flipped from false to true.
+    expect(setters.setAutoSpO2).toHaveBeenCalledWith(fakeDevice, true);
     expect(setters.setUserParams).toHaveBeenCalledWith(
       fakeDevice,
       expect.objectContaining({

@@ -24,7 +24,7 @@
 // else is wrong and we want to bail rather than spin forever.
 
 import type { UrionDevice } from '../ble/UrionDevice';
-import { syncBacklog } from './syncBacklog';
+import { backfillBPHistoryOlderThan, syncBacklog } from './syncBacklog';
 
 const MAX_BATCHES = 20;
 
@@ -35,6 +35,21 @@ export interface BacklogLoopResult {
   latestTimestampSec: number | null;
 }
 
+/**
+ * Sprint 16.5b — two-phase BP sync:
+ *   1. Forward (TS=0): pulls the watch's latest 50 records via
+ *      `syncBacklog`. This is what every routine sync needs.
+ *   2. Backward (DIR=1 walk): if the watch has more than 50 records
+ *      stored (the user was offline a long time, never synced before,
+ *      etc.), walks backward in 50-record chunks anchored at the
+ *      previous batch's oldest timestamp until the watch's history is
+ *      exhausted OR MAX_BATCHES (20 × 50 = 1000 readings ≈ 1 year of
+ *      3/day) is hit.
+ *
+ * The forward phase is the steady-state path. The backward phase
+ * exists for first-ever syncs after a fresh install / Reset Cursors /
+ * long-offline period, when there's >50 records of history to recover.
+ */
 export async function syncBacklogToCompletion(
   device: UrionDevice,
   deviceBleId: string,
@@ -43,20 +58,46 @@ export async function syncBacklogToCompletion(
   let totalPulled = 0;
   let batches = 0;
   let latestTimestampSec: number | null = null;
-  for (let i = 0; i < MAX_BATCHES; i++) {
-    const result = await syncBacklog(device, deviceBleId, {
-      ...options,
-      // setTime once per connection; subsequent batches skip it.
-      skipSetTime: i > 0,
-    });
-    batches++;
-    totalPulled += result.pulled;
-    if (result.latestTimestampSec !== null) {
-      latestTimestampSec = result.latestTimestampSec;
-    }
-    if (result.pulled === 0) {
-      return { totalPulled, batches, hitBatchCap: false, latestTimestampSec };
-    }
+
+  // Phase 1 — forward sync (TS=0, returns latest 50).
+  const first = await syncBacklog(device, deviceBleId, {
+    ...options,
+    skipSetTime: false,
+  });
+  batches++;
+  totalPulled += first.pulled;
+  if (first.latestTimestampSec !== null) {
+    latestTimestampSec = first.latestTimestampSec;
   }
-  return { totalPulled, batches, hitBatchCap: true, latestTimestampSec };
+  // If the watch returned nothing, there's no backfill to do either.
+  if (first.oldestTimestampSecInBatch === null) {
+    return { totalPulled, batches, hitBatchCap: false, latestTimestampSec };
+  }
+
+  // Phase 2 — backward walk via DIR=1 + decreasing anchor. Each
+  // iteration anchors at the previous batch's oldest timestamp; the
+  // watch returns up to 50 records strictly < anchor. We stop when
+  // the watch returns nothing OR the new "oldest" doesn't decrease
+  // (defensive — shouldn't happen per protocol, but prevents loops).
+  let anchorTs = first.oldestTimestampSecInBatch;
+  for (let i = 1; i < MAX_BATCHES; i++) {
+    const back = await backfillBPHistoryOlderThan(device, deviceBleId, anchorTs, options);
+    batches++;
+    totalPulled += back.pulled;
+    if (back.pulled === 0 || back.oldestTimestampSec === null) break;
+    if (back.oldestTimestampSec >= anchorTs) {
+      // No progress — watch returned a record at-or-above our anchor.
+      // Bail to avoid spinning. Shouldn't happen per protocol §4.5
+      // ("strictly older than TS"), but defensive.
+      break;
+    }
+    anchorTs = back.oldestTimestampSec;
+  }
+
+  return {
+    totalPulled,
+    batches,
+    hitBatchCap: batches >= MAX_BATCHES,
+    latestTimestampSec,
+  };
 }

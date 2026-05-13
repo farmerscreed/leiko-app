@@ -216,6 +216,74 @@ export function resetVitalCursors(deviceBleId: string): void {
 export interface BacklogResult {
   pulled: number;
   latestTimestampSec: number | null;
+  /** Sprint 16.5b — oldest raw timestamp seen in THIS batch's
+   *  readBPHistory response (regardless of whether it passed the cursor
+   *  filter). Used by `syncBacklogToCompletion` to anchor the next
+   *  backfill iteration walking backward via DIR=1. Null when the
+   *  watch returned no records. */
+  oldestTimestampSecInBatch: number | null;
+}
+
+/** Sprint 16.5b — pull a batch of BP records STRICTLY OLDER than
+ *  `anchorTs` (the documented use for DIR=1). Used by
+ *  `syncBacklogToCompletion` to walk backward through the watch's
+ *  stored history beyond the latest 50 that the forward `syncBacklog`
+ *  captures via TS=0. Does NOT touch the in-memory lastSync cursor —
+ *  cursor is a forward-watermark only. Records are deduped at ingest
+ *  by addPendingReading's `(source, deviceBleId, measuredAtSec)` key,
+ *  so re-fetched records are safe. */
+export interface BacklogBackwardResult {
+  /** Raw count of records returned by readBPHistory (pre-dedupe). */
+  pulled: number;
+  /** Oldest raw timestamp in this batch. Caller anchors the next
+   *  iteration at this value. Null when the watch returned nothing. */
+  oldestTimestampSec: number | null;
+}
+
+export async function backfillBPHistoryOlderThan(
+  device: UrionDevice,
+  deviceBleId: string,
+  anchorTs: number,
+  options: { timeoutMs?: number } = {},
+): Promise<BacklogBackwardResult> {
+  if (anchorTs <= 0) {
+    return { pulled: 0, oldestTimestampSec: null };
+  }
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] backfillBPHistoryOlderThan enter anchorTs=${anchorTs} (DIR=1 walk-backward)`,
+    );
+  }
+  const readings = await readBPHistory(device, {
+    sinceTimestampSec: anchorTs,
+    direction: 'oldest_first', // DIR=1 — records strictly < anchorTs
+    count: BATCH_SIZE,
+    timeoutMs: options.timeoutMs ?? 10_000,
+  });
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] backfillBPHistoryOlderThan returned ${readings.length} packet(s); ` +
+        `first.ts=${readings[0]?.timestampSec ?? 'n/a'} ` +
+        `last.ts=${readings[readings.length - 1]?.timestampSec ?? 'n/a'}`,
+    );
+  }
+  if (readings.length === 0) {
+    return { pulled: 0, oldestTimestampSec: null };
+  }
+  const addPending = useReadings.getState().addPendingReading;
+  let oldest = readings[0].timestampSec;
+  for (const r of readings) {
+    addPending({
+      measuredAtSec: watchTimestampToUtcSec(r.timestampSec),
+      systolic: r.systolic,
+      diastolic: r.diastolic,
+      pulse: r.pulse,
+      source: 'watch',
+      deviceBleId,
+    });
+    if (r.timestampSec < oldest) oldest = r.timestampSec;
+  }
+  return { pulled: readings.length, oldestTimestampSec: oldest };
 }
 
 export async function syncBacklog(
@@ -292,7 +360,13 @@ export async function syncBacklog(
     }
   }
   if (readings.length === 0) {
-    return { pulled: 0, latestTimestampSec: null };
+    return { pulled: 0, latestTimestampSec: null, oldestTimestampSecInBatch: null };
+  }
+  // Track oldest in this batch (pre-cursor-filter) so the loop in
+  // syncBacklogToCompletion can anchor backward-walk iterations.
+  let oldestInBatch = readings[0].timestampSec;
+  for (const r of readings) {
+    if (r.timestampSec < oldestInBatch) oldestInBatch = r.timestampSec;
   }
   // De-dupe by cursor: when lastSync > 0, DIR=1 returns records OLDER
   // than the cursor (verified empirically + per U16PRO §4.5). We only
@@ -330,6 +404,7 @@ export async function syncBacklog(
   return {
     pulled: fresh.length,
     latestTimestampSec: newest > 0 ? newest : null,
+    oldestTimestampSecInBatch: oldestInBatch,
   };
 }
 
