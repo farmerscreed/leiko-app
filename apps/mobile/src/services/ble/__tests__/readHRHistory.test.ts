@@ -3,10 +3,7 @@ const bleMock = require('../../../../../../tools/ble-mock');
 
 import { UrionDevice } from '../UrionDevice';
 import { buildPacket, bytesToBase64 } from '../io';
-import {
-  readHRHistory,
-  type HRHistorySample,
-} from '../commands/readHRHistory';
+import { readHRHistory } from '../commands/readHRHistory';
 import { writeUint32LE } from '../commands/readBPHistory';
 
 const { MockDevice } = bleMock;
@@ -64,13 +61,15 @@ describe('readHRHistory', () => {
       ),
     );
 
-    const samples: HRHistorySample[] = await promise;
+    const { samples, intervalSec } = await promise;
     // bpm=0 placeholders dropped → 7 real samples kept.
     expect(samples).toHaveLength(7);
     expect(samples[0]).toEqual({ timestampSec: dayStart, bpm: 80 });
     expect(samples[1]).toEqual({ timestampSec: dayStart + 5 * 60, bpm: 82 });
     // sampleIndex 2 was bpm=0 (dropped) — index 3 lands at +3*5min.
     expect(samples[2]).toEqual({ timestampSec: dayStart + 3 * 5 * 60, bpm: 78 });
+    // Sprint 16.5b — returned interval reflects the index packet.
+    expect(intervalSec).toBe(5 * 60);
   });
 
   it('writes the request packet with the correct cmd + LE timestamp + zero payload', async () => {
@@ -100,7 +99,7 @@ describe('readHRHistory', () => {
     await new Promise((r) => setImmediate(r));
     device.__pushNotify(bytesToBase64(hrNoDataPacket()));
 
-    expect(await promise).toEqual([]);
+    expect(await promise).toEqual({ samples: [], intervalSec: 0 });
   });
 
   it('resolves once all data packets indicated by the index packet have arrived', async () => {
@@ -121,7 +120,7 @@ describe('readHRHistory', () => {
       bytesToBase64(hrSubsequentDataPacket(0x02, [70, 71, 72, 73, 74])),
     );
 
-    const samples = await promise;
+    const { samples, intervalSec } = await promise;
     expect(samples).toHaveLength(14); // 9 + 5
     expect(samples[0].bpm).toBe(60);
     expect(samples[8].bpm).toBe(68);
@@ -129,6 +128,7 @@ describe('readHRHistory', () => {
     // Continuous sample-index timing across packet boundaries.
     expect(samples[9].timestampSec).toBe(dayStart + 9 * 5 * 60);
     expect(samples[13].timestampSec).toBe(dayStart + 13 * 5 * 60);
+    expect(intervalSec).toBe(5 * 60);
   });
 
   it('filters bpm=0 placeholders interleaved across packets (regression)', async () => {
@@ -149,7 +149,7 @@ describe('readHRHistory', () => {
       bytesToBase64(hrSubsequentDataPacket(0x02, [0, 80, 0, 0, 0])),
     );
 
-    const samples = await promise;
+    const { samples, intervalSec } = await promise;
     expect(samples.map((s) => s.bpm)).toEqual([65, 70, 75, 80]);
     // sampleIndex preserved through filtering: 65 is at index 1, 70 at 4,
     // 75 at 8, 80 at 9+1=10.
@@ -157,5 +157,6 @@ describe('readHRHistory', () => {
     expect(samples[1].timestampSec).toBe(dayStart + 4 * 10 * 60);
     expect(samples[2].timestampSec).toBe(dayStart + 8 * 10 * 60);
     expect(samples[3].timestampSec).toBe(dayStart + 10 * 10 * 60);
+    expect(intervalSec).toBe(10 * 60);
   });
 });

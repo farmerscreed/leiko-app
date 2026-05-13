@@ -40,6 +40,19 @@ export interface HRHistorySample {
   bpm: number;
 }
 
+/** Sprint 16.5b — wrapper returns the watch's reported sample cadence
+ *  alongside the samples themselves so consumers can use it for
+ *  sampleWindowSec instead of the hardcoded `30 min` assumption that was
+ *  6x wrong on U19M_013C (actual: 5 min per Phase A trace). */
+export interface HRHistoryResult {
+  samples: HRHistorySample[];
+  /** Seconds between consecutive samples per the watch's index packet.
+   *  0 when the watch returned the no-data marker. Consumers should
+   *  treat 0 as "fall back to default" since the index packet is the
+   *  only source of truth for this. */
+  intervalSec: number;
+}
+
 export interface ReadHRHistoryOptions {
   dayTimestampSec: number;
   timeoutMs?: number;
@@ -53,13 +66,13 @@ const HR_NO_DATA_MARKER = 0xff;
 export async function readHRHistory(
   device: UrionDevice,
   options: ReadHRHistoryOptions,
-): Promise<HRHistorySample[]> {
+): Promise<HRHistoryResult> {
   const timeoutMs = options.timeoutMs ?? 10_000;
 
   const payload = new Uint8Array(14);
   writeUint32LE(payload, 0, options.dayTimestampSec);
 
-  return new Promise<HRHistorySample[]>((resolve, reject) => {
+  return new Promise<HRHistoryResult>((resolve, reject) => {
     const samples: HRHistorySample[] = [];
     let dayStartSec: number | null = null;
     let intervalSec = 0;
@@ -84,7 +97,7 @@ export async function readHRHistory(
       const seq = packet.payload[0];
 
       if (seq === HR_NO_DATA_MARKER) {
-        finish(() => resolve([]));
+        finish(() => resolve({ samples: [], intervalSec: 0 }));
         return;
       }
 
@@ -96,12 +109,12 @@ export async function readHRHistory(
         if (BLE_TRACE) {
           console.log(
             `[ble-trace] readHRHistory index totalPackets=${totalPackets} ` +
-              `intervalMinutes=${intervalMinutes} (assumed 30 in slice config)`,
+              `intervalMinutes=${intervalMinutes} (returned to caller)`,
           );
         }
         if (totalPackets <= 1) {
           // Index packet only — no samples to follow.
-          finish(() => resolve([]));
+          finish(() => resolve({ samples: [], intervalSec }));
         }
         return;
       }
@@ -127,7 +140,7 @@ export async function readHRHistory(
       dataPacketsSeen++;
       // The index packet counts as packet 0; data packets fill 1..total-1.
       if (totalPackets > 0 && dataPacketsSeen >= totalPackets - 1) {
-        finish(() => resolve(samples));
+        finish(() => resolve({ samples, intervalSec }));
       }
     });
 

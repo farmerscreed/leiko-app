@@ -96,7 +96,8 @@ beforeEach(() => {
   useSleep.getState().reset();
   useActivity.getState().reset();
   // Default mocks return empty (no data).
-  mockReadHRHistory.mockResolvedValue([]);
+  // Sprint 16.5b — readHRHistory now returns { samples, intervalSec }.
+  mockReadHRHistory.mockResolvedValue({ samples: [], intervalSec: 0 });
   mockReadSpO2History.mockResolvedValue([]);
   mockReadDayInfo.mockResolvedValue({ activity: null, sleep: null });
   mockPostMultiVitals.mockResolvedValue({
@@ -119,10 +120,13 @@ function seedCursorsAtYesterday(): void {
 describe('syncMultiVitals — happy path', () => {
   it('pushes HR samples to useHR.pending and advances cursor.hr', async () => {
     seedCursorsAtYesterday();
-    mockReadHRHistory.mockResolvedValueOnce([
-      { timestampSec: 1737420000, bpm: 65 },
-      { timestampSec: 1737423600, bpm: 68 },
-    ]);
+    mockReadHRHistory.mockResolvedValueOnce({
+      samples: [
+        { timestampSec: 1737420000, bpm: 65 },
+        { timestampSec: 1737423600, bpm: 68 },
+      ],
+      intervalSec: 5 * 60,
+    });
     const result = await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
       firstSyncDays: 1,
@@ -295,9 +299,10 @@ describe('syncMultiVitals — failure isolation', () => {
 
   it('marks ok=false when /sync POST fails but step errors are still recorded', async () => {
     seedCursorsAtYesterday();
-    mockReadHRHistory.mockResolvedValueOnce([
-      { timestampSec: 1737420000, bpm: 65 },
-    ]);
+    mockReadHRHistory.mockResolvedValueOnce({
+      samples: [{ timestampSec: 1737420000, bpm: 65 }],
+      intervalSec: 5 * 60,
+    });
     mockPostMultiVitals.mockRejectedValueOnce(new Error('network'));
     const result = await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
@@ -330,10 +335,13 @@ describe('syncMultiVitals — cursor dedup', () => {
   it('drops HR samples older than cursor.hr', async () => {
     seedCursorsAtYesterday();
     setVitalCursor(DEVICE_BLE_ID, 'hr', 1737422000);
-    mockReadHRHistory.mockResolvedValueOnce([
-      { timestampSec: 1737420000, bpm: 60 }, // older than cursor — drop
-      { timestampSec: 1737423600, bpm: 65 }, // fresh
-    ]);
+    mockReadHRHistory.mockResolvedValueOnce({
+      samples: [
+        { timestampSec: 1737420000, bpm: 60 }, // older than cursor — drop
+        { timestampSec: 1737423600, bpm: 65 }, // fresh
+      ],
+      intervalSec: 5 * 60,
+    });
     const result = await syncMultiVitals(fakeDevice, DEVICE_BLE_ID, DEVICE_META, {
       nowSec: NOW_SEC,
       firstSyncDays: 1,
@@ -573,7 +581,8 @@ describe('computeBackfillDayList', () => {
 // params / goals) on each sync. Closes the Sprint 7.5 stub.
 describe('syncMultiVitals — applyDeviceConfig wiring (Sprint 14.5)', () => {
   beforeEach(() => {
-    mockReadHRHistory.mockResolvedValue([]);
+    // Sprint 16.5b — readHRHistory now returns { samples, intervalSec }.
+    mockReadHRHistory.mockResolvedValue({ samples: [], intervalSec: 0 });
     mockReadSpO2History.mockResolvedValue([]);
     mockReadDayInfo.mockResolvedValue({ sleep: null, activity: null, calories: null });
     mockPostMultiVitals.mockReset();

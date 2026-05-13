@@ -96,7 +96,12 @@ import type {
 const BLE_TRACE = typeof __DEV__ !== 'undefined' && __DEV__;
 
 const APP_VERSION = '0.0.1'; // bumped via package.json on release
-const HR_DEFAULT_WINDOW_SEC = 30 * 60;
+/** Sprint 16.5b — fallback only. Pre-16.5b this was used directly for
+ *  every HRSample's sampleWindowSec. Phase A trace revealed the actual
+ *  watch cadence is 5 min on U19M_013C, not 30 min. We now read the
+ *  interval from the watch's index packet on every read (per call) and
+ *  fall back to this only when the watch returns the no-data marker. */
+const HR_FALLBACK_WINDOW_SEC = 30 * 60;
 const SPO2_DEFAULT_WINDOW_SEC = 60 * 60;
 const SECONDS_PER_DAY = 24 * 60 * 60;
 
@@ -274,12 +279,18 @@ async function syncHRStep(
   let totalPulled = 0;
 
   for (const day of days) {
-    const samples = await readHRHistory(device, {
+    const result = await readHRHistory(device, {
       dayTimestampSec: unixSecFromDayLocal(day),
     });
+    const { samples, intervalSec: rawIntervalSec } = result;
+    // Sprint 16.5b — use the watch's reported interval, not the
+    // hardcoded 30-min assumption. Fall back only if the watch returned
+    // no-data (intervalSec=0 in that case).
+    const sampleWindowSec = rawIntervalSec > 0 ? rawIntervalSec : HR_FALLBACK_WINDOW_SEC;
     if (BLE_TRACE) {
       console.log(
-        `[ble-trace] syncMultiVitals.hr day=${day} readHRHistory returned ${samples.length} samples`,
+        `[ble-trace] syncMultiVitals.hr day=${day} readHRHistory returned ${samples.length} samples ` +
+          `(intervalSec=${rawIntervalSec}, sampleWindowSec=${sampleWindowSec})`,
       );
     }
     // Sample-level dedup: keep only samples newer than cursor.hr.
@@ -291,7 +302,7 @@ async function syncHRStep(
       const sample: HRSample = {
         measuredAtSec: watchTimestampToUtcSec(s.timestampSec),
         bpm: s.bpm,
-        sampleWindowSec: HR_DEFAULT_WINDOW_SEC,
+        sampleWindowSec,
         // The 0x15 history packet does not expose motion-state per sample.
         // Classifier's sensor-error fallback ignores motion='unknown' for
         // baseline computation but still classifies extreme values.
