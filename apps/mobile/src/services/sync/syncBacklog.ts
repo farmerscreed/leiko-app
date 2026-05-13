@@ -91,6 +91,29 @@ export function watchTimestampToUtcSec(rawWatchSec: number): number {
   return rawWatchSec + WATCH_FIRMWARE_OFFSET_SEC - phoneOffsetSec;
 }
 
+// Sprint 16.5c — HR + SpO2 path uses a DIFFERENT firmware encoding than
+// BP. The 0x14 (BP) packet carries `wall_clock_display_as_Beijing` —
+// hence the +8h firmware offset above. The 0x15 (HR) day-anchor and the
+// 0x2D (SpO2) day-anchor are echoed back as `wall_clock_display_as_UTC`
+// — the watch interprets the unix sec we send (e.g. for `<day>T00:00:00Z`)
+// as a literal wall-clock anchor and records subsequent samples at slot
+// indexes derived from its own wall-clock progression. Verified on
+// U19M_013C / Pixel 8 in Lagos 2026-05-13 (scenario-13 trace):
+//   • sample 0 of "2026-05-13" had ts = 1778630400 = 2026-05-13T00:00 UTC
+//     and bpm = 79 (sleeping HR at real-Lagos 00:00, watch wall clock
+//     displayed 00:00 — interpreted-as-UTC matches the watch face value)
+//   • sample 194 had ts = 1778688600 (= 16:10 UTC) and was the freshest
+//     sample at real-Lagos 16:10 — i.e. the watch's wall-clock 16:10
+//     mapped to slot index 194 (= 16:10 / 5min from midnight).
+// So for HR/SpO2 the correct correction to TRUE UTC subtracts the
+// user's local-offset (Lagos +1 → subtract 3600 s). Equivalent to the
+// general formula with WATCH_FIRMWARE_OFFSET_SEC=0.
+export function watchVitalTimestampToUtcSec(rawWatchSec: number): number {
+  const phoneOffsetSec =
+    -new Date(rawWatchSec * 1000).getTimezoneOffset() * 60;
+  return rawWatchSec - phoneOffsetSec;
+}
+
 // Per-device, per-vital sync cursor — Sprint 7.5 / D13 §3.4.
 //
 // Sprint 6 stored a single number per device (BP cursor) at

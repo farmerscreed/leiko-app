@@ -112,20 +112,62 @@ export async function readSpO2History(
       }
 
       const baseSec = dayStartSec ?? options.dayTimestampSec;
-      // Each pair is (max, min). Stop one short of the end so we
-      // always read a full pair.
-      for (let i = offset; i + 1 < packet.payload.length; i += 2) {
-        const max = packet.payload[i];
-        const min = packet.payload[i + 1];
+      // Sprint 16.5c byte-level trace for the SpO2 pair-decoding
+      // investigation. Watch sends 16 hourly slots per day yet only 9
+      // pass the parser; this trace dumps every pair so we can verify
+      // whether the protocol's claimed (max, min) order actually matches
+      // the firmware. Remove once the daytime-samples gap is resolved.
+      if (BLE_TRACE) {
+        const hex = (n: number) => (n & 0xff).toString(16).padStart(2, '0');
+        const bytes: string[] = [];
+        for (let j = 0; j < packet.payload.length; j++) {
+          bytes.push(hex(packet.payload[j] ?? 0));
+        }
+        console.log(
+          `[ble-trace] readSpO2History seq=${packet.payload[0]?.toString(16)} ` +
+            `full_payload=${bytes.join(' ')}`,
+        );
+      }
+      // Sprint 16.5c — each data byte is a SINGLE SpO2 sample.
+      //
+      // The U16PRO_protocol_en.pdf §4.11 documentation describes
+      // `(max, min)` BYTE PAIRS, with worked-example annotations like
+      // "FF=0x63:0 Maximum blood oxygen value of 99, GG=0x62:0
+      // Minimum blood oxygen value of 98". But the U19M_013C firmware
+      // actually streams single-byte hourly readings — every other
+      // byte is the next hour, not a (max, min) partner.
+      //
+      // Empirical proof from a 2026-05-13 bench trace: packet
+      // `02 61 62 62 63 61 61 63 62 61 00 00 00 00` (seq=2, 13 data
+      // bytes), interpreted as pairs, yields (97,98)(98,99)(97,97)
+      // (99,98)(97,0) — the first two pairs have "max" < "min" which
+      // is impossible. Interpreted as singles, yields 97,98,98,99,97,
+      // 97,99,98,97,0,0,0,0 — 9 valid hourly readings then padding,
+      // exactly matching the watch face's chart for that day window.
+      // Pair interpretation surfaced 9 samples for a 17-hour day;
+      // singles surface 18. The watch face shows ~hourly markers,
+      // which lines up with the single-byte interpretation.
+      //
+      // We iterate one byte at a time. Each non-zero byte is the
+      // hour's SpO2 reading; advance `sampleIndex` per byte.
+      // `maxInWindow` / `minInWindow` are kept on the type for the
+      // server schema but both receive the single reading.
+      for (let i = offset; i < packet.payload.length; i++) {
+        const reading = packet.payload[i];
+        if (BLE_TRACE && reading !== 0) {
+          console.log(
+            `[ble-trace] readSpO2History sample idx=${pairIndex} payload[${i}]=${reading}`,
+          );
+        }
         const ts = baseSec + pairIndex * intervalSec;
         pairIndex++;
-        if (max === 0 && min === 0) continue;
-        const percent = Math.round((max + min) / 2);
+        if (reading === 0) continue;
+        if (reading < 70 || reading > 100) continue;
         samples.push({
           timestampSec: ts,
-          percent,
-          maxInWindow: max,
-          minInWindow: min,
+          percent: reading,
+          maxInWindow: reading,
+          minInWindow: reading,
         });
       }
 

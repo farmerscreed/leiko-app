@@ -124,6 +124,15 @@ export async function readHRHistory(
       if (seq === 0x01) {
         dayStartSec = readUint32LE(packet.payload, 1);
         offset = 5;
+        if (BLE_TRACE) {
+          const p = packet.payload;
+          const hex = (n: number) => (n & 0xff).toString(16).padStart(2, '0');
+          console.log(
+            `[ble-trace] readHRHistory seq=01 bytes[1..4]=${hex(p[1] ?? 0)} ${hex(p[2] ?? 0)} ${hex(p[3] ?? 0)} ${hex(p[4] ?? 0)} ` +
+              `dayStartSec=${dayStartSec} ` +
+              `(requested dayTimestampSec=${options.dayTimestampSec})`,
+          );
+        }
       } else {
         offset = 1;
       }
@@ -132,6 +141,11 @@ export async function readHRHistory(
       for (let i = offset; i < packet.payload.length; i++) {
         const bpm = packet.payload[i];
         const ts = baseSec + sampleIndex * intervalSec;
+        if (BLE_TRACE && sampleIndex < 3) {
+          console.log(
+            `[ble-trace] readHRHistory sample idx=${sampleIndex} ts=${ts} bpm=${bpm}`,
+          );
+        }
         sampleIndex++;
         if (bpm === 0) continue;
         samples.push({ timestampSec: ts, bpm });

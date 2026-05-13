@@ -65,7 +65,7 @@ import { readDayInfo } from '../ble/commands/readDayInfo';
 import {
   getVitalCursor,
   setVitalCursor,
-  watchTimestampToUtcSec,
+  watchVitalTimestampToUtcSec,
 } from './syncBacklog';
 import { postMultiVitals, isPayloadEmpty } from './postMultiVitals';
 import { applyDeviceConfig } from './applyDeviceConfig';
@@ -256,10 +256,16 @@ async function syncHRStep(
   const todayLocal = dayLocalFromNow(nowSec);
   const cursor = getVitalCursor(deviceBleId);
 
-  const cursorDayLocal =
-    cursor.hr > 0
-      ? dayLocalFromNow(watchTimestampToUtcSec(cursor.hr))
-      : '';
+  // Sprint 16.5c — `cursor.hr` holds the watch's raw timestamp for the
+  // newest HR sample we've ingested. HR/SpO2 use a DIFFERENT firmware
+  // encoding than BP: the day-anchor is echoed back and per-sample
+  // timestamps are `dayStart + i × intervalSec` where `dayStart` is
+  // interpreted as `wall-clock-display-as-UTC`. To get TRUE UTC we
+  // subtract the user's local offset — encapsulated in
+  // `watchVitalTimestampToUtcSec`. (The BP +8h "Beijing wall clock"
+  // shift `watchTimestampToUtcSec` is wrong here — that one is for the
+  // 0x14 packet's TS field only.)
+  const cursorDayLocal = cursor.hr > 0 ? dayLocalFromNow(watchVitalTimestampToUtcSec(cursor.hr)) : '';
 
   const days = computeBackfillDayList(cursorDayLocal, todayLocal, {
     firstSyncDays,
@@ -300,7 +306,13 @@ async function syncHRStep(
         : samples;
     for (const s of fresh) {
       const sample: HRSample = {
-        measuredAtSec: watchTimestampToUtcSec(s.timestampSec),
+        // Sprint 16.5c: HR raw timestamps from the watch encode
+        // `wall_clock_display_as_UTC`. For TRUE UTC we subtract the
+        // user's local-offset (`watchVitalTimestampToUtcSec`). The BP
+        // +7h Beijing shift `watchTimestampToUtcSec` was wrong here
+        // (pushed samples 7 h into the future on Lagos clients) and
+        // applying NO shift was also wrong (left them 1 h ahead).
+        measuredAtSec: watchVitalTimestampToUtcSec(s.timestampSec),
         bpm: s.bpm,
         sampleWindowSec,
         // The 0x15 history packet does not expose motion-state per sample.
@@ -362,8 +374,21 @@ async function syncSpO2Step(
       );
     }
     for (const s of samples) {
+      const measuredAtSec = watchVitalTimestampToUtcSec(s.timestampSec);
+      if (BLE_TRACE) {
+        const isoLocal = new Date(measuredAtSec * 1000).toISOString();
+        const hourLocal = new Date(measuredAtSec * 1000).getHours();
+        console.log(
+          `[ble-trace] spo2 store raw=${s.timestampSec} ` +
+            `measuredAtSec=${measuredAtSec} percent=${s.percent} ` +
+            `isoUTC=${isoLocal} getHours=${hourLocal}`,
+        );
+      }
       const sample: SpO2Sample = {
-        measuredAtSec: watchTimestampToUtcSec(s.timestampSec),
+        // Sprint 16.5c: SpO2 encoding mirrors HR —
+        // `wall_clock_display_as_UTC` raw timestamps that need the
+        // user's local-offset subtracted to reach TRUE UTC.
+        measuredAtSec,
         percent: s.percent,
         maxInWindow: s.maxInWindow,
         minInWindow: s.minInWindow,
@@ -397,11 +422,28 @@ async function syncDayInfoStep(
   const todayLocal = dayLocalFromNow(nowSec);
   const cursor = getVitalCursor(deviceBleId);
 
+  // Sprint 16.5c — `alwaysIncludeToday: true` for sleep.
+  //
+  // Pre-fix: sleep used `alwaysIncludeToday: false` with the rationale
+  // "last-night totals don't change once captured." But the cursor
+  // advanced inside the loop unconditionally — even on syncs that ran
+  // before the user had actually slept (e.g., a morning sync immediately
+  // after wake, before the watch's overnight session was persisted).
+  // The cursor would jump to today, no sleep session was ever ingested,
+  // and subsequent syncs computed an empty sleepDays list and skipped
+  // today's `readDayInfo` sleep result entirely (the result kept coming
+  // back from the watch but `sleepDaySet.has(day)` was false, so the
+  // ingest branch was bypassed).
+  //
+  // Fix: always include today in sleepDays. The dayInfo branch's
+  // `addPending(session)` dedupes by `sessionStartSec`, so re-pulling
+  // today's sleep on every sync is idempotent. The cursor advances only
+  // when there's a real session — see the `info.sleep` check below.
   const sleepDays = computeBackfillDayList(cursor.sleep, todayLocal, {
     firstSyncDays,
     maxBackfillDays,
     inclusiveCursorDay: false,
-    alwaysIncludeToday: false,
+    alwaysIncludeToday: true,
   });
   const activityDays = computeBackfillDayList(cursor.activity, todayLocal, {
     firstSyncDays,
@@ -468,8 +510,18 @@ async function syncDayInfoStep(
         };
         useSleep.getState().addPending(session);
         sleepCount += 1;
+        // Sprint 16.5c — only advance the cursor when we actually
+        // ingested a session. The pre-fix code advanced unconditionally,
+        // so a sync that ran before the user had slept (or before the
+        // watch had persisted the overnight session) burned today's
+        // chance and locked out the eventual real session.
+        setVitalCursor(deviceBleId, 'sleep', day);
+      } else if (BLE_TRACE) {
+        console.log(
+          `[ble-trace] syncMultiVitals.dayInfo day=${day} sleep skipped ` +
+            `(info.sleep=${info.sleep ? `min=${info.sleep.totalMinutes}` : 'null'}); cursor NOT advanced`,
+        );
       }
-      setVitalCursor(deviceBleId, 'sleep', day);
     }
 
     if (activityDaySet.has(day)) {
