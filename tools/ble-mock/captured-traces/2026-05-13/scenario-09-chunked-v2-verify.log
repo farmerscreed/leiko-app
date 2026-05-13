@@ -1,0 +1,1029 @@
+--------- beginning of main
+05-13 12:05:14.773 I/ReactNativeJS(14852): Running "main" with {"rootTag":1,"initialProps":{},"fabric":true}
+05-13 12:05:15.060 I/ReactNativeJS(14852): '[analytics]', 'sync_started', { trigger: 'cold_start' }
+05-13 12:05:15.071 I/ReactNativeJS(14852): '[analytics]', 'health_platform_read_skipped', { trigger: 'foreground', reason: 'no_user' }
+05-13 12:05:15.100 W/ReactNativeJS(14852): expo-background-fetch: This library is deprecated. Use expo-background-task instead.
+05-13 12:05:15.112 I/ReactNativeJS(14852): '[analytics]', 'background_sync_registered', { intervalMin: 15 }
+05-13 12:05:15.278 I/ReactNativeJS(14852): '[analytics]', 'push_permission_denied', ''
+05-13 12:05:15.990 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:16.223 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:16.370 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:16.479 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:16.578 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:16.677 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:16.782 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:16.898 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:17.046 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:17.181 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:17.331 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:17.468 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:17.494 I/ReactNativeJS(14852): [ble-trace] applyDeviceConfig skipped — dirty=false force=false sinceFlushMs=2610986 (debounce 3600000ms)
+05-13 12:05:17.617 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:17.667 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x01 payload[0..3]=00 00 00 00 listeners=1
+05-13 12:05:17.669 I/ReactNativeJS(14852): [ble-trace] syncBacklog enter deviceBleId=CA:BF:55:1F:01:3C lastSync=1778642478 (filter-only; query is TS=0)
+05-13 12:05:17.749 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:17.759 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=2e ee 03 6a listeners=1
+05-13 12:05:17.762 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778642478 bytes[0..7]=2e ee 03 6a 55 91 4b 00 decoded: dia=85 sys=145 pulse=75
+05-13 12:05:17.762 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=19 e8 03 6a listeners=1
+05-13 12:05:17.763 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778640921 bytes[0..7]=19 e8 03 6a 50 85 45 00 decoded: dia=80 sys=133 pulse=69
+05-13 12:05:17.763 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=37 da 03 6a listeners=1
+05-13 12:05:17.763 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778637367 bytes[0..7]=37 da 03 6a 4e 8a 53 00 decoded: dia=78 sys=138 pulse=83
+05-13 12:05:17.764 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d0 49 03 6a listeners=1
+05-13 12:05:17.764 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778600400 bytes[0..7]=d0 49 03 6a 54 88 4e 00 decoded: dia=84 sys=136 pulse=78
+05-13 12:05:17.805 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=b6 45 03 6a listeners=1
+05-13 12:05:17.806 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778599350 bytes[0..7]=b6 45 03 6a 56 96 53 00 decoded: dia=86 sys=150 pulse=83
+05-13 12:05:17.808 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=5b 41 03 6a listeners=1
+05-13 12:05:17.808 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778598235 bytes[0..7]=5b 41 03 6a 56 8b 53 00 decoded: dia=86 sys=139 pulse=83
+05-13 12:05:17.810 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a2 3d 03 6a listeners=1
+05-13 12:05:17.811 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778597282 bytes[0..7]=a2 3d 03 6a 56 90 51 00 decoded: dia=86 sys=144 pulse=81
+05-13 12:05:17.812 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7c 7d 02 6a listeners=1
+05-13 12:05:17.813 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778548092 bytes[0..7]=7c 7d 02 6a 51 91 4e 00 decoded: dia=81 sys=145 pulse=78
+05-13 12:05:17.814 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=07 26 02 6a listeners=1
+05-13 12:05:17.814 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778525703 bytes[0..7]=07 26 02 6a 57 8d 53 00 decoded: dia=87 sys=141 pulse=83
+05-13 12:05:17.815 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a1 09 02 6a listeners=1
+05-13 12:05:17.815 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778518433 bytes[0..7]=a1 09 02 6a 57 8f 3e 00 decoded: dia=87 sys=143 pulse=62
+05-13 12:05:17.815 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=88 f7 01 6a listeners=1
+05-13 12:05:17.816 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778513800 bytes[0..7]=88 f7 01 6a 52 80 42 00 decoded: dia=82 sys=128 pulse=66
+05-13 12:05:17.816 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=50 f2 01 6a listeners=1
+05-13 12:05:17.817 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778512464 bytes[0..7]=50 f2 01 6a 58 8d 44 00 decoded: dia=88 sys=141 pulse=68
+05-13 12:05:17.824 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=b4 f1 01 6a listeners=1
+05-13 12:05:17.825 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778512308 bytes[0..7]=b4 f1 01 6a 56 8c 47 00 decoded: dia=86 sys=140 pulse=71
+05-13 12:05:17.826 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=c6 ed 01 6a listeners=1
+05-13 12:05:17.827 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778511302 bytes[0..7]=c6 ed 01 6a 56 8a 47 00 decoded: dia=86 sys=138 pulse=71
+05-13 12:05:17.855 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=27 e9 01 6a listeners=1
+05-13 12:05:17.856 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778510119 bytes[0..7]=27 e9 01 6a 5a 98 44 00 decoded: dia=90 sys=152 pulse=68
+05-13 12:05:17.857 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=27 e8 01 6a listeners=1
+05-13 12:05:17.857 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778509863 bytes[0..7]=27 e8 01 6a 54 8b 41 00 decoded: dia=84 sys=139 pulse=65
+05-13 12:05:17.858 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=74 b0 01 6a listeners=1
+05-13 12:05:17.858 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778495604 bytes[0..7]=74 b0 01 6a 52 86 55 00 decoded: dia=82 sys=134 pulse=85
+05-13 12:05:17.858 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ec a8 01 6a listeners=1
+05-13 12:05:17.858 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778493676 bytes[0..7]=ec a8 01 6a 53 8e 58 00 decoded: dia=83 sys=142 pulse=88
+05-13 12:05:17.859 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=21 61 01 6a listeners=1
+05-13 12:05:17.859 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778475297 bytes[0..7]=21 61 01 6a 4e 79 49 00 decoded: dia=78 sys=121 pulse=73
+05-13 12:05:17.859 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ed 24 01 6a listeners=1
+05-13 12:05:17.860 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778459885 bytes[0..7]=ed 24 01 6a 59 8e 49 00 decoded: dia=89 sys=142 pulse=73
+05-13 12:05:17.860 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7e 81 00 6a listeners=1
+05-13 12:05:17.860 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778418046 bytes[0..7]=7e 81 00 6a 48 72 5d 00 decoded: dia=72 sys=114 pulse=93
+05-13 12:05:17.860 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ac 7b 00 6a listeners=1
+05-13 12:05:17.861 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778416556 bytes[0..7]=ac 7b 00 6a 5a 94 49 00 decoded: dia=90 sys=148 pulse=73
+05-13 12:05:17.862 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=55 7b 00 6a listeners=1
+05-13 12:05:17.862 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778416469 bytes[0..7]=55 7b 00 6a 5f 97 4c 00 decoded: dia=95 sys=151 pulse=76
+05-13 12:05:17.863 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=66 57 00 6a listeners=1
+05-13 12:05:17.863 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778407270 bytes[0..7]=66 57 00 6a 59 90 53 00 decoded: dia=89 sys=144 pulse=83
+05-13 12:05:17.865 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:17.900 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d9 fe fe 69 listeners=1
+05-13 12:05:17.901 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778319065 bytes[0..7]=d9 fe fe 69 56 8a 4e 00 decoded: dia=86 sys=138 pulse=78
+05-13 12:05:17.902 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7a 91 fe 69 listeners=1
+05-13 12:05:17.903 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778291066 bytes[0..7]=7a 91 fe 69 56 85 4b 00 decoded: dia=86 sys=133 pulse=75
+05-13 12:05:17.905 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=1d 7e fe 69 listeners=1
+05-13 12:05:17.906 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778286109 bytes[0..7]=1d 7e fe 69 58 92 49 00 decoded: dia=88 sys=146 pulse=73
+05-13 12:05:17.907 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=5c 0f fe 69 listeners=1
+05-13 12:05:17.907 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778257756 bytes[0..7]=5c 0f fe 69 4c 71 51 00 decoded: dia=76 sys=113 pulse=81
+05-13 12:05:17.908 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a7 c1 fd 69 listeners=1
+05-13 12:05:17.908 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778237863 bytes[0..7]=a7 c1 fd 69 4d 77 4e 00 decoded: dia=77 sys=119 pulse=78
+05-13 12:05:17.908 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=0a c1 fd 69 listeners=1
+05-13 12:05:17.909 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778237706 bytes[0..7]=0a c1 fd 69 5d 94 4e 00 decoded: dia=93 sys=148 pulse=78
+05-13 12:05:17.909 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=97 70 fd 69 listeners=1
+05-13 12:05:17.910 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778217111 bytes[0..7]=97 70 fd 69 56 89 51 00 decoded: dia=86 sys=137 pulse=81
+05-13 12:05:17.910 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ee 65 fc 69 listeners=1
+05-13 12:05:17.910 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778148846 bytes[0..7]=ee 65 fc 69 55 87 49 00 decoded: dia=85 sys=135 pulse=73
+05-13 12:05:17.911 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=f3 62 fc 69 listeners=1
+05-13 12:05:17.911 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778148083 bytes[0..7]=f3 62 fc 69 5d 96 49 00 decoded: dia=93 sys=150 pulse=73
+05-13 12:05:17.911 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=32 e6 fb 69 listeners=1
+05-13 12:05:17.912 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778116146 bytes[0..7]=32 e6 fb 69 55 8c 4b 00 decoded: dia=85 sys=140 pulse=75
+05-13 12:05:17.947 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d6 e4 fb 69 listeners=1
+05-13 12:05:17.948 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778115798 bytes[0..7]=d6 e4 fb 69 59 90 4c 00 decoded: dia=89 sys=144 pulse=76
+05-13 12:05:17.948 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=36 de fb 69 listeners=1
+05-13 12:05:17.948 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778114102 bytes[0..7]=36 de fb 69 4e 79 45 00 decoded: dia=78 sys=121 pulse=69
+05-13 12:05:17.949 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=57 52 fb 69 listeners=1
+05-13 12:05:17.949 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778078295 bytes[0..7]=57 52 fb 69 57 85 60 00 decoded: dia=87 sys=133 pulse=96
+05-13 12:05:17.950 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=2a 50 fb 69 listeners=1
+05-13 12:05:17.950 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778077738 bytes[0..7]=2a 50 fb 69 59 93 51 00 decoded: dia=89 sys=147 pulse=81
+05-13 12:05:17.951 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7f 4f fb 69 listeners=1
+05-13 12:05:17.952 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778077567 bytes[0..7]=7f 4f fb 69 53 80 58 00 decoded: dia=83 sys=128 pulse=88
+05-13 12:05:17.952 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=17 4c fb 69 listeners=1
+05-13 12:05:17.952 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778076695 bytes[0..7]=17 4c fb 69 58 91 51 00 decoded: dia=88 sys=145 pulse=81
+05-13 12:05:17.953 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=95 4b fb 69 listeners=1
+05-13 12:05:17.954 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778076565 bytes[0..7]=95 4b fb 69 56 8c 53 00 decoded: dia=86 sys=140 pulse=83
+05-13 12:05:17.954 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=cd 84 fa 69 listeners=1
+05-13 12:05:17.955 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778025677 bytes[0..7]=cd 84 fa 69 56 90 49 00 decoded: dia=86 sys=144 pulse=73
+05-13 12:05:17.955 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=cd bf f9 69 listeners=1
+05-13 12:05:17.955 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777975245 bytes[0..7]=cd bf f9 69 54 80 53 00 decoded: dia=84 sys=128 pulse=83
+05-13 12:05:17.956 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=62 7c f9 69 listeners=1
+05-13 12:05:17.956 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777957986 bytes[0..7]=62 7c f9 69 55 86 6b 00 decoded: dia=85 sys=134 pulse=107
+05-13 12:05:17.963 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:17.997 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=4f 33 f9 69 listeners=1
+05-13 12:05:17.997 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777939279 bytes[0..7]=4f 33 f9 69 54 93 45 00 decoded: dia=84 sys=147 pulse=69
+05-13 12:05:17.998 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=e3 a1 f8 69 listeners=1
+05-13 12:05:17.998 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777902051 bytes[0..7]=e3 a1 f8 69 57 8a 55 00 decoded: dia=87 sys=138 pulse=85
+05-13 12:05:17.998 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=95 a1 f8 69 listeners=1
+05-13 12:05:17.999 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777901973 bytes[0..7]=95 a1 f8 69 48 55 53 00 decoded: dia=72 sys=85 pulse=83
+05-13 12:05:17.999 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d3 fe f7 69 listeners=1
+05-13 12:05:18.000 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777860307 bytes[0..7]=d3 fe f7 69 54 89 4e 00 decoded: dia=84 sys=137 pulse=78
+05-13 12:05:18.000 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=26 db f7 69 listeners=1
+05-13 12:05:18.000 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777851174 bytes[0..7]=26 db f7 69 59 8d 49 00 decoded: dia=89 sys=141 pulse=73
+05-13 12:05:18.001 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=87 11 f7 69 listeners=1
+05-13 12:05:18.001 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777799559 bytes[0..7]=87 11 f7 69 5e 97 55 00 decoded: dia=94 sys=151 pulse=85
+05-13 12:05:18.002 I/ReactNativeJS(14852): [ble-trace] syncBacklog readBPHistory returned 50 packet(s); first.ts=1778642478 last.ts=1777799559
+05-13 12:05:18.002 I/ReactNativeJS(14852): [ble-trace] syncBacklog exit pulled=0 (filtered from 50); cursor 1778642478 → 1778642478
+05-13 12:05:18.005 I/ReactNativeJS(14852): [ble-trace] backfillBPHistoryOlderThan enter anchorTs=1777799559 (DIR=1 walk-backward)
+05-13 12:05:18.063 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:18.096 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=41 11 f7 69 listeners=1
+05-13 12:05:18.097 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777799489 bytes[0..7]=41 11 f7 69 4d 77 55 00 decoded: dia=77 sys=119 pulse=85
+05-13 12:05:18.098 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=02 c7 f6 69 listeners=1
+05-13 12:05:18.098 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777780482 bytes[0..7]=02 c7 f6 69 64 9d 58 00 decoded: dia=100 sys=157 pulse=88
+05-13 12:05:18.099 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=b9 c6 f6 69 listeners=1
+05-13 12:05:18.099 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777780409 bytes[0..7]=b9 c6 f6 69 5d a0 58 00 decoded: dia=93 sys=160 pulse=88
+05-13 12:05:18.100 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ca 90 f6 69 listeners=1
+05-13 12:05:18.101 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777766602 bytes[0..7]=ca 90 f6 69 5e 98 51 00 decoded: dia=94 sys=152 pulse=81
+05-13 12:05:18.102 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=33 1a f6 69 listeners=1
+05-13 12:05:18.103 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777736243 bytes[0..7]=33 1a f6 69 4e 8b 5a 00 decoded: dia=78 sys=139 pulse=90
+05-13 12:05:18.105 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=28 fe f5 69 listeners=1
+05-13 12:05:18.106 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777729064 bytes[0..7]=28 fe f5 69 56 90 55 00 decoded: dia=86 sys=144 pulse=85
+05-13 12:05:18.106 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=e9 f7 f5 69 listeners=1
+05-13 12:05:18.106 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777727465 bytes[0..7]=e9 f7 f5 69 51 8d 5d 00 decoded: dia=81 sys=141 pulse=93
+05-13 12:05:18.106 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=2a b4 f5 69 listeners=1
+05-13 12:05:18.107 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777710122 bytes[0..7]=2a b4 f5 69 5a 94 51 00 decoded: dia=90 sys=148 pulse=81
+05-13 12:05:18.107 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=0e 75 f5 69 listeners=1
+05-13 12:05:18.107 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777693966 bytes[0..7]=0e 75 f5 69 5a 8d 4c 00 decoded: dia=90 sys=141 pulse=76
+05-13 12:05:18.107 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=3c 45 f5 69 listeners=1
+05-13 12:05:18.108 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777681724 bytes[0..7]=3c 45 f5 69 58 95 58 00 decoded: dia=88 sys=149 pulse=88
+05-13 12:05:18.145 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=10 d0 f4 69 listeners=1
+05-13 12:05:18.146 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777651728 bytes[0..7]=10 d0 f4 69 4f 7a 51 00 decoded: dia=79 sys=122 pulse=81
+05-13 12:05:18.146 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=17 3e f4 69 listeners=1
+05-13 12:05:18.146 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777614359 bytes[0..7]=17 3e f4 69 5c 94 53 00 decoded: dia=92 sys=148 pulse=83
+05-13 12:05:18.147 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=66 32 f4 69 listeners=1
+05-13 12:05:18.147 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777611366 bytes[0..7]=66 32 f4 69 58 95 4b 00 decoded: dia=88 sys=149 pulse=75
+05-13 12:05:18.147 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=06 32 f4 69 listeners=1
+05-13 12:05:18.148 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777611270 bytes[0..7]=06 32 f4 69 5d 9a 53 00 decoded: dia=93 sys=154 pulse=83
+05-13 12:05:18.152 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=17 22 f3 69 listeners=1
+05-13 12:05:18.152 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777541655 bytes[0..7]=17 22 f3 69 54 8c 4e 00 decoded: dia=84 sys=140 pulse=78
+05-13 12:05:18.153 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=23 9a f2 69 listeners=1
+05-13 12:05:18.154 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777506851 bytes[0..7]=23 9a f2 69 55 93 49 00 decoded: dia=85 sys=147 pulse=73
+05-13 12:05:18.154 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=c3 99 f2 69 listeners=1
+05-13 12:05:18.155 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777506755 bytes[0..7]=c3 99 f2 69 59 8f 55 00 decoded: dia=89 sys=143 pulse=85
+05-13 12:05:18.155 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=8e 90 f2 69 listeners=1
+05-13 12:05:18.156 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777504398 bytes[0..7]=8e 90 f2 69 4f 79 55 00 decoded: dia=79 sys=121 pulse=85
+05-13 12:05:18.156 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=bf e8 f1 69 listeners=1
+05-13 12:05:18.157 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777461439 bytes[0..7]=bf e8 f1 69 57 8b 4e 00 decoded: dia=87 sys=139 pulse=78
+05-13 12:05:18.157 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=73 db f1 69 listeners=1
+05-13 12:05:18.158 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777458035 bytes[0..7]=73 db f1 69 54 84 4b 00 decoded: dia=84 sys=132 pulse=75
+05-13 12:05:18.196 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=0f a9 f1 69 listeners=1
+05-13 12:05:18.197 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777445135 bytes[0..7]=0f a9 f1 69 48 71 5a 00 decoded: dia=72 sys=113 pulse=90
+05-13 12:05:18.198 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:18.203 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=be 4c f1 69 listeners=1
+05-13 12:05:18.204 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777421502 bytes[0..7]=be 4c f1 69 54 83 41 00 decoded: dia=84 sys=131 pulse=65
+05-13 12:05:18.204 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=1d 27 f1 69 listeners=1
+05-13 12:05:18.204 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777411869 bytes[0..7]=1d 27 f1 69 49 6d 3d 00 decoded: dia=73 sys=109 pulse=61
+05-13 12:05:18.205 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=e1 26 f1 69 listeners=1
+05-13 12:05:18.205 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777411809 bytes[0..7]=e1 26 f1 69 5b 91 3e 00 decoded: dia=91 sys=145 pulse=62
+05-13 12:05:18.205 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=73 1a f1 69 listeners=1
+05-13 12:05:18.206 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777408627 bytes[0..7]=73 1a f1 69 45 68 45 00 decoded: dia=69 sys=104 pulse=69
+05-13 12:05:18.206 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=33 1a f1 69 listeners=1
+05-13 12:05:18.206 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777408563 bytes[0..7]=33 1a f1 69 4e 77 3f 00 decoded: dia=78 sys=119 pulse=63
+05-13 12:05:18.207 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=f7 19 f1 69 listeners=1
+05-13 12:05:18.207 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777408503 bytes[0..7]=f7 19 f1 69 4f 6f 42 00 decoded: dia=79 sys=111 pulse=66
+05-13 12:05:18.207 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=db 9c f0 69 listeners=1
+05-13 12:05:18.207 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777376475 bytes[0..7]=db 9c f0 69 5c 91 49 00 decoded: dia=92 sys=145 pulse=73
+05-13 12:05:18.207 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=48 97 f0 69 listeners=1
+05-13 12:05:18.208 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777375048 bytes[0..7]=48 97 f0 69 5a 90 47 00 decoded: dia=90 sys=144 pulse=71
+05-13 12:05:18.208 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=46 77 f0 69 listeners=1
+05-13 12:05:18.208 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777366854 bytes[0..7]=46 77 f0 69 56 92 4e 00 decoded: dia=86 sys=146 pulse=78
+05-13 12:05:18.244 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=fa 60 f0 69 listeners=1
+05-13 12:05:18.245 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777361146 bytes[0..7]=fa 60 f0 69 56 8f 44 00 decoded: dia=86 sys=143 pulse=68
+05-13 12:05:18.246 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=21 4a f0 69 listeners=1
+05-13 12:05:18.247 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777355297 bytes[0..7]=21 4a f0 69 59 90 49 00 decoded: dia=89 sys=144 pulse=73
+05-13 12:05:18.247 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=e0 49 f0 69 listeners=1
+05-13 12:05:18.254 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777355232 bytes[0..7]=e0 49 f0 69 52 7e 55 00 decoded: dia=82 sys=126 pulse=85
+05-13 12:05:18.254 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=e7 12 ee 69 listeners=1
+05-13 12:05:18.254 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777210087 bytes[0..7]=e7 12 ee 69 51 8f 4c 00 decoded: dia=81 sys=143 pulse=76
+05-13 12:05:18.255 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=56 fc ed 69 listeners=1
+05-13 12:05:18.255 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777204310 bytes[0..7]=56 fc ed 69 5b 94 49 00 decoded: dia=91 sys=148 pulse=73
+05-13 12:05:18.255 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=5b ec ed 69 listeners=1
+05-13 12:05:18.255 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777200219 bytes[0..7]=5b ec ed 69 5d 92 45 00 decoded: dia=93 sys=146 pulse=69
+05-13 12:05:18.255 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a2 9c ec 69 listeners=1
+05-13 12:05:18.256 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777114274 bytes[0..7]=a2 9c ec 69 5e 98 49 00 decoded: dia=94 sys=152 pulse=73
+05-13 12:05:18.256 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=85 84 eb 69 listeners=1
+05-13 12:05:18.256 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777042565 bytes[0..7]=85 84 eb 69 54 81 51 00 decoded: dia=84 sys=129 pulse=81
+05-13 12:05:18.256 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=2e 74 eb 69 listeners=1
+05-13 12:05:18.256 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777038382 bytes[0..7]=2e 74 eb 69 52 8d 4c 00 decoded: dia=82 sys=141 pulse=76
+05-13 12:05:18.257 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=61 28 eb 69 listeners=1
+05-13 12:05:18.257 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777018977 bytes[0..7]=61 28 eb 69 58 95 4b 00 decoded: dia=88 sys=149 pulse=75
+05-13 12:05:18.291 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=f7 e9 ea 69 listeners=1
+05-13 12:05:18.291 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777002999 bytes[0..7]=f7 e9 ea 69 5b 8e 4c 00 decoded: dia=91 sys=142 pulse=76
+05-13 12:05:18.292 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=27 e9 ea 69 listeners=1
+05-13 12:05:18.292 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777002791 bytes[0..7]=27 e9 ea 69 4e 77 53 00 decoded: dia=78 sys=119 pulse=83
+05-13 12:05:18.293 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=2d e8 ea 69 listeners=1
+05-13 12:05:18.293 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777002541 bytes[0..7]=2d e8 ea 69 42 5a 53 00 decoded: dia=66 sys=90 pulse=83
+05-13 12:05:18.294 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7a e7 ea 69 listeners=1
+05-13 12:05:18.294 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777002362 bytes[0..7]=7a e7 ea 69 5b 91 45 00 decoded: dia=91 sys=145 pulse=69
+05-13 12:05:18.295 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=31 e7 ea 69 listeners=1
+05-13 12:05:18.295 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777002289 bytes[0..7]=31 e7 ea 69 50 7b 47 00 decoded: dia=80 sys=123 pulse=71
+05-13 12:05:18.296 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ae e6 ea 69 listeners=1
+05-13 12:05:18.296 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777002158 bytes[0..7]=ae e6 ea 69 5f 96 49 00 decoded: dia=95 sys=150 pulse=73
+05-13 12:05:18.297 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=26 e6 ea 69 listeners=1
+05-13 12:05:18.298 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777002022 bytes[0..7]=26 e6 ea 69 5f 95 47 00 decoded: dia=95 sys=149 pulse=71
+05-13 12:05:18.299 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=34 e5 ea 69 listeners=1
+05-13 12:05:18.299 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777001780 bytes[0..7]=34 e5 ea 69 61 99 47 00 decoded: dia=97 sys=153 pulse=71
+05-13 12:05:18.300 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=e3 e4 ea 69 listeners=1
+05-13 12:05:18.301 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777001699 bytes[0..7]=e3 e4 ea 69 60 b7 4c 00 decoded: dia=96 sys=183 pulse=76
+05-13 12:05:18.301 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=96 e4 ea 69 listeners=1
+05-13 12:05:18.302 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777001622 bytes[0..7]=96 e4 ea 69 51 7d 47 00 decoded: dia=81 sys=125 pulse=71
+05-13 12:05:18.302 I/ReactNativeJS(14852): [ble-trace] backfillBPHistoryOlderThan returned 50 packet(s); first.ts=1777799489 last.ts=1777001622
+05-13 12:05:18.305 I/ReactNativeJS(14852): [ble-trace] backfillBPHistoryOlderThan enter anchorTs=1777001622 (DIR=1 walk-backward)
+05-13 12:05:18.311 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:18.386 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=f8 e3 ea 69 listeners=1
+05-13 12:05:18.387 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777001464 bytes[0..7]=f8 e3 ea 69 52 82 47 00 decoded: dia=82 sys=130 pulse=71
+05-13 12:05:18.388 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=73 e2 ea 69 listeners=1
+05-13 12:05:18.388 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777001075 bytes[0..7]=73 e2 ea 69 59 8c 4e 00 decoded: dia=89 sys=140 pulse=78
+05-13 12:05:18.388 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=13 e2 ea 69 listeners=1
+05-13 12:05:18.388 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777000979 bytes[0..7]=13 e2 ea 69 4e 71 4c 00 decoded: dia=78 sys=113 pulse=76
+05-13 12:05:18.389 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=fb d5 ea 69 listeners=1
+05-13 12:05:18.389 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776997883 bytes[0..7]=fb d5 ea 69 53 92 45 00 decoded: dia=83 sys=146 pulse=69
+05-13 12:05:18.390 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=3f d1 ea 69 listeners=1
+05-13 12:05:18.390 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776996671 bytes[0..7]=3f d1 ea 69 4e 6f 4e 00 decoded: dia=78 sys=111 pulse=78
+05-13 12:05:18.390 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=70 d0 ea 69 listeners=1
+05-13 12:05:18.390 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776996464 bytes[0..7]=70 d0 ea 69 53 80 5a 00 decoded: dia=83 sys=128 pulse=90
+05-13 12:05:18.391 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=c8 cf ea 69 listeners=1
+05-13 12:05:18.391 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776996296 bytes[0..7]=c8 cf ea 69 52 78 6f 00 decoded: dia=82 sys=120 pulse=111
+05-13 12:05:18.393 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=f9 ce ea 69 listeners=1
+05-13 12:05:18.393 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776996089 bytes[0..7]=f9 ce ea 69 61 ad 78 00 decoded: dia=97 sys=173 pulse=120
+05-13 12:05:18.396 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=91 b9 ea 69 listeners=1
+05-13 12:05:18.396 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776990609 bytes[0..7]=91 b9 ea 69 58 91 47 00 decoded: dia=88 sys=145 pulse=71
+05-13 12:05:18.396 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d9 b8 ea 69 listeners=1
+05-13 12:05:18.397 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776990425 bytes[0..7]=d9 b8 ea 69 5a 90 4b 00 decoded: dia=90 sys=144 pulse=75
+05-13 12:05:18.412 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:18.435 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=3d b8 ea 69 listeners=1
+05-13 12:05:18.436 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776990269 bytes[0..7]=3d b8 ea 69 59 8d 4e 00 decoded: dia=89 sys=141 pulse=78
+05-13 12:05:18.437 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=16 49 ea 69 listeners=1
+05-13 12:05:18.438 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776961814 bytes[0..7]=16 49 ea 69 51 8d 4c 00 decoded: dia=81 sys=141 pulse=76
+05-13 12:05:18.439 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=aa 6d b7 65 listeners=1
+05-13 12:05:18.440 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1706519978 bytes[0..7]=aa 6d b7 65 59 96 5a 00 decoded: dia=89 sys=150 pulse=90
+05-13 12:05:18.441 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ff ff ff ff listeners=1
+05-13 12:05:18.442 I/ReactNativeJS(14852): [ble-trace] backfillBPHistoryOlderThan returned 13 packet(s); first.ts=1777001464 last.ts=1706519978
+05-13 12:05:18.443 I/ReactNativeJS(14852): [ble-trace] backfillBPHistoryOlderThan enter anchorTs=1706519978 (DIR=1 walk-backward)
+05-13 12:05:18.532 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ff ff ff ff listeners=1
+05-13 12:05:18.533 I/ReactNativeJS(14852): [ble-trace] backfillBPHistoryOlderThan returned 0 packet(s); first.ts=n/a last.ts=n/a
+05-13 12:05:18.535 I/ReactNativeJS(14852): '[analytics]', 'sync_completed', { trigger: 'cold_start',
+05-13 12:05:18.535 I/ReactNativeJS(14852):   batches: 4,
+05-13 12:05:18.535 I/ReactNativeJS(14852):   hitBatchCap: false,
+05-13 12:05:18.535 I/ReactNativeJS(14852):   pulled: 63 }
+05-13 12:05:18.542 I/ReactNativeJS(14852): [ble-trace] applyDeviceConfig skipped — dirty=false force=false sinceFlushMs=2612033 (debounce 3600000ms)
+05-13 12:05:18.544 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.hr enter cursor.hr=1778673000 days=[2026-05-13]
+05-13 12:05:18.547 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.spo2 enter cursor.spo2=2026-05-13 days=[2026-05-13]
+05-13 12:05:18.551 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.dayInfo enter cursor.sleep=2026-05-13 cursor.activity=2026-05-13 allDays=[2026-05-13]
+05-13 12:05:18.557 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:18.629 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=00 18 05 00 listeners=3
+05-13 12:05:18.629 I/ReactNativeJS(14852): [ble-trace] readHRHistory index totalPackets=24 intervalMinutes=5 (returned to caller)
+05-13 12:05:18.650 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=01 00 bf 03 listeners=3
+05-13 12:05:18.650 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=02 4f 51 65 listeners=3
+05-13 12:05:18.651 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=03 4a 4d 48 listeners=3
+05-13 12:05:18.651 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=04 53 4a 4c listeners=3
+05-13 12:05:18.652 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=05 43 46 47 listeners=3
+05-13 12:05:18.653 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=06 3f 37 3f listeners=3
+05-13 12:05:18.654 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=07 44 43 49 listeners=3
+05-13 12:05:18.655 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=08 40 48 59 listeners=3
+05-13 12:05:18.655 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=09 3c 3e 4b listeners=3
+05-13 12:05:18.680 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:18.688 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0a 00 00 00 listeners=3
+05-13 12:05:18.689 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0b 52 4d 4d listeners=3
+05-13 12:05:18.691 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0c 5d 58 4d listeners=3
+05-13 12:05:18.693 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0d 00 00 00 listeners=3
+05-13 12:05:18.696 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0e 00 00 00 listeners=3
+05-13 12:05:18.697 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0f 00 00 00 listeners=3
+05-13 12:05:18.698 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=10 00 00 00 listeners=3
+05-13 12:05:18.698 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=11 00 00 00 listeners=3
+05-13 12:05:18.699 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=12 00 00 00 listeners=3
+05-13 12:05:18.700 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=13 00 00 00 listeners=3
+05-13 12:05:18.783 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=14 00 00 00 listeners=3
+05-13 12:05:18.784 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=15 00 00 00 listeners=3
+05-13 12:05:18.784 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=16 00 00 00 listeners=3
+05-13 12:05:18.785 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=17 00 00 00 listeners=3
+05-13 12:05:18.786 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.hr day=2026-05-13 readHRHistory returned 134 samples (intervalSec=300, sampleWindowSec=300)
+05-13 12:05:18.839 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'hr', count: 1 }
+05-13 12:05:18.872 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'hr', count: 1 }
+05-13 12:05:18.873 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.hr exit totalPulled=2 newestRaw=1778673600
+05-13 12:05:18.983 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x2d payload[0..3]=00 04 3c 00 listeners=2
+05-13 12:05:18.983 I/ReactNativeJS(14852): [ble-trace] readSpO2History index totalPackets=4 intervalMinutes=60 (assumed 60 in slice config)
+05-13 12:05:18.983 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x2d payload[0..3]=01 00 bf 03 listeners=2
+05-13 12:05:18.983 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x2d payload[0..3]=02 61 62 62 listeners=2
+05-13 12:05:18.984 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x2d payload[0..3]=03 00 00 00 listeners=2
+05-13 12:05:18.984 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.spo2 day=2026-05-13 readSpO2History returned 6 samples
+05-13 12:05:18.985 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:05:18.986 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:05:18.987 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:05:18.989 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:05:18.990 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:05:18.991 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:05:18.991 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.spo2 exit totalPulled=6
+05-13 12:05:19.098 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x07 payload[0..3]=00 00 26 05 listeners=1
+05-13 12:05:19.099 I/ReactNativeJS(14852): [ble-trace] readDayInfo packet idx=0x00 daysAgo=0 payload=00 00 26 05 13 00 01 fe 6c 11 01 00 01 39
+05-13 12:05:19.099 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x07 payload[0..3]=01 00 26 05 listeners=1
+05-13 12:05:19.099 I/ReactNativeJS(14852): [ble-trace] readDayInfo packet idx=0x01 daysAgo=0 payload=01 00 26 05 13 02 57 00 76 01 ab 00 14 00
+05-13 12:05:19.100 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.dayInfo day=2026-05-13 daysAgo=0 activity=steps=510 sleep=min=599
+05-13 12:05:19.101 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'activity', count: 1 }
+05-13 12:05:19.102 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'calories', count: 1 }
+05-13 12:05:19.102 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.dayInfo exit sleepCount=0 activityCount=1
+05-13 12:05:19.228 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:19.396 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:19.427 I/ReactNativeJS(14852): '[analytics]', 'multi_vitals_sync_failed', { reason: '/sync invoke failed: 500  (Edge Function returned a non-2xx status code) [spo2=124,act=11,cal=11]',
+05-13 12:05:19.427 I/ReactNativeJS(14852):   hr_pending: 3100,
+05-13 12:05:19.427 I/ReactNativeJS(14852):   spo2_pending: 124,
+05-13 12:05:19.427 I/ReactNativeJS(14852):   sleep_pending: 0,
+05-13 12:05:19.427 I/ReactNativeJS(14852):   steps_pending: 11,
+05-13 12:05:19.427 I/ReactNativeJS(14852):   calories_pending: 11 }
+05-13 12:05:19.428 I/ReactNativeJS(14852): '[analytics]', 'sync_failed', { trigger: 'cold_start', reason: 'multi_vitals:sync' }
+05-13 12:05:19.498 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:19.611 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:19.722 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:19.870 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:19.981 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:20.098 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:20.232 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:20.381 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:05:20.482 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:04.536 I/ReactNativeJS(14852): '[analytics]', 'ble_disconnected', { deviceId: 'CA:BF:55:1F:01:3C',
+05-13 12:06:04.536 I/ReactNativeJS(14852):   reason: 'Operation was cancelled' }
+05-13 12:06:39.256 I/ReactNativeJS(14852): '[analytics]', 'sync_started', { trigger: 'manual_force' }
+05-13 12:06:41.650 I/ReactNativeJS(14852): [ble-trace] applyDeviceConfig skipped — dirty=false force=false sinceFlushMs=2695141 (debounce 3600000ms)
+05-13 12:06:41.735 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x01 payload[0..3]=00 00 00 00 listeners=1
+05-13 12:06:41.736 I/ReactNativeJS(14852): [ble-trace] syncBacklog enter deviceBleId=CA:BF:55:1F:01:3C lastSync=1778642478 (filter-only; query is TS=0)
+05-13 12:06:41.850 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=2e ee 03 6a listeners=1
+05-13 12:06:41.851 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778642478 bytes[0..7]=2e ee 03 6a 55 91 4b 00 decoded: dia=85 sys=145 pulse=75
+05-13 12:06:41.852 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=19 e8 03 6a listeners=1
+05-13 12:06:41.853 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778640921 bytes[0..7]=19 e8 03 6a 50 85 45 00 decoded: dia=80 sys=133 pulse=69
+05-13 12:06:41.867 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=37 da 03 6a listeners=1
+05-13 12:06:41.867 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778637367 bytes[0..7]=37 da 03 6a 4e 8a 53 00 decoded: dia=78 sys=138 pulse=83
+05-13 12:06:41.868 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d0 49 03 6a listeners=1
+05-13 12:06:41.868 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778600400 bytes[0..7]=d0 49 03 6a 54 88 4e 00 decoded: dia=84 sys=136 pulse=78
+05-13 12:06:41.868 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=b6 45 03 6a listeners=1
+05-13 12:06:41.869 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778599350 bytes[0..7]=b6 45 03 6a 56 96 53 00 decoded: dia=86 sys=150 pulse=83
+05-13 12:06:41.869 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=5b 41 03 6a listeners=1
+05-13 12:06:41.869 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778598235 bytes[0..7]=5b 41 03 6a 56 8b 53 00 decoded: dia=86 sys=139 pulse=83
+05-13 12:06:41.869 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a2 3d 03 6a listeners=1
+05-13 12:06:41.870 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778597282 bytes[0..7]=a2 3d 03 6a 56 90 51 00 decoded: dia=86 sys=144 pulse=81
+05-13 12:06:41.870 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7c 7d 02 6a listeners=1
+05-13 12:06:41.870 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778548092 bytes[0..7]=7c 7d 02 6a 51 91 4e 00 decoded: dia=81 sys=145 pulse=78
+05-13 12:06:41.870 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=07 26 02 6a listeners=1
+05-13 12:06:41.871 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778525703 bytes[0..7]=07 26 02 6a 57 8d 53 00 decoded: dia=87 sys=141 pulse=83
+05-13 12:06:41.871 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a1 09 02 6a listeners=1
+05-13 12:06:41.871 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778518433 bytes[0..7]=a1 09 02 6a 57 8f 3e 00 decoded: dia=87 sys=143 pulse=62
+05-13 12:06:41.917 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=88 f7 01 6a listeners=1
+05-13 12:06:41.917 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778513800 bytes[0..7]=88 f7 01 6a 52 80 42 00 decoded: dia=82 sys=128 pulse=66
+05-13 12:06:41.918 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=50 f2 01 6a listeners=1
+05-13 12:06:41.918 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778512464 bytes[0..7]=50 f2 01 6a 58 8d 44 00 decoded: dia=88 sys=141 pulse=68
+05-13 12:06:41.918 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=b4 f1 01 6a listeners=1
+05-13 12:06:41.918 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778512308 bytes[0..7]=b4 f1 01 6a 56 8c 47 00 decoded: dia=86 sys=140 pulse=71
+05-13 12:06:41.918 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=c6 ed 01 6a listeners=1
+05-13 12:06:41.918 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778511302 bytes[0..7]=c6 ed 01 6a 56 8a 47 00 decoded: dia=86 sys=138 pulse=71
+05-13 12:06:41.919 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=27 e9 01 6a listeners=1
+05-13 12:06:41.926 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778510119 bytes[0..7]=27 e9 01 6a 5a 98 44 00 decoded: dia=90 sys=152 pulse=68
+05-13 12:06:41.927 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=27 e8 01 6a listeners=1
+05-13 12:06:41.927 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778509863 bytes[0..7]=27 e8 01 6a 54 8b 41 00 decoded: dia=84 sys=139 pulse=65
+05-13 12:06:41.927 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=74 b0 01 6a listeners=1
+05-13 12:06:41.927 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778495604 bytes[0..7]=74 b0 01 6a 52 86 55 00 decoded: dia=82 sys=134 pulse=85
+05-13 12:06:41.928 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ec a8 01 6a listeners=1
+05-13 12:06:41.928 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778493676 bytes[0..7]=ec a8 01 6a 53 8e 58 00 decoded: dia=83 sys=142 pulse=88
+05-13 12:06:41.928 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=21 61 01 6a listeners=1
+05-13 12:06:41.928 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778475297 bytes[0..7]=21 61 01 6a 4e 79 49 00 decoded: dia=78 sys=121 pulse=73
+05-13 12:06:41.928 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ed 24 01 6a listeners=1
+05-13 12:06:41.928 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778459885 bytes[0..7]=ed 24 01 6a 59 8e 49 00 decoded: dia=89 sys=142 pulse=73
+05-13 12:06:41.944 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7e 81 00 6a listeners=1
+05-13 12:06:41.944 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778418046 bytes[0..7]=7e 81 00 6a 48 72 5d 00 decoded: dia=72 sys=114 pulse=93
+05-13 12:06:41.944 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ac 7b 00 6a listeners=1
+05-13 12:06:41.945 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778416556 bytes[0..7]=ac 7b 00 6a 5a 94 49 00 decoded: dia=90 sys=148 pulse=73
+05-13 12:06:41.945 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=55 7b 00 6a listeners=1
+05-13 12:06:41.946 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778416469 bytes[0..7]=55 7b 00 6a 5f 97 4c 00 decoded: dia=95 sys=151 pulse=76
+05-13 12:06:41.946 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=66 57 00 6a listeners=1
+05-13 12:06:41.946 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778407270 bytes[0..7]=66 57 00 6a 59 90 53 00 decoded: dia=89 sys=144 pulse=83
+05-13 12:06:41.947 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d9 fe fe 69 listeners=1
+05-13 12:06:41.947 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778319065 bytes[0..7]=d9 fe fe 69 56 8a 4e 00 decoded: dia=86 sys=138 pulse=78
+05-13 12:06:41.947 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7a 91 fe 69 listeners=1
+05-13 12:06:41.948 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778291066 bytes[0..7]=7a 91 fe 69 56 85 4b 00 decoded: dia=86 sys=133 pulse=75
+05-13 12:06:41.948 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=1d 7e fe 69 listeners=1
+05-13 12:06:41.948 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778286109 bytes[0..7]=1d 7e fe 69 58 92 49 00 decoded: dia=88 sys=146 pulse=73
+05-13 12:06:41.950 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=5c 0f fe 69 listeners=1
+05-13 12:06:41.951 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778257756 bytes[0..7]=5c 0f fe 69 4c 71 51 00 decoded: dia=76 sys=113 pulse=81
+05-13 12:06:41.951 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a7 c1 fd 69 listeners=1
+05-13 12:06:41.951 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778237863 bytes[0..7]=a7 c1 fd 69 4d 77 4e 00 decoded: dia=77 sys=119 pulse=78
+05-13 12:06:41.952 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=0a c1 fd 69 listeners=1
+05-13 12:06:41.952 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778237706 bytes[0..7]=0a c1 fd 69 5d 94 4e 00 decoded: dia=93 sys=148 pulse=78
+05-13 12:06:41.998 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=97 70 fd 69 listeners=1
+05-13 12:06:41.998 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778217111 bytes[0..7]=97 70 fd 69 56 89 51 00 decoded: dia=86 sys=137 pulse=81
+05-13 12:06:41.999 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ee 65 fc 69 listeners=1
+05-13 12:06:41.999 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778148846 bytes[0..7]=ee 65 fc 69 55 87 49 00 decoded: dia=85 sys=135 pulse=73
+05-13 12:06:41.999 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=f3 62 fc 69 listeners=1
+05-13 12:06:41.999 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778148083 bytes[0..7]=f3 62 fc 69 5d 96 49 00 decoded: dia=93 sys=150 pulse=73
+05-13 12:06:42.000 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=32 e6 fb 69 listeners=1
+05-13 12:06:42.000 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778116146 bytes[0..7]=32 e6 fb 69 55 8c 4b 00 decoded: dia=85 sys=140 pulse=75
+05-13 12:06:42.000 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d6 e4 fb 69 listeners=1
+05-13 12:06:42.000 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778115798 bytes[0..7]=d6 e4 fb 69 59 90 4c 00 decoded: dia=89 sys=144 pulse=76
+05-13 12:06:42.001 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=36 de fb 69 listeners=1
+05-13 12:06:42.001 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778114102 bytes[0..7]=36 de fb 69 4e 79 45 00 decoded: dia=78 sys=121 pulse=69
+05-13 12:06:42.001 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=57 52 fb 69 listeners=1
+05-13 12:06:42.001 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778078295 bytes[0..7]=57 52 fb 69 57 85 60 00 decoded: dia=87 sys=133 pulse=96
+05-13 12:06:42.009 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=2a 50 fb 69 listeners=1
+05-13 12:06:42.009 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778077738 bytes[0..7]=2a 50 fb 69 59 93 51 00 decoded: dia=89 sys=147 pulse=81
+05-13 12:06:42.009 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7f 4f fb 69 listeners=1
+05-13 12:06:42.009 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778077567 bytes[0..7]=7f 4f fb 69 53 80 58 00 decoded: dia=83 sys=128 pulse=88
+05-13 12:06:42.010 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=17 4c fb 69 listeners=1
+05-13 12:06:42.010 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778076695 bytes[0..7]=17 4c fb 69 58 91 51 00 decoded: dia=88 sys=145 pulse=81
+05-13 12:06:42.041 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=95 4b fb 69 listeners=1
+05-13 12:06:42.041 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778076565 bytes[0..7]=95 4b fb 69 56 8c 53 00 decoded: dia=86 sys=140 pulse=83
+05-13 12:06:42.041 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=cd 84 fa 69 listeners=1
+05-13 12:06:42.042 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778025677 bytes[0..7]=cd 84 fa 69 56 90 49 00 decoded: dia=86 sys=144 pulse=73
+05-13 12:06:42.042 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=cd bf f9 69 listeners=1
+05-13 12:06:42.042 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777975245 bytes[0..7]=cd bf f9 69 54 80 53 00 decoded: dia=84 sys=128 pulse=83
+05-13 12:06:42.042 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=62 7c f9 69 listeners=1
+05-13 12:06:42.042 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777957986 bytes[0..7]=62 7c f9 69 55 86 6b 00 decoded: dia=85 sys=134 pulse=107
+05-13 12:06:42.060 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=4f 33 f9 69 listeners=1
+05-13 12:06:42.060 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777939279 bytes[0..7]=4f 33 f9 69 54 93 45 00 decoded: dia=84 sys=147 pulse=69
+05-13 12:06:42.060 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=e3 a1 f8 69 listeners=1
+05-13 12:06:42.060 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777902051 bytes[0..7]=e3 a1 f8 69 57 8a 55 00 decoded: dia=87 sys=138 pulse=85
+05-13 12:06:42.060 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=95 a1 f8 69 listeners=1
+05-13 12:06:42.060 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777901973 bytes[0..7]=95 a1 f8 69 48 55 53 00 decoded: dia=72 sys=85 pulse=83
+05-13 12:06:42.061 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d3 fe f7 69 listeners=1
+05-13 12:06:42.061 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777860307 bytes[0..7]=d3 fe f7 69 54 89 4e 00 decoded: dia=84 sys=137 pulse=78
+05-13 12:06:42.061 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=26 db f7 69 listeners=1
+05-13 12:06:42.061 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777851174 bytes[0..7]=26 db f7 69 59 8d 49 00 decoded: dia=89 sys=141 pulse=73
+05-13 12:06:42.061 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=87 11 f7 69 listeners=1
+05-13 12:06:42.061 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777799559 bytes[0..7]=87 11 f7 69 5e 97 55 00 decoded: dia=94 sys=151 pulse=85
+05-13 12:06:42.062 I/ReactNativeJS(14852): [ble-trace] syncBacklog readBPHistory returned 50 packet(s); first.ts=1778642478 last.ts=1777799559
+05-13 12:06:42.062 I/ReactNativeJS(14852): [ble-trace] syncBacklog exit pulled=0 (filtered from 50); cursor 1778642478 → 1778642478
+05-13 12:06:42.062 I/ReactNativeJS(14852): [ble-trace] backfillBPHistoryOlderThan enter anchorTs=1777799559 (DIR=1 walk-backward)
+05-13 12:06:42.152 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=41 11 f7 69 listeners=1
+05-13 12:06:42.152 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777799489 bytes[0..7]=41 11 f7 69 4d 77 55 00 decoded: dia=77 sys=119 pulse=85
+05-13 12:06:42.152 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=02 c7 f6 69 listeners=1
+05-13 12:06:42.152 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777780482 bytes[0..7]=02 c7 f6 69 64 9d 58 00 decoded: dia=100 sys=157 pulse=88
+05-13 12:06:42.155 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=b9 c6 f6 69 listeners=1
+05-13 12:06:42.156 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777780409 bytes[0..7]=b9 c6 f6 69 5d a0 58 00 decoded: dia=93 sys=160 pulse=88
+05-13 12:06:42.156 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ca 90 f6 69 listeners=1
+05-13 12:06:42.156 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777766602 bytes[0..7]=ca 90 f6 69 5e 98 51 00 decoded: dia=94 sys=152 pulse=81
+05-13 12:06:42.156 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=33 1a f6 69 listeners=1
+05-13 12:06:42.156 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777736243 bytes[0..7]=33 1a f6 69 4e 8b 5a 00 decoded: dia=78 sys=139 pulse=90
+05-13 12:06:42.156 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=28 fe f5 69 listeners=1
+05-13 12:06:42.156 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777729064 bytes[0..7]=28 fe f5 69 56 90 55 00 decoded: dia=86 sys=144 pulse=85
+05-13 12:06:42.157 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=e9 f7 f5 69 listeners=1
+05-13 12:06:42.157 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777727465 bytes[0..7]=e9 f7 f5 69 51 8d 5d 00 decoded: dia=81 sys=141 pulse=93
+05-13 12:06:42.157 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=2a b4 f5 69 listeners=1
+05-13 12:06:42.157 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777710122 bytes[0..7]=2a b4 f5 69 5a 94 51 00 decoded: dia=90 sys=148 pulse=81
+05-13 12:06:42.157 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=0e 75 f5 69 listeners=1
+05-13 12:06:42.157 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777693966 bytes[0..7]=0e 75 f5 69 5a 8d 4c 00 decoded: dia=90 sys=141 pulse=76
+05-13 12:06:42.157 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=3c 45 f5 69 listeners=1
+05-13 12:06:42.157 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777681724 bytes[0..7]=3c 45 f5 69 58 95 58 00 decoded: dia=88 sys=149 pulse=88
+05-13 12:06:42.189 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=10 d0 f4 69 listeners=1
+05-13 12:06:42.189 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777651728 bytes[0..7]=10 d0 f4 69 4f 7a 51 00 decoded: dia=79 sys=122 pulse=81
+05-13 12:06:42.203 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=17 3e f4 69 listeners=1
+05-13 12:06:42.203 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777614359 bytes[0..7]=17 3e f4 69 5c 94 53 00 decoded: dia=92 sys=148 pulse=83
+05-13 12:06:42.203 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=66 32 f4 69 listeners=1
+05-13 12:06:42.204 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777611366 bytes[0..7]=66 32 f4 69 58 95 4b 00 decoded: dia=88 sys=149 pulse=75
+05-13 12:06:42.204 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=06 32 f4 69 listeners=1
+05-13 12:06:42.204 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777611270 bytes[0..7]=06 32 f4 69 5d 9a 53 00 decoded: dia=93 sys=154 pulse=83
+05-13 12:06:42.204 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=17 22 f3 69 listeners=1
+05-13 12:06:42.204 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777541655 bytes[0..7]=17 22 f3 69 54 8c 4e 00 decoded: dia=84 sys=140 pulse=78
+05-13 12:06:42.204 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=23 9a f2 69 listeners=1
+05-13 12:06:42.204 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777506851 bytes[0..7]=23 9a f2 69 55 93 49 00 decoded: dia=85 sys=147 pulse=73
+05-13 12:06:42.204 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=c3 99 f2 69 listeners=1
+05-13 12:06:42.204 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777506755 bytes[0..7]=c3 99 f2 69 59 8f 55 00 decoded: dia=89 sys=143 pulse=85
+05-13 12:06:42.205 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=8e 90 f2 69 listeners=1
+05-13 12:06:42.205 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777504398 bytes[0..7]=8e 90 f2 69 4f 79 55 00 decoded: dia=79 sys=121 pulse=85
+05-13 12:06:42.205 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=bf e8 f1 69 listeners=1
+05-13 12:06:42.205 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777461439 bytes[0..7]=bf e8 f1 69 57 8b 4e 00 decoded: dia=87 sys=139 pulse=78
+05-13 12:06:42.205 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=73 db f1 69 listeners=1
+05-13 12:06:42.205 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777458035 bytes[0..7]=73 db f1 69 54 84 4b 00 decoded: dia=84 sys=132 pulse=75
+05-13 12:06:42.238 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=0f a9 f1 69 listeners=1
+05-13 12:06:42.238 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777445135 bytes[0..7]=0f a9 f1 69 48 71 5a 00 decoded: dia=72 sys=113 pulse=90
+05-13 12:06:42.238 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=be 4c f1 69 listeners=1
+05-13 12:06:42.238 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777421502 bytes[0..7]=be 4c f1 69 54 83 41 00 decoded: dia=84 sys=131 pulse=65
+05-13 12:06:42.239 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=1d 27 f1 69 listeners=1
+05-13 12:06:42.239 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777411869 bytes[0..7]=1d 27 f1 69 49 6d 3d 00 decoded: dia=73 sys=109 pulse=61
+05-13 12:06:42.239 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=e1 26 f1 69 listeners=1
+05-13 12:06:42.240 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777411809 bytes[0..7]=e1 26 f1 69 5b 91 3e 00 decoded: dia=91 sys=145 pulse=62
+05-13 12:06:42.252 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=73 1a f1 69 listeners=1
+05-13 12:06:42.252 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777408627 bytes[0..7]=73 1a f1 69 45 68 45 00 decoded: dia=69 sys=104 pulse=69
+05-13 12:06:42.253 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=33 1a f1 69 listeners=1
+05-13 12:06:42.253 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777408563 bytes[0..7]=33 1a f1 69 4e 77 3f 00 decoded: dia=78 sys=119 pulse=63
+05-13 12:06:42.253 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=f7 19 f1 69 listeners=1
+05-13 12:06:42.253 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777408503 bytes[0..7]=f7 19 f1 69 4f 6f 42 00 decoded: dia=79 sys=111 pulse=66
+05-13 12:06:42.254 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=db 9c f0 69 listeners=1
+05-13 12:06:42.254 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777376475 bytes[0..7]=db 9c f0 69 5c 91 49 00 decoded: dia=92 sys=145 pulse=73
+05-13 12:06:42.254 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=48 97 f0 69 listeners=1
+05-13 12:06:42.254 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777375048 bytes[0..7]=48 97 f0 69 5a 90 47 00 decoded: dia=90 sys=144 pulse=71
+05-13 12:06:42.255 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=46 77 f0 69 listeners=1
+05-13 12:06:42.255 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777366854 bytes[0..7]=46 77 f0 69 56 92 4e 00 decoded: dia=86 sys=146 pulse=78
+05-13 12:06:42.294 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=fa 60 f0 69 listeners=1
+05-13 12:06:42.294 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777361146 bytes[0..7]=fa 60 f0 69 56 8f 44 00 decoded: dia=86 sys=143 pulse=68
+05-13 12:06:42.295 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=21 4a f0 69 listeners=1
+05-13 12:06:42.295 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777355297 bytes[0..7]=21 4a f0 69 59 90 49 00 decoded: dia=89 sys=144 pulse=73
+05-13 12:06:42.295 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=e0 49 f0 69 listeners=1
+05-13 12:06:42.295 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777355232 bytes[0..7]=e0 49 f0 69 52 7e 55 00 decoded: dia=82 sys=126 pulse=85
+05-13 12:06:42.295 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=e7 12 ee 69 listeners=1
+05-13 12:06:42.295 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777210087 bytes[0..7]=e7 12 ee 69 51 8f 4c 00 decoded: dia=81 sys=143 pulse=76
+05-13 12:06:42.346 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=56 fc ed 69 listeners=1
+05-13 12:06:42.347 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777204310 bytes[0..7]=56 fc ed 69 5b 94 49 00 decoded: dia=91 sys=148 pulse=73
+05-13 12:06:42.347 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=5b ec ed 69 listeners=1
+05-13 12:06:42.347 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777200219 bytes[0..7]=5b ec ed 69 5d 92 45 00 decoded: dia=93 sys=146 pulse=69
+05-13 12:06:42.347 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a2 9c ec 69 listeners=1
+05-13 12:06:42.348 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777114274 bytes[0..7]=a2 9c ec 69 5e 98 49 00 decoded: dia=94 sys=152 pulse=73
+05-13 12:06:42.348 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=85 84 eb 69 listeners=1
+05-13 12:06:42.348 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777042565 bytes[0..7]=85 84 eb 69 54 81 51 00 decoded: dia=84 sys=129 pulse=81
+05-13 12:06:42.348 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=2e 74 eb 69 listeners=1
+05-13 12:06:42.349 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777038382 bytes[0..7]=2e 74 eb 69 52 8d 4c 00 decoded: dia=82 sys=141 pulse=76
+05-13 12:06:42.349 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=61 28 eb 69 listeners=1
+05-13 12:06:42.349 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777018977 bytes[0..7]=61 28 eb 69 58 95 4b 00 decoded: dia=88 sys=149 pulse=75
+05-13 12:06:42.350 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=f7 e9 ea 69 listeners=1
+05-13 12:06:42.350 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777002999 bytes[0..7]=f7 e9 ea 69 5b 8e 4c 00 decoded: dia=91 sys=142 pulse=76
+05-13 12:06:42.350 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=27 e9 ea 69 listeners=1
+05-13 12:06:42.350 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777002791 bytes[0..7]=27 e9 ea 69 4e 77 53 00 decoded: dia=78 sys=119 pulse=83
+05-13 12:06:42.351 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=2d e8 ea 69 listeners=1
+05-13 12:06:42.351 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777002541 bytes[0..7]=2d e8 ea 69 42 5a 53 00 decoded: dia=66 sys=90 pulse=83
+05-13 12:06:42.391 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7a e7 ea 69 listeners=1
+05-13 12:06:42.391 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777002362 bytes[0..7]=7a e7 ea 69 5b 91 45 00 decoded: dia=91 sys=145 pulse=69
+05-13 12:06:42.391 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=31 e7 ea 69 listeners=1
+05-13 12:06:42.392 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777002289 bytes[0..7]=31 e7 ea 69 50 7b 47 00 decoded: dia=80 sys=123 pulse=71
+05-13 12:06:42.392 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ae e6 ea 69 listeners=1
+05-13 12:06:42.392 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777002158 bytes[0..7]=ae e6 ea 69 5f 96 49 00 decoded: dia=95 sys=150 pulse=73
+05-13 12:06:42.393 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=26 e6 ea 69 listeners=1
+05-13 12:06:42.393 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777002022 bytes[0..7]=26 e6 ea 69 5f 95 47 00 decoded: dia=95 sys=149 pulse=71
+05-13 12:06:42.394 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=34 e5 ea 69 listeners=1
+05-13 12:06:42.394 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777001780 bytes[0..7]=34 e5 ea 69 61 99 47 00 decoded: dia=97 sys=153 pulse=71
+05-13 12:06:42.407 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=e3 e4 ea 69 listeners=1
+05-13 12:06:42.408 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777001699 bytes[0..7]=e3 e4 ea 69 60 b7 4c 00 decoded: dia=96 sys=183 pulse=76
+05-13 12:06:42.408 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=96 e4 ea 69 listeners=1
+05-13 12:06:42.408 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777001622 bytes[0..7]=96 e4 ea 69 51 7d 47 00 decoded: dia=81 sys=125 pulse=71
+05-13 12:06:42.408 I/ReactNativeJS(14852): [ble-trace] backfillBPHistoryOlderThan returned 50 packet(s); first.ts=1777799489 last.ts=1777001622
+05-13 12:06:42.411 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.413 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.425 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.426 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.428 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.429 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.430 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.431 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.432 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.432 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.433 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.434 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.435 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.436 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.439 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.440 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.441 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.443 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.444 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.445 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.446 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.447 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.448 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.465 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.466 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.467 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.467 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.468 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.469 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.606 I/ReactNativeJS(14852): [ble-trace] backfillBPHistoryOlderThan enter anchorTs=1777001622 (DIR=1 walk-backward)
+05-13 12:06:42.716 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=f8 e3 ea 69 listeners=1
+05-13 12:06:42.716 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777001464 bytes[0..7]=f8 e3 ea 69 52 82 47 00 decoded: dia=82 sys=130 pulse=71
+05-13 12:06:42.717 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=73 e2 ea 69 listeners=1
+05-13 12:06:42.717 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777001075 bytes[0..7]=73 e2 ea 69 59 8c 4e 00 decoded: dia=89 sys=140 pulse=78
+05-13 12:06:42.717 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=13 e2 ea 69 listeners=1
+05-13 12:06:42.717 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777000979 bytes[0..7]=13 e2 ea 69 4e 71 4c 00 decoded: dia=78 sys=113 pulse=76
+05-13 12:06:42.717 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=fb d5 ea 69 listeners=1
+05-13 12:06:42.717 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776997883 bytes[0..7]=fb d5 ea 69 53 92 45 00 decoded: dia=83 sys=146 pulse=69
+05-13 12:06:42.718 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=3f d1 ea 69 listeners=1
+05-13 12:06:42.718 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776996671 bytes[0..7]=3f d1 ea 69 4e 6f 4e 00 decoded: dia=78 sys=111 pulse=78
+05-13 12:06:42.718 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=70 d0 ea 69 listeners=1
+05-13 12:06:42.718 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776996464 bytes[0..7]=70 d0 ea 69 53 80 5a 00 decoded: dia=83 sys=128 pulse=90
+05-13 12:06:42.718 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=c8 cf ea 69 listeners=1
+05-13 12:06:42.718 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776996296 bytes[0..7]=c8 cf ea 69 52 78 6f 00 decoded: dia=82 sys=120 pulse=111
+05-13 12:06:42.719 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=f9 ce ea 69 listeners=1
+05-13 12:06:42.719 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776996089 bytes[0..7]=f9 ce ea 69 61 ad 78 00 decoded: dia=97 sys=173 pulse=120
+05-13 12:06:42.719 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=91 b9 ea 69 listeners=1
+05-13 12:06:42.719 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776990609 bytes[0..7]=91 b9 ea 69 58 91 47 00 decoded: dia=88 sys=145 pulse=71
+05-13 12:06:42.719 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d9 b8 ea 69 listeners=1
+05-13 12:06:42.719 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776990425 bytes[0..7]=d9 b8 ea 69 5a 90 4b 00 decoded: dia=90 sys=144 pulse=75
+05-13 12:06:42.734 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=3d b8 ea 69 listeners=1
+05-13 12:06:42.734 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776990269 bytes[0..7]=3d b8 ea 69 59 8d 4e 00 decoded: dia=89 sys=141 pulse=78
+05-13 12:06:42.735 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=16 49 ea 69 listeners=1
+05-13 12:06:42.735 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1776961814 bytes[0..7]=16 49 ea 69 51 8d 4c 00 decoded: dia=81 sys=141 pulse=76
+05-13 12:06:42.735 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=aa 6d b7 65 listeners=1
+05-13 12:06:42.735 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1706519978 bytes[0..7]=aa 6d b7 65 59 96 5a 00 decoded: dia=89 sys=150 pulse=90
+05-13 12:06:42.735 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ff ff ff ff listeners=1
+05-13 12:06:42.735 I/ReactNativeJS(14852): [ble-trace] backfillBPHistoryOlderThan returned 13 packet(s); first.ts=1777001464 last.ts=1706519978
+05-13 12:06:42.736 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.737 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.738 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.739 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:06:42.859 I/ReactNativeJS(14852): [ble-trace] backfillBPHistoryOlderThan enter anchorTs=1706519978 (DIR=1 walk-backward)
+05-13 12:06:42.958 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:42.963 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ff ff ff ff listeners=1
+05-13 12:06:42.963 I/ReactNativeJS(14852): [ble-trace] backfillBPHistoryOlderThan returned 0 packet(s); first.ts=n/a last.ts=n/a
+05-13 12:06:42.964 I/ReactNativeJS(14852): '[analytics]', 'sync_completed', { trigger: 'manual_force',
+05-13 12:06:42.964 I/ReactNativeJS(14852):   batches: 4,
+05-13 12:06:42.964 I/ReactNativeJS(14852):   hitBatchCap: false,
+05-13 12:06:42.964 I/ReactNativeJS(14852):   pulled: 63 }
+05-13 12:06:42.964 I/ReactNativeJS(14852): [ble-trace] applyDeviceConfig skipped — dirty=false force=false sinceFlushMs=2696456 (debounce 3600000ms)
+05-13 12:06:42.965 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.hr enter cursor.hr=1778673600 days=[2026-05-13]
+05-13 12:06:42.965 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.spo2 enter cursor.spo2=2026-05-13 days=[2026-05-13]
+05-13 12:06:42.965 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.dayInfo enter cursor.sleep=2026-05-13 cursor.activity=2026-05-13 allDays=[2026-05-13]
+05-13 12:06:43.074 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=00 18 05 00 listeners=3
+05-13 12:06:43.074 I/ReactNativeJS(14852): [ble-trace] readHRHistory index totalPackets=24 intervalMinutes=5 (returned to caller)
+05-13 12:06:43.075 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=01 00 bf 03 listeners=3
+05-13 12:06:43.075 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=02 4f 51 65 listeners=3
+05-13 12:06:43.076 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=03 4a 4d 48 listeners=3
+05-13 12:06:43.076 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=04 53 4a 4c listeners=3
+05-13 12:06:43.076 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=05 43 46 47 listeners=3
+05-13 12:06:43.077 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=06 3f 37 3f listeners=3
+05-13 12:06:43.077 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=07 44 43 49 listeners=3
+05-13 12:06:43.078 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=08 40 48 59 listeners=3
+05-13 12:06:43.078 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=09 3c 3e 4b listeners=3
+05-13 12:06:43.102 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:43.119 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0a 00 00 00 listeners=3
+05-13 12:06:43.120 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0b 52 4d 4d listeners=3
+05-13 12:06:43.120 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0c 5d 58 4d listeners=3
+05-13 12:06:43.122 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0d 00 00 00 listeners=3
+05-13 12:06:43.122 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0e 00 00 00 listeners=3
+05-13 12:06:43.123 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0f 00 00 00 listeners=3
+05-13 12:06:43.123 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=10 00 00 00 listeners=3
+05-13 12:06:43.124 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=11 00 00 00 listeners=3
+05-13 12:06:43.124 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=12 00 00 00 listeners=3
+05-13 12:06:43.125 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=13 00 00 00 listeners=3
+05-13 12:06:43.163 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=14 00 00 00 listeners=3
+05-13 12:06:43.176 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=15 00 00 00 listeners=3
+05-13 12:06:43.176 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=16 00 00 00 listeners=3
+05-13 12:06:43.177 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=17 00 00 00 listeners=3
+05-13 12:06:43.177 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.hr day=2026-05-13 readHRHistory returned 135 samples (intervalSec=300, sampleWindowSec=300)
+05-13 12:06:43.215 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'hr', count: 1 }
+05-13 12:06:43.216 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.hr exit totalPulled=1 newestRaw=1778673900
+05-13 12:06:43.329 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x2d payload[0..3]=00 04 3c 00 listeners=2
+05-13 12:06:43.329 I/ReactNativeJS(14852): [ble-trace] readSpO2History index totalPackets=4 intervalMinutes=60 (assumed 60 in slice config)
+05-13 12:06:43.329 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x2d payload[0..3]=01 00 bf 03 listeners=2
+05-13 12:06:43.329 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x2d payload[0..3]=02 61 62 62 listeners=2
+05-13 12:06:43.330 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x2d payload[0..3]=03 00 00 00 listeners=2
+05-13 12:06:43.330 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.spo2 day=2026-05-13 readSpO2History returned 6 samples
+05-13 12:06:43.331 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:06:43.332 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:06:43.335 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:06:43.337 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:06:43.338 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:06:43.339 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:06:43.339 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.spo2 exit totalPulled=6
+05-13 12:06:43.340 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x07 payload[0..3]=00 00 26 05 listeners=1
+05-13 12:06:43.340 I/ReactNativeJS(14852): [ble-trace] readDayInfo packet idx=0x00 daysAgo=0 payload=00 00 26 05 13 00 01 fe 6c 11 01 00 01 39
+05-13 12:06:43.340 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x07 payload[0..3]=01 00 26 05 listeners=1
+05-13 12:06:43.340 I/ReactNativeJS(14852): [ble-trace] readDayInfo packet idx=0x01 daysAgo=0 payload=01 00 26 05 13 02 57 00 76 01 ab 00 14 00
+05-13 12:06:43.340 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.dayInfo day=2026-05-13 daysAgo=0 activity=steps=510 sleep=min=599
+05-13 12:06:43.341 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'activity', count: 1 }
+05-13 12:06:43.375 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'calories', count: 1 }
+05-13 12:06:43.375 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.dayInfo exit sleepCount=0 activityCount=1
+05-13 12:06:43.474 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:43.525 I/ReactNativeJS(14852): '[analytics]', 'multi_vitals_sync_failed', { reason: '/sync invoke failed: 500  (Edge Function returned a non-2xx status code) [spo2=124,sleep=7,act=11,cal=11]',
+05-13 12:06:43.525 I/ReactNativeJS(14852):   hr_pending: 3101,
+05-13 12:06:43.525 I/ReactNativeJS(14852):   spo2_pending: 124,
+05-13 12:06:43.525 I/ReactNativeJS(14852):   sleep_pending: 7,
+05-13 12:06:43.525 I/ReactNativeJS(14852):   steps_pending: 11,
+05-13 12:06:43.525 I/ReactNativeJS(14852):   calories_pending: 11 }
+05-13 12:06:43.526 I/ReactNativeJS(14852): '[analytics]', 'sync_failed', { trigger: 'manual_force', reason: 'multi_vitals:sync' }
+05-13 12:06:43.609 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:43.726 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:43.842 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:43.963 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:44.083 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:44.228 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:44.346 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:44.501 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:44.647 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:44.787 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:44.982 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:45.133 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:45.267 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:45.419 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:45.551 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:45.685 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:45.837 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:45.963 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:46.104 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:46.234 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:46.387 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:46.540 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:46.687 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:46.939 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:47.077 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:47.216 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:47.375 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:47.503 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:47.654 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:06:47.791 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: true }
+05-13 12:07:28.573 I/ReactNativeJS(14852): '[analytics]', 'ble_disconnected', { deviceId: 'CA:BF:55:1F:01:3C',
+05-13 12:07:28.573 I/ReactNativeJS(14852):   reason: 'Operation was cancelled' }
+05-13 12:08:54.449 I/ReactNativeJS(14852): '[take-reading] begin: connecting to', 'CA:BF:55:1F:01:3C'
+05-13 12:08:54.450 I/ReactNativeJS(14852): '[analytics]', 'take_reading_started', { trigger: 'fab' }
+05-13 12:08:57.020 I/ReactNativeJS(14852): [take-reading] connected; flushing device config + backlog sync
+05-13 12:08:57.021 I/ReactNativeJS(14852): [ble-trace] applyDeviceConfig start — reason=force force=true dirty=false sinceFlushMs=2830512 autoHR=true autoSpO2=true hasDemographics=true
+05-13 12:08:57.141 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x16 payload[0..3]=02 01 00 00 listeners=1
+05-13 12:08:57.144 I/ReactNativeJS(14852): [ble-trace] applyDeviceConfig step=autoHr ok
+05-13 12:08:57.231 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x2c payload[0..3]=02 01 00 00 listeners=1
+05-13 12:08:57.232 I/ReactNativeJS(14852): [ble-trace] applyDeviceConfig step=autoSpo2 ok
+05-13 12:08:57.330 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x0a payload[0..3]=02 00 00 00 listeners=1
+05-13 12:08:57.330 I/ReactNativeJS(14852): [ble-trace] applyDeviceConfig step=userParams ok
+05-13 12:08:57.479 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x21 payload[0..3]=02 70 17 00 listeners=1
+05-13 12:08:57.479 I/ReactNativeJS(14852): [ble-trace] applyDeviceConfig step=goals ok
+05-13 12:08:57.480 I/ReactNativeJS(14852): [ble-trace] applyDeviceConfig done — steps=4 [autoHr,autoSpo2,userParams,goals]
+05-13 12:08:57.481 I/ReactNativeJS(14852): '[analytics]', 'device_config_flushed', { steps: 4 }
+05-13 12:08:57.492 I/ReactNativeJS(14852): [take-reading] applyDeviceConfig steps=4
+05-13 12:08:57.571 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x01 payload[0..3]=00 00 00 00 listeners=1
+05-13 12:08:57.573 I/ReactNativeJS(14852): [ble-trace] syncBacklog enter deviceBleId=CA:BF:55:1F:01:3C lastSync=1778642478 (filter-only; query is TS=0)
+05-13 12:08:57.668 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=2e ee 03 6a listeners=1
+05-13 12:08:57.669 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778642478 bytes[0..7]=2e ee 03 6a 55 91 4b 00 decoded: dia=85 sys=145 pulse=75
+05-13 12:08:57.674 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=19 e8 03 6a listeners=1
+05-13 12:08:57.675 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778640921 bytes[0..7]=19 e8 03 6a 50 85 45 00 decoded: dia=80 sys=133 pulse=69
+05-13 12:08:57.676 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=37 da 03 6a listeners=1
+05-13 12:08:57.680 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778637367 bytes[0..7]=37 da 03 6a 4e 8a 53 00 decoded: dia=78 sys=138 pulse=83
+05-13 12:08:57.681 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d0 49 03 6a listeners=1
+05-13 12:08:57.684 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778600400 bytes[0..7]=d0 49 03 6a 54 88 4e 00 decoded: dia=84 sys=136 pulse=78
+05-13 12:08:57.685 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=b6 45 03 6a listeners=1
+05-13 12:08:57.685 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778599350 bytes[0..7]=b6 45 03 6a 56 96 53 00 decoded: dia=86 sys=150 pulse=83
+05-13 12:08:57.686 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=5b 41 03 6a listeners=1
+05-13 12:08:57.688 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778598235 bytes[0..7]=5b 41 03 6a 56 8b 53 00 decoded: dia=86 sys=139 pulse=83
+05-13 12:08:57.690 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a2 3d 03 6a listeners=1
+05-13 12:08:57.690 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778597282 bytes[0..7]=a2 3d 03 6a 56 90 51 00 decoded: dia=86 sys=144 pulse=81
+05-13 12:08:57.691 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7c 7d 02 6a listeners=1
+05-13 12:08:57.692 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778548092 bytes[0..7]=7c 7d 02 6a 51 91 4e 00 decoded: dia=81 sys=145 pulse=78
+05-13 12:08:57.693 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=07 26 02 6a listeners=1
+05-13 12:08:57.693 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778525703 bytes[0..7]=07 26 02 6a 57 8d 53 00 decoded: dia=87 sys=141 pulse=83
+05-13 12:08:57.696 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a1 09 02 6a listeners=1
+05-13 12:08:57.696 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778518433 bytes[0..7]=a1 09 02 6a 57 8f 3e 00 decoded: dia=87 sys=143 pulse=62
+05-13 12:08:57.717 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=88 f7 01 6a listeners=1
+05-13 12:08:57.718 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778513800 bytes[0..7]=88 f7 01 6a 52 80 42 00 decoded: dia=82 sys=128 pulse=66
+05-13 12:08:57.719 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=50 f2 01 6a listeners=1
+05-13 12:08:57.719 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778512464 bytes[0..7]=50 f2 01 6a 58 8d 44 00 decoded: dia=88 sys=141 pulse=68
+05-13 12:08:57.724 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=b4 f1 01 6a listeners=1
+05-13 12:08:57.725 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778512308 bytes[0..7]=b4 f1 01 6a 56 8c 47 00 decoded: dia=86 sys=140 pulse=71
+05-13 12:08:57.725 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=c6 ed 01 6a listeners=1
+05-13 12:08:57.726 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778511302 bytes[0..7]=c6 ed 01 6a 56 8a 47 00 decoded: dia=86 sys=138 pulse=71
+05-13 12:08:57.726 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=27 e9 01 6a listeners=1
+05-13 12:08:57.727 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778510119 bytes[0..7]=27 e9 01 6a 5a 98 44 00 decoded: dia=90 sys=152 pulse=68
+05-13 12:08:57.730 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=27 e8 01 6a listeners=1
+05-13 12:08:57.730 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778509863 bytes[0..7]=27 e8 01 6a 54 8b 41 00 decoded: dia=84 sys=139 pulse=65
+05-13 12:08:57.731 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=74 b0 01 6a listeners=1
+05-13 12:08:57.731 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778495604 bytes[0..7]=74 b0 01 6a 52 86 55 00 decoded: dia=82 sys=134 pulse=85
+05-13 12:08:57.733 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ec a8 01 6a listeners=1
+05-13 12:08:57.750 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778493676 bytes[0..7]=ec a8 01 6a 53 8e 58 00 decoded: dia=83 sys=142 pulse=88
+05-13 12:08:57.750 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=21 61 01 6a listeners=1
+05-13 12:08:57.751 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778475297 bytes[0..7]=21 61 01 6a 4e 79 49 00 decoded: dia=78 sys=121 pulse=73
+05-13 12:08:57.754 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ed 24 01 6a listeners=1
+05-13 12:08:57.754 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778459885 bytes[0..7]=ed 24 01 6a 59 8e 49 00 decoded: dia=89 sys=142 pulse=73
+05-13 12:08:57.771 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7e 81 00 6a listeners=1
+05-13 12:08:57.772 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778418046 bytes[0..7]=7e 81 00 6a 48 72 5d 00 decoded: dia=72 sys=114 pulse=93
+05-13 12:08:57.774 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ac 7b 00 6a listeners=1
+05-13 12:08:57.775 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778416556 bytes[0..7]=ac 7b 00 6a 5a 94 49 00 decoded: dia=90 sys=148 pulse=73
+05-13 12:08:57.776 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=55 7b 00 6a listeners=1
+05-13 12:08:57.777 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778416469 bytes[0..7]=55 7b 00 6a 5f 97 4c 00 decoded: dia=95 sys=151 pulse=76
+05-13 12:08:57.778 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=66 57 00 6a listeners=1
+05-13 12:08:57.779 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778407270 bytes[0..7]=66 57 00 6a 59 90 53 00 decoded: dia=89 sys=144 pulse=83
+05-13 12:08:57.781 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d9 fe fe 69 listeners=1
+05-13 12:08:57.783 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778319065 bytes[0..7]=d9 fe fe 69 56 8a 4e 00 decoded: dia=86 sys=138 pulse=78
+05-13 12:08:57.785 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7a 91 fe 69 listeners=1
+05-13 12:08:57.789 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778291066 bytes[0..7]=7a 91 fe 69 56 85 4b 00 decoded: dia=86 sys=133 pulse=75
+05-13 12:08:57.790 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=1d 7e fe 69 listeners=1
+05-13 12:08:57.791 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778286109 bytes[0..7]=1d 7e fe 69 58 92 49 00 decoded: dia=88 sys=146 pulse=73
+05-13 12:08:57.792 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=5c 0f fe 69 listeners=1
+05-13 12:08:57.792 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778257756 bytes[0..7]=5c 0f fe 69 4c 71 51 00 decoded: dia=76 sys=113 pulse=81
+05-13 12:08:57.793 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a7 c1 fd 69 listeners=1
+05-13 12:08:57.794 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778237863 bytes[0..7]=a7 c1 fd 69 4d 77 4e 00 decoded: dia=77 sys=119 pulse=78
+05-13 12:08:57.794 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=0a c1 fd 69 listeners=1
+05-13 12:08:57.795 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778237706 bytes[0..7]=0a c1 fd 69 5d 94 4e 00 decoded: dia=93 sys=148 pulse=78
+05-13 12:08:57.817 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=97 70 fd 69 listeners=1
+05-13 12:08:57.818 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778217111 bytes[0..7]=97 70 fd 69 56 89 51 00 decoded: dia=86 sys=137 pulse=81
+05-13 12:08:57.819 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ee 65 fc 69 listeners=1
+05-13 12:08:57.822 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778148846 bytes[0..7]=ee 65 fc 69 55 87 49 00 decoded: dia=85 sys=135 pulse=73
+05-13 12:08:57.823 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=f3 62 fc 69 listeners=1
+05-13 12:08:57.824 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778148083 bytes[0..7]=f3 62 fc 69 5d 96 49 00 decoded: dia=93 sys=150 pulse=73
+05-13 12:08:57.824 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=32 e6 fb 69 listeners=1
+05-13 12:08:57.826 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778116146 bytes[0..7]=32 e6 fb 69 55 8c 4b 00 decoded: dia=85 sys=140 pulse=75
+05-13 12:08:57.827 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d6 e4 fb 69 listeners=1
+05-13 12:08:57.828 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778115798 bytes[0..7]=d6 e4 fb 69 59 90 4c 00 decoded: dia=89 sys=144 pulse=76
+05-13 12:08:57.829 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=36 de fb 69 listeners=1
+05-13 12:08:57.830 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778114102 bytes[0..7]=36 de fb 69 4e 79 45 00 decoded: dia=78 sys=121 pulse=69
+05-13 12:08:57.831 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=57 52 fb 69 listeners=1
+05-13 12:08:57.833 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778078295 bytes[0..7]=57 52 fb 69 57 85 60 00 decoded: dia=87 sys=133 pulse=96
+05-13 12:08:57.835 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=2a 50 fb 69 listeners=1
+05-13 12:08:57.836 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778077738 bytes[0..7]=2a 50 fb 69 59 93 51 00 decoded: dia=89 sys=147 pulse=81
+05-13 12:08:57.837 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7f 4f fb 69 listeners=1
+05-13 12:08:57.839 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778077567 bytes[0..7]=7f 4f fb 69 53 80 58 00 decoded: dia=83 sys=128 pulse=88
+05-13 12:08:57.839 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=17 4c fb 69 listeners=1
+05-13 12:08:57.842 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778076695 bytes[0..7]=17 4c fb 69 58 91 51 00 decoded: dia=88 sys=145 pulse=81
+05-13 12:08:57.864 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=95 4b fb 69 listeners=1
+05-13 12:08:57.864 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778076565 bytes[0..7]=95 4b fb 69 56 8c 53 00 decoded: dia=86 sys=140 pulse=83
+05-13 12:08:57.865 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=cd 84 fa 69 listeners=1
+05-13 12:08:57.867 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778025677 bytes[0..7]=cd 84 fa 69 56 90 49 00 decoded: dia=86 sys=144 pulse=73
+05-13 12:08:57.867 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=cd bf f9 69 listeners=1
+05-13 12:08:57.868 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777975245 bytes[0..7]=cd bf f9 69 54 80 53 00 decoded: dia=84 sys=128 pulse=83
+05-13 12:08:57.869 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=62 7c f9 69 listeners=1
+05-13 12:08:57.871 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777957986 bytes[0..7]=62 7c f9 69 55 86 6b 00 decoded: dia=85 sys=134 pulse=107
+05-13 12:08:57.872 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=4f 33 f9 69 listeners=1
+05-13 12:08:57.872 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777939279 bytes[0..7]=4f 33 f9 69 54 93 45 00 decoded: dia=84 sys=147 pulse=69
+05-13 12:08:57.873 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=e3 a1 f8 69 listeners=1
+05-13 12:08:57.874 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777902051 bytes[0..7]=e3 a1 f8 69 57 8a 55 00 decoded: dia=87 sys=138 pulse=85
+05-13 12:08:57.875 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=95 a1 f8 69 listeners=1
+05-13 12:08:57.876 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777901973 bytes[0..7]=95 a1 f8 69 48 55 53 00 decoded: dia=72 sys=85 pulse=83
+05-13 12:08:57.876 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d3 fe f7 69 listeners=1
+05-13 12:08:57.877 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777860307 bytes[0..7]=d3 fe f7 69 54 89 4e 00 decoded: dia=84 sys=137 pulse=78
+05-13 12:08:57.879 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=26 db f7 69 listeners=1
+05-13 12:08:57.881 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777851174 bytes[0..7]=26 db f7 69 59 8d 49 00 decoded: dia=89 sys=141 pulse=73
+05-13 12:08:57.882 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=87 11 f7 69 listeners=1
+05-13 12:08:57.882 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777799559 bytes[0..7]=87 11 f7 69 5e 97 55 00 decoded: dia=94 sys=151 pulse=85
+05-13 12:08:57.883 I/ReactNativeJS(14852): [ble-trace] syncBacklog readBPHistory returned 50 packet(s); first.ts=1778642478 last.ts=1777799559
+05-13 12:08:57.883 I/ReactNativeJS(14852): [ble-trace] syncBacklog exit pulled=0 (filtered from 50); cursor 1778642478 → 1778642478
+05-13 12:08:57.884 I/ReactNativeJS(14852): [take-reading] backlog sync pulled 0 reading(s)
+05-13 12:08:57.884 I/ReactNativeJS(14852): [take-reading] subscribing to notifications
+05-13 12:08:57.891 I/ReactNativeJS(14852): [take-reading] phase: waiting_for_watch (press the BP button)
+05-13 12:17:10.028 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x73 payload[0..3]=01 00 00 00 listeners=1
+05-13 12:17:10.028 I/ReactNativeJS(14852): [ble-trace] 0x73 kindByte=0x01 classified=hr
+05-13 12:17:10.029 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x73 payload[0..3]=01 00 00 00 listeners=1
+05-13 12:17:10.029 I/ReactNativeJS(14852): [ble-trace] 0x73 kindByte=0x01 classified=hr
+05-13 12:17:10.056 I/ReactNativeJS(14852): '[analytics]', 'sync_skipped', { trigger: 'app_foreground', reason: 'take_reading_active' }
+05-13 12:17:10.058 I/ReactNativeJS(14852): '[analytics]', 'health_platform_read_skipped', { trigger: 'foreground', reason: 'master_off' }
+05-13 12:17:10.076 I/ReactNativeJS(14852): [take-reading] watch timeout — no BP-ready in 90s
+05-13 12:17:10.077 I/ReactNativeJS(14852): '[analytics]', 'take_reading_failed', { reason: 'watch_timeout' }
+05-13 12:17:10.108 I/ReactNativeJS(14852): '[analytics]', 'ble_disconnected', { deviceId: 'CA:BF:55:1F:01:3C',
+05-13 12:17:10.108 I/ReactNativeJS(14852):   reason: 'Operation was cancelled' }
+05-13 12:25:30.102 I/ReactNativeJS(14852): '[analytics]', 'sync_started', { trigger: 'cold_start' }
+05-13 12:25:30.103 I/ReactNativeJS(14852): '[analytics]', 'health_platform_read_skipped', { trigger: 'foreground', reason: 'master_off' }
+05-13 12:25:30.194 I/ReactNativeJS(14852): '[analytics]', 'background_sync_unregistered', ''
+05-13 12:25:30.263 I/ReactNativeJS(14852): '[analytics]', 'push_permission_denied', ''
+05-13 12:25:32.514 I/ReactNativeJS(14852): [ble-trace] applyDeviceConfig skipped — dirty=false force=false sinceFlushMs=995033 (debounce 3600000ms)
+05-13 12:25:32.678 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x01 payload[0..3]=00 00 00 00 listeners=1
+05-13 12:25:32.680 I/ReactNativeJS(14852): [ble-trace] syncBacklog enter deviceBleId=CA:BF:55:1F:01:3C lastSync=1778642478 (filter-only; query is TS=0)
+05-13 12:25:32.778 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a0 fb 03 6a listeners=1
+05-13 12:25:32.778 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778645920 bytes[0..7]=a0 fb 03 6a 5b 91 53 00 decoded: dia=91 sys=145 pulse=83
+05-13 12:25:32.779 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=2e ee 03 6a listeners=1
+05-13 12:25:32.780 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778642478 bytes[0..7]=2e ee 03 6a 55 91 4b 00 decoded: dia=85 sys=145 pulse=75
+05-13 12:25:32.780 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=19 e8 03 6a listeners=1
+05-13 12:25:32.781 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778640921 bytes[0..7]=19 e8 03 6a 50 85 45 00 decoded: dia=80 sys=133 pulse=69
+05-13 12:25:32.786 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=37 da 03 6a listeners=1
+05-13 12:25:32.787 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778637367 bytes[0..7]=37 da 03 6a 4e 8a 53 00 decoded: dia=78 sys=138 pulse=83
+05-13 12:25:32.789 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d0 49 03 6a listeners=1
+05-13 12:25:32.789 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778600400 bytes[0..7]=d0 49 03 6a 54 88 4e 00 decoded: dia=84 sys=136 pulse=78
+05-13 12:25:32.791 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=b6 45 03 6a listeners=1
+05-13 12:25:32.791 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778599350 bytes[0..7]=b6 45 03 6a 56 96 53 00 decoded: dia=86 sys=150 pulse=83
+05-13 12:25:32.792 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=5b 41 03 6a listeners=1
+05-13 12:25:32.792 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778598235 bytes[0..7]=5b 41 03 6a 56 8b 53 00 decoded: dia=86 sys=139 pulse=83
+05-13 12:25:32.793 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a2 3d 03 6a listeners=1
+05-13 12:25:32.794 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778597282 bytes[0..7]=a2 3d 03 6a 56 90 51 00 decoded: dia=86 sys=144 pulse=81
+05-13 12:25:32.794 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7c 7d 02 6a listeners=1
+05-13 12:25:32.795 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778548092 bytes[0..7]=7c 7d 02 6a 51 91 4e 00 decoded: dia=81 sys=145 pulse=78
+05-13 12:25:32.795 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=07 26 02 6a listeners=1
+05-13 12:25:32.795 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778525703 bytes[0..7]=07 26 02 6a 57 8d 53 00 decoded: dia=87 sys=141 pulse=83
+05-13 12:25:32.825 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a1 09 02 6a listeners=1
+05-13 12:25:32.826 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778518433 bytes[0..7]=a1 09 02 6a 57 8f 3e 00 decoded: dia=87 sys=143 pulse=62
+05-13 12:25:32.827 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=88 f7 01 6a listeners=1
+05-13 12:25:32.827 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778513800 bytes[0..7]=88 f7 01 6a 52 80 42 00 decoded: dia=82 sys=128 pulse=66
+05-13 12:25:32.833 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=50 f2 01 6a listeners=1
+05-13 12:25:32.833 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778512464 bytes[0..7]=50 f2 01 6a 58 8d 44 00 decoded: dia=88 sys=141 pulse=68
+05-13 12:25:32.834 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=b4 f1 01 6a listeners=1
+05-13 12:25:32.834 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778512308 bytes[0..7]=b4 f1 01 6a 56 8c 47 00 decoded: dia=86 sys=140 pulse=71
+05-13 12:25:32.835 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=c6 ed 01 6a listeners=1
+05-13 12:25:32.835 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778511302 bytes[0..7]=c6 ed 01 6a 56 8a 47 00 decoded: dia=86 sys=138 pulse=71
+05-13 12:25:32.835 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=27 e9 01 6a listeners=1
+05-13 12:25:32.836 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778510119 bytes[0..7]=27 e9 01 6a 5a 98 44 00 decoded: dia=90 sys=152 pulse=68
+05-13 12:25:32.836 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=27 e8 01 6a listeners=1
+05-13 12:25:32.837 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778509863 bytes[0..7]=27 e8 01 6a 54 8b 41 00 decoded: dia=84 sys=139 pulse=65
+05-13 12:25:32.837 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=74 b0 01 6a listeners=1
+05-13 12:25:32.838 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778495604 bytes[0..7]=74 b0 01 6a 52 86 55 00 decoded: dia=82 sys=134 pulse=85
+05-13 12:25:32.838 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ec a8 01 6a listeners=1
+05-13 12:25:32.838 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778493676 bytes[0..7]=ec a8 01 6a 53 8e 58 00 decoded: dia=83 sys=142 pulse=88
+05-13 12:25:32.840 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=21 61 01 6a listeners=1
+05-13 12:25:32.840 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778475297 bytes[0..7]=21 61 01 6a 4e 79 49 00 decoded: dia=78 sys=121 pulse=73
+05-13 12:25:32.875 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ed 24 01 6a listeners=1
+05-13 12:25:32.875 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778459885 bytes[0..7]=ed 24 01 6a 59 8e 49 00 decoded: dia=89 sys=142 pulse=73
+05-13 12:25:32.876 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7e 81 00 6a listeners=1
+05-13 12:25:32.876 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778418046 bytes[0..7]=7e 81 00 6a 48 72 5d 00 decoded: dia=72 sys=114 pulse=93
+05-13 12:25:32.877 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ac 7b 00 6a listeners=1
+05-13 12:25:32.877 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778416556 bytes[0..7]=ac 7b 00 6a 5a 94 49 00 decoded: dia=90 sys=148 pulse=73
+05-13 12:25:32.878 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=55 7b 00 6a listeners=1
+05-13 12:25:32.878 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778416469 bytes[0..7]=55 7b 00 6a 5f 97 4c 00 decoded: dia=95 sys=151 pulse=76
+05-13 12:25:32.879 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=66 57 00 6a listeners=1
+05-13 12:25:32.879 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778407270 bytes[0..7]=66 57 00 6a 59 90 53 00 decoded: dia=89 sys=144 pulse=83
+05-13 12:25:32.880 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d9 fe fe 69 listeners=1
+05-13 12:25:32.880 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778319065 bytes[0..7]=d9 fe fe 69 56 8a 4e 00 decoded: dia=86 sys=138 pulse=78
+05-13 12:25:32.880 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7a 91 fe 69 listeners=1
+05-13 12:25:32.880 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778291066 bytes[0..7]=7a 91 fe 69 56 85 4b 00 decoded: dia=86 sys=133 pulse=75
+05-13 12:25:32.884 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=1d 7e fe 69 listeners=1
+05-13 12:25:32.884 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778286109 bytes[0..7]=1d 7e fe 69 58 92 49 00 decoded: dia=88 sys=146 pulse=73
+05-13 12:25:32.885 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=5c 0f fe 69 listeners=1
+05-13 12:25:32.885 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778257756 bytes[0..7]=5c 0f fe 69 4c 71 51 00 decoded: dia=76 sys=113 pulse=81
+05-13 12:25:32.886 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=a7 c1 fd 69 listeners=1
+05-13 12:25:32.887 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778237863 bytes[0..7]=a7 c1 fd 69 4d 77 4e 00 decoded: dia=77 sys=119 pulse=78
+05-13 12:25:32.930 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=0a c1 fd 69 listeners=1
+05-13 12:25:32.931 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778237706 bytes[0..7]=0a c1 fd 69 5d 94 4e 00 decoded: dia=93 sys=148 pulse=78
+05-13 12:25:32.931 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=97 70 fd 69 listeners=1
+05-13 12:25:32.932 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778217111 bytes[0..7]=97 70 fd 69 56 89 51 00 decoded: dia=86 sys=137 pulse=81
+05-13 12:25:32.932 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=ee 65 fc 69 listeners=1
+05-13 12:25:32.932 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778148846 bytes[0..7]=ee 65 fc 69 55 87 49 00 decoded: dia=85 sys=135 pulse=73
+05-13 12:25:32.933 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=f3 62 fc 69 listeners=1
+05-13 12:25:32.933 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778148083 bytes[0..7]=f3 62 fc 69 5d 96 49 00 decoded: dia=93 sys=150 pulse=73
+05-13 12:25:32.934 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=32 e6 fb 69 listeners=1
+05-13 12:25:32.934 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778116146 bytes[0..7]=32 e6 fb 69 55 8c 4b 00 decoded: dia=85 sys=140 pulse=75
+05-13 12:25:32.934 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d6 e4 fb 69 listeners=1
+05-13 12:25:32.935 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778115798 bytes[0..7]=d6 e4 fb 69 59 90 4c 00 decoded: dia=89 sys=144 pulse=76
+05-13 12:25:32.937 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=36 de fb 69 listeners=1
+05-13 12:25:32.938 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778114102 bytes[0..7]=36 de fb 69 4e 79 45 00 decoded: dia=78 sys=121 pulse=69
+05-13 12:25:32.939 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=57 52 fb 69 listeners=1
+05-13 12:25:32.940 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778078295 bytes[0..7]=57 52 fb 69 57 85 60 00 decoded: dia=87 sys=133 pulse=96
+05-13 12:25:32.941 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=2a 50 fb 69 listeners=1
+05-13 12:25:32.942 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778077738 bytes[0..7]=2a 50 fb 69 59 93 51 00 decoded: dia=89 sys=147 pulse=81
+05-13 12:25:32.943 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=7f 4f fb 69 listeners=1
+05-13 12:25:32.944 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778077567 bytes[0..7]=7f 4f fb 69 53 80 58 00 decoded: dia=83 sys=128 pulse=88
+05-13 12:25:32.973 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=17 4c fb 69 listeners=1
+05-13 12:25:32.974 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778076695 bytes[0..7]=17 4c fb 69 58 91 51 00 decoded: dia=88 sys=145 pulse=81
+05-13 12:25:32.975 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=95 4b fb 69 listeners=1
+05-13 12:25:32.975 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778076565 bytes[0..7]=95 4b fb 69 56 8c 53 00 decoded: dia=86 sys=140 pulse=83
+05-13 12:25:32.976 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=cd 84 fa 69 listeners=1
+05-13 12:25:32.976 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1778025677 bytes[0..7]=cd 84 fa 69 56 90 49 00 decoded: dia=86 sys=144 pulse=73
+05-13 12:25:32.977 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=cd bf f9 69 listeners=1
+05-13 12:25:32.977 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777975245 bytes[0..7]=cd bf f9 69 54 80 53 00 decoded: dia=84 sys=128 pulse=83
+05-13 12:25:32.978 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=62 7c f9 69 listeners=1
+05-13 12:25:32.978 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777957986 bytes[0..7]=62 7c f9 69 55 86 6b 00 decoded: dia=85 sys=134 pulse=107
+05-13 12:25:32.979 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=4f 33 f9 69 listeners=1
+05-13 12:25:32.980 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777939279 bytes[0..7]=4f 33 f9 69 54 93 45 00 decoded: dia=84 sys=147 pulse=69
+05-13 12:25:32.980 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=e3 a1 f8 69 listeners=1
+05-13 12:25:32.981 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777902051 bytes[0..7]=e3 a1 f8 69 57 8a 55 00 decoded: dia=87 sys=138 pulse=85
+05-13 12:25:32.982 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=95 a1 f8 69 listeners=1
+05-13 12:25:32.982 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777901973 bytes[0..7]=95 a1 f8 69 48 55 53 00 decoded: dia=72 sys=85 pulse=83
+05-13 12:25:32.982 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=d3 fe f7 69 listeners=1
+05-13 12:25:32.983 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777860307 bytes[0..7]=d3 fe f7 69 54 89 4e 00 decoded: dia=84 sys=137 pulse=78
+05-13 12:25:32.983 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x14 payload[0..3]=26 db f7 69 listeners=1
+05-13 12:25:32.984 I/ReactNativeJS(14852): [ble-trace] parseBPReading ts=1777851174 bytes[0..7]=26 db f7 69 59 8d 49 00 decoded: dia=89 sys=141 pulse=73
+05-13 12:25:32.984 I/ReactNativeJS(14852): [ble-trace] syncBacklog readBPHistory returned 50 packet(s); first.ts=1778645920 last.ts=1777851174
+05-13 12:25:32.986 I/ReactNativeJS(14852): '[analytics]', 'reading_persisted', { source: 'watch', tier: 'in_pattern' }
+05-13 12:25:32.988 I/ReactNativeJS(14852): [ble-trace] syncBacklog exit pulled=1 (filtered from 50); cursor 1778642478 → 1778645920
+05-13 12:25:33.142 I/ReactNativeJS(14852): '[analytics]', 'sync_completed', { trigger: 'cold_start',
+05-13 12:25:33.142 I/ReactNativeJS(14852):   batches: 1,
+05-13 12:25:33.142 I/ReactNativeJS(14852):   hitBatchCap: false,
+05-13 12:25:33.142 I/ReactNativeJS(14852):   pulled: 1 }
+05-13 12:25:33.143 I/ReactNativeJS(14852): [ble-trace] applyDeviceConfig skipped — dirty=false force=false sinceFlushMs=995662 (debounce 3600000ms)
+05-13 12:25:33.143 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.hr enter cursor.hr=1778673900 days=[2026-05-13]
+05-13 12:25:33.143 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.spo2 enter cursor.spo2=2026-05-13 days=[2026-05-13]
+05-13 12:25:33.144 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.dayInfo enter cursor.sleep=2026-05-13 cursor.activity=2026-05-13 allDays=[2026-05-13]
+05-13 12:25:33.255 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=00 18 05 00 listeners=3
+05-13 12:25:33.255 I/ReactNativeJS(14852): [ble-trace] readHRHistory index totalPackets=24 intervalMinutes=5 (returned to caller)
+05-13 12:25:33.255 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=01 00 bf 03 listeners=3
+05-13 12:25:33.255 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=02 4f 51 65 listeners=3
+05-13 12:25:33.255 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=03 4a 4d 48 listeners=3
+05-13 12:25:33.256 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=04 53 4a 4c listeners=3
+05-13 12:25:33.256 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=05 43 46 47 listeners=3
+05-13 12:25:33.256 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=06 3f 37 3f listeners=3
+05-13 12:25:33.256 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=07 44 43 49 listeners=3
+05-13 12:25:33.256 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=08 40 48 59 listeners=3
+05-13 12:25:33.256 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=09 3c 3e 4b listeners=3
+05-13 12:25:33.260 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0a 00 00 00 listeners=3
+05-13 12:25:33.260 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0b 52 4d 4d listeners=3
+05-13 12:25:33.261 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0c 5d 58 4d listeners=3
+05-13 12:25:33.261 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0d 00 00 00 listeners=3
+05-13 12:25:33.263 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0e 00 00 00 listeners=3
+05-13 12:25:33.264 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=0f 00 00 00 listeners=3
+05-13 12:25:33.264 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=10 00 00 00 listeners=3
+05-13 12:25:33.265 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=11 00 00 00 listeners=3
+05-13 12:25:33.266 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=12 00 00 00 listeners=3
+05-13 12:25:33.267 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=13 00 00 00 listeners=3
+05-13 12:25:33.311 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=14 00 00 00 listeners=3
+05-13 12:25:33.312 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=15 00 00 00 listeners=3
+05-13 12:25:33.313 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=16 00 00 00 listeners=3
+05-13 12:25:33.314 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x15 payload[0..3]=17 00 00 00 listeners=3
+05-13 12:25:33.314 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.hr day=2026-05-13 readHRHistory returned 138 samples (intervalSec=300, sampleWindowSec=300)
+05-13 12:25:33.366 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'hr', count: 1 }
+05-13 12:25:33.396 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'hr', count: 1 }
+05-13 12:25:33.429 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'hr', count: 1 }
+05-13 12:25:33.429 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.hr exit totalPulled=3 newestRaw=1778674800
+05-13 12:25:33.516 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x2d payload[0..3]=00 04 3c 00 listeners=2
+05-13 12:25:33.516 I/ReactNativeJS(14852): [ble-trace] readSpO2History index totalPackets=4 intervalMinutes=60 (assumed 60 in slice config)
+05-13 12:25:33.516 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x2d payload[0..3]=01 00 bf 03 listeners=2
+05-13 12:25:33.516 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x2d payload[0..3]=02 61 62 62 listeners=2
+05-13 12:25:33.516 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x2d payload[0..3]=03 00 00 00 listeners=2
+05-13 12:25:33.517 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.spo2 day=2026-05-13 readSpO2History returned 6 samples
+05-13 12:25:33.518 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:25:33.519 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:25:33.521 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:25:33.522 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:25:33.523 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:25:33.524 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'spo2', count: 1 }
+05-13 12:25:33.525 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.spo2 exit totalPulled=6
+05-13 12:25:33.525 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x07 payload[0..3]=00 00 26 05 listeners=1
+05-13 12:25:33.525 I/ReactNativeJS(14852): [ble-trace] readDayInfo packet idx=0x00 daysAgo=0 payload=00 00 26 05 13 00 01 fe 6c 11 01 00 01 39
+05-13 12:25:33.526 I/ReactNativeJS(14852): [ble-trace] notify cmd=0x07 payload[0..3]=01 00 26 05 listeners=1
+05-13 12:25:33.526 I/ReactNativeJS(14852): [ble-trace] readDayInfo packet idx=0x01 daysAgo=0 payload=01 00 26 05 13 02 57 00 76 01 ab 00 14 00
+05-13 12:25:33.526 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.dayInfo day=2026-05-13 daysAgo=0 activity=steps=510 sleep=min=599
+05-13 12:25:33.528 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'activity', count: 1 }
+05-13 12:25:33.529 I/ReactNativeJS(14852): '[analytics]', 'vital_persisted', { vital_type: 'calories', count: 1 }
+05-13 12:25:33.530 I/ReactNativeJS(14852): [ble-trace] syncMultiVitals.dayInfo exit sleepCount=0 activityCount=1
+05-13 12:25:33.793 I/ReactNativeJS(14852): '[analytics]', 'multi_vitals_sync_failed', { reason: '/sync invoke failed: 500  (Edge Function returned a non-2xx status code) [spo2=124,sleep=7,act=11,cal=11]',
+05-13 12:25:33.793 I/ReactNativeJS(14852):   hr_pending: 3104,
+05-13 12:25:33.793 I/ReactNativeJS(14852):   spo2_pending: 124,
+05-13 12:25:33.793 I/ReactNativeJS(14852):   sleep_pending: 7,
+05-13 12:25:33.793 I/ReactNativeJS(14852):   steps_pending: 11,
+05-13 12:25:33.793 I/ReactNativeJS(14852):   calories_pending: 11 }
+05-13 12:25:33.795 I/ReactNativeJS(14852): '[analytics]', 'sync_failed', { trigger: 'cold_start', reason: 'multi_vitals:sync' }
+05-13 12:25:33.817 I/ReactNativeJS(14852): '[analytics]', 'reading_sync_success', { duplicate: false }
+05-13 12:26:18.843 I/ReactNativeJS(14852): '[analytics]', 'ble_disconnected', { deviceId: 'CA:BF:55:1F:01:3C',
+05-13 12:26:18.843 I/ReactNativeJS(14852):   reason: 'Operation was cancelled' }
