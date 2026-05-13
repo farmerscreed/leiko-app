@@ -61,6 +61,12 @@ export type AnalyticsEvent =
   // appear in analytics. Per CLAUDE.md data rule + D13 §5.1.
   | { name: 'vital_persisted'; props?: { vital_type: 'hr' | 'spo2' | 'sleep' | 'activity' | 'calories'; count?: number } }
   | { name: 'vital_sync_accepted'; props?: { vital_type: 'hr' | 'spo2' | 'sleep' | 'activity' | 'calories'; count: number } }
+  // Sprint 16.5b — multi-vitals upload failure. Pre-16.5b syncMultiVitals's
+  // return value was ignored by the orchestrator, so /sync upload errors
+  // were silent — pending arrays grew for 8+ days at a time without any
+  // analytics signal. This event makes the failure visible. Per CLAUDE.md
+  // data rule: counts of pending rows + error code only, NEVER values.
+  | { name: 'multi_vitals_sync_failed'; props?: { reason: string; hr_pending: number; spo2_pending: number; sleep_pending: number; steps_pending: number; calories_pending: number } }
   // Sprint 9.5 — Apple Health / Health Connect bridge. Counts only,
   // never values. Per D13 §13.4 + CLAUDE.md analytics rule.
   | { name: 'health_platform_write'; props?: { vital_type: 'bp' | 'hr' | 'spo2' | 'sleep' | 'steps' | 'calories'; written: number; rejected: number } }

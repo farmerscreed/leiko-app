@@ -43,7 +43,18 @@ export async function postMultiVitals(
     'sync',
     { body: payload },
   );
-  if (error) throw new Error(`/sync invoke failed: ${error.message}`);
+  if (error) {
+    // Sprint 16.5b — surface the upstream failure so the orchestrator
+    // can log it. Pre-16.5b this error was caught further up but never
+    // logged; the result was 8 days of HR/SpO2/Sleep/Activity samples
+    // accumulating in MMKV pending without anyone knowing why /sync
+    // wasn't accepting them. Per CLAUDE.md voice + data rules: include
+    // status + name only, never PHI.
+    const detail = (error as { status?: number; name?: string }).status
+      ? `${(error as { status?: number }).status} ${error.message}`
+      : error.message;
+    throw new Error(`/sync invoke failed: ${detail}`);
+  }
   if (!data) throw new Error('/sync returned no body');
   return data;
 }

@@ -691,6 +691,20 @@ export async function syncMultiVitals(
     };
   } catch (e) {
     errors.sync = e instanceof Error ? e.message : 'sync failed';
+    // Sprint 16.5b — make the upload failure VISIBLE. The orchestrator
+    // historically ignored syncMultiVitals's return value, so this
+    // analytics event is the only signal future bench traces have for
+    // diagnosing why HR/SpO2/Sleep/Activity pending arrays accumulate.
+    // Per CLAUDE.md voice + data rules: includes counts + error code,
+    // never sample values.
+    logger.track('multi_vitals_sync_failed', {
+      reason: errors.sync,
+      hr_pending: hrPending.length,
+      spo2_pending: spo2Pending.length,
+      sleep_pending: sleepPending.length,
+      steps_pending: stepsPending.length,
+      calories_pending: caloriesPending.length,
+    });
     return { ok: false, errors, pulled, inserted: null };
   }
 }
