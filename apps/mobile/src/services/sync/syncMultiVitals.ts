@@ -516,12 +516,15 @@ async function syncDayInfoStep(
   return { sleep: sleepCount, activity: activityCount };
 }
 
-/** Sprint 16.5b — Edge Function CPU-soft-limit-safe chunk size.
- *  Empirically ~3000 HR samples in one POST triggers CPU termination on
- *  Supabase's default Deno isolate. 300/chunk → ~10 chunks for a worst-
- *  case 3000-sample backfill, each well under the CPU budget. The number
- *  is conservative — raise it if the function tightens up later. */
-const MULTIVITALS_CHUNK_SIZE = 300;
+/** Sprint 16.5b — Edge Function CPU-soft-limit-safe HR chunk size.
+ *  Empirically (2026-05-13 scenario 07 + 08 traces): the Supabase Deno
+ *  isolate's CPU soft limit (~200ms) kills POSTs of ~300+ samples even
+ *  when the rest of the payload is small. 100 HR samples/chunk → ~30
+ *  POSTs for a worst-case 3000-sample backfill. The other vital arrays
+ *  (SpO2 ~120/day, Sleep 7-10/week, Activity ~10/day) go in a SEPARATE
+ *  first POST with NO HR samples — keeps the small-vitals POST bounded
+ *  and decouples it from the HR backfill loop. */
+const MULTIVITALS_HR_CHUNK_SIZE = 100;
 
 function chunkArray<T>(arr: T[] | undefined, size: number): T[][] {
   if (!arr || arr.length === 0) return [];
@@ -580,68 +583,79 @@ async function postMultiVitalsChunked(
   stepsPending: ActivityDay[],
   caloriesPending: CaloriesDay[],
 ): Promise<{ deviceId: string; inserted: MultiVitalsCounts; rejected: MultiVitalsCounts; duplicates: MultiVitalsCounts }> {
-  const hrChunks = chunkArray(hrPending, MULTIVITALS_CHUNK_SIZE);
-  // Even when HR is empty we still want one POST (for any spo2/sleep/etc).
-  const chunkCount = Math.max(hrChunks.length, 1);
-
   let deviceId = '';
   let totalInserted: MultiVitalsCounts = emptyCounts();
   let totalRejected: MultiVitalsCounts = emptyCounts();
   let totalDuplicates: MultiVitalsCounts = emptyCounts();
 
-  for (let i = 0; i < chunkCount; i++) {
-    const isFirstChunk = i === 0;
-    const hrSlice = hrChunks[i];
-
-    const chunkPayload: MultiVitalsPayload = {
+  // Phase 1 — the "small vitals" POST. SpO2 (~120/day) + Sleep (~7-10
+  // entries) + Activity (~10 days) + Calories (~10 days). NO HR samples.
+  // Bounded enough to fit comfortably under the Edge Function CPU budget.
+  if (
+    spo2Pending.length > 0 ||
+    sleepPending.length > 0 ||
+    stepsPending.length > 0 ||
+    caloriesPending.length > 0
+  ) {
+    const smallVitalsPayload: MultiVitalsPayload = {
       ...basePayload,
-      hrSamples: hrSlice && hrSlice.length > 0 ? hrSlice : undefined,
-      // Smaller per-day arrays ride in the first chunk only.
-      spo2Samples: isFirstChunk && spo2Pending.length ? spo2Pending : undefined,
-      sleepSessions: isFirstChunk && sleepPending.length ? sleepPending : undefined,
-      activityDays: isFirstChunk && stepsPending.length ? stepsPending : undefined,
-      caloriesDays: isFirstChunk && caloriesPending.length ? caloriesPending : undefined,
+      hrSamples: undefined,
+      spo2Samples: spo2Pending.length ? spo2Pending : undefined,
+      sleepSessions: sleepPending.length ? sleepPending : undefined,
+      activityDays: stepsPending.length ? stepsPending : undefined,
+      caloriesDays: caloriesPending.length ? caloriesPending : undefined,
     };
-
-    if (isPayloadEmpty(chunkPayload)) {
-      // No work for this chunk (HR slice empty + non-first chunk OR everything empty).
-      continue;
-    }
-
-    const response = await postMultiVitals(chunkPayload);
+    const response = await postMultiVitals(smallVitalsPayload);
     deviceId = response.deviceId;
     totalInserted = addCounts(totalInserted, response.inserted);
     totalRejected = addCounts(totalRejected, response.rejected);
     totalDuplicates = addCounts(totalDuplicates, response.duplicates);
-
-    // Drain THIS chunk's pending entries into recent.
-    if (hrSlice && hrSlice.length > 0) {
-      useHR.getState().acceptSyncResult(
-        hrSlice.map((s) => String(s.measuredAtSec)),
+    // Drain the slices we just sent.
+    if (spo2Pending.length) {
+      useSpO2.getState().acceptSyncResult(
+        spo2Pending.map((s) => String(s.measuredAtSec)),
       );
     }
-    if (isFirstChunk) {
-      if (spo2Pending.length) {
-        useSpO2.getState().acceptSyncResult(
-          spo2Pending.map((s) => String(s.measuredAtSec)),
-        );
-      }
-      if (sleepPending.length) {
-        useSleep.getState().acceptSyncResult(
-          sleepPending.map((s) => String(s.sessionStartSec)),
-        );
-      }
-      if (stepsPending.length) {
-        useActivity.getState().acceptStepsSyncResult(
-          stepsPending.map((d) => d.dayLocal),
-        );
-      }
-      if (caloriesPending.length) {
-        useActivity.getState().acceptCaloriesSyncResult(
-          caloriesPending.map((d) => d.dayLocal),
-        );
-      }
+    if (sleepPending.length) {
+      useSleep.getState().acceptSyncResult(
+        sleepPending.map((s) => String(s.sessionStartSec)),
+      );
     }
+    if (stepsPending.length) {
+      useActivity.getState().acceptStepsSyncResult(
+        stepsPending.map((d) => d.dayLocal),
+      );
+    }
+    if (caloriesPending.length) {
+      useActivity.getState().acceptCaloriesSyncResult(
+        caloriesPending.map((d) => d.dayLocal),
+      );
+    }
+  }
+
+  // Phase 2 — HR-only chunks. Each chunk has MULTIVITALS_HR_CHUNK_SIZE
+  // samples (100). For a worst-case 3000-sample HR backfill: 30 POSTs.
+  // Per-chunk validation + insert + audit-log is bounded so the CPU
+  // soft limit isn't tripped.
+  const hrChunks = chunkArray(hrPending, MULTIVITALS_HR_CHUNK_SIZE);
+  for (const hrSlice of hrChunks) {
+    if (hrSlice.length === 0) continue;
+    const hrChunkPayload: MultiVitalsPayload = {
+      ...basePayload,
+      hrSamples: hrSlice,
+      spo2Samples: undefined,
+      sleepSessions: undefined,
+      activityDays: undefined,
+      caloriesDays: undefined,
+    };
+    const response = await postMultiVitals(hrChunkPayload);
+    deviceId = deviceId || response.deviceId;
+    totalInserted = addCounts(totalInserted, response.inserted);
+    totalRejected = addCounts(totalRejected, response.rejected);
+    totalDuplicates = addCounts(totalDuplicates, response.duplicates);
+    useHR.getState().acceptSyncResult(
+      hrSlice.map((s) => String(s.measuredAtSec)),
+    );
   }
 
   return {

@@ -50,10 +50,28 @@ export async function postMultiVitals(
     // accumulating in MMKV pending without anyone knowing why /sync
     // wasn't accepting them. Per CLAUDE.md voice + data rules: include
     // status + name only, never PHI.
-    const detail = (error as { status?: number; name?: string }).status
-      ? `${(error as { status?: number }).status} ${error.message}`
+    //
+    // supabase.functions.invoke wraps the Response in error.context.
+    // Surface .status from the context so trace logs show "503" /
+    // "504" / "CPU time soft limit reached" rather than just the
+    // generic "non-2xx status code" string.
+    const ctx = (error as { context?: { status?: number; statusText?: string } }).context;
+    const status = ctx?.status;
+    const statusText = ctx?.statusText;
+    const detail = status
+      ? `${status} ${statusText ?? ''} (${error.message})`.trim()
       : error.message;
-    throw new Error(`/sync invoke failed: ${detail}`);
+    // Sample size in the error helps correlate failures with payload
+    // size when the CPU soft limit hits a borderline chunk.
+    const sizes = [
+      payload.bpReadings?.length && `bp=${payload.bpReadings.length}`,
+      payload.hrSamples?.length && `hr=${payload.hrSamples.length}`,
+      payload.spo2Samples?.length && `spo2=${payload.spo2Samples.length}`,
+      payload.sleepSessions?.length && `sleep=${payload.sleepSessions.length}`,
+      payload.activityDays?.length && `act=${payload.activityDays.length}`,
+      payload.caloriesDays?.length && `cal=${payload.caloriesDays.length}`,
+    ].filter(Boolean).join(',');
+    throw new Error(`/sync invoke failed: ${detail} [${sizes}]`);
   }
   if (!data) throw new Error('/sync returned no body');
   return data;
