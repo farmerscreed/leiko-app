@@ -140,9 +140,20 @@ export function buildOvernightSeries(
 }
 
 /**
- * Pulls the last N awake-window (07:00–21:00 UTC) samples for the recent
- * readings list. Awake samples are what the user took on-demand; they
- * read more naturally in the list than overnight averages.
+ * Build the full list of recent SpO2 readings, newest-first. The
+ * RecentReadingsSection wrapper handles slicing + the "Show more"
+ * picker (defaults to 5 visible).
+ *
+ * Sprint 16.5c rewrite: prior implementation hard-capped this at ~4
+ * rows (newest + last-night low + 2 "awake reading" rows) even when
+ * the user had dozens of valid samples. The wrapper's "Show more"
+ * footer never appeared because `total <= defaultCount`. Now we
+ * surface every valid sample so the picker can expose them.
+ *
+ * The first row keeps the "Just now" caption (current latest sample)
+ * + we synthesize an "Overnight low" pseudo-row when available, so the
+ * top-of-list keeps the readable narrative the design intended.
+ * Everything after that is a chronological sample list.
  */
 function buildRecentList(
   pendingAndRecent: readonly SpO2Sample[],
@@ -152,32 +163,35 @@ function buildRecentList(
     return [];
   }
 
-  // Most recent sample = "Just now" headline row.
   const sortedByRecency = pendingAndRecent
     .slice()
     .sort((a, b) => b.measuredAtSec - a.measuredAtSec);
   const newest = sortedByRecency[0] ?? null;
 
-  // Last overnight low for "Overnight average" context.
   const lastOvernightLow =
     overnightLowsRecent.length > 0
       ? overnightLowsRecent[overnightLowsRecent.length - 1]
       : null;
 
-  // Pick a couple of distinct awake-window samples for the tail rows.
-  const awake = sortedByRecency.filter((s) => {
-    const hr = new Date(s.measuredAtSec * 1000).getUTCHours();
-    return (
-      hr >= OVERNIGHT_WINDOW_END_HOUR && hr < OVERNIGHT_WINDOW_START_HOUR
-    );
-  });
-
   const rows: RecentReading[] = [];
+  const nowMs = Date.now();
   if (newest) {
+    const ageHours = (nowMs - newest.measuredAtSec * 1000) / 3_600_000;
+    // Sprint 16.5c — age-aware "newest" label. Pre-fix hardcoded "Just
+    // now" was misleading when the latest sample was hours old (which
+    // is common for SpO2 — hourly cadence + skin contact varies).
+    const newestContext =
+      ageHours < 1.5
+        ? 'Just now'
+        : ageHours < 24
+          ? 'Latest today'
+          : ageHours < 48
+            ? 'Latest · yesterday'
+            : `Latest · ${formatDayShort(newest.measuredAtSec)}`;
     rows.push({
       id: `spo2-${newest.measuredAtSec}`,
       value: `${newest.percent}%`,
-      context: 'Just now',
+      context: newestContext,
       time: formatTimeShort(newest.measuredAtSec),
     });
   }
@@ -189,15 +203,24 @@ function buildRecentList(
       time: 'last night',
     });
   }
-  for (const s of awake.slice(1, 3)) {
+  // All remaining samples after the newest, in recency order. Use a
+  // calendar-day boundary for the time label so today's daytime
+  // samples read as "6:42 am" but yesterday-and-older read as "Mon".
+  const nowSec = Math.floor(Date.now() / 1000);
+  const todayBoundary = nowSec - (nowSec % 86400);
+  for (const s of sortedByRecency.slice(1)) {
+    const isToday = s.measuredAtSec >= todayBoundary;
+    const isOvernight = (() => {
+      const hr = new Date(s.measuredAtSec * 1000).getUTCHours();
+      return hr >= OVERNIGHT_WINDOW_START_HOUR || hr < OVERNIGHT_WINDOW_END_HOUR;
+    })();
     rows.push({
       id: `spo2-${s.measuredAtSec}`,
       value: `${s.percent}%`,
-      context: 'Awake reading',
-      time: formatDayShort(s.measuredAtSec),
+      context: isOvernight ? 'Overnight reading' : 'Daytime reading',
+      time: isToday ? formatTimeShort(s.measuredAtSec) : formatDayShort(s.measuredAtSec),
     });
   }
-  // Pass full list — RecentReadingsSection handles slicing + the picker.
   return rows;
 }
 

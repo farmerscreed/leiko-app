@@ -40,6 +40,10 @@ import {
   type VitalSeries,
 } from '../../components/CorrelationStrip';
 import { HRZonesCard, type HRZone } from '../../components/HRZonesCard';
+import {
+  RecentReadingsSection,
+} from '../../components/RecentReadingsSection';
+import type { RecentReading } from '../../components/RecentReadingsList';
 import { useDailyPulseData } from '../../state/dailyPulse';
 import { useHR } from '../../state/hr';
 import { useSleep } from '../../state/sleep';
@@ -190,6 +194,58 @@ export function buildSleepHRCorrelation(
   return { hr, sleep };
 }
 
+// Sprint 16.5c — recent-readings row helpers.
+//
+// HR has the highest sample density of any vital (5-min auto cadence →
+// ~200 samples in the slice's recent cap). The user asked for the same
+// "Recent readings + Show more picker" affordance the other vitals have
+// so they can audit when each sample was captured. We pass the full
+// sorted list to RecentReadingsSection; its picker handles paging.
+
+function hrRowContext(bpm: number, ageHours: number, isFirst: boolean): string {
+  // The 0x15 history packet doesn't carry per-sample motion state, so
+  // we lean on the BPM zones for readable copy. Matches the HRZones
+  // bands (Resting / Steady / Elevated / Active) without re-inventing
+  // colour semantics.
+  const zone =
+    bpm < 65
+      ? 'Resting'
+      : bpm < 95
+        ? 'Steady'
+        : bpm < 125
+          ? 'Elevated'
+          : 'Active';
+  if (isFirst && ageHours < 1.5) return `Latest · ${zone.toLowerCase()}`;
+  if (ageHours < 24) return zone;
+  if (ageHours < 48) return `${zone} · yesterday`;
+  return zone;
+}
+
+function hrRowTime(measuredAtSec: number, nowMs: number): string {
+  const d = new Date(measuredAtSec * 1000);
+  const ageHours = (nowMs - measuredAtSec * 1000) / 3_600_000;
+  if (ageHours < 24) {
+    return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+  if (ageHours < 48) return 'Yesterday';
+  return d.toLocaleDateString([], { weekday: 'short' });
+}
+
+function buildHRRecentRows(samples: ReadonlyArray<HRSample>): RecentReading[] {
+  if (samples.length === 0) return [];
+  const sorted = samples.slice().sort((a, b) => b.measuredAtSec - a.measuredAtSec);
+  const nowMs = Date.now();
+  return sorted.map((s, idx) => {
+    const ageHours = (nowMs - s.measuredAtSec * 1000) / 3_600_000;
+    return {
+      id: `hr-${s.measuredAtSec}`,
+      value: `${Math.round(s.bpm)}`,
+      context: hrRowContext(s.bpm, ageHours, idx === 0),
+      time: hrRowTime(s.measuredAtSec, nowMs),
+    };
+  });
+}
+
 const INSIGHT_BODY_HAS_DATA =
   "Your resting heart rate has settled three points lower than last month. That tracks with the better sleep we've seen — they tend to move together. A calm wake again this morning.";
 
@@ -252,6 +308,8 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
       ),
     [allSleepSessions, nowSec],
   );
+
+  const recentRows = useMemo(() => buildHRRecentRows(allSamples), [allSamples]);
 
   const hasData = restingToday !== null;
   const hasZoneData = zones.some((z) => z.pct > 0);
@@ -342,6 +400,15 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
           caption="Sleep × resting HR — last 7 days"
           testID="hr-detail-correlation"
           style={{ marginHorizontal: 20 }}
+        />
+      ) : null}
+
+      {recentRows.length > 0 ? (
+        <RecentReadingsSection
+          vital="hr"
+          eyebrow="Recent readings"
+          readings={recentRows}
+          testID="hr-detail-recent"
         />
       ) : null}
 
