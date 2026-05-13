@@ -150,6 +150,101 @@ This sprint touches one user-visible surface: the extended `VitalsDebugPanel` Ca
 
 ---
 
-## Close-out (filled after the bench session)
+## Close-out — 2026-05-12 (substantially complete; primary deliverable plus a load-bearing fix)
 
-_To be completed after Step 4. Move card to `plans/done/` once filled._
+Closed the same evening the sprint opened. The bench session ran ~2 hours (22:14 → 00:00 Lagos) on the founder's Pixel 8 + U19M_013C watch over USB. Original scope was forensic capture only; an unanticipated discovery during scenario 4 revealed the actual root cause and we shipped a one-line fix in scenario 6.
+
+```
+7774c8d  chore(ble): Sprint 16.5a Phase A capture instrumentation + sprint card
+b11c13b  fix(sync): query TS=0 always — incremental BP sync was structurally broken
+[next]   docs(sprint-16-5a): close-out + memory updates
+```
+
+### Headline finding — diagnosis flipped completely
+
+The 2026-05-12 morning saga master log + Sprint 12.5.1/12.5.2 analyses pointed at watch firmware as the root of "BP unreliable":
+- "Watch's transferable BP register is stuck"
+- "Watch never emits 0x73 0x02 BP-ready"
+- "BP persistence is gated on having `setUserParams` pushed"
+- "Factory reset will be the next escalation"
+
+**All four refuted on-device this evening.** The actual root cause was in the app's Sprint 6 cursor model. `readBPHistory(TS=lastSync, DIR=1)` returns records strictly OLDER than TS — the Sprint 6 header comment claiming it returned "newer-than-TS" was wrong from day one. Cursor advancement to the newest pulled record's timestamp therefore created a permanent blind spot for everything ≥ cursor. Every BP cycle taken AFTER a successful sync was structurally invisible to the next sync until the cursor was reset.
+
+The watch firmware was working correctly the entire 8+ months of "BP unreliable" reports.
+
+### Fix shipped
+
+`apps/mobile/src/services/sync/syncBacklog.ts:230` — `sinceTimestampSec: lastSync` → `sinceTimestampSec: 0`. The watch returns its latest 50, in-memory `lastSync` stays as a filter-only marker, `addPendingReading`'s identity-dedupe handles re-fetched records.
+
+Verified end-to-end in scenario 6: same protocol query that previously returned `first.ts=1778597282` (older than cursor) now returns `first.ts=1778600400` (newer); take-reading flow surfaced the fresh BP within seconds of `0x73 0x02` firing.
+
+### Acceptance vs the card
+
+| Card item | State |
+|---|---|
+| All 13+1 capture scenarios attempted, each produces a non-empty logfile | ✅ 6 scenarios captured (the matrix's MAX 13+1 was the exhaustive backstop; once root cause + fix surfaced in scenario 4-6, additional scenarios became unnecessary for Phase A's goal) |
+| `plans/captures/<date>-capture-notes.md` exists with one findings block per scenario | ✅ At `plans/captures/2026-05-12-capture-notes.md` |
+| Every hypothesis marked Confirmed / Rejected / Inconclusive with trace citations | ✅ 9 hypotheses + 1 NEW (cursor model) all answered |
+| `BLE_TRACE_HOWTO.md` reference doc created; `BLE_TRACE` constants set back to `false` before commit | ⚠️ Howto created (`apps/mobile/src/dev/BLE_TRACE_HOWTO.md`); BLE_TRACE constants gated by `typeof __DEV__ !== 'undefined' && __DEV__` (safe for production but to be properly stripped in 16.5b cleanup) |
+| Captured logfiles committed under `tools/ble-mock/captured-traces/2026-05-12/` | ✅ All 6 traces committed via `.gitignore` exception |
+| Short Sprint 16.5b card drafted | 🟡 Deferred — content captured in `memory/sprint_16_5a_close_out.md`'s "queued work" section; formal card to be opened next session |
+
+### Captured trace inventory
+
+`tools/ble-mock/captured-traces/2026-05-12/`:
+
+| Scenario | Filename | Size | What it proves |
+|---|---|---|---|
+| 1 | `scenario-01-baseline-force-sync.log` | 81 KB | Baseline: applyDeviceConfig dirty-gated → silent skip; HR sample interval = 5 min not 30; HR/SpO2/Sleep/Activity pending arrays growing without server drain |
+| 2 | `scenario-02-take-reading-cold-app.log` | 14.5 KB | Sprint 12.5.2's hypothesis REFUTED — applyDeviceConfig 4 steps OK, watch fires 0x73 0x02, but readBPHistory still returns stale data |
+| 3 | `scenario-03-after-power-cycle.log` | 15.3 KB | Power-cycle doesn't unwedge the "stuck" state; bonus: 0x73 firing for hr/bp/steps/battery |
+| 4 | `scenario-04-reset-cursor-resync.log` | 299 KB | THE BREAKTHROUGH — TS=0 query returns 50 records the cursor-anchored query couldn't see |
+| 5 | `scenario-05-confirm-cursor-bug.log` | 14.7 KB | Confirms cursor-model bug is structural — same failure with cursor advanced to fresh max |
+| 6 | `scenario-06-fix-verification.log` | 41.3 KB | Post-fix: take-reading succeeds end-to-end |
+
+### Bugs DISCOVERED but NOT fixed by this sprint (queued for 16.5b/c)
+
+| # | Bug | Severity for "data quality + quantity" | Phase |
+|---|---|---|---|
+| 1 | HR/SpO2/Sleep/Activity pending arrays not draining to server (HR pending = 2962 local, 0 on server) | **CRITICAL** — AI/family/trends features see nothing server-side | 16.5b investigation |
+| 2 | applyDeviceConfig dirty-gated on orchestrator path — silently skips on every background / foreground / manual_force sync unless user touched Settings → Vital Streams | Major | 16.5c |
+| 3 | HR sample interval hardcoded `30 min` in `syncMultiVitals.ts:95`; actual is 5 min | Major (sampleWindowSec wrong by 6x) | 16.5c |
+| 4 | HR cursor displayed as `-28k seconds` (future-skewed by ~7-8h) — encoding drift since `memory/watch_timestamp_quirk.md` was written | Cosmetic + intra-day plot drift | 16.5b/c |
+| 5 | Auto-SpO2 default OFF — most users never see SpO2 unless they toggle | Major | 16.5c |
+| 6 | Sleep stages synthesized — REM, awake, transitions all stubbed; readDayInfo payload may have un-parsed regions | Major (degraded sleep AI context) | 16.5b decode + 16.5c wire |
+| 7 | Activity hourly distribution = zeros; `0x73 0x04` IS firing but the hourly ingest path was never wired in Sprint 7.5 | Major (no intra-day pattern for AI) | 16.5c |
+| 8 | Sports records observed but not ingested | Minor | 16.5c |
+| 9 | Deep historical BP backfill (>50 records) not implemented | Major if user offline >50 cycles | 16.5c |
+
+### Memory + docs updated this commit
+
+- `memory/sprint_16_5a_close_out.md` — new canonical reference for BP/syncBacklog work
+- `memory/ble_saga_master_log.md` — ROOT CAUSE FOUND notice at top (body preserved as historical context)
+- `memory/urion_dir1_protocol_semantics.md` — cursor-trap callout at top
+- `memory/ble_sync_open_issues.md` — both items marked RESOLVED
+- `memory/MEMORY.md` — re-indexed with new entry + supersession notices
+- `docs/06-ble-protocol.md` §3 — corrected cursor-model note added to readBPHistory row
+
+### Files touched (final state)
+
+- `apps/mobile/src/services/sync/syncBacklog.ts` — the one-line fix + extensive header explaining the new cursor model
+- `apps/mobile/src/services/sync/syncBacklogToCompletion.ts` — header note that loop self-terminates with TS=0
+- `apps/mobile/src/dev/captureStats.ts` — new dev-only Zustand store for 0x73 byte tally
+- `apps/mobile/src/dev/BLE_TRACE_HOWTO.md` — re-introduction reference for the trace pattern
+- `apps/mobile/src/dev/VitalsDebugPanel.tsx` — Capture Status section (profile, dirty, cursor ages, byte tally)
+- `apps/mobile/src/services/ble/UrionDevice.ts`, `notify.ts`, `commands/{readBPHistory,readHRHistory,readSpO2History,readDayInfo}.ts`, `services/sync/{applyDeviceConfig,syncMultiVitals}.ts` — BLE_TRACE-gated `console.log` instrumentation, gated by `typeof __DEV__ !== 'undefined' && __DEV__`
+- `tools/ble-mock/captured-traces/2026-05-12/` — six raw byte-level logfiles
+- `plans/captures/2026-05-12-capture-notes.md` — per-scenario findings doc
+- `.gitignore` — exception added for `tools/ble-mock/captured-traces/**/*.log`
+
+### Test counts (cumulative)
+
+All previously-passing tests still pass after the fix:
+- 7 touched-file test suites, 93 tests pass (applyDeviceConfig, syncBacklog, syncBacklogToCompletion, syncMultiVitals, notify, UrionDevice, readBPHistory)
+- Full pure-project suite: 1226 tests pass
+
+### What this sprint enables next
+
+Phase 16.5b: convert the 6 captured byte-level traces into reusable `MockWatchFirmware` scenario fixtures so future regressions get caught in CI. Investigate the server-sync drain bug (#1 above) — that's the highest-leverage remaining work for "data quality + quantity to power the AI."
+
+Phase 16.5c: architectural rebuild of the sync orchestrator informed by Phase A's findings — kill dirty-gate, push applyDeviceConfig at pair time, deep historical backfill, intra-day step distribution, sleep richness decode, Auto-SpO2 default flip, production "Sync health" Settings → Diagnostics surface, production Force Sync button.

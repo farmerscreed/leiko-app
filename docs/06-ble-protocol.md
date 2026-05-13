@@ -132,7 +132,7 @@ Fourteen commands wired in v1.0. Each has a TypeScript wrapper in `apps/mobile/s
 | Set time format / metric | `0x04` | `setTimeFormat(device, fmt)` | D6 US-86 |
 | Auto HR on/off | `0x16` | `setAutoHR(device, bool)` | D6 US-87 |
 | Read HR history | `0x15` | `readHRHistory(device, since)` | D6 US-29 / US-31 |
-| **Read BP history** | `0x14` | `readBPHistory(device, since)` | **Core sync** |
+| **Read BP history** | `0x14` | `readBPHistory(device, since)` | **Core sync** — see §3.1 below for the cursor model |
 | Auto SpO2 on/off | `0x2C` | `setAutoSpO2(device, bool)` | D6 US-87 |
 | Read SpO2 history | `0x2D` | `readSpO2History(device, day)` | D6 US-31 |
 | Find watch (vibrate) | `0x50` | `findWatch(device)` | D6 US-84 helper |
@@ -153,6 +153,37 @@ export async function setAutoHR(device: Device, enabled: boolean): Promise<void>
   await sendCommand(device, 0x16, payload, expectByte0(0x16));
 }
 ```
+
+### 3.1 The `readBPHistory` cursor model — CORRECTED 2026-05-12
+
+**Verified empirically in Sprint 16.5a Phase A (commit `b11c13b`).** This section corrects an 8+ month silent failure in the Sprint 6 cursor model.
+
+`readBPHistory(TS=X, DIR=1)` returns up to COUNT records **strictly OLDER than X**, not records "newer than X." The Sprint 6 syncBacklog header comment claimed DIR=1 with TS=lastSync returned "up to 50 newer ones" — that interpretation was wrong from day one. Cursor advancement to the newest pulled record's timestamp therefore created a permanent blind spot for everything ≥ cursor: every BP cycle taken AFTER a successful sync was structurally invisible to the next sync until the cursor was reset.
+
+**The correct pattern for incremental sync:**
+
+```ts
+// Always query TS=0. Per protocol §4.5: "TS=0 returns latest COUNT records,
+// DIR ignored." The watch returns its current latest 50 (or fewer if it has
+// fewer stored). Filter by lastSync in JS to keep only records newer than
+// the previous high-watermark; addPendingReading dedupes the rest by
+// (source, deviceBleId, measuredAtSec).
+let readings = await readBPHistory(device, {
+  sinceTimestampSec: 0,        // ← NOT lastSync
+  direction: 'oldest_first',    // moot with TS=0 but kept for clarity
+  count: BATCH_SIZE,
+});
+const fresh = lastSync > 0
+  ? readings.filter((r) => r.timestampSec > lastSync)
+  : readings;
+```
+
+**For deep historical backfill (records older than the latest 50):** DIR=1 with TS = oldest_returned_in_previous_batch IS the correct tool. Each iteration advances TS BACKWARD, which is what DIR=1 was actually designed for. Sprint 7's `syncBacklogToCompletion` originally intended this pattern; Phase 16.5c will wire it properly.
+
+**Hard rules:**
+- Never use `TS=lastSync` (or any non-zero TS derived from a previously-pulled record) with DIR=1 for incremental sync. Use TS=0.
+- The in-memory `lastSync` is a filter-only marker, not a query anchor.
+- See `memory/sprint_16_5a_close_out.md` and `memory/urion_dir1_protocol_semantics.md` for the full investigation context and trace evidence.
 
 ---
 
