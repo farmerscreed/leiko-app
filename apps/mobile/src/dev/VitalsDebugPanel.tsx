@@ -50,6 +50,11 @@ const TIMELINE_EVENTS = new Set([
   'reading_sync_success',
   'reading_sync_failed',
   'ble_disconnected',
+  // Sprint 16.5b — surface multi-vitals upload outcomes. Pre-16.5b the
+  // panel was completely silent on whether HR/SpO2/Sleep/Activity made
+  // it to the server.
+  'multi_vitals_sync_failed',
+  'vital_sync_accepted',
 ]);
 
 function filterTimeline(
@@ -77,6 +82,14 @@ function summarizeProps(name: string, props: unknown): string {
   if (name === 'reading_sync_success') return p.duplicate ? 'dupe' : 'new';
   if (name === 'reading_sync_failed') return String(p.reason ?? '');
   if (name === 'ble_disconnected') return String(p.reason ?? '');
+  if (name === 'multi_vitals_sync_failed') {
+    return `${p.reason ?? '?'} · pending hr=${p.hr_pending ?? '?'} ` +
+      `spo2=${p.spo2_pending ?? '?'} sleep=${p.sleep_pending ?? '?'} ` +
+      `steps=${p.steps_pending ?? '?'}`;
+  }
+  if (name === 'vital_sync_accepted') {
+    return `${p.vital_type ?? '?'} · ${p.count ?? 0}`;
+  }
   return '';
 }
 

@@ -516,6 +516,142 @@ async function syncDayInfoStep(
   return { sleep: sleepCount, activity: activityCount };
 }
 
+/** Sprint 16.5b — Edge Function CPU-soft-limit-safe chunk size.
+ *  Empirically ~3000 HR samples in one POST triggers CPU termination on
+ *  Supabase's default Deno isolate. 300/chunk → ~10 chunks for a worst-
+ *  case 3000-sample backfill, each well under the CPU budget. The number
+ *  is conservative — raise it if the function tightens up later. */
+const MULTIVITALS_CHUNK_SIZE = 300;
+
+function chunkArray<T>(arr: T[] | undefined, size: number): T[][] {
+  if (!arr || arr.length === 0) return [];
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
+}
+
+function emptyCounts(): MultiVitalsCounts {
+  return { bp: 0, hr: 0, spo2: 0, sleep: 0, steps: 0, calories: 0 };
+}
+
+function addCounts(a: MultiVitalsCounts, b: MultiVitalsCounts): MultiVitalsCounts {
+  return {
+    bp: a.bp + b.bp,
+    hr: a.hr + b.hr,
+    spo2: a.spo2 + b.spo2,
+    sleep: a.sleep + b.sleep,
+    steps: a.steps + b.steps,
+    calories: a.calories + b.calories,
+  };
+}
+
+/** Type alias so the local helpers above can reference the shape without
+ *  pulling postMultiVitals's import (which is already imported below). */
+type MultiVitalsCounts = {
+  bp: number;
+  hr: number;
+  spo2: number;
+  sleep: number;
+  steps: number;
+  calories: number;
+};
+
+/**
+ * Sprint 16.5b — chunked POST that respects the Supabase Edge Function's
+ * CPU soft limit. The HR array (which can hold thousands of samples after
+ * a long offline period or a fresh-install backfill) is split into
+ * MULTIVITALS_CHUNK_SIZE-sized batches; SpO2 / sleep / activity / calories
+ * ride in the FIRST chunk only.
+ *
+ * Each chunk acceptSyncResult's its own slice ONLY after the chunk's
+ * POST succeeds. A mid-stream failure aborts the loop and re-throws —
+ * the unsent slices stay in pending for the next sync.
+ *
+ * Returns aggregate `MultiVitalsResponse` shape so the caller's
+ * `inserted` count reflects all chunks combined.
+ */
+async function postMultiVitalsChunked(
+  basePayload: MultiVitalsPayload,
+  hrPending: HRSample[],
+  spo2Pending: SpO2Sample[],
+  sleepPending: SleepSession[],
+  stepsPending: ActivityDay[],
+  caloriesPending: CaloriesDay[],
+): Promise<{ deviceId: string; inserted: MultiVitalsCounts; rejected: MultiVitalsCounts; duplicates: MultiVitalsCounts }> {
+  const hrChunks = chunkArray(hrPending, MULTIVITALS_CHUNK_SIZE);
+  // Even when HR is empty we still want one POST (for any spo2/sleep/etc).
+  const chunkCount = Math.max(hrChunks.length, 1);
+
+  let deviceId = '';
+  let totalInserted: MultiVitalsCounts = emptyCounts();
+  let totalRejected: MultiVitalsCounts = emptyCounts();
+  let totalDuplicates: MultiVitalsCounts = emptyCounts();
+
+  for (let i = 0; i < chunkCount; i++) {
+    const isFirstChunk = i === 0;
+    const hrSlice = hrChunks[i];
+
+    const chunkPayload: MultiVitalsPayload = {
+      ...basePayload,
+      hrSamples: hrSlice && hrSlice.length > 0 ? hrSlice : undefined,
+      // Smaller per-day arrays ride in the first chunk only.
+      spo2Samples: isFirstChunk && spo2Pending.length ? spo2Pending : undefined,
+      sleepSessions: isFirstChunk && sleepPending.length ? sleepPending : undefined,
+      activityDays: isFirstChunk && stepsPending.length ? stepsPending : undefined,
+      caloriesDays: isFirstChunk && caloriesPending.length ? caloriesPending : undefined,
+    };
+
+    if (isPayloadEmpty(chunkPayload)) {
+      // No work for this chunk (HR slice empty + non-first chunk OR everything empty).
+      continue;
+    }
+
+    const response = await postMultiVitals(chunkPayload);
+    deviceId = response.deviceId;
+    totalInserted = addCounts(totalInserted, response.inserted);
+    totalRejected = addCounts(totalRejected, response.rejected);
+    totalDuplicates = addCounts(totalDuplicates, response.duplicates);
+
+    // Drain THIS chunk's pending entries into recent.
+    if (hrSlice && hrSlice.length > 0) {
+      useHR.getState().acceptSyncResult(
+        hrSlice.map((s) => String(s.measuredAtSec)),
+      );
+    }
+    if (isFirstChunk) {
+      if (spo2Pending.length) {
+        useSpO2.getState().acceptSyncResult(
+          spo2Pending.map((s) => String(s.measuredAtSec)),
+        );
+      }
+      if (sleepPending.length) {
+        useSleep.getState().acceptSyncResult(
+          sleepPending.map((s) => String(s.sessionStartSec)),
+        );
+      }
+      if (stepsPending.length) {
+        useActivity.getState().acceptStepsSyncResult(
+          stepsPending.map((d) => d.dayLocal),
+        );
+      }
+      if (caloriesPending.length) {
+        useActivity.getState().acceptCaloriesSyncResult(
+          caloriesPending.map((d) => d.dayLocal),
+        );
+      }
+    }
+  }
+
+  return {
+    deviceId,
+    inserted: totalInserted,
+    rejected: totalRejected,
+    duplicates: totalDuplicates,
+  };
+}
+
 // ────────────────────────────────────────────────────────────────────
 // Pipeline entry point.
 
@@ -653,38 +789,29 @@ export async function syncMultiVitals(
     };
   }
 
+  // Sprint 16.5b — chunk the multi-vitals POST when the payload is
+  // large. The Supabase Edge Function's CPU soft limit (~200ms) kills
+  // the isolate when validation + insert + audit-log for ~3000 HR
+  // samples runs in a single request. Symptom: every multi-vitals POST
+  // returns "non-2xx status code" after `CPU time soft limit reached`
+  // in the function log; pending arrays grow indefinitely.
+  //
+  // Chunking strategy: HR is the high-volume vital (5-min cadence →
+  // ~250-300/day per user). Send HR in batches of MULTIVITALS_CHUNK_SIZE.
+  // SpO2 / Sleep / Activity / Calories ride along in the FIRST chunk
+  // only (they're small enough not to stress the function alone).
+  // After each successful chunk, that slice of HR moves pending → recent.
+  // Subsequent chunks run only if the previous one succeeded; first
+  // failure aborts the rest (preserves pending for retry next sync).
   try {
-    const response = await postMultiVitals(payload);
-    // Move pending → recent on each slice using the keys we pushed.
-    // The /sync response gives us insert/duplicate counts; treat any
-    // sample we sent as accepted (the server has it; cursor already
-    // advanced; whether THIS request inserted vs found-as-duplicate
-    // is irrelevant for client-side state).
-    if (hrPending.length) {
-      useHR.getState().acceptSyncResult(
-        hrPending.map((s) => String(s.measuredAtSec)),
-      );
-    }
-    if (spo2Pending.length) {
-      useSpO2.getState().acceptSyncResult(
-        spo2Pending.map((s) => String(s.measuredAtSec)),
-      );
-    }
-    if (sleepPending.length) {
-      useSleep.getState().acceptSyncResult(
-        sleepPending.map((s) => String(s.sessionStartSec)),
-      );
-    }
-    if (stepsPending.length) {
-      useActivity.getState().acceptStepsSyncResult(
-        stepsPending.map((d) => d.dayLocal),
-      );
-    }
-    if (caloriesPending.length) {
-      useActivity.getState().acceptCaloriesSyncResult(
-        caloriesPending.map((d) => d.dayLocal),
-      );
-    }
+    const response = await postMultiVitalsChunked(
+      payload,
+      hrPending,
+      spo2Pending,
+      sleepPending,
+      stepsPending,
+      caloriesPending,
+    );
     logger.track('vital_sync_accepted', {
       vital_type: 'hr',
       count: response.inserted.hr,
