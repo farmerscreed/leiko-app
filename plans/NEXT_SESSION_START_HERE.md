@@ -1,94 +1,83 @@
-# Start here — next session
+# Start here — next session (post Sprint 16.5d)
 
-Last touched: 2026-05-13 ~11:35 Lagos. Founder asked to stop and pick up fresh.
+Last touched: 2026-05-13 ~22:30 Lagos. Founder asked to end the session and pick up fresh.
 
-## 30-second context
+## 90-second context
 
-Sprint 16.5a fixed the BP cursor bug (Phase A, end of 2026-05-12). Sprint 16.5b started 2026-05-13 — shipped 5 of 9 queued Phase A bugs + confirmed the multi-vitals server-sync drain root cause (Supabase Edge Function CPU soft limit). **Chunking fix is shipped (commit `389fb80`) but NOT YET VERIFIED on-device** — that's the first thing.
+Sprint 16.5d shipped tonight. Five commits (`bb9eb24` → `af64223`, pushed to origin). The Sleep page is fully rebuilt and protocol-honest; HR + SpO2 timestamp encoding is correct; the "server has more data than device" pattern was solved for sleep via a server-hydration hook that's now the template for the other multi-day vitals.
 
-A separate intermittent finding surfaced: BP value mismatch (watch face shows X/Y, app stores different X/Y for the same timestamp). Trace site added (`722d8c2`), waiting for the next mismatch to capture raw bytes.
+The bench session ended on a working state. Three things remain on the punch-list before this round of vital work is complete.
 
 ## Read in this order
 
-1. **`memory/sprint_16_5a_close_out.md`** — the canonical Phase A reference. Cursor model fix, what's been refuted (saga master log claims), hard rules.
-2. **`memory/sprint_16_5b_session_2026_05_13.md`** — today's full progress note. Commits, what's verified vs not, what's open.
-3. (Optional, if interested in raw evidence) `tools/ble-mock/captured-traces/2026-05-13/scenario-{07,08}.log` — byte-level traces.
+1. **`memory/sprint_16_5d_close_out.md`** — the full 16.5d story, the eight hard rules, the pending list, the file matrix.
+2. **`memory/sprint_16_5c_close_out.md`** — the multi-vitals partial-index fix story (still load-bearing).
+3. **`memory/sprint_16_5a_close_out.md`** — the BP cursor fix (still load-bearing).
+4. Skip the saga master log + the 16.5b memo — both superseded.
 
-Skip the saga master log — both 16.5a and 16.5b supersede it.
+Optional, only if relevant to today's task:
+- `tools/ble-mock/captured-traces/2026-05-13/scenario-{12-16}.log` — bench evidence
+- `apps/mobile/src/hooks/useHydrateSleepFromServer.ts` — the canonical template for the new hydration hooks
 
-## Three things you should know up front
+## The three pending tasks (in priority order)
 
-1. **The multi-vitals server-sync drain is a CPU soft limit issue on the Edge Function.** The function log shows `CPU time soft limit reached: isolate: ...`. Chunking is the right move. Latest iteration uses 100-sample HR chunks + a separate "small vitals" POST with NO HR. Worst case: 30+1 POSTs for a 3000-sample backfill.
+### 1. Activity hydration + UI fix
+Same shape as Sleep. Server has 11+ days of `steps_day` + `calories_day`; watch's day-info storage rolls over so a re-sync only gets today; user reported "only one record" earlier.
 
-2. **The first action is force-stop + reopen Leiko on the phone, then watch HR pending drop.** No code changes needed first. If HR drops from 3092 → 0 over ~60s, drain is fixed. If `multi_vitals_sync_failed` shows up with a status code (504/500/401/etc.), the new error log will tell us what to do next.
+What to add:
+- `useActivity.seedStepsFromServer(rows)` + `seedCaloriesFromServer(rows)` — idempotent merge by `dayLocal`
+- `useHydrateActivityFromServer` hook — mirror `useHydrateSleepFromServer` exactly
+- Wire into `SelfBuyerHome` alongside the existing two hydration hooks
+- Audit `ActivityDetail` for the same hard-cap pattern that bit SpO2 + Sleep (`buildRecentList` returning ≤ 4 hard-coded rows)
+- Wire `onRangeChange` so 7d / 30d / 90d filters Activity's chart + list
 
-3. **The BP value mismatch is intermittent.** One cycle this morning had it (133/80 → 160/93). Another cycle 30 min later didn't (145/85 → 145/85). The added trace site logs raw bytes on every BP cycle going forward; next mismatch is captured automatically.
+### 2. Wire 7d/30d/90d on BP / HR / SpO2 / Activity
+DetailShell renders `TimeRangePills` on every detail screen, but only `SleepDetail` mirrors the range into local state and re-derives data. The other four screens render the pills purely as decoration.
+
+Per screen:
+- Add `const [range, setRange] = useState<TrendRange>('7d')`
+- Pass `onRangeChange={setRange}` to `DetailShell`
+- Filter the screen's chart series / recent-list / correlation strip by the range
+- For correlation strips: pass `tBounds={{ tMin: now - days*DAY_MS, tMax: now }}` + `axisLabels={{ left, right }}` — the props are already on `CorrelationStrip` (added in 16.5d)
+
+### 3. Home / Daily Pulse spot-check
+Just verify that the constellation tiles + the morning narration are using the now-populated server data. Probably nothing to fix; this is a "did the fix land" pass.
 
 ## Bench environment state
 
-The user paused mid-bench. Background processes may still be running OR they may have closed the laptop. Either way, run the preflight first:
+The user has paused. Background services may or may not still be running — run the preflight first:
 
 ```powershell
 & "$PWD\scripts\dev-phone-reconnect.ps1"
 ```
 
-This checks (and tells you to start) all of:
-- Phone tethered via USB
-- Metro on :8081
-- Supabase local on :54321
-- Edge Functions runtime
-- adb reverse tcp:8081 + tcp:54321
+This checks Metro on :8081, Supabase Kong on :54321, Edge Functions runtime, adb reverse forwards. If anything is red, start it:
+- **Metro**: `cd apps/mobile && npx expo start --dev-client` (must run from `apps/mobile`)
+- **Supabase**: `supabase start && supabase functions serve --env-file supabase/functions/.env`
+- Both env files (`.env.local` at root + `apps/mobile/.env.local`) are gitignored — if missing on a fresh worktree, copy from `C:\Users\admin\Documents\APP\kena-app\`
 
-If anything is RED, start it:
-- **Metro** (must run from this worktree): `cd apps/mobile && npx expo start --dev-client`
-- **Supabase**: needs Docker Desktop running first; then `supabase start` (long warmup) then `supabase functions serve --env-file supabase/functions/.env` (the env file is gitignored; if missing, copy from `C:\Users\admin\Documents\APP\kena-app\supabase\functions\.env`)
-- **Env files**: `.env.local` files at both repo root + apps/mobile are gitignored. If they're missing in the worktree (e.g. fresh `git worktree add`), copy from the main repo at `C:\Users\admin\Documents\APP\kena-app\` (both root and apps/mobile).
+The captures dir for tomorrow's session is at `tools/ble-mock/captured-traces/<today's date>/`. Scenario 17+ would be the next numbers.
 
-The captured-traces directory for today is at `tools/ble-mock/captured-traces/2026-05-13/`. Scenario 9 would be the next number.
+## Recommended first action
 
-## The verify-chunking ritual
+**Start with Activity (#1).** It's the same pattern Sleep just nailed; should ship in one sitting. Once that's done, Activity has full parity with Sleep — then either close out the 7d/30d/90d wiring across the remaining screens, or stop and let the founder do a holistic verification pass.
 
-```sh
-# Clear logcat buffer
-adb logcat -c
+Activity-detail-specific notes:
+- The `useActivity` slice has TWO recent arrays: `recentSteps` (per-day step totals) and `recentCalories` (per-day calorie totals). The hydration hook needs to map both from `vitals_other` (vital_type `steps_day` and `calories_day` respectively).
+- The DB query I ran during 16.5d showed: server has steps + calories for 2026-05-03 → 2026-05-13 (11 days). Activity should surface all of those after hydration.
 
-# Capture to scenario 9 (background)
-adb logcat -v time ReactNativeJS:V '*:S' \
-  > tools/ble-mock/captured-traces/2026-05-13/scenario-09-chunked-v2-verify.log 2>&1 &
-```
+## Hard rules carried over from 16.5d (don't repeat the lessons)
 
-Then on the phone:
-1. Force-stop Leiko (Settings → Apps → Leiko → Force Stop, or long-press icon → App info → Force Stop).
-2. Reopen Leiko.
-3. Open Vitals Debug Panel.
-4. Watch HR pending count for 60-90 seconds. Should drop visibly.
-5. Screenshot the panel timeline.
-
-What you're looking for:
-- **Win:** many `vital_sync_accepted hr · N` events on the timeline, HR pending → 0
-- **Loss:** `multi_vitals_sync_failed /sync invoke failed: <STATUS_CODE> <statusText> [hr=100]`
-   - 504 / timeout → still CPU. Reduce `MULTIVITALS_HR_CHUNK_SIZE` to 50 or look at server optimisation.
-   - 401 → auth. Token expired, refresh path broken.
-   - 400 → schema/validation. Server rejecting a sample field.
-   - 500 → server bug. Look at supabase function logs.
-
-## Things that are explicitly NOT in scope tonight
-
-- The deferred Phase A bugs needing fresh bench captures: HR cursor encoding (#4), sleep richness decode (#6), activity hourly wire-up (#7), sports records ingest (#8). All queued for a future session.
-- The BLE_TRACE strip — gated behind `typeof __DEV__ !== 'undefined' && __DEV__`, safe to keep. Strip during Phase 16.5b cleanup once chunking + BP mismatch are both resolved.
-
-## Hard rules (don't repeat work already paid for)
-
-From `memory/sprint_16_5a_close_out.md` — these stay forever:
-1. Don't use `TS=cursor` with DIR=1 for incremental BP sync. Use TS=0.
-2. Don't think the watch's transferable BP register is "stuck" — it's not. The cursor model was broken.
-3. Don't propose factory reset of the watch as a fix. That hypothesis is dead.
-4. Don't drop `addPendingReading`'s identity-dedupe.
-5. Don't change the cursor's units (raw watch firmware seconds).
-6. Don't ship `BLE_TRACE = true` — always gate behind `typeof __DEV__ !== 'undefined' && __DEV__`.
+From `memory/sprint_16_5d_close_out.md`:
+1. HR/SpO2 day-anchor timestamps use `watchVitalTimestampToUtcSec` (subtract localOff). Not BP's `watchTimestampToUtcSec`. Not no-shift.
+2. SpO2 packets are SINGLE bytes per hour. Don't reintroduce pair-decoding.
+3. Server is source of truth for historical day-data. Don't try to coax history out of the watch — its day-info storage rolls over within ~3-5 days.
+4. `useReadings.syncPending` cap must sort by `measuredAtSec` DESC before slicing.
+5. Hydration-hook gate: `localCount < FETCH_LIMIT`, not `localCount === 0`.
+6. Dev panel reset must NOT touch the BP cursor. (Triggers legacy `/sync` flood per Sprint 16.5b.)
+7. Wiring 7d/30d/90d means BOTH `onRangeChange` AND the screen's data selectors react to the range.
+8. `CorrelationStrip` `tBounds` + `axisLabels` props are the canonical way to make the chart's x-axis match the range window.
 
 ## What was the last thing the user did
 
-They took a fresh BP cycle on the watch at 11:23 Lagos. Watch face showed 145/85. App's `lates` showed 145/85 p75. That cycle did NOT have the value mismatch — values matched perfectly. But the HR pending was still 3092 at that point, with `multi_vitals_sync_failed` firing on every sync. That's when chunking-v2 was shipped (commit `389fb80`) and the user paused.
-
-So next session: app needs to reload to pick up `389fb80`, then we verify drain.
+Verified the Sleep × Morning BP correlation chart with the new `tBounds` + `axisLabels` props, said "WE ARE GOOD WITH THIS", and asked to wrap so the next session can pick up cleanly.
