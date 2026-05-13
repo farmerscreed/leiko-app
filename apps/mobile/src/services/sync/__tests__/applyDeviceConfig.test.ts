@@ -32,7 +32,32 @@ beforeEach(() => {
 });
 
 describe('applyDeviceConfig', () => {
-  it('no-ops when dirty is false', async () => {
+  it('runs even when dirty=false IF lastFlushedAtMs is stale or 0 (Sprint 16.5b debounce-or-dirty)', async () => {
+    // Default state: lastFlushedAtMs=0, dirty=false. With the new debounce-
+    // or-dirty gate, sinceFlushMs is POSITIVE_INFINITY > FLUSH_DEBOUNCE_MS,
+    // so the flush runs. This refreshes the watch's config periodically
+    // even when the user hasn't touched Settings — the load-bearing fix
+    // for "demographics never reach the watch on background syncs."
+    const setters = {
+      setAutoHR: jest.fn().mockResolvedValue(undefined),
+      setAutoSpO2: jest.fn().mockResolvedValue(undefined),
+      setUserParams: jest.fn().mockResolvedValue(undefined),
+      setGoals: jest.fn().mockResolvedValue(undefined),
+    };
+    const r = await applyDeviceConfig(fakeDevice, {
+      profileSnapshot: makeProfile(),
+      setters,
+    });
+    expect(r.ran).toBe(true);
+    expect(setters.setAutoHR).toHaveBeenCalled();
+  });
+
+  it('no-ops when dirty=false AND last flush was recent (within debounce window)', async () => {
+    // Simulate a successful flush moments ago (clearDirty stamps Date.now()).
+    useVitalSetup.getState().setAutoHr(false);
+    useVitalSetup.getState().clearDirty();
+    expect(useVitalSetup.getState().dirty).toBe(false);
+    expect(useVitalSetup.getState().lastFlushedAtMs).toBeGreaterThan(0);
     const setters = {
       setAutoHR: jest.fn().mockResolvedValue(undefined),
       setAutoSpO2: jest.fn().mockResolvedValue(undefined),
