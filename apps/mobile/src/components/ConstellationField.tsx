@@ -158,7 +158,10 @@ export function ConstellationField({
     opacity: pulseOpacity.value,
   }));
 
-  const youLabelColor = theme.colors.text.tertiary;
+  // Sprint 16.6 — "YOU" label was 9pt text.tertiary, effectively
+  // invisible against the dark canopy. Lift to text.secondary; the
+  // size bump happens in the Text style below.
+  const youLabelColor = theme.colors.text.secondary;
   const centerDotColor = theme.colors.text.primary;
 
   return (
@@ -267,9 +270,10 @@ export function ConstellationField({
           allowFontScaling={false}
           style={{
             fontFamily: theme.fontFamilies.numeric,
-            fontSize: 9,
-            lineHeight: 11,
-            letterSpacing: 1.8, // 0.20em at 9pt
+            fontSize: 11,
+            lineHeight: 13,
+            letterSpacing: 2.2,
+            fontWeight: '500',
             color: youLabelColor,
             textTransform: 'uppercase',
           }}

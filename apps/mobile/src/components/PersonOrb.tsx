@@ -294,8 +294,13 @@ export function PersonOrb({
             allowFontScaling={false}
             style={{
               fontFamily: theme.fontFamilies.editorial,
-              fontSize: 14,
-              lineHeight: 16,
+              // Sprint 16.6 — 14pt editorial serif was rendering too
+              // thin against the dark canopy to be readable at a
+              // glance. 17pt + 500 weight gives the name presence
+              // without breaking the editorial typographic register.
+              fontSize: 17,
+              lineHeight: 20,
+              fontWeight: '500',
               color: theme.colors.text.primary,
             }}
           >
@@ -305,11 +310,14 @@ export function PersonOrb({
             allowFontScaling={false}
             style={{
               fontFamily: theme.fontFamilies.numeric,
-              fontSize: 10,
-              lineHeight: 12,
+              // Sprint 16.6 — bump 10→12 so BP under the portrait
+              // ("147/93", "—") is actually readable.
+              fontSize: 12,
+              lineHeight: 14,
+              fontWeight: '500',
               color: accent,
               letterSpacing: 0.4,
-              marginTop: 1,
+              marginTop: 2,
             }}
           >
             {bpLabel}
