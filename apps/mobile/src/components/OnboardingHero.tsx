@@ -9,9 +9,13 @@
 //     Single brand-accent stop at 18% opacity centre, fading to 0 at
 //     280pt radius. Keeps the colour budget under D11's 8% screen rule
 //     because the gradient is mostly transparent.
-//   - type.displayXxl headline (64/68 bold) per D12 §3 (explicitly
-//     specced for "Onboarding hero, paywall hero" moments).
-//   - spacing.xxxxxxl (96pt) vertical rhythm per D12 §4.
+//   - type.displayXl headline (48/52 bold). D12 §3 lists displayXxl
+//     (64pt) for onboarding heroes; in practice on 360pt-wide Androids
+//     (Nord, Pixel 4a-class) that bleeds 3+ lines and consumes the
+//     fold. Stepping down one notch keeps the premium feel without
+//     pushing the CTA off-screen.
+//   - spacing.xxxxl (48pt) top vertical rhythm; reduced from D12 §4's
+//     suggested 6xl (96pt) for the same fold-budget reason.
 //   - Cinematic entrance: glow + icon scale + fade over 1200ms with a
 //     decelerate ease, then headline → body → buttons stagger in. Once
 //     per screen mount; treats the intro as a *moment* rather than a
@@ -57,7 +61,7 @@ export interface OnboardingHeroProps {
   skip?: { label: string; onPress: () => void; testID?: string };
 }
 
-const HERO_SIZE = 280;
+const HERO_SIZE = 220;
 const ICON_SIZE = 96;
 
 export function OnboardingHero({
@@ -74,7 +78,7 @@ export function OnboardingHero({
   const theme = useTheme();
   const reducedMotion = useReducedMotion();
 
-  const display = theme.type('displayXxl');
+  const display = theme.type('displayXl');
   const bodyType = theme.type('bodyL');
   const accent = theme.colors.brand.primary;
 
@@ -136,7 +140,7 @@ export function OnboardingHero({
           styles.content,
           {
             paddingHorizontal: theme.spacing.xxl,
-            paddingTop: theme.spacing.xxxxxxl,
+            paddingTop: theme.spacing.xxxxl,
             paddingBottom: theme.spacing.xxl,
           },
         ]}
@@ -189,9 +193,9 @@ export function OnboardingHero({
               fontWeight: display.weight as '700',
               fontFamily: display.family,
               textAlign: 'center',
-              marginTop: theme.spacing.xxxl,
+              marginTop: theme.spacing.xl,
               marginBottom: theme.spacing.l,
-              maxWidth: 360,
+              maxWidth: 340,
             },
           ]}
         >
