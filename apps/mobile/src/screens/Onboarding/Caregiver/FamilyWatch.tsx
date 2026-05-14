@@ -21,7 +21,7 @@ export function CaregiverFamilyWatchScreen({
   const finalizing = useOnboarding((s) => s.finalizing);
   const finalizeError = useOnboarding((s) => s.finalizeError);
 
-  const [pressed, setPressed] = useState<'have' | null>(null);
+  const [pressed, setPressed] = useState<'have' | 'later' | null>(null);
 
   const headline = theme.type('displayM');
   const body = theme.type('bodyL');
@@ -37,6 +37,21 @@ export function CaregiverFamilyWatchScreen({
       // caregiverOnboardingComplete flag flip and renders the home stack.
     } catch {
       // Error message surfaces via finalizeError below.
+      setPressed(null);
+    }
+  };
+
+  // Sprint 16.6: third option for caregivers whose parent already has
+  // the watch on another phone, or who just want to finish onboarding
+  // now and pair the watch later from Settings. Same underlying call —
+  // completeWithWatchInHand only finalizes the user + family rows, it
+  // does NOT actually pair a device. The name is historical.
+  const handleAddLater = async () => {
+    if (finalizing) return;
+    setPressed('later');
+    try {
+      await completeWithWatchInHand();
+    } catch {
       setPressed(null);
     }
   };
@@ -183,6 +198,51 @@ export function CaregiverFamilyWatchScreen({
           >
             We're getting ready to ship watches direct in the United States.
           </Text>
+        </Card>
+
+        <Card
+          elevation="low"
+          onPress={handleAddLater}
+          disabled={finalizing}
+          accessibilityLabel="Add a watch later. Finish setup now and pair a watch from Settings when you're ready."
+          testID="family-watch-later"
+          style={{ marginBottom: theme.spacing.l }}
+        >
+          <Text
+            style={{
+              color: theme.colors.text.primary,
+              fontSize: title.size,
+              lineHeight: title.lineHeight,
+              fontWeight: title.weight as '600',
+              fontFamily: title.family,
+              marginBottom: theme.spacing.xs,
+            }}
+          >
+            Add a watch later
+          </Text>
+          <Text
+            style={{
+              color: theme.colors.text.secondary,
+              fontSize: body.size,
+              lineHeight: body.lineHeight,
+              fontFamily: body.family,
+            }}
+          >
+            Finish setting up now. You can pair a watch from Settings whenever it's ready.
+          </Text>
+          {pressed === 'later' && finalizing ? (
+            <Text
+              style={{
+                color: theme.colors.text.secondary,
+                fontSize: caption.size,
+                fontFamily: caption.family,
+                marginTop: theme.spacing.s,
+              }}
+              accessibilityLiveRegion="polite"
+            >
+              Setting things up…
+            </Text>
+          ) : null}
         </Card>
 
         {finalizeError ? (
