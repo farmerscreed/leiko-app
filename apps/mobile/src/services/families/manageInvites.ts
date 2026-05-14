@@ -18,6 +18,11 @@ export interface SendInviteResult {
   invitationId: string;
   pairingCode: string;
   expiresAt: string;
+  /** Sprint 16.6 FUN-1: true when the server emailed the code via
+   *  Resend. False when the Edge Function's RESEND_API_KEY is unset
+   *  or the send failed. Callers may surface different copy
+   *  ("We emailed Sarah" vs "Share this code with Sarah"). */
+  emailSent?: boolean;
 }
 
 export interface AcceptInviteInput {
