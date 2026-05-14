@@ -13,10 +13,12 @@
 # and avoids EAS's Docker dependency. Use `-Mode eas-local` if you
 # want the `eas build --profile preview-lan --local` flow instead.
 #
-# Usage:
-#   pwsh -File scripts/build-preview-apk.ps1
-#   pwsh -File scripts/build-preview-apk.ps1 -Mode eas-local
-#   pwsh -File scripts/build-preview-apk.ps1 -LanIp 192.168.0.166
+# Usage (Windows PowerShell 5.1 or PowerShell 7 — script is dual-compatible):
+#   powershell -File scripts\build-preview-apk.ps1
+#   powershell -File scripts\build-preview-apk.ps1 -Mode eas-local
+#   powershell -File scripts\build-preview-apk.ps1 -LanIp 192.168.0.166
+# Or from an already-open PowerShell session:
+#   .\scripts\build-preview-apk.ps1
 #
 # Exits 0 on success, non-zero on any pre-flight check failure.
 
@@ -67,9 +69,13 @@ if (-not $LanIp) {
 # 2. Read dev Supabase publishable/anon key from `supabase status`.
 # ------------------------------------------------------------------
 try {
-    # 2>$null suppresses the "Stopped services" warning that supabase
-    # prints to stderr; we only want the stdout JSON document.
-    $rawJson = (& supabase status --output json 2>$null) -join "`n"
+    # Route through cmd.exe so its `2>nul` consumes the supabase
+    # CLI's stderr (e.g. the harmless "Stopped services" notice for
+    # imgproxy/pooler) before PowerShell sees it. Without this,
+    # PS 5.1's native-command stderr handler turns the notice into
+    # a NativeCommandError that $ErrorActionPreference='Stop' treats
+    # as fatal — even though the JSON stdout is perfectly fine.
+    $rawJson = (cmd /c "supabase status --output json 2>nul") -join "`n"
     if (-not $rawJson) { throw 'supabase status returned no output' }
     $status = $rawJson | ConvertFrom-Json
 } catch {
