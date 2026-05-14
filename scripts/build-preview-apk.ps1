@@ -195,15 +195,22 @@ if ($code -ne 0) {
 # ------------------------------------------------------------------
 # 7. Locate APK + print post-build hint.
 # ------------------------------------------------------------------
-$apkSearchRoot = if ($Mode -eq 'expo-run') {
-    Join-Path $mobileDir 'android\app\build\outputs\apk\release'
+$apkSearchRoots = if ($Mode -eq 'expo-run') {
+    @(
+        # Debug variant (current default) lives under apk\debug.
+        Join-Path $mobileDir 'android\app\build\outputs\apk\debug',
+        # Keep release as a fallback for the day we reinstate it.
+        Join-Path $mobileDir 'android\app\build\outputs\apk\release'
+    )
 } else {
-    $mobileDir
+    @($mobileDir)
 }
 $apk = $null
-if (Test-Path $apkSearchRoot) {
-    $apk = Get-ChildItem -Path $apkSearchRoot -Filter '*.apk' -Recurse -ErrorAction SilentlyContinue |
+foreach ($searchRoot in $apkSearchRoots) {
+    if (-not (Test-Path $searchRoot)) { continue }
+    $candidate = Get-ChildItem -Path $searchRoot -Filter '*.apk' -Recurse -ErrorAction SilentlyContinue |
         Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if ($candidate) { $apk = $candidate; break }
 }
 
 Write-Host ''
