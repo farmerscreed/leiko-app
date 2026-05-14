@@ -163,8 +163,13 @@ Write-Host ''
 Push-Location $mobileDir
 try {
     if ($Mode -eq 'expo-run') {
-        Write-Host '>>> npx expo run:android --variant release' -ForegroundColor Cyan
-        & npx expo run:android --variant release
+        # Pass $mobileDir as the positional project-root so Expo CLI
+        # doesn't walk up to the workspace root (where node_modules/expo
+        # is hoisted) and pick that as the project root. Documented
+        # symptom of the workspace heuristic: Metro fails to resolve
+        # `./index.js` because it thinks the entry lives at the repo root.
+        Write-Host ">>> npx expo run:android `"$mobileDir`" --variant release" -ForegroundColor Cyan
+        & npx expo run:android $mobileDir --variant release
         $code = $LASTEXITCODE
     } else {
         Write-Host '>>> eas build --platform android --profile preview-lan --local' -ForegroundColor Cyan
