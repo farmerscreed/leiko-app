@@ -1,28 +1,68 @@
-// TrendsWeeklySummaryCard — Trends v2 "The Letter".
+// TrendsWeeklySummaryCard — Sprint 16.5g.
 //
-// Dashed-border placeholder card for the Tier-C weekly summary slot.
-// Copy comes from the design brief; the engine that generates the
-// real summary is deferred (Sprint 12.5 follow-up). When the engine
-// lands, this component gets swapped for the real renderer; the
-// layout slot on Trends stays put so nothing else moves.
+// Real weekly recap card. Pre-fix this rendered a static "Weekly
+// summary · coming soon" placeholder; now it consumes the Tier-C
+// engine output (`buildWeeklySummary` in services/ai/trendsTierC.ts)
+// and renders a present-tense letter about what the week did.
+//
+// When the engine can't author a meaningful recap (insufficient data),
+// the card falls back to the calm placeholder copy so the slot
+// doesn't disappear entirely. The dashed-border treatment is reserved
+// for the placeholder; the real recap uses a solid border.
+//
+// Voice rules (docs/05-voice-and-claims.md): all strings come from
+// the engine, which is voice-clean by construction.
 
+import { useMemo } from 'react';
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useTheme } from '../theme';
+import { buildWeeklySummary } from '../services/ai/trendsTierC';
+import type { TrendsData } from '../utils/trends-aggregate';
+import type { AccountType, CorrelationRow } from '../types/database';
+import type { BPBaseline } from '../utils/vitalBaselines';
 
-export const TRENDS_WEEKLY_EYEBROW = 'Weekly summary · coming soon';
-export const TRENDS_WEEKLY_BODY =
-  'A short letter, every Sunday, of what your week did.';
+export const TRENDS_WEEKLY_EYEBROW_FALLBACK = 'Weekly summary';
+export const TRENDS_WEEKLY_BODY_FALLBACK =
+  'A short letter every Sunday, once your week has a few days of readings.';
 
 export interface TrendsWeeklySummaryCardProps {
+  /** Aggregated trends data from useTrendsData. */
+  data?: TrendsData;
+  correlations?: CorrelationRow[];
+  accountType?: AccountType;
+  parentLabel?: string;
+  baselineBP?: BPBaseline | null;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
 
 export function TrendsWeeklySummaryCard({
+  data,
+  correlations = [],
+  accountType = 'caregiver',
+  parentLabel,
+  baselineBP,
   style,
   testID,
 }: TrendsWeeklySummaryCardProps) {
   const theme = useTheme();
+
+  const summary = useMemo(
+    () =>
+      buildWeeklySummary({
+        data,
+        correlations,
+        accountType,
+        parentLabel,
+        baselines: { bp: baselineBP ?? null },
+      }),
+    [data, correlations, accountType, parentLabel, baselineBP],
+  );
+
+  const isPlaceholder = summary === null;
+  const eyebrow = summary?.eyebrow ?? TRENDS_WEEKLY_EYEBROW_FALLBACK;
+  const body = summary?.body ?? TRENDS_WEEKLY_BODY_FALLBACK;
+
   return (
     <View
       style={[
@@ -33,6 +73,10 @@ export function TrendsWeeklySummaryCard({
           padding: theme.spacing.l,
           borderRadius: theme.radii.m,
           borderColor: theme.colors.border.subtle,
+          borderStyle: isPlaceholder ? 'dashed' : 'solid',
+          backgroundColor: isPlaceholder
+            ? 'transparent'
+            : theme.colors.surface.warmSubtle,
         },
         style,
       ]}
@@ -45,12 +89,14 @@ export function TrendsWeeklySummaryCard({
           fontSize: 9,
           letterSpacing: 1.6,
           textTransform: 'uppercase',
-          color: theme.colors.text.tertiary,
+          color: isPlaceholder
+            ? theme.colors.text.tertiary
+            : theme.colors.brand.primary,
           marginBottom: 6,
         }}
         testID={testID ? `${testID}-eyebrow` : undefined}
       >
-        {TRENDS_WEEKLY_EYEBROW}
+        {eyebrow}
       </Text>
       <Text
         style={[
@@ -59,7 +105,7 @@ export function TrendsWeeklySummaryCard({
         ]}
         testID={testID ? `${testID}-body` : undefined}
       >
-        {TRENDS_WEEKLY_BODY}
+        {body}
       </Text>
     </View>
   );
@@ -67,8 +113,6 @@ export function TrendsWeeklySummaryCard({
 
 const styles = StyleSheet.create({
   root: {
-    borderStyle: 'dashed',
     borderWidth: 1,
-    // Subtle wash — the dashed border carries the "placeholder" cue.
   },
 });
