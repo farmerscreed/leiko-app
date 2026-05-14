@@ -66,6 +66,12 @@ import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import { useActivity } from '../../state/activity';
 import { useTheme } from '../../theme';
 import type { ActivityDay } from '../../types/vitals';
+import { BaselineReference } from '../../components/BaselineReference';
+import {
+  activityBaseline,
+  formatActivityBaseline,
+  type ActivityBaseline,
+} from '../../utils/vitalBaselines';
 
 export interface ActivityDetailProps {
   onBack: () => void;
@@ -85,11 +91,53 @@ const RANGE_TO_DAYS: Record<TrendRange, number> = {
   '90d': 90,
 };
 
-const PLACEHOLDER_INSIGHT_POPULATED =
-  "You hit your step goal four times this week — a quiet improvement. Today's still early; an evening walk would close the ring. Step count tends to track gently with calmer evening blood pressure.";
+// Sprint 16.5f — deterministic insight bodies. The pre-fix
+// PLACEHOLDER_INSIGHT_POPULATED was a hardcoded story about "four
+// times this week + evening walk"; this version computes against the
+// real numbers in `rangedDays`.
 
 const PLACEHOLDER_INSIGHT_EMPTY =
   "Welcome. Once your steps start coming in, this is where you'll see how the day is shaping up — and a gentle nudge if you'd like one.";
+
+const PLACEHOLDER_INSIGHT_PRE_BASELINE =
+  "After a few days of activity, this card will compare your current pace to your usual and call out anything worth noting.";
+
+/** Deterministic activity insight body — real "X met-goal days this
+ *  week" / "your week is averaging Y/day vs your usual Z" framing. */
+function activityInsightBody(
+  rangedDays: ActivityDay[],
+  goal: number,
+  baseline: ActivityBaseline | null,
+): string {
+  if (rangedDays.length === 0 || baseline === null) {
+    return PLACEHOLDER_INSIGHT_PRE_BASELINE;
+  }
+  const metGoal = rangedDays.filter((d) => d.totalSteps >= goal).length;
+  const total = rangedDays.length;
+  const sum = rangedDays.reduce((a, b) => a + b.totalSteps, 0);
+  const avgPerDay = total > 0 ? Math.round(sum / total) : 0;
+  const baselineDiff = avgPerDay - baseline.median;
+  const absDiff = Math.abs(baselineDiff);
+
+  // First line — met-goal frequency.
+  const goalLine =
+    metGoal === 0
+      ? `No met-goal days yet this week — a gentle walk today would change that.`
+      : metGoal === 1
+        ? `You met your goal once this week.`
+        : `You met your goal ${metGoal} times this week.`;
+
+  // Second line — how the average compares to baseline.
+  let compareLine: string;
+  if (absDiff < 500) {
+    compareLine = `Your daily average (${avgPerDay.toLocaleString()}) is right at your usual.`;
+  } else if (baselineDiff > 0) {
+    compareLine = `Your daily average (${avgPerDay.toLocaleString()}) is about ${absDiff.toLocaleString()} steps above your usual — a small lift.`;
+  } else {
+    compareLine = `Your daily average (${avgPerDay.toLocaleString()}) is about ${absDiff.toLocaleString()} steps below your usual.`;
+  }
+  return `${goalLine} ${compareLine}`;
+}
 
 const EMPTY_HERO_MESSAGE = 'Start moving to see your day fill in.';
 
@@ -104,6 +152,8 @@ export function ActivityDetail({
   const pendingStepsRows = useActivity((s) => s.pendingSteps);
   const todayCalories = useActivity((s) => s.todayCalories());
 
+  const recentCaloriesRows = useActivity((s) => s.recentCalories);
+  const pendingCaloriesRows = useActivity((s) => s.pendingCalories);
   const stepsToday = data.activity.stepsToday;
   const targetSteps = data.activity.targetSteps;
 
@@ -128,7 +178,10 @@ export function ActivityDetail({
   );
 
   // ----- Today's calories + move minutes -----------------------------
-  // Move minutes aren't tracked yet (Sprint 7.5 stubs); pass null.
+  // Move ring is hidden in 16.5f — the U16PRO doesn't expose move
+  // minutes. The watch's hourly step buckets are still all-zero per
+  // Sprint 16.5a's open-bugs queue, so a "derived from hourly" estimate
+  // would be 0 anyway. Drop the ring; revisit when hourly ingest lands.
   const caloriesToday = todayCalories?.activityKcal ?? null;
   const moveMinutesToday: number | null = null;
 
@@ -169,10 +222,32 @@ export function ActivityDetail({
   const streakDaysAtGoal = useMemo(
     () =>
       // Streak is a "current run" — always measured from today
-      // backwards. Range-independent.
+      // backwards. Range-independent. 16.5f allows 1 skip per 7 met-
+      // goal days so a single rest day doesn't reset the streak.
       computeStreakFromToday(rangedDays, targetSteps),
     [rangedDays, targetSteps],
   );
+
+  // ----- Baseline reference (16.5f) -----------------------------------
+  const baseline: ActivityBaseline | null = useMemo(
+    () => activityBaseline(recentStepsRows),
+    [recentStepsRows],
+  );
+  const baselineBody = baseline ? formatActivityBaseline(baseline) : '';
+
+  // ----- Weekly calories total (16.5f) --------------------------------
+  // Sum the active kcal over the last 7 days to surface a weekly
+  // calorie stat below the StatTrio. The activity slice tracks
+  // recentCalories per day; we use it directly.
+  const weeklyActiveKcal = useMemo(() => {
+    const all = [...pendingCaloriesRows, ...recentCaloriesRows];
+    if (all.length === 0) return null;
+    const nowSec = Math.floor(Date.now() / 1000);
+    const cutoff = nowSec - 7 * SECONDS_PER_DAY;
+    const window = all.filter((c) => c.measuredAtSec >= cutoff);
+    if (window.length === 0) return null;
+    return Math.round(window.reduce((a, b) => a + b.activityKcal, 0));
+  }, [pendingCaloriesRows, recentCaloriesRows]);
 
   // ----- Recent-days list (no hard cap) ------------------------------
   const recentReadings = useMemo<RecentReading[]>(
@@ -202,6 +277,7 @@ export function ActivityDetail({
             target={targetSteps}
             calories={caloriesToday}
             moveMinutes={moveMinutesToday}
+            hideMoveRing
             empty={isEmpty}
             emptyMessage={isEmpty ? EMPTY_HERO_MESSAGE : undefined}
             staleCaption={activityStaleCaption}
@@ -209,6 +285,14 @@ export function ActivityDetail({
           />
         }
       >
+        {!isEmpty && baselineBody ? (
+          <BaselineReference
+            body={baselineBody}
+            eyebrow="Your typical day"
+            caption={`based on ${baseline?.sampleCount ?? 30} days of activity`}
+            testID="activity-detail-baseline"
+          />
+        ) : null}
         {!isEmpty ? (
           <StatTrio
             testID="activity-detail-stat-trio"
@@ -244,7 +328,11 @@ export function ActivityDetail({
 
         <VitalInsightCard
           vital="activity"
-          body={isEmpty ? PLACEHOLDER_INSIGHT_EMPTY : PLACEHOLDER_INSIGHT_POPULATED}
+          body={
+            isEmpty
+              ? PLACEHOLDER_INSIGHT_EMPTY
+              : activityInsightBody(rangedDays, targetSteps, baseline)
+          }
           testID="activity-detail-insight"
         />
 
@@ -254,6 +342,10 @@ export function ActivityDetail({
           onLearnOpen={onLearnOpen}
           testID="activity-detail-explainer-anchor"
         />
+
+        {!isEmpty && weeklyActiveKcal !== null ? (
+          <WeeklyCaloriesRow kcal={weeklyActiveKcal} />
+        ) : null}
 
         {!isEmpty ? (
           <RecentReadingsSection
@@ -477,10 +569,15 @@ export function buildChartSeries(
   const binCount = Math.ceil(totalDays / 7);
   const values: number[] = [];
   const labels: string[] = [];
-  // Bins are aligned to "today", oldest bin first. For 30d the oldest
-  // bin may be a partial 2-day window; we still total its days.
+  // Sprint 16.5f — bin values are the AVERAGE daily step count over
+  // the days in that bin (was: total). The total made the chart read
+  // wrong against a `dailyGoal × 7` line — a 56k weekly bar next to a
+  // 56k goal line looked like "just barely". Now each bar reads like
+  // "this week, you averaged 8.4k/day" — directly comparable to the
+  // daily goal line. The goal stays at `dailyGoal` (was `dailyGoal × 7`).
   for (let bin = binCount - 1; bin >= 0; bin--) {
     let total = 0;
+    let count = 0;
     let endKeyDate: Date | null = null;
     for (let d = 0; d < 7; d++) {
       const offset = bin * 7 + d;
@@ -488,13 +585,16 @@ export function buildChartSeries(
       const t = nowSec - offset * SECONDS_PER_DAY;
       const key = todayKey(t);
       const day = byDay.get(key);
-      total += day?.totalSteps ?? 0;
+      if (day && day.totalSteps > 0) {
+        total += day.totalSteps;
+        count += 1;
+      }
       if (endKeyDate === null) endKeyDate = dayKeyToDate(key);
     }
-    values.push(total);
+    values.push(count > 0 ? Math.round(total / count) : 0);
     labels.push(endKeyDate ? shortMonthDay(endKeyDate) : '');
   }
-  return { values, labels, goal: dailyGoal * 7 };
+  return { values, labels, goal: dailyGoal };
 }
 
 /** All days within the range, newest first. Includes days with zero
@@ -523,9 +623,11 @@ export function buildRangedDays(
   return out;
 }
 
-/** Walk back from today, count consecutive met-goal days. Stops at the
- *  first miss or first gap. Range-independent — looks at today / yesterday
- *  regardless of which pill is active. */
+/** Walk back from today, count consecutive met-goal days. Sprint 16.5f
+ *  allows ONE skip day per 7 met-goal days so a single rest day doesn't
+ *  reset the streak. Rationale: an unforgiving streak punishes a
+ *  meaningful rest day; the "consecutive met-goal days" interpretation
+ *  stays intuitive while being kinder to real-life patterns. */
 export function computeStreakFromToday(
   rangedDays: ActivityDay[],
   targetSteps: number,
@@ -535,12 +637,23 @@ export function computeStreakFromToday(
   const byDay = new Map<string, ActivityDay>();
   for (const d of rangedDays) byDay.set(d.dayLocal, d);
   let count = 0;
+  let skipsAvailable = 1; // 1 skip per current streak run
   for (let i = 0; i < rangedDays.length; i++) {
     const t = nowSec - i * SECONDS_PER_DAY;
     const key = todayKey(t);
     const day = byDay.get(key);
-    if (!day || day.totalSteps < targetSteps || day.totalSteps === 0) break;
-    count += 1;
+    const metGoal = day && day.totalSteps >= targetSteps;
+    if (metGoal) {
+      count += 1;
+      // Replenish skip every 7 met-goal days (so longer streaks earn
+      // more grace).
+      if (count > 0 && count % 7 === 0) skipsAvailable = 1;
+    } else if (skipsAvailable > 0 && i > 0) {
+      // Use a skip — streak continues but day isn't counted.
+      skipsAvailable -= 1;
+    } else {
+      break;
+    }
   }
   return count;
 }
@@ -557,21 +670,44 @@ function dayContextLabel(dayLocal: string, range: TrendRange): string {
 
 /** Pre-16.5e this function capped at "today + 3 prior days". The cap
  *  silently hid history the user had asked to see. Now we surface every
- *  non-zero day within the selected range, newest first. */
+ *  non-zero day within the selected range, newest first.
+ *
+ *  Sprint 16.5f — "Today" context is now time-of-day aware (was always
+ *  "Today · in progress" regardless of hour). And historical days show
+ *  "Today · met goal" or "Today · light day so far" depending on
+ *  whether today is met-goal-yet. */
 export function buildRecentReadings(
   stepsToday: number,
   rangedDays: ActivityDay[],
   goal: number,
+  nowMs: number = Date.now(),
 ): RecentReading[] {
-  const todayKeyStr = new Date().toISOString().slice(0, 10);
+  const now = new Date(nowMs);
+  const hour = now.getHours();
+  const todayKeyStr = now.toISOString().slice(0, 10);
   const rows: RecentReading[] = [];
-  // Today is always the first row (in-progress framing).
+
+  // Today is always the first row. Sprint 16.5f — context is time-of-day
+  // aware. "in progress" feels wrong at 11pm; "today so far" feels right.
+  let todayContext: string;
+  if (stepsToday >= goal) {
+    todayContext = 'Today · met goal';
+  } else if (hour < 12) {
+    todayContext = 'Today · in progress';
+  } else if (hour < 19) {
+    todayContext = 'Today · so far';
+  } else if (stepsToday > 0) {
+    todayContext = 'Today · light day';
+  } else {
+    todayContext = 'Today · no steps yet';
+  }
   rows.push({
     id: 'today',
     value: stepsToday > 0 ? stepsToday.toLocaleString() : '—',
-    context: 'Today · in progress',
+    context: todayContext,
     time: 'now',
   });
+
   // Every other day with non-zero steps, oldest excluded only when zero.
   for (const day of rangedDays) {
     if (day.dayLocal === todayKeyStr) continue;
@@ -579,15 +715,79 @@ export function buildRecentReadings(
     const date = dayKeyToDate(day.dayLocal);
     const dayName = FULL_DAY_NAMES[date.getUTCDay()];
     const meets = day.totalSteps >= goal;
-    const ctx = meets ? `${dayName} · met goal` : `${dayName} · light day`;
+    // Sprint 16.5f — include date in context so "Wednesday" is no longer
+    // ambiguous (this Wed vs last Wed).
+    const dateLabel = shortMonthDay(date);
+    const ctx = meets
+      ? `${dayName} · met goal`
+      : `${dayName} · light day`;
     rows.push({
       id: `day-${day.dayLocal}`,
       value: day.totalSteps.toLocaleString(),
       context: ctx,
-      time: shortMonthDay(date),
+      time: dateLabel,
     });
   }
   return rows;
+}
+
+// ---------------------------------------------------------------------------
+// Sprint 16.5f — WeeklyCaloriesRow: surfaces the active-kcal total
+// from the last 7 days. The activity hydration in 16.5e populates the
+// calories slice; this is the first place ActivityDetail exposes it
+// outside the hero ring.
+// ---------------------------------------------------------------------------
+
+interface WeeklyCaloriesRowProps {
+  kcal: number;
+}
+
+function WeeklyCaloriesRow({ kcal }: WeeklyCaloriesRowProps) {
+  const theme = useTheme();
+  const labelStyle = theme.type('labelUppercase');
+  const valueStyle = theme.type('numericM');
+  return (
+    <View
+      style={{
+        marginHorizontal: 20,
+        paddingHorizontal: theme.spacing.l,
+        paddingVertical: theme.spacing.m,
+        backgroundColor: theme.colors.surface.warmSubtle,
+        borderColor: theme.colors.border.rim,
+        borderWidth: 0.5,
+        borderRadius: theme.radii.l,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+      testID="activity-detail-weekly-calories"
+    >
+      <Text
+        allowFontScaling={false}
+        style={{
+          fontFamily: labelStyle.family,
+          fontSize: labelStyle.size,
+          lineHeight: labelStyle.lineHeight,
+          letterSpacing: labelStyle.letterSpacing,
+          color: theme.colors.text.tertiary,
+          textTransform: 'uppercase',
+        }}
+      >
+        Weekly calories
+      </Text>
+      <Text
+        allowFontScaling={false}
+        style={{
+          fontFamily: theme.fontFamilies.editorial,
+          fontSize: valueStyle.size,
+          lineHeight: valueStyle.lineHeight,
+          color: theme.colors.text.primary,
+        }}
+      >
+        {kcal.toLocaleString()} kcal
+      </Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

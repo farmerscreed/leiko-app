@@ -77,6 +77,11 @@ export interface ActivityRingsHeroProps {
   /** Optional move minutes. Null = render legend value as "—" and fill
    *  the move ring at 0. */
   moveMinutes?: number | null;
+  /** Sprint 16.5f — when true, render only outer + middle rings (steps
+   *  + calories) and drop the Move legend item. The U16PRO doesn't
+   *  expose move minutes today; ActivityDetail passes true so the
+   *  permanently-empty move ring isn't shown. */
+  hideMoveRing?: boolean;
   /** When true, replaces the giant step count + percent line with "—"
    *  and a soft welcome sub. Empty state for first-day users. */
   empty?: boolean;
@@ -97,6 +102,7 @@ export function ActivityRingsHero({
   target,
   calories = null,
   moveMinutes = null,
+  hideMoveRing = false,
   empty = false,
   emptyMessage,
   staleCaption,
@@ -194,27 +200,30 @@ export function ActivityRingsHero({
               testID={testID ? `${testID}-ring-calories` : undefined}
             />
           </View>
-          {/* Inner — move minutes */}
-          <View
-            style={[
-              styles.ringLayer,
-              {
-                top: 24,
-                left: 24,
-                width: RING_INNER_DIAMETER,
-                height: RING_INNER_DIAMETER,
-              },
-            ]}
-          >
-            <VitalRing
-              vitalType="activity"
-              fill={moveFill}
-              diameter={RING_INNER_DIAMETER}
-              strokeWidth={RING_INNER_STROKE}
-              style={{ opacity: 0.7 }}
-              testID={testID ? `${testID}-ring-move` : undefined}
-            />
-          </View>
+          {/* Inner — move minutes (hidden in 16.5f when watch can't
+              provide a real value). */}
+          {hideMoveRing ? null : (
+            <View
+              style={[
+                styles.ringLayer,
+                {
+                  top: 24,
+                  left: 24,
+                  width: RING_INNER_DIAMETER,
+                  height: RING_INNER_DIAMETER,
+                },
+              ]}
+            >
+              <VitalRing
+                vitalType="activity"
+                fill={moveFill}
+                diameter={RING_INNER_DIAMETER}
+                strokeWidth={RING_INNER_STROKE}
+                style={{ opacity: 0.7 }}
+                testID={testID ? `${testID}-ring-move` : undefined}
+              />
+            </View>
+          )}
         </View>
         <View style={{ flex: 1, minWidth: 0, marginLeft: theme.spacing.l }}>
           <Text
@@ -310,12 +319,14 @@ export function ActivityRingsHero({
           value={formatLegendValue(calories, '')}
           testID={testID ? `${testID}-legend-calories` : undefined}
         />
-        <LegendDot
-          color={moveColor}
-          label="Move"
-          value={formatLegendValue(moveMinutes, 'm')}
-          testID={testID ? `${testID}-legend-move` : undefined}
-        />
+        {hideMoveRing ? null : (
+          <LegendDot
+            color={moveColor}
+            label="Move"
+            value={formatLegendValue(moveMinutes, 'm')}
+            testID={testID ? `${testID}-legend-move` : undefined}
+          />
+        )}
       </View>
     </View>
   );
