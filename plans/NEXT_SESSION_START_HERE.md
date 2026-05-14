@@ -1,77 +1,99 @@
-# Start here — next session (post Sprint 16.5e)
+# Start here — next session (post Sprint 16.5e batch 2)
 
 Last touched: 2026-05-14 Lagos.
 
 ## 90-second context
 
-Sprint 16.5e shipped today on `claude/vigilant-almeida-0bbc5e`. Two commits (`27fe7ca` + `29507dc`). It closes the first two pending tasks from the 16.5d handoff: Activity now has server-side hydration (the same shape as Sleep got in 16.5d), and ActivityDetail's 7d / 30d / 90d pills are wired through — chart, stat trio, and Recent-days list all react. The silent "today + 3 prior days" cap on the Recent-days list (which was hiding history) is gone.
+Sprint 16.5e is **fully shipped**. Five commits on
+`claude/vigilant-almeida-0bbc5e` close the entire 16.5d / 16.5e
+state matrix:
 
-Worktree note: this branch needed a fast-forward merge from `claude/silly-solomon-1be49b` at session start to pick up the 16.5d foundations. The merge is in `1a5f5a2..58a248d`.
+| Vital    | Recent list | Server hydration | 7d/30d/90d wired |
+|----------|-------------|------------------|------------------|
+| BP       | ✓           | ✓                | ✓                |
+| HR       | ✓           | ✓ (16.5e)        | ✓ (16.5e)        |
+| SpO2     | ✓           | ✓ (16.5e)        | ✓ (16.5e)        |
+| Sleep    | ✓           | ✓ (16.5d)        | ✓ (16.5d)        |
+| Activity | ✓           | ✓ (16.5e)        | ✓ (16.5e)        |
+
+What this means for the user: on next rebuild, opening Home will
+pull the family's full vitals history from the server (BP, HR, SpO2,
+sleep sessions, daily steps, daily calories) and seed the local
+slices. Every detail screen's recent-readings list now surfaces that
+history — capped only by the `RECENT_*_CAP` (90 days for daily
+vitals, 200 samples for per-sample vitals). Every detail screen's
+`7d / 30d / 90d` pill re-renders the chart / stats / recent list.
 
 ## Read in this order
 
-1. **`memory/sprint_16_5e_close_out.md`** — today's full story + the new state matrix + the worktree-jest gotcha.
-2. **`memory/sprint_16_5d_close_out.md`** — the eight hard rules carried over.
-3. **`memory/sprint_16_5c_close_out.md`** — the multi-vitals partial-index fix story (still load-bearing).
-4. **`memory/sprint_16_5a_close_out.md`** — the BP cursor fix (still load-bearing).
+1. **`memory/sprint_16_5e_close_out.md`** — full story + file matrix
+   + the worktree-jest gotcha.
+2. **`memory/sprint_16_5d_close_out.md`** — the eight hard rules
+   carried over (plus rule #9 added in 16.5e).
+3. **`memory/sprint_16_5c_close_out.md`** — multi-vitals partial-
+   index fix (still load-bearing).
+4. **`memory/sprint_16_5a_close_out.md`** — BP cursor fix (still
+   load-bearing).
 5. Skip the saga master log + the 16.5b memo — both superseded.
 
-Optional, only if relevant to today's task:
-- `apps/mobile/src/hooks/useHydrateActivityFromServer.ts` — the just-shipped activity hook, near-identical to the sleep one
-- `apps/mobile/src/screens/VitalDetail/ActivityDetail.tsx` — current canonical example of "range-wired detail screen"
-- `tools/ble-mock/captured-traces/2026-05-13/scenario-{12-16}.log` — 16.5d bench evidence (still relevant for any HR/SpO2 protocol work)
+## The remaining tasks (verification only, not code)
 
-## The three pending tasks (in priority order)
+### 1. Bench spot-check
+On the bench phone with a Self-Buyer account that has multi-day
+server-side history, verify:
 
-### 1. Daily Pulse spot-check (carried from 16.5d)
-On the bench phone, verify that:
-- The 5 constellation tiles all surface today's data (post the activity + sleep hydration that now fire from Self-Buyer Home)
-- The morning narration uses the now-populated server data
-- The `7d / 30d / 90d` pills on `ActivityDetail` re-render chart + stats + list correctly when tapped
-- The `7d / 30d / 90d` pills on the OTHER four screens (BP / HR / SpO2 / Sleep) still feel like decoration (they are, until task #3 lands — Sleep was fixed in 16.5d, the others not yet)
+- All 5 constellation tiles surface today's data on cold-start Home.
+- Each detail screen's recent-readings list shows server-side
+  history (not just whatever's left in the watch's day-info storage).
+- Tapping `7d / 30d / 90d` on each detail screen re-renders the
+  chart / stats / recent list. The SpO2 stat trio + overnight chart
+  stay overnight-focused regardless of the pill — that's intentional.
+- Morning narration uses the now-populated server data.
 
-Probably nothing new to fix in this pass; it's a "did the fixes land" pass.
+If anything looks wrong, the most likely culprit is the dailyPulse
+selector — none of 16.5e touched it. Any "tile shows wrong value"
+symptom is probably upstream of hydration.
 
-### 2. HR + SpO2 server hydration
-Same shape as Activity (and Sleep before it). The two slices already have `pending` + `recent` but no `seedFromServer`. Pattern:
-- `useHR.seedFromServer(rows)` + `useSpO2.seedFromServer(rows)` — idempotent merge by `measuredAtSec` (per-sample, not per-day; that's the difference from Sleep + Activity)
-- `useHydrateHRFromServer` + `useHydrateSpO2FromServer` hooks
-- Wire both into `SelfBuyerHome`
+### 2. Regenerate snapshot
+`ActivityDetail.test.tsx.snap` was deleted in commit `29507dc`.
+First jest run in the founder's regular kena-app setup writes a
+fresh one; commit it. The other detail-screen snapshots (BP / HR /
+SpO2) may also need regen — the useState additions show up as new
+hooks in the call order, but visible content at the 7d default
+shouldn't have changed.
 
-Be careful with the keys — HR samples can land at minute granularity, so dedup by exact `measuredAtSec` is the right key. Sleep / Activity dedup by `dayLocal` because they're per-day.
-
-### 3. Wire 7d / 30d / 90d on BP / HR / SpO2 detail screens
-Same shape as the ActivityDetail rewrite that just shipped. Per screen:
-- Add `const [range, setRange] = useState<TrendRange>('7d')`
-- Pass `onRangeChange={setRange}` to `DetailShell`
-- Filter the screen's chart series / recent-list / correlation strip by the range
-- For correlation strips: pass `tBounds={{ tMin: now - days*DAY_MS, tMax: now }}` + `axisLabels={{ left, right }}` — props live on `CorrelationStrip` (added in 16.5d)
-
-`BPDetail.tsx` has a `VitalTrendChart` of its own — audit before changing how it consumes the range.
-
-### 4. (Cleanup) Regenerate ActivityDetail snapshot
-The stale `ActivityDetail.test.tsx.snap` was deleted in `29507dc`. The next jest run in the founder's regular kena-app setup will write a fresh one; commit it.
+### 3. (Bigger follow-up, deferred) Caregiver Home hydration
+The hydration hooks fire from `SelfBuyerHome`. CaregiverHome does
+NOT call them today. When the caregiver-mode work gets cycled back
+to, audit CaregiverHome for the same self-heal pattern — but the
+data shape is different (the caregiver is looking AT a parent's
+readings, not their own), so it's not a copy-paste.
 
 ## Bench environment state
-
-Background services may or may not still be running. Preflight first:
 
 ```powershell
 & "$PWD\scripts\dev-phone-reconnect.ps1"
 ```
 
-This checks Metro on :8081, Supabase Kong on :54321, Edge Functions runtime, adb reverse forwards. If anything is red, start it:
-- **Metro**: `cd apps/mobile && npx expo start --dev-client` (must run from `apps/mobile`)
+Checks Metro on :8081, Supabase Kong on :54321, Edge Functions
+runtime, adb reverse forwards. If anything is red, start it:
+- **Metro**: `cd apps/mobile && npx expo start --dev-client` (must
+  run from `apps/mobile`)
 - **Supabase**: `supabase start && supabase functions serve --env-file supabase/functions/.env`
-- Both env files (`.env.local` at root + `apps/mobile/.env.local`) are gitignored — if missing on a fresh worktree, copy from `C:\Users\admin\Documents\APP\kena-app\`
-
-The captures dir for the next session is at `tools/ble-mock/captured-traces/<today's date>/`. Scenario 17+ would be the next numbers.
+- Both env files (`.env.local` at root + `apps/mobile/.env.local`)
+  are gitignored — if missing on a fresh worktree, copy from
+  `C:\Users\admin\Documents\APP\kena-app\`
 
 ## Worktree note
 
-If you're working in a `.claude\worktrees\...` worktree, jest won't find tests in-worktree — the `__dirname` path contains `\.claude\` which collides with glob escape rules. Code verified with `tsc --noEmit` + `eslint` only. Tests run fine in the founder's regular kena-app checkout. Don't try to fix this in the worktree config.
+If you're in a `.claude\worktrees\...` worktree, jest won't find
+tests — the `__dirname` path contains `\.claude\` which collides
+with glob escape rules. Code was verified with `tsc --noEmit` +
+`eslint` only this session. Tests run fine in the founder's regular
+kena-app checkout.
 
-Also: a fresh worktree starts with no `node_modules`. Junction the parent repo's into both the worktree root AND `apps/mobile`:
+Also: a fresh worktree starts with no `node_modules`. Junction the
+parent repo's into both the worktree root AND `apps/mobile`:
 
 ```cmd
 mklink /J node_modules C:\Users\admin\Documents\APP\kena-app\node_modules
@@ -80,20 +102,40 @@ mklink /J apps\mobile\node_modules C:\Users\admin\Documents\APP\kena-app\apps\mo
 
 ## Recommended first action
 
-**Spot-check on the bench (#1).** Cheap, and tells you whether the just-shipped activity + sleep hydration is doing what the diff says it should. Then make a call: either HR + SpO2 hydration (#2) or close out the 7d/30d/90d wiring across BP/HR/SpO2 (#3), depending on what feels more user-visible at the moment.
+**Rebuild the dev APK + open Self-Buyer Home on the bench phone.**
+The hook chain (BP / sleep / activity / HR / SpO2) fires once per
+Home mount. After ~1s the local slices should be populated; opening
+Activity / HR / SpO2 / BP detail should show real history, not just
+today.
 
 ## Hard rules carried over from 16.5d / 16.5e (don't repeat the lessons)
 
-1. HR/SpO2 day-anchor timestamps use `watchVitalTimestampToUtcSec` (subtract localOff). Not BP's `watchTimestampToUtcSec`. Not no-shift.
-2. SpO2 packets are SINGLE bytes per hour. Don't reintroduce pair-decoding.
-3. Server is source of truth for historical day-data. Don't try to coax history out of the watch — its day-info storage rolls over within ~3-5 days.
-4. `useReadings.syncPending` cap must sort by `measuredAtSec` DESC before slicing.
-5. Hydration-hook gate: `localCount < FETCH_LIMIT`, not `localCount === 0`.
-6. Dev panel reset must NOT touch the BP cursor. (Triggers legacy `/sync` flood per Sprint 16.5b.)
-7. Wiring 7d/30d/90d means BOTH `onRangeChange` AND the screen's data selectors react to the range.
-8. `CorrelationStrip` `tBounds` + `axisLabels` props are the canonical way to make the chart's x-axis match the range window.
-9. (New 16.5e) The `buildRecentReadings`-style hard cap is dead. When you add server hydration to a vital, AUDIT its detail screen's recent-list builder for the same pattern (Activity had `added < 3`; SpO2 had a similar one fixed in 16.5d). Surface every row in the chosen range, newest first, and let the user scroll.
+1. HR/SpO2 day-anchor timestamps use `watchVitalTimestampToUtcSec`
+   (subtract localOff). Not BP's `watchTimestampToUtcSec`. Not no-shift.
+2. SpO2 packets are SINGLE bytes per hour. Don't reintroduce
+   pair-decoding.
+3. Server is source of truth for historical day-data. Don't try to
+   coax history out of the watch — its day-info storage rolls over
+   within ~3-5 days.
+4. `useReadings.syncPending` cap must sort by `measuredAtSec` DESC
+   before slicing.
+5. Hydration-hook gate: `localCount < FETCH_LIMIT`, not
+   `localCount === 0`.
+6. Dev panel reset must NOT touch the BP cursor.
+7. Wiring 7d/30d/90d means BOTH `onRangeChange` AND the screen's
+   data selectors react to the range.
+8. `CorrelationStrip`'s `tBounds` + `axisLabels` props are the
+   canonical way to make the chart's x-axis match the range window.
+9. The `buildRecentReadings`-style hard cap is dead. When you add
+   server hydration to a vital, AUDIT its detail screen's
+   recent-list builder for the same pattern. Surface every row in
+   the chosen range, newest first.
 
 ## What was the last thing the user did
 
-Asked to pick up at Activity per the 16.5d handoff, then to work without stopping for clarifying questions.
+Asked to "round up everything" + ensure the activity page surfaces
+multiple values + then complete all remaining tasks. The full code
+side is now done across all 5 vitals; the activity-page "only one
+value" symptom is addressed by the activity hydration shipped in
+commits `27fe7ca` + `29507dc`. Rebuild required for the user to see
+the fix land.
