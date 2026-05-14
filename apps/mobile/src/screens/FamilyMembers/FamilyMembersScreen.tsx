@@ -33,8 +33,9 @@ const ROLE_LABEL: Record<FamilyRole, string> = {
 };
 
 function formatJoined(iso: string): string {
+  // Sprint 16.5i — device-locale-aware (was hardcoded 'en-US').
   const d = new Date(iso);
-  return d.toLocaleDateString('en-US', {
+  return d.toLocaleDateString(undefined, {
     month: 'short',
     year: 'numeric',
   });

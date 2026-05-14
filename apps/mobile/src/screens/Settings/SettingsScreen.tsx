@@ -128,7 +128,10 @@ function formatSleepTarget(minutes: number): string {
 }
 
 function formatStepsTarget(value: number): string {
-  return `${value.toLocaleString('en-US')} steps`;
+  // Sprint 16.5i — device-locale-aware (was hardcoded 'en-US'). Steps
+  // are a count; Nigerian + US locales both render this with
+  // thousands separators, just different glyphs.
+  return `${value.toLocaleString()} steps`;
 }
 
 function buildStepsOptions(): number[] {

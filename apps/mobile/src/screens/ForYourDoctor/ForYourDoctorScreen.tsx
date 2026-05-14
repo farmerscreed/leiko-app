@@ -148,7 +148,8 @@ function dateRangeLabel(range: DoctorPdfRange, nowMs: number = Date.now()): stri
   const days = range === '7d' ? 7 : range === '30d' ? 30 : range === '90d' ? 90 : 365;
   const start = new Date(nowMs - (days - 1) * 24 * 60 * 60 * 1000);
   const fmt = (d: Date) =>
-    d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    // Sprint 16.5i — device-locale-aware (was hardcoded 'en-US').
+    d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   const yearLabel = end.getFullYear();
   return `${fmt(start)} – ${fmt(end)}, ${yearLabel}`;
 }
