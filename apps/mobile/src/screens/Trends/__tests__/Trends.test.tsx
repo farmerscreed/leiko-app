@@ -10,7 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '../../../theme';
 import { Trends } from '../Trends';
 import { TRENDS_ASK_LABEL } from '../../../components/TrendsAskAffordance';
-import { TRENDS_WEEKLY_BODY } from '../../../components/TrendsWeeklySummaryCard';
+import { TRENDS_WEEKLY_BODY_FALLBACK as TRENDS_WEEKLY_BODY } from '../../../components/TrendsWeeklySummaryCard';
 import type { TrendsData } from '../../../utils/trends-aggregate';
 import type {
   CorrelationRow,
