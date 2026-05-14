@@ -65,6 +65,11 @@ import { PersonCard } from '../../components/PersonCard';
 import { ViewToggle } from '../../components/ViewToggle';
 import { useCaregiverFamily } from '../../hooks/useCaregiverFamily';
 import { useCaregiverViewMode } from '../../hooks/useCaregiverViewMode';
+import { useHydrateReadingsFromServer } from '../../hooks/useHydrateReadingsFromServer';
+import { useHydrateSleepFromServer } from '../../hooks/useHydrateSleepFromServer';
+import { useHydrateActivityFromServer } from '../../hooks/useHydrateActivityFromServer';
+import { useHydrateHRFromServer } from '../../hooks/useHydrateHRFromServer';
+import { useHydrateSpO2FromServer } from '../../hooks/useHydrateSpO2FromServer';
 import { useReducedMotion } from '../../theme/useReducedMotion';
 import { useTheme, type Theme } from '../../theme';
 import { usePairing } from '../../state/pairing';
@@ -108,6 +113,18 @@ export function CaregiverHome() {
   const localLatest = useReadings((s) => s.latest());
   const { viewMode, setViewMode } = useCaregiverViewMode();
   const reduceMotion = useReducedMotion();
+
+  // Sprint 16.5i — caregiver-side server hydration. Pre-fix all 5
+  // hydration hooks were wired ONLY in SelfBuyerHome. Caregivers (the
+  // primary persona) saw stale data when the parent watch's day-info
+  // storage rolled over after ~3-5 days. The hooks are no-ops when
+  // local already has the FETCH_LIMIT worth of rows, so this is safe
+  // to call on every mount.
+  useHydrateReadingsFromServer();
+  useHydrateSleepFromServer();
+  useHydrateActivityFromServer();
+  useHydrateHRFromServer();
+  useHydrateSpO2FromServer();
 
   // Owning-phone first-paint merge: if local latest is newer than the
   // server view, prepend it. Same logic the legacy screen used.
