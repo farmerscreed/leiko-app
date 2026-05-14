@@ -30,7 +30,9 @@
 
 import { useMemo, useState } from 'react';
 import { DetailShell } from '../../components/DetailShell';
+import { BaselineReference } from '../../components/BaselineReference';
 import type { TrendRange } from '../../components/TimeRangePills';
+import { hrBaseline, formatHRBaseline, type HRBaseline } from '../../utils/vitalBaselines';
 
 const RANGE_TO_DAYS: Record<TrendRange, number> = {
   '7d': 7,
@@ -61,7 +63,6 @@ import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import type { HRSample, SleepSession } from '../../types/vitals';
 
 const SECONDS_PER_DAY = 24 * 60 * 60;
-const TREND_RANGE_BPM: [number, number] = [60, 95];
 
 /**
  * Build the trend-chart series for "today". Bins all available HR samples
@@ -136,10 +137,14 @@ export function buildZones(samples: ReadonlyArray<HRSample>): [HRZone, HRZone, H
 
 /**
  * Compute the headline "stats trio" inputs from the live HR data.
- * - Resting: 7-day average of `restingBpmRecent` (rounded; null if empty)
+ * Sprint 16.5f — Variability slot was a permanent "—" placeholder
+ * (HRV needs RR intervals, not 5-min averages). Replaced with
+ * "Range today" — max − min of today's samples. Real, useful,
+ * computable from current data.
+ *
+ * - Resting: range-average of `restingBpmRecent` (rounded; null if empty)
  * - Peak: max bpm in the last 24h (null if no samples)
- * - Variability: not yet derived from the watch firmware — placeholder
- *   "—" until Sprint 15 (HR streaming).
+ * - Range today: today's max − min spread in bpm (null if < 2 samples)
  */
 export function buildStats(
   samples: ReadonlyArray<HRSample>,
@@ -148,6 +153,7 @@ export function buildStats(
 ): {
   restingAvg: number | null;
   peakToday: number | null;
+  rangeToday: number | null;
 } {
   const restingAvg =
     restingBpmRecent.length === 0
@@ -163,7 +169,26 @@ export function buildStats(
     todays.length === 0
       ? null
       : todays.reduce((a, b) => (b.bpm > a.bpm ? b : a)).bpm;
-  return { restingAvg, peakToday };
+  let rangeToday: number | null = null;
+  if (todays.length >= 2) {
+    const minBpm = todays.reduce((a, b) => (b.bpm < a.bpm ? b : a)).bpm;
+    const maxBpm = todays.reduce((a, b) => (b.bpm > a.bpm ? b : a)).bpm;
+    rangeToday = Math.round(maxBpm - minBpm);
+  }
+  return { restingAvg, peakToday, rangeToday };
+}
+
+/** Dynamic Y-axis range for the today trend chart. Pre-16.5f was
+ *  hardcoded [60, 95], which clipped activity peaks (110+) out of
+ *  view. Returns a band rounded to the nearest 10 with a floor of 40
+ *  and a ceiling of max(95, dataMax + 10). */
+export function dynamicHRChartRange(data: ReadonlyArray<number>): [number, number] {
+  if (data.length === 0) return [60, 95];
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const lo = Math.max(40, Math.floor((min - 5) / 10) * 10);
+  const hi = Math.max(95, Math.ceil((max + 5) / 10) * 10);
+  return [lo, hi];
 }
 
 /**
@@ -260,11 +285,32 @@ function buildHRRecentRows(samples: ReadonlyArray<HRSample>): RecentReading[] {
   });
 }
 
-const INSIGHT_BODY_HAS_DATA =
-  "Your resting heart rate has settled three points lower than last month. That tracks with the better sleep we've seen — they tend to move together. A calm wake again this morning.";
-
 const INSIGHT_BODY_EMPTY =
   "Wear the watch to start tracking your heart rate. After a few nights of sleep, you'll see how it moves with your rest.";
+
+const INSIGHT_BODY_PRE_BASELINE =
+  "After a few nights of sleep, this card will compare your resting heart rate to your usual band and call out anything worth noting.";
+
+/** Deterministic HR insight body — describes the real numbers against
+ *  the baseline. No fabricated month-over-month claims. */
+function hrInsightBody(
+  restingToday: number | null,
+  baseline: HRBaseline | null,
+): string {
+  if (restingToday === null || baseline === null) {
+    return INSIGHT_BODY_PRE_BASELINE;
+  }
+  const baselineMid = Math.round((baseline.bpmLow + baseline.bpmHigh) / 2);
+  const diff = Math.round(restingToday) - baselineMid;
+  const absDiff = Math.abs(diff);
+  if (absDiff <= 2) {
+    return `Your resting heart rate this morning (${Math.round(restingToday)} bpm) is right at your usual. Calm wake.`;
+  }
+  if (diff < 0) {
+    return `Your resting heart rate this morning (${Math.round(restingToday)} bpm) is about ${absDiff} below your usual — a quieter night than last week.`;
+  }
+  return `Your resting heart rate this morning (${Math.round(restingToday)} bpm) is about ${absDiff} above your usual. Worth watching this week.`;
+}
 
 export interface HRDetailProps {
   onBack: () => void;
@@ -312,8 +358,12 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
     () => buildTodayTrendData(allSamples, nowSec),
     [allSamples, nowSec],
   );
+  const trendChartRange = useMemo(
+    () => dynamicHRChartRange(trendData),
+    [trendData],
+  );
   const zones = useMemo(() => buildZones(rangedSamples), [rangedSamples]);
-  const { restingAvg, peakToday } = useMemo(
+  const { restingAvg, peakToday, rangeToday } = useMemo(
     () =>
       buildStats(
         allSamples,
@@ -324,6 +374,13 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
       ),
     [allSamples, nowSec],
   );
+
+  // ----- Baseline reference (16.5f) -----------------------------------
+  const baseline: HRBaseline | null = useMemo(
+    () => hrBaseline(useHR.getState().restingBpmRecent(nowSec)),
+    [nowSec, hrRecent, hrPending],
+  );
+  const baselineBody = baseline ? formatHRBaseline(baseline) : '';
 
   const correlation = useMemo(
     () =>
@@ -377,6 +434,14 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
       }
       testID="hr-detail"
     >
+      {baselineBody ? (
+        <BaselineReference
+          body={baselineBody}
+          eyebrow="Your usual resting"
+          caption={`over the last ${baseline?.sampleCount ?? 14} nights`}
+          testID="hr-detail-baseline"
+        />
+      ) : null}
       <StatTrio
         items={[
           {
@@ -390,9 +455,9 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
             unit: peakToday !== null ? 'today' : 'bpm',
           },
           {
-            label: 'Variability',
-            value: '—',
-            unit: 'ms',
+            label: 'Range today',
+            value: rangeToday !== null ? String(rangeToday) : '—',
+            unit: rangeToday !== null ? 'bpm spread' : 'bpm',
           },
         ]}
         testID="hr-detail-stats"
@@ -402,9 +467,9 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
         <VitalTrendChart
           vital="hr"
           data={trendData}
-          range={TREND_RANGE_BPM}
-          caption="Today · resting HR"
-          subCaption="60–95 band"
+          range={trendChartRange}
+          caption="Today · heart rate"
+          subCaption={`${trendChartRange[0]}–${trendChartRange[1]} band`}
           peak
           trough
           testID="hr-detail-trend"
@@ -415,6 +480,7 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
       {hasZoneData ? (
         <HRZonesCard
           zones={zones}
+          label={`Time in zones · last ${RANGE_TO_DAYS[range]} days`}
           testID="hr-detail-zones"
         />
       ) : null}
@@ -456,7 +522,7 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
 
       <VitalInsightCard
         vital="hr"
-        body={hasData ? INSIGHT_BODY_HAS_DATA : INSIGHT_BODY_EMPTY}
+        body={hasData ? hrInsightBody(restingToday, baseline) : INSIGHT_BODY_EMPTY}
         testID="hr-detail-insight"
       />
 
