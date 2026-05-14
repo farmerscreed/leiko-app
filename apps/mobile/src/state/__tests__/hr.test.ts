@@ -170,6 +170,61 @@ describe('useHR slice', () => {
     expect(mmkv.contains(STORAGE_KEYS.pendingHR)).toBe(false);
     expect(mmkv.contains(STORAGE_KEYS.recentHR)).toBe(false);
   });
+
+  // ---- Sprint 16.5e — server hydration ---------------------------------
+
+  test('seedFromServer adds new samples + dedups by measuredAtSec', () => {
+    const existing = makeSample(1_700_000_000, 70);
+    useHR.setState({ recent: [existing] });
+    const serverRows = [
+      makeSample(1_700_000_000, 9999), // duplicate — should NOT replace
+      makeSample(1_699_900_000, 65),
+      makeSample(1_699_800_000, 62),
+    ];
+    const added = useHR.getState().seedFromServer(serverRows);
+    expect(added).toBe(2);
+    const recent = useHR.getState().recent;
+    expect(recent).toHaveLength(3);
+    const dup = recent.find((s) => s.measuredAtSec === 1_700_000_000);
+    expect(dup?.bpm).toBe(70); // existing preserved
+  });
+
+  test('seedFromServer ignores rows already in pending', () => {
+    useHR.getState().addPending(makeSample(1_700_000_000, 70));
+    const added = useHR
+      .getState()
+      .seedFromServer([makeSample(1_700_000_000, 9999)]);
+    expect(added).toBe(0);
+    expect(useHR.getState().recent).toEqual([]);
+  });
+
+  test('seedFromServer sorts merged result newest-first', () => {
+    const rows = [
+      makeSample(1_699_800_000, 60),
+      makeSample(1_700_000_000, 80),
+      makeSample(1_699_900_000, 70),
+    ];
+    useHR.getState().seedFromServer(rows);
+    const recent = useHR.getState().recent;
+    expect(recent.map((s) => s.measuredAtSec)).toEqual([
+      1_700_000_000,
+      1_699_900_000,
+      1_699_800_000,
+    ]);
+  });
+
+  test('seedFromServer persists to MMKV', () => {
+    useHR.getState().seedFromServer([makeSample(1_700_000_000, 70)]);
+    const raw = mmkv.getString(STORAGE_KEYS.recentHR);
+    expect(raw).toBeDefined();
+    expect(JSON.parse(raw!)).toHaveLength(1);
+  });
+
+  test('seedFromServer returns 0 on empty input', () => {
+    useHR.setState({ recent: [makeSample(1_700_000_000, 70)] });
+    expect(useHR.getState().seedFromServer([])).toBe(0);
+    expect(useHR.getState().recent).toHaveLength(1);
+  });
 });
 
 // Sanity: the brief asks for an explicit timezone-handling note.

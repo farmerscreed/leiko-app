@@ -53,6 +53,8 @@ import { useDailyNarration } from '../../hooks/useDailyNarration';
 import { useHydrateReadingsFromServer } from '../../hooks/useHydrateReadingsFromServer';
 import { useHydrateSleepFromServer } from '../../hooks/useHydrateSleepFromServer';
 import { useHydrateActivityFromServer } from '../../hooks/useHydrateActivityFromServer';
+import { useHydrateHRFromServer } from '../../hooks/useHydrateHRFromServer';
+import { useHydrateSpO2FromServer } from '../../hooks/useHydrateSpO2FromServer';
 import { VitalTile } from '../../components/VitalTile';
 import {
   CorrelationStrip,
@@ -119,6 +121,11 @@ export function SelfBuyerHome() {
   // rollover; without this the ActivityDetail screen + the activity
   // tile show only today's row after a few days of normal use.
   useHydrateActivityFromServer();
+  // Sprint 16.5e — HR + SpO2 round out the multi-day hydration set.
+  // HR's recent cap is ~16h dense, but the SpO2 hourly cadence + the
+  // sleep × resting-HR correlation strip both need server-side history.
+  useHydrateHRFromServer();
+  useHydrateSpO2FromServer();
 
   // ----- Sprint 12 follow-up: Ask Leiko bottom sheet ----------------
   const [askLeikoVisible, setAskLeikoVisible] = useState(false);

@@ -58,6 +58,16 @@ interface HRState {
    *  Empty entries are skipped (not zero-filled) so classifyHR sees
    *  baseline length = days-with-data. */
   restingBpmRecent: (nowSec?: number) => number[];
+  /**
+   * Sprint 16.5e — seed historical samples from the server. The U16PRO
+   * watch's day-info storage rolls over after a few days; without a
+   * server top-up the HR detail screen loses everything older than the
+   * watch's retention window. Mirrors `useSleep.seedFromServer` /
+   * `useActivity.seedStepsFromServer` — accepts the authoritative list,
+   * dedups against `pending` + `recent` by `measuredAtSec`, merges, sorts
+   * desc, caps at `RECENT_SAMPLES_CAP`. Returns the number of NEW rows.
+   */
+  seedFromServer: (samples: HRSample[]) => number;
   reset: () => void;
 }
 
@@ -233,6 +243,28 @@ export const useHR = create<HRState>((set, get) => ({
       out.push(avg);
     }
     return out;
+  },
+
+  seedFromServer: (samples) => {
+    if (samples.length === 0) return 0;
+    const existing = get().recent;
+    const existingKeys = new Set(existing.map((s) => String(s.measuredAtSec)));
+    const pendingKeys = new Set(
+      get().pending.map((s) => String(s.measuredAtSec)),
+    );
+    const newRows = samples.filter((s) => {
+      const key = String(s.measuredAtSec);
+      return !existingKeys.has(key) && !pendingKeys.has(key);
+    });
+    if (newRows.length === 0) return 0;
+    const merged = dedupRecent(
+      [...newRows, ...existing].sort(
+        (a, b) => b.measuredAtSec - a.measuredAtSec,
+      ),
+    ).slice(0, RECENT_SAMPLES_CAP);
+    set({ recent: merged });
+    persistRecent(merged);
+    return newRows.length;
   },
 
   reset: () => {

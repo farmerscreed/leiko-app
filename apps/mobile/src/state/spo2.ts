@@ -36,6 +36,13 @@ interface SpO2State {
    *  Empty nights skipped (not zero-filled). Window interpreted in UTC
    *  for test determinism — production callers pass TZ-aware nowSec. */
   overnightLowsRecent: (nowSec?: number, nights?: number) => number[];
+  /**
+   * Sprint 16.5e — seed historical samples from the server. Same
+   * pattern as `useHR.seedFromServer`. The U16PRO watch's day-info
+   * storage rolls over after a few days; this top-up keeps the SpO2
+   * detail screen + the overnight chart populated.
+   */
+  seedFromServer: (samples: SpO2Sample[]) => number;
   reset: () => void;
 }
 
@@ -163,6 +170,28 @@ export const useSpO2 = create<SpO2State>((set, get) => ({
       out.push(low);
     }
     return out;
+  },
+
+  seedFromServer: (samples) => {
+    if (samples.length === 0) return 0;
+    const existing = get().recent;
+    const existingKeys = new Set(existing.map((s) => String(s.measuredAtSec)));
+    const pendingKeys = new Set(
+      get().pending.map((s) => String(s.measuredAtSec)),
+    );
+    const newRows = samples.filter((s) => {
+      const key = String(s.measuredAtSec);
+      return !existingKeys.has(key) && !pendingKeys.has(key);
+    });
+    if (newRows.length === 0) return 0;
+    const merged = dedupRecent(
+      [...newRows, ...existing].sort(
+        (a, b) => b.measuredAtSec - a.measuredAtSec,
+      ),
+    ).slice(0, RECENT_SAMPLES_CAP);
+    set({ recent: merged });
+    persistRecent(merged);
+    return newRows.length;
   },
 
   reset: () => {
