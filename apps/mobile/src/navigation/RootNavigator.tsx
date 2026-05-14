@@ -69,6 +69,7 @@ import {
   stopBackgroundSync,
 } from '../services/sync/backgroundSync';
 import { inferModel, setDeviceMetaProvider } from '../services/sync/postReading';
+import { scheduleNextLearnedTimeReminder } from '../services/reminders/dispatcher';
 import {
   configureNotificationHandler,
   registerForPushNotifications,
@@ -265,6 +266,23 @@ function HydratingFallback() {
   );
 }
 
+/**
+ * Sprint 16.6 FUN-4 — wire the learned-time reminder dispatcher to
+ * current app state. Pure-ish: reads the store snapshots directly so
+ * it does not depend on React rendering. Self-buyer fires "you"
+ * copy; caregiver fires a neutral "your loved one" until per-parent
+ * resolution is wired through useCaregiverFamily (TODO follow-up).
+ * The "parent" persona route is read-only by spec, so we skip it.
+ */
+function scheduleLearnedTimeFromCurrentState(): Promise<unknown> | void {
+  const accountType = useAuth.getState().profile?.account_type;
+  if (!accountType || accountType === 'parent') return;
+  const isSelf = accountType === 'self_buyer';
+  const readings = useReadings.getState().recent ?? [];
+  const parentLabel = isSelf ? '' : 'your loved one';
+  return scheduleNextLearnedTimeReminder({ readings, parentLabel, isSelf });
+}
+
 export function RootNavigator() {
   const status = useAuth((s) => s.status);
   const accountType = useAuth((s) => s.profile?.account_type);
@@ -322,6 +340,12 @@ export function RootNavigator() {
     // tap → deep-link routing.
     void configureNotificationHandler();
     void registerForPushNotifications();
+    // Sprint 16.6 FUN-4 — learned-time reminder dispatcher. Reads
+    // current readings + persona from the stores and schedules the
+    // next one-shot reminder. The dispatcher cancel-and-reschedules,
+    // so re-running on foreground (when the orchestrator does its
+    // own re-fire) keeps the schedule fresh as readings come in.
+    void scheduleLearnedTimeFromCurrentState();
     const notifListeners = startNotificationListeners();
     return () => {
       stopOrchestrator();
