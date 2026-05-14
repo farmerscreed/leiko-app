@@ -78,10 +78,13 @@ export function CaregiverActionBar({
       <Text
         style={{
           fontFamily: theme.fontFamilies.numeric,
-          fontSize: 9.5,
-          lineHeight: 14,
-          letterSpacing: 0.95, // ~0.14em at 9.5pt
-          color: theme.colors.text.tertiary,
+          // Sprint 16.6 — 9.5pt tertiary read as illegible against the
+          // glass-blurred background. 11pt secondary keeps the chip
+          // tone but lets the caregiver actually read it.
+          fontSize: 11,
+          lineHeight: 15,
+          letterSpacing: 1,
+          color: theme.colors.text.secondary,
           textTransform: 'uppercase',
         }}
         allowFontScaling={false}

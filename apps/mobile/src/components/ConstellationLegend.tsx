@@ -172,10 +172,12 @@ export function ConstellationLegend({
                   allowFontScaling={false}
                   style={{
                     fontFamily: theme.fontFamilies.numeric,
-                    fontSize: 9,
-                    lineHeight: 12,
-                    color: theme.colors.text.tertiary,
-                    letterSpacing: 0.9, // 0.10em at 9pt
+                    // Sprint 16.6 — 9pt tertiary was unreadable; bump
+                    // to 10.5pt secondary for at-a-glance scan.
+                    fontSize: 10.5,
+                    lineHeight: 14,
+                    color: theme.colors.text.secondary,
+                    letterSpacing: 1,
                     textTransform: 'uppercase',
                   }}
                 >
@@ -187,10 +189,13 @@ export function ConstellationLegend({
                 numberOfLines={1}
                 ellipsizeMode="tail"
                 style={{
-                  fontSize: 11.5,
-                  lineHeight: 16, // ~1.35
-                  color: theme.colors.text.secondary,
-                  marginTop: 1,
+                  // Sprint 16.6 — was 11.5pt secondary; promote to
+                  // 13pt primary so the per-person status sentence
+                  // reads without leaning in.
+                  fontSize: 13,
+                  lineHeight: 18,
+                  color: theme.colors.text.primary,
+                  marginTop: 2,
                 }}
               >
                 {p.headline}
