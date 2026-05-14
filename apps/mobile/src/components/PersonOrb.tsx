@@ -70,7 +70,13 @@ const PULSE_NORMAL_MS = 4000;
 const PULSE_ATTENTION_MS = 1600;
 
 const HALO_INSET = -16; // halo bleeds 16pt outside the orb body
+// Sprint 16.6 — the halo bleeds 16pt beyond the orb diameter; the
+// label used to sit at `diameter + LABEL_GAP` (= diameter + 4) which
+// landed INSIDE the halo's bottom 12pt. The halo's tinted fill
+// overlay rendered on top of the name, clipping it visually. New
+// offset clears the halo first, then leaves the original LABEL_GAP.
 const LABEL_GAP = 4;
+const HALO_BLEED = 16;
 
 function isAttentionStatus(s: Status): boolean {
   return s === 'attention' || s === 'urgent' || s === 'watch';
@@ -279,12 +285,12 @@ export function PersonOrb({
           ) : null}
         </View>
 
-        {/* Name + BP label below the orb */}
+        {/* Name + BP label below the orb (clear of the halo bleed) */}
         <View
           pointerEvents="none"
           style={{
             position: 'absolute',
-            top: diameter + LABEL_GAP,
+            top: diameter + HALO_BLEED + LABEL_GAP,
             left: 0,
             right: 0,
             alignItems: 'center',
