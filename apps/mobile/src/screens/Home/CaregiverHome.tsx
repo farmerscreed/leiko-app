@@ -154,17 +154,27 @@ export function CaregiverHome() {
     (id: string) => {
       const target = merged.find((p) => p.familyId === id);
       if (!target) return;
+      // Sprint 16.6 fix — only route to ReadingDetail when the reading
+      // is in this phone's local MMKV (i.e. the caregiver IS the
+      // parent — hybrid mode — and took the reading here). Cross-phone
+      // readings live only on the server; ReadingDetail can't find
+      // them and renders "We can't find that reading." Route those
+      // taps to ParentReadings (the per-parent immersive surface).
       if (target.latestReading) {
-        navigation.navigate('ReadingDetail', {
-          readingLocalId: target.latestReading.id,
-        });
+        const local = useReadings.getState().byLocalId(target.latestReading.id);
+        if (local) {
+          navigation.navigate('ReadingDetail', {
+            readingLocalId: target.latestReading.id,
+          });
+          return;
+        }
+        navigation.navigate('ParentReadings', { familyId: id });
         return;
       }
       // No reading yet — route based on what the user can act on. If the
       // caregiver hasn't paired their own watch yet, route to Pairing
       // (they may BE the parent in hybrid mode). Otherwise route to
-      // ParentReadings, the per-parent placeholder list — Sprint 8.5
-      // replaces this with the per-parent immersive Daily Pulse.
+      // ParentReadings, the per-parent placeholder list.
       if (!pairedDevice) {
         navigation.navigate('Pairing');
         return;
