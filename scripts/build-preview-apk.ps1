@@ -163,17 +163,20 @@ Write-Host ''
 Push-Location $mobileDir
 try {
     if ($Mode -eq 'expo-run') {
-        # Pass $mobileDir as the positional project-root so Expo CLI
-        # doesn't walk up to the workspace root (where node_modules/expo
-        # is hoisted) and pick that as the project root. Documented
-        # symptom of the workspace heuristic: Metro fails to resolve
-        # `./index.js` because it thinks the entry lives at the repo root.
+        # NOTE: this used to default to --variant release, but Expo's
+        # `createBundleReleaseJsAndAssets` gradle task fights with this
+        # monorepo's projectRoot detection (Metro's serverRoot resolves
+        # to the workspace root via watchFolders, so the embed bundler
+        # looks for ./index.js at the repo root instead of apps/mobile).
+        # Debug variant skips the embed step entirely; the dev-client
+        # APK loads JS from Metro at runtime. For the two-phone test
+        # rig that's fine: both phones reach Metro + Supabase over the
+        # LAN IP we baked into the EXPO_PUBLIC_* env vars.
         #
-        # Expo's `resolveStringOrBooleanArgsAsync` parses args in reverse
-        # and only accepts the project root in the LAST positional slot,
-        # so flags must come before the path.
-        Write-Host ">>> npx expo run:android --variant release `"$mobileDir`"" -ForegroundColor Cyan
-        & npx expo run:android --variant release $mobileDir
+        # Project-root passed as the LAST positional arg so Expo's
+        # reverse arg parser sees it.
+        Write-Host ">>> npx expo run:android `"$mobileDir`" (debug variant — Metro loads JS at runtime)" -ForegroundColor Cyan
+        & npx expo run:android $mobileDir
         $code = $LASTEXITCODE
     } else {
         Write-Host '>>> eas build --platform android --profile preview-lan --local' -ForegroundColor Cyan
