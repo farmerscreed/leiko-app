@@ -293,14 +293,17 @@ export function PersonOrb({
           <Text
             allowFontScaling={false}
             style={{
-              fontFamily: theme.fontFamilies.editorial,
-              // Sprint 16.6 — 14pt editorial serif was rendering too
+              // Sprint 16.6 — editorial serif at 14/17pt rendered too
               // thin against the dark canopy to be readable at a
-              // glance. 17pt + 500 weight gives the name presence
-              // without breaking the editorial typographic register.
-              fontSize: 17,
+              // glance. InstrumentSerif only ships at weight 400 in our
+              // bundle, so we cannot push the weight on the editorial
+              // family. Swap to Inter SemiBold for the orb label only
+              // — the legend keeps the editorial register where the
+              // larger surface gives the serif room to breathe.
+              fontFamily: theme.fontFamilies.bodySemiBold,
+              fontSize: 16,
               lineHeight: 20,
-              fontWeight: '500',
+              letterSpacing: 0.1,
               color: theme.colors.text.primary,
             }}
           >
