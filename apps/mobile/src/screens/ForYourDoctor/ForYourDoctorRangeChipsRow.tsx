@@ -127,7 +127,7 @@ function LockedChip({
             fontFamily: labelStyle.family,
             fontSize: 8,
             letterSpacing: 1.2,
-            color: theme.colors.text.onBrand ?? '#FFFFFF',
+            color: theme.colors.text.onBrand,
             textTransform: 'uppercase',
           }}
         >

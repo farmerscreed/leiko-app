@@ -2,7 +2,7 @@
   "expo": {
     "name": "Leiko",
     "slug": "leiko",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "scheme": "leiko",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
