@@ -67,6 +67,7 @@ import { useActivity } from '../../state/activity';
 import { useTheme } from '../../theme';
 import type { ActivityDay } from '../../types/vitals';
 import { BaselineReference } from '../../components/BaselineReference';
+import { StalenessHintRow } from '../../components/StalenessHintRow';
 import {
   activityBaseline,
   formatActivityBaseline,
@@ -293,6 +294,10 @@ export function ActivityDetail({
             testID="activity-detail-baseline"
           />
         ) : null}
+        <StalenessHintRow
+          stale={activityStaleness === 'stale'}
+          testID="activity-detail-staleness-hint"
+        />
         {!isEmpty ? (
           <StatTrio
             testID="activity-detail-stat-trio"

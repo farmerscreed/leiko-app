@@ -31,6 +31,7 @@
 import { useMemo, useState } from 'react';
 import { DetailShell } from '../../components/DetailShell';
 import { BaselineReference } from '../../components/BaselineReference';
+import { StalenessHintRow } from '../../components/StalenessHintRow';
 import type { TrendRange } from '../../components/TimeRangePills';
 import { hrBaseline, formatHRBaseline, type HRBaseline } from '../../utils/vitalBaselines';
 
@@ -442,6 +443,7 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
           testID="hr-detail-baseline"
         />
       ) : null}
+      <StalenessHintRow stale={staleness === 'stale'} testID="hr-detail-staleness-hint" />
       <StatTrio
         items={[
           {

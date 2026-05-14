@@ -46,3 +46,16 @@ export function formatStalenessCaption(
   const weekday = d.toLocaleDateString(undefined, { weekday: 'short' });
   return `${STALENESS_PREFIX} ${weekday}`;
 }
+
+/**
+ * Sprint 16.5f — a short reassurance hint that explains WHY the vital
+ * is stale and what the user can do about it. Surfaced alongside the
+ * staleness caption on detail screens so a user with 3 stale captions
+ * doesn't wonder if the watch is broken — the hint tells them how to
+ * refresh.
+ *
+ * Voice rules: calm, no fear. Leads with what *will* happen.
+ */
+export function stalenessReassuranceHint(): string {
+  return 'Open the app within Bluetooth range to refresh.';
+}

@@ -47,6 +47,7 @@ import { type RecentReading } from '../../components/RecentReadingsList';
 import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { CorrelationStrip, type VitalSeries } from '../../components/CorrelationStrip';
 import { BaselineReference } from '../../components/BaselineReference';
+import { StalenessHintRow } from '../../components/StalenessHintRow';
 import type { TrendRange } from '../../components/TimeRangePills';
 import { useSleep } from '../../state/sleep';
 import {
@@ -433,6 +434,10 @@ export function SpO2Detail({ onBack, onArticleOpen, onLearnOpen }: SpO2DetailPro
               testID="spo2-detail-baseline"
             />
           ) : null}
+          <StalenessHintRow
+            stale={spo2Staleness === 'stale'}
+            testID="spo2-detail-staleness-hint"
+          />
           <StatTrio
             testID="spo2-detail-trio"
             items={[

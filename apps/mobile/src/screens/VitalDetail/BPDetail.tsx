@@ -41,6 +41,7 @@ import { VitalInsightCard } from '../../components/VitalInsightCard';
 import { BPTwinLineChart } from '../../components/BPTwinLineChart';
 import { VitalExplainerAnchor } from '../../components/VitalExplainerAnchor';
 import { BaselineReference } from '../../components/BaselineReference';
+import { StalenessHintRow } from '../../components/StalenessHintRow';
 import type { TrendRange } from '../../components/TimeRangePills';
 import { useDailyPulseData } from '../../state/dailyPulse';
 import { useReadings, type LocalReading } from '../../state/readings';
@@ -484,6 +485,7 @@ export function BPDetail({
           testID="bp-detail-baseline"
         />
       ) : null}
+      <StalenessHintRow stale={isStale} testID="bp-detail-staleness-hint" />
       {!isEmpty ? (
         <>
           <StatTrio items={statItems} testID="bp-detail-stats" />
