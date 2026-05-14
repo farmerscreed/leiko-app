@@ -51,7 +51,12 @@ config.server = {
       !next.startsWith(`/${REL_PROJECT}/`) &&
       (next.startsWith('/index.bundle') ||
         next.startsWith('/index.map') ||
-        next.startsWith('/assets/'))
+        next.startsWith('/assets/') ||
+        // Modern Expo dev-client requests this virtual entry instead of
+        // /index.bundle; without the prefix the AppEntry.js shim
+        // resolves `../../App` from <workspaceRoot> and fails to find
+        // the real App.tsx that lives in apps/mobile/.
+        next.startsWith('/.expo/.virtual-metro-entry'))
     ) {
       return `/${REL_PROJECT}${next}`;
     }
