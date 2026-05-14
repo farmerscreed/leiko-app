@@ -168,8 +168,12 @@ try {
         # is hoisted) and pick that as the project root. Documented
         # symptom of the workspace heuristic: Metro fails to resolve
         # `./index.js` because it thinks the entry lives at the repo root.
-        Write-Host ">>> npx expo run:android `"$mobileDir`" --variant release" -ForegroundColor Cyan
-        & npx expo run:android $mobileDir --variant release
+        #
+        # Expo's `resolveStringOrBooleanArgsAsync` parses args in reverse
+        # and only accepts the project root in the LAST positional slot,
+        # so flags must come before the path.
+        Write-Host ">>> npx expo run:android --variant release `"$mobileDir`"" -ForegroundColor Cyan
+        & npx expo run:android --variant release $mobileDir
         $code = $LASTEXITCODE
     } else {
         Write-Host '>>> eas build --platform android --profile preview-lan --local' -ForegroundColor Cyan
