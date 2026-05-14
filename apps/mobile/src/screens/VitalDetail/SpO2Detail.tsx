@@ -35,7 +35,7 @@
 // falls back to the design's mock array so the surface still reads
 // completely. Sprint 12.5 wires the real generator.
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { DetailShell } from '../../components/DetailShell';
 import { VitalHero } from '../../components/VitalHero';
@@ -45,6 +45,15 @@ import { VitalInsightCard } from '../../components/VitalInsightCard';
 import { VitalExplainerAnchor } from '../../components/VitalExplainerAnchor';
 import { type RecentReading } from '../../components/RecentReadingsList';
 import { RecentReadingsSection } from '../../components/RecentReadingsSection';
+import type { TrendRange } from '../../components/TimeRangePills';
+
+const RANGE_TO_DAYS: Record<TrendRange, number> = {
+  '7d': 7,
+  '30d': 30,
+  '90d': 90,
+};
+
+const SECONDS_PER_DAY = 24 * 60 * 60;
 import { useDailyPulseData } from '../../state/dailyPulse';
 import { useSpO2 } from '../../state/spo2';
 import { spo2Fill } from '../../utils/vitalThemes';
@@ -245,6 +254,13 @@ export function SpO2Detail({ onBack, onArticleOpen, onLearnOpen }: SpO2DetailPro
   const spo2Pending = useSpO2((s) => s.pending);
   const spo2Recent = useSpO2((s) => s.recent);
 
+  // Sprint 16.5e — mirror DetailShell's range. SpO2 doesn't have a
+  // dense per-day chart but the recent-readings list (now densely
+  // populated by 16.5e server hydration) benefits from the filter.
+  // Named `trendRange` to avoid colliding with the local `range` var
+  // (which carries tier-keyed hero / insight copy) below.
+  const [trendRange, setTrendRange] = useState<TrendRange>('7d');
+
   const latestPercent = data.spo2.latestPercent;
   const tier = data.spo2.classification?.tier ?? null;
   const isEmpty = latestPercent === null;
@@ -262,6 +278,11 @@ export function SpO2Detail({ onBack, onArticleOpen, onLearnOpen }: SpO2DetailPro
     () => [...spo2Pending, ...spo2Recent],
     [spo2Pending, spo2Recent],
   );
+
+  const rangedSamples = useMemo(() => {
+    const cutoff = Math.floor(Date.now() / 1000) - RANGE_TO_DAYS[trendRange] * SECONDS_PER_DAY;
+    return allSamples.filter((s) => s.measuredAtSec >= cutoff);
+  }, [allSamples, trendRange]);
 
   // Overnight chart series — real data when present, otherwise the
   // design fallback so the screen reads fully on a fresh install.
@@ -287,14 +308,15 @@ export function SpO2Detail({ onBack, onArticleOpen, onLearnOpen }: SpO2DetailPro
   const awakeAvg = latestPercent;
 
   const recentRows = useMemo(
-    () => buildRecentList(allSamples, overnightLows),
-    [allSamples, overnightLows],
+    () => buildRecentList(rangedSamples, overnightLows),
+    [rangedSamples, overnightLows],
   );
 
   return (
     <DetailShell
       vital="spo2"
       onBack={onBack}
+      onRangeChange={setTrendRange}
       testID="spo2-detail"
       hero={
         <VitalHero

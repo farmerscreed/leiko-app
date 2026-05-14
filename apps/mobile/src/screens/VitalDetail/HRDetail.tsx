@@ -28,8 +28,16 @@
 // Stack pin (docs/00-tech-stack.md): RN 0.81.5, react-native-svg 15.x,
 // react-native-reanimated v3, phosphor-react-native v3. No new deps.
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { DetailShell } from '../../components/DetailShell';
+import type { TrendRange } from '../../components/TimeRangePills';
+
+const RANGE_TO_DAYS: Record<TrendRange, number> = {
+  '7d': 7,
+  '30d': 30,
+  '90d': 90,
+};
+
 import { VitalHero } from '../../components/VitalHero';
 import { StatTrio } from '../../components/StatTrio';
 import { VitalTrendChart } from '../../components/VitalTrendChart';
@@ -159,37 +167,43 @@ export function buildStats(
 }
 
 /**
- * Build the seven-day sleep-x-restingHR correlation series. Each day's
- * resting HR is paired with the same day's sleep-session totalMinutes —
- * we anchor on session end-of-day so a 23:00–06:00 session bucketed as
- * "the morning of the 7th" lines up with the resting HR computed from
- * that same window. Returns null when either side has < 2 days of data.
+ * Build the sleep × resting-HR correlation series for the chosen range.
+ * Pre-16.5e was hardcoded to last-7-days; now takes `days` so the
+ * chart re-derives when the user taps 30d / 90d. Each entry uses
+ * sessionEndSec as the t-axis value (ms) so CorrelationStrip's tBounds
+ * can frame the window correctly.
  */
 export function buildSleepHRCorrelation(
   hrRecent: ReadonlyArray<number>,
   sleepSessions: ReadonlyArray<SleepSession>,
+  days: number = 7,
 ): { hr: VitalSeries; sleep: VitalSeries } | null {
   if (hrRecent.length < 2 || sleepSessions.length < 2) return null;
-  // The HR slice produces `restingBpmRecent` ordered oldest → newest. For
-  // sleep, we anchor by sessionEndSec and take the most recent 7 ordered
-  // oldest → newest. We then truncate both to the same length so the t
-  // axis lines up index-by-index.
   const sleepOrdered = [...sleepSessions].sort(
     (a, b) => a.sessionEndSec - b.sessionEndSec,
   );
-  const recentSleep = sleepOrdered.slice(-7);
-  const recentHR = hrRecent.slice(-7);
+  const recentSleep = sleepOrdered.slice(-days);
+  const recentHR = hrRecent.slice(-days);
   const n = Math.min(recentSleep.length, recentHR.length);
   if (n < 2) return null;
   const sleepWindow = recentSleep.slice(-n);
   const hrWindow = recentHR.slice(-n);
+  // Pair the i-th sleep session with the i-th resting HR — both are
+  // oldest → newest, so the alignment is positional. t uses the sleep
+  // session's end time in ms so the strip can frame the window.
   const hr: VitalSeries = {
     type: 'hr',
-    points: hrWindow.map((v, i) => ({ t: i, value: v })),
+    points: hrWindow.map((v, i) => ({
+      t: sleepWindow[i].sessionEndSec * 1000,
+      value: v,
+    })),
   };
   const sleep: VitalSeries = {
     type: 'sleep',
-    points: sleepWindow.map((s, i) => ({ t: i, value: s.totalMinutes })),
+    points: sleepWindow.map((s) => ({
+      t: s.sessionEndSec * 1000,
+      value: s.totalMinutes,
+    })),
   };
   return { hr, sleep };
 }
@@ -262,6 +276,12 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
   const data = useDailyPulseData();
   const restingToday = data.hr.restingToday;
 
+  // Sprint 16.5e — mirror DetailShell's range so the recent-readings
+  // list, the sleep × resting-HR correlation, and the zone-card
+  // distribution react to 7d / 30d / 90d. The today trend chart stays
+  // 24h-bound (it's literally "today").
+  const [range, setRange] = useState<TrendRange>('7d');
+
   // Pull the live HR samples + the recent restingBpm series + last sleep
   // sessions. These selectors return the underlying arrays; for the
   // composed inputs (stats, zones, trend) we re-derive on every render —
@@ -276,6 +296,11 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
     () => [...hrPending, ...hrRecent],
     [hrPending, hrRecent],
   );
+
+  const rangedSamples = useMemo(() => {
+    const cutoff = Math.floor(Date.now() / 1000) - RANGE_TO_DAYS[range] * SECONDS_PER_DAY;
+    return allSamples.filter((s) => s.measuredAtSec >= cutoff);
+  }, [allSamples, range]);
   const allSleepSessions = useMemo(
     () => [...sleepPending, ...sleepRecent],
     [sleepPending, sleepRecent],
@@ -287,7 +312,7 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
     () => buildTodayTrendData(allSamples, nowSec),
     [allSamples, nowSec],
   );
-  const zones = useMemo(() => buildZones(allSamples), [allSamples]);
+  const zones = useMemo(() => buildZones(rangedSamples), [rangedSamples]);
   const { restingAvg, peakToday } = useMemo(
     () =>
       buildStats(
@@ -305,11 +330,12 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
       buildSleepHRCorrelation(
         useHR.getState().restingBpmRecent(nowSec),
         allSleepSessions,
+        RANGE_TO_DAYS[range],
       ),
-    [allSleepSessions, nowSec],
+    [allSleepSessions, nowSec, range],
   );
 
-  const recentRows = useMemo(() => buildHRRecentRows(allSamples), [allSamples]);
+  const recentRows = useMemo(() => buildHRRecentRows(rangedSamples), [rangedSamples]);
 
   const hasData = restingToday !== null;
   const hasZoneData = zones.some((z) => z.pct > 0);
@@ -337,6 +363,7 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
     <DetailShell
       vital="hr"
       onBack={onBack}
+      onRangeChange={setRange}
       hero={
         <VitalHero
           vital="hr"
@@ -396,8 +423,23 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
         <CorrelationStrip
           vitalA={correlation.sleep}
           vitalB={correlation.hr}
-          range="7d"
-          caption="Sleep × resting HR — last 7 days"
+          range={range}
+          caption={`Sleep × resting HR — last ${RANGE_TO_DAYS[range]} days`}
+          tBounds={(() => {
+            const nowMs = Date.now();
+            const days = RANGE_TO_DAYS[range];
+            return { tMin: nowMs - days * 24 * 60 * 60 * 1000, tMax: nowMs };
+          })()}
+          axisLabels={(() => {
+            const nowMs = Date.now();
+            const days = RANGE_TO_DAYS[range];
+            const startMs = nowMs - days * 24 * 60 * 60 * 1000;
+            const left = new Date(startMs).toLocaleDateString([], {
+              month: 'short',
+              day: 'numeric',
+            });
+            return { left, right: 'today' };
+          })()}
           testID="hr-detail-correlation"
           style={{ marginHorizontal: 20 }}
         />

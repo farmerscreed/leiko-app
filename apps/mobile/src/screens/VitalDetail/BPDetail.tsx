@@ -30,7 +30,7 @@
 // `onSelectReading`. Tests can mount the screen directly with mocked
 // hooks — no NavigationContainer needed.
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { DetailShell } from '../../components/DetailShell';
 import { VitalHero } from '../../components/VitalHero';
@@ -40,6 +40,7 @@ import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { VitalInsightCard } from '../../components/VitalInsightCard';
 import { BPTwinLineChart } from '../../components/BPTwinLineChart';
 import { VitalExplainerAnchor } from '../../components/VitalExplainerAnchor';
+import type { TrendRange } from '../../components/TimeRangePills';
 import { useDailyPulseData } from '../../state/dailyPulse';
 import { useReadings, type LocalReading } from '../../state/readings';
 import { bpFillFromTier } from '../../utils/vitalThemes';
@@ -49,6 +50,27 @@ import {
   type ClassificationTier,
 } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
+
+const RANGE_TO_DAYS: Record<TrendRange, number> = {
+  '7d': 7,
+  '30d': 30,
+  '90d': 90,
+};
+
+function rangeStatsLabel(range: TrendRange): string {
+  switch (range) {
+    case '7d':
+      return '7-day avg';
+    case '30d':
+      return '30-day avg';
+    case '90d':
+      return '90-day avg';
+  }
+}
+
+function rangeFallbackUnit(range: TrendRange): string {
+  return `last ${RANGE_TO_DAYS[range]} days`;
+}
 
 // ---------------------------------------------------------------------------
 // Voice-clean copy
@@ -168,8 +190,14 @@ export function bucketReadingsByHour(
   return { sys, dia };
 }
 
-/** Pure helper: 7-day stats from a list of BP readings. */
-export function computeStats(readings: LocalReading[], nowMs: number = Date.now()): {
+/** Pure helper: stats for the chosen window from a list of BP readings.
+ *  Pre-16.5e was hardcoded to 7 days; now takes `days` so the stat trio
+ *  reacts to the 7d / 30d / 90d range pills. */
+export function computeStats(
+  readings: LocalReading[],
+  nowMs: number = Date.now(),
+  days: number = 7,
+): {
   avgSys: number | null;
   avgDia: number | null;
   lowSys: number | null;
@@ -179,8 +207,8 @@ export function computeStats(readings: LocalReading[], nowMs: number = Date.now(
   highDia: number | null;
   highDayLabel: string | null;
 } {
-  const sevenDaysAgo = nowMs - 7 * 24 * 3_600_000;
-  const window = readings.filter((r) => r.measuredAtSec * 1000 >= sevenDaysAgo);
+  const cutoffMs = nowMs - days * 24 * 3_600_000;
+  const window = readings.filter((r) => r.measuredAtSec * 1000 >= cutoffMs);
   if (window.length === 0) {
     return {
       avgSys: null,
@@ -244,10 +272,19 @@ export function BPDetail({
   const recentReadings = useReadings((s) => s.recent);
   const pendingReadings = useReadings((s) => s.pending);
 
+  // Sprint 16.5e — mirror DetailShell's range so stats + recent list
+  // react to 7d / 30d / 90d.
+  const [range, setRange] = useState<TrendRange>('7d');
+
   const allBPReadings = useMemo(
     () => [...pendingReadings, ...recentReadings],
     [pendingReadings, recentReadings],
   );
+
+  const rangedReadings = useMemo(() => {
+    const cutoffMs = Date.now() - RANGE_TO_DAYS[range] * 24 * 3_600_000;
+    return allBPReadings.filter((r) => r.measuredAtSec * 1000 >= cutoffMs);
+  }, [allBPReadings, range]);
 
   const tier = data.bp.classification?.tier ?? null;
   const ringFill = bpFillFromTier(tier);
@@ -290,11 +327,14 @@ export function BPDetail({
     />
   );
 
-  // ----- Stat trio ----------------------------------------------------
-  const stats = useMemo(() => computeStats(allBPReadings), [allBPReadings]);
+  // ----- Stat trio (over the chosen range) ----------------------------
+  const stats = useMemo(
+    () => computeStats(allBPReadings, Date.now(), RANGE_TO_DAYS[range]),
+    [allBPReadings, range],
+  );
   const statItems: [StatTrioItem, StatTrioItem, StatTrioItem] = [
     {
-      label: '7-day avg',
+      label: rangeStatsLabel(range),
       value:
         stats.avgSys !== null && stats.avgDia !== null
           ? `${stats.avgSys}/${stats.avgDia}`
@@ -307,7 +347,7 @@ export function BPDetail({
         stats.lowSys !== null && stats.lowDia !== null
           ? `${stats.lowSys}/${stats.lowDia}`
           : '—',
-      unit: stats.lowDayLabel ?? 'last 7 days',
+      unit: stats.lowDayLabel ?? rangeFallbackUnit(range),
     },
     {
       label: 'Highest',
@@ -315,7 +355,7 @@ export function BPDetail({
         stats.highSys !== null && stats.highDia !== null
           ? `${stats.highSys}/${stats.highDia}`
           : '—',
-      unit: stats.highDayLabel ?? 'last 7 days',
+      unit: stats.highDayLabel ?? rangeFallbackUnit(range),
     },
   ];
 
@@ -335,12 +375,11 @@ export function BPDetail({
     [todayReadings],
   );
 
-  // ----- Recent readings list — full list, sliced by RecentReadingsSection
-  // (on-device review 2026-05-08: original sliced to 4; user couldn't
-  // reach the rest of their server-side history. Pass everything; the
-  // section wrapper owns the visible-count + picker UX).
+  // ----- Recent readings list — filtered to range, sliced by
+  // RecentReadingsSection (the section wrapper owns the visible-count +
+  // picker UX).
   const recentRows: RecentReading[] = useMemo(() => {
-    return allBPReadings
+    return rangedReadings
       .slice()
       .sort((a, b) => b.measuredAtSec - a.measuredAtSec)
       .map((r, idx) => ({
@@ -349,12 +388,13 @@ export function BPDetail({
         context: rowContext(r.measuredAtSec, idx === 0),
         time: idx === 0 ? 'now' : formatRowTime(r.measuredAtSec),
       }));
-  }, [allBPReadings]);
+  }, [rangedReadings]);
 
   return (
     <DetailShell
       vital="bp"
       onBack={onBack}
+      onRangeChange={setRange}
       hero={hero}
       testID="bp-detail"
     >
