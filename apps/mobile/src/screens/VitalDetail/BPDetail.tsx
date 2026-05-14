@@ -31,7 +31,7 @@
 // hooks — no NavigationContainer needed.
 
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { DetailShell } from '../../components/DetailShell';
 import { VitalHero } from '../../components/VitalHero';
 import { StatTrio, type StatTrioItem } from '../../components/StatTrio';
@@ -40,6 +40,7 @@ import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { VitalInsightCard } from '../../components/VitalInsightCard';
 import { BPTwinLineChart } from '../../components/BPTwinLineChart';
 import { VitalExplainerAnchor } from '../../components/VitalExplainerAnchor';
+import { BaselineReference } from '../../components/BaselineReference';
 import type { TrendRange } from '../../components/TimeRangePills';
 import { useDailyPulseData } from '../../state/dailyPulse';
 import { useReadings, type LocalReading } from '../../state/readings';
@@ -50,6 +51,7 @@ import {
   type ClassificationTier,
 } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
+import { bpBaseline, formatBPBaseline, type BPBaseline } from '../../utils/vitalBaselines';
 
 const RANGE_TO_DAYS: Record<TrendRange, number> = {
   '7d': 7,
@@ -79,14 +81,17 @@ function rangeFallbackUnit(range: TrendRange): string {
 const HOUR_LABELS = ['12a', '3a', '6a', '9a', '12p', '3p', '6p', '9p'];
 const SYS_RANGE: [number, number] = [110, 130];
 
-// Sprint 8.5 ships a placeholder Tier-B paragraph; Sprint 12.5 wires the
-// real ambient-AI generator. The placeholder paraphrases the design's
-// "morning-coffee BP rise" insight in a voice-clean way.
-const INSIGHT_BODY_DEFAULT =
-  "Your morning numbers tend to climb roughly 8 points after coffee — a normal physiological response. The afternoon dip you usually see is here too. Talk to your doctor if you'd like to understand the morning band.";
+// Sprint 16.5f — deterministic insight body. Replaces the Sprint 8.5
+// hardcoded "morning coffee" paragraph (which was fiction — we didn't
+// know whether the user had coffee). The new body is derived from the
+// real stats over the range + the baseline band, so it never makes a
+// claim the data can't support.
 
 const INSIGHT_BODY_EMPTY =
   "Once you take your first reading, this is where you'll see how it lands compared to your usual range. Patterns appear after a few days of readings.";
+
+const INSIGHT_BODY_PRE_BASELINE =
+  "After about a week of readings, this card will compare your current numbers to your usual range and call out anything worth noting.";
 
 // Range-line copy keyed to the BP classification tier. Mirrors the
 // in-app `tierChipText()` (utils/classification.ts) so the same calm
@@ -161,15 +166,16 @@ export function readingsForToday(
 /**
  * Bucket today's readings into the 8 hour-of-day slots used by the
  * BPTwinLineChart axis (12a, 3a, 6a, 9a, 12p, 3p, 6p, 9p). Each bucket
- * is the *average* of the readings landing in it; empty buckets fall
- * back to the design's mock data so the chart never renders an
- * incoherent flat line on partial-day data.
+ * is the *average* of the readings landing in it.
+ *
+ * Sprint 16.5f — empty buckets now return `null` (was: mock fallback
+ * data). The chart renders no dot for null slots. Previously a user
+ * with one morning reading saw a complete fake 24h trace; now they
+ * see one honest dot.
  */
 export function bucketReadingsByHour(
   readings: LocalReading[],
-  fallbackSys: number[],
-  fallbackDia: number[],
-): { sys: number[]; dia: number[] } {
+): { sys: (number | null)[]; dia: (number | null)[] } {
   // Slot index = floor(hour / 3) — 8 slots covering 0-23h.
   const sysSums = new Array(8).fill(0) as number[];
   const diaSums = new Array(8).fill(0) as number[];
@@ -181,13 +187,57 @@ export function bucketReadingsByHour(
     diaSums[slot] += r.diastolic;
     counts[slot] += 1;
   }
-  const sys = sysSums.map((sum, i) =>
-    counts[i] > 0 ? Math.round(sum / counts[i]) : fallbackSys[i],
+  const sys: (number | null)[] = sysSums.map((sum, i) =>
+    counts[i] > 0 ? Math.round(sum / counts[i]) : null,
   );
-  const dia = diaSums.map((sum, i) =>
-    counts[i] > 0 ? Math.round(sum / counts[i]) : fallbackDia[i],
+  const dia: (number | null)[] = diaSums.map((sum, i) =>
+    counts[i] > 0 ? Math.round(sum / counts[i]) : null,
   );
   return { sys, dia };
+}
+
+/**
+ * Bucket readings into N daily slots over the chosen window. Each bucket
+ * is the average sys + dia for that day; days with no readings return
+ * null. Used by the BP twin chart in 7d / 30d / 90d range modes.
+ */
+export function bucketReadingsByDay(
+  readings: LocalReading[],
+  days: number,
+  nowMs: number = Date.now(),
+): { sys: (number | null)[]; dia: (number | null)[]; labels: string[] } {
+  const sysSums = new Array(days).fill(0) as number[];
+  const diaSums = new Array(days).fill(0) as number[];
+  const counts = new Array(days).fill(0) as number[];
+  const labels: string[] = [];
+  for (let i = 0; i < days; i++) {
+    const slotMs = nowMs - (days - 1 - i) * 24 * 3_600_000;
+    const d = new Date(slotMs);
+    // Two short label modes: short month-day for 7d (readable), single
+    // char weekday for 30d/90d (avoid label crowding).
+    labels.push(
+      days <= 7
+        ? d.toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 3)
+        : '',
+    );
+  }
+  for (const r of readings) {
+    const offsetDays = Math.floor(
+      (nowMs - r.measuredAtSec * 1000) / (24 * 3_600_000),
+    );
+    if (offsetDays < 0 || offsetDays >= days) continue;
+    const slot = days - 1 - offsetDays;
+    sysSums[slot] += r.systolic;
+    diaSums[slot] += r.diastolic;
+    counts[slot] += 1;
+  }
+  const sys: (number | null)[] = sysSums.map((sum, i) =>
+    counts[i] > 0 ? Math.round(sum / counts[i]) : null,
+  );
+  const dia: (number | null)[] = diaSums.map((sum, i) =>
+    counts[i] > 0 ? Math.round(sum / counts[i]) : null,
+  );
+  return { sys, dia, labels };
 }
 
 /** Pure helper: stats for the chosen window from a list of BP readings.
@@ -229,10 +279,12 @@ export function computeStats(
   );
   const low = window.reduce((a, b) => (b.systolic < a.systolic ? b : a));
   const high = window.reduce((a, b) => (b.systolic > a.systolic ? b : a));
-  const labelFor = (r: LocalReading) =>
-    new Date(r.measuredAtSec * 1000).toLocaleDateString(undefined, {
-      weekday: 'short',
-    });
+  // Sprint 16.5f — show short weekday + month-day so "Thu" isn't
+  // ambiguous (this Thursday vs last Thursday). Example: "Thu · May 9".
+  const labelFor = (r: LocalReading) => {
+    const d = new Date(r.measuredAtSec * 1000);
+    return `${d.toLocaleDateString(undefined, { weekday: 'short' })} · ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+  };
   return {
     avgSys,
     avgDia,
@@ -259,6 +311,9 @@ export interface BPDetailProps {
   /** Wired by the router so the InlineExplainer's "Read more in Learn"
    *  CTA can route to the Learn home. */
   onLearnOpen?: () => void;
+  /** Sprint 16.5f — tap "Share with your doctor" → navigates to Trends
+   *  where the doctor-prep PDF generator lives. Router wires this. */
+  onSharePress?: () => void;
 }
 
 export function BPDetail({
@@ -266,6 +321,7 @@ export function BPDetail({
   onSelectReading,
   onArticleOpen,
   onLearnOpen,
+  onSharePress,
 }: BPDetailProps) {
   const theme = useTheme();
   const data = useDailyPulseData();
@@ -359,21 +415,44 @@ export function BPDetail({
     },
   ];
 
-  // ----- Today twin chart ---------------------------------------------
-  // Sprint 8.5 ships hour-bucketed averages of today's readings, with
-  // the design's mock series as fallback for slots without data. This
-  // keeps the chart visually coherent during the cold-start week, then
-  // grows organically denser as more readings come in.
-  const FALLBACK_SYS = [114, 110, 122, 124, 128, 130, 126, 120];
-  const FALLBACK_DIA = [72, 70, 78, 79, 82, 84, 81, 76];
+  // ----- Twin chart — range-aware (16.5f) ------------------------------
+  // 7d default uses 24h hourly slots from today's readings (matches the
+  // design's "Today" intent). 7d/30d/90d picks switch to daily bins so
+  // the chart's window matches the range pill. Empty slots return null
+  // → no dots drawn (was: mock fallback data on every empty slot).
   const todayReadings = useMemo(
     () => readingsForToday(allBPReadings),
     [allBPReadings],
   );
-  const { sys, dia } = useMemo(
-    () => bucketReadingsByHour(todayReadings, FALLBACK_SYS, FALLBACK_DIA),
-    [todayReadings],
-  );
+  const { sys, dia, hourLabels, chartEyebrow } = useMemo(() => {
+    if (range === '7d') {
+      // Default: today's 8-slot hourly chart.
+      const { sys: s, dia: d } = bucketReadingsByHour(todayReadings);
+      return {
+        sys: s,
+        dia: d,
+        hourLabels: HOUR_LABELS,
+        chartEyebrow: 'Today · systolic & diastolic',
+      };
+    }
+    // 30d / 90d — daily bins over the window.
+    const days = RANGE_TO_DAYS[range];
+    const { sys: s, dia: d, labels } = bucketReadingsByDay(
+      allBPReadings,
+      days,
+      Date.now(),
+    );
+    return {
+      sys: s,
+      dia: d,
+      hourLabels: labels,
+      chartEyebrow: `Last ${days} days · daily averages`,
+    };
+  }, [allBPReadings, todayReadings, range]);
+
+  // ----- Baseline reference (16.5f) ------------------------------------
+  const baseline = useMemo(() => bpBaseline(allBPReadings), [allBPReadings]);
+  const baselineBody = baseline ? formatBPBaseline(baseline) : '';
 
   // ----- Recent readings list — filtered to range, sliced by
   // RecentReadingsSection (the section wrapper owns the visible-count +
@@ -398,11 +477,18 @@ export function BPDetail({
       hero={hero}
       testID="bp-detail"
     >
+      {!isEmpty && baselineBody ? (
+        <BaselineReference
+          body={baselineBody}
+          caption={`over the last ${baseline?.sampleCount ?? 30} readings`}
+          testID="bp-detail-baseline"
+        />
+      ) : null}
       {!isEmpty ? (
         <>
           <StatTrio items={statItems} testID="bp-detail-stats" />
 
-          {/* Today twin chart */}
+          {/* Twin chart — range-aware (16.5f) */}
           <View
             style={[
               styles.section,
@@ -422,7 +508,7 @@ export function BPDetail({
               }}
               testID="bp-detail-chart-eyebrow"
             >
-              Today · systolic & diastolic
+              {chartEyebrow}
             </Text>
             <View
               style={{
@@ -437,7 +523,7 @@ export function BPDetail({
                 vital="bp"
                 sys={sys}
                 dia={dia}
-                hourLabels={HOUR_LABELS}
+                hourLabels={hourLabels}
                 range={SYS_RANGE}
                 testID="bp-detail-chart"
               />
@@ -448,7 +534,13 @@ export function BPDetail({
 
       <VitalInsightCard
         vital="bp"
-        body={isEmpty ? INSIGHT_BODY_EMPTY : INSIGHT_BODY_DEFAULT}
+        body={
+          isEmpty
+            ? INSIGHT_BODY_EMPTY
+            : baseline
+              ? bpInsightBody(stats, baseline, range, tier)
+              : INSIGHT_BODY_PRE_BASELINE
+        }
         testID="bp-detail-insight"
       />
 
@@ -478,7 +570,130 @@ export function BPDetail({
           testID="bp-detail-readings"
         />
       ) : null}
+      {!isEmpty && onSharePress ? (
+        <ShareWithDoctorRow onPress={onSharePress} />
+      ) : null}
     </DetailShell>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Sprint 16.5f — deterministic BP insight body
+// ---------------------------------------------------------------------------
+
+/** Deterministic template fed by the real stats + baseline. Returns a
+ *  voice-clean paragraph that does NOT claim anything the data can't
+ *  support (no coffee, no diet, no time-of-day causation). */
+export function bpInsightBody(
+  stats: ReturnType<typeof computeStats>,
+  baseline: BPBaseline,
+  range: TrendRange,
+  tier: ClassificationTier | null,
+): string {
+  if (stats.avgSys === null || stats.avgDia === null) {
+    return INSIGHT_BODY_PRE_BASELINE;
+  }
+  const windowLabel =
+    range === '7d' ? 'this week' : range === '30d' ? 'this month' : 'the last 90 days';
+  const baselineMid = Math.round((baseline.sysLow + baseline.sysHigh) / 2);
+  const diff = stats.avgSys - baselineMid;
+  const absDiff = Math.abs(diff);
+  // Trend line — calm, never alarming.
+  let trendLine: string;
+  if (absDiff <= 3) {
+    trendLine = `Your average ${windowLabel} (${stats.avgSys}/${stats.avgDia}) is right at your usual.`;
+  } else if (diff > 0) {
+    trendLine = `Your average ${windowLabel} (${stats.avgSys}/${stats.avgDia}) is about ${absDiff} points above your usual.`;
+  } else {
+    trendLine = `Your average ${windowLabel} (${stats.avgSys}/${stats.avgDia}) is about ${absDiff} points below your usual.`;
+  }
+  // Tier-driven framing — calm regardless.
+  let tierLine: string;
+  switch (tier) {
+    case 'confirmed_urgent':
+      tierLine = "Your recent readings have been higher than usual. Worth talking to your doctor today.";
+      break;
+    case 'calm_concerned':
+      tierLine = "A few recent readings have been higher than usual — might be worth mentioning at your next visit.";
+      break;
+    case 'in_pattern':
+    default:
+      tierLine = "Your recent readings are following your usual pattern.";
+  }
+  return `${trendLine} ${tierLine}`;
+}
+
+// ---------------------------------------------------------------------------
+// Sprint 16.5f — Share with doctor row
+// ---------------------------------------------------------------------------
+
+interface ShareWithDoctorRowProps {
+  onPress: () => void;
+}
+
+function ShareWithDoctorRow({ onPress }: ShareWithDoctorRowProps) {
+  const theme = useTheme();
+  const labelStyle = theme.type('labelUppercase');
+  const valueStyle = theme.type('bodyM');
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Share with your doctor"
+      accessibilityHint="Opens a summary you can send to your doctor"
+      onPress={onPress}
+      hitSlop={6}
+      testID="bp-detail-share-row"
+      style={({ pressed }) => [
+        styles.shareRow,
+        {
+          backgroundColor: theme.colors.surface.warmSubtle,
+          borderColor: theme.colors.border.rim,
+          borderRadius: theme.radii.l,
+          marginHorizontal: 20,
+          paddingHorizontal: theme.spacing.l,
+          paddingVertical: theme.spacing.l,
+          opacity: pressed ? 0.7 : 1,
+        },
+      ]}
+    >
+      <View style={{ flex: 1 }}>
+        <Text
+          allowFontScaling={false}
+          style={{
+            fontFamily: labelStyle.family,
+            fontSize: labelStyle.size,
+            lineHeight: labelStyle.lineHeight,
+            letterSpacing: labelStyle.letterSpacing,
+            color: theme.colors.text.tertiary,
+            textTransform: 'uppercase',
+            marginBottom: 2,
+          }}
+        >
+          Share
+        </Text>
+        <Text
+          allowFontScaling={false}
+          style={{
+            fontFamily: valueStyle.family,
+            fontSize: valueStyle.size,
+            lineHeight: valueStyle.lineHeight,
+            color: theme.colors.text.primary,
+          }}
+        >
+          Share with your doctor
+        </Text>
+      </View>
+      <Text
+        allowFontScaling={false}
+        style={{
+          fontFamily: theme.fontFamilies.numeric,
+          fontSize: 22,
+          color: theme.colors.text.tertiary,
+        }}
+      >
+        ›
+      </Text>
+    </Pressable>
   );
 }
 
@@ -486,5 +701,10 @@ const styles = StyleSheet.create({
   section: {
     // section eyebrow + body wrap; horizontal padding matches the rest
     // of the screen content (hero / stat trio).
+  },
+  shareRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 0.5,
   },
 });
