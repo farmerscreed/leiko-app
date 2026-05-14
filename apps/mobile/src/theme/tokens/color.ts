@@ -24,8 +24,16 @@ export const paletteDark = {
     850: '#120C07', // subtle
     800: '#1D140D', // elevated
   },
-  bone: { 50: '#F5F1EA', 100: '#ECE9E2' },
-  stone: { 300: '#9C9890', 500: '#6B6862' },
+  // Sprint 16.6 — bone[50] was #F5F1EA (warm cream) and bone[100] was
+  // #ECE9E2. On AMOLED dark surfaces those read as muddy/brown under
+  // bright ambient lighting (user report: "fonts look black on a
+  // dark background"). Lifted to near-pure whites so headlines and
+  // body text on caregiver dark surfaces are unambiguously legible.
+  // text.primary now lands ~21:1 against warmCharcoal[850].
+  bone: { 50: '#FFFFFF', 100: '#F4F2EE' },
+  // Tertiary — was #9C9890 (mid-grey). Lifted to a brighter grey for
+  // eyebrows + labels that didn't get per-component bumps.
+  stone: { 300: '#B8B5AE', 500: '#6B6862' },
   amber: { 400: '#F5B47A', 500: '#E8A063', 600: '#C5824A' },
   // Coral — caregiver-mode brand accent (Sprint 7.7). Distinct from the
   // existing `coral.500 #D6745A` used for HR vital chromatic; this is
