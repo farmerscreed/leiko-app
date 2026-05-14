@@ -38,3 +38,11 @@ jobs:
 
       - name: Test
         run: npm run test --workspace=apps/mobile
+
+      # Sprint 16.6 QUA-6. Production-only audit, high+critical block
+      # the build. Moderate/low transitives are tolerated because the
+      # current set (postcss / jest-expo / jsdom) are all build-time
+      # or test-time only — they never ship in the APK. Allowlist + a
+      # remediation plan live in docs/_reference/npm-audit-allowlist.md.
+      - name: Audit (production deps, high+ severity)
+        run: npm audit --omit=dev --audit-level=high
