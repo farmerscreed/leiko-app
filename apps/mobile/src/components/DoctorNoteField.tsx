@@ -14,16 +14,29 @@ import type { AccountType } from '../types/database';
 
 export const DOCTOR_NOTE_EYEBROW = 'A line for the cover (optional)';
 
-export function doctorNotePlaceholder(accountType: AccountType): string {
-  return accountType === 'caregiver'
-    ? "Anything on her mind for this visit?"
-    : 'Anything on your mind for this visit?';
+/**
+ * Sprint 16.5h — placeholder uses the real parent's name in caregiver
+ * mode. Pre-fix it was hardcoded "her" regardless of which parent the
+ * caregiver was caring for.
+ */
+export function doctorNotePlaceholder(
+  accountType: AccountType,
+  parentLabel?: string,
+): string {
+  if (accountType === 'caregiver') {
+    const name = parentLabel?.trim();
+    if (name) return `Anything on ${name}'s mind for this visit?`;
+    return 'Anything on their mind for this visit?';
+  }
+  return 'Anything on your mind for this visit?';
 }
 
 export interface DoctorNoteFieldProps {
   value: string;
   onChange: (next: string) => void;
   accountType: AccountType;
+  /** Sprint 16.5h — real parent name in caregiver mode. */
+  parentLabel?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
@@ -32,6 +45,7 @@ export function DoctorNoteField({
   value,
   onChange,
   accountType,
+  parentLabel,
   style,
   testID,
 }: DoctorNoteFieldProps) {
@@ -86,9 +100,9 @@ export function DoctorNoteField({
         <TextInput
           value={value}
           onChangeText={onChange}
-          placeholder={doctorNotePlaceholder(accountType)}
+          placeholder={doctorNotePlaceholder(accountType, parentLabel)}
           placeholderTextColor={theme.colors.text.tertiary}
-          accessibilityLabel={doctorNotePlaceholder(accountType)}
+          accessibilityLabel={doctorNotePlaceholder(accountType, parentLabel)}
           testID={testID ? `${testID}-input` : undefined}
           style={{
             flex: 1,

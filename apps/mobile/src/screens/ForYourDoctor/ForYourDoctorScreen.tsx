@@ -24,7 +24,7 @@
 //   empty (no readings) → EmptyState; preview/options/CTA hidden
 //   offline → globally banner; CTA error copy
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -40,7 +40,7 @@ import { useAuth } from '../../state/auth';
 import { useFamilyReadings } from '../../hooks/useFamilyReadings';
 import { useTrendsData } from '../../hooks/useTrendsData';
 import { usePlusEntitlement } from '../../hooks/usePlusEntitlement';
-import { Pill } from '../../components/Pill';
+import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import { Button } from '../../components/Button';
 import { ListRow } from '../../components/ListRow';
 import { EmptyState } from '../../components/EmptyState';
@@ -48,13 +48,24 @@ import { ErrorState } from '../../components/ErrorState';
 import { PaywallSheet } from '../../components/PaywallSheet';
 import { DoctorCoverPreview } from '../../components/DoctorCoverPreview';
 import { DoctorNoteField } from '../../components/DoctorNoteField';
+import { BaselineReference } from '../../components/BaselineReference';
+import { ForYourDoctorRangeChipsRow } from './ForYourDoctorRangeChipsRow';
 import {
   generateDoctorPdf,
   pdfRangeFromTrendsRange,
-  DOCTOR_PDF_RANGES,
+  projectedPageCount,
   type DoctorPdfRange,
   type DoctorPdfResult,
 } from '../../services/doctorPdf';
+import {
+  readCoverNote,
+  writeCoverNote,
+  readLastGenerated,
+  writeLastGenerated,
+  formatLastGenerated,
+} from '../../services/doctorPdfState';
+import { useReadings } from '../../state/readings';
+import { bpBaseline, formatBPBaseline } from '../../utils/vitalBaselines';
 import { logger } from '../../services/analytics/logger';
 import type { AccountType } from '../../types/database';
 import type {
@@ -63,25 +74,33 @@ import type {
 } from '../../navigation/types';
 
 // Strings — voice-lint tested at the bottom of this file's test.
+//
+// Sprint 16.5h — subtitle templates use a `{possessive}` placeholder
+// instead of hardcoded "her" / "your" so the screen can interpolate
+// the real parent's name in caregiver mode. The {range} placeholder
+// is still substituted by the screen.
 export const FYD_STRINGS = {
   eyebrow: 'Leiko · Share',
-  subtitleSelf: 'A summary of your last {range} of readings, in a format your doctor can scan in a minute.',
-  subtitleCaregiver: 'A summary of her last {range} of readings, in a format her doctor can scan in a minute.',
+  subtitleTemplate:
+    'A summary of {possessive} last {range} of readings, in a format {possessive_doctor} doctor can scan in a minute.',
   rangeEyebrow: 'Cover the last',
-  pagesPdf: '8 pages · PDF',
   pdfFootnote: 'Cover · Vitals · Cross-vital observations',
   optionIncludeNotes: 'Include notes',
   optionIncludeNotesSub: 'The lines you wrote on individual readings',
   optionIncludeComments: 'Include caregiver comments',
   optionIncludeCommentsSub: 'Anything you noted from your visits',
   generateLabel: 'Generate PDF',
+  reShareLabel: 'Re-share most recent',
   generatingLabel: 'Putting your report together…',
   retryLabel: 'Try again',
   errorBody: "We couldn't put it together just now.",
   emptyTitle: 'No readings to share yet',
   emptyBody: "Take a few readings this week and they'll appear here.",
   offlineHint: 'We need a connection to put this together.',
+  offlineCtaSub: "Offline · we'll generate this once you're back online.",
   plusUnlock: 'Plus unlocks 30 days and beyond',
+  shareTargetHint: 'Opens your share sheet — mail, messages, files.',
+  sandboxToast: 'Sandbox: HTML logged for the dev build.',
 } as const;
 
 type Phase = 'default' | 'generating' | 'error';
@@ -101,19 +120,27 @@ const RANGE_WORD: Record<DoctorPdfRange, string> = {
   '1y': 'year',
 };
 
-const RANGE_LABEL: Record<DoctorPdfRange, string> = {
-  '7d': '7D',
-  '30d': '30D',
-  '90d': '90D',
-  '1y': '1Y',
-};
-
-function subtitleCopy(accountType: AccountType, range: DoctorPdfRange): string {
-  const tmpl =
-    accountType === 'caregiver'
-      ? FYD_STRINGS.subtitleCaregiver
-      : FYD_STRINGS.subtitleSelf;
-  return tmpl.replace('{range}', RANGE_WORD[range]);
+/**
+ * Sprint 16.5h — subtitle composer. Pre-fix the caregiver template
+ * hardcoded "her" three times in one sentence; now we interpolate
+ * the real parent's name where the possessive used to be. Self-buyer
+ * keeps "your".
+ */
+export function subtitleCopy(
+  accountType: AccountType,
+  range: DoctorPdfRange,
+  parentLabel: string,
+): string {
+  if (accountType === 'caregiver') {
+    // "A summary of Patricia's last 30 days of readings, ready for her
+    //  next visit with the doctor." — uses the real name once + a
+    // generic descriptor instead of three pronouns.
+    return `A summary of ${parentLabel}'s last ${RANGE_WORD[range]} of readings, in a format the doctor can scan in a minute.`;
+  }
+  return FYD_STRINGS.subtitleTemplate
+    .replace('{possessive}', 'your')
+    .replace('{possessive_doctor}', 'your')
+    .replace('{range}', RANGE_WORD[range]);
 }
 
 function dateRangeLabel(range: DoctorPdfRange, nowMs: number = Date.now()): string {
@@ -136,12 +163,34 @@ export function ForYourDoctorScreen(props: Nav) {
 
   const profile = useAuth((s) => s.profile);
   const accountType: AccountType = profile?.account_type ?? 'self_buyer';
-  const preparedFor = profile?.display_name ?? 'Adaeze Okeke';
 
   const { isPlus } = usePlusEntitlement();
   const { parents } = useFamilyReadings();
   const familyId = parents[0]?.familyId ?? null;
   const userId = useAuth((s) => s.session?.user.id ?? null);
+  const networkStatus = useNetworkStatus();
+  const isOffline = networkStatus.offline;
+
+  // Sprint 16.5h — parent label resolution. In caregiver mode this is
+  // the parent the caregiver is caring FOR (Patricia/John/etc), pulled
+  // from the family membership. In self-buyer mode it's the user's own
+  // display name. Pre-fix `preparedFor` defaulted to a literal real
+  // person's name ("Adaeze Okeke") from the design bundle.
+  const parentLabel = useMemo(() => {
+    if (accountType !== 'caregiver') {
+      return profile?.display_name?.trim() || 'You';
+    }
+    return parents[0]?.parentDisplayName?.trim() || 'your parent';
+  }, [accountType, profile?.display_name, parents]);
+
+  // `preparedFor` is the name that prints on the PDF cover. In
+  // caregiver mode that's the parent's name; in self-buyer mode the
+  // user's own. Empty string suppresses the line in the preview
+  // (DoctorCoverPreview handles the no-name case).
+  const preparedFor =
+    accountType === 'caregiver'
+      ? parents[0]?.parentDisplayName?.trim() || ''
+      : profile?.display_name?.trim() || '';
 
   // Default range: 7d (free) or 30d (Plus); honour the deep-link
   // range carried from Trends when present.
@@ -152,16 +201,67 @@ export function ForYourDoctorScreen(props: Nav) {
 
   const [includeNotes, setIncludeNotes] = useState(true);
   const [includeComments, setIncludeComments] = useState(true);
-  const [note, setNote] = useState('');
+  // Sprint 16.5h — note seeded from MMKV so a draft survives nav away.
+  const [note, setNote] = useState<string>(() => readCoverNote());
   const [phase, setPhase] = useState<Phase>('default');
   const [paywallVisible, setPaywallVisible] = useState(false);
+  const [sandboxNotice, setSandboxNotice] = useState(false);
+  // Last-generated snapshot — readLastGenerated returns null when none.
+  const [lastGenerated, setLastGenerated] = useState(() => readLastGenerated());
+
+  // Persist note draft on every change (debounce-free MMKV is fine here).
+  useEffect(() => {
+    writeCoverNote(note);
+  }, [note]);
 
   const trends = useTrendsData(familyId, range);
-  const isEmpty = (trends.data?.summary.bp.count ?? 0) === 0;
+
+  // Sprint 16.5h — multi-vital empty gate. Pre-fix this was BP-only:
+  // a user with HR/SpO2/sleep/activity history but no BP saw the
+  // empty state even though the PDF would still have meaningful
+  // sections. Now any vital with ≥ 3 entries qualifies.
+  const summary = trends.data?.summary;
+  const hasAnyVitalData =
+    !!summary &&
+    (summary.bp.count >= 3 ||
+      summary.hr.count >= 3 ||
+      summary.spo2.count >= 3 ||
+      summary.sleep.count >= 3 ||
+      summary.activity.count >= 3);
+  const isEmpty = !!trends.data && !hasAnyVitalData;
+
   const sparkline = useMemo(
     () => (trends.data?.series.bp ?? []).map((p) => p.sys),
     [trends.data],
   );
+
+  // Sprint 16.5h — projected page count from real vital counts.
+  // Pre-fix the screen showed a literal "8 pages" regardless.
+  const pageCount = useMemo(() => {
+    if (!summary) return 2;
+    return projectedPageCount(
+      {
+        bp: summary.bp.count,
+        hr: summary.hr.count,
+        spo2: summary.spo2.count,
+        sleep: summary.sleep.count,
+        activity: summary.activity.count,
+      },
+      false, // hasCorrelations — wire correlations hook in a later pass
+    );
+  }, [summary]);
+  const pagesPdfLabel = `${pageCount} pages · PDF`;
+
+  // Sprint 16.5h — baseline reference for the BP band shown on the
+  // preview + threaded into the PDF eventually. Local-readings-slice
+  // 30-day p10–p90.
+  const recentReadings = useReadings((s) => s.recent);
+  const pendingReadings = useReadings((s) => s.pending);
+  const baseline = useMemo(
+    () => bpBaseline([...pendingReadings, ...recentReadings]),
+    [pendingReadings, recentReadings],
+  );
+  const baselineBody = baseline ? formatBPBaseline(baseline) : '';
 
   const onRangeTap = useCallback(
     (next: DoctorPdfRange) => {
@@ -179,6 +279,13 @@ export function ForYourDoctorScreen(props: Nav) {
       setPaywallVisible(true);
       return;
     }
+    if (isOffline) {
+      // Surface the offline message without firing a request that
+      // will 5xx. The CTA-disabled gate below should also block this
+      // path; this is defence-in-depth.
+      setPhase('error');
+      return;
+    }
     if (!familyId || !userId) {
       setPhase('error');
       return;
@@ -191,13 +298,23 @@ export function ForYourDoctorScreen(props: Nav) {
       range,
       includeNotes,
       includeComments,
+      coverNote: note,
     });
     if (result.status === 'ok') {
       logger.track('doctor_pdf_generated', { bytes: result.bytes });
+      // Sprint 16.5h — persist for the "Last generated" line.
+      const info = {
+        url: result.url,
+        range,
+        generatedAtMs: Date.now(),
+        bytes: result.bytes,
+      };
+      writeLastGenerated(info);
+      setLastGenerated(info);
       try {
         await Share.share({
           url: result.url,
-          message: subtitleCopy(accountType, range),
+          message: subtitleCopy(accountType, range, parentLabel),
         });
       } catch {
         // OS sheet dismissed — nothing to do.
@@ -206,16 +323,45 @@ export function ForYourDoctorScreen(props: Nav) {
       return;
     }
     if (result.status === 'mock') {
-      // Local dev path — sandbox returns mock HTML. Treat as
-      // success for UX purposes; the engineer running the dev
-      // build can read the HTML separately if needed.
+      // Sprint 16.5h — surface a visible toast so the engineer knows
+      // the sandbox path fired. Pre-fix the spinner just cleared with
+      // no indication anything happened.
       logger.track('doctor_pdf_generated', { bytes: result.htmlBytes });
+      setSandboxNotice(true);
       setPhase('default');
       return;
     }
     logger.track('doctor_pdf_failed', { reason: result.reason });
     setPhase('error');
-  }, [accountType, familyId, userId, range, includeNotes, includeComments, isPlus]);
+  }, [
+    accountType,
+    familyId,
+    userId,
+    range,
+    includeNotes,
+    includeComments,
+    note,
+    parentLabel,
+    isPlus,
+    isOffline,
+  ]);
+
+  // Sprint 16.5h — re-share path. Uses the cached URL from the most
+  // recent generation. Supabase signed URLs typically expire after a
+  // few minutes-to-hours; if the share fails, fall through to a fresh
+  // generate.
+  const onReShare = useCallback(async () => {
+    if (!lastGenerated) return;
+    try {
+      await Share.share({
+        url: lastGenerated.url,
+        message: subtitleCopy(accountType, lastGenerated.range, parentLabel),
+      });
+    } catch {
+      // OS sheet dismissed — fall back to a fresh generate.
+      void onGenerate();
+    }
+  }, [accountType, lastGenerated, parentLabel, onGenerate]);
 
   return (
     <SafeAreaView
@@ -235,7 +381,8 @@ export function ForYourDoctorScreen(props: Nav) {
         <TitleBlock
           theme={theme}
           accountType={accountType}
-          rangeLabel={RANGE_WORD[range]}
+          parentLabel={parentLabel}
+          range={range}
         />
 
         {isEmpty ? (
@@ -248,12 +395,33 @@ export function ForYourDoctorScreen(props: Nav) {
           </View>
         ) : (
           <>
-            <RangeBlock
-              theme={theme}
-              active={range}
-              isPlus={isPlus}
-              onRangeTap={onRangeTap}
-            />
+            <View
+              style={{
+                marginTop: theme.spacing.xl,
+                paddingHorizontal: theme.spacing.l,
+              }}
+              testID="fyd-range-block"
+            >
+              <Text
+                allowFontScaling={false}
+                style={{
+                  fontFamily: theme.fontFamilies.numeric,
+                  fontSize: 9,
+                  letterSpacing: 1.6,
+                  textTransform: 'uppercase',
+                  color: theme.colors.text.tertiary,
+                  marginBottom: theme.spacing.s,
+                }}
+                testID="fyd-range-eyebrow"
+              >
+                {FYD_STRINGS.rangeEyebrow}
+              </Text>
+              <ForYourDoctorRangeChipsRow
+                active={range}
+                isPlus={isPlus}
+                onRangeTap={onRangeTap}
+              />
+            </View>
 
             <View
               style={{
@@ -266,6 +434,7 @@ export function ForYourDoctorScreen(props: Nav) {
                 rangeLabel={RANGE_WORD[range]}
                 datesLabel={dateRangeLabel(range)}
                 accountType={accountType}
+                parentLabel={parentLabel}
                 sparkline={sparkline}
                 freeUser={!isPlus}
                 testID="fyd-preview"
@@ -282,7 +451,7 @@ export function ForYourDoctorScreen(props: Nav) {
                   }}
                   testID="fyd-pages-tag"
                 >
-                  {FYD_STRINGS.pagesPdf}
+                  {pagesPdfLabel}
                 </Text>
               </View>
               <Text
@@ -302,10 +471,19 @@ export function ForYourDoctorScreen(props: Nav) {
               </Text>
             </View>
 
+            {baselineBody ? (
+              <BaselineReference
+                body={baselineBody}
+                caption={`over the last ${baseline?.sampleCount ?? 30} readings`}
+                testID="fyd-baseline"
+              />
+            ) : null}
+
             <DoctorNoteField
               value={note}
               onChange={setNote}
               accountType={accountType}
+              parentLabel={parentLabel}
               testID="fyd-note"
             />
 
@@ -354,9 +532,12 @@ export function ForYourDoctorScreen(props: Nav) {
                   void onGenerate();
                 }}
                 loading={phase === 'generating'}
+                disabled={isPlus && isOffline}
                 accessibilityHint={
                   isPlus
-                    ? 'Generates the PDF and opens the share sheet.'
+                    ? isOffline
+                      ? 'Disabled while offline.'
+                      : 'Generates the PDF and opens the share sheet.'
                     : 'Opens the Leiko Plus paywall.'
                 }
                 testID="fyd-generate"
@@ -367,23 +548,131 @@ export function ForYourDoctorScreen(props: Nav) {
                     ? FYD_STRINGS.retryLabel
                     : FYD_STRINGS.generateLabel}
               </Button>
-              {!isPlus ? (
+              {/* Sub-caption under the CTA — varies by state. */}
+              {(() => {
+                if (!isPlus) {
+                  return (
+                    <Text
+                      allowFontScaling={false}
+                      style={{
+                        fontFamily: theme.fontFamilies.numeric,
+                        fontSize: 9,
+                        letterSpacing: 1.2,
+                        textTransform: 'uppercase',
+                        color: theme.colors.brand.primary,
+                        textAlign: 'center',
+                        marginTop: theme.spacing.s,
+                      }}
+                      testID="fyd-plus-unlock"
+                    >
+                      {FYD_STRINGS.plusUnlock}
+                    </Text>
+                  );
+                }
+                if (isOffline) {
+                  return (
+                    <Text
+                      allowFontScaling={false}
+                      style={{
+                        fontFamily: theme.fontFamilies.numeric,
+                        fontSize: 9,
+                        letterSpacing: 1.2,
+                        textTransform: 'uppercase',
+                        color: theme.colors.text.tertiary,
+                        textAlign: 'center',
+                        marginTop: theme.spacing.s,
+                      }}
+                      testID="fyd-offline-hint"
+                    >
+                      {FYD_STRINGS.offlineCtaSub}
+                    </Text>
+                  );
+                }
+                return (
+                  <Text
+                    allowFontScaling={false}
+                    style={{
+                      fontFamily: theme.fontFamilies.numeric,
+                      fontSize: 9,
+                      letterSpacing: 1.2,
+                      textTransform: 'uppercase',
+                      color: theme.colors.text.tertiary,
+                      textAlign: 'center',
+                      marginTop: theme.spacing.s,
+                    }}
+                    testID="fyd-share-hint"
+                  >
+                    {FYD_STRINGS.shareTargetHint}
+                  </Text>
+                );
+              })()}
+
+              {/* Sprint 16.5h — Last generated line + re-share. Only
+                  shown when a previous successful generation exists,
+                  and only when not currently generating. */}
+              {lastGenerated && phase === 'default' ? (
+                <Pressable
+                  onPress={() => {
+                    void onReShare();
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${formatLastGenerated(lastGenerated) ?? 'Last generated'}. Tap to re-share.`}
+                  hitSlop={6}
+                  testID="fyd-last-generated"
+                  style={({ pressed }) => ({
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    marginTop: theme.spacing.m,
+                    opacity: pressed ? 0.7 : 1,
+                  })}
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={{
+                      fontFamily: theme.fontFamilies.numeric,
+                      fontSize: 11,
+                      color: theme.colors.text.secondary,
+                    }}
+                  >
+                    {formatLastGenerated(lastGenerated)}
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={{
+                      fontFamily: theme.fontFamilies.numeric,
+                      fontSize: 11,
+                      color: theme.colors.brand.primary,
+                    }}
+                  >
+                    · {FYD_STRINGS.reShareLabel}
+                  </Text>
+                </Pressable>
+              ) : null}
+
+              {/* Sandbox indicator — replaces the silent no-op when
+                  the dev rasterizer returns mock HTML. */}
+              {sandboxNotice ? (
                 <Text
                   allowFontScaling={false}
                   style={{
                     fontFamily: theme.fontFamilies.numeric,
-                    fontSize: 9,
-                    letterSpacing: 1.2,
-                    textTransform: 'uppercase',
-                    color: theme.colors.brand.primary,
+                    fontSize: 10,
+                    letterSpacing: 0.4,
+                    color: theme.colors.text.tertiary,
                     textAlign: 'center',
                     marginTop: theme.spacing.s,
                   }}
-                  testID="fyd-plus-unlock"
+                  testID="fyd-sandbox-toast"
                 >
-                  {FYD_STRINGS.plusUnlock}
+                  {FYD_STRINGS.sandboxToast}
                 </Text>
               ) : null}
+
+              {/* Consolidated error surface — single ErrorState, no
+                  duplicate "Try again" affordance with the primary
+                  button. The primary CTA above turns into the retry. */}
               {phase === 'error' ? (
                 <View
                   style={{
@@ -392,10 +681,11 @@ export function ForYourDoctorScreen(props: Nav) {
                 >
                   <ErrorState
                     title={FYD_STRINGS.errorBody}
-                    body={FYD_STRINGS.offlineHint}
-                    onRetry={() => {
-                      void onGenerate();
-                    }}
+                    body={
+                      isOffline
+                        ? FYD_STRINGS.offlineHint
+                        : 'Tap the button above to try again.'
+                    }
                     testID="fyd-error"
                   />
                 </View>
@@ -486,13 +776,21 @@ function Header({ theme, onBack }: { theme: Theme; onBack: () => void }) {
 function TitleBlock({
   theme,
   accountType,
-  rangeLabel,
+  parentLabel,
+  range,
 }: {
   theme: Theme;
   accountType: AccountType;
-  rangeLabel: string;
+  parentLabel: string;
+  range: DoctorPdfRange;
 }) {
-  const possessive = accountType === 'caregiver' ? 'her' : 'your';
+  // Sprint 16.5h — title now reads "For [Patricia]'s doctor." in
+  // caregiver mode (was "For her doctor.") so the user sees the
+  // actual parent's name. Self-buyer stays "For your doctor."
+  const titleLead =
+    accountType === 'caregiver'
+      ? `For ${parentLabel}'s `
+      : 'For your ';
   return (
     <View
       style={{
@@ -512,7 +810,7 @@ function TitleBlock({
         }}
         testID="fyd-title"
       >
-        <Text>For {possessive} </Text>
+        <Text>{titleLead}</Text>
         <Text
           style={{
             fontFamily: theme.fontFamilies.editorialItalic,
@@ -535,68 +833,8 @@ function TitleBlock({
         }}
         testID="fyd-subtitle"
       >
-        A summary of {possessive} last {rangeLabel} of readings, in a format {possessive} doctor can scan in a minute.
+        {subtitleCopy(accountType, range, parentLabel)}
       </Text>
-    </View>
-  );
-}
-
-function RangeBlock({
-  theme,
-  active,
-  isPlus,
-  onRangeTap,
-}: {
-  theme: Theme;
-  active: DoctorPdfRange;
-  isPlus: boolean;
-  onRangeTap: (r: DoctorPdfRange) => void;
-}) {
-  return (
-    <View
-      style={{
-        marginTop: theme.spacing.xl,
-        paddingHorizontal: theme.spacing.l,
-      }}
-      testID="fyd-range-block"
-    >
-      <Text
-        allowFontScaling={false}
-        style={{
-          fontFamily: theme.fontFamilies.numeric,
-          fontSize: 9,
-          letterSpacing: 1.6,
-          textTransform: 'uppercase',
-          color: theme.colors.text.tertiary,
-          marginBottom: theme.spacing.s,
-        }}
-        testID="fyd-range-eyebrow"
-      >
-        {FYD_STRINGS.rangeEyebrow}
-      </Text>
-      <View
-        style={{
-          flexDirection: 'row',
-          gap: theme.spacing.xs,
-        }}
-      >
-        {DOCTOR_PDF_RANGES.map((r) => {
-          const isActive = active === r;
-          const locked = r !== '7d' && !isPlus;
-          return (
-            <Pill
-              key={r}
-              variant={isActive ? 'accent' : 'outline'}
-              selected={isActive}
-              onPress={() => onRangeTap(r)}
-              accessibilityLabel={locked ? `${RANGE_LABEL[r]} (Plus only)` : RANGE_LABEL[r]}
-              testID={`fyd-range:${r}`}
-            >
-              {RANGE_LABEL[r]}
-            </Pill>
-          );
-        })}
-      </View>
     </View>
   );
 }
