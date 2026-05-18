@@ -49,8 +49,11 @@ export function CaregiverActionBar({
   const blurTint: 'dark' | 'light' = theme.colorMode === 'dark' ? 'dark' : 'light';
 
   // Pill container — borderRadius 999, 10/18 padding (per design HTML).
-  // Background floor uses glassMedium so the pill is visible when the
-  // BlurView falls back (Android < 12) and as a tint when it doesn't.
+  // Background floor is a warm-dark glass per the design source
+  // (`oklch(20% 0.02 60 / .7)` ≈ rgba(32, 26, 22, 0.7)) so the pill
+  // stays visible on Android < 12 when the BlurView falls back, and
+  // reads as a coherent warm-tinted surface alongside the canopy.
+  // Border at warm-near-white 10% per `oklch(98% 0.005 60 / .1)`.
   const containerStyle: ViewStyle = {
     flexDirection: 'row',
     alignItems: 'center',
@@ -58,9 +61,9 @@ export function CaregiverActionBar({
     paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: 999,
-    backgroundColor: theme.colors.surface.glassMedium,
+    backgroundColor: 'rgba(32, 26, 22, 0.7)',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: theme.colors.border.subtle,
+    borderColor: 'rgba(251, 248, 244, 0.1)',
     overflow: 'hidden',
   };
 
@@ -78,13 +81,15 @@ export function CaregiverActionBar({
       <Text
         style={{
           fontFamily: theme.fontFamilies.numeric,
-          // Sprint 16.6 — 9.5pt tertiary read as illegible against the
-          // glass-blurred background. 11pt secondary keeps the chip
-          // tone but lets the caregiver actually read it.
-          fontSize: 11,
-          lineHeight: 15,
-          letterSpacing: 1,
-          color: theme.colors.text.secondary,
+          // Back to design's 9.5pt mono tertiary letter-spacing 0.14em
+          // uppercase. The earlier 11pt secondary patch was offsetting
+          // the legibility hit of the brighter glassMedium floor; with
+          // the warm-dark glass + warm-near-white text the tertiary
+          // chip reads cleanly at the design's smaller size.
+          fontSize: 9.5,
+          lineHeight: 13,
+          letterSpacing: 1.33,
+          color: theme.colors.text.tertiary,
           textTransform: 'uppercase',
         }}
         allowFontScaling={false}

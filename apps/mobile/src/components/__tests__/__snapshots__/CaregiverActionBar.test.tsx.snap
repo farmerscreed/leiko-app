@@ -5,8 +5,8 @@ exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders c
   style={
     {
       "alignItems": "center",
-      "backgroundColor": "rgba(255,255,255,0.08)",
-      "borderColor": "rgba(255,255,255,0.08)",
+      "backgroundColor": "rgba(32, 26, 22, 0.7)",
+      "borderColor": "rgba(251, 248, 244, 0.1)",
       "borderRadius": 999,
       "borderWidth": 0.5,
       "flexDirection": "row",
@@ -36,11 +36,11 @@ exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders c
     allowFontScaling={false}
     style={
       {
-        "color": "#9C9890",
+        "color": "#B8B5AE",
         "fontFamily": "JetBrainsMono_500Medium",
         "fontSize": 9.5,
-        "letterSpacing": 0.95,
-        "lineHeight": 14,
+        "letterSpacing": 1.33,
+        "lineHeight": 13,
         "textTransform": "uppercase",
       }
     }
@@ -55,8 +55,8 @@ exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders c
   style={
     {
       "alignItems": "center",
-      "backgroundColor": "rgba(15,18,28,0.08)",
-      "borderColor": "rgba(15,18,28,0.08)",
+      "backgroundColor": "rgba(32, 26, 22, 0.7)",
+      "borderColor": "rgba(251, 248, 244, 0.1)",
       "borderRadius": 999,
       "borderWidth": 0.5,
       "flexDirection": "row",
@@ -89,8 +89,8 @@ exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders c
         "color": "#5A6478",
         "fontFamily": "JetBrainsMono_500Medium",
         "fontSize": 9.5,
-        "letterSpacing": 0.95,
-        "lineHeight": 14,
+        "letterSpacing": 1.33,
+        "lineHeight": 13,
         "textTransform": "uppercase",
       }
     }
@@ -105,8 +105,8 @@ exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders c
   style={
     {
       "alignItems": "center",
-      "backgroundColor": "rgba(255,255,255,0.08)",
-      "borderColor": "rgba(255,255,255,0.08)",
+      "backgroundColor": "rgba(32, 26, 22, 0.7)",
+      "borderColor": "rgba(251, 248, 244, 0.1)",
       "borderRadius": 999,
       "borderWidth": 0.5,
       "flexDirection": "row",
@@ -136,11 +136,11 @@ exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders c
     allowFontScaling={false}
     style={
       {
-        "color": "#9C9890",
+        "color": "#B8B5AE",
         "fontFamily": "JetBrainsMono_500Medium",
         "fontSize": 9.5,
-        "letterSpacing": 0.95,
-        "lineHeight": 14,
+        "letterSpacing": 1.33,
+        "lineHeight": 13,
         "textTransform": "uppercase",
       }
     }
@@ -210,8 +210,8 @@ exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders c
   style={
     {
       "alignItems": "center",
-      "backgroundColor": "rgba(15,18,28,0.08)",
-      "borderColor": "rgba(15,18,28,0.08)",
+      "backgroundColor": "rgba(32, 26, 22, 0.7)",
+      "borderColor": "rgba(251, 248, 244, 0.1)",
       "borderRadius": 999,
       "borderWidth": 0.5,
       "flexDirection": "row",
@@ -244,8 +244,8 @@ exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders c
         "color": "#5A6478",
         "fontFamily": "JetBrainsMono_500Medium",
         "fontSize": 9.5,
-        "letterSpacing": 0.95,
-        "lineHeight": 14,
+        "letterSpacing": 1.33,
+        "lineHeight": 13,
         "textTransform": "uppercase",
       }
     }
