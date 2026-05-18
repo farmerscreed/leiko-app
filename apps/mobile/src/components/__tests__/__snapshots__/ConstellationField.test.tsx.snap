@@ -106,7 +106,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
         r={130}
         stroke={
           {
-            "payload": 4294308330,
+            "payload": 4294703348,
             "type": 0,
           }
         }
@@ -135,7 +135,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
         r={80}
         stroke={
           {
-            "payload": 4294308330,
+            "payload": 4294703348,
             "type": 0,
           }
         }
@@ -228,7 +228,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
         cy={180}
         fill={
           {
-            "payload": 4294308330,
+            "payload": 4294703348,
             "type": 0,
           }
         }
@@ -253,7 +253,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
         r={3}
         stroke={
           {
-            "payload": 4294308330,
+            "payload": 4294703348,
             "type": 0,
           }
         }
@@ -281,10 +281,11 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
       allowFontScaling={false}
       style={
         {
-          "color": "#9C9890",
+          "color": "#B8B5AE",
           "fontFamily": "JetBrainsMono_500Medium",
-          "fontSize": 9,
-          "letterSpacing": 1.8,
+          "fontSize": 8.5,
+          "fontWeight": "500",
+          "letterSpacing": 1.7,
           "lineHeight": 11,
           "textTransform": "uppercase",
         }
@@ -373,8 +374,6 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             style={
               [
                 {
-                  "backgroundColor": "#FF735059",
-                  "borderRadius": 9999,
                   "bottom": -16,
                   "left": -16,
                   "position": "absolute",
@@ -391,7 +390,75 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 },
               ]
             }
-          />
+          >
+            <RNSVGSvgView
+              bbHeight="100%"
+              bbWidth="100%"
+              focusable={false}
+              height="100%"
+              style={
+                [
+                  {
+                    "backgroundColor": "transparent",
+                    "borderWidth": 0,
+                  },
+                  {
+                    "flex": 0,
+                    "height": "100%",
+                    "width": "100%",
+                  },
+                ]
+              }
+              width="100%"
+            >
+              <RNSVGGroup
+                fill={
+                  {
+                    "payload": 4278190080,
+                    "type": 0,
+                  }
+                }
+              >
+                <RNSVGDefs>
+                  <RNSVGRadialGradient
+                    cx="50%"
+                    cy="50%"
+                    fx="50%"
+                    fy="50%"
+                    gradient={
+                      [
+                        0,
+                        1509913424,
+                        1,
+                        16741200,
+                      ]
+                    }
+                    gradientTransform={null}
+                    gradientUnits={0}
+                    name="cg-orb-halo"
+                    rx="50%"
+                    ry="50%"
+                  />
+                </RNSVGDefs>
+                <RNSVGCircle
+                  cx="50%"
+                  cy="50%"
+                  fill={
+                    {
+                      "brushRef": "cg-orb-halo",
+                      "type": 1,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                  r="50%"
+                />
+              </RNSVGGroup>
+            </RNSVGSvgView>
+          </View>
           <View
             style={
               [
@@ -463,10 +530,11 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             allowFontScaling={false}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FBF8F4",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
-                "lineHeight": 16,
+                "letterSpacing": -0.07,
+                "lineHeight": 18,
               }
             }
           >
@@ -479,6 +547,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 "color": "#FF7350",
                 "fontFamily": "JetBrainsMono_500Medium",
                 "fontSize": 10,
+                "fontWeight": "500",
                 "letterSpacing": 0.4,
                 "lineHeight": 12,
                 "marginTop": 1,
@@ -571,8 +640,6 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             style={
               [
                 {
-                  "backgroundColor": "#F2A61859",
-                  "borderRadius": 9999,
                   "bottom": -16,
                   "left": -16,
                   "position": "absolute",
@@ -589,7 +656,75 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 },
               ]
             }
-          />
+          >
+            <RNSVGSvgView
+              bbHeight="100%"
+              bbWidth="100%"
+              focusable={false}
+              height="100%"
+              style={
+                [
+                  {
+                    "backgroundColor": "transparent",
+                    "borderWidth": 0,
+                  },
+                  {
+                    "flex": 0,
+                    "height": "100%",
+                    "width": "100%",
+                  },
+                ]
+              }
+              width="100%"
+            >
+              <RNSVGGroup
+                fill={
+                  {
+                    "payload": 4278190080,
+                    "type": 0,
+                  }
+                }
+              >
+                <RNSVGDefs>
+                  <RNSVGRadialGradient
+                    cx="50%"
+                    cy="50%"
+                    fx="50%"
+                    fy="50%"
+                    gradient={
+                      [
+                        0,
+                        1509074456,
+                        1,
+                        15902232,
+                      ]
+                    }
+                    gradientTransform={null}
+                    gradientUnits={0}
+                    name="cg-orb-halo"
+                    rx="50%"
+                    ry="50%"
+                  />
+                </RNSVGDefs>
+                <RNSVGCircle
+                  cx="50%"
+                  cy="50%"
+                  fill={
+                    {
+                      "brushRef": "cg-orb-halo",
+                      "type": 1,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                  r="50%"
+                />
+              </RNSVGGroup>
+            </RNSVGSvgView>
+          </View>
           <View
             style={
               [
@@ -677,10 +812,11 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             allowFontScaling={false}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FBF8F4",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
-                "lineHeight": 16,
+                "letterSpacing": -0.07,
+                "lineHeight": 18,
               }
             }
           >
@@ -693,6 +829,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 "color": "#F2A618",
                 "fontFamily": "JetBrainsMono_500Medium",
                 "fontSize": 10,
+                "fontWeight": "500",
                 "letterSpacing": 0.4,
                 "lineHeight": 12,
                 "marginTop": 1,
@@ -785,8 +922,6 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             style={
               [
                 {
-                  "backgroundColor": "#7B67CC59",
-                  "borderRadius": 9999,
                   "bottom": -16,
                   "left": -16,
                   "position": "absolute",
@@ -803,7 +938,75 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 },
               ]
             }
-          />
+          >
+            <RNSVGSvgView
+              bbHeight="100%"
+              bbWidth="100%"
+              focusable={false}
+              height="100%"
+              style={
+                [
+                  {
+                    "backgroundColor": "transparent",
+                    "borderWidth": 0,
+                  },
+                  {
+                    "flex": 0,
+                    "height": "100%",
+                    "width": "100%",
+                  },
+                ]
+              }
+              width="100%"
+            >
+              <RNSVGGroup
+                fill={
+                  {
+                    "payload": 4278190080,
+                    "type": 0,
+                  }
+                }
+              >
+                <RNSVGDefs>
+                  <RNSVGRadialGradient
+                    cx="50%"
+                    cy="50%"
+                    fx="50%"
+                    fy="50%"
+                    gradient={
+                      [
+                        0,
+                        1501259724,
+                        1,
+                        8087500,
+                      ]
+                    }
+                    gradientTransform={null}
+                    gradientUnits={0}
+                    name="cg-orb-halo"
+                    rx="50%"
+                    ry="50%"
+                  />
+                </RNSVGDefs>
+                <RNSVGCircle
+                  cx="50%"
+                  cy="50%"
+                  fill={
+                    {
+                      "brushRef": "cg-orb-halo",
+                      "type": 1,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                  r="50%"
+                />
+              </RNSVGGroup>
+            </RNSVGSvgView>
+          </View>
           <View
             style={
               [
@@ -906,10 +1109,11 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             allowFontScaling={false}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FBF8F4",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
-                "lineHeight": 16,
+                "letterSpacing": -0.07,
+                "lineHeight": 18,
               }
             }
           >
@@ -922,6 +1126,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 "color": "#7B67CC",
                 "fontFamily": "JetBrainsMono_500Medium",
                 "fontSize": 10,
+                "fontWeight": "500",
                 "letterSpacing": 0.4,
                 "lineHeight": 12,
                 "marginTop": 1,
@@ -1220,8 +1425,9 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
         {
           "color": "#5A6478",
           "fontFamily": "JetBrainsMono_500Medium",
-          "fontSize": 9,
-          "letterSpacing": 1.8,
+          "fontSize": 8.5,
+          "fontWeight": "500",
+          "letterSpacing": 1.7,
           "lineHeight": 11,
           "textTransform": "uppercase",
         }
@@ -1310,8 +1516,6 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             style={
               [
                 {
-                  "backgroundColor": "#FF735059",
-                  "borderRadius": 9999,
                   "bottom": -16,
                   "left": -16,
                   "position": "absolute",
@@ -1328,7 +1532,75 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 },
               ]
             }
-          />
+          >
+            <RNSVGSvgView
+              bbHeight="100%"
+              bbWidth="100%"
+              focusable={false}
+              height="100%"
+              style={
+                [
+                  {
+                    "backgroundColor": "transparent",
+                    "borderWidth": 0,
+                  },
+                  {
+                    "flex": 0,
+                    "height": "100%",
+                    "width": "100%",
+                  },
+                ]
+              }
+              width="100%"
+            >
+              <RNSVGGroup
+                fill={
+                  {
+                    "payload": 4278190080,
+                    "type": 0,
+                  }
+                }
+              >
+                <RNSVGDefs>
+                  <RNSVGRadialGradient
+                    cx="50%"
+                    cy="50%"
+                    fx="50%"
+                    fy="50%"
+                    gradient={
+                      [
+                        0,
+                        1509913424,
+                        1,
+                        16741200,
+                      ]
+                    }
+                    gradientTransform={null}
+                    gradientUnits={0}
+                    name="cg-orb-halo"
+                    rx="50%"
+                    ry="50%"
+                  />
+                </RNSVGDefs>
+                <RNSVGCircle
+                  cx="50%"
+                  cy="50%"
+                  fill={
+                    {
+                      "brushRef": "cg-orb-halo",
+                      "type": 1,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                  r="50%"
+                />
+              </RNSVGGroup>
+            </RNSVGSvgView>
+          </View>
           <View
             style={
               [
@@ -1403,7 +1675,8 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 "color": "#0F121C",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
-                "lineHeight": 16,
+                "letterSpacing": -0.07,
+                "lineHeight": 18,
               }
             }
           >
@@ -1416,6 +1689,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 "color": "#FF7350",
                 "fontFamily": "JetBrainsMono_500Medium",
                 "fontSize": 10,
+                "fontWeight": "500",
                 "letterSpacing": 0.4,
                 "lineHeight": 12,
                 "marginTop": 1,
@@ -1508,8 +1782,6 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             style={
               [
                 {
-                  "backgroundColor": "#F2A61859",
-                  "borderRadius": 9999,
                   "bottom": -16,
                   "left": -16,
                   "position": "absolute",
@@ -1526,7 +1798,75 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 },
               ]
             }
-          />
+          >
+            <RNSVGSvgView
+              bbHeight="100%"
+              bbWidth="100%"
+              focusable={false}
+              height="100%"
+              style={
+                [
+                  {
+                    "backgroundColor": "transparent",
+                    "borderWidth": 0,
+                  },
+                  {
+                    "flex": 0,
+                    "height": "100%",
+                    "width": "100%",
+                  },
+                ]
+              }
+              width="100%"
+            >
+              <RNSVGGroup
+                fill={
+                  {
+                    "payload": 4278190080,
+                    "type": 0,
+                  }
+                }
+              >
+                <RNSVGDefs>
+                  <RNSVGRadialGradient
+                    cx="50%"
+                    cy="50%"
+                    fx="50%"
+                    fy="50%"
+                    gradient={
+                      [
+                        0,
+                        1509074456,
+                        1,
+                        15902232,
+                      ]
+                    }
+                    gradientTransform={null}
+                    gradientUnits={0}
+                    name="cg-orb-halo"
+                    rx="50%"
+                    ry="50%"
+                  />
+                </RNSVGDefs>
+                <RNSVGCircle
+                  cx="50%"
+                  cy="50%"
+                  fill={
+                    {
+                      "brushRef": "cg-orb-halo",
+                      "type": 1,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                  r="50%"
+                />
+              </RNSVGGroup>
+            </RNSVGSvgView>
+          </View>
           <View
             style={
               [
@@ -1617,7 +1957,8 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 "color": "#0F121C",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
-                "lineHeight": 16,
+                "letterSpacing": -0.07,
+                "lineHeight": 18,
               }
             }
           >
@@ -1630,6 +1971,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 "color": "#F2A618",
                 "fontFamily": "JetBrainsMono_500Medium",
                 "fontSize": 10,
+                "fontWeight": "500",
                 "letterSpacing": 0.4,
                 "lineHeight": 12,
                 "marginTop": 1,
@@ -1722,8 +2064,6 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             style={
               [
                 {
-                  "backgroundColor": "#7B67CC59",
-                  "borderRadius": 9999,
                   "bottom": -16,
                   "left": -16,
                   "position": "absolute",
@@ -1740,7 +2080,75 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 },
               ]
             }
-          />
+          >
+            <RNSVGSvgView
+              bbHeight="100%"
+              bbWidth="100%"
+              focusable={false}
+              height="100%"
+              style={
+                [
+                  {
+                    "backgroundColor": "transparent",
+                    "borderWidth": 0,
+                  },
+                  {
+                    "flex": 0,
+                    "height": "100%",
+                    "width": "100%",
+                  },
+                ]
+              }
+              width="100%"
+            >
+              <RNSVGGroup
+                fill={
+                  {
+                    "payload": 4278190080,
+                    "type": 0,
+                  }
+                }
+              >
+                <RNSVGDefs>
+                  <RNSVGRadialGradient
+                    cx="50%"
+                    cy="50%"
+                    fx="50%"
+                    fy="50%"
+                    gradient={
+                      [
+                        0,
+                        1501259724,
+                        1,
+                        8087500,
+                      ]
+                    }
+                    gradientTransform={null}
+                    gradientUnits={0}
+                    name="cg-orb-halo"
+                    rx="50%"
+                    ry="50%"
+                  />
+                </RNSVGDefs>
+                <RNSVGCircle
+                  cx="50%"
+                  cy="50%"
+                  fill={
+                    {
+                      "brushRef": "cg-orb-halo",
+                      "type": 1,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                  r="50%"
+                />
+              </RNSVGGroup>
+            </RNSVGSvgView>
+          </View>
           <View
             style={
               [
@@ -1846,7 +2254,8 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 "color": "#0F121C",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
-                "lineHeight": 16,
+                "letterSpacing": -0.07,
+                "lineHeight": 18,
               }
             }
           >
@@ -1859,6 +2268,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
                 "color": "#7B67CC",
                 "fontFamily": "JetBrainsMono_500Medium",
                 "fontSize": 10,
+                "fontWeight": "500",
                 "letterSpacing": 0.4,
                 "lineHeight": 12,
                 "marginTop": 1,

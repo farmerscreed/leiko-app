@@ -158,10 +158,12 @@ export function ConstellationField({
     opacity: pulseOpacity.value,
   }));
 
-  // Sprint 16.6 — "YOU" label was 9pt text.tertiary, effectively
-  // invisible against the dark canopy. Lift to text.secondary; the
-  // size bump happens in the Text style below.
-  const youLabelColor = theme.colors.text.secondary;
+  // Sprint 16.6 — back to the design's quiet "YOU" treatment now that
+  // the warm-near-white text token + bg radial canopy + gradient
+  // halos give the surface enough contrast that small tertiary mono
+  // reads without a brightness bump. Per
+  // `leiko-caregiver-unified.html` ConstellationFieldClickable.
+  const youLabelColor = theme.colors.text.tertiary;
   const centerDotColor = theme.colors.text.primary;
 
   return (
@@ -270,9 +272,13 @@ export function ConstellationField({
           allowFontScaling={false}
           style={{
             fontFamily: theme.fontFamilies.numeric,
-            fontSize: 11,
-            lineHeight: 13,
-            letterSpacing: 2.2,
+            // Design: 8.5pt mono uppercase, letter-spacing 0.20em
+            // (~1.7pt at 8.5pt). The earlier 11pt bump made the
+            // label compete with the orb portraits for attention;
+            // small + quiet is the intent.
+            fontSize: 8.5,
+            lineHeight: 11,
+            letterSpacing: 1.7,
             fontWeight: '500',
             color: youLabelColor,
             textTransform: 'uppercase',
