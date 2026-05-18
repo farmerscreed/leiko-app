@@ -207,13 +207,17 @@ export function PersonCard({
               allowFontScaling={false}
               style={{
                 fontFamily: theme.fontFamilies.numeric,
-                fontSize: 10.5,
+                // Back to design's 10pt mono tertiary letter-spacing
+                // 0.14em uppercase per leiko-caregiver-a.jsx PersonPage
+                // header eyebrow. The earlier secondary bump compensated
+                // for palette/canopy contrast issues that the warm-
+                // near-white text + bg gradient + gradient halo now
+                // resolve at source.
+                fontSize: 10,
                 lineHeight: 13,
                 letterSpacing: 1.4,
                 textTransform: 'uppercase',
-                // Sprint 16.6 — secondary instead of tertiary so eyebrow
-                // ("SELF · 35", "MOTHER · 71") reads at a glance.
-                color: theme.colors.text.secondary,
+                color: theme.colors.text.tertiary,
                 marginBottom: 2,
               }}
             >
@@ -252,16 +256,17 @@ export function PersonCard({
           {`“${headline}”`}
         </Text>
 
-        {/* Sentence paragraph — Sprint 16.6: bumped 13.5→15pt and lifted
-            colour from secondary to primary so the body reads as cleanly
-            as the headline on dark-canonical surfaces. */}
+        {/* Body sentence — design uses 13.5pt body / text.secondary.
+            Reads as a quiet supporting paragraph under the italic
+            editorial headline; promoting it to primary made the card
+            feel typographically flat. */}
         <Text
           allowFontScaling={false}
           style={{
             fontFamily: theme.fontFamilies.body,
-            fontSize: 15,
-            lineHeight: 22,
-            color: theme.colors.text.primary,
+            fontSize: 13.5,
+            lineHeight: 20,
+            color: theme.colors.text.secondary,
             marginBottom: theme.spacing.l,
           }}
         >
@@ -286,7 +291,7 @@ export function PersonCard({
             valueFamily={theme.fontFamilies.editorial}
             valueColor={theme.colors.text.primary}
             labelFamily={theme.fontFamilies.numeric}
-            labelColor={theme.colors.text.secondary}
+            labelColor={theme.colors.text.tertiary}
           />
           <VitalCol
             value={vitalStrip.hr}
@@ -296,7 +301,7 @@ export function PersonCard({
             valueFamily={theme.fontFamilies.editorial}
             valueColor={theme.colors.text.primary}
             labelFamily={theme.fontFamilies.numeric}
-            labelColor={theme.colors.text.secondary}
+            labelColor={theme.colors.text.tertiary}
           />
           <VitalCol
             value={vitalStrip.spo2}
@@ -306,7 +311,7 @@ export function PersonCard({
             valueFamily={theme.fontFamilies.editorial}
             valueColor={theme.colors.text.primary}
             labelFamily={theme.fontFamilies.numeric}
-            labelColor={theme.colors.text.secondary}
+            labelColor={theme.colors.text.tertiary}
           />
           <VitalCol
             value={vitalStrip.sleep}
@@ -316,7 +321,7 @@ export function PersonCard({
             valueFamily={theme.fontFamilies.editorial}
             valueColor={theme.colors.text.primary}
             labelFamily={theme.fontFamilies.numeric}
-            labelColor={theme.colors.text.secondary}
+            labelColor={theme.colors.text.tertiary}
           />
         </View>
 
@@ -331,13 +336,15 @@ export function PersonCard({
             allowFontScaling={false}
             style={{
               fontFamily: theme.fontFamilies.numeric,
-              // Sprint 16.6 — 9.5→11pt + secondary so "READ · 8:43 PM"
-              // and "NO READINGS YET" register at a glance.
-              fontSize: 11,
-              lineHeight: 14,
-              letterSpacing: 1.1,
+              // Back to design's 9.5pt mono tertiary letter-spacing
+              // 0.14em uppercase. Footer is supporting metadata, not
+              // a headline; design hierarchy puts it below the body
+              // and above only the divider.
+              fontSize: 9.5,
+              lineHeight: 13,
+              letterSpacing: 1.33,
               textTransform: 'uppercase',
-              color: theme.colors.text.secondary,
+              color: theme.colors.text.tertiary,
             }}
           >
             {footerLeftLabel}
@@ -420,13 +427,13 @@ function VitalCol({
         allowFontScaling={false}
         style={{
           fontFamily: labelFamily,
-          // Sprint 16.6 — vital row labels (BP / HR / SPO2 / SLEEP)
-          // were 8pt at text.tertiary, effectively unreadable on dark.
-          // Bumped to 10pt at the brighter labelColor passed by the
-          // consumer (PersonCard passes text.secondary).
-          fontSize: 10,
+          // Back to design's 9pt mono uppercase letter-spacing 0.10em
+          // for BP / HR / SPO2 / SLEEP. The earlier 10pt secondary
+          // patch was compensating for legibility issues that the
+          // warm-near-white text + warm canopy now resolve.
+          fontSize: 9,
           lineHeight: 12,
-          letterSpacing: 0.8,
+          letterSpacing: 0.9,
           textTransform: 'uppercase',
           color: labelColor,
           marginTop: 4,
