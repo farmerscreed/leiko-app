@@ -108,7 +108,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#FBF8F4",
+              "color": "#FFFFFF",
               "fontFamily": "InstrumentSerif_400Regular",
               "fontSize": 15,
               "letterSpacing": -0.075,
@@ -122,7 +122,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#FFFFFF",
+              "color": "#D9D2C2",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -140,7 +140,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#FFFFFF",
+            "color": "#F5EFE2",
             "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
@@ -305,7 +305,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#FBF8F4",
+              "color": "#FFFFFF",
               "fontFamily": "InstrumentSerif_400Regular",
               "fontSize": 15,
               "letterSpacing": -0.075,
@@ -319,7 +319,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#FFFFFF",
+              "color": "#D9D2C2",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -337,7 +337,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#FFFFFF",
+            "color": "#F5EFE2",
             "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
@@ -493,7 +493,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#FBF8F4",
+              "color": "#FFFFFF",
               "fontFamily": "InstrumentSerif_400Regular",
               "fontSize": 15,
               "letterSpacing": -0.075,
@@ -507,7 +507,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#FFFFFF",
+              "color": "#D9D2C2",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -525,7 +525,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#FFFFFF",
+            "color": "#F5EFE2",
             "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
@@ -713,7 +713,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#FFFFFF",
+              "color": "#5A6478",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -731,7 +731,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#FFFFFF",
+            "color": "#2A3040",
             "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
@@ -910,7 +910,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#FFFFFF",
+              "color": "#5A6478",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -928,7 +928,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#FFFFFF",
+            "color": "#2A3040",
             "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
@@ -1098,7 +1098,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#FFFFFF",
+              "color": "#5A6478",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -1116,7 +1116,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#FFFFFF",
+            "color": "#2A3040",
             "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,

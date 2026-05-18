@@ -172,13 +172,13 @@ export function ConstellationLegend({
                   allowFontScaling={false}
                   style={{
                     fontFamily: theme.fontFamilies.numeric,
-                    // Color forced to pure #FFFFFF (overrides tertiary
-                    // #B8B5AE) per founder on-device feedback: small
-                    // mono uppercase at the design's tertiary tone
-                    // reads as grey on Android against the warm canopy.
+                    // Tertiary token now resolves to a warm bright
+                    // grey-cream #D9D2C2 (~85% luminance) — visibly
+                    // recessive vs the primary serif name above, but
+                    // never reads as "disabled" on Android.
                     fontSize: 9,
                     lineHeight: 12,
-                    color: '#FFFFFF',
+                    color: theme.colors.text.tertiary,
                     letterSpacing: 0.9,
                     textTransform: 'uppercase',
                   }}
@@ -191,16 +191,14 @@ export function ConstellationLegend({
                 numberOfLines={1}
                 ellipsizeMode="tail"
                 style={{
-                  // Color forced to pure #FFFFFF (overrides secondary
-                  // #F4F2EE) per founder on-device feedback: the
-                  // per-person status line was reading as off-white.
-                  // Keep the design's 11.5pt body size + hierarchy via
-                  // the supporting role; brightness alone fixes the
-                  // legibility, not the type weight.
+                  // Secondary token now resolves to a warm cream
+                  // #F5EFE2 (~96% luminance) — bright enough to read
+                  // cleanly on Android, warm enough to carry the
+                  // editorial register.
                   fontFamily: theme.fontFamilies.body,
                   fontSize: 11.5,
                   lineHeight: 16,
-                  color: '#FFFFFF',
+                  color: theme.colors.text.secondary,
                   marginTop: 2,
                 }}
               >

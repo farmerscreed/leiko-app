@@ -81,14 +81,13 @@ export function CaregiverActionBar({
       <Text
         style={{
           fontFamily: theme.fontFamilies.numeric,
-          // Color forced to pure #FFFFFF per founder on-device feedback:
-          // tertiary on warm-glass-over-canopy reads as grey. Keep
-          // design's 9.5pt + letter-spacing so the chip stays visually
-          // recessive against the coral "+ Add someone" CTA.
+          // Tertiary token resolves to warm bright grey-cream #D9D2C2
+          // — recessive vs the coral CTA at the right edge, but
+          // legibly bright on Android against the warm-dark glass.
           fontSize: 9.5,
           lineHeight: 13,
           letterSpacing: 1.33,
-          color: '#FFFFFF',
+          color: theme.colors.text.tertiary,
           textTransform: 'uppercase',
         }}
         allowFontScaling={false}

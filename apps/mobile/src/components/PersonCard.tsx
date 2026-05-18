@@ -207,15 +207,13 @@ export function PersonCard({
               allowFontScaling={false}
               style={{
                 fontFamily: theme.fontFamilies.numeric,
-                // Pure #FFFFFF (overrides tertiary) per founder on-device
-                // feedback — the eyebrow "MOM · 71" was reading as
-                // grey on Android. Design size + tracking preserved so
-                // the eyebrow stays visually below the full name.
+                // tertiary resolves to warm bright grey-cream — sits
+                // visually below the serif full name without going dim.
                 fontSize: 10,
                 lineHeight: 13,
                 letterSpacing: 1.4,
                 textTransform: 'uppercase',
-                color: '#FFFFFF',
+                color: theme.colors.text.tertiary,
                 marginBottom: 2,
               }}
             >
@@ -254,16 +252,16 @@ export function PersonCard({
           {`“${headline}”`}
         </Text>
 
-        {/* Body sentence — pure #FFFFFF (overrides secondary) per
-            founder on-device feedback. Keep design's 13.5pt body so
-            the headline stays the visual lead via size alone. */}
+        {/* Body sentence — secondary (warm cream #F5EFE2) keeps the
+            paragraph visibly under the italic headline while staying
+            unambiguously bright. */}
         <Text
           allowFontScaling={false}
           style={{
             fontFamily: theme.fontFamilies.body,
             fontSize: 13.5,
             lineHeight: 20,
-            color: '#FFFFFF',
+            color: theme.colors.text.secondary,
             marginBottom: theme.spacing.l,
           }}
         >
@@ -288,7 +286,7 @@ export function PersonCard({
             valueFamily={theme.fontFamilies.editorial}
             valueColor={theme.colors.text.primary}
             labelFamily={theme.fontFamilies.numeric}
-            labelColor="#FFFFFF"
+            labelColor={theme.colors.text.tertiary}
           />
           <VitalCol
             value={vitalStrip.hr}
@@ -298,7 +296,7 @@ export function PersonCard({
             valueFamily={theme.fontFamilies.editorial}
             valueColor={theme.colors.text.primary}
             labelFamily={theme.fontFamilies.numeric}
-            labelColor="#FFFFFF"
+            labelColor={theme.colors.text.tertiary}
           />
           <VitalCol
             value={vitalStrip.spo2}
@@ -308,7 +306,7 @@ export function PersonCard({
             valueFamily={theme.fontFamilies.editorial}
             valueColor={theme.colors.text.primary}
             labelFamily={theme.fontFamilies.numeric}
-            labelColor="#FFFFFF"
+            labelColor={theme.colors.text.tertiary}
           />
           <VitalCol
             value={vitalStrip.sleep}
@@ -318,7 +316,7 @@ export function PersonCard({
             valueFamily={theme.fontFamilies.editorial}
             valueColor={theme.colors.text.primary}
             labelFamily={theme.fontFamilies.numeric}
-            labelColor="#FFFFFF"
+            labelColor={theme.colors.text.tertiary}
           />
         </View>
 
@@ -333,14 +331,13 @@ export function PersonCard({
             allowFontScaling={false}
             style={{
               fontFamily: theme.fontFamilies.numeric,
-              // Pure #FFFFFF (overrides tertiary) per founder on-device
-              // feedback — "READ · 6:42 AM" / "LAST READING · …" was
-              // reading as grey. Design size + tracking preserved.
+              // tertiary resolves to warm bright grey-cream — footer
+              // sits below the body without falling dim.
               fontSize: 9.5,
               lineHeight: 13,
               letterSpacing: 1.33,
               textTransform: 'uppercase',
-              color: '#FFFFFF',
+              color: theme.colors.text.tertiary,
             }}
           >
             {footerLeftLabel}

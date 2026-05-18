@@ -615,15 +615,15 @@ function DetailedView({ people, onSelectPerson, theme }: DetailedViewProps) {
             fontFamily: theme.fontFamilies.editorial,
             fontSize: headlineStyle.size,
             lineHeight: headlineStyle.lineHeight,
-            // Per founder on-device feedback — the design renders this
-            // headline at warm-near-white + warmer-cream italic, but
-            // both tones read as off-white/dim against the canopy on
-            // Android. Pure #FFFFFF on both clauses; differentiation
-            // of the leading word comes from font-style: italic alone.
-            color: '#FFFFFF',
+            // primary now resolves to pure #FFFFFF; the italic leading
+            // word picks up secondary (warm cream #F5EFE2) so the
+            // accent reads as gently warmer rather than identical.
+            // Hierarchy lands on font-style + tone rather than
+            // brightness drop.
+            color: theme.colors.text.primary,
           }}
         >
-          <Text style={{ fontStyle: 'italic', color: '#FFFFFF' }}>
+          <Text style={{ fontStyle: 'italic', color: theme.colors.text.secondary }}>
             {headlineWord}
           </Text>
           {' you love,\nchecked in.'}
@@ -700,11 +700,11 @@ function SharedHeader({
             allowFontScaling={false}
             style={{
               fontFamily: theme.fontFamilies.numeric,
-              // Pure #FFFFFF per founder on-device feedback — tertiary
-              // mono reads as grey against the canopy.
+              // tertiary resolves to warm bright grey-cream (token-
+              // level tune in Sprint 16.6) — recessive but legible.
               fontSize: 9.5,
               letterSpacing: 1.3,
-              color: '#FFFFFF',
+              color: theme.colors.text.tertiary,
               textTransform: 'uppercase',
             }}
           >
@@ -737,10 +737,11 @@ function SharedHeader({
         allowFontScaling={false}
         style={{
           fontFamily: theme.fontFamilies.numeric,
-          // Pure #FFFFFF per founder on-device feedback.
+          // tertiary resolves to warm bright grey-cream — recessive
+          // but legible against the canopy.
           fontSize: 9,
           letterSpacing: 1.6,
-          color: '#FFFFFF',
+          color: theme.colors.text.tertiary,
           textTransform: 'uppercase',
         }}
       >

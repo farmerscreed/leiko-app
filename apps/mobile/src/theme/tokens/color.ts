@@ -24,20 +24,27 @@ export const paletteDark = {
     850: '#120C07', // subtle
     800: '#1D140D', // elevated
   },
-  // Sprint 16.6 — bone[50] tracks the caregiver-unified design source
-  // (`leiko-caregiver-unified.html` → `oklch(98% 0.005 60)`). That's a
-  // *warm near-white* (#FBF8F4), tonally cohesive with the warm-
-  // charcoal canopy. An earlier patch lifted to pure #FFFFFF in
-  // response to a "fonts look black" device report; that turned out
-  // to be a halo-bleed clip problem rooted in the PersonOrb's flat
-  // alpha halo (now replaced by a true radial gradient). With the
-  // gradient halo + bg in place, the design's warm near-white reads
-  // cleanly (~19:1 against warmCharcoal[850]) without breaking the
-  // editorial palette.
-  bone: { 50: '#FBF8F4', 100: '#F4F2EE' },
-  // Tertiary — was #9C9890 (mid-grey). Lifted to a brighter grey for
-  // eyebrows + labels that didn't get per-component bumps.
-  stone: { 300: '#B8B5AE', 500: '#6B6862' },
+  // Sprint 16.6 — text palette tuned for on-device legibility against
+  // the warm-charcoal canopy AND the design's warm editorial register.
+  // The strategy: tighten the brightness gradation so even tertiary
+  // reads as bright + warm rather than dim grey. Hierarchy comes
+  // from tone + size + weight, not from "primary is white / tertiary
+  // is grey." Mirrors print typography on warm paper.
+  //   bone[50]  #FFFFFF  primary    — focal text (names, headlines,
+  //                                    vital values). Pure white reads
+  //                                    as the lead element on canopy.
+  //   bone[100] #F5EFE2  secondary  — supporting body. Warm cream
+  //                                    at ~96% luminance — visibly
+  //                                    warm but unambiguously bright.
+  bone: { 50: '#FFFFFF', 100: '#F5EFE2' },
+  //   stone[300] #D9D2C2 tertiary  — recessive labels / eyebrows /
+  //                                    dates. Warm bright grey-cream
+  //                                    at ~85% luminance. Visibly
+  //                                    smaller-importance than the
+  //                                    secondary cream, but never
+  //                                    reads as "disabled" the way the
+  //                                    previous #B8B5AE did on Android.
+  stone: { 300: '#D9D2C2', 500: '#6B6862' },
   amber: { 400: '#F5B47A', 500: '#E8A063', 600: '#C5824A' },
   // Coral — caregiver-mode brand accent (Sprint 7.7). Distinct from the
   // existing `coral.500 #D6745A` used for HR vital chromatic; this is

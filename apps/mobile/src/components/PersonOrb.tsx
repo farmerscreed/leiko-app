@@ -325,20 +325,16 @@ export function PersonOrb({
           <Text
             allowFontScaling={false}
             style={{
-              // Sprint 16.6 — Instrument Serif at 14pt per the design
-              // source. Color is forced to pure #FFFFFF here (rather
-              // than text.primary which is the design's warm-near-white
-              // #FBF8F4): on Android the serif's narrow 400-weight
-              // strokes need every pixel of luminance to read as
-              // unambiguously white against the warm canopy. Cards +
-              // legends keep text.primary because their fonts (italic
-              // serif at 22pt, body sans at 13.5pt+) push enough
-              // stroke mass for the warm-near-white to read cleanly.
+              // Instrument Serif 14pt per the design. text.primary now
+              // resolves to pure #FFFFFF at the token level (Sprint
+              // 16.6 palette tune for on-device legibility), so the
+              // inline override is no longer needed — semantic token
+              // carries the white.
               fontFamily: theme.fontFamilies.editorial,
               fontSize: 14,
               lineHeight: 18,
               letterSpacing: -0.07, // ~-0.005em at 14pt
-              color: '#FFFFFF',
+              color: theme.colors.text.primary,
             }}
           >
             {fullName.split(' ')[0]}

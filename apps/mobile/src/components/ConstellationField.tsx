@@ -158,11 +158,11 @@ export function ConstellationField({
     opacity: pulseOpacity.value,
   }));
 
-  // Sprint 16.6 — "YOU" forced to pure #FFFFFF per founder on-device
-  // feedback: tertiary mono at this size reads as grey against the
-  // canopy on Android. Keeping the small size + letter-spacing so the
-  // visual recessiveness comes from scale, not from colour dimness.
-  const youLabelColor = '#FFFFFF';
+  // "YOU" uses the tertiary token, which now resolves to a warm bright
+  // grey-cream #D9D2C2 (Sprint 16.6 palette tune). Recessive from the
+  // surrounding primary serifs through tone + scale; never grey-dim
+  // the way the previous tertiary #B8B5AE read on Android.
+  const youLabelColor = theme.colors.text.tertiary;
   const centerDotColor = theme.colors.text.primary;
 
   return (
