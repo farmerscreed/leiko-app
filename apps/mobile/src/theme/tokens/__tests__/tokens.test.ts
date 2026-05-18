@@ -23,7 +23,11 @@ describe('color — raw palette dark (D12 §2.2)', () => {
     expect(paletteDark.midnight[850]).toBe('#11171F');
     expect(paletteDark.midnight[800]).toBe('#1A2030');
     expect(paletteDark.midnight[750]).toBe('#222937');
-    expect(paletteDark.bone[50]).toBe('#F5F1EA');
+    // Sprint 16.6 — bone[50] tracks the caregiver-unified design source
+    // (`oklch(98% 0.005 60)` = warm near-white #FBF8F4). Previously the
+    // D12 §2.2 default #F5F1EA; the design's warm-charcoal canopy
+    // wants a lifted, tonally-cohesive primary text colour.
+    expect(paletteDark.bone[50]).toBe('#FBF8F4');
     expect(paletteDark.amber[500]).toBe('#E8A063');
     expect(paletteDark.coral[500]).toBe('#D6745A');
     expect(paletteDark.teal[500]).toBe('#5FA8A8');

@@ -24,13 +24,17 @@ export const paletteDark = {
     850: '#120C07', // subtle
     800: '#1D140D', // elevated
   },
-  // Sprint 16.6 — bone[50] was #F5F1EA (warm cream) and bone[100] was
-  // #ECE9E2. On AMOLED dark surfaces those read as muddy/brown under
-  // bright ambient lighting (user report: "fonts look black on a
-  // dark background"). Lifted to near-pure whites so headlines and
-  // body text on caregiver dark surfaces are unambiguously legible.
-  // text.primary now lands ~21:1 against warmCharcoal[850].
-  bone: { 50: '#FFFFFF', 100: '#F4F2EE' },
+  // Sprint 16.6 — bone[50] tracks the caregiver-unified design source
+  // (`leiko-caregiver-unified.html` → `oklch(98% 0.005 60)`). That's a
+  // *warm near-white* (#FBF8F4), tonally cohesive with the warm-
+  // charcoal canopy. An earlier patch lifted to pure #FFFFFF in
+  // response to a "fonts look black" device report; that turned out
+  // to be a halo-bleed clip problem rooted in the PersonOrb's flat
+  // alpha halo (now replaced by a true radial gradient). With the
+  // gradient halo + bg in place, the design's warm near-white reads
+  // cleanly (~19:1 against warmCharcoal[850]) without breaking the
+  // editorial palette.
+  bone: { 50: '#FBF8F4', 100: '#F4F2EE' },
   // Tertiary — was #9C9890 (mid-grey). Lifted to a brighter grey for
   // eyebrows + labels that didn't get per-component bumps.
   stone: { 300: '#B8B5AE', 500: '#6B6862' },
@@ -64,7 +68,12 @@ export const paletteDark = {
     clear: '#61B565', // green
     watch: '#F2A618', // amber (same as person.2)
     attention: '#FF7350', // coral (same as person.1 / brand caregiver)
-    urgent: '#EE343B', // bright red — distinct from `crimson.700` for higher salience
+    // Sprint 16.6 — was #EE343B (bright red). The caregiver-unified
+    // design source uses oklch(62% 0.22 25) for the urgent dot — a
+    // softer red-orange that reads as "needs attention now" without
+    // siren-grade alarm. Aligns with the broader Leiko voice rule
+    // that red is reserved for confirmed-urgent, calibrated tone.
+    urgent: '#DC5631',
     offline: '#857F7A', // grey
     sleeping: '#7B67CC', // periwinkle (same as person.3)
   },
