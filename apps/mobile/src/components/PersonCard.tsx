@@ -207,17 +207,15 @@ export function PersonCard({
               allowFontScaling={false}
               style={{
                 fontFamily: theme.fontFamilies.numeric,
-                // Back to design's 10pt mono tertiary letter-spacing
-                // 0.14em uppercase per leiko-caregiver-a.jsx PersonPage
-                // header eyebrow. The earlier secondary bump compensated
-                // for palette/canopy contrast issues that the warm-
-                // near-white text + bg gradient + gradient halo now
-                // resolve at source.
+                // Pure #FFFFFF (overrides tertiary) per founder on-device
+                // feedback — the eyebrow "MOM · 71" was reading as
+                // grey on Android. Design size + tracking preserved so
+                // the eyebrow stays visually below the full name.
                 fontSize: 10,
                 lineHeight: 13,
                 letterSpacing: 1.4,
                 textTransform: 'uppercase',
-                color: theme.colors.text.tertiary,
+                color: '#FFFFFF',
                 marginBottom: 2,
               }}
             >
@@ -256,17 +254,16 @@ export function PersonCard({
           {`“${headline}”`}
         </Text>
 
-        {/* Body sentence — design uses 13.5pt body / text.secondary.
-            Reads as a quiet supporting paragraph under the italic
-            editorial headline; promoting it to primary made the card
-            feel typographically flat. */}
+        {/* Body sentence — pure #FFFFFF (overrides secondary) per
+            founder on-device feedback. Keep design's 13.5pt body so
+            the headline stays the visual lead via size alone. */}
         <Text
           allowFontScaling={false}
           style={{
             fontFamily: theme.fontFamilies.body,
             fontSize: 13.5,
             lineHeight: 20,
-            color: theme.colors.text.secondary,
+            color: '#FFFFFF',
             marginBottom: theme.spacing.l,
           }}
         >
@@ -291,7 +288,7 @@ export function PersonCard({
             valueFamily={theme.fontFamilies.editorial}
             valueColor={theme.colors.text.primary}
             labelFamily={theme.fontFamilies.numeric}
-            labelColor={theme.colors.text.tertiary}
+            labelColor="#FFFFFF"
           />
           <VitalCol
             value={vitalStrip.hr}
@@ -301,7 +298,7 @@ export function PersonCard({
             valueFamily={theme.fontFamilies.editorial}
             valueColor={theme.colors.text.primary}
             labelFamily={theme.fontFamilies.numeric}
-            labelColor={theme.colors.text.tertiary}
+            labelColor="#FFFFFF"
           />
           <VitalCol
             value={vitalStrip.spo2}
@@ -311,7 +308,7 @@ export function PersonCard({
             valueFamily={theme.fontFamilies.editorial}
             valueColor={theme.colors.text.primary}
             labelFamily={theme.fontFamilies.numeric}
-            labelColor={theme.colors.text.tertiary}
+            labelColor="#FFFFFF"
           />
           <VitalCol
             value={vitalStrip.sleep}
@@ -321,7 +318,7 @@ export function PersonCard({
             valueFamily={theme.fontFamilies.editorial}
             valueColor={theme.colors.text.primary}
             labelFamily={theme.fontFamilies.numeric}
-            labelColor={theme.colors.text.tertiary}
+            labelColor="#FFFFFF"
           />
         </View>
 
@@ -336,15 +333,14 @@ export function PersonCard({
             allowFontScaling={false}
             style={{
               fontFamily: theme.fontFamilies.numeric,
-              // Back to design's 9.5pt mono tertiary letter-spacing
-              // 0.14em uppercase. Footer is supporting metadata, not
-              // a headline; design hierarchy puts it below the body
-              // and above only the divider.
+              // Pure #FFFFFF (overrides tertiary) per founder on-device
+              // feedback — "READ · 6:42 AM" / "LAST READING · …" was
+              // reading as grey. Design size + tracking preserved.
               fontSize: 9.5,
               lineHeight: 13,
               letterSpacing: 1.33,
               textTransform: 'uppercase',
-              color: theme.colors.text.tertiary,
+              color: '#FFFFFF',
             }}
           >
             {footerLeftLabel}

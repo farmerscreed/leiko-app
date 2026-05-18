@@ -122,7 +122,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#B8B5AE",
+              "color": "#FFFFFF",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -140,7 +140,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#F4F2EE",
+            "color": "#FFFFFF",
             "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
@@ -319,7 +319,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#B8B5AE",
+              "color": "#FFFFFF",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -337,7 +337,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#F4F2EE",
+            "color": "#FFFFFF",
             "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
@@ -507,7 +507,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#B8B5AE",
+              "color": "#FFFFFF",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -525,7 +525,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#F4F2EE",
+            "color": "#FFFFFF",
             "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
@@ -713,7 +713,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#5A6478",
+              "color": "#FFFFFF",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -731,7 +731,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#2A3040",
+            "color": "#FFFFFF",
             "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
@@ -910,7 +910,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#5A6478",
+              "color": "#FFFFFF",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -928,7 +928,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#2A3040",
+            "color": "#FFFFFF",
             "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
@@ -1098,7 +1098,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#5A6478",
+              "color": "#FFFFFF",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -1116,7 +1116,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#2A3040",
+            "color": "#FFFFFF",
             "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,

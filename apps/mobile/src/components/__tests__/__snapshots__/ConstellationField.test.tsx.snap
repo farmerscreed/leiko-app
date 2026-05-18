@@ -281,7 +281,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
       allowFontScaling={false}
       style={
         {
-          "color": "#B8B5AE",
+          "color": "#FFFFFF",
           "fontFamily": "JetBrainsMono_500Medium",
           "fontSize": 8.5,
           "fontWeight": "500",
@@ -530,7 +530,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             allowFontScaling={false}
             style={
               {
-                "color": "#FBF8F4",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
                 "letterSpacing": -0.07,
@@ -812,7 +812,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             allowFontScaling={false}
             style={
               {
-                "color": "#FBF8F4",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
                 "letterSpacing": -0.07,
@@ -1109,7 +1109,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             allowFontScaling={false}
             style={
               {
-                "color": "#FBF8F4",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
                 "letterSpacing": -0.07,
@@ -1423,7 +1423,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
       allowFontScaling={false}
       style={
         {
-          "color": "#5A6478",
+          "color": "#FFFFFF",
           "fontFamily": "JetBrainsMono_500Medium",
           "fontSize": 8.5,
           "fontWeight": "500",
@@ -1672,7 +1672,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             allowFontScaling={false}
             style={
               {
-                "color": "#0F121C",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
                 "letterSpacing": -0.07,
@@ -1954,7 +1954,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             allowFontScaling={false}
             style={
               {
-                "color": "#0F121C",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
                 "letterSpacing": -0.07,
@@ -2251,7 +2251,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             allowFontScaling={false}
             style={
               {
-                "color": "#0F121C",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
                 "letterSpacing": -0.07,

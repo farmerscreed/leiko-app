@@ -615,10 +615,15 @@ function DetailedView({ people, onSelectPerson, theme }: DetailedViewProps) {
             fontFamily: theme.fontFamilies.editorial,
             fontSize: headlineStyle.size,
             lineHeight: headlineStyle.lineHeight,
-            color: theme.colors.text.primary,
+            // Per founder on-device feedback — the design renders this
+            // headline at warm-near-white + warmer-cream italic, but
+            // both tones read as off-white/dim against the canopy on
+            // Android. Pure #FFFFFF on both clauses; differentiation
+            // of the leading word comes from font-style: italic alone.
+            color: '#FFFFFF',
           }}
         >
-          <Text style={{ fontStyle: 'italic', color: theme.colors.text.secondary }}>
+          <Text style={{ fontStyle: 'italic', color: '#FFFFFF' }}>
             {headlineWord}
           </Text>
           {' you love,\nchecked in.'}
@@ -695,9 +700,11 @@ function SharedHeader({
             allowFontScaling={false}
             style={{
               fontFamily: theme.fontFamilies.numeric,
+              // Pure #FFFFFF per founder on-device feedback — tertiary
+              // mono reads as grey against the canopy.
               fontSize: 9.5,
               letterSpacing: 1.3,
-              color: theme.colors.text.tertiary,
+              color: '#FFFFFF',
               textTransform: 'uppercase',
             }}
           >
@@ -730,9 +737,10 @@ function SharedHeader({
         allowFontScaling={false}
         style={{
           fontFamily: theme.fontFamilies.numeric,
+          // Pure #FFFFFF per founder on-device feedback.
           fontSize: 9,
           letterSpacing: 1.6,
-          color: theme.colors.text.tertiary,
+          color: '#FFFFFF',
           textTransform: 'uppercase',
         }}
       >

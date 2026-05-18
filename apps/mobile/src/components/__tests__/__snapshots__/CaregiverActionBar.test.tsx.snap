@@ -36,7 +36,7 @@ exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders c
     allowFontScaling={false}
     style={
       {
-        "color": "#B8B5AE",
+        "color": "#FFFFFF",
         "fontFamily": "JetBrainsMono_500Medium",
         "fontSize": 9.5,
         "letterSpacing": 1.33,
@@ -86,7 +86,7 @@ exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders c
     allowFontScaling={false}
     style={
       {
-        "color": "#5A6478",
+        "color": "#FFFFFF",
         "fontFamily": "JetBrainsMono_500Medium",
         "fontSize": 9.5,
         "letterSpacing": 1.33,
@@ -136,7 +136,7 @@ exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders c
     allowFontScaling={false}
     style={
       {
-        "color": "#B8B5AE",
+        "color": "#FFFFFF",
         "fontFamily": "JetBrainsMono_500Medium",
         "fontSize": 9.5,
         "letterSpacing": 1.33,
@@ -241,7 +241,7 @@ exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders c
     allowFontScaling={false}
     style={
       {
-        "color": "#5A6478",
+        "color": "#FFFFFF",
         "fontFamily": "JetBrainsMono_500Medium",
         "fontSize": 9.5,
         "letterSpacing": 1.33,

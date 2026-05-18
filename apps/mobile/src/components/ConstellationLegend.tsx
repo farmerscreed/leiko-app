@@ -172,13 +172,13 @@ export function ConstellationLegend({
                   allowFontScaling={false}
                   style={{
                     fontFamily: theme.fontFamilies.numeric,
-                    // Back to design's 9pt mono tertiary letter-spacing
-                    // 0.10em uppercase. The earlier brightness bump
-                    // was compensating for halo/palette contrast issues
-                    // resolved upstream in this sprint.
+                    // Color forced to pure #FFFFFF (overrides tertiary
+                    // #B8B5AE) per founder on-device feedback: small
+                    // mono uppercase at the design's tertiary tone
+                    // reads as grey on Android against the warm canopy.
                     fontSize: 9,
                     lineHeight: 12,
-                    color: theme.colors.text.tertiary,
+                    color: '#FFFFFF',
                     letterSpacing: 0.9,
                     textTransform: 'uppercase',
                   }}
@@ -191,14 +191,16 @@ export function ConstellationLegend({
                 numberOfLines={1}
                 ellipsizeMode="tail"
                 style={{
-                  // Back to design's 11.5pt body / text.secondary —
-                  // a quiet supporting line under the editorial name.
-                  // The earlier 13pt primary bump made every row read
-                  // as a headline, flattening the visual hierarchy.
+                  // Color forced to pure #FFFFFF (overrides secondary
+                  // #F4F2EE) per founder on-device feedback: the
+                  // per-person status line was reading as off-white.
+                  // Keep the design's 11.5pt body size + hierarchy via
+                  // the supporting role; brightness alone fixes the
+                  // legibility, not the type weight.
                   fontFamily: theme.fontFamilies.body,
                   fontSize: 11.5,
                   lineHeight: 16,
-                  color: theme.colors.text.secondary,
+                  color: '#FFFFFF',
                   marginTop: 2,
                 }}
               >

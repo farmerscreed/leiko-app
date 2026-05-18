@@ -158,12 +158,11 @@ export function ConstellationField({
     opacity: pulseOpacity.value,
   }));
 
-  // Sprint 16.6 — back to the design's quiet "YOU" treatment now that
-  // the warm-near-white text token + bg radial canopy + gradient
-  // halos give the surface enough contrast that small tertiary mono
-  // reads without a brightness bump. Per
-  // `leiko-caregiver-unified.html` ConstellationFieldClickable.
-  const youLabelColor = theme.colors.text.tertiary;
+  // Sprint 16.6 — "YOU" forced to pure #FFFFFF per founder on-device
+  // feedback: tertiary mono at this size reads as grey against the
+  // canopy on Android. Keeping the small size + letter-spacing so the
+  // visual recessiveness comes from scale, not from colour dimness.
+  const youLabelColor = '#FFFFFF';
   const centerDotColor = theme.colors.text.primary;
 
   return (

@@ -81,15 +81,14 @@ export function CaregiverActionBar({
       <Text
         style={{
           fontFamily: theme.fontFamilies.numeric,
-          // Back to design's 9.5pt mono tertiary letter-spacing 0.14em
-          // uppercase. The earlier 11pt secondary patch was offsetting
-          // the legibility hit of the brighter glassMedium floor; with
-          // the warm-dark glass + warm-near-white text the tertiary
-          // chip reads cleanly at the design's smaller size.
+          // Color forced to pure #FFFFFF per founder on-device feedback:
+          // tertiary on warm-glass-over-canopy reads as grey. Keep
+          // design's 9.5pt + letter-spacing so the chip stays visually
+          // recessive against the coral "+ Add someone" CTA.
           fontSize: 9.5,
           lineHeight: 13,
           letterSpacing: 1.33,
-          color: theme.colors.text.tertiary,
+          color: '#FFFFFF',
           textTransform: 'uppercase',
         }}
         allowFontScaling={false}
