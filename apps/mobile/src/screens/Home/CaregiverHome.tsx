@@ -39,6 +39,13 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, {
+  Circle as SvgCircle,
+  Defs,
+  RadialGradient,
+  Rect,
+  Stop,
+} from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
@@ -104,6 +111,18 @@ const VIEW_TRANSITION_EASING = Easing.bezier(0.22, 1, 0.36, 1);
 // opacity + scale.
 const VIEW_BIRDS = 0;
 const VIEW_CARDS = 1;
+
+// Sprint 16.6 — design canopy colors (`leiko-caregiver-unified.html`).
+// react-native-svg accepts hex but not CSS oklch, so these are the sRGB
+// equivalents of the design's source oklch values. The base sits behind
+// the SafeAreaView so the status-bar / nav-bar safe areas read as the
+// same near-black warm canopy. The radial gradients are painted by the
+// two bg components below.
+const CAREGIVER_BG_BASE = '#060505';
+const BIRDS_GLOW_INNER = '#3A2B1A'; // ≈ oklch(24% 0.04 50)
+const BIRDS_GLOW_OUTER = '#0E0B08'; // ≈ oklch(10% 0.01 55)
+const CARDS_BG_BASE = '#0F0C09'; //   ≈ oklch(12% 0.012 55)
+const CARDS_GLOW_INNER = '#3D2D1F'; // ≈ oklch(28% 0.04 50)
 
 export function CaregiverHome() {
   const theme = useTheme();
@@ -239,6 +258,17 @@ export function CaregiverHome() {
     transform: [{ scale: 0.96 + viewProgress.value * 0.04 }],
   }));
 
+  // Background layers fade in lockstep with the content, but opacity-only
+  // (no scale) so the canopy stays anchored to the screen edges through
+  // the transition. The bg layer mounts unconditionally and sits below
+  // every other surface; pointer-events disabled so it never steals taps.
+  const birdsBgAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: 1 - viewProgress.value,
+  }));
+  const cardsBgAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: viewProgress.value,
+  }));
+
   const showBirds = viewMode === 'birds' || isTransitioning;
   const showCards = viewMode === 'cards' || isTransitioning;
 
@@ -269,9 +299,31 @@ export function CaregiverHome() {
 
   return (
     <SafeAreaView
-      style={[styles.root, { backgroundColor: theme.colors.surface.warmBase }]}
+      // Sprint 16.6 — design uses a near-black warm base (#060505) under
+      // a layered radial-gradient canopy + ambient star field for
+      // bird's-eye, and a softer warm gradient over warm-charcoal for
+      // detailed. Per `leiko-caregiver-unified.html`. The bg layer below
+      // is opacity-faded by `viewProgress` so the two atmospheres
+      // crossfade with the content.
+      style={[styles.root, { backgroundColor: CAREGIVER_BG_BASE }]}
       edges={['top', 'bottom']}
     >
+      <View
+        pointerEvents="none"
+        style={StyleSheet.absoluteFill}
+        testID="caregiver-home-bg"
+      >
+        <Animated.View
+          style={[StyleSheet.absoluteFill, birdsBgAnimatedStyle]}
+        >
+          <BirdsBackgroundSvg />
+        </Animated.View>
+        <Animated.View
+          style={[StyleSheet.absoluteFill, cardsBgAnimatedStyle]}
+        >
+          <CardsBackgroundSvg />
+        </Animated.View>
+      </View>
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
@@ -839,6 +891,76 @@ function humanizeFooterAge(ms: number): string {
   if (hours < 24) return `${hours} hr`;
   const days = Math.floor(hours / 24);
   return `${days} day${days === 1 ? '' : 's'}`;
+}
+
+// -----------------------------------------------------------------------------
+// Bird's-eye + detailed background canopies. Translates the design's
+// CSS `radial-gradient(...)` + ambient star-dot layer to react-native-svg.
+//
+// `react-native-svg`'s RadialGradient only supports a single radius `r`
+// (no rx/ry — the spec extension isn't wired). The design's elliptical
+// `70% 50%` gradient is approximated as a 60%-radius circle anchored at
+// (50%, 35%); on a portrait-phone aspect ratio it reads visually close
+// to the source ellipse. -----------------------------------------------------------------------------
+
+function BirdsBackgroundSvg() {
+  return (
+    <Svg width="100%" height="100%" preserveAspectRatio="none">
+      <Defs>
+        <RadialGradient
+          id="cg-bg-birds"
+          cx="50%"
+          cy="35%"
+          r="60%"
+          fx="50%"
+          fy="35%"
+        >
+          <Stop offset="0%" stopColor={BIRDS_GLOW_INNER} stopOpacity={0.8} />
+          <Stop offset="70%" stopColor={BIRDS_GLOW_OUTER} stopOpacity={1} />
+          <Stop offset="100%" stopColor={CAREGIVER_BG_BASE} stopOpacity={1} />
+        </RadialGradient>
+      </Defs>
+      <Rect width="100%" height="100%" fill="url(#cg-bg-birds)" />
+      {/* Ambient star field — 7 white dots at the design's positions.
+          Per-dot opacity 0.5 * 0.5 layer ≈ 0.25 effective; rendered
+          directly at 0.25 here so we can drop the wrapping layer. */}
+      <SvgCircle cx="20%" cy="30%" r={1}   fill="white" opacity={0.25} />
+      <SvgCircle cx="70%" cy="18%" r={1}   fill="white" opacity={0.25} />
+      <SvgCircle cx="40%" cy="65%" r={1}   fill="white" opacity={0.25} />
+      <SvgCircle cx="85%" cy="80%" r={1}   fill="white" opacity={0.25} />
+      <SvgCircle cx="12%" cy="80%" r={0.6} fill="white" opacity={0.25} />
+      <SvgCircle cx="60%" cy="92%" r={0.6} fill="white" opacity={0.25} />
+      <SvgCircle cx="88%" cy="40%" r={0.8} fill="white" opacity={0.25} />
+    </Svg>
+  );
+}
+
+function CardsBackgroundSvg() {
+  return (
+    <Svg width="100%" height="100%" preserveAspectRatio="none">
+      <Defs>
+        <RadialGradient
+          id="cg-bg-cards"
+          cx="50%"
+          cy="0%"
+          r="100%"
+          fx="50%"
+          fy="0%"
+        >
+          <Stop offset="0%" stopColor={CARDS_GLOW_INNER} stopOpacity={0.55} />
+          <Stop offset="70%" stopColor={CARDS_BG_BASE} stopOpacity={0} />
+        </RadialGradient>
+      </Defs>
+      {/* Base fill first; the gradient overlays on top so the top-of-
+          screen warm glow blends into the warm-charcoal canopy. */}
+      <Rect width="100%" height="100%" fill={CARDS_BG_BASE} />
+      <Rect width="100%" height="100%" fill="url(#cg-bg-cards)" />
+      {/* Paper-grain SVG filter is in the design but RN-SVG's
+          feTurbulence support is inconsistent across iOS/Android; the
+          radial canopy carries 90% of the atmosphere on its own. Grain
+          can land later as a tiled PNG asset if the founder wants it. */}
+    </Svg>
+  );
 }
 
 export function mergeLocalLatest(

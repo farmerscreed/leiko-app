@@ -69,7 +69,17 @@ jest.mock('../../hooks/useSeededLearnCard', () => ({
 }));
 
 jest.mock('../../state/readings', () => {
-  const state = { latest: () => null, pending: [], recent: [] };
+  // Sprint 16.6 — `byLocalId` was added to useReadings in the cross-phone
+  // tap-routing fix (commit 221f19c) so CaregiverHome can distinguish a
+  // local reading (route to ReadingDetail) from a server-only one (route
+  // to ParentReadings). The test's existing assertion expects
+  // ReadingDetail navigation, so the mock returns a stub for any id.
+  const state = {
+    latest: () => null,
+    pending: [],
+    recent: [],
+    byLocalId: (id: string) => ({ localId: id } as unknown),
+  };
   const useReadings = (selector?: (s: unknown) => unknown) =>
     selector ? selector(state) : state;
   // Sprint 14.5 task 3 — useSeededLearnCard reads useReadings.getState()
