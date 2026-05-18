@@ -325,18 +325,20 @@ export function PersonOrb({
           <Text
             allowFontScaling={false}
             style={{
-              // Sprint 16.6 — back to the design's Instrument Serif at
-              // 14pt for the orb name. The earlier swap to Inter
-              // SemiBold was patching a halo-bleed legibility issue
-              // (flat alpha halo washing over the label); with the
-              // true radial-gradient halo + warm-near-white text token
-              // (#FBF8F4) the serif reads cleanly and keeps the
-              // editorial brand register.
+              // Sprint 16.6 — Instrument Serif at 14pt per the design
+              // source. Color is forced to pure #FFFFFF here (rather
+              // than text.primary which is the design's warm-near-white
+              // #FBF8F4): on Android the serif's narrow 400-weight
+              // strokes need every pixel of luminance to read as
+              // unambiguously white against the warm canopy. Cards +
+              // legends keep text.primary because their fonts (italic
+              // serif at 22pt, body sans at 13.5pt+) push enough
+              // stroke mass for the warm-near-white to read cleanly.
               fontFamily: theme.fontFamilies.editorial,
               fontSize: 14,
               lineHeight: 18,
               letterSpacing: -0.07, // ~-0.005em at 14pt
-              color: theme.colors.text.primary,
+              color: '#FFFFFF',
             }}
           >
             {fullName.split(' ')[0]}
