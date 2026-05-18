@@ -172,12 +172,14 @@ export function ConstellationLegend({
                   allowFontScaling={false}
                   style={{
                     fontFamily: theme.fontFamilies.numeric,
-                    // Sprint 16.6 — 9pt tertiary was unreadable; bump
-                    // to 10.5pt secondary for at-a-glance scan.
-                    fontSize: 10.5,
-                    lineHeight: 14,
-                    color: theme.colors.text.secondary,
-                    letterSpacing: 1,
+                    // Back to design's 9pt mono tertiary letter-spacing
+                    // 0.10em uppercase. The earlier brightness bump
+                    // was compensating for halo/palette contrast issues
+                    // resolved upstream in this sprint.
+                    fontSize: 9,
+                    lineHeight: 12,
+                    color: theme.colors.text.tertiary,
+                    letterSpacing: 0.9,
                     textTransform: 'uppercase',
                   }}
                 >
@@ -189,12 +191,14 @@ export function ConstellationLegend({
                 numberOfLines={1}
                 ellipsizeMode="tail"
                 style={{
-                  // Sprint 16.6 — was 11.5pt secondary; promote to
-                  // 13pt primary so the per-person status sentence
-                  // reads without leaning in.
-                  fontSize: 13,
-                  lineHeight: 18,
-                  color: theme.colors.text.primary,
+                  // Back to design's 11.5pt body / text.secondary —
+                  // a quiet supporting line under the editorial name.
+                  // The earlier 13pt primary bump made every row read
+                  // as a headline, flattening the visual hierarchy.
+                  fontFamily: theme.fontFamilies.body,
+                  fontSize: 11.5,
+                  lineHeight: 16,
+                  color: theme.colors.text.secondary,
                   marginTop: 2,
                 }}
               >
