@@ -1,141 +1,206 @@
-# Start here — next session (post Sprint 16.5e batch 2)
+# Start here — Sprint 16.6 caregiver session handoff
 
-Last touched: 2026-05-14 Lagos.
+Last touched: 2026-05-15 Lagos.
+Supersedes the 16.5e-era NEXT_SESSION_START_HERE.md.
 
 ## 90-second context
 
-Sprint 16.5e is **fully shipped**. Five commits on
-`claude/vigilant-almeida-0bbc5e` close the entire 16.5d / 16.5e
-state matrix:
+Sprint 16.6 (Pre-Launch Validation & Hardening) is **mid-flight**. A
+two-phone rig is running and we've been iterating live on real
+caregiver-flow issues the founder hits while testing. The branch is
+`claude/competent-goldberg-737194`. Latest tip: `09cb9c8` (or newer
+— check `git log`).
 
-| Vital    | Recent list | Server hydration | 7d/30d/90d wired |
-|----------|-------------|------------------|------------------|
-| BP       | ✓           | ✓                | ✓                |
-| HR       | ✓           | ✓ (16.5e)        | ✓ (16.5e)        |
-| SpO2     | ✓           | ✓ (16.5e)        | ✓ (16.5e)        |
-| Sleep    | ✓           | ✓ (16.5d)        | ✓ (16.5d)        |
-| Activity | ✓           | ✓ (16.5e)        | ✓ (16.5e)        |
+The bench right now:
 
-What this means for the user: on next rebuild, opening Home will
-pull the family's full vitals history from the server (BP, HR, SpO2,
-sleep sessions, daily steps, daily calories) and seed the local
-slices. Every detail screen's recent-readings list now surfaces that
-history — capped only by the `RECENT_*_CAP` (90 days for daily
-vitals, 200 samples for per-sample vitals). Every detail screen's
-`7d / 30d / 90d` pill re-renders the chart / stats / recent list.
+- **Phone 1** (Pixel 8, serial `43230DLJH001YY`): self-buyer account
+  `biebele@gmail.com`, Watch 1 paired, has real BP history.
+- **Phone 2** (OnePlus Nord N30, serial `8fae80bc`): caregiver account
+  `TheOne` (`lawonelimited@gmail.com`), no watch, just onboarded via
+  the new "Add a watch later" path.
+- **PC**: Supabase local stack on `192.168.0.166:54321`, Metro running
+  from `apps/mobile/` with `EXPO_NO_METRO_WORKSPACE_ROOT=1` set (this
+  env var is **non-negotiable** — see DO/DON'T below).
 
-## Read in this order
+## What shipped this session
 
-1. **`memory/sprint_16_5e_close_out.md`** — full story + file matrix
-   + the worktree-jest gotcha.
-2. **`memory/sprint_16_5d_close_out.md`** — the eight hard rules
-   carried over (plus rule #9 added in 16.5e).
-3. **`memory/sprint_16_5c_close_out.md`** — multi-vitals partial-
-   index fix (still load-bearing).
-4. **`memory/sprint_16_5a_close_out.md`** — BP cursor fix (still
-   load-bearing).
-5. Skip the saga master log + the 16.5b memo — both superseded.
+§B P1 hardening (in commit order):
 
-## The remaining tasks (verification only, not code)
+| Commit    | Item                                                          |
+|-----------|---------------------------------------------------------------|
+| `69a87a6` | §A two-phone test rig (eas.json + build-preview-apk.ps1 + CAREGIVER_TEST_FLOW.md + CAREGIVER_TEST_RESULTS.md) |
+| `1dc2670` | QUA-7 + QUA-5: store metadata + iOS PrivacyInfo               |
+| `f91ecac` | FUN-2: hard-delete cron migration                             |
+| `acf73af` | FUN-1: Resend email transport in send-family-invite           |
+| `5e10b53` | QUA-1: 200ms BP settling delay after `0x73 0x02`              |
+| `fcba36a` | FUN-4: learned-time reminder dispatcher wired                 |
+| `e31c896` | QUA-6: npm audit allowlist + CI threshold                     |
+| `f8aafcc` | QUA-4: CI deploy workflows (release.yml + db-migrate.yml)     |
 
-### 1. Bench spot-check
-On the bench phone with a Self-Buyer account that has multi-day
-server-side history, verify:
+Build-script + Metro plumbing (several iterations to crack the
+Expo monorepo / workspace-root trap):
 
-- All 5 constellation tiles surface today's data on cold-start Home.
-- Each detail screen's recent-readings list shows server-side
-  history (not just whatever's left in the watch's day-info storage).
-- Tapping `7d / 30d / 90d` on each detail screen re-renders the
-  chart / stats / recent list. The SpO2 stat trio + overnight chart
-  stay overnight-focused regardless of the pill — that's intentional.
-- Morning narration uses the now-populated server data.
+| Commit    | What                                                          |
+|-----------|---------------------------------------------------------------|
+| `d92a61d` | supabase status stderr → cmd /c                               |
+| `cfc22d6` | project-root as positional arg                                |
+| `10b1108` | positional arg goes LAST (Expo's reverse-parser)              |
+| `3acab17` | drop `--variant release` (pivot to debug variant)             |
+| `2b766de` | pick up debug APK output dir                                  |
+| `bdad3a4` | drop URL-rewrite, rely on EXPO_NO_METRO_WORKSPACE_ROOT=1      |
 
-If anything looks wrong, the most likely culprit is the dailyPulse
-selector — none of 16.5e touched it. Any "tile shows wrong value"
-symptom is probably upstream of hydration.
+Onboarding redesign — all 6 intros + watch-step fix:
 
-### 2. Regenerate snapshot
-`ActivityDetail.test.tsx.snap` was deleted in commit `29507dc`.
-First jest run in the founder's regular kena-app setup writes a
-fresh one; commit it. The other detail-screen snapshots (BP / HR /
-SpO2) may also need regen — the useState additions show up as new
-hooks in the call order, but visible content at the 7d default
-shouldn't have changed.
+| Commit    | What                                                          |
+|-----------|---------------------------------------------------------------|
+| `d90a425` | `OnboardingHero` component + 6 intros (Caregiver Intro 1/2/3 + Self-Buyer Intro 1/2/3); Phosphor duotone icons, radial-glow halo, displayXl + cinematic entrance |
+| `2eea415` | Hero typography tightened to fit Nord (360pt wide)            |
+| `83caf5c` | "Add a watch later" third option on Caregiver FamilyWatch (fixes the blocker where remote caregiver had no honest path) |
 
-### 3. (Bigger follow-up, deferred) Caregiver Home hydration
-The hydration hooks fire from `SelfBuyerHome`. CaregiverHome does
-NOT call them today. When the caregiver-mode work gets cycled back
-to, audit CaregiverHome for the same self-heal pattern — but the
-data shape is different (the caregiver is looking AT a parent's
-readings, not their own), so it's not a copy-paste.
+Caregiver Home — bug + contrast:
 
-## Bench environment state
+| Commit    | What                                                          |
+|-----------|---------------------------------------------------------------|
+| `221f19c` | Bug: tapping a parent card with a cross-phone reading no longer routes to ReadingDetail (which can't find the local reading). Falls through to ParentReadings. PLUS contrast bumps on PersonCard (vital tiles + sentence + footer). |
+| `ea0cfe8` | Contrast bumps on bird's-eye ConstellationLegend + CaregiverActionBar |
+| `55fa006` | Bigger/weightier names on PersonOrb (constellation orb labels) |
+| `1dfdd99` | Swap orb names from editorial serif to Inter SemiBold (serif at 400-only was rendering thin against dark) |
+| `35b311f` | Palette lift: dark-mode `text.primary` cream `#F5F1EA` → pure white `#FFFFFF`; secondary + tertiary similarly lifted |
+| `09cb9c8` | Clear halo bleed below orb so names render without clipping   |
 
-```powershell
-& "$PWD\scripts\dev-phone-reconnect.ps1"
-```
+## What's mid-flight (not yet verified)
 
-Checks Metro on :8081, Supabase Kong on :54321, Edge Functions
-runtime, adb reverse forwards. If anything is red, start it:
-- **Metro**: `cd apps/mobile && npx expo start --dev-client` (must
-  run from `apps/mobile`)
-- **Supabase**: `supabase start && supabase functions serve --env-file supabase/functions/.env`
-- Both env files (`.env.local` at root + `apps/mobile/.env.local`)
-  are gitignored — if missing on a fresh worktree, copy from
-  `C:\Users\admin\Documents\APP\kena-app\`
+The **caregiver Home contrast pass** is committed but the founder
+hasn't visually confirmed on the phone yet. Last screenshot before
+the handoff still showed the orb names rendering with what looked
+like a blue-grey cool tone instead of crisp white — either:
 
-## Worktree note
+- the dev-client cached an older bundle and never re-fetched after
+  the palette change, OR
+- Android screencap is rendering dark content with a cool-tinted
+  compression artifact and the user actually sees white on device.
 
-If you're in a `.claude\worktrees\...` worktree, jest won't find
-tests — the `__dirname` path contains `\.claude\` which collides
-with glob escape rules. Code was verified with `tsc --noEmit` +
-`eslint` only this session. Tests run fine in the founder's regular
-kena-app checkout.
+**Pickup test:** plug a phone in, run the build script if not already
+installed, open caregiver Home in BIRD'S-EYE view, look at the orb
+labels ("Biebele" / "Mome"). They should be **white sans-serif Inter
+SemiBold**, fully visible below each orb's halo, same color as
+"ALL CLEAR" pill text. If they're still dim/italic/clipped, the
+bundle on the phone is stale — uninstall + reinstall the APK (loses
+auth state, requires re-sign-in via Mailpit OTP) to force a fresh
+bundle.
 
-Also: a fresh worktree starts with no `node_modules`. Junction the
-parent repo's into both the worktree root AND `apps/mobile`:
+## Issues the founder raised that are still open
 
-```cmd
-mklink /J node_modules C:\Users\admin\Documents\APP\kena-app\node_modules
-mklink /J apps\mobile\node_modules C:\Users\admin\Documents\APP\kena-app\apps\mobile\node_modules
-```
+Numbered in priority order:
 
-## Recommended first action
+1. **Invite-code UX for incoming caregivers.** The "I have an invite
+   code" entry point is buried in Settings → Family. A non-technical
+   caregiver finishing onboarding won't find it. Founder approved
+   path: empty-state CTA on caregiver Home + an optional step at the
+   end of caregiver onboarding ("Has someone invited you? Enter the
+   code now"). Not started.
 
-**Rebuild the dev APK + open Self-Buyer Home on the bench phone.**
-The hook chain (BP / sleep / activity / HR / SpO2) fires once per
-Home mount. After ~1s the local slices should be populated; opening
-Activity / HR / SpO2 / BP detail should show real history, not just
-today.
+2. **Settings page colors + caregiver/self-buyer parity.** Founder
+   reports the Settings page is hard to read and caregiver Settings
+   looks different from self-buyer Settings. Need Phone 2 Settings
+   screenshot to diff against Phone 1. Probably the same
+   palette-bump + tertiary→secondary pattern from this session, but
+   verify before changing.
 
-## Hard rules carried over from 16.5d / 16.5e (don't repeat the lessons)
+3. **Phone 1 family-invite call fails.** Error toast "we couldn't
+   send invite, try again" when `biebele` tries to invite from
+   Phone 1. Edge Function logs show
+   `TypeError: Invalid Token or Protected Header formatting` in
+   `verifyHybridJWT`. Phone 1's auth token is in a legacy format the
+   current edge runtime can't decode. Founder tried sign-out and
+   that itself returned "Network request failed" — see issue 4.
 
-1. HR/SpO2 day-anchor timestamps use `watchVitalTimestampToUtcSec`
-   (subtract localOff). Not BP's `watchTimestampToUtcSec`. Not no-shift.
-2. SpO2 packets are SINGLE bytes per hour. Don't reintroduce
-   pair-decoding.
-3. Server is source of truth for historical day-data. Don't try to
-   coax history out of the watch — its day-info storage rolls over
-   within ~3-5 days.
-4. `useReadings.syncPending` cap must sort by `measuredAtSec` DESC
-   before slicing.
-5. Hydration-hook gate: `localCount < FETCH_LIMIT`, not
-   `localCount === 0`.
-6. Dev panel reset must NOT touch the BP cursor.
-7. Wiring 7d/30d/90d means BOTH `onRangeChange` AND the screen's
-   data selectors react to the range.
-8. `CorrelationStrip`'s `tBounds` + `axisLabels` props are the
-   canonical way to make the chart's x-axis match the range window.
-9. The `buildRecentReadings`-style hard cap is dead. When you add
-   server hydration to a vital, AUDIT its detail screen's
-   recent-list builder for the same pattern. Surface every row in
-   the chosen range, newest first.
+4. **Phone 1 sign-out network failure.** Probably a stale bundle
+   from when `.env.local` still had `localhost:54321`. Should be
+   fixed by force-reloading Phone 1 against the current Metro, but
+   we never got back to verify because the contrast iteration took
+   over.
 
-## What was the last thing the user did
+5. **DEC-1 (founder decision).** From PRODUCTION_READINESS.md.
+   `docs/05-voice-and-claims.md` mandates the exact phrase
+   "It is not a diagnosis" on the doctor-PDF cover line. CLAUDE.md
+   voice rules forbid the word "diagnosis". Founder needs to pick:
+   keep the mandated phrase (exempt with a comment) OR reframe to
+   "This report is general information. Talk to your doctor about
+   what it means." Five-minute commit either way.
 
-Asked to "round up everything" + ensure the activity page surfaces
-multiple values + then complete all remaining tasks. The full code
-side is now done across all 5 vitals; the activity-page "only one
-value" symptom is addressed by the activity hydration shipped in
-commits `27fe7ca` + `29507dc`. Rebuild required for the user to see
-the fix land.
+6. **SEC-1 MMKV encryption.** Still deferred from §B. Card budgets
+   1-2 days; this is the only multi-day item left in §B. Skipped
+   intentionally this session in favour of unblocking the founder
+   on real testing.
+
+## Where the docs live
+
+- **`plans/PRODUCTION_READINESS.md`** — launch-gating checklist.
+  Every P0 + P1 + P2 item. The "Recommended launch path" at the
+  bottom is the current week-by-week plan.
+- **`plans/sprint-16-6-pre-launch-validation.md`** — this sprint's
+  card. Has §A (test rig), §B (P1 list), §C (founder ops parallel
+  track), §D (test execution), §E (DEC-1).
+- **`plans/CAREGIVER_TEST_FLOW.md`** — 12-scenario test plan for
+  the two-phone bench. Pickup point if you're continuing the
+  testing run.
+- **`plans/CAREGIVER_TEST_RESULTS.md`** — empty template. Founder
+  fills as they go.
+
+## DO / DON'T for picking up
+
+**DO:**
+- Start Metro from `apps/mobile/` with the env var:
+  `cd apps/mobile && EXPO_NO_METRO_WORKSPACE_ROOT=1 npx expo start --dev-client`
+- Set `adb reverse tcp:8081 tcp:8081` + `tcp:54321 tcp:54321` on
+  any phone before launching the dev-client. The reverses clear on
+  USB disconnect; re-apply on replug.
+- Build the APK via `scripts/build-preview-apk.ps1` from the
+  *main checkout* path
+  (`C:\Users\admin\Documents\APP\kena-app`), not from inside the
+  `.claude/worktrees/...` subtree. Worktree-path Gradle resolution
+  is documented broken for `react-native-purchases` 8.x — see the
+  build-script header.
+- Commit each logical change separately, push, then
+  `git fetch && git checkout origin/claude/competent-goldberg-737194`
+  inside the main checkout so Metro picks up the change.
+
+**DON'T:**
+- Don't start Metro WITHOUT `EXPO_NO_METRO_WORKSPACE_ROOT=1`. Without
+  it, Expo's `getMetroServerRoot` walks up to the workspace root
+  and the dev-client's virtual-entry bundle 500s with
+  `Unable to resolve module ../../App`.
+- Don't `npm audit fix --force`. The only auto-fix is a downgrade
+  to Expo 49; the moderate-severity postcss chain is documented as
+  build-tooling-only in `docs/_reference/npm-audit-allowlist.md`.
+- Don't re-enable the metro.config.js URL rewrite that was deleted
+  in `bdad3a4`. With the env var set, serverRoot = projectRoot and
+  the rewrite would double-prefix and 404 every bundle request.
+- Don't restart the Supabase docker stack while the founder is
+  testing. The local anon key changes on restart and every bundle
+  needs to be rebuilt with the new key in `.env.local`.
+
+## Memory files to read first
+
+In order of decreasing relevance:
+
+1. **`memory/sprint_16_5e_close_out.md`** — the multi-vitals
+   hydration pattern is load-bearing on every detail screen + Home.
+2. **`memory/sprint_16_5d_close_out.md`** — the eight hard rules.
+3. **`memory/running_on_phone.md`** — USB / Wi-Fi / adb-reverse
+   recipes. The MTN-extender trap is real but the founder confirmed
+   it's NOT active right now (Phone 2 = `MTN-5G-CD3D3E`, PC =
+   different SSID but same router, ping works at 12–25ms).
+
+## Open prompt (what to say to the next session)
+
+> Sprint 16.6 mid-flight on `claude/competent-goldberg-737194`.
+> Read `plans/NEXT_SESSION_START_HERE.md` first, then the active
+> sprint card `plans/sprint-16-6-pre-launch-validation.md`. The
+> founder is bench-testing live on two phones; the most recent
+> blocker is contrast/legibility on caregiver Home — last commit
+> (`09cb9c8`) is committed but not visually verified on device.
+> Pick up by verifying the orb-name render on Phone 2 and routing
+> to issue #1 (invite-code UX) or issue #2 (Settings parity) per
+> the founder's call.
