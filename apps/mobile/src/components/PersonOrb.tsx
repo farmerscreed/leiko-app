@@ -39,6 +39,12 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import Svg, {
+  Circle as SvgCircle,
+  Defs,
+  RadialGradient,
+  Stop,
+} from 'react-native-svg';
 import { Portrait } from './Portrait';
 import { useTheme } from '../theme';
 import { useReducedMotion } from '../theme/useReducedMotion';
@@ -69,14 +75,13 @@ const ENTRANCE_EASING = Easing.bezier(0.22, 1, 0.36, 1);
 const PULSE_NORMAL_MS = 4000;
 const PULSE_ATTENTION_MS = 1600;
 
-const HALO_INSET = -16; // halo bleeds 16pt outside the orb body
-// Sprint 16.6 — the halo bleeds 16pt beyond the orb diameter; the
-// label used to sit at `diameter + LABEL_GAP` (= diameter + 4) which
-// landed INSIDE the halo's bottom 12pt. The halo's tinted fill
-// overlay rendered on top of the name, clipping it visually. New
-// offset clears the halo first, then leaves the original LABEL_GAP.
+const HALO_INSET = -16; // halo SVG bleeds 16pt outside the orb body
+// Sprint 16.6 — the halo is now a true radial gradient (accent → 0%
+// at the edge) painted in SVG, so the previous halo-bleed clip of the
+// label is structurally impossible: the outer rim of the halo SVG is
+// at 0% opacity, indistinguishable from the canvas. The label can
+// sit at the design's `diameter + 4` again, right under the orb.
 const LABEL_GAP = 4;
-const HALO_BLEED = 16;
 
 function isAttentionStatus(s: Status): boolean {
   return s === 'attention' || s === 'urgent' || s === 'watch';
@@ -212,7 +217,11 @@ export function PersonOrb({
         })}
       >
         <View style={{ width: diameter, height: diameter }}>
-          {/* Halo — sits behind the orb, animated opacity/scale */}
+          {/* Halo — true radial gradient SVG sitting behind the orb, with
+              animated opacity + scale on the wrapping Animated.View. The
+              gradient fades from accent 35% at the centre to 0% at the
+              outer rim, exactly matching the design's `radial-gradient(
+              circle, ${accent} / .35 0%, transparent 60%)`. */}
           <Animated.View
             pointerEvents="none"
             style={[
@@ -222,12 +231,27 @@ export function PersonOrb({
                 left: HALO_INSET,
                 right: HALO_INSET,
                 bottom: HALO_INSET,
-                borderRadius: 9999,
-                backgroundColor: accent + '59', // 35% — radial gradient stand-in
               },
               haloAnimatedStyle,
             ]}
-          />
+          >
+            <Svg width="100%" height="100%">
+              <Defs>
+                <RadialGradient
+                  id="cg-orb-halo"
+                  cx="50%"
+                  cy="50%"
+                  r="50%"
+                  fx="50%"
+                  fy="50%"
+                >
+                  <Stop offset="0%" stopColor={accent} stopOpacity={0.35} />
+                  <Stop offset="100%" stopColor={accent} stopOpacity={0} />
+                </RadialGradient>
+              </Defs>
+              <SvgCircle cx="50%" cy="50%" r="50%" fill="url(#cg-orb-halo)" />
+            </Svg>
+          </Animated.View>
 
           {/* Orb body — composes Portrait + glow + status overlay */}
           <View style={[orbShadow, { opacity: orbBodyOpacity }]}>
@@ -285,12 +309,14 @@ export function PersonOrb({
           ) : null}
         </View>
 
-        {/* Name + BP label below the orb (clear of the halo bleed) */}
+        {/* Name + BP label sit right under the orb. With the gradient
+            halo fading to 0 at its rim there's no clipping; the
+            design's `top: pos.r + 4` geometry is restored. */}
         <View
           pointerEvents="none"
           style={{
             position: 'absolute',
-            top: diameter + HALO_BLEED + LABEL_GAP,
+            top: diameter + LABEL_GAP,
             left: 0,
             right: 0,
             alignItems: 'center',
@@ -299,17 +325,17 @@ export function PersonOrb({
           <Text
             allowFontScaling={false}
             style={{
-              // Sprint 16.6 — editorial serif at 14/17pt rendered too
-              // thin against the dark canopy to be readable at a
-              // glance. InstrumentSerif only ships at weight 400 in our
-              // bundle, so we cannot push the weight on the editorial
-              // family. Swap to Inter SemiBold for the orb label only
-              // — the legend keeps the editorial register where the
-              // larger surface gives the serif room to breathe.
-              fontFamily: theme.fontFamilies.bodySemiBold,
-              fontSize: 16,
-              lineHeight: 20,
-              letterSpacing: 0.1,
+              // Sprint 16.6 — back to the design's Instrument Serif at
+              // 14pt for the orb name. The earlier swap to Inter
+              // SemiBold was patching a halo-bleed legibility issue
+              // (flat alpha halo washing over the label); with the
+              // true radial-gradient halo + warm-near-white text token
+              // (#FBF8F4) the serif reads cleanly and keeps the
+              // editorial brand register.
+              fontFamily: theme.fontFamilies.editorial,
+              fontSize: 14,
+              lineHeight: 18,
+              letterSpacing: -0.07, // ~-0.005em at 14pt
               color: theme.colors.text.primary,
             }}
           >
@@ -319,14 +345,16 @@ export function PersonOrb({
             allowFontScaling={false}
             style={{
               fontFamily: theme.fontFamilies.numeric,
-              // Sprint 16.6 — bump 10→12 so BP under the portrait
-              // ("147/93", "—") is actually readable.
-              fontSize: 12,
-              lineHeight: 14,
+              // Sprint 16.6 — back to design's 10pt for the BP label.
+              // The earlier 12pt bump compensated for unreadable
+              // contrast that the bg + halo + palette work has now
+              // resolved at the source.
+              fontSize: 10,
+              lineHeight: 12,
               fontWeight: '500',
               color: accent,
               letterSpacing: 0.4,
-              marginTop: 2,
+              marginTop: 1,
             }}
           >
             {bpLabel}
