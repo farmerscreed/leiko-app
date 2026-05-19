@@ -40,10 +40,8 @@ import {
   deleteAccount,
   exportFamilyData,
 } from '../../services/users/accountActions';
-import {
-  acceptFamilyInvite,
-  sendFamilyInvite,
-} from '../../services/families/manageInvites';
+import { sendFamilyInvite } from '../../services/families/manageInvites';
+import { AcceptInviteSheet } from '../../components/AcceptInviteSheet';
 import { listCaregivers } from '../../services/families/visibility';
 import { useFamilyReadings } from '../../hooks/useFamilyReadings';
 import { useAuth } from '../../state/auth';
@@ -234,11 +232,11 @@ export function SettingsScreen({ navigation }: Props) {
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
 
+  // Sprint 16.6 — accept-invite UI lives in the shared AcceptInviteSheet
+  // component now. Only `acceptSheetOpen` + `acceptSuccess` remain here:
+  // acceptSheetOpen drives mounting; acceptSuccess triggers the
+  // post-accept family-list refresh effect at line 317.
   const [acceptSheetOpen, setAcceptSheetOpen] = useState(false);
-  const [acceptCode, setAcceptCode] = useState('');
-  const [acceptEmail, setAcceptEmail] = useState('');
-  const [acceptPending, setAcceptPending] = useState(false);
-  const [acceptError, setAcceptError] = useState<string | null>(null);
   const [acceptSuccess, setAcceptSuccess] = useState(false);
 
   // Vital setup (auto-HR / auto-SpO2 / goals).
@@ -773,9 +771,8 @@ export function SettingsScreen({ navigation }: Props) {
             title="I have an invite code"
             subtitle="Join a family circle someone invited you to."
             onPress={() => {
-              setAcceptCode('');
-              setAcceptEmail(profile?.email ?? '');
-              setAcceptError(null);
+              // AcceptInviteSheet resets its own form on every open; we
+              // just toggle visibility + reset the post-success flag.
               setAcceptSuccess(false);
               setAcceptSheetOpen(true);
             }}
@@ -1475,156 +1472,17 @@ export function SettingsScreen({ navigation }: Props) {
         </View>
       </BottomSheet>
 
-      {/* Accept invite */}
-      <BottomSheet
+      {/* Accept invite — Sprint 16.6, extracted into AcceptInviteSheet so
+          CaregiverHome empty-state + FamilyWatch onboarding can reuse it.
+          testID prefix preserves the existing settings-accept-{slot}
+          contract that the Settings tests assert on. */}
+      <AcceptInviteSheet
         visible={acceptSheetOpen}
         onDismiss={() => setAcceptSheetOpen(false)}
-        size="default"
-        surface="solid"
-        title={acceptSuccess ? "You're in" : 'Join a family circle'}
-        testID="settings-accept-sheet"
-      >
-        <View style={{ paddingHorizontal: theme.spacing.l, paddingBottom: theme.spacing.l }}>
-          {acceptSuccess ? (
-            <>
-              <Text
-                style={{
-                  color: theme.colors.text.secondary,
-                  fontSize: bodyStyle.size,
-                  lineHeight: bodyStyle.lineHeight,
-                  fontFamily: bodyStyle.family,
-                  marginBottom: theme.spacing.m,
-                }}
-              >
-                You&apos;ve joined the circle. Their readings will appear on your home screen.
-              </Text>
-              <Button
-                variant="primary"
-                onPress={() => setAcceptSheetOpen(false)}
-                accessibilityLabel="Done"
-                testID="settings-accept-done"
-              >
-                Done
-              </Button>
-            </>
-          ) : (
-            <>
-              <Text
-                style={{
-                  color: theme.colors.text.secondary,
-                  fontSize: bodyStyle.size,
-                  lineHeight: bodyStyle.lineHeight,
-                  fontFamily: bodyStyle.family,
-                  marginBottom: theme.spacing.m,
-                }}
-              >
-                Type the email the inviter used and the 6-digit code they shared with you.
-              </Text>
-              <TextInput
-                value={acceptEmail}
-                onChangeText={setAcceptEmail}
-                placeholder="Your email"
-                placeholderTextColor={theme.colors.text.tertiary}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                style={{
-                  borderWidth: 1,
-                  borderColor: theme.colors.border.subtle,
-                  borderRadius: theme.radii.m,
-                  paddingHorizontal: theme.spacing.m,
-                  paddingVertical: theme.spacing.s,
-                  color: theme.colors.text.primary,
-                  fontSize: bodyStyle.size,
-                  fontFamily: bodyStyle.family,
-                  marginBottom: theme.spacing.m,
-                }}
-                testID="settings-accept-email-input"
-              />
-              <TextInput
-                value={acceptCode}
-                onChangeText={setAcceptCode}
-                placeholder="6-digit code"
-                placeholderTextColor={theme.colors.text.tertiary}
-                keyboardType="number-pad"
-                maxLength={6}
-                style={{
-                  borderWidth: 1,
-                  borderColor: theme.colors.border.subtle,
-                  borderRadius: theme.radii.m,
-                  paddingHorizontal: theme.spacing.m,
-                  paddingVertical: theme.spacing.s,
-                  color: theme.colors.text.primary,
-                  fontSize: bodyStyle.size,
-                  fontFamily: bodyStyle.family,
-                  marginBottom: theme.spacing.m,
-                  letterSpacing: 4,
-                }}
-                testID="settings-accept-code-input"
-              />
-              {acceptError ? (
-                <Text
-                  style={{
-                    color: theme.colors.text.secondary,
-                    fontSize: theme.type('label').size,
-                    fontFamily: theme.type('label').family,
-                    marginBottom: theme.spacing.m,
-                  }}
-                  testID="settings-accept-error"
-                >
-                  {acceptError}
-                </Text>
-              ) : null}
-              <Button
-                variant="primary"
-                disabled={
-                  acceptPending || acceptCode.length !== 6 || acceptEmail.trim().length === 0
-                }
-                loading={acceptPending}
-                onPress={async () => {
-                  setAcceptError(null);
-                  setAcceptPending(true);
-                  try {
-                    await acceptFamilyInvite({
-                      code: acceptCode,
-                      email: acceptEmail.trim(),
-                    });
-                    setAcceptSuccess(true);
-                  } catch (e) {
-                    const msg = e instanceof Error ? e.message : 'unknown';
-                    setAcceptError(
-                      /invitation_not_found/i.test(msg)
-                        ? "We couldn't find that code. Double-check and try again."
-                        : /email_mismatch/i.test(msg)
-                          ? "That email doesn't match the invite."
-                          : /invitation_expired/i.test(msg)
-                            ? 'That code has expired. Ask for a new one.'
-                            : /invitation_already_accepted/i.test(msg)
-                              ? "You're already in this circle."
-                              : "We couldn't join the circle. Try again in a moment.",
-                    );
-                  } finally {
-                    setAcceptPending(false);
-                  }
-                }}
-                accessibilityLabel="Join family circle"
-                testID="settings-accept-join"
-              >
-                Join family circle
-              </Button>
-              <View style={{ marginTop: theme.spacing.s }}>
-                <Button
-                  variant="ghost"
-                  onPress={() => setAcceptSheetOpen(false)}
-                  accessibilityLabel="Cancel"
-                  testID="settings-accept-cancel"
-                >
-                  Cancel
-                </Button>
-              </View>
-            </>
-          )}
-        </View>
-      </BottomSheet>
+        initialEmail={profile?.email ?? ''}
+        onSuccess={() => setAcceptSuccess(true)}
+        testID="settings-accept"
+      />
 
       {/* Export paywall — for free users tapping Export my data */}
       <PaywallSheet
