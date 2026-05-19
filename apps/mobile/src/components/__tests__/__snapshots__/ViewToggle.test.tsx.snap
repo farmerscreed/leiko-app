@@ -7,8 +7,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
     [
       {
         "alignItems": "center",
-        "backgroundColor": "#140E0AD9",
-        "borderColor": "#FFFFFF26",
+        "backgroundColor": "#140E0AE0",
+        "borderColor": "#FFFFFF33",
         "borderRadius": 999,
         "borderWidth": 0.5,
         "elevation": 8,
@@ -21,9 +21,9 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
           "height": 4,
           "width": 0,
         },
-        "shadowOpacity": 0.3,
+        "shadowOpacity": 0.32,
         "shadowRadius": 12,
-        "width": 96,
+        "width": 176,
       },
       undefined,
     ]
@@ -49,8 +49,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
     style={
       [
         {
-          "backgroundColor": "#FF73503D",
-          "borderColor": "#FF735080",
+          "backgroundColor": "#FF735040",
+          "borderColor": "#FF73508C",
           "borderRadius": 999,
           "borderWidth": 0.5,
           "elevation": 2,
@@ -62,10 +62,10 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
             "height": 0,
             "width": 0,
           },
-          "shadowOpacity": 0.4,
+          "shadowOpacity": 0.45,
           "shadowRadius": 6,
           "top": 4,
-          "width": 44,
+          "width": 84,
         },
         {
           "transform": [
@@ -115,7 +115,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
         "alignItems": "center",
         "height": 28,
         "justifyContent": "center",
-        "width": 44,
+        "width": 84,
       }
     }
     testID="toggle-birds"
@@ -125,7 +125,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
         [
           {
             "alignItems": "center",
-            "justifyContent": "center",
+            "flexDirection": "row",
+            "gap": 6,
           },
           {
             "transform": [
@@ -139,10 +140,10 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
     >
       <RNSVGSvgView
         align="xMidYMid"
-        bbHeight={16}
-        bbWidth={16}
+        bbHeight={14}
+        bbWidth={14}
         focusable={false}
-        height={16}
+        height={14}
         meetOrSlice={0}
         minX={0}
         minY={0}
@@ -154,15 +155,15 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
             },
             {
               "flex": 0,
-              "height": 16,
+              "height": 14,
               "opacity": 1,
-              "width": 16,
+              "width": 14,
             },
           ]
         }
         vbHeight={24}
         vbWidth={24}
-        width={16}
+        width={14}
       >
         <RNSVGGroup
           fill={
@@ -225,6 +226,21 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
           />
         </RNSVGGroup>
       </RNSVGSvgView>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 9.5,
+            "letterSpacing": 0.57,
+            "lineHeight": 12,
+            "opacity": 1,
+          }
+        }
+      >
+        BIRD'S-EYE
+      </Text>
     </View>
   </View>
   <View
@@ -265,7 +281,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
         "alignItems": "center",
         "height": 28,
         "justifyContent": "center",
-        "width": 44,
+        "width": 84,
       }
     }
     testID="toggle-cards"
@@ -275,7 +291,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
         [
           {
             "alignItems": "center",
-            "justifyContent": "center",
+            "flexDirection": "row",
+            "gap": 6,
           },
           {
             "transform": [
@@ -289,11 +306,11 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
     >
       <RNSVGSvgView
         align="xMidYMid"
-        bbHeight={16}
-        bbWidth={16}
+        bbHeight={14}
+        bbWidth={14}
         fill="none"
         focusable={false}
-        height={16}
+        height={14}
         meetOrSlice={0}
         minX={0}
         minY={0}
@@ -305,15 +322,15 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
             },
             {
               "flex": 0,
-              "height": 16,
-              "opacity": 0.55,
-              "width": 16,
+              "height": 14,
+              "opacity": 0.5,
+              "width": 14,
             },
           ]
         }
         vbHeight={24}
         vbWidth={24}
-        width={16}
+        width={14}
       >
         <RNSVGGroup
           fill={null}
@@ -403,6 +420,21 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
           />
         </RNSVGGroup>
       </RNSVGSvgView>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 9.5,
+            "letterSpacing": 0.57,
+            "lineHeight": 12,
+            "opacity": 0.5,
+          }
+        }
+      >
+        DETAILED
+      </Text>
     </View>
   </View>
 </View>
@@ -415,8 +447,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
     [
       {
         "alignItems": "center",
-        "backgroundColor": "#140E0AD9",
-        "borderColor": "#FFFFFF26",
+        "backgroundColor": "#140E0AE0",
+        "borderColor": "#FFFFFF33",
         "borderRadius": 999,
         "borderWidth": 0.5,
         "elevation": 8,
@@ -429,9 +461,9 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
           "height": 4,
           "width": 0,
         },
-        "shadowOpacity": 0.3,
+        "shadowOpacity": 0.32,
         "shadowRadius": 12,
-        "width": 96,
+        "width": 176,
       },
       undefined,
     ]
@@ -457,8 +489,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
     style={
       [
         {
-          "backgroundColor": "#FF73503D",
-          "borderColor": "#FF735080",
+          "backgroundColor": "#FF735040",
+          "borderColor": "#FF73508C",
           "borderRadius": 999,
           "borderWidth": 0.5,
           "elevation": 2,
@@ -470,10 +502,10 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
             "height": 0,
             "width": 0,
           },
-          "shadowOpacity": 0.4,
+          "shadowOpacity": 0.45,
           "shadowRadius": 6,
           "top": 4,
-          "width": 44,
+          "width": 84,
         },
         {
           "transform": [
@@ -523,7 +555,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
         "alignItems": "center",
         "height": 28,
         "justifyContent": "center",
-        "width": 44,
+        "width": 84,
       }
     }
     testID="toggle-birds"
@@ -533,7 +565,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
         [
           {
             "alignItems": "center",
-            "justifyContent": "center",
+            "flexDirection": "row",
+            "gap": 6,
           },
           {
             "transform": [
@@ -547,10 +580,10 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
     >
       <RNSVGSvgView
         align="xMidYMid"
-        bbHeight={16}
-        bbWidth={16}
+        bbHeight={14}
+        bbWidth={14}
         focusable={false}
-        height={16}
+        height={14}
         meetOrSlice={0}
         minX={0}
         minY={0}
@@ -562,15 +595,15 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
             },
             {
               "flex": 0,
-              "height": 16,
+              "height": 14,
               "opacity": 1,
-              "width": 16,
+              "width": 14,
             },
           ]
         }
         vbHeight={24}
         vbWidth={24}
-        width={16}
+        width={14}
       >
         <RNSVGGroup
           fill={
@@ -585,7 +618,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
             cy={9}
             fill={
               {
-                "payload": 4279177756,
+                "payload": 4294967295,
                 "type": 0,
               }
             }
@@ -602,7 +635,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
             cy={6}
             fill={
               {
-                "payload": 4279177756,
+                "payload": 4294967295,
                 "type": 0,
               }
             }
@@ -619,7 +652,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
             cy={16}
             fill={
               {
-                "payload": 4279177756,
+                "payload": 4294967295,
                 "type": 0,
               }
             }
@@ -633,6 +666,21 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
           />
         </RNSVGGroup>
       </RNSVGSvgView>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 9.5,
+            "letterSpacing": 0.57,
+            "lineHeight": 12,
+            "opacity": 1,
+          }
+        }
+      >
+        BIRD'S-EYE
+      </Text>
     </View>
   </View>
   <View
@@ -673,7 +721,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
         "alignItems": "center",
         "height": 28,
         "justifyContent": "center",
-        "width": 44,
+        "width": 84,
       }
     }
     testID="toggle-cards"
@@ -683,7 +731,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
         [
           {
             "alignItems": "center",
-            "justifyContent": "center",
+            "flexDirection": "row",
+            "gap": 6,
           },
           {
             "transform": [
@@ -697,11 +746,11 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
     >
       <RNSVGSvgView
         align="xMidYMid"
-        bbHeight={16}
-        bbWidth={16}
+        bbHeight={14}
+        bbWidth={14}
         fill="none"
         focusable={false}
-        height={16}
+        height={14}
         meetOrSlice={0}
         minX={0}
         minY={0}
@@ -713,15 +762,15 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
             },
             {
               "flex": 0,
-              "height": 16,
-              "opacity": 0.55,
-              "width": 16,
+              "height": 14,
+              "opacity": 0.5,
+              "width": 14,
             },
           ]
         }
         vbHeight={24}
         vbWidth={24}
-        width={16}
+        width={14}
       >
         <RNSVGGroup
           fill={null}
@@ -748,7 +797,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
             rx={1.2}
             stroke={
               {
-                "payload": 4279177756,
+                "payload": 4294967295,
                 "type": 0,
               }
             }
@@ -774,7 +823,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
             rx={1.2}
             stroke={
               {
-                "payload": 4279177756,
+                "payload": 4294967295,
                 "type": 0,
               }
             }
@@ -800,7 +849,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
             rx={1}
             stroke={
               {
-                "payload": 4279177756,
+                "payload": 4294967295,
                 "type": 0,
               }
             }
@@ -811,6 +860,21 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=birds c
           />
         </RNSVGGroup>
       </RNSVGSvgView>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 9.5,
+            "letterSpacing": 0.57,
+            "lineHeight": 12,
+            "opacity": 0.5,
+          }
+        }
+      >
+        DETAILED
+      </Text>
     </View>
   </View>
 </View>
@@ -823,8 +887,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
     [
       {
         "alignItems": "center",
-        "backgroundColor": "#140E0AD9",
-        "borderColor": "#FFFFFF26",
+        "backgroundColor": "#140E0AE0",
+        "borderColor": "#FFFFFF33",
         "borderRadius": 999,
         "borderWidth": 0.5,
         "elevation": 8,
@@ -837,9 +901,9 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
           "height": 4,
           "width": 0,
         },
-        "shadowOpacity": 0.3,
+        "shadowOpacity": 0.32,
         "shadowRadius": 12,
-        "width": 96,
+        "width": 176,
       },
       undefined,
     ]
@@ -865,8 +929,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
     style={
       [
         {
-          "backgroundColor": "#FF73503D",
-          "borderColor": "#FF735080",
+          "backgroundColor": "#FF735040",
+          "borderColor": "#FF73508C",
           "borderRadius": 999,
           "borderWidth": 0.5,
           "elevation": 2,
@@ -878,15 +942,15 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
             "height": 0,
             "width": 0,
           },
-          "shadowOpacity": 0.4,
+          "shadowOpacity": 0.45,
           "shadowRadius": 6,
           "top": 4,
-          "width": 44,
+          "width": 84,
         },
         {
           "transform": [
             {
-              "translateX": 44,
+              "translateX": 84,
             },
           ],
         },
@@ -931,7 +995,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
         "alignItems": "center",
         "height": 28,
         "justifyContent": "center",
-        "width": 44,
+        "width": 84,
       }
     }
     testID="toggle-birds"
@@ -941,7 +1005,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
         [
           {
             "alignItems": "center",
-            "justifyContent": "center",
+            "flexDirection": "row",
+            "gap": 6,
           },
           {
             "transform": [
@@ -955,10 +1020,10 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
     >
       <RNSVGSvgView
         align="xMidYMid"
-        bbHeight={16}
-        bbWidth={16}
+        bbHeight={14}
+        bbWidth={14}
         focusable={false}
-        height={16}
+        height={14}
         meetOrSlice={0}
         minX={0}
         minY={0}
@@ -970,15 +1035,15 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
             },
             {
               "flex": 0,
-              "height": 16,
-              "opacity": 0.55,
-              "width": 16,
+              "height": 14,
+              "opacity": 0.5,
+              "width": 14,
             },
           ]
         }
         vbHeight={24}
         vbWidth={24}
-        width={16}
+        width={14}
       >
         <RNSVGGroup
           fill={
@@ -1041,6 +1106,21 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
           />
         </RNSVGGroup>
       </RNSVGSvgView>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 9.5,
+            "letterSpacing": 0.57,
+            "lineHeight": 12,
+            "opacity": 0.5,
+          }
+        }
+      >
+        BIRD'S-EYE
+      </Text>
     </View>
   </View>
   <View
@@ -1081,7 +1161,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
         "alignItems": "center",
         "height": 28,
         "justifyContent": "center",
-        "width": 44,
+        "width": 84,
       }
     }
     testID="toggle-cards"
@@ -1091,7 +1171,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
         [
           {
             "alignItems": "center",
-            "justifyContent": "center",
+            "flexDirection": "row",
+            "gap": 6,
           },
           {
             "transform": [
@@ -1105,11 +1186,11 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
     >
       <RNSVGSvgView
         align="xMidYMid"
-        bbHeight={16}
-        bbWidth={16}
+        bbHeight={14}
+        bbWidth={14}
         fill="none"
         focusable={false}
-        height={16}
+        height={14}
         meetOrSlice={0}
         minX={0}
         minY={0}
@@ -1121,15 +1202,15 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
             },
             {
               "flex": 0,
-              "height": 16,
+              "height": 14,
               "opacity": 1,
-              "width": 16,
+              "width": 14,
             },
           ]
         }
         vbHeight={24}
         vbWidth={24}
-        width={16}
+        width={14}
       >
         <RNSVGGroup
           fill={null}
@@ -1219,6 +1300,21 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
           />
         </RNSVGGroup>
       </RNSVGSvgView>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 9.5,
+            "letterSpacing": 0.57,
+            "lineHeight": 12,
+            "opacity": 1,
+          }
+        }
+      >
+        DETAILED
+      </Text>
     </View>
   </View>
 </View>
@@ -1231,8 +1327,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
     [
       {
         "alignItems": "center",
-        "backgroundColor": "#140E0AD9",
-        "borderColor": "#FFFFFF26",
+        "backgroundColor": "#140E0AE0",
+        "borderColor": "#FFFFFF33",
         "borderRadius": 999,
         "borderWidth": 0.5,
         "elevation": 8,
@@ -1245,9 +1341,9 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
           "height": 4,
           "width": 0,
         },
-        "shadowOpacity": 0.3,
+        "shadowOpacity": 0.32,
         "shadowRadius": 12,
-        "width": 96,
+        "width": 176,
       },
       undefined,
     ]
@@ -1273,8 +1369,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
     style={
       [
         {
-          "backgroundColor": "#FF73503D",
-          "borderColor": "#FF735080",
+          "backgroundColor": "#FF735040",
+          "borderColor": "#FF73508C",
           "borderRadius": 999,
           "borderWidth": 0.5,
           "elevation": 2,
@@ -1286,15 +1382,15 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
             "height": 0,
             "width": 0,
           },
-          "shadowOpacity": 0.4,
+          "shadowOpacity": 0.45,
           "shadowRadius": 6,
           "top": 4,
-          "width": 44,
+          "width": 84,
         },
         {
           "transform": [
             {
-              "translateX": 44,
+              "translateX": 84,
             },
           ],
         },
@@ -1339,7 +1435,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
         "alignItems": "center",
         "height": 28,
         "justifyContent": "center",
-        "width": 44,
+        "width": 84,
       }
     }
     testID="toggle-birds"
@@ -1349,7 +1445,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
         [
           {
             "alignItems": "center",
-            "justifyContent": "center",
+            "flexDirection": "row",
+            "gap": 6,
           },
           {
             "transform": [
@@ -1363,10 +1460,10 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
     >
       <RNSVGSvgView
         align="xMidYMid"
-        bbHeight={16}
-        bbWidth={16}
+        bbHeight={14}
+        bbWidth={14}
         focusable={false}
-        height={16}
+        height={14}
         meetOrSlice={0}
         minX={0}
         minY={0}
@@ -1378,15 +1475,15 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
             },
             {
               "flex": 0,
-              "height": 16,
-              "opacity": 0.55,
-              "width": 16,
+              "height": 14,
+              "opacity": 0.5,
+              "width": 14,
             },
           ]
         }
         vbHeight={24}
         vbWidth={24}
-        width={16}
+        width={14}
       >
         <RNSVGGroup
           fill={
@@ -1401,7 +1498,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
             cy={9}
             fill={
               {
-                "payload": 4279177756,
+                "payload": 4294967295,
                 "type": 0,
               }
             }
@@ -1418,7 +1515,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
             cy={6}
             fill={
               {
-                "payload": 4279177756,
+                "payload": 4294967295,
                 "type": 0,
               }
             }
@@ -1435,7 +1532,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
             cy={16}
             fill={
               {
-                "payload": 4279177756,
+                "payload": 4294967295,
                 "type": 0,
               }
             }
@@ -1449,6 +1546,21 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
           />
         </RNSVGGroup>
       </RNSVGSvgView>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 9.5,
+            "letterSpacing": 0.57,
+            "lineHeight": 12,
+            "opacity": 0.5,
+          }
+        }
+      >
+        BIRD'S-EYE
+      </Text>
     </View>
   </View>
   <View
@@ -1489,7 +1601,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
         "alignItems": "center",
         "height": 28,
         "justifyContent": "center",
-        "width": 44,
+        "width": 84,
       }
     }
     testID="toggle-cards"
@@ -1499,7 +1611,8 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
         [
           {
             "alignItems": "center",
-            "justifyContent": "center",
+            "flexDirection": "row",
+            "gap": 6,
           },
           {
             "transform": [
@@ -1513,11 +1626,11 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
     >
       <RNSVGSvgView
         align="xMidYMid"
-        bbHeight={16}
-        bbWidth={16}
+        bbHeight={14}
+        bbWidth={14}
         fill="none"
         focusable={false}
-        height={16}
+        height={14}
         meetOrSlice={0}
         minX={0}
         minY={0}
@@ -1529,15 +1642,15 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
             },
             {
               "flex": 0,
-              "height": 16,
+              "height": 14,
               "opacity": 1,
-              "width": 16,
+              "width": 14,
             },
           ]
         }
         vbHeight={24}
         vbWidth={24}
-        width={16}
+        width={14}
       >
         <RNSVGGroup
           fill={null}
@@ -1564,7 +1677,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
             rx={1.2}
             stroke={
               {
-                "payload": 4279177756,
+                "payload": 4294967295,
                 "type": 0,
               }
             }
@@ -1590,7 +1703,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
             rx={1.2}
             stroke={
               {
-                "payload": 4279177756,
+                "payload": 4294967295,
                 "type": 0,
               }
             }
@@ -1616,7 +1729,7 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
             rx={1}
             stroke={
               {
-                "payload": 4279177756,
+                "payload": 4294967295,
                 "type": 0,
               }
             }
@@ -1627,6 +1740,21 @@ exports[`ViewToggle — value × colorMode snapshot matrix renders value=cards c
           />
         </RNSVGGroup>
       </RNSVGSvgView>
+      <Text
+        allowFontScaling={false}
+        style={
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "JetBrainsMono_500Medium",
+            "fontSize": 9.5,
+            "letterSpacing": 0.57,
+            "lineHeight": 12,
+            "opacity": 1,
+          }
+        }
+      >
+        DETAILED
+      </Text>
     </View>
   </View>
 </View>
