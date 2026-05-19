@@ -76,6 +76,10 @@ export interface CaregiverPerson {
   relation: string;
   /** Pre-formatted four-vital labels for the editorial card row. */
   vitalStrip: VitalStripLabels;
+  /** Parent age in years derived from parentYearOfBirth. `undefined`
+   *  when the family record has no DOB on file — PersonCard then
+   *  renders the eyebrow as just "MOM" without " · N". */
+  age?: number;
 }
 
 export function caregiverPersonFromParent(
@@ -128,6 +132,14 @@ export function caregiverPersonFromParent(
     }
   }
 
+  const currentYear = new Date(nowMs).getFullYear();
+  const age =
+    typeof parent.parentYearOfBirth === 'number' &&
+    parent.parentYearOfBirth > 0 &&
+    parent.parentYearOfBirth <= currentYear
+      ? currentYear - parent.parentYearOfBirth
+      : undefined;
+
   return {
     id: parent.familyId,
     fullName: trimmedName.length > 0 ? trimmedName : 'Family member',
@@ -139,6 +151,7 @@ export function caregiverPersonFromParent(
     sentence,
     relation: parent.parentRelationship || 'Family',
     vitalStrip: formatVitalStrip(bpLabel, parent.latestHr, parent.latestSpo2, parent.latestSleep),
+    age,
   };
 }
 

@@ -290,6 +290,7 @@ export function CaregiverHome() {
           initial: p.initial,
           fullName: p.fullName,
           relation: p.relation,
+          age: p.age,
           status: p.status,
           headline: p.headline,
           sentence: p.sentence,
@@ -577,6 +578,7 @@ interface DetailedViewProps {
     initial: string;
     fullName: string;
     relation: string;
+    age?: number;
     status: import('../../components/StatusPill').Status;
     headline: string;
     sentence: string;
@@ -621,6 +623,7 @@ function DetailedView({ people, onSelectPerson, theme }: DetailedViewProps) {
             initial={p.initial}
             fullName={p.fullName}
             relation={p.relation}
+            age={p.age}
             status={p.status}
             headline={p.headline}
             sentence={p.sentence}
