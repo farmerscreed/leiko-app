@@ -71,6 +71,8 @@ import {
 import { PersonCard } from '../../components/PersonCard';
 import { ViewToggle } from '../../components/ViewToggle';
 import { useCaregiverFamily } from '../../hooks/useCaregiverFamily';
+import { AcceptInviteSheet } from '../../components/AcceptInviteSheet';
+import { useAuth } from '../../state/auth';
 import {
   useCaregiverViewMode,
   type CaregiverViewMode,
@@ -166,6 +168,13 @@ export function CaregiverHome() {
 
   // Sprint 12 follow-up — Ask Leiko bottom sheet visibility.
   const [askLeikoVisible, setAskLeikoVisible] = useState(false);
+
+  // Sprint 16.6 Issue #1 — accept-invite sheet for the empty-state
+  // primary CTA. Reuses the shared AcceptInviteSheet component;
+  // on success we refresh the family list so the constellation
+  // populates without a manual reload.
+  const [acceptInviteVisible, setAcceptInviteVisible] = useState(false);
+  const profileEmail = useAuth((s) => s.profile?.email ?? '');
 
   // Sprint 14.5 task 3 — home-seeded "Worth a read" Learn card. Same
   // priority cascade as Self-Buyer Home; renders below the
@@ -383,7 +392,11 @@ export function CaregiverHome() {
         {isLoading ? (
           <Skeleton theme={theme} />
         ) : merged.length === 0 ? (
-          <EmptyNoFamily theme={theme} />
+          <EmptyNoFamily
+            theme={theme}
+            onEnterCode={() => setAcceptInviteVisible(true)}
+            onInviteOthers={() => navigation.navigate('Settings')}
+          />
         ) : (
           // Mount only the active view at rest; both render briefly during
           // the transition window so the cross-fade is visible. The
@@ -501,6 +514,19 @@ export function CaregiverHome() {
         visible={askLeikoVisible}
         onDismiss={() => setAskLeikoVisible(false)}
         onArticleOpen={(id) => navigation.navigate('Article', { articleId: id })}
+      />
+      {/* Sprint 16.6 Issue #1 — accept-invite sheet for the empty-state
+          CTA. Mounted at the screen level so it can layer above any
+          other UI; on success the family-list refresh repopulates the
+          constellation and EmptyNoFamily unmounts automatically. */}
+      <AcceptInviteSheet
+        visible={acceptInviteVisible}
+        onDismiss={() => setAcceptInviteVisible(false)}
+        initialEmail={profileEmail}
+        onSuccess={() => {
+          refresh();
+        }}
+        testID="caregiver-home-accept"
       />
       <QuietHoursAffirmSlot />
     </SafeAreaView>
@@ -805,9 +831,20 @@ function pickAnomalyForBanner(people: CaregiverPerson[]): BannerState | null {
 // Empty + skeleton states (preserved from the legacy screen, voice-rule-clean).
 // -----------------------------------------------------------------------------
 
-function EmptyNoFamily({ theme }: { theme: Theme }) {
+interface EmptyNoFamilyProps {
+  theme: Theme;
+  onEnterCode: () => void;
+  onInviteOthers: () => void;
+}
+
+function EmptyNoFamily({
+  theme,
+  onEnterCode,
+  onInviteOthers,
+}: EmptyNoFamilyProps) {
   const headline = theme.type('displayM');
   const body = theme.type('bodyL');
+  const label = theme.type('label');
   return (
     <View
       style={{
@@ -839,16 +876,39 @@ function EmptyNoFamily({ theme }: { theme: Theme }) {
           marginBottom: theme.spacing.xxl,
         }}
       >
-        Add a family member to start sharing care.
+        Has someone shared an invite code with you? Enter it now to join
+        their circle.
       </Text>
       <Button
         variant="primary"
-        onPress={() => undefined}
-        accessibilityLabel="Add a family member"
-        testID="caregiver-home-add-family"
+        onPress={onEnterCode}
+        accessibilityLabel="I have an invite code"
+        testID="caregiver-home-enter-code"
       >
-        Add a family member
+        I have an invite code
       </Button>
+      <Pressable
+        onPress={onInviteOthers}
+        accessibilityRole="button"
+        accessibilityLabel="Or invite someone yourself"
+        hitSlop={8}
+        testID="caregiver-home-invite-someone"
+        style={({ pressed }) => ({
+          marginTop: theme.spacing.m,
+          opacity: pressed ? 0.65 : 1,
+        })}
+      >
+        <Text
+          style={{
+            color: theme.colors.brand.coral,
+            fontSize: label.size,
+            lineHeight: label.lineHeight,
+            fontFamily: label.family,
+          }}
+        >
+          Or invite someone yourself →
+        </Text>
+      </Pressable>
     </View>
   );
 }

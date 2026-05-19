@@ -159,14 +159,21 @@ beforeEach(() => {
 });
 
 describe('<CaregiverHome /> — empty state', () => {
-  it('renders the verified empty-state copy when the user has no families', () => {
+  // Sprint 16.6 Issue #1 — empty state inverted to lead with the
+  // invite-code path (the more common journey for non-technical
+  // caregivers being invited by an existing user) and a secondary
+  // link drops to Settings → Family for outgoing invites.
+  it('renders the empty-state heading + body + both CTAs', () => {
     render(withProviders(<CaregiverHome />));
     expect(screen.getByText('Your family circle is quiet for now')).toBeTruthy();
     expect(
-      screen.getByText('Add a family member to start sharing care.'),
+      screen.getByText(/Has someone shared an invite code with you/),
     ).toBeTruthy();
     expect(
-      screen.getByRole('button', { name: 'Add a family member' }),
+      screen.getByRole('button', { name: 'I have an invite code' }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'Or invite someone yourself' }),
     ).toBeTruthy();
   });
 
@@ -512,7 +519,13 @@ describe('<CaregiverHome /> — seeded Learn card (Sprint 14.5 task 3)', () => {
 describe('<CaregiverHome /> — voice rules', () => {
   it.each([
     'Your family circle is quiet for now',
-    'Add a family member to start sharing care.',
+    // Sprint 16.6 Issue #1 — empty-state copy refreshed for the
+    // invite-code-first CTA. Body explains the incoming-caregiver
+    // path; primary CTA opens the AcceptInviteSheet; secondary text
+    // link drops to Settings → Family for outgoing invites.
+    /Has someone shared an invite code with you/,
+    'I have an invite code',
+    /Or invite someone yourself/,
     'Good morning',
     'Leiko · Family',
   ])('voice-rule clean string present: %s', (text) => {
