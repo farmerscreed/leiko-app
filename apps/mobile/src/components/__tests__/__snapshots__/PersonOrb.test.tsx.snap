@@ -244,7 +244,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=attention m
         allowFontScaling={false}
         style={
           {
-            "color": "#F9F6EE",
+            "color": "#FFFFFF",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
             "letterSpacing": -0.07,
@@ -778,7 +778,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=clear mode=
         allowFontScaling={false}
         style={
           {
-            "color": "#F9F6EE",
+            "color": "#FFFFFF",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
             "letterSpacing": -0.07,
@@ -1296,7 +1296,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=offline mod
         allowFontScaling={false}
         style={
           {
-            "color": "#F9F6EE",
+            "color": "#FFFFFF",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
             "letterSpacing": -0.07,
@@ -1845,7 +1845,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=sleeping mo
         allowFontScaling={false}
         style={
           {
-            "color": "#F9F6EE",
+            "color": "#FFFFFF",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
             "letterSpacing": -0.07,
@@ -2410,7 +2410,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=urgent mode
         allowFontScaling={false}
         style={
           {
-            "color": "#F9F6EE",
+            "color": "#FFFFFF",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
             "letterSpacing": -0.07,
@@ -2960,7 +2960,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=watch mode=
         allowFontScaling={false}
         style={
           {
-            "color": "#F9F6EE",
+            "color": "#FFFFFF",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
             "letterSpacing": -0.07,

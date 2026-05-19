@@ -24,17 +24,19 @@ export const paletteDark = {
     850: '#120C07', // subtle
     800: '#1D140D', // elevated
   },
-  // Sprint 16.6 — single warm bone-cream ink across all dark-mode text
-  // tokens after the on-device A/B test (founder picked #F9F6EE as
-  // the warm winner over pure white + the warmer-yet candidates).
-  // Hierarchy comes purely from type — size, weight, italic style,
-  // family — not from brightness gradation. Mirrors print typography
-  // on warm paper: one ink, structure through type.
-  //   bone[50]   #F9F6EE  primary
-  //   bone[100]  #F9F6EE  secondary
-  //   stone[300] #F9F6EE  tertiary
-  bone: { 50: '#F9F6EE', 100: '#F9F6EE' },
-  stone: { 300: '#F9F6EE', 500: '#6B6862' },
+  // Sprint 16.6 — pure #FFFFFF across all dark-mode text tokens after
+  // multiple on-device iterations. Warm-cream candidates (#FBF8F4,
+  // #F9F6EE, #F5EFE2 etc.) consistently read as dim/off-white on the
+  // bench Android device even at >96% luminance — the perception
+  // problem isn't solved by tighter cream tones. Pure white removes
+  // the ambiguity at the cost of editorial warmth; hierarchy on
+  // dark-mode surfaces is now carried entirely by type (size, weight,
+  // italic, family) rather than tone.
+  //   bone[50]   #FFFFFF  primary
+  //   bone[100]  #FFFFFF  secondary
+  //   stone[300] #FFFFFF  tertiary
+  bone: { 50: '#FFFFFF', 100: '#FFFFFF' },
+  stone: { 300: '#FFFFFF', 500: '#6B6862' },
   amber: { 400: '#F5B47A', 500: '#E8A063', 600: '#C5824A' },
   // Coral — caregiver-mode brand accent (Sprint 7.7). Distinct from the
   // existing `coral.500 #D6745A` used for HR vital chromatic; this is
