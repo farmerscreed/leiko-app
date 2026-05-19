@@ -168,35 +168,19 @@ export function ConstellationLegend({
                 >
                   {firstName(p.fullName)}
                 </Text>
-                {(() => {
-                  const relationKey = p.relation.toLowerCase();
-                  // TEMP — Sprint 16.6 A/B color test per founder. Two
-                  // candidate warm-whites on the relation tags so they
-                  // can be compared side-by-side. Remove this branching
-                  // once chosen and apply the picked hex (or revert to
-                  // theme.colors.text.tertiary) uniformly.
-                  const TEST_RELATION_COLOR =
-                    relationKey === 'self'
-                      ? '#FFFFF0' // candidate C — ivory (warm yellow tint)
-                      : relationKey === 'mother'
-                      ? '#F9F6EE' // candidate D — warm bone cream
-                      : theme.colors.text.tertiary;
-                  return (
-                    <Text
-                      allowFontScaling={false}
-                      style={{
-                        fontFamily: theme.fontFamilies.numeric,
-                        fontSize: 9,
-                        lineHeight: 12,
-                        color: TEST_RELATION_COLOR,
-                        letterSpacing: 0.9,
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      {`· ${p.relation}`}
-                    </Text>
-                  );
-                })()}
+                <Text
+                  allowFontScaling={false}
+                  style={{
+                    fontFamily: theme.fontFamilies.numeric,
+                    fontSize: 9,
+                    lineHeight: 12,
+                    color: theme.colors.text.tertiary,
+                    letterSpacing: 0.9,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {`· ${p.relation}`}
+                </Text>
               </View>
               <Text
                 allowFontScaling={false}

@@ -106,7 +106,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
         r={130}
         stroke={
           {
-            "payload": 4294967295,
+            "payload": 4294571758,
             "type": 0,
           }
         }
@@ -135,7 +135,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
         r={80}
         stroke={
           {
-            "payload": 4294967295,
+            "payload": 4294571758,
             "type": 0,
           }
         }
@@ -228,7 +228,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
         cy={180}
         fill={
           {
-            "payload": 4294967295,
+            "payload": 4294571758,
             "type": 0,
           }
         }
@@ -253,7 +253,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
         r={3}
         stroke={
           {
-            "payload": 4294967295,
+            "payload": 4294571758,
             "type": 0,
           }
         }
@@ -281,7 +281,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
       allowFontScaling={false}
       style={
         {
-          "color": "#D9D2C2",
+          "color": "#F9F6EE",
           "fontFamily": "JetBrainsMono_500Medium",
           "fontSize": 8.5,
           "fontWeight": "500",
@@ -530,7 +530,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             allowFontScaling={false}
             style={
               {
-                "color": "#FFFFFF",
+                "color": "#F9F6EE",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
                 "letterSpacing": -0.07,
@@ -812,7 +812,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             allowFontScaling={false}
             style={
               {
-                "color": "#FFFFFF",
+                "color": "#F9F6EE",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
                 "letterSpacing": -0.07,
@@ -1109,7 +1109,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
             allowFontScaling={false}
             style={
               {
-                "color": "#FFFFFF",
+                "color": "#F9F6EE",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 14,
                 "letterSpacing": -0.07,

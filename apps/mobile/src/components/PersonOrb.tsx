@@ -322,34 +322,22 @@ export function PersonOrb({
             alignItems: 'center',
           }}
         >
-          {(() => {
-            const firstName = fullName.split(' ')[0];
-            // TEMP — Sprint 16.6 A/B color test per founder. Two
-            // candidate near-whites on the orb names so they can be
-            // compared side-by-side on Phone 2 and the winner picked.
-            // Remove this branching once chosen and apply the picked
-            // hex (or revert to theme.colors.text.primary) uniformly.
-            const TEST_NAME_COLOR =
-              firstName.toLowerCase().startsWith('bieb')
-                ? '#FAF9F6' // candidate A — warm-near-white, slight cream
-                : firstName.toUpperCase().startsWith('MOMC')
-                ? '#FFFFFF' // candidate B — pure white
-                : theme.colors.text.primary;
-            return (
-              <Text
-                allowFontScaling={false}
-                style={{
-                  fontFamily: theme.fontFamilies.editorial,
-                  fontSize: 14,
-                  lineHeight: 18,
-                  letterSpacing: -0.07, // ~-0.005em at 14pt
-                  color: TEST_NAME_COLOR,
-                }}
-              >
-                {firstName}
-              </Text>
-            );
-          })()}
+          <Text
+            allowFontScaling={false}
+            style={{
+              // Instrument Serif 14pt per the design. text.primary
+              // resolves to the single warm bone-cream #F9F6EE
+              // (Sprint 16.6 palette consolidation after on-device
+              // A/B test).
+              fontFamily: theme.fontFamilies.editorial,
+              fontSize: 14,
+              lineHeight: 18,
+              letterSpacing: -0.07, // ~-0.005em at 14pt
+              color: theme.colors.text.primary,
+            }}
+          >
+            {fullName.split(' ')[0]}
+          </Text>
           <Text
             allowFontScaling={false}
             style={{

@@ -24,27 +24,17 @@ export const paletteDark = {
     850: '#120C07', // subtle
     800: '#1D140D', // elevated
   },
-  // Sprint 16.6 — text palette tuned for on-device legibility against
-  // the warm-charcoal canopy AND the design's warm editorial register.
-  // The strategy: tighten the brightness gradation so even tertiary
-  // reads as bright + warm rather than dim grey. Hierarchy comes
-  // from tone + size + weight, not from "primary is white / tertiary
-  // is grey." Mirrors print typography on warm paper.
-  //   bone[50]  #FFFFFF  primary    — focal text (names, headlines,
-  //                                    vital values). Pure white reads
-  //                                    as the lead element on canopy.
-  //   bone[100] #F5EFE2  secondary  — supporting body. Warm cream
-  //                                    at ~96% luminance — visibly
-  //                                    warm but unambiguously bright.
-  bone: { 50: '#FFFFFF', 100: '#F5EFE2' },
-  //   stone[300] #D9D2C2 tertiary  — recessive labels / eyebrows /
-  //                                    dates. Warm bright grey-cream
-  //                                    at ~85% luminance. Visibly
-  //                                    smaller-importance than the
-  //                                    secondary cream, but never
-  //                                    reads as "disabled" the way the
-  //                                    previous #B8B5AE did on Android.
-  stone: { 300: '#D9D2C2', 500: '#6B6862' },
+  // Sprint 16.6 — single warm bone-cream ink across all dark-mode text
+  // tokens after the on-device A/B test (founder picked #F9F6EE as
+  // the warm winner over pure white + the warmer-yet candidates).
+  // Hierarchy comes purely from type — size, weight, italic style,
+  // family — not from brightness gradation. Mirrors print typography
+  // on warm paper: one ink, structure through type.
+  //   bone[50]   #F9F6EE  primary
+  //   bone[100]  #F9F6EE  secondary
+  //   stone[300] #F9F6EE  tertiary
+  bone: { 50: '#F9F6EE', 100: '#F9F6EE' },
+  stone: { 300: '#F9F6EE', 500: '#6B6862' },
   amber: { 400: '#F5B47A', 500: '#E8A063', 600: '#C5824A' },
   // Coral — caregiver-mode brand accent (Sprint 7.7). Distinct from the
   // existing `coral.500 #D6745A` used for HR vital chromatic; this is
