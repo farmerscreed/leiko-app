@@ -71,7 +71,10 @@ import {
 import { PersonCard } from '../../components/PersonCard';
 import { ViewToggle } from '../../components/ViewToggle';
 import { useCaregiverFamily } from '../../hooks/useCaregiverFamily';
-import { useCaregiverViewMode } from '../../hooks/useCaregiverViewMode';
+import {
+  useCaregiverViewMode,
+  type CaregiverViewMode,
+} from '../../hooks/useCaregiverViewMode';
 import { useHydrateReadingsFromServer } from '../../hooks/useHydrateReadingsFromServer';
 import { useHydrateSleepFromServer } from '../../hooks/useHydrateSleepFromServer';
 import { useHydrateActivityFromServer } from '../../hooks/useHydrateActivityFromServer';
@@ -344,6 +347,9 @@ export function CaregiverHome() {
         <SharedHeader
           theme={theme}
           onSettingsPress={() => navigation.navigate('Settings')}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          showToggle={merged.length > 0}
         />
 
         {/* Sprint 16 — calm reassurance banner after 24h of failed
@@ -451,42 +457,21 @@ export function CaregiverHome() {
       </ScrollView>
 
       {merged.length > 0 ? (
-        <>
-          {/* Top-right segmented toggle. Glass background reads against
-              both views; absolute position so the constellation/cards
-              behind it scroll while the toggle stays anchored to the
-              SafeArea top inset. spacing.xxxl (48pt) below the inset so
-              the touch target sits clear of the system status bar +
-              battery gauge — spacing.xxl was too cramped on Pixel 8. */}
-          <View
-            style={{
-              position: 'absolute',
-              top: theme.spacing.xxxl,
-              right: theme.spacing.l,
-            }}
-          >
-            <ViewToggle
-              value={viewMode}
-              onChange={setViewMode}
-              testID="caregiver-home-view-toggle"
-            />
-          </View>
-          <View
-            style={{
-              position: 'absolute',
-              left: theme.spacing.l,
-              right: theme.spacing.l,
-              bottom: theme.spacing.xxl,
-            }}
-          >
-            <CaregiverActionBar
-              count={merged.length}
-              canInvite={CAN_INVITE_FOR_NOW}
-              onInvitePress={() => navigation.navigate('Settings')}
-              testID="caregiver-home-action-bar"
-            />
-          </View>
-        </>
+        <View
+          style={{
+            position: 'absolute',
+            left: theme.spacing.l,
+            right: theme.spacing.l,
+            bottom: theme.spacing.xxl,
+          }}
+        >
+          <CaregiverActionBar
+            count={merged.length}
+            canInvite={CAN_INVITE_FOR_NOW}
+            onInvitePress={() => navigation.navigate('Settings')}
+            testID="caregiver-home-action-bar"
+          />
+        </View>
       ) : null}
       {/* Sprint 9.5 / Task 8 — Apple Health / Health Connect opt-in
           (D13 §12.5). Parent (own phone) asked on first home render.
@@ -663,9 +648,15 @@ function humanizeCount(n: number): string {
 function SharedHeader({
   theme,
   onSettingsPress,
+  viewMode,
+  onViewModeChange,
+  showToggle,
 }: {
   theme: Theme;
   onSettingsPress: () => void;
+  viewMode: CaregiverViewMode;
+  onViewModeChange: (next: CaregiverViewMode) => void;
+  showToggle: boolean;
 }) {
   const dateLabel = useMemo(() => formatHeaderDate(new Date()), []);
   return (
@@ -700,8 +691,6 @@ function SharedHeader({
             allowFontScaling={false}
             style={{
               fontFamily: theme.fontFamilies.numeric,
-              // tertiary resolves to warm bright grey-cream (token-
-              // level tune in Sprint 16.6) — recessive but legible.
               fontSize: 9.5,
               letterSpacing: 1.3,
               color: theme.colors.text.tertiary,
@@ -733,20 +722,39 @@ function SharedHeader({
           </Pressable>
         </View>
       </View>
-      <Text
-        allowFontScaling={false}
+      {/* Row 2: "Good morning" greeting on the left, view toggle on the
+          right. Founder moved the toggle off its absolute top-right
+          position (it was blocking the top of the screen) — sitting
+          here inline keeps the toggle reachable as part of the
+          header's natural surface without dominating the canopy. */}
+      <View
         style={{
-          fontFamily: theme.fontFamilies.numeric,
-          // tertiary resolves to warm bright grey-cream — recessive
-          // but legible against the canopy.
-          fontSize: 9,
-          letterSpacing: 1.6,
-          color: theme.colors.text.tertiary,
-          textTransform: 'uppercase',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          minHeight: 28,
         }}
       >
-        Good morning
-      </Text>
+        <Text
+          allowFontScaling={false}
+          style={{
+            fontFamily: theme.fontFamilies.numeric,
+            fontSize: 9,
+            letterSpacing: 1.6,
+            color: theme.colors.text.tertiary,
+            textTransform: 'uppercase',
+          }}
+        >
+          Good morning
+        </Text>
+        {showToggle ? (
+          <ViewToggle
+            value={viewMode}
+            onChange={onViewModeChange}
+            testID="caregiver-home-view-toggle"
+          />
+        ) : null}
+      </View>
     </View>
   );
 }
