@@ -130,34 +130,44 @@ been flaky.
 ### A. From-scratch two-phone caregiver test (founder-driven)
 
 Goal: walk the new Sprint 16.6 invite-code flow end-to-end on both
-phones, starting from a clean state. The verified flow becomes a
-PASS row in `plans/CAREGIVER_TEST_RESULTS.md`.
+phones. The verified flow becomes a PASS row in
+`plans/CAREGIVER_TEST_RESULTS.md`.
+
+**IMPORTANT — Phone 1 is NOT to be wiped.** Biebele's account on
+Phone 1 owns the bench Watch 1 + has the real BP history we don't
+want to lose. The test rewipes Phone 2 only; Phone 1 stays as-is.
+
+**IMPORTANT — both phones connect via USB cable, not WiFi.** USB
++ `adb reverse` is the proven stable bench path (the MTN extender
+has been historically flaky for LAN). Make sure
+`apps/mobile/.env.local` reads
+`EXPO_PUBLIC_SUPABASE_URL=http://localhost:54321` (USB reverse
+path), NOT the `192.168.0.166` LAN IP.
 
 Sequence:
 
-1. **Wipe + reinstall** on both phones to clear MMKV + auth state.
-   Either uninstall the APK (`adb -s <serial> uninstall com.leiko.app`)
-   then `scripts/build-preview-apk.ps1` from the main checkout, OR
-   `adb shell pm clear com.leiko.app` to reset state without reinstall.
-2. **Phone 1 — Biebele as self-buyer** (caregiving themselves):
-   sign up via Mailpit OTP at http://localhost:54324 → onboard as
-   self-buyer with their year-of-birth set (so PersonCard eyebrow
-   renders the age) → pair Watch 1.
+1. **Phone 1 — leave as-is** (Biebele's self-buyer account is
+   already signed in, paired to Watch 1, with BP history). Just
+   verify the reload picks up the new bundle.
+2. **Wipe Phone 2 only**: `adb -s 8fae80bc shell pm clear
+   com.leiko.app`. Clears MMKV + auth without uninstalling the APK.
 3. **Phone 1 — invite TheOne**: Settings → Family → "Invite a
-   caregiver" → `lawonelimited@gmail.com` → Invite. Note the 6-digit
-   code.
+   caregiver" → `lawonelimited@gmail.com` → Invite. Note the
+   6-digit code.
 4. **Phone 2 — TheOne as caregiver, via the new invite path**:
-   sign up via Mailpit OTP → caregiver onboarding (Intro1/2/3 +
-   FamilyYou name) → FamilyWatch → **"Someone invited me"** (the
-   new third card from `67172b6`) → AcceptInviteSheet → enter the
-   code from step 3 + their own email → join. Should land
-   straight on caregiver Home with Biebele in the constellation.
-5. **Alt path** — bench the empty-state CTAs by also creating a
-   third test caregiver who completes onboarding via "Add a watch
-   later" (no invite), lands on empty Home, taps "I have an invite
-   code", redeems → constellation populates.
-6. **Cross-flow** — take a BP reading on Phone 1's watch, confirm it
-   appears on Phone 2 in both bird's-eye + detailed views.
+   sign up via Mailpit OTP at http://localhost:54324 → caregiver
+   onboarding (Intro1/2/3 + FamilyYou name) → FamilyWatch →
+   **"Someone invited me"** (the new third card from `67172b6`) →
+   AcceptInviteSheet → enter the code from step 3 + their own
+   email → join. Should land straight on caregiver Home with
+   Biebele in the constellation.
+5. **Alt path** — bench the empty-state CTAs by wiping Phone 2
+   again, signing up as a different test email, completing
+   onboarding via "Add a watch later" (no invite), landing on
+   empty Home, then tapping "I have an invite code" and redeeming
+   a fresh code from Phone 1 → constellation populates.
+6. **Cross-flow** — take a BP reading on Phone 1's watch, confirm
+   it appears on Phone 2 in both bird's-eye + detailed views.
 
 ### B. Per-person dashboard drill-in (engineering — main task)
 
