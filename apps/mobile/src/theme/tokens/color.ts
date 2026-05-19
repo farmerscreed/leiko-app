@@ -24,19 +24,23 @@ export const paletteDark = {
     850: '#120C07', // subtle
     800: '#1D140D', // elevated
   },
-  // Sprint 16.6 — pure #FFFFFF across all dark-mode text tokens after
-  // multiple on-device iterations. Warm-cream candidates (#FBF8F4,
-  // #F9F6EE, #F5EFE2 etc.) consistently read as dim/off-white on the
-  // bench Android device even at >96% luminance — the perception
-  // problem isn't solved by tighter cream tones. Pure white removes
-  // the ambiguity at the cost of editorial warmth; hierarchy on
-  // dark-mode surfaces is now carried entirely by type (size, weight,
-  // italic, family) rather than tone.
-  //   bone[50]   #FFFFFF  primary
-  //   bone[100]  #FFFFFF  secondary
-  //   stone[300] #FFFFFF  tertiary
-  bone: { 50: '#FFFFFF', 100: '#FFFFFF' },
-  stone: { 300: '#FFFFFF', 500: '#6B6862' },
+  // Sprint 16.6 — three-tone text gradation. The earlier "all-white"
+  // consolidation was a defensive over-correction made while light-
+  // mode was secretly active (resolving text.primary to near-black);
+  // now that dark mode fires correctly, the original design's
+  // brightness hierarchy renders cleanly on the warm-charcoal canopy
+  // and gives the editorial register back.
+  //   bone[50]   #FFFFFF  primary    — focal: orb / person names,
+  //                                    headlines, vital values.
+  //   bone[100]  #F5EFE2  secondary  — body sentences, italic accents,
+  //                                    status / legend headlines. Warm
+  //                                    cream at ~96% luminance.
+  bone: { 50: '#FFFFFF', 100: '#F5EFE2' },
+  //   stone[300] #D9D2C2 tertiary  — recessive labels: relation tags,
+  //                                    eyebrows, dates, footers, vital
+  //                                    labels. Warm bright grey-cream
+  //                                    at ~85% luminance.
+  stone: { 300: '#D9D2C2', 500: '#6B6862' },
   amber: { 400: '#F5B47A', 500: '#E8A063', 600: '#C5824A' },
   // Coral — caregiver-mode brand accent (Sprint 7.7). Distinct from the
   // existing `coral.500 #D6745A` used for HR vital chromatic; this is

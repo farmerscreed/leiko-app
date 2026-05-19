@@ -281,7 +281,7 @@ exports[`ConstellationField — snapshot per colorMode renders three-person fixt
       allowFontScaling={false}
       style={
         {
-          "color": "#FFFFFF",
+          "color": "#D9D2C2",
           "fontFamily": "JetBrainsMono_500Medium",
           "fontSize": 8.5,
           "fontWeight": "500",

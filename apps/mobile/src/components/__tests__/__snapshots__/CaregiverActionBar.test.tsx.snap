@@ -36,7 +36,7 @@ exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders c
     allowFontScaling={false}
     style={
       {
-        "color": "#FFFFFF",
+        "color": "#D9D2C2",
         "fontFamily": "JetBrainsMono_500Medium",
         "fontSize": 9.5,
         "letterSpacing": 1.33,
@@ -136,7 +136,7 @@ exports[`CaregiverActionBar — canInvite × colorMode snapshot matrix renders c
     allowFontScaling={false}
     style={
       {
-        "color": "#FFFFFF",
+        "color": "#D9D2C2",
         "fontFamily": "JetBrainsMono_500Medium",
         "fontSize": 9.5,
         "letterSpacing": 1.33,
