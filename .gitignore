@@ -106,3 +106,9 @@ _specs/
 # Bench / on-device screenshots — captured during sprints, not source
 screenshots-onboarding/
 screenshots/
+
+# Branding scratch — keep PHILOSOPHY.md, SVGs, render.mjs, generated PNGs
+# but never commit the npm install used to run resvg.
+branding/node_modules/
+branding/package.json
+branding/package-lock.json

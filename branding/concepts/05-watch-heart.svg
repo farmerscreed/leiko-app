@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Direction 5 — Watch + heart -->
+  <!-- The hardware made gentle. A wristband seen from above, encircling a
+       small heart. The band is dark and warm; the heart at the centre is
+       solid amber. No clock face, no ticks. Just the embrace. -->
+
+  <defs>
+    <radialGradient id="canopy5" cx="50%" cy="55%" r="65%">
+      <stop offset="0%" stop-color="#2A231C"/>
+      <stop offset="100%" stop-color="#1F1A14"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#canopy5)"/>
+
+  <!-- Outer band — a wide ring with soft amber inner glow. -->
+  <circle cx="512" cy="512" r="340" fill="none" stroke="#A86436" stroke-width="68"/>
+
+  <!-- Subtle inner highlight — the band catches a thin warm line on the
+       inside edge, like worn leather. -->
+  <circle cx="512" cy="512" r="304" fill="none" stroke="#E8A063" stroke-width="6" opacity="0.45"/>
+
+  <!-- Heart at the centre, sized so its lobes fit comfortably inside the
+       ring with breathing room. -->
+  <path d="
+    M 512 660
+    C 416 572, 312 510, 312 422
+    C 312 360, 360 312, 422 312
+    C 466 312, 496 334, 512 368
+    C 528 334, 558 312, 602 312
+    C 664 312, 712 360, 712 422
+    C 712 510, 608 572, 512 660
+    Z
+  " fill="#E8A063"/>
+</svg>
