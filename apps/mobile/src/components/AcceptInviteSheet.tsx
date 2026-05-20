@@ -97,7 +97,7 @@ export function AcceptInviteSheet({
             ? "That email doesn't match the invite."
             : /invitation_expired/i.test(msg)
               ? 'That code has expired. Ask for a new one.'
-              : /invitation_already_accepted/i.test(msg)
+              : /invitation_already_accepted|already_member/i.test(msg)
                 ? "You're already in this circle."
                 : "We couldn't join the circle. Try again in a moment.",
       );
