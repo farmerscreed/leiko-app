@@ -102,3 +102,7 @@ _specs/
 # Misc
 *.tgz
 .eslintcache
+
+# Bench / on-device screenshots — captured during sprints, not source
+screenshots-onboarding/
+screenshots/
