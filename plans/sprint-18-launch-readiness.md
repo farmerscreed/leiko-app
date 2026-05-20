@@ -40,11 +40,29 @@ Confirm against `git log --grep=FUN-` etc. before starting:
 | **FUN-4** Reminder dispatcher wired | ✅ | `fcba36a` |
 | **CODE-1..6** Audit's code-side P0s | ✅ | various 16.5i |
 | **DEC-1** Doctor-PDF "not a diagnosis" string | ✅ | kept verbatim (founder pick) |
+| **QUA-4** CI release + db-migrate workflows | ✅ Sprint 16.6 | `.github/workflows/{release,db-migrate}.yml` |
 
 The remaining P0 items are **all founder-ops** (OPS-1..12). The
 remaining P1 items are split between **SEC-1** (the only big
 engineering lift), three doctor-PDF wiring items, and four
 verification / hardening passes.
+
+## Sprint 18 engineering progress (live)
+
+Tick as commits land. Updated 2026-05-20.
+
+| Item | Status | Commit | Notes |
+|---|---|---|---|
+| **SEC-1** MMKV encryption at rest | ✅ | `7d0455e` | Day 1 |
+| **FUN-5** Doctor-PDF AI narrative + cover note wired | ✅ | `bf370c3` | Day 3 |
+| **QUA-2** Drop hardcoded HR fallback window | ✅ | `7475bbd` | Day 5 prep |
+| **QUA-8** Settings → Help & Support row + email row | ✅ | `ddc45e2` | Day 4 |
+| **QUA-5** iOS PrivacyInfo collected data types | ✅ | `241f55d` | Day 3 |
+| **QUA-7** App Store metadata + ITSAppUsesNonExemptEncryption | ✅ | `241f55d` | Day 3 |
+| **QUA-4** CI workflows | ✅ already in Sprint 16.6 | (existing) | re-verified |
+| **FUN-6** PDFShift signup | ⏳ founder Day 2 Block 1 | — | unblocks doctor-PDF in prod |
+| **OPS-1..12** founder ops blitz | ⏳ Day 2 | — | LAUNCH_DAY2_CHECKLIST.md |
+| **Day 5 bench** FUN-7 / FUN-8 / QUA-1 / QUA-2-verify / QUA-3 | ⏳ Day 5 | — | SPRINT_18_VERIFICATION.md |
 
 ---
 
