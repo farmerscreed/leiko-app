@@ -72,19 +72,34 @@ Reserved tabs: Supabase, Expo, Anthropic, Resend, PDFShift, GitHub.
   ```
 - [ ] Verify in dashboard → Project Settings → Edge Functions → Environment Variables — all six listed
 
-### Set pg_cron GUCs (5 min)
+### Configure pg_cron secrets via Vault (5 min)
 
-- [ ] Supabase SQL editor:
+⚠️ The earlier instruction to set `app.settings.*` via `ALTER DATABASE`
+won't work on hosted Supabase (`42501: permission denied to set
+parameter`). Migration `0023_pg_cron_vault.sql` switched the cron
+helpers to read from Supabase Vault instead.
+
+The base URL stored is the project ROOT (`https://<ref>.supabase.co`),
+NOT `.../functions/v1` — the helpers append the path themselves.
+
+- [ ] Supabase SQL editor → New query → paste (substitute your values):
   ```sql
-  ALTER DATABASE postgres SET app.settings.functions_base_url = 'https://<YOUR_PROJECT_REF>.supabase.co/functions/v1';
-  ALTER DATABASE postgres SET app.settings.service_role_key = '<YOUR_SERVICE_ROLE_KEY>';
-  SELECT pg_reload_conf();
+  select vault.create_secret(
+    'https://<YOUR_PROJECT_REF>.supabase.co',
+    'functions_base_url'
+  );
+  select vault.create_secret(
+    '<YOUR_SERVICE_ROLE_KEY>',
+    'service_role_key'
+  );
   ```
-- [ ] Verify:
+- [ ] Verify (will return TWO rows, both decrypted_secret populated):
   ```sql
-  SELECT current_setting('app.settings.functions_base_url');
+  select name, length(decrypted_secret) as len
+    from vault.decrypted_secrets
+    where name in ('functions_base_url', 'service_role_key');
   ```
-  Returns the URL → OPS-2 done.
+  Two rows back → OPS-2 done.
 
 ### Deploy Edge Functions (5 min)
 

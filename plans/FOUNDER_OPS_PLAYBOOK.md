@@ -143,24 +143,45 @@ is missing).
 
 **Time:** 30 min.
 
-### 2.3 — OPS-2: Set pg_cron GUCs in prod Supabase
+### 2.3 — OPS-2: Configure pg_cron secrets via Supabase Vault
 
-**What:** The three cron jobs (`compute-correlations`, `monthly-baseline`,
-`detect-anomaly`) call back into Edge Functions. They need the URL +
-service-role key as Postgres GUCs.
+**What:** The four cron jobs (`compute-correlations`, `weekly-summary`,
+`monthly-baseline`, `detect-anomaly`) call back into Edge Functions.
+They need the project URL + service-role key.
 
 **Why:** Without these, the crons run but their function calls 404.
 Trends correlation cards stay empty.
 
-**How:** Supabase SQL editor:
+**How:** The original GUC-based plan (`ALTER DATABASE postgres SET
+app.settings.X`) fails on hosted Supabase with `42501: permission
+denied`. Migration `0023_pg_cron_vault.sql` (Sprint 18) switched the
+helpers to read from Supabase Vault instead.
+
+Supabase SQL editor:
 ```sql
-ALTER DATABASE postgres SET app.settings.functions_base_url = 'https://<your-proj>.supabase.co/functions/v1';
-ALTER DATABASE postgres SET app.settings.service_role_key = '<your-service-role-key>';
-SELECT pg_reload_conf();
+select vault.create_secret(
+  'https://<your-proj>.supabase.co',
+  'functions_base_url'
+);
+select vault.create_secret(
+  '<your-service-role-key>',
+  'service_role_key'
+);
 ```
 
-**Verify:** `SELECT current_setting('app.settings.functions_base_url');`
-should return the URL.
+⚠️ `functions_base_url` is the project ROOT, **not** `.../functions/v1`.
+The helpers in 0023 append `/functions/v1/<name>` themselves.
+
+**Verify:**
+```sql
+select name, length(decrypted_secret) as len
+  from vault.decrypted_secrets
+  where name in ('functions_base_url', 'service_role_key');
+```
+Two rows back → done.
+
+**Rotation:** `vault.update_secret(id, new_value)` or drop + recreate
+by name.
 
 **Time:** 5 min.
 
