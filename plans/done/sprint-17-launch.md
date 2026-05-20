@@ -1,4 +1,15 @@
-# Sprint 17 — Launch
+# Sprint 17 — Launch ⚠️ SUPERSEDED
+
+**Status:** SUPERSEDED 2026-05-20. This card's original scope was redistributed across the post-pivot sequence:
+
+- **Sprint 16.6** absorbed pre-launch validation tooling (two-phone test rig, CAREGIVER_TEST_FLOW.md, CAREGIVER_TEST_RESULTS.md) + P1 hardening (FUN-1/2/4, QUA-5/7) — closed 2026-05-19.
+- **Sprint 17a** (per-person dashboard) + **Sprint 17b** (family member management + visibility enforcement) absorbed what would have been "final regression QA" of caregiver flows — closed 2026-05-20.
+- **Sprint 18 — Launch Readiness Blitz** (`plans/sprint-18-launch-readiness.md`) absorbs the engineering remainder: SEC-1, doctor-PDF wiring, CI workflows, help/support row, plus the founder-ops blitz.
+- **Actual store submission work** (TestFlight, Play Internal, App Store screenshots, privacy policy URL hosting, HealthKit entitlement justification, beta tester recruitment, Maestro E2E) is now tracked in `plans/PRODUCTION_READINESS.md` as OPS-* and QUA-* items, plus the v1.1 deferrals in `plans/sprint-18-launch-readiness.md` § "Out of scope". Run after Sprint 18 closes.
+
+The original card body is preserved below for historical context, but **the source of truth for what's left is `plans/PRODUCTION_READINESS.md`**, not this file.
+
+---
 
 ## Goal
 Store submission. Beta channel via TestFlight + Play Internal Testing. App Store + Play screenshots. Final regression QA on real iOS + real Android with the real watch. **HealthKit entitlement justification copy** (newly required at v1.0 per Sprint 9.5). NAFDAC + FDA paperwork is a separate workstream and does not block this sprint.
