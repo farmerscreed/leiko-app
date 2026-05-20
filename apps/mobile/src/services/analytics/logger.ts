@@ -95,6 +95,13 @@ export type AnalyticsEvent =
   | { name: 'family_invite_accept_started' }
   | { name: 'family_invite_accept_completed'; props?: { familyId: string } }
   | { name: 'family_invite_accept_failed'; props?: { reason: string } }
+  // Sprint 17b — Family member management (owner remove + self leave).
+  | { name: 'family_member_removed' }
+  | { name: 'family_member_remove_failed'; props?: { reason: string } }
+  | { name: 'family_self_left' }
+  | { name: 'family_self_leave_failed'; props?: { reason: string } }
+  | { name: 'family_removal_push_failed'; props?: { reason: string } }
+  | { name: 'family_removal_banner_shown'; props?: { familyId: string } }
   // Sprint 10c.2 polish — OS-scheduled background sync lifecycle.
   | { name: 'background_sync_registered'; props?: { intervalMin: number } }
   | { name: 'background_sync_unregistered' }
