@@ -494,7 +494,6 @@ interface PulseHeaderProps {
 function PulseHeader({ theme, eyebrow, greeting, name, onAvatarPress }: PulseHeaderProps) {
   const eyebrowStyle = theme.type('labelUppercase');
   const greetingStyle = theme.type('displayM');
-  const initial = name.trim().charAt(0).toUpperCase() || 'A';
   return (
     <View
       accessibilityRole="header"
@@ -553,17 +552,24 @@ function PulseHeader({ theme, eyebrow, greeting, name, onAvatarPress }: PulseHea
           justifyContent: 'center',
           opacity: pressed ? 0.65 : 1,
         })}
-        testID="self-buyer-home-avatar"
+        testID="self-buyer-home-settings"
       >
+        {/* Sprint 17b polish — the affordance is "open settings", so
+            show a settings glyph (matches CaregiverHome's pattern at
+            screens/Home/CaregiverHome.tsx). Previously displayed the
+            user's first initial, which was visually identical to a
+            generic avatar bubble and read as "B" instead of
+            "Settings". Phosphor GearSix lands when the icon library
+            sweep ships. */}
         <Text
           allowFontScaling={false}
           style={{
-            fontFamily: theme.fontFamilies.editorial,
-            fontSize: 17,
+            fontSize: 18,
             color: theme.colors.text.secondary,
+            lineHeight: 18,
           }}
         >
-          {initial}
+          {'⚙'}
         </Text>
       </Pressable>
     </View>
