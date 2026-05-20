@@ -374,14 +374,18 @@ describe('<SettingsScreen /> — Watch', () => {
 });
 
 describe('<SettingsScreen /> — About', () => {
-  it('renders the version row + opens terms / privacy / help via Linking', () => {
+  it('renders the version row + opens terms / privacy / help & support / email via Linking', () => {
     renderScreen();
     expect(screen.getByTestId('settings-about-version')).toBeTruthy();
     fireEvent.press(screen.getByTestId('settings-about-terms'));
     expect(linkingSpy).toHaveBeenCalledWith('https://leiko.app/terms');
     fireEvent.press(screen.getByTestId('settings-about-privacy'));
     expect(linkingSpy).toHaveBeenCalledWith('https://leiko.app/privacy');
+    // Sprint 18 / QUA-8 — Help row now opens the web support page;
+    // mailto moved to its own "Email us" row below.
     fireEvent.press(screen.getByTestId('settings-about-help'));
+    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.app/support');
+    fireEvent.press(screen.getByTestId('settings-about-email'));
     expect(linkingSpy).toHaveBeenCalledWith('mailto:support@leiko.app');
   });
 });
@@ -676,7 +680,8 @@ describe('<SettingsScreen /> — voice rules', () => {
     'About',
     'Account',
     'Sign out',
-    'Help',
+    'Help & support',
+    'Email us',
     'Terms of service',
     'Privacy policy',
   ])('renders voice-rule clean string: %s', (text) => {

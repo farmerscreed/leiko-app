@@ -919,11 +919,17 @@ export function SettingsScreen({ navigation }: Props) {
             testID="settings-about-privacy"
           />
           <ListRow
+            variant="navigation"
+            title="Help & support"
+            onPress={() => void Linking.openURL('https://leiko.app/support')}
+            testID="settings-about-help"
+          />
+          <ListRow
             variant="action"
-            title="Help"
+            title="Email us"
             onPress={() => void Linking.openURL('mailto:support@leiko.app')}
             showDivider={false}
-            testID="settings-about-help"
+            testID="settings-about-email"
           />
         </SettingsSection>
 
