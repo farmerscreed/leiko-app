@@ -34,9 +34,20 @@ export type CaregiverStackParamList = {
   // Sprint 7 — replaces the Sprint 2 placeholder. Family Circle list
   // of parents per docs/04-screens/caregiver-home.md.
   CaregiverHome: undefined;
-  // Sprint 7 — tap-on-card target. Placeholder for now; full reading
-  // list view ships in Sprint 9.
-  ParentReadings: { familyId: string };
+  // Sprint 17a — per-person immersive dashboard. Replaces the Sprint 7
+  // `ParentReadings` placeholder as the canonical tap-on-parent
+  // target. Mirrors SelfBuyerHome but family-scoped to the tapped
+  // parent's `familyId`.
+  ParentDashboard: { familyId: string };
+  // Sprint 17a — caregiver entry to the parameterized VitalDetail
+  // screens. The `familyId` is always set on this stack (the caregiver
+  // is viewing a parent's data, not their own); the self-buyer stack
+  // omits it. Reached only from ParentDashboard for now (sprint card
+  // §4 — no other natural entry point in this stack).
+  VitalDetail: {
+    vital: 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity';
+    familyId: string;
+  };
   Pairing: undefined;
   Settings: undefined;
   // Sprint 6 — Take Reading + Reading Detail. ReadingDetail receives
@@ -101,7 +112,14 @@ export type SelfBuyerStackParamList = {
   Settings: undefined;
   TakeReading: undefined;
   ReadingDetail: { readingLocalId: string };
-  VitalDetail: { vital: 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity' };
+  // Sprint 17a — optional `familyId` for caregiver entry. When set, the
+  // detail screen sources its data from the parent-scoped query layer
+  // (`useParentDailyPulseData` + `useParentVitalsRecent`) instead of the
+  // singleton slices. Unset → unchanged self-buyer behavior.
+  VitalDetail: {
+    vital: 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity';
+    familyId?: string;
+  };
   // Sprint 9 — multi-vital trends + correlation cards + doctor PDF
   // export. The Self-Buyer Home tab bar's "Trends" entry routes here
   // (was a placeholder in Sprint 8).

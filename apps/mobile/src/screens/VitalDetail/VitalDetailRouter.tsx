@@ -42,6 +42,11 @@ export function VitalDetailRouter() {
     navigation.navigate('Learn');
   }, [navigation]);
 
+  // Sprint 17a — optional caregiver entry. When present, every detail
+  // screen sources its data from the parent-scoped query layer; the
+  // router just forwards the route param.
+  const familyId = route.params.familyId;
+
   switch (route.params.vital) {
     case 'bp':
       return (
@@ -50,6 +55,7 @@ export function VitalDetailRouter() {
           onSelectReading={onSelectReading}
           onArticleOpen={onArticleOpen}
           onLearnOpen={onLearnOpen}
+          familyId={familyId}
         />
       );
     case 'hr':
@@ -58,6 +64,7 @@ export function VitalDetailRouter() {
           onBack={onBack}
           onArticleOpen={onArticleOpen}
           onLearnOpen={onLearnOpen}
+          familyId={familyId}
         />
       );
     case 'spo2':
@@ -66,6 +73,7 @@ export function VitalDetailRouter() {
           onBack={onBack}
           onArticleOpen={onArticleOpen}
           onLearnOpen={onLearnOpen}
+          familyId={familyId}
         />
       );
     case 'sleep':
@@ -74,6 +82,7 @@ export function VitalDetailRouter() {
           onBack={onBack}
           onArticleOpen={onArticleOpen}
           onLearnOpen={onLearnOpen}
+          familyId={familyId}
         />
       );
     case 'activity':
@@ -82,6 +91,7 @@ export function VitalDetailRouter() {
           onBack={onBack}
           onArticleOpen={onArticleOpen}
           onLearnOpen={onLearnOpen}
+          familyId={familyId}
         />
       );
   }

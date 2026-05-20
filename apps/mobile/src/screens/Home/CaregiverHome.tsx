@@ -189,8 +189,9 @@ export function CaregiverHome() {
       // is in this phone's local MMKV (i.e. the caregiver IS the
       // parent — hybrid mode — and took the reading here). Cross-phone
       // readings live only on the server; ReadingDetail can't find
-      // them and renders "We can't find that reading." Route those
-      // taps to ParentReadings (the per-parent immersive surface).
+      // them and renders "We can't find that reading." Sprint 17a
+      // routes those taps to ParentDashboard — the per-parent
+      // immersive surface that replaces the Sprint 7 placeholder.
       if (target.latestReading) {
         const local = useReadings.getState().byLocalId(target.latestReading.id);
         if (local) {
@@ -199,18 +200,18 @@ export function CaregiverHome() {
           });
           return;
         }
-        navigation.navigate('ParentReadings', { familyId: id });
+        navigation.navigate('ParentDashboard', { familyId: id });
         return;
       }
       // No reading yet — route based on what the user can act on. If the
       // caregiver hasn't paired their own watch yet, route to Pairing
       // (they may BE the parent in hybrid mode). Otherwise route to
-      // ParentReadings, the per-parent placeholder list.
+      // ParentDashboard, which renders the immersive empty-state view.
       if (!pairedDevice) {
         navigation.navigate('Pairing');
         return;
       }
-      navigation.navigate('ParentReadings', { familyId: id });
+      navigation.navigate('ParentDashboard', { familyId: id });
     },
     [merged, navigation, pairedDevice],
   );

@@ -42,9 +42,11 @@ import {
 import { SleepStagesBar } from '../../components/SleepStagesBar';
 import { SleepNightlyBars } from '../../components/SleepNightlyBars';
 import type { TrendRange } from '../../components/TimeRangePills';
-import { useDailyPulseData } from '../../state/dailyPulse';
+import { useDailyPulseData, emptyDailyPulse } from '../../state/dailyPulse';
 import { useSleep } from '../../state/sleep';
 import { useReadings } from '../../state/readings';
+import { useParentDailyPulseData } from '../../hooks/useParentDailyPulseData';
+import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { sleepFill } from '../../utils/vitalThemes';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
@@ -181,10 +183,30 @@ export interface SleepDetailProps {
   onBack: () => void;
   onArticleOpen?: (articleId: string) => void;
   onLearnOpen?: () => void;
+  /** Sprint 17a — caregiver entry. When set, sleep + readings data
+   *  sources swap to the parent-scoped query layer. */
+  familyId?: string;
 }
 
-export function SleepDetail({ onBack, onArticleOpen, onLearnOpen }: SleepDetailProps) {
-  const data = useDailyPulseData();
+export function SleepDetail({
+  onBack,
+  onArticleOpen,
+  onLearnOpen,
+  familyId,
+}: SleepDetailProps) {
+  // Sprint 17a — both data sources called unconditionally.
+  const ownPulse = useDailyPulseData();
+  const ownSleepRecent = useSleep((s) => s.recent);
+  const ownSleepPending = useSleep((s) => s.pending);
+  const ownAllReadings = useReadings((s) => [...s.pending, ...s.recent]);
+  const scopedFamilyId = familyId ?? null;
+  const parentPulse = useParentDailyPulseData(scopedFamilyId);
+  const parentRecent = useParentVitalsRecent(scopedFamilyId);
+  const emptyFallback = useMemo(() => emptyDailyPulse(), []);
+
+  const data = scopedFamilyId
+    ? parentPulse.data ?? emptyFallback
+    : ownPulse;
   const session = data.sleep.session;
 
   // Sprint 16.5c — DetailShell's TimeRangePills are now wired here.
@@ -194,8 +216,10 @@ export function SleepDetail({ onBack, onArticleOpen, onLearnOpen }: SleepDetailP
   const [range, setRange] = useState<TrendRange>('7d');
 
   // All recorded sessions, newest-first.
-  const sleepRecent = useSleep((s) => s.recent);
-  const sleepPending = useSleep((s) => s.pending);
+  const sleepRecent = scopedFamilyId
+    ? parentRecent.data.sleep
+    : ownSleepRecent;
+  const sleepPending = scopedFamilyId ? [] : ownSleepPending;
   const allNights = useMemo(() => {
     const all = [...sleepPending, ...sleepRecent];
     return all
@@ -210,7 +234,9 @@ export function SleepDetail({ onBack, onArticleOpen, onLearnOpen }: SleepDetailP
   );
 
   // Morning BP × sleep score correlation, matching the selected range.
-  const allReadings = useReadings((s) => [...s.pending, ...s.recent]);
+  const allReadings = scopedFamilyId
+    ? parentRecent.data.readings
+    : ownAllReadings;
   const correlationSeries = useMemo<{ a: VitalSeries; b: VitalSeries } | null>(() => {
     if (rangedNights.length < 2 || allReadings.length < 2) return null;
     const nowSec = Math.floor(Date.now() / 1000);

@@ -1,9 +1,10 @@
 // Apple Health / Health Connect opt-in — Sprint 9.5 / Task 8.
 //
 // One-shot bottom sheet shown on first home render for self-buyer +
-// parent (own phone) personas. Caregiver never sees it (mounted only
-// from SelfBuyerHome / ParentReadingsList — CaregiverHome doesn't
-// import this component). Per D13 §12.5.
+// parent (own phone) personas. Caregiver never sees it — mounted only
+// from SelfBuyerHome (ParentDashboard intentionally omits it since
+// caregiver-mode health-platform import is a parent-own-phone concern,
+// not the remote caregiver's concern). Per D13 §12.5.
 //
 // Voice rules (docs/05-voice-and-claims.md): every string here is calm,
 // plain, agency-affirming. No "patient", "diagnose", "predict",

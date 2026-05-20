@@ -60,7 +60,9 @@ import { ActivityRingsHero } from '../../components/ActivityRingsHero';
 import { ActivityWeeklyBars } from '../../components/ActivityWeeklyBars';
 import { ActivityGoalSheet } from '../../components/ActivityGoalSheet';
 import type { TrendRange } from '../../components/TimeRangePills';
-import { useDailyPulseData } from '../../state/dailyPulse';
+import { useDailyPulseData, emptyDailyPulse } from '../../state/dailyPulse';
+import { useParentDailyPulseData } from '../../hooks/useParentDailyPulseData';
+import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import { useActivity } from '../../state/activity';
@@ -80,6 +82,9 @@ export interface ActivityDetailProps {
   onGoalChange?: (newGoal: number) => void;
   onArticleOpen?: (articleId: string) => void;
   onLearnOpen?: () => void;
+  /** Sprint 17a — caregiver entry. When set, activity data sources
+   *  swap to the parent-scoped query layer. */
+  familyId?: string;
 }
 
 // Indexed by Date.getUTCDay(): 0=Sun, 1=Mon, ..., 6=Sat.
@@ -147,14 +152,41 @@ export function ActivityDetail({
   onGoalChange,
   onArticleOpen,
   onLearnOpen,
+  familyId,
 }: ActivityDetailProps) {
-  const data = useDailyPulseData();
-  const recentStepsRows = useActivity((s) => s.recentSteps);
-  const pendingStepsRows = useActivity((s) => s.pendingSteps);
-  const todayCalories = useActivity((s) => s.todayCalories());
+  // Sprint 17a — both data sources called unconditionally.
+  const ownPulse = useDailyPulseData();
+  const ownRecentSteps = useActivity((s) => s.recentSteps);
+  const ownPendingSteps = useActivity((s) => s.pendingSteps);
+  const ownTodayCalories = useActivity((s) => s.todayCalories());
+  const ownRecentCalories = useActivity((s) => s.recentCalories);
+  const ownPendingCalories = useActivity((s) => s.pendingCalories);
+  const scopedFamilyId = familyId ?? null;
+  const parentPulse = useParentDailyPulseData(scopedFamilyId);
+  const parentRecent = useParentVitalsRecent(scopedFamilyId);
+  const emptyFallback = useMemo(() => emptyDailyPulse(), []);
 
-  const recentCaloriesRows = useActivity((s) => s.recentCalories);
-  const pendingCaloriesRows = useActivity((s) => s.pendingCalories);
+  const data = scopedFamilyId
+    ? parentPulse.data ?? emptyFallback
+    : ownPulse;
+  const recentStepsRows = scopedFamilyId
+    ? parentRecent.data.steps
+    : ownRecentSteps;
+  const pendingStepsRows = scopedFamilyId ? [] : ownPendingSteps;
+  const recentCaloriesRows = scopedFamilyId
+    ? parentRecent.data.calories
+    : ownRecentCalories;
+  const pendingCaloriesRows = scopedFamilyId ? [] : ownPendingCalories;
+  // Parent path: find today's CaloriesDay from the server-fetched array.
+  // The slice's `todayCalories()` method is replicated inline here.
+  const parentTodayCalories = useMemo(() => {
+    if (!scopedFamilyId) return null;
+    const today = new Date().toISOString().slice(0, 10);
+    return (
+      parentRecent.data.calories.find((c) => c.dayLocal === today) ?? null
+    );
+  }, [parentRecent.data.calories, scopedFamilyId]);
+  const todayCalories = scopedFamilyId ? parentTodayCalories : ownTodayCalories;
   const stepsToday = data.activity.stepsToday;
   const targetSteps = data.activity.targetSteps;
 

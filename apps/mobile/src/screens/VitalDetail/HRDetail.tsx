@@ -55,9 +55,11 @@ import {
   RecentReadingsSection,
 } from '../../components/RecentReadingsSection';
 import type { RecentReading } from '../../components/RecentReadingsList';
-import { useDailyPulseData } from '../../state/dailyPulse';
+import { useDailyPulseData, emptyDailyPulse } from '../../state/dailyPulse';
 import { useHR } from '../../state/hr';
 import { useSleep } from '../../state/sleep';
+import { useParentDailyPulseData } from '../../hooks/useParentDailyPulseData';
+import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { hrFill } from '../../utils/vitalThemes';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
@@ -317,10 +319,33 @@ export interface HRDetailProps {
   onBack: () => void;
   onArticleOpen?: (articleId: string) => void;
   onLearnOpen?: () => void;
+  /** Sprint 17a — caregiver entry. When set, HR + sleep data sources
+   *  swap to the parent-scoped query layer. Unset → unchanged
+   *  self-buyer behavior. */
+  familyId?: string;
 }
 
-export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) {
-  const data = useDailyPulseData();
+export function HRDetail({
+  onBack,
+  onArticleOpen,
+  onLearnOpen,
+  familyId,
+}: HRDetailProps) {
+  // Sprint 17a — both data sources called unconditionally (rules of
+  // hooks). Value-level pick below.
+  const ownPulse = useDailyPulseData();
+  const ownHRPending = useHR((s) => s.pending);
+  const ownHRRecent = useHR((s) => s.recent);
+  const ownSleepPending = useSleep((s) => s.pending);
+  const ownSleepRecent = useSleep((s) => s.recent);
+  const scopedFamilyId = familyId ?? null;
+  const parentPulse = useParentDailyPulseData(scopedFamilyId);
+  const parentRecent = useParentVitalsRecent(scopedFamilyId);
+  const emptyFallback = useMemo(() => emptyDailyPulse(), []);
+
+  const data = scopedFamilyId
+    ? parentPulse.data ?? emptyFallback
+    : ownPulse;
   const restingToday = data.hr.restingToday;
 
   // Sprint 16.5e — mirror DetailShell's range so the recent-readings
@@ -329,15 +354,12 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
   // 24h-bound (it's literally "today").
   const [range, setRange] = useState<TrendRange>('7d');
 
-  // Pull the live HR samples + the recent restingBpm series + last sleep
-  // sessions. These selectors return the underlying arrays; for the
-  // composed inputs (stats, zones, trend) we re-derive on every render —
-  // these are O(samples) over short windows and the screen renders
-  // infrequently. Sprint 9 introduces memoised selector hooks if needed.
-  const hrPending = useHR((s) => s.pending);
-  const hrRecent = useHR((s) => s.recent);
-  const sleepPending = useSleep((s) => s.pending);
-  const sleepRecent = useSleep((s) => s.recent);
+  const hrPending = scopedFamilyId ? [] : ownHRPending;
+  const hrRecent = scopedFamilyId ? parentRecent.data.hr : ownHRRecent;
+  const sleepPending = scopedFamilyId ? [] : ownSleepPending;
+  const sleepRecent = scopedFamilyId
+    ? parentRecent.data.sleep
+    : ownSleepRecent;
 
   const allSamples = useMemo(
     () => [...hrPending, ...hrRecent],

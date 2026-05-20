@@ -63,8 +63,10 @@ const RANGE_TO_DAYS: Record<TrendRange, number> = {
 };
 
 const SECONDS_PER_DAY = 24 * 60 * 60;
-import { useDailyPulseData } from '../../state/dailyPulse';
+import { useDailyPulseData, emptyDailyPulse } from '../../state/dailyPulse';
 import { useSpO2 } from '../../state/spo2';
+import { useParentDailyPulseData } from '../../hooks/useParentDailyPulseData';
+import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { spo2Fill } from '../../utils/vitalThemes';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
@@ -76,6 +78,9 @@ export interface SpO2DetailProps {
   onBack: () => void;
   onArticleOpen?: (articleId: string) => void;
   onLearnOpen?: () => void;
+  /** Sprint 17a — caregiver entry. When set, SpO2 + sleep data
+   *  sources swap to the parent-scoped query layer. */
+  familyId?: string;
 }
 
 // Sprint 16.5f — design fallback removed. The chart now shows real
@@ -275,10 +280,28 @@ function formatDayShort(sec: number): string {
   return d.toLocaleDateString(undefined, { weekday: 'short' });
 }
 
-export function SpO2Detail({ onBack, onArticleOpen, onLearnOpen }: SpO2DetailProps) {
-  const data = useDailyPulseData();
-  const spo2Pending = useSpO2((s) => s.pending);
-  const spo2Recent = useSpO2((s) => s.recent);
+export function SpO2Detail({
+  onBack,
+  onArticleOpen,
+  onLearnOpen,
+  familyId,
+}: SpO2DetailProps) {
+  // Sprint 17a — both data sources called unconditionally.
+  const ownPulse = useDailyPulseData();
+  const ownSpO2Pending = useSpO2((s) => s.pending);
+  const ownSpO2Recent = useSpO2((s) => s.recent);
+  const scopedFamilyId = familyId ?? null;
+  const parentPulse = useParentDailyPulseData(scopedFamilyId);
+  const parentRecent = useParentVitalsRecent(scopedFamilyId);
+  const emptyFallback = useMemo(() => emptyDailyPulse(), []);
+
+  const data = scopedFamilyId
+    ? parentPulse.data ?? emptyFallback
+    : ownPulse;
+  const spo2Pending = scopedFamilyId ? [] : ownSpO2Pending;
+  const spo2Recent = scopedFamilyId
+    ? parentRecent.data.spo2
+    : ownSpO2Recent;
 
   // Sprint 16.5e — mirror DetailShell's range. SpO2 doesn't have a
   // dense per-day chart but the recent-readings list (now densely
@@ -356,8 +379,12 @@ export function SpO2Detail({ onBack, onArticleOpen, onLearnOpen }: SpO2DetailPro
   const baselineBody = baseline ? formatSpO2Baseline(baseline) : '';
 
   // ----- SpO2 × Sleep correlation (16.5f) -----------------------------
-  const sleepRecent = useSleep((s) => s.recent);
-  const sleepPending = useSleep((s) => s.pending);
+  const ownSleepRecent = useSleep((s) => s.recent);
+  const ownSleepPending = useSleep((s) => s.pending);
+  const sleepRecent = scopedFamilyId
+    ? parentRecent.data.sleep
+    : ownSleepRecent;
+  const sleepPending = scopedFamilyId ? [] : ownSleepPending;
   const correlation = useMemo<{ spo2: VitalSeries; sleep: VitalSeries } | null>(() => {
     const allSleep = [...sleepPending, ...sleepRecent];
     if (allSleep.length < 2 || overnightLows.length < 2) return null;

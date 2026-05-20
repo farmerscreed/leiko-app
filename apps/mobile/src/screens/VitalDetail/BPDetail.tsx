@@ -43,8 +43,10 @@ import { VitalExplainerAnchor } from '../../components/VitalExplainerAnchor';
 import { BaselineReference } from '../../components/BaselineReference';
 import { StalenessHintRow } from '../../components/StalenessHintRow';
 import type { TrendRange } from '../../components/TimeRangePills';
-import { useDailyPulseData } from '../../state/dailyPulse';
+import { useDailyPulseData, emptyDailyPulse } from '../../state/dailyPulse';
 import { useReadings, type LocalReading } from '../../state/readings';
+import { useParentDailyPulseData } from '../../hooks/useParentDailyPulseData';
+import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { bpFillFromTier } from '../../utils/vitalThemes';
 import { useTheme } from '../../theme';
 import {
@@ -315,6 +317,11 @@ export interface BPDetailProps {
   /** Sprint 16.5f — tap "Share with your doctor" → navigates to Trends
    *  where the doctor-prep PDF generator lives. Router wires this. */
   onSharePress?: () => void;
+  /** Sprint 17a — caregiver entry. When set, the screen sources its
+   *  data from `useParentDailyPulseData(familyId)` +
+   *  `useParentVitalsRecent(familyId)` instead of the singleton
+   *  slices. Unset → unchanged self-buyer behavior. */
+  familyId?: string;
 }
 
 export function BPDetail({
@@ -323,11 +330,32 @@ export function BPDetail({
   onArticleOpen,
   onLearnOpen,
   onSharePress,
+  familyId,
 }: BPDetailProps) {
   const theme = useTheme();
-  const data = useDailyPulseData();
-  const recentReadings = useReadings((s) => s.recent);
-  const pendingReadings = useReadings((s) => s.pending);
+  // Sprint 17a — both data sources called unconditionally (rules of
+  // hooks). Value-level pick at the end. Self-buyer path: familyId
+  // unset → singleton slices win. Caregiver path: familyId set →
+  // parent-scoped query wins, with `emptyDailyPulse()` as the brief
+  // loading-state fallback so the screen renders its empty state
+  // instead of flashing the caregiver's own (probably empty) data.
+  const ownPulse = useDailyPulseData();
+  const ownRecentReadings = useReadings((s) => s.recent);
+  const ownPendingReadings = useReadings((s) => s.pending);
+  const scopedFamilyId = familyId ?? null;
+  const parentPulse = useParentDailyPulseData(scopedFamilyId);
+  const parentRecent = useParentVitalsRecent(scopedFamilyId);
+  const emptyFallback = useMemo(() => emptyDailyPulse(), []);
+
+  const data = scopedFamilyId
+    ? parentPulse.data ?? emptyFallback
+    : ownPulse;
+  const recentReadings = scopedFamilyId
+    ? parentRecent.data.readings
+    : ownRecentReadings;
+  const pendingReadings: LocalReading[] = scopedFamilyId
+    ? []
+    : ownPendingReadings;
 
   // Sprint 16.5e — mirror DetailShell's range so stats + recent list
   // react to 7d / 30d / 90d.
