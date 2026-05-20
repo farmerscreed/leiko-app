@@ -177,7 +177,26 @@ export type AnalyticsEvent =
   // "For your doctor" PDF prep flow — Trends v2 follow-up.
   | { name: 'doctor_pdf_requested'; props?: { range: '7d' | '30d' | '90d' | '1y' } }
   | { name: 'doctor_pdf_generated'; props?: { bytes: number } }
-  | { name: 'doctor_pdf_failed'; props?: { reason: string } };
+  | { name: 'doctor_pdf_failed'; props?: { reason: string } }
+  // Sprint 18 / SEC-1 — MMKV encryption-at-rest boot telemetry. `encrypted`
+  // is the load-bearing metric: if it stays below 100% in prod we need
+  // to investigate which devices are failing the keychain step. Never
+  // includes the key or any stored value.
+  | {
+      name: 'sec1_boot_completed';
+      props?: {
+        encrypted: boolean;
+        status: 'completed' | 'pending' | 'failed';
+        attempts: number;
+        migrationDurationMs: number;
+        keysCopied: number;
+      };
+    }
+  | {
+      name: 'sec1_migration_failed';
+      props?: { mode: 'keychain' | 'copy' | 'limit_reached'; attempt: number; reason: string };
+    }
+  | { name: 'sec1_legacy_deleted' };
 
 type EventName = AnalyticsEvent['name'];
 

@@ -93,6 +93,7 @@
     "plugins": [
       "expo-font",
       "expo-notifications",
+      "expo-secure-store",
       "@kingstinct/react-native-healthkit",
       "react-native-health-connect"
     ]

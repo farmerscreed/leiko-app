@@ -4,15 +4,39 @@
 // MMKV instance (for the Zustand auth store's pendingAccountType cache)
 // and the Supabase-shaped adapter.
 //
+// Sprint 18 / SEC-1 — module-load behaviour now depends on secureBoot
+// having resolved first. If secureBoot.getCachedKey() returns a key
+// AND migration is complete, this module opens the ENCRYPTED instance
+// at id 'leiko-enc'. Otherwise it falls through to the legacy plain
+// instance at id 'leiko'. App.tsx enforces the ordering by dynamic-
+// importing the navigator (which transitively imports this module)
+// only AFTER acquireMmkvKey() + the migration (if needed) resolve.
+//
 // Test surface: mocked at __mocks__/react-native-mmkv.js so jest projects
 // (pure + rn) can import this module without the native module loading.
-// Tokens live here in dev only — the production build will gate access
-// through the platform Keychain/Keystore (per docs/00-tech-stack.md
-// §Encryption inventory). Keychain integration is a follow-up task.
+// In test contexts secureBoot is not initialised, so this module opens
+// the legacy plain instance — same behaviour the test suite expects.
 
 import { createMMKV, type MMKV } from 'react-native-mmkv';
+import { getCachedKey, getCachedStatus } from './secureBoot';
 
-export const mmkv: MMKV = createMMKV({ id: 'leiko' });
+function openMmkv(): MMKV {
+  const key = getCachedKey();
+  const status = getCachedStatus();
+  if (key && status === 'completed') {
+    return createMMKV({ id: 'leiko-enc', encryptionKey: key });
+  }
+  return createMMKV({ id: 'leiko' });
+}
+
+export const mmkv: MMKV = openMmkv();
+
+/** True iff the live mmkv instance is the encrypted one. Telemetry
+ *  surface — analytics may sample this on session start so we can
+ *  measure the encryption-at-rest coverage in prod. */
+export function isMmkvEncrypted(): boolean {
+  return getCachedKey() !== null && getCachedStatus() === 'completed';
+}
 
 export const STORAGE_KEYS = {
   pendingAccountType: 'leiko.onboarding.pendingAccountType',
