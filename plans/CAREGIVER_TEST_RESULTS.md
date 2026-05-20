@@ -81,29 +81,46 @@ re-binds to the existing account, which is still a member.
 `invitation_already_accepted`. Both surface "You're already in this
 circle." `AcceptInviteSheet.tsx:100`.
 
-**F4 — Settings → Family Members shows "Member" instead of real
-display_names for every row except the signed-in user** *(fixed this session)*
+**F4 — Settings → Family Members never loaded** *(fixed this
+session, TWO underlying bugs)*
 
-The screen's data path (`listFamilyMembers` →
-`family_members.select('user_id, role, joined_at, users(display_name)')`)
-silently returned `users: null` for every member that isn't the
-signed-in user. Root cause: the original RLS on `public.users`
-allows only `id = auth.uid()` for SELECT — so the join into
-`users` resolved nothing for other members, and the mapper fell
-back to the generic "Member" label. All three family_members rows
-were present in `family_members` (its RLS allows members to see
-members) but the display names were unreadable.
+Initial diagnosis (RLS) was incomplete — the more proximate cause
+was a PostgREST ambiguous-embed error that threw before RLS even
+came into play:
 
-**Fix:** migration `0021_users_visibility_in_family.sql` adds a
-`shares_family(uuid)` security-definer helper + a second RLS
-policy on `public.users` that allows reads when both users share
-an active family membership. Display_name is a chosen handle, not
-sensitive PII; same-family members already share vital readings so
-this is less sensitive than what they already see.
+1. **PGRST201 ambiguous embed (the why-it-fully-errored bug).**
+   `listMembers.ts:32` requested
+   `select('user_id, role, joined_at, users(display_name)')` against
+   `family_members`. PostgREST sees TWO FKs from `family_members`
+   to `users` (`user_id` and `invited_by`) and refuses to guess —
+   the entire query throws. The screen's `catch` swallowed the
+   error and rendered the generic "We couldn't load your family
+   list" copy. The founder's initial report ("can't see all
+   members") was describing this error state, not partial data.
+   **Fix:** disambiguate with
+   `users!family_members_user_id_fkey(display_name)`.
 
-**Verify on phone:** navigate away from Settings → Family Members
-and back; the screen re-fetches on mount and renders the real
-display_names (Biebele / TheOne / TheTest in the bench setup).
+2. **users RLS hides other members' display_names (the why-they-
+   would-have-rendered-as-Member bug).** Original RLS on
+   `public.users` allows only `id = auth.uid()` for SELECT. If the
+   embed had succeeded with the ambiguous syntax (hypothetical),
+   every non-self row would have come back with `users: null` and
+   the mapper would have rendered "Member" for everyone else.
+   **Fix:** migration `0021_users_visibility_in_family.sql` adds a
+   `shares_family(uuid)` security-definer helper + a second policy
+   on `public.users` that allows reads when both users share an
+   active family membership.
+
+Both fixes are needed: (1) makes the query return data; (2) makes
+the embedded display_names actually visible to non-self callers.
+Display_name is a chosen handle, not sensitive PII; same-family
+members already share vital readings so this is less sensitive
+than what they already see.
+
+**Verify on phone:** reload the bundle (RR or shake → Reload) to
+pick up the disambiguation fix, then navigate away from Settings →
+Family Members and back; the screen renders all real display_names
+(biebele / TheOne / TheTest in the bench setup).
 
 **F3 — Onboarding Continue button visually narrow / off-center**
 *(fixed this session)*
