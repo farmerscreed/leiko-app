@@ -63,6 +63,8 @@ import {
 import { DaySpine } from '../../components/DaySpine';
 import { useDailyPulseData } from '../../state/dailyPulse';
 import { useFamilyReadings } from '../../hooks/useFamilyReadings';
+import { FamilyRemovalBanner } from '../../components/FamilyRemovalBanner';
+import { useFamilyRemovalBanner } from '../../hooks/useFamilyRemovalBanner';
 import { useAuth } from '../../state/auth';
 import { useHR } from '../../state/hr';
 import { useSleep } from '../../state/sleep';
@@ -80,7 +82,14 @@ export function SelfBuyerHome() {
   const theme = useTheme();
   const navigation = useNavigation<Nav>();
   const profile = useAuth((s) => s.profile);
-  const { parents, isRefreshing, refresh } = useFamilyReadings();
+  const { parents, isLoading: familyLoading, isRefreshing, refresh } =
+    useFamilyReadings();
+  // Sprint 17b — backstop banner if this user (who could be a hybrid
+  // mode caregiver of another family) was removed from a circle.
+  // Self-buyers can't be removed from their own family (the Edge
+  // Function refuses owner-removal); only their secondary
+  // memberships are at risk.
+  const removalBanner = useFamilyRemovalBanner(parents, familyLoading);
   const data = useDailyPulseData();
   // Sprint 10a — drives the 6th-reading auto-paywall mount below.
   const familyId = parents[0]?.familyId ?? null;
@@ -202,6 +211,17 @@ export function SelfBuyerHome() {
           name={headerText.name}
           onAvatarPress={() => navigation.navigate('Settings')}
         />
+
+        {/* Sprint 17b — surfaces when this user was removed from a
+            family circle they were a member of (hybrid mode only;
+            self-buyers can't be removed from their own family). */}
+        {removalBanner.removed ? (
+          <FamilyRemovalBanner
+            label={removalBanner.removed.label}
+            onDismiss={removalBanner.dismiss}
+            testID="self-buyer-home-removal-banner"
+          />
+        ) : null}
 
         {/* Sprint 16 — calm reassurance banner after 24h of failed
             /sync. Renders only when the failure-tracker reports a

@@ -72,6 +72,8 @@ import { PersonCard } from '../../components/PersonCard';
 import { ViewToggle } from '../../components/ViewToggle';
 import { useCaregiverFamily } from '../../hooks/useCaregiverFamily';
 import { AcceptInviteSheet } from '../../components/AcceptInviteSheet';
+import { FamilyRemovalBanner } from '../../components/FamilyRemovalBanner';
+import { useFamilyRemovalBanner } from '../../hooks/useFamilyRemovalBanner';
 import { useAuth } from '../../state/auth';
 import {
   useCaregiverViewMode,
@@ -133,6 +135,10 @@ export function CaregiverHome() {
   const theme = useTheme();
   const navigation = useNavigation<Nav>();
   const { parents, people, isLoading, isRefreshing, refresh } = useCaregiverFamily();
+  // Sprint 17b — detect "you were removed from a family" between
+  // refetches and surface a calm banner. Backstop for the
+  // `family_removed` push when push is suppressed for any reason.
+  const removalBanner = useFamilyRemovalBanner(parents, isLoading);
   const pairedDevice = usePairing((s) => s.pairedDevice);
   const localLatest = useReadings((s) => s.latest());
   const { viewMode, setViewMode } = useCaregiverViewMode();
@@ -362,6 +368,18 @@ export function CaregiverHome() {
           onViewModeChange={setViewMode}
           showToggle={merged.length > 0}
         />
+
+        {/* Sprint 17b — surfaces when the family_owner removed this
+            user from a circle. Safety net for the `family_removed`
+            push. */}
+        {removalBanner.removed ? (
+          <FamilyRemovalBanner
+            label={removalBanner.removed.label}
+            onDismiss={removalBanner.dismiss}
+            onEnterInvite={() => setAcceptInviteVisible(true)}
+            testID="caregiver-home-removal-banner"
+          />
+        ) : null}
 
         {/* Sprint 16 — calm reassurance banner after 24h of failed
             /sync. Owning phone vs caregiver phone: this mounts on

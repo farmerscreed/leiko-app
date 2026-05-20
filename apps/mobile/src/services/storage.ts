@@ -151,6 +151,15 @@ export const STORAGE_KEYS = {
   //     spo2: { ... }, sleep: { ... }, activity: { ... } }
   // Cleared per-vital on success.
   vitalFailureCounters: 'leiko.sync.vitalFailureCounters',
+  // Sprint 17b — JSON map { familyId: parentDisplayName } of every
+  // family the user is currently a known member of. On every
+  // useFamilyReadings refetch the removal-detection banner diffs the
+  // live `parents` array against this map. If a familyId disappears
+  // from the live array, the banner surfaces "You're no longer in
+  // {label}'s circle." until dismissed. Persistence allows the banner
+  // to survive app backgrounding — important because a removed user
+  // might miss the push notification (permissions, quiet hours).
+  lastKnownFamilyIds: 'leiko.family.lastKnownIds',
 } as const;
 
 export const supabaseStorage = {
