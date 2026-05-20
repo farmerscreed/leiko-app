@@ -28,18 +28,20 @@ Update this log every time a new build artifact is produced.
 | **Status** | Awaits upload to Play Console → Internal Testing track |
 | **Used for** | Submitting to Play Store via `eas submit` or manual upload. Not directly installable on a phone — `adb install` rejects AAB. |
 
-### v1.0.0 (versionCode TBD) — production-apk `.apk` for bench install
+### v1.0.0 (versionCode 3) — production-apk `.apk` for bench install
 
 | Field | Value |
 |---|---|
-| **Artifact URL** | _pending — paste once EAS finishes_ |
+| **Artifact URL** | https://expo.dev/artifacts/eas/kQ5uMNfwz7P6517WuvkAbW.apk |
+| **Build logs** | https://expo.dev/accounts/lawone-apps/projects/leiko/builds/a0941b42-c9bf-47ac-b2b7-6c64d59acf0a |
 | **EAS profile** | `production-apk` (extends `production`, overrides `buildType: apk`) |
 | **Build type** | `apk` (single-file install) |
 | **versionName** | `1.0.0` |
-| **versionCode** | TBD (auto-incremented from previous) |
+| **versionCode** | `3` (auto-incremented after the AAB's `2`) |
 | **EAS credentials slot** | Same as the AAB above |
+| **Built** | 2026-05-20 |
 | **Target backend** | prod Supabase `kqnzxjrpnjnczhgdwdqg.supabase.co` |
-| **Status** | Pending build |
+| **Status** | Built; pending Phone 1 install + smoke test (Block 4) |
 | **Used for** | `adb install` on Phone 1 (Pixel 8, `43230DLJH001YY`) for Block 4 smoke test — uninstall dev build first; the keystore mismatch will reject a side-load over the dev install. |
 
 ---
