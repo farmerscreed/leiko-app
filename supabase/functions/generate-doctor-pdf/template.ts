@@ -77,11 +77,25 @@ function renderCover(data: ReportData): string {
   const ageLine = data.user.yearOfBirth
     ? `${new Date().getUTCFullYear() - data.user.yearOfBirth} years old`
     : '';
+  // Sprint 18 / FUN-5 — AI cover paragraph between the headline and
+  // the regulatory disclaimer. Absent on free tier or when the
+  // doctor-prep-ai call failed; template degrades gracefully.
+  const aiCover = data.aiSections?.cover
+    ? `<p class="cover-ai">${escape(data.aiSections.cover)}</p>`
+    : '';
+  // Sprint 16.5h — optional user-authored cover-page note. Rendered
+  // above the regulatory disclaimer so the clinician reads the user's
+  // own context first, then the platform-mandated language.
+  const note = data.coverNote && data.coverNote.trim().length > 0
+    ? `<p class="cover-note">${escape(data.coverNote.trim())}</p>`
+    : '';
   return `
     <header class="cover">
       <p class="brand-eyebrow">Leiko · Pulse report</p>
       <h1 class="cover-headline">${escape(data.user.displayName)}</h1>
       <p class="cover-meta">${escape(data.rangeLabel)}${ageLine ? ' · ' + escape(ageLine) : ''}</p>
+      ${aiCover}
+      ${note}
       <p class="cover-line">${escape(coverLine(data.user.accountType, data.user.displayName))}</p>
       <p class="generated-at">Generated ${escape(formatDate(data.generatedAtIso))}</p>
     </header>
@@ -210,7 +224,27 @@ function renderActivity(data: ReportData): string {
 }
 
 function renderCrossVital(data: ReportData): string {
+  // Sprint 18 / FUN-5 — AI observations paragraph rendered as the
+  // section lead, above any deterministic correlation cards. May span
+  // 1–2 paragraphs (Tier-B prompt enforces that). Split on double-
+  // newline so each <p> renders as its own paragraph block.
+  const aiObs = data.aiSections?.observations
+    ? data.aiSections.observations
+        .split(/\n{2,}/)
+        .map((p) => `<p class="cross-vital-ai">${escape(p.trim())}</p>`)
+        .join('')
+    : '';
+
   if (data.correlations.length === 0) {
+    // No deterministic correlations available — the AI paragraph (if
+    // present) is the whole section. Fall back to the empty-state
+    // line when there's nothing on either side.
+    if (aiObs) {
+      return `
+        <h2>Cross-vital observations</h2>
+        ${aiObs}
+      `;
+    }
     return `
       <h2>Cross-vital observations</h2>
       <p class="muted">No cross-vital patterns reached the meaningful threshold over the selected range.</p>
@@ -225,6 +259,7 @@ function renderCrossVital(data: ReportData): string {
   `).join('');
   return `
     <h2>Cross-vital observations</h2>
+    ${aiObs}
     ${cards}
   `;
 }
@@ -364,7 +399,10 @@ h3.subheading { font-size: 11pt; margin: 6mm 0 2mm; text-transform: uppercase; l
   font-weight: 500;
 }
 .cover-meta { font-size: 12pt; color: #4a4339; margin: 0 0 10mm; }
+.cover-ai { font-size: 11pt; line-height: 1.6; color: #2a241c; max-width: 130mm; margin: 0 auto 6mm; text-align: left; }
+.cover-note { font-size: 11pt; line-height: 1.55; color: #4a4339; max-width: 130mm; margin: 0 auto 6mm; padding: 4mm 5mm; background: rgba(176, 122, 60, 0.06); border-left: 2pt solid #b07a3c; text-align: left; }
 .cover-line { font-style: italic; color: #4a4339; max-width: 130mm; margin: 0 auto 12mm; }
+.cross-vital-ai { font-size: 11pt; line-height: 1.6; color: #2a241c; margin: 0 0 4mm; }
 .generated-at { font-size: 9pt; color: #8b8378; margin: 0; }
 
 .stat-row { display: flex; gap: 8mm; margin: 4mm 0 6mm; }

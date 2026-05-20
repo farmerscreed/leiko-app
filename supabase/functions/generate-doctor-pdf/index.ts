@@ -121,7 +121,76 @@ function parseBody(body: unknown): PdfRequest {
     range: b.range as Range,
     includeNotes: b.includeNotes !== false,
     includeComments: b.includeComments !== false,
+    // Sprint 16.5h — opaque cover-note string. Capped at 300 chars on
+    // the server side as a defensive guard; the screen also caps it.
+    coverNote:
+      typeof b.coverNote === 'string' && b.coverNote.trim().length > 0
+        ? b.coverNote.slice(0, 300)
+        : undefined,
   };
+}
+
+/** Sprint 18 / FUN-5 — call generate-doctor-prep-ai with the caller's
+ *  JWT so its plus-tier gate + RLS run against the same identity. The
+ *  prep-ai function handles paywall (free tier) by returning
+ *  `status: paywall_required` — we treat that as "no AI sections,
+ *  fall through" rather than a hard error. Any other failure also
+ *  cascades to no-AI rendering; the deterministic content always
+ *  ships. Per Sprint 16 cascade pattern.
+ *
+ *  Returns `{ cover: null, observations: null }` on any failure so
+ *  the renderReport can branch on presence/absence in one place. */
+async function fetchAiSections(
+  callerJwt: string,
+  range: Range,
+): Promise<{ cover: string | null; observations: string | null }> {
+  try {
+    const supabaseUrl = envOrThrow('SUPABASE_URL');
+    const { startDate, endDate } = rangeToDates(range);
+    const exportId = crypto.randomUUID();
+    const res = await fetch(
+      `${supabaseUrl}/functions/v1/generate-doctor-prep-ai`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${callerJwt}`,
+        },
+        body: JSON.stringify({ exportId, startDate, endDate }),
+      },
+    );
+    if (!res.ok) {
+      // 503 = no Anthropic key, 401 = bad jwt, 500 = scrub/internal.
+      // Any of these → ship without AI. Log so we can attribute.
+      console.warn('generate-doctor-pdf: prep-ai non-ok', res.status);
+      return { cover: null, observations: null };
+    }
+    const payload = (await res.json()) as Record<string, unknown>;
+    if (payload.status === 'paywall_required') {
+      // Free tier — expected. No telemetry warning.
+      return { cover: null, observations: null };
+    }
+    if (payload.status !== 'ok') {
+      console.warn('generate-doctor-pdf: prep-ai status', payload.status);
+      return { cover: null, observations: null };
+    }
+    return {
+      cover: typeof payload.cover === 'string' ? payload.cover : null,
+      observations:
+        typeof payload.observations === 'string' ? payload.observations : null,
+    };
+  } catch (err) {
+    console.warn('generate-doctor-pdf: prep-ai fetch failed', err);
+    return { cover: null, observations: null };
+  }
+}
+
+function rangeToDates(range: Range): { startDate: string; endDate: string } {
+  const days = range === '7d' ? 7 : range === '30d' ? 30 : range === '90d' ? 90 : 365;
+  const end = new Date();
+  const start = new Date(end.getTime() - days * 24 * 60 * 60 * 1000);
+  const fmt = (d: Date): string => d.toISOString().slice(0, 10);
+  return { startDate: fmt(start), endDate: fmt(end) };
 }
 
 async function rasterize(html: string): Promise<Uint8Array> {
@@ -197,7 +266,22 @@ Deno.serve(async (req: Request) => {
     await validateMembership(serviceClient, callerId, body.familyId, body.userId);
 
     const data = await fetchReportData(serviceClient, body);
-    const html = renderReport(data);
+
+    // Sprint 18 / FUN-5 — run AI prep + PDF rasterize in parallel where
+    // possible. The AI call needs the caller's JWT (plus-tier gate runs
+    // against their subscription). Result threads into renderReport;
+    // both `cover` and `observations` are nullable so the template
+    // cascades to deterministic content when AI is unavailable.
+    const authHeader = req.headers.get('authorization') ?? '';
+    const callerJwt = authHeader.slice('Bearer '.length);
+    const aiSections = await fetchAiSections(callerJwt, body.range);
+
+    const enrichedData = {
+      ...data,
+      coverNote: body.coverNote,
+      aiSections,
+    };
+    const html = renderReport(enrichedData);
 
     // Sprint 9 test seam — bypass the rasterizer when explicitly mocked.
     const rasterizerUrl = Deno.env.get('PDF_RASTERIZER_URL') ?? '';

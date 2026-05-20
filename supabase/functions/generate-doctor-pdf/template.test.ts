@@ -197,6 +197,114 @@ Deno.test('renderReport — empty sleep section degrades gracefully', () => {
   assertStringIncludes(html, 'No sleep sessions recorded over the period.');
 });
 
+// ─── Sprint 18 / FUN-5 — AI sections + coverNote ───────────────────────
+
+Deno.test('renderReport — cover-page note renders when provided', () => {
+  const html = renderReport(
+    fixture({
+      coverNote:
+        'BP often spikes on Mondays after the weekend visit to the village.',
+    }),
+  );
+  assertStringIncludes(html, 'class="cover-note"');
+  assertStringIncludes(html, 'BP often spikes on Mondays');
+});
+
+Deno.test('renderReport — cover-page note absent when omitted', () => {
+  const html = renderReport(fixture());
+  assert(!html.includes('class="cover-note"'));
+});
+
+Deno.test('renderReport — cover-page note absent when whitespace-only', () => {
+  const html = renderReport(fixture({ coverNote: '   ' }));
+  assert(!html.includes('class="cover-note"'));
+});
+
+Deno.test('renderReport — AI cover paragraph renders when provided', () => {
+  const html = renderReport(
+    fixture({
+      aiSections: {
+        cover:
+          'Average systolic over the past 30 days was 124 mmHg with 86% in-range readings; one stage-2 event flagged on April 12.',
+        observations: null,
+      },
+    }),
+  );
+  assertStringIncludes(html, 'class="cover-ai"');
+  assertStringIncludes(html, 'Average systolic over the past 30 days');
+});
+
+Deno.test('renderReport — AI cover absent when aiSections.cover is null', () => {
+  const html = renderReport(
+    fixture({ aiSections: { cover: null, observations: 'obs' } }),
+  );
+  assert(!html.includes('class="cover-ai"'));
+});
+
+Deno.test('renderReport — AI observations render above correlation cards', () => {
+  const html = renderReport(
+    fixture({
+      aiSections: {
+        cover: null,
+        observations:
+          'Sleep duration and morning BP trended inversely across the window.',
+      },
+    }),
+  );
+  assertStringIncludes(html, 'class="cross-vital-ai"');
+  // AI paragraph appears before the correlation card body.
+  const aiIdx = html.indexOf('cross-vital-ai');
+  const cardIdx = html.indexOf('correlation-card');
+  assert(aiIdx > -1 && cardIdx > -1 && aiIdx < cardIdx);
+});
+
+Deno.test('renderReport — AI observations render alone when no correlations exist', () => {
+  const html = renderReport(
+    fixture({
+      correlations: [],
+      aiSections: {
+        cover: null,
+        observations: 'Sparse data this period; trends are tentative.',
+      },
+    }),
+  );
+  assertStringIncludes(html, 'Sparse data this period');
+  // Fallback "no patterns reached the threshold" line is suppressed
+  // when the AI paragraph carries the section.
+  assert(
+    !html.includes(
+      'No cross-vital patterns reached the meaningful threshold',
+    ),
+  );
+});
+
+Deno.test('renderReport — AI observations split on double-newline into multiple paragraphs', () => {
+  const html = renderReport(
+    fixture({
+      aiSections: {
+        cover: null,
+        observations: 'First paragraph here.\n\nSecond paragraph here.',
+      },
+    }),
+  );
+  const matches = html.match(/class="cross-vital-ai"/g) ?? [];
+  assertEquals(matches.length, 2);
+});
+
+Deno.test('renderReport — disclaimer renders even when AI cover is present', () => {
+  const html = renderReport(
+    fixture({
+      aiSections: {
+        cover: 'AI cover here.',
+        observations: null,
+      },
+    }),
+  );
+  // Both the AI paragraph and the regulatory disclaimer must coexist.
+  assertStringIncludes(html, 'AI cover here.');
+  assertStringIncludes(html, 'It is not a diagnosis');
+});
+
 Deno.test('renderReport — notes section lists user-supplied notes', () => {
   const html = renderReport(fixture());
   assertStringIncludes(html, 'Felt anxious before reading.');

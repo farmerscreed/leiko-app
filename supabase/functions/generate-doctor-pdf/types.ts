@@ -11,6 +11,18 @@ export interface PdfRequest {
   includeNotes?: boolean;
   /** Include caregiver comments. Defaults to true. */
   includeComments?: boolean;
+  /** Sprint 16.5h — personal cover-page note authored on the
+   *  For-your-doctor screen. Rendered above the disclaimer line. */
+  coverNote?: string;
+}
+
+/** Sprint 18 / FUN-5 — AI-generated sections produced by
+ *  generate-doctor-prep-ai. Either (or both) may be absent when the
+ *  user is on the free tier OR when the AI call failed; the template
+ *  cascades to the deterministic content in that case. */
+export interface AiSections {
+  cover: string | null;
+  observations: string | null;
 }
 
 export interface BPDayPoint {
@@ -115,4 +127,9 @@ export interface ReportData {
   };
   correlations: CorrelationRow[];
   notes: { day: string; body: string }[];
+  /** Sprint 16.5h — user-authored cover-page note (≤300 chars). */
+  coverNote?: string;
+  /** Sprint 18 / FUN-5 — AI narrative sections. Absent on free tier
+   *  or when the doctor-prep-ai call failed. */
+  aiSections?: AiSections;
 }
