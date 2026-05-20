@@ -102,6 +102,7 @@ export type AnalyticsEvent =
   | { name: 'family_self_leave_failed'; props?: { reason: string } }
   | { name: 'family_removal_push_failed'; props?: { reason: string } }
   | { name: 'family_removal_banner_shown'; props?: { familyId: string } }
+  | { name: 'visibility_slice_purged'; props?: { vital: string } }
   // Sprint 10c.2 polish — OS-scheduled background sync lifecycle.
   | { name: 'background_sync_registered'; props?: { intervalMin: number } }
   | { name: 'background_sync_unregistered' }

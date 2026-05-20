@@ -72,6 +72,10 @@ interface ReadingsState {
   seedRecentFromServer: (rows: LocalReading[]) => number;
   /** Test/utility: drop all rows (does NOT clear MMKV — use clearAll for that). */
   reset: () => void;
+  /** Sprint 17b — visibility-enforcement purge. Clears `recent` and
+   *  the persisted MMKV blob but PRESERVES `pending` (the user's
+   *  own offline writes must never be wiped by an external toggle). */
+  clearRecent: () => void;
 }
 
 function uuid(): string {
@@ -320,6 +324,11 @@ export const useReadings = create<ReadingsState>((set, get) => ({
     set({ recent: merged });
     persist({ pending, recent: merged });
     return newRows.length;
+  },
+
+  clearRecent: () => {
+    set({ recent: [] });
+    mmkv.remove(STORAGE_KEYS.recentReadings);
   },
 
   reset: () => {

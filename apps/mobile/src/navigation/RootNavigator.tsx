@@ -52,6 +52,7 @@ import { ArticleScreen } from '../screens/Learn/ArticleScreen';
 import { AskLeikoScreen } from '../screens/AskLeiko/AskLeikoScreen';
 import { DebugLauncher } from '../dev/DebugLauncher';
 import { OfflineBanner } from '../components/OfflineBanner';
+import { useEnforceVisibility } from '../hooks/useEnforceVisibility';
 import { useTheme } from '../theme';
 import { useAuth } from '../state/auth';
 import { useOnboarding } from '../state/onboarding';
@@ -378,6 +379,12 @@ export function RootNavigator() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      {/* Sprint 17b — visibility enforcement. Subscribes to UPDATEs
+          on the signed-in user's family_members row and purges
+          singleton-slice `recent` + TanStack caches when a vital
+          flips visible → hidden. Must be inside QueryClientProvider
+          because it uses useQueryClient. */}
+      <VisibilityEnforcer />
       {/* navigationRef is typed loosely so jest-expo's mock can stand
           in for it in tests. Cast here so NavigationContainer's
           stricter ref shape accepts it. */}
@@ -393,6 +400,14 @@ export function RootNavigator() {
       <DebugLauncher />
     </QueryClientProvider>
   );
+}
+
+// Sprint 17b — single-purpose wrapper so the hook is called inside
+// the QueryClientProvider tree (useQueryClient requires it). Returns
+// null; pure side-effect.
+function VisibilityEnforcer(): null {
+  useEnforceVisibility();
+  return null;
 }
 
 const styles = StyleSheet.create({

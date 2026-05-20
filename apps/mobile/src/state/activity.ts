@@ -56,6 +56,10 @@ interface ActivityState {
   seedStepsFromServer: (rows: ActivityDay[]) => number;
   /** Same as `seedStepsFromServer` but for the calories slice. */
   seedCaloriesFromServer: (rows: CaloriesDay[]) => number;
+  /** Sprint 17b — visibility purge. Clears BOTH recent arrays
+   *  (steps + calories) since the activity visibility toggle covers
+   *  the combined "activity" surface. Pending preserved. */
+  clearRecent: () => void;
   reset: () => void;
 }
 
@@ -250,6 +254,12 @@ export const useActivity = create<ActivityState>((set, get) => ({
     set({ recentCalories: merged });
     persistRecentCalories(merged);
     return newRows.length;
+  },
+
+  clearRecent: () => {
+    set({ recentSteps: [], recentCalories: [] });
+    mmkv.remove(STORAGE_KEYS.recentActivity);
+    mmkv.remove(STORAGE_KEYS.recentCalories);
   },
 
   reset: () => {

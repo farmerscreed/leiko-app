@@ -47,6 +47,8 @@ interface SleepState {
    * Returns the number of NEW sessions added (not duplicates).
    */
   seedFromServer: (sessions: SleepSession[]) => number;
+  /** Sprint 17b — visibility purge. Clears `recent` only. */
+  clearRecent: () => void;
   reset: () => void;
 }
 
@@ -168,6 +170,11 @@ export const useSleep = create<SleepState>((set, get) => ({
     set({ recent: merged });
     persistRecent(merged);
     return newRows.length;
+  },
+
+  clearRecent: () => {
+    set({ recent: [] });
+    mmkv.remove(STORAGE_KEYS.recentSleep);
   },
 
   reset: () => {

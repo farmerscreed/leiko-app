@@ -68,6 +68,9 @@ interface HRState {
    * desc, caps at `RECENT_SAMPLES_CAP`. Returns the number of NEW rows.
    */
   seedFromServer: (samples: HRSample[]) => number;
+  /** Sprint 17b — visibility purge. Clears `recent` only; `pending`
+   *  is preserved (user's own offline writes). */
+  clearRecent: () => void;
   reset: () => void;
 }
 
@@ -265,6 +268,11 @@ export const useHR = create<HRState>((set, get) => ({
     set({ recent: merged });
     persistRecent(merged);
     return newRows.length;
+  },
+
+  clearRecent: () => {
+    set({ recent: [] });
+    mmkv.remove(STORAGE_KEYS.recentHR);
   },
 
   reset: () => {

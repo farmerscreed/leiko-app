@@ -160,6 +160,13 @@ export const STORAGE_KEYS = {
   // to survive app backgrounding — important because a removed user
   // might miss the push notification (permissions, quiet hours).
   lastKnownFamilyIds: 'leiko.family.lastKnownIds',
+  // Sprint 17b — last seen `vital_visibility` JSON for the signed-in
+  // user, across all families they're a member of. The visibility-
+  // enforcement hook diffs incoming Realtime updates against this
+  // snapshot; when a vital flips visible → hidden, the matching
+  // singleton slice's `recent` is purged and TanStack Query caches
+  // are invalidated. Cleared on sign-out.
+  lastKnownVisibility: 'leiko.family.lastKnownVisibility',
 } as const;
 
 export const supabaseStorage = {

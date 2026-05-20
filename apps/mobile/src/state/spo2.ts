@@ -43,6 +43,8 @@ interface SpO2State {
    * detail screen + the overnight chart populated.
    */
   seedFromServer: (samples: SpO2Sample[]) => number;
+  /** Sprint 17b — visibility purge. Clears `recent` only. */
+  clearRecent: () => void;
   reset: () => void;
 }
 
@@ -192,6 +194,11 @@ export const useSpO2 = create<SpO2State>((set, get) => ({
     set({ recent: merged });
     persistRecent(merged);
     return newRows.length;
+  },
+
+  clearRecent: () => {
+    set({ recent: [] });
+    mmkv.remove(STORAGE_KEYS.recentSpO2);
   },
 
   reset: () => {
