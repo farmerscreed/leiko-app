@@ -96,12 +96,10 @@ import type {
 const BLE_TRACE = typeof __DEV__ !== 'undefined' && __DEV__;
 
 const APP_VERSION = '0.0.1'; // bumped via package.json on release
-/** Sprint 16.5b — fallback only. Pre-16.5b this was used directly for
- *  every HRSample's sampleWindowSec. Phase A trace revealed the actual
- *  watch cadence is 5 min on U19M_013C, not 30 min. We now read the
- *  interval from the watch's index packet on every read (per call) and
- *  fall back to this only when the watch returns the no-data marker. */
-const HR_FALLBACK_WINDOW_SEC = 30 * 60;
+// Sprint 18 / QUA-2 — removed HR_FALLBACK_WINDOW_SEC (was 30 * 60).
+// readHRHistory now always returns intervalSec (5 min on U19M_013C,
+// confirmed by Sprint 16.5b traces). On the no-data branch both
+// intervalSec and samples are 0 together, so no fallback is reachable.
 const SPO2_DEFAULT_WINDOW_SEC = 60 * 60;
 const SECONDS_PER_DAY = 24 * 60 * 60;
 
@@ -289,15 +287,28 @@ async function syncHRStep(
       dayTimestampSec: unixSecFromDayLocal(day),
     });
     const { samples, intervalSec: rawIntervalSec } = result;
-    // Sprint 16.5b — use the watch's reported interval, not the
-    // hardcoded 30-min assumption. Fall back only if the watch returned
-    // no-data (intervalSec=0 in that case).
-    const sampleWindowSec = rawIntervalSec > 0 ? rawIntervalSec : HR_FALLBACK_WINDOW_SEC;
+    // Sprint 18 / QUA-2 — the watch's index packet always reports
+    // intervalSec when samples are present (5 min on U19M_013C). No
+    // fallback needed; when intervalSec is 0 the watch also returns
+    // an empty samples array, so the loop below is a no-op.
+    const sampleWindowSec = rawIntervalSec;
     if (BLE_TRACE) {
       console.log(
         `[ble-trace] syncMultiVitals.hr day=${day} readHRHistory returned ${samples.length} samples ` +
-          `(intervalSec=${rawIntervalSec}, sampleWindowSec=${sampleWindowSec})`,
+          `(intervalSec=${rawIntervalSec})`,
       );
+    }
+    // Invariant guard: if the watch ever returns samples WITHOUT an
+    // interval, the per-sample window is undefined. Skip the day to
+    // avoid persisting samples with sampleWindowSec=0 (which would
+    // wedge the classifier). Should be unreachable per readHRHistory.
+    if (samples.length > 0 && rawIntervalSec <= 0) {
+      if (BLE_TRACE) {
+        console.warn(
+          `[ble-trace] syncMultiVitals.hr day=${day} skipped — samples without intervalSec`,
+        );
+      }
+      continue;
     }
     // Sample-level dedup: keep only samples newer than cursor.hr.
     const fresh =
