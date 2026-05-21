@@ -199,6 +199,16 @@ export function SettingsScreen({ navigation }: Props) {
   const pairedDevice = usePairing((s) => s.pairedDevice);
   const forget = usePairing((s) => s.forget);
 
+  // Sprint 18 bench bug — defensive backstop. Onboarding completion
+  // paths in state/onboarding.ts now refresh profile after the DB
+  // update, but if any future code path forgets, this still rehydrates
+  // the auth-store profile from public.users every time Settings
+  // mounts. Cheap, idempotent, prevents the "I filled in my name in
+  // onboarding but Settings shows nothing" trap from ever recurring.
+  useEffect(() => {
+    void refreshProfile();
+  }, [refreshProfile]);
+
   // Notifications.
   const notif = useNotifications();
   const flushNotifs = useNotifications((s) => s.flushToSupabase);

@@ -239,6 +239,19 @@ export const useOnboarding = create<OnboardingState>((set, get) => ({
       mmkv.set(STORAGE_KEYS.currentFamilyId, familyId);
       mmkv.set(STORAGE_KEYS.caregiverOnboardingComplete, true);
 
+      // Sprint 18 bench bug — the .update() above wrote display_name +
+      // timezone to public.users but useAuth.profile is still the stale
+      // placeholder hydrated at signup. Refresh BEFORE flipping the
+      // navigator gate so the first render of post-onboarding Home (and
+      // any Settings → Profile peek) sees the values the user just
+      // entered.
+      try {
+        await useAuth.getState().refreshProfile();
+      } catch {
+        // Profile refresh failure is non-fatal — DB has the truth; the
+        // next app open / refreshProfile call will catch up.
+      }
+
       set({
         familyId,
         caregiverOnboardingComplete: true,
@@ -288,6 +301,16 @@ export const useOnboarding = create<OnboardingState>((set, get) => ({
       // this user, so no additional RPC is needed here.
       mmkv.set(STORAGE_KEYS.currentFamilyId, familyId);
       mmkv.set(STORAGE_KEYS.caregiverOnboardingComplete, true);
+
+      // Sprint 18 bench bug — refresh useAuth.profile so Settings →
+      // Profile reflects the freshly-written display_name + timezone
+      // (or, on the skip-FamilyYou path, the handle_new_user
+      // placeholder) instead of whatever was hydrated at signup.
+      try {
+        await useAuth.getState().refreshProfile();
+      } catch {
+        // Non-fatal; next refresh will catch up.
+      }
 
       set({
         familyId,
@@ -355,6 +378,16 @@ export const useOnboarding = create<OnboardingState>((set, get) => ({
       // 3. Persist + flip the navigator gate.
       mmkv.set(STORAGE_KEYS.currentFamilyId, familyId);
       mmkv.set(STORAGE_KEYS.selfBuyerOnboardingComplete, true);
+
+      // Sprint 18 bench bug — refresh useAuth.profile so Settings →
+      // Profile reflects the display_name + timezone + year_of_birth
+      // the user just entered in onboarding instead of the
+      // handle_new_user placeholder hydrated at signup.
+      try {
+        await useAuth.getState().refreshProfile();
+      } catch {
+        // Non-fatal; next refresh will catch up.
+      }
 
       set({
         familyId,
