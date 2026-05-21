@@ -42,6 +42,8 @@ import { BPTwinLineChart } from '../../components/BPTwinLineChart';
 import { VitalExplainerAnchor } from '../../components/VitalExplainerAnchor';
 import { BaselineReference } from '../../components/BaselineReference';
 import { StalenessHintRow } from '../../components/StalenessHintRow';
+import { LoadingState } from '../../components/LoadingState';
+import { ErrorState } from '../../components/ErrorState';
 import type { TrendRange } from '../../components/TimeRangePills';
 import { useDailyPulseData, emptyDailyPulse } from '../../state/dailyPulse';
 import { useReadings, type LocalReading } from '../../state/readings';
@@ -117,26 +119,39 @@ function rangeCopyForTier(tier: ClassificationTier | null | undefined): string {
 // Pure formatting helpers — exported for tests
 // ---------------------------------------------------------------------------
 
-function formatHeroTime(measuredAtSec: number, nowMs: number = Date.now()): string {
+export function formatHeroTime(measuredAtSec: number, nowMs: number = Date.now()): string {
   const d = new Date(measuredAtSec * 1000);
   const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   const ageHours = (nowMs - d.getTime()) / 3_600_000;
   if (ageHours < 24) {
     return `Latest · ${time}`;
   }
-  return `Latest · ${d.toLocaleDateString(undefined, { weekday: 'short' })} ${time}`;
+  // Sprint 18 B5 — older than 24h includes the date so "Mon 3:14 PM"
+  // isn't ambiguous about which week. Format: "Latest · Mon · May 18,
+  // 3:14 PM".
+  const weekday = d.toLocaleDateString(undefined, { weekday: 'short' });
+  const monthDay = d.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+  });
+  return `Latest · ${weekday} · ${monthDay}, ${time}`;
 }
 
-function formatRowTime(measuredAtSec: number, nowMs: number = Date.now()): string {
+export function formatRowTime(measuredAtSec: number, nowMs: number = Date.now()): string {
   const d = new Date(measuredAtSec * 1000);
   const ageHours = (nowMs - d.getTime()) / 3_600_000;
+  const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   if (ageHours < 24) {
-    return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    return time;
   }
+  // Sprint 18 P-B1 — include the time alongside "Yesterday" so three
+  // readings on the same day are visually distinguishable in the list.
   if (ageHours < 48) {
-    return 'Yesterday';
+    return `Yesterday ${time}`;
   }
-  return d.toLocaleDateString(undefined, { weekday: 'short' });
+  // Older — short weekday + time. Sparse trackers viewing a >48h-old
+  // row should at least see when the reading happened, not just "Mon".
+  return `${d.toLocaleDateString(undefined, { weekday: 'short' })} ${time}`;
 }
 
 function rowContext(
@@ -347,6 +362,17 @@ export function BPDetail({
   const parentRecent = useParentVitalsRecent(scopedFamilyId);
   const emptyFallback = useMemo(() => emptyDailyPulse(), []);
 
+  // Sprint 18 B1 — distinguish loading + error from "truly empty" for
+  // the caregiver-scoped path. Same pattern Sleep/HR audits introduced.
+  const isCaregiverScoped = scopedFamilyId !== null;
+  const isInitialParentLoad =
+    isCaregiverScoped &&
+    (parentPulse.isLoading || parentRecent.isLoading) &&
+    parentPulse.data === null;
+  const parentLoadError = isCaregiverScoped
+    ? (parentPulse.error ?? parentRecent.error ?? null)
+    : null;
+
   const data = scopedFamilyId
     ? parentPulse.data ?? emptyFallback
     : ownPulse;
@@ -486,17 +512,35 @@ export function BPDetail({
   // ----- Recent readings list — filtered to range, sliced by
   // RecentReadingsSection (the section wrapper owns the visible-count +
   // picker UX).
+  // Sprint 18 B2 — gate the "now" time-chip on the same freshness
+  // window rowContext uses (ageHours < 1). Previously the newest row
+  // was unconditionally labelled "now" — so a sparse tracker whose
+  // newest BP reading was 5 days old still saw "now" next to it.
   const recentRows: RecentReading[] = useMemo(() => {
+    const nowMs = Date.now();
     return rangedReadings
       .slice()
       .sort((a, b) => b.measuredAtSec - a.measuredAtSec)
-      .map((r, idx) => ({
-        id: r.localId,
-        value: `${r.systolic}/${r.diastolic}`,
-        context: rowContext(r.measuredAtSec, idx === 0),
-        time: idx === 0 ? 'now' : formatRowTime(r.measuredAtSec),
-      }));
+      .map((r, idx) => {
+        const ageHours = (nowMs - r.measuredAtSec * 1000) / 3_600_000;
+        const isFreshFirst = idx === 0 && ageHours < 1;
+        return {
+          id: r.localId,
+          value: `${r.systolic}/${r.diastolic}`,
+          context: rowContext(r.measuredAtSec, idx === 0, nowMs),
+          time: isFreshFirst ? 'now' : formatRowTime(r.measuredAtSec, nowMs),
+        };
+      });
   }, [rangedReadings]);
+
+  // Sprint 18 B4 — when the 7d chart has zero readings today but the
+  // user DOES have older readings, the chart would render with all 8
+  // slots null (no dots) under a "Today · systolic & diastolic"
+  // eyebrow. Honest but visually confusing. Show an inline placeholder
+  // instead, while still keeping the chart card frame so the layout
+  // doesn't jump.
+  const has7dTodayData =
+    range !== '7d' || sys.some((v) => v !== null) || dia.some((v) => v !== null);
 
   return (
     <DetailShell
@@ -506,103 +550,143 @@ export function BPDetail({
       hero={hero}
       testID="bp-detail"
     >
-      {!isEmpty && baselineBody ? (
-        <BaselineReference
-          body={baselineBody}
-          caption={`over the last ${baseline?.sampleCount ?? 30} readings`}
-          testID="bp-detail-baseline"
-        />
-      ) : null}
-      <StalenessHintRow stale={isStale} testID="bp-detail-staleness-hint" />
-      {!isEmpty ? (
-        <>
-          <StatTrio items={statItems} testID="bp-detail-stats" />
-
-          {/* Twin chart — range-aware (16.5f) */}
-          <View
-            style={[
-              styles.section,
-              { paddingHorizontal: theme.spacing.xl },
-            ]}
-          >
-            <Text
-              allowFontScaling={false}
-              style={{
-                fontFamily: theme.type('labelUppercase').family,
-                fontSize: theme.type('labelUppercase').size,
-                lineHeight: theme.type('labelUppercase').lineHeight,
-                letterSpacing: theme.type('labelUppercase').letterSpacing,
-                color: theme.colors.text.tertiary,
-                textTransform: 'uppercase',
-                marginBottom: theme.spacing.s,
-              }}
-              testID="bp-detail-chart-eyebrow"
-            >
-              {chartEyebrow}
-            </Text>
-            <View
-              style={{
-                backgroundColor: theme.colors.surface.warmSubtle,
-                borderColor: theme.colors.border.rim,
-                borderRadius: theme.radii.l,
-                borderWidth: 0.5,
-                padding: theme.spacing.l,
-              }}
-            >
-              <BPTwinLineChart
-                vital="bp"
-                sys={sys}
-                dia={dia}
-                hourLabels={hourLabels}
-                range={SYS_RANGE}
-                testID="bp-detail-chart"
-              />
-            </View>
-          </View>
-        </>
-      ) : null}
-
-      <VitalInsightCard
-        vital="bp"
-        body={
-          isEmpty
-            ? INSIGHT_BODY_EMPTY
-            : baseline
-              ? bpInsightBody(stats, baseline, range, tier)
-              : INSIGHT_BODY_PRE_BASELINE
-        }
-        testID="bp-detail-insight"
-      />
-
-      {!isEmpty && data.bp.latest ? (
-        <VitalExplainerAnchor
-          context={{
-            type: 'bp',
-            reading: {
-              systolic: data.bp.latest.systolic,
-              diastolic: data.bp.latest.diastolic,
-            },
+      {/* Sprint 18 B1 — caregiver-scoped loading + error swap-in.
+          During the initial parent fetch we render a calm spinner
+          instead of telling the caregiver their parent has no BP
+          data; on fetch errors we surface a recoverable banner
+          instead of falling through to the empty-state UI. The hero
+          above still renders so the persona header stays consistent. */}
+      {isInitialParentLoad ? (
+        <LoadingState testID="bp-detail-loading" />
+      ) : parentLoadError ? (
+        <ErrorState
+          onRetry={() => {
+            void parentPulse.refresh();
+            void parentRecent.refresh();
           }}
-          onArticleOpen={onArticleOpen}
-          onLearnOpen={onLearnOpen}
-          testID="bp-detail-explainer-anchor"
+          testID="bp-detail-error"
         />
-      ) : null}
+      ) : (
+        <>
+          {!isEmpty && baselineBody ? (
+            <BaselineReference
+              body={baselineBody}
+              caption={`over the last ${baseline?.sampleCount ?? 30} readings`}
+              testID="bp-detail-baseline"
+            />
+          ) : null}
+          <StalenessHintRow stale={isStale} testID="bp-detail-staleness-hint" />
+          {!isEmpty ? (
+            <>
+              <StatTrio items={statItems} testID="bp-detail-stats" />
 
-      {!isEmpty ? (
-        <RecentReadingsSection
-          vital="bp"
-          eyebrow="Recent readings"
-          readings={recentRows}
-          onSelect={
-            onSelectReading ? (r) => onSelectReading(r.id) : undefined
-          }
-          testID="bp-detail-readings"
-        />
-      ) : null}
-      {!isEmpty && onSharePress ? (
-        <ShareWithDoctorRow onPress={onSharePress} />
-      ) : null}
+              {/* Twin chart — range-aware (16.5f) */}
+              <View
+                style={[
+                  styles.section,
+                  { paddingHorizontal: theme.spacing.xl },
+                ]}
+              >
+                <Text
+                  allowFontScaling={false}
+                  style={{
+                    fontFamily: theme.type('labelUppercase').family,
+                    fontSize: theme.type('labelUppercase').size,
+                    lineHeight: theme.type('labelUppercase').lineHeight,
+                    letterSpacing: theme.type('labelUppercase').letterSpacing,
+                    color: theme.colors.text.tertiary,
+                    textTransform: 'uppercase',
+                    marginBottom: theme.spacing.s,
+                  }}
+                  testID="bp-detail-chart-eyebrow"
+                >
+                  {chartEyebrow}
+                </Text>
+                <View
+                  style={{
+                    backgroundColor: theme.colors.surface.warmSubtle,
+                    borderColor: theme.colors.border.rim,
+                    borderRadius: theme.radii.l,
+                    borderWidth: 0.5,
+                    padding: theme.spacing.l,
+                  }}
+                >
+                  {has7dTodayData ? (
+                    <BPTwinLineChart
+                      vital="bp"
+                      sys={sys}
+                      dia={dia}
+                      hourLabels={hourLabels}
+                      range={SYS_RANGE}
+                      testID="bp-detail-chart"
+                    />
+                  ) : (
+                    // Sprint 18 B4 — "no readings today" inline copy.
+                    // The chart card frame stays so the screen doesn't
+                    // jump; the body explains why there's no line yet.
+                    <Text
+                      allowFontScaling={false}
+                      testID="bp-detail-chart-empty-today"
+                      style={[
+                        theme.type('bodyM'),
+                        {
+                          color: theme.colors.text.secondary,
+                          textAlign: 'center',
+                          paddingVertical: theme.spacing.l,
+                        },
+                      ]}
+                    >
+                      No readings today yet. Tap the 30d or 90d range above to see your wider trend.
+                    </Text>
+                  )}
+                </View>
+              </View>
+            </>
+          ) : null}
+
+          <VitalInsightCard
+            vital="bp"
+            body={
+              isEmpty
+                ? INSIGHT_BODY_EMPTY
+                : baseline
+                  ? bpInsightBody(stats, baseline, range, tier)
+                  : INSIGHT_BODY_PRE_BASELINE
+            }
+            testID="bp-detail-insight"
+          />
+
+          {!isEmpty && data.bp.latest ? (
+            <VitalExplainerAnchor
+              context={{
+                type: 'bp',
+                reading: {
+                  systolic: data.bp.latest.systolic,
+                  diastolic: data.bp.latest.diastolic,
+                },
+              }}
+              onArticleOpen={onArticleOpen}
+              onLearnOpen={onLearnOpen}
+              testID="bp-detail-explainer-anchor"
+            />
+          ) : null}
+
+          {!isEmpty ? (
+            <RecentReadingsSection
+              vital="bp"
+              eyebrow="Recent readings"
+              readings={recentRows}
+              onSelect={
+                onSelectReading ? (r) => onSelectReading(r.id) : undefined
+              }
+              testID="bp-detail-readings"
+            />
+          ) : null}
+          {!isEmpty && onSharePress ? (
+            <ShareWithDoctorRow onPress={onSharePress} />
+          ) : null}
+        </>
+      )}
     </DetailShell>
   );
 }

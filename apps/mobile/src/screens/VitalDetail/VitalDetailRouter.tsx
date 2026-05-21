@@ -47,6 +47,15 @@ export function VitalDetailRouter() {
   // router just forwards the route param.
   const familyId = route.params.familyId;
 
+  // Sprint 18 B3 — Sprint 16.5f shipped the "Share with your doctor"
+  // row on BPDetail but the router forgot to pass `onSharePress`, so
+  // the affordance never reached users. Route the tap to the
+  // dedicated `ForYourDoctor` screen where the doctor-prep PDF
+  // generator already lives.
+  const onSharePress = useCallback(() => {
+    navigation.navigate('ForYourDoctor');
+  }, [navigation]);
+
   switch (route.params.vital) {
     case 'bp':
       return (
@@ -55,6 +64,7 @@ export function VitalDetailRouter() {
           onSelectReading={onSelectReading}
           onArticleOpen={onArticleOpen}
           onLearnOpen={onLearnOpen}
+          onSharePress={onSharePress}
           familyId={familyId}
         />
       );
