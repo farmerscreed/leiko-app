@@ -43,7 +43,17 @@ import type { CaregiverScreenProps } from '../../navigation/types';
 
 type Props =
   | CaregiverScreenProps<'TakeReading'>
-  | { navigation: { goBack: () => void; navigate: (r: string, p?: object) => void } };
+  | {
+      navigation: {
+        goBack: () => void;
+        navigate: (r: string, p?: object) => void;
+        // Sprint 18 bench bug — added so onContinueToDetail can replace
+        // (not push) ReadingDetail onto the stack, leaving the back
+        // affordance pointing at Home rather than at the just-finished
+        // TakeReading wizard.
+        replace?: (r: string, p?: object) => void;
+      };
+    };
 
 export function TakeReadingScreen({ navigation }: Props) {
   const theme = useTheme();
@@ -74,9 +84,17 @@ export function TakeReadingScreen({ navigation }: Props) {
       navigation.goBack();
       return;
     }
-    (navigation as { navigate: (r: string, p?: object) => void }).navigate('ReadingDetail', {
-      readingLocalId: lastReadingId,
-    });
+    // Sprint 18 bench bug — replace TakeReading with ReadingDetail on
+    // the stack instead of pushing. Otherwise the user lands on
+    // ReadingDetail with no obvious exit (Back returns to the success
+    // view of TakeReading, not Home). With replace, Back from
+    // ReadingDetail goes straight to Home.
+    const nav = navigation as {
+      navigate: (r: string, p?: object) => void;
+      replace?: (r: string, p?: object) => void;
+    };
+    const target = nav.replace ?? nav.navigate;
+    target('ReadingDetail', { readingLocalId: lastReadingId });
   };
 
   let body: React.ReactNode;
