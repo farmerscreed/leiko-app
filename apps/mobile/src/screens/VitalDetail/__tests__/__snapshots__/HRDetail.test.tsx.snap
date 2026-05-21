@@ -187,7 +187,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   }
                   stroke={
                     {
-                      "payload": 4294308330,
+                      "payload": 4294967295,
                       "type": 0,
                     }
                   }
@@ -306,7 +306,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -322,7 +322,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -338,7 +338,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -369,7 +369,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
           }
         >
           <View
-            accessibilityLabel="Now · resting. 64. bpm · within your range"
+            accessibilityLabel="Now · resting. 64. bpm · resting"
             accessibilityRole="text"
             style={
               [
@@ -671,7 +671,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "Inter_500Medium",
                       "fontSize": 11,
                       "letterSpacing": 0.55,
@@ -697,7 +697,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#F5F1EA",
+                        "color": "#FFFFFF",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 56,
                         "letterSpacing": -0.5,
@@ -713,7 +713,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 12,
                       "letterSpacing": 0.5,
@@ -723,7 +723,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   }
                   testID="hr-detail-hero-range"
                 >
-                  bpm · within your range
+                  bpm · resting
                 </Text>
               </View>
             </View>
@@ -809,7 +809,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -873,7 +873,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -937,7 +937,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -975,7 +975,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
             testID="hr-detail-stats"
           >
             <View
-              accessibilityLabel="Resting: 63 bpm avg"
+              accessibilityLabel="Resting avg: — bpm"
               accessibilityRole="text"
               style={
                 [
@@ -997,7 +997,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "Inter_500Medium",
                     "fontSize": 11,
                     "letterSpacing": 0.55,
@@ -1007,26 +1007,26 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   }
                 }
               >
-                Resting
+                Resting avg
               </Text>
               <Text
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "InstrumentSerif_400Regular",
                     "fontSize": 22,
                     "lineHeight": 28,
                   }
                 }
               >
-                63
+                —
               </Text>
               <Text
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "letterSpacing": 0.4,
@@ -1035,7 +1035,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   }
                 }
               >
-                bpm avg
+                bpm
               </Text>
             </View>
             <View
@@ -1061,7 +1061,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "Inter_500Medium",
                     "fontSize": 11,
                     "letterSpacing": 0.55,
@@ -1077,7 +1077,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "InstrumentSerif_400Regular",
                     "fontSize": 22,
                     "lineHeight": 28,
@@ -1090,7 +1090,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "letterSpacing": 0.4,
@@ -1103,7 +1103,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
               </Text>
             </View>
             <View
-              accessibilityLabel="Variability: — ms"
+              accessibilityLabel="Range today: 14 bpm"
               accessibilityRole="text"
               style={
                 [
@@ -1125,7 +1125,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "Inter_500Medium",
                     "fontSize": 11,
                     "letterSpacing": 0.55,
@@ -1135,26 +1135,26 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   }
                 }
               >
-                Variability
+                Range today
               </Text>
               <Text
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "InstrumentSerif_400Regular",
                     "fontSize": 22,
                     "lineHeight": 28,
                   }
                 }
               >
-                —
+                14
               </Text>
               <Text
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "letterSpacing": 0.4,
@@ -1163,12 +1163,12 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   }
                 }
               >
-                ms
+                bpm
               </Text>
             </View>
           </View>
           <View
-            accessibilityLabel="Today · resting HR trend, latest 64, peak 78, low 64"
+            accessibilityLabel="Last 24h · heart rate trend, latest 64, peak 78, low 64"
             style={
               {
                 "marginHorizontal": 20,
@@ -1190,7 +1190,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "Inter_500Medium",
                     "fontSize": 11,
                     "letterSpacing": 0.55,
@@ -1200,13 +1200,13 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 }
                 testID="hr-detail-trend-caption"
               >
-                Today · resting HR
+                Last 24h · heart rate
               </Text>
               <Text
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "letterSpacing": 0.4,
@@ -1215,7 +1215,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 }
                 testID="hr-detail-trend-subCaption"
               >
-                60–95 band
+                50–95 band
               </Text>
             </View>
             <RNSVGSvgView
@@ -1307,7 +1307,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   }
                   stroke={
                     {
-                      "payload": 4294308330,
+                      "payload": 4294967295,
                       "type": 0,
                     }
                   }
@@ -1339,7 +1339,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   }
                   stroke={
                     {
-                      "payload": 4294308330,
+                      "payload": 4294967295,
                       "type": 0,
                     }
                   }
@@ -1371,7 +1371,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   }
                   stroke={
                     {
-                      "payload": 4294308330,
+                      "payload": 4294967295,
                       "type": 0,
                     }
                   }
@@ -1388,7 +1388,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   y2={116.5}
                 />
                 <RNSVGPath
-                  d="M 16 83.2 L 35.2 83.2 L 54.4 83.2 L 73.6 83.2 L 92.8 83.2 L 112 83.2 L 131.2 83.2 L 150.4 83.2 L 169.6 83.2 L 188.8 83.2 L 208 83.2 L 227.2 83.2 L 246.4 112 L 265.6 112 L 284.8 112 L 304 133.6 L 304 148 L 16 148 Z"
+                  d="M 16 69.6 L 35.2 69.6 L 54.4 69.6 L 73.6 69.6 L 92.8 69.6 L 112 69.6 L 131.2 69.6 L 150.4 69.6 L 169.6 69.6 L 188.8 69.6 L 208 69.6 L 227.2 69.6 L 246.4 92 L 265.6 92 L 284.8 92 L 304 108.8 L 304 148 L 16 148 Z"
                   fill={
                     {
                       "brushRef": "hr-detail-trend-fill",
@@ -1402,7 +1402,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   }
                 />
                 <RNSVGPath
-                  d="M16 83.2 35.2 83.2 54.4 83.2 73.6 83.2 92.8 83.2 112 83.2 131.2 83.2 150.4 83.2 169.6 83.2 188.8 83.2 208 83.2 227.2 83.2 246.4 112 265.6 112 284.8 112 304 133.6"
+                  d="M16 69.6 35.2 69.6 54.4 69.6 73.6 69.6 92.8 69.6 112 69.6 131.2 69.6 150.4 69.6 169.6 69.6 188.8 69.6 208 69.6 227.2 69.6 246.4 92 265.6 92 284.8 92 304 108.8"
                   fill={null}
                   propList={
                     [
@@ -1435,7 +1435,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 />
                 <RNSVGCircle
                   cx={16}
-                  cy={83.2}
+                  cy={69.6}
                   fill={
                     {
                       "payload": 4278847752,
@@ -1464,7 +1464,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   dy={[]}
                   fill={
                     {
-                      "payload": 4294308330,
+                      "payload": 4294967295,
                       "type": 0,
                     }
                   }
@@ -1489,7 +1489,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   }
                   y={
                     [
-                      75.2,
+                      61.599999999999994,
                     ]
                   }
                 >
@@ -1511,7 +1511,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 </RNSVGText>
                 <RNSVGCircle
                   cx={304}
-                  cy={133.6}
+                  cy={108.8}
                   fill={
                     {
                       "payload": 4278847752,
@@ -1540,7 +1540,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   dy={[]}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -1565,7 +1565,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   }
                   y={
                     [
-                      147.6,
+                      122.8,
                     ]
                   }
                 >
@@ -1587,7 +1587,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 </RNSVGText>
                 <RNSVGCircle
                   cx={304}
-                  cy={133.6}
+                  cy={108.8}
                   fill={
                     {
                       "payload": 4292244570,
@@ -1636,7 +1636,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
               allowFontScaling={false}
               style={
                 {
-                  "color": "#9C9890",
+                  "color": "#857F7A",
                   "fontFamily": "Inter_500Medium",
                   "fontSize": 11,
                   "letterSpacing": 0.55,
@@ -1647,7 +1647,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
               }
               testID="hr-detail-zones-label"
             >
-              Time in zones · today
+              Time in zones · last 7 days
             </Text>
             <View
               accessibilityLabel="Resting zone, < 60 bpm, 0 percent"
@@ -1679,7 +1679,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#F5F1EA",
+                      "color": "#FFFFFF",
                       "fontFamily": "Inter_400Regular",
                       "fontSize": 15,
                       "lineHeight": 22,
@@ -1692,7 +1692,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 9,
                       "letterSpacing": 0.5,
@@ -1756,7 +1756,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "lineHeight": 16,
@@ -1799,7 +1799,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#F5F1EA",
+                      "color": "#FFFFFF",
                       "fontFamily": "Inter_400Regular",
                       "fontSize": 15,
                       "lineHeight": 22,
@@ -1812,7 +1812,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 9,
                       "letterSpacing": 0.5,
@@ -1876,7 +1876,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "lineHeight": 16,
@@ -1919,7 +1919,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#F5F1EA",
+                      "color": "#FFFFFF",
                       "fontFamily": "Inter_400Regular",
                       "fontSize": 15,
                       "lineHeight": 22,
@@ -1932,7 +1932,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 9,
                       "letterSpacing": 0.5,
@@ -1996,7 +1996,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "lineHeight": 16,
@@ -2039,7 +2039,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#F5F1EA",
+                      "color": "#FFFFFF",
                       "fontFamily": "Inter_400Regular",
                       "fontSize": 15,
                       "lineHeight": 22,
@@ -2052,7 +2052,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 9,
                       "letterSpacing": 0.5,
@@ -2116,7 +2116,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "lineHeight": 16,
@@ -2131,7 +2131,393 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
             </View>
           </View>
           <View
-            accessibilityLabel="Leiko about your heart rate: Your resting heart rate has settled three points lower than last month. That tracks with the better sleep we've seen — they tend to move together. A calm wake again this morning."
+            testID="hr-detail-recent"
+          >
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#857F7A",
+                  "fontFamily": "Inter_500Medium",
+                  "fontSize": 11,
+                  "letterSpacing": 0.55,
+                  "lineHeight": 14,
+                  "marginBottom": 8,
+                  "paddingHorizontal": 20,
+                  "textTransform": "uppercase",
+                }
+              }
+              testID="hr-detail-recent-eyebrow"
+            >
+              Recent readings
+            </Text>
+            <View
+              style={
+                [
+                  {
+                    "borderWidth": 0.5,
+                  },
+                  {
+                    "backgroundColor": "#120C07",
+                    "borderColor": "rgba(255,255,255,0.06)",
+                    "borderRadius": 22,
+                    "marginHorizontal": 20,
+                    "paddingHorizontal": 16,
+                  },
+                  undefined,
+                ]
+              }
+              testID="hr-detail-recent-list"
+            >
+              <View
+                accessibilityLabel="64, Latest · resting, 11:20 PM"
+                accessibilityRole="text"
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                    },
+                    {
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0.5,
+                      "opacity": 1,
+                      "paddingVertical": 12,
+                    },
+                  ]
+                }
+                testID="hr-detail-recent-list-row-hr-1779402008"
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#D6745A",
+                      },
+                    ]
+                  }
+                />
+                <View
+                  style={
+                    {
+                      "flex": 1,
+                      "marginLeft": 12,
+                    }
+                  }
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#FFFFFF",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    64
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Latest · resting
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
+                    }
+                  }
+                >
+                  11:20 PM
+                </Text>
+              </View>
+              <View
+                accessibilityLabel="70, Steady, 6:20 PM"
+                accessibilityRole="text"
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                    },
+                    {
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0.5,
+                      "opacity": 1,
+                      "paddingVertical": 12,
+                    },
+                  ]
+                }
+                testID="hr-detail-recent-list-row-hr-1779384008"
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#D6745A",
+                      },
+                    ]
+                  }
+                />
+                <View
+                  style={
+                    {
+                      "flex": 1,
+                      "marginLeft": 12,
+                    }
+                  }
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#FFFFFF",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    70
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Steady
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
+                    }
+                  }
+                >
+                  6:20 PM
+                </Text>
+              </View>
+              <View
+                accessibilityLabel="78, Steady, 12:20 PM"
+                accessibilityRole="text"
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                    },
+                    {
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0,
+                      "opacity": 1,
+                      "paddingVertical": 12,
+                    },
+                  ]
+                }
+                testID="hr-detail-recent-list-row-hr-1779362408"
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#D6745A",
+                      },
+                    ]
+                  }
+                />
+                <View
+                  style={
+                    {
+                      "flex": 1,
+                      "marginLeft": 12,
+                    }
+                  }
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#FFFFFF",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    78
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Steady
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
+                    }
+                  }
+                >
+                  12:20 PM
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View
+            accessibilityLabel="Leiko about your heart rate: After a few nights of sleep, this card will compare your resting heart rate to your usual band and call out anything worth noting."
             accessibilityRole="text"
             style={
               [
@@ -2268,14 +2654,14 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
             <Text
               style={
                 {
-                  "color": "#F5F1EA",
+                  "color": "#FFFFFF",
                   "fontFamily": "Inter_400Regular",
                   "fontSize": 15,
                   "lineHeight": 22,
                 }
               }
             >
-              Your resting heart rate has settled three points lower than last month. That tracks with the better sleep we've seen — they tend to move together. A calm wake again this morning.
+              After a few nights of sleep, this card will compare your resting heart rate to your usual band and call out anything worth noting.
             </Text>
           </View>
           <View

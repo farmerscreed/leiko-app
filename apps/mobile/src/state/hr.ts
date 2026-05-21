@@ -58,6 +58,14 @@ interface HRState {
    *  Empty entries are skipped (not zero-filled) so classifyHR sees
    *  baseline length = days-with-data. */
   restingBpmRecent: (nowSec?: number) => number[];
+  /** Sprint 18 — same data as restingBpmRecent but each entry carries
+   *  the nightKey (YYYY-MM-DD of the night the sleep window
+   *  belongs to) so consumers can date-align with other vitals'
+   *  per-night data instead of positional pairing. Oldest first.
+   *  Empty nights are skipped (not zero-filled). */
+  restingBpmRecentByNight: (
+    nowSec?: number,
+  ) => Array<{ nightKey: string; restingBpm: number }>;
   /**
    * Sprint 16.5e — seed historical samples from the server. The U16PRO
    * watch's day-info storage rolls over after a few days; without a
@@ -219,6 +227,12 @@ export const useHR = create<HRState>((set, get) => ({
   },
 
   restingBpmRecent: (nowSec) => {
+    return get()
+      .restingBpmRecentByNight(nowSec)
+      .map((e) => e.restingBpm);
+  },
+
+  restingBpmRecentByNight: (nowSec) => {
     const now = nowSec ?? Math.floor(Date.now() / 1000);
     const all = [...get().pending, ...get().recent];
     if (all.length === 0) return [];
@@ -235,7 +249,7 @@ export const useHR = create<HRState>((set, get) => ({
     // before today's nightKey) so today's restingBpm is NOT included
     // — classifyHR consumes today separately.
     const todayKey = nightDateKey(now);
-    const out: number[] = [];
+    const out: Array<{ nightKey: string; restingBpm: number }> = [];
     for (let d = RESTING_RECENT_DAYS; d >= 1; d--) {
       const nightKey = nightDateKey(now - d * SECONDS_PER_DAY);
       if (nightKey === todayKey) continue;
@@ -243,7 +257,7 @@ export const useHR = create<HRState>((set, get) => ({
       if (!samples || samples.length < 2) continue;
       const avg = rollingMinAverage(samples);
       if (avg === null) continue;
-      out.push(avg);
+      out.push({ nightKey, restingBpm: avg });
     }
     return out;
   },
