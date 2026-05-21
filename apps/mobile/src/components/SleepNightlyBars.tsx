@@ -47,6 +47,13 @@ const MAX_BAR_WIDTH = 28;
 export interface SleepNightlyBarsProps {
   sessions: ReadonlyArray<SleepSession>;
   range: TrendRange;
+  /** Sprint 18 — explicit chart-area width. The chart computes per-bar
+   *  width from this; without it the component used to hardcode 360 and
+   *  cluster bars to the left on wider phones (Pixel 8 = 412dp). When
+   *  omitted, falls back to 360 for back-compat. Callers should pass
+   *  `useWindowDimensions().width` (or a horizontally-padded slice of
+   *  it) so the chart fills its container. */
+  width?: number;
   testID?: string;
   style?: StyleProp<ViewStyle>;
 }
@@ -98,7 +105,7 @@ function buildDayGrid(
   return grid;
 }
 
-export function SleepNightlyBars({ sessions, range, testID, style }: SleepNightlyBarsProps) {
+export function SleepNightlyBars({ sessions, range, width, testID, style }: SleepNightlyBarsProps) {
   const theme = useTheme();
   const sleepColor = theme.colors.vital.sleep;
   const labelStyle = theme.type('labelUppercase');
@@ -108,8 +115,16 @@ export function SleepNightlyBars({ sessions, range, testID, style }: SleepNightl
 
   // Width per bar — shrinks with range so 90d fits.
   const slotCount = grid.length;
-  const horizontalPad = 32;
-  const usableWidth = 360 - horizontalPad; // approx; bars will flex
+  // Sprint 18 — Y-axis labels + chart frame + card padding consume the
+  // leading horizontal space. The y-axis column is ~28px (22px label +
+  // 6px gap), the card has spacing.l (~16px) padding each side, plus a
+  // small inner safe margin. Subtract conservatively so bars don't
+  // hug the right edge.
+  const Y_AXIS_GUTTER = 28;
+  const CARD_PADDING = 32; // sum of left+right padding
+  const horizontalPad = Y_AXIS_GUTTER + CARD_PADDING;
+  const baseWidth = typeof width === 'number' && width > 0 ? width : 360;
+  const usableWidth = Math.max(120, baseWidth - horizontalPad);
   const gap = range === '7d' ? 6 : range === '30d' ? 2 : 1;
   const bw = Math.max(
     MIN_BAR_WIDTH,

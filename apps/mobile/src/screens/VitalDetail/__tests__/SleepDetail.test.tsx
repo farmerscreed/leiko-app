@@ -68,6 +68,72 @@ jest.mock('../../../state/readings', () => ({
   pending: [],
 });
 
+// Sprint 17a parent-scoped hooks land in SleepDetail but were never
+// mocked here, so the test suite has been failing on baseline since
+// 17a (TanStack Query throws "No QueryClient set"). Stub both to the
+// "self-buyer path" defaults (data null, not loading, no error) so the
+// existing assertions run; the Sprint 18 audit fixes add new
+// describe blocks that flip these mocks to exercise the loading +
+// error paths explicitly.
+let mockParentPulse: {
+  data: unknown;
+  isLoading: boolean;
+  isRefreshing: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+} = {
+  data: null,
+  isLoading: false,
+  isRefreshing: false,
+  error: null,
+  refresh: async () => undefined,
+};
+let mockParentRecent: {
+  data: { sleep: unknown[]; readings: unknown[] };
+  isLoading: boolean;
+  isRefreshing: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+} = {
+  data: { sleep: [], readings: [] },
+  isLoading: false,
+  isRefreshing: false,
+  error: null,
+  refresh: async () => undefined,
+};
+const setMockParentPulse = (next: Partial<typeof mockParentPulse>) => {
+  mockParentPulse = { ...mockParentPulse, ...next };
+};
+// setMockParentRecent retained for future tests that need to flip the
+// recent-list slice; intentionally referenced via void here so TS6133
+// stays quiet without an eslint suppression. Remove the void line when
+// the first real consumer lands.
+void ((_next: Partial<typeof mockParentRecent>) => {
+  mockParentRecent = { ...mockParentRecent, ..._next };
+});
+const resetParentMocks = () => {
+  mockParentPulse = {
+    data: null,
+    isLoading: false,
+    isRefreshing: false,
+    error: null,
+    refresh: async () => undefined,
+  };
+  mockParentRecent = {
+    data: { sleep: [], readings: [] },
+    isLoading: false,
+    isRefreshing: false,
+    error: null,
+    refresh: async () => undefined,
+  };
+};
+jest.mock('../../../hooks/useParentDailyPulseData', () => ({
+  useParentDailyPulseData: () => mockParentPulse,
+}));
+jest.mock('../../../hooks/useParentVitalsRecent', () => ({
+  useParentVitalsRecent: () => mockParentRecent,
+}));
+
 function withProviders(ui: ReactNode, colorMode: 'dark' | 'light' = 'dark') {
   return (
     <SafeAreaProvider
@@ -146,7 +212,54 @@ describe('SleepDetail — hero', () => {
     expect(screen.getByText('hrs')).toBeTruthy();
   });
 
-  it('renders calmer range copy for high sleep score', () => {
+  it('renders calmer range copy for high sleep score (with history)', () => {
+    // Sprint 18 P1 — comparative phrasing ("than last week") only fires
+    // once the user has HISTORY_REFERENCE_NIGHTS (7) recorded sessions.
+    // Seed 8 nights so the comparative copy returns.
+    const session = makeSleep({ sleepScore: 85 });
+    const history = Array.from({ length: 8 }, (_, i) =>
+      makeSleep({ endSec: NOW_SEC() - (i + 1) * 86400, sleepScore: 78 }),
+    );
+    setMockData({
+      bpLatest: null,
+      hrRestingToday: null,
+      hrRestingRecent: [],
+      hrLatestSampleAt: null,
+      spo2LatestPercent: null,
+      spo2OvernightLowsRecent: [],
+      spo2LatestSampleAt: null,
+      sleepSession: session,
+      activityToday: null,
+    });
+    mockSleepRecent = [session, ...history];
+    render(withProviders(<SleepDetail onBack={() => undefined} />));
+    expect(screen.getByText('A quieter night than last week')).toBeTruthy();
+  });
+
+  it('renders the "more restless" range copy for low sleep score (with history)', () => {
+    const session = makeSleep({ sleepScore: 40 });
+    const history = Array.from({ length: 8 }, (_, i) =>
+      makeSleep({ endSec: NOW_SEC() - (i + 1) * 86400, sleepScore: 50 }),
+    );
+    setMockData({
+      bpLatest: null,
+      hrRestingToday: null,
+      hrRestingRecent: [],
+      hrLatestSampleAt: null,
+      spo2LatestPercent: null,
+      spo2OvernightLowsRecent: [],
+      spo2LatestSampleAt: null,
+      sleepSession: session,
+      activityToday: null,
+    });
+    mockSleepRecent = [session, ...history];
+    render(withProviders(<SleepDetail onBack={() => undefined} />));
+    expect(screen.getByText('A more restless night than your usual')).toBeTruthy();
+  });
+
+  it('uses non-comparative range copy when the user has fewer than 7 nights of history', () => {
+    // Sprint 18 P1 — first-week user shouldn't see "than your usual"
+    // when they have no "usual" yet.
     const session = makeSleep({ sleepScore: 85 });
     setMockData({
       bpLatest: null,
@@ -159,27 +272,10 @@ describe('SleepDetail — hero', () => {
       sleepSession: session,
       activityToday: null,
     });
-    mockSleepRecent = [session];
+    mockSleepRecent = [session]; // only 1 night
     render(withProviders(<SleepDetail onBack={() => undefined} />));
-    expect(screen.getByText('A quieter night than last week')).toBeTruthy();
-  });
-
-  it('renders the "more restless" range copy for low sleep score', () => {
-    const session = makeSleep({ sleepScore: 40 });
-    setMockData({
-      bpLatest: null,
-      hrRestingToday: null,
-      hrRestingRecent: [],
-      hrLatestSampleAt: null,
-      spo2LatestPercent: null,
-      spo2OvernightLowsRecent: [],
-      spo2LatestSampleAt: null,
-      sleepSession: session,
-      activityToday: null,
-    });
-    mockSleepRecent = [session];
-    render(withProviders(<SleepDetail onBack={() => undefined} />));
-    expect(screen.getByText('A more restless night than your usual')).toBeTruthy();
+    expect(screen.getByText('A quieter night by the numbers')).toBeTruthy();
+    expect(screen.queryByText('A quieter night than last week')).toBeNull();
   });
 });
 
@@ -209,8 +305,11 @@ describe('SleepDetail — empty state', () => {
   });
 });
 
-describe('SleepDetail — hypnogram + recent', () => {
-  it('renders the hypnogram when a session is present', () => {
+describe('SleepDetail — stages bar + recent', () => {
+  // Sprint 16.5c replaced SleepHypnogram with SleepStagesBar
+  // (testID renamed from `sleep-detail-hypnogram` to
+  // `sleep-detail-stages`); test was failing on baseline since then.
+  it('renders the stages bar when a session is present', () => {
     const session = makeSleep();
     setMockData({
       bpLatest: null,
@@ -225,10 +324,115 @@ describe('SleepDetail — hypnogram + recent', () => {
     });
     mockSleepRecent = [session];
     render(withProviders(<SleepDetail onBack={() => undefined} />));
-    expect(screen.getByTestId('sleep-detail-hypnogram')).toBeTruthy();
+    expect(screen.getByTestId('sleep-detail-stages')).toBeTruthy();
     // Eyebrow renamed when SleepDetail moved to RecentReadingsSection
     // (on-device review 2026-05-08): "Last seven nights" → "Recent nights".
     expect(screen.getByText('Recent nights')).toBeTruthy();
+  });
+});
+
+// ─── Sprint 18 audit fixes ──────────────────────────────────────────────
+
+describe('SleepDetail — caregiver-scoped loading + error (Sprint 18 S1 + S3)', () => {
+  beforeEach(() => {
+    resetParentMocks();
+    mockSleepRecent = [];
+    mockSleepPending = [];
+    setMockData({
+      bpLatest: null,
+      hrRestingToday: null,
+      hrRestingRecent: [],
+      hrLatestSampleAt: null,
+      spo2LatestPercent: null,
+      spo2OvernightLowsRecent: [],
+      spo2LatestSampleAt: null,
+      sleepSession: null,
+      activityToday: null,
+    });
+  });
+
+  it('shows a loading spinner — not the empty-state UI — when the parent fetch is in flight', () => {
+    setMockParentPulse({ isLoading: true, data: null });
+    render(
+      withProviders(
+        <SleepDetail onBack={() => undefined} familyId="fam-123" />,
+      ),
+    );
+    expect(screen.getByTestId('sleep-detail-loading')).toBeTruthy();
+    // The empty-state body should NOT be claiming "no sleep" while we're still fetching.
+    expect(screen.queryByTestId('sleep-detail-insight')).toBeNull();
+  });
+
+  it('shows an ErrorState — not the empty-state UI — when the parent fetch errored', () => {
+    setMockParentPulse({ error: new Error('network down'), data: null });
+    render(
+      withProviders(
+        <SleepDetail onBack={() => undefined} familyId="fam-123" />,
+      ),
+    );
+    expect(screen.getByTestId('sleep-detail-error')).toBeTruthy();
+    expect(screen.queryByTestId('sleep-detail-insight')).toBeNull();
+  });
+});
+
+describe("SleepDetail — recent-nights labels (Sprint 18 S2)", () => {
+  it("does NOT label the newest row 'Last night' / 'now' when it's older than 36 hours", () => {
+    // Newest session was 3 days ago (sparse-tracker scenario).
+    const stale = makeSleep({ endSec: NOW_SEC() - 3 * 86400, totalMinutes: 420 });
+    setMockData({
+      bpLatest: null,
+      hrRestingToday: null,
+      hrRestingRecent: [],
+      hrLatestSampleAt: null,
+      spo2LatestPercent: null,
+      spo2OvernightLowsRecent: [],
+      spo2LatestSampleAt: null,
+      sleepSession: null, // no last-night session in dailyPulse
+      activityToday: null,
+    });
+    mockSleepRecent = [stale];
+    render(withProviders(<SleepDetail onBack={() => undefined} />));
+    // The recent-list row should NOT call this stale session "Last night".
+    expect(screen.queryByText(/Last night ·/)).toBeNull();
+    // And the time chip should not say "now" for it.
+    expect(screen.queryByText('now')).toBeNull();
+  });
+});
+
+describe('SleepDetail — correlation empty-state placeholder (Sprint 18 P5)', () => {
+  it('renders the calm placeholder when sleep history exists but BP data is too sparse', () => {
+    const session = makeSleep();
+    setMockData({
+      bpLatest: null,
+      hrRestingToday: null,
+      hrRestingRecent: [],
+      hrLatestSampleAt: null,
+      spo2LatestPercent: null,
+      spo2OvernightLowsRecent: [],
+      spo2LatestSampleAt: null,
+      sleepSession: session,
+      activityToday: null,
+    });
+    mockSleepRecent = [session];
+    render(withProviders(<SleepDetail onBack={() => undefined} />));
+    expect(screen.getByTestId('sleep-detail-correlation-placeholder')).toBeTruthy();
+  });
+
+  it('does NOT render the placeholder when there is no sleep history at all', () => {
+    setMockData({
+      bpLatest: null,
+      hrRestingToday: null,
+      hrRestingRecent: [],
+      hrLatestSampleAt: null,
+      spo2LatestPercent: null,
+      spo2OvernightLowsRecent: [],
+      spo2LatestSampleAt: null,
+      sleepSession: null,
+      activityToday: null,
+    });
+    mockSleepRecent = [];
+    render(withProviders(<SleepDetail onBack={() => undefined} />));
+    expect(screen.queryByTestId('sleep-detail-correlation-placeholder')).toBeNull();
   });
 });
 
