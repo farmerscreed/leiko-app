@@ -67,6 +67,7 @@ import { FamilyRemovalBanner } from '../../components/FamilyRemovalBanner';
 import { useFamilyRemovalBanner } from '../../hooks/useFamilyRemovalBanner';
 import { useAuth } from '../../state/auth';
 import { useHR } from '../../state/hr';
+import { usePairing } from '../../state/pairing';
 import { useSleep } from '../../state/sleep';
 import { useTheme, type Theme } from '../../theme';
 import {
@@ -93,6 +94,11 @@ export function SelfBuyerHome() {
   const data = useDailyPulseData();
   // Sprint 10a — drives the 6th-reading auto-paywall mount below.
   const familyId = parents[0]?.familyId ?? null;
+  // Sprint 18 bench bug — self-buyer post-onboarding has no inline
+  // pairing affordance; if pairedDevice is null we render a calm
+  // "let's pair your watch" prompt under the hero so first-run users
+  // don't have to dig into Settings to find pairing.
+  const pairedDevice = usePairing((s) => s.pairedDevice);
 
   // ----- Adaptive central value (D13 §7.2) ---------------------------
   const central = useMemo(() => pickCentralValue(data), [data]);
@@ -288,6 +294,25 @@ export function SelfBuyerHome() {
             testID="self-buyer-home-hero"
           />
         </Pressable>
+
+        {/* Sprint 18 bench bug — first-run self-buyer with no watch
+            paired had no inline pairing CTA on Home and had to dig into
+            Settings. This calm prompt slots between the hero and the
+            narration so the next action is obvious. Disappears the
+            moment usePairing has a pairedDevice. */}
+        {!pairedDevice ? (
+          <View
+            style={{
+              paddingHorizontal: theme.spacing.l,
+              marginTop: theme.spacing.xxl,
+            }}
+          >
+            <PairWatchPrompt
+              theme={theme}
+              onPair={() => navigation.navigate('Pairing')}
+            />
+          </View>
+        ) : null}
 
         {/* AI narration card — placeholder string until Sprint 12.5. */}
         <View
@@ -579,6 +604,96 @@ function PulseHeader({ theme, eyebrow, greeting, name, onAvatarPress }: PulseHea
 interface NarrationCardProps {
   theme: Theme;
   text: string;
+}
+
+// Sprint 18 bench bug — calm pairing prompt rendered on self-buyer Home
+// when no watch is paired. Matches NarrationCard's visual weight so it
+// sits naturally below the hero. Tapping anywhere on the card routes to
+// the Pairing screen; an explicit "Pair watch" pressable carries the
+// label for screen readers + accessibility.
+interface PairWatchPromptProps {
+  theme: Theme;
+  onPair: () => void;
+}
+
+function PairWatchPrompt({ theme, onPair }: PairWatchPromptProps) {
+  const labelStyle = theme.type('labelUppercase');
+  const titleStyle = theme.type('title');
+  const bodyStyle = theme.type('bodyM');
+  return (
+    <Pressable
+      onPress={onPair}
+      accessibilityRole="button"
+      accessibilityLabel="Pair your watch"
+      accessibilityHint="Opens the pairing flow"
+      testID="self-buyer-home-pair-watch-prompt"
+      style={({ pressed }) => ({
+        padding: theme.spacing.l,
+        borderRadius: theme.radii.l,
+        backgroundColor: theme.colors.surface.warmElevated,
+        borderWidth: 0.5,
+        borderColor: theme.colors.border.rim,
+        opacity: pressed ? 0.85 : 1,
+      })}
+    >
+      <Text
+        allowFontScaling={false}
+        style={{
+          fontFamily: labelStyle.family,
+          fontSize: labelStyle.size,
+          lineHeight: labelStyle.lineHeight,
+          letterSpacing: labelStyle.letterSpacing,
+          color: theme.colors.brand.coral,
+          textTransform: 'uppercase',
+          marginBottom: theme.spacing.s,
+        }}
+      >
+        Your watch
+      </Text>
+      <Text
+        style={{
+          fontFamily: titleStyle.family,
+          fontSize: titleStyle.size,
+          lineHeight: titleStyle.lineHeight,
+          fontWeight: titleStyle.weight as '600',
+          color: theme.colors.text.primary,
+          marginBottom: theme.spacing.xs,
+        }}
+      >
+        Pair your watch to start.
+      </Text>
+      <Text
+        style={{
+          fontFamily: bodyStyle.family,
+          fontSize: bodyStyle.size,
+          lineHeight: bodyStyle.lineHeight,
+          color: theme.colors.text.secondary,
+          marginBottom: theme.spacing.m,
+        }}
+      >
+        Once connected, your readings start syncing on their own.
+      </Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: bodyStyle.family,
+            fontSize: bodyStyle.size,
+            lineHeight: bodyStyle.lineHeight,
+            fontWeight: '600',
+            color: theme.colors.brand.coral,
+          }}
+        >
+          Pair watch  ›
+        </Text>
+      </View>
+    </Pressable>
+  );
 }
 
 function NarrationCard({ theme, text }: NarrationCardProps) {
