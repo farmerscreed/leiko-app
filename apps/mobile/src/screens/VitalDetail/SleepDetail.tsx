@@ -52,8 +52,24 @@ import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { sleepFill } from '../../utils/vitalThemes';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
+import { formatClockInTz, useUserTz } from '../../utils/userTz';
+import { useReconcileSleepFromHR } from '../../hooks/useReconcileSleepFromHR';
 import { useTheme } from '../../theme';
 import type { SleepSession } from '../../types/vitals';
+
+/** Sprint 18 — pick the HR-inferred wake/bed times when present, else
+ *  fall back to the legacy synthesized boundaries. Exported for tests. */
+export function displayWindow(session: SleepSession): {
+  startSec: number;
+  endSec: number;
+  wakeSource: 'hr_inferred' | 'fallback' | undefined;
+} {
+  return {
+    startSec: session.inferredSessionStartSec ?? session.sessionStartSec,
+    endSec: session.inferredSessionEndSec ?? session.sessionEndSec,
+    wakeSource: session.wakeSource,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Pure helpers (exported for tests via the screen module)
@@ -127,19 +143,15 @@ function insightBody(
 }
 
 /** "Last night · 11:14 pm → 8:00 am" — bedtime AND wake-time in one
- *  line. Pre-16.5c only the bedtime appeared. */
+ *  line. Pre-16.5c only the bedtime appeared. Sprint 18: now formats
+ *  in the user's IANA timezone instead of the device-OS default. */
 export function bedTimeSub(
   sessionStartSec: number,
   sessionEndSec: number,
+  tz: string,
 ): string {
-  const bed = new Date(sessionStartSec * 1000).toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-  const wake = new Date(sessionEndSec * 1000).toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
+  const bed = formatClockInTz(sessionStartSec, tz);
+  const wake = formatClockInTz(sessionEndSec, tz);
   return `Last night · ${bed} → ${wake}`;
 }
 
@@ -248,6 +260,12 @@ export function SleepDetail({
 }: SleepDetailProps) {
   const theme = useTheme();
   const { width: screenWidth } = useWindowDimensions();
+  const tz = useUserTz();
+  // Sprint 18 — re-derive HR-inferred wake times across stored
+  // sessions whose `wakeSource` is missing or 'fallback'. Mounts here
+  // (and on each Home variant) so we re-run whenever the screen
+  // appears with fresh HR data.
+  useReconcileSleepFromHR();
   // Sprint 17a — both data sources called unconditionally.
   const ownPulse = useDailyPulseData();
   const ownSleepRecent = useSleep((s) => s.recent);
@@ -325,15 +343,17 @@ export function SleepDetail({
 
   // ---- Hero ------------------------------------------------------------
   const heroPrimary = hasLastNight ? formatHm(session.totalMinutes) : '—';
+  // Sprint 18 — prefer HR-inferred wake/bed when present.
+  const heroDisplay = hasLastNight ? displayWindow(session) : null;
   const sleepStaleness = hasLastNight
-    ? checkStaleness('sleep', session.sessionEndSec)
+    ? checkStaleness('sleep', heroDisplay!.endSec)
     : 'no_data';
   const sleepStaleCaption =
     sleepStaleness === 'stale' && hasLastNight
-      ? formatStalenessCaption(session.sessionEndSec)
+      ? formatStalenessCaption(heroDisplay!.endSec)
       : null;
   const heroSub = hasLastNight
-    ? (sleepStaleCaption ?? bedTimeSub(session.sessionStartSec, session.sessionEndSec))
+    ? (sleepStaleCaption ?? bedTimeSub(heroDisplay!.startSec, heroDisplay!.endSec, tz))
     : 'No sleep recorded last night';
   // Sprint 18 — P1 fix. Pass the count of recorded nights so the
   // "than your usual" / "than last week" phrasing only fires once the
@@ -418,8 +438,10 @@ export function SleepDetail({
               deepMinutes={deepMinutes}
               lightMinutes={lightMinutes}
               otherMinutes={otherMinutes}
-              sessionStartSec={session.sessionStartSec}
-              sessionEndSec={session.sessionEndSec}
+              sessionStartSec={heroDisplay!.startSec}
+              sessionEndSec={heroDisplay!.endSec}
+              wakeSource={heroDisplay!.wakeSource}
+              tz={tz}
               testID="sleep-detail-stages"
             />
           ) : null}

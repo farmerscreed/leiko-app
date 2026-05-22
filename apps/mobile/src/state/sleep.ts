@@ -14,7 +14,8 @@ import { create } from 'zustand';
 import { mmkv, STORAGE_KEYS } from '../services/storage';
 import { createPendingVitalBuffer } from '../services/pendingVitalBuffer';
 import { logger } from '../services/analytics/logger';
-import type { SleepSession } from '../types/vitals';
+import type { HRSample, SleepSession } from '../types/vitals';
+import { inferWakeFromHR } from '../services/sleep/inferWakeFromHR';
 
 const RECENT_SESSIONS_CAP = 60;     // ~2 months at 1 session/day
 const LAST_NIGHT_LOOKBACK_SEC = 36 * 60 * 60;
@@ -47,6 +48,17 @@ interface SleepState {
    * Returns the number of NEW sessions added (not duplicates).
    */
   seedFromServer: (sessions: SleepSession[]) => number;
+  /**
+   * Sprint 18 — re-derive HR-inferred wake times across all stored
+   * sessions. For each session whose `wakeSource` is missing or marked
+   * 'fallback', re-runs inferWakeFromHR; if HR data now yields a
+   * confident inflection, populates `inferredSession{Start,End}Sec` +
+   * sets `wakeSource = 'hr_inferred'`. Legacy `sessionStartSec` /
+   * `sessionEndSec` are NEVER mutated — they remain the canonical
+   * dedup key + the server-side identity. Display layers prefer the
+   * inferred values. Returns the count of sessions actually upgraded.
+   */
+  reconcileWakeSources: (hrSamples: ReadonlyArray<HRSample>, tz: string) => number;
   /** Sprint 17b — visibility purge. Clears `recent` only. */
   clearRecent: () => void;
   reset: () => void;
@@ -170,6 +182,87 @@ export const useSleep = create<SleepState>((set, get) => ({
     set({ recent: merged });
     persistRecent(merged);
     return newRows.length;
+  },
+
+  reconcileWakeSources: (hrSamples, tz) => {
+    if (!tz) return 0;
+    const upgrade = (session: SleepSession): { session: SleepSession; upgraded: boolean } => {
+      // Skip sessions we've already pinned to an HR-derived wake.
+      if (session.wakeSource === 'hr_inferred') {
+        return { session, upgraded: false };
+      }
+      // Derive dayLocal from the legacy session end (UTC-anchored —
+      // matches what the watch ingest used). For legacy rows ingested
+      // before Sprint 18 this is the synthesized 08:00 UTC day; for
+      // rows from the new ingest the legacy field is still set to the
+      // same anchor. Either way the day-key is correct.
+      const dayLocal = new Date(session.sessionEndSec * 1000)
+        .toISOString()
+        .slice(0, 10);
+      const inferred = inferWakeFromHR(
+        hrSamples,
+        dayLocal,
+        session.totalMinutes,
+        tz,
+      );
+      // Only persist an upgrade when we crossed from no-data /
+      // fallback into a confident HR inference. Re-running fallback
+      // on an already-fallback row would churn without value.
+      if (inferred.source !== 'hr_inferred') {
+        // If the row had no marker at all (legacy), at least stamp
+        // it with the calibrated fallback so the UI can mark it
+        // approximate. Don't overwrite an existing 'fallback' marker
+        // with the same value.
+        if (session.wakeSource === undefined) {
+          return {
+            session: {
+              ...session,
+              inferredSessionStartSec: inferred.sessionStartSec,
+              inferredSessionEndSec: inferred.sessionEndSec,
+              wakeSource: 'fallback',
+            },
+            upgraded: true,
+          };
+        }
+        return { session, upgraded: false };
+      }
+      return {
+        session: {
+          ...session,
+          inferredSessionStartSec: inferred.sessionStartSec,
+          inferredSessionEndSec: inferred.sessionEndSec,
+          wakeSource: 'hr_inferred',
+        },
+        upgraded: true,
+      };
+    };
+
+    let upgradedCount = 0;
+    const oldPending = get().pending;
+    const newPending = oldPending.map((s) => {
+      const r = upgrade(s);
+      if (r.upgraded) upgradedCount += 1;
+      return r.session;
+    });
+    const oldRecent = get().recent;
+    const newRecent = oldRecent.map((s) => {
+      const r = upgrade(s);
+      if (r.upgraded) upgradedCount += 1;
+      return r.session;
+    });
+    if (upgradedCount === 0) return 0;
+    // Pending lives in MMKV via the buffer; rewrite each entry by
+    // remove + append so the buffer's storage reflects the upgrade.
+    for (let i = 0; i < newPending.length; i++) {
+      const before = oldPending[i];
+      const after = newPending[i];
+      if (before === after) continue;
+      buffer.removeByKey(String(before.sessionStartSec));
+      buffer.append(after);
+    }
+    set({ pending: buffer.readAll(), recent: newRecent });
+    persistRecent(newRecent);
+    return upgradedCount;
   },
 
   clearRecent: () => {

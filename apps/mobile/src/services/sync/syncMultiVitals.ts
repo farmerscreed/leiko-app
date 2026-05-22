@@ -80,6 +80,8 @@ import { useSpO2 } from '../../state/spo2';
 import { useSleep } from '../../state/sleep';
 import { useActivity } from '../../state/activity';
 import { logger } from '../analytics/logger';
+import { userTz } from '../../utils/userTz';
+import { inferWakeFromHR } from '../sleep/inferWakeFromHR';
 import type {
   HRSample,
   SpO2Sample,
@@ -499,12 +501,28 @@ async function syncDayInfoStep(
           info.sleep.day,
         );
         const dayStart = unixSecFromDayLocal(dayLocal);
-        // Synthesize session boundaries — the 0x07 reply doesn't expose
-        // start/end. sessionEnd = day 08:00 UTC (proxy for "this morning's
-        // wake"); sessionStart = sessionEnd - totalMinutes. Tracked in D13
-        // §15.4 Q-D13-3.
+        // Legacy synthesized boundaries — kept as the canonical
+        // sessionStartSec/sessionEndSec for server identity + client
+        // dedup. Display layers prefer the `inferred*Sec` values below
+        // (Sprint 18 / SLEEP_TIMEZONE_FIX_BRIEF).
         const sessionEndSec = dayStart + 8 * 3600;
         const sessionStartSec = sessionEndSec - info.sleep.totalMinutes * 60;
+        // Sprint 18 — derive the display-time wake from HR samples
+        // already in the slice (this ingest path runs in parallel with
+        // syncHRStep, so HR for tonight may or may not be present yet;
+        // when not, we fall back to a tz-aware 07:00-local synthesis
+        // and the reconcile hook upgrades the session once HR catches
+        // up). The legacy `sessionStartSec`/`sessionEndSec` are
+        // untouched to preserve dedup identity.
+        const tz = userTz();
+        const hrState = useHR.getState();
+        const hrSamples = [...hrState.pending, ...hrState.recent];
+        const inferred = inferWakeFromHR(
+          hrSamples,
+          dayLocal,
+          info.sleep.totalMinutes,
+          tz,
+        );
         const session: SleepSession = {
           sessionStartSec,
           sessionEndSec,
@@ -518,6 +536,9 @@ async function syncDayInfoStep(
           awakeCount: 0,
           transitions: [] as { atSec: number; stage: SleepStage }[],
           sleepScore: 0, // computed by classifier downstream
+          inferredSessionStartSec: inferred.sessionStartSec,
+          inferredSessionEndSec: inferred.sessionEndSec,
+          wakeSource: inferred.source,
         };
         useSleep.getState().addPending(session);
         sleepCount += 1;

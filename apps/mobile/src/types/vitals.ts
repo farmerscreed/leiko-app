@@ -70,9 +70,13 @@ export interface SleepTransition {
 }
 
 export interface SleepSession {
-  /** unix sec UTC; session start. */
+  /** unix sec UTC; session start. Legacy synthesized boundary used as
+   *  the dedup key on the client and the primary identity on the
+   *  server. NEVER mutated post-ingest — see inferredSessionStartSec
+   *  for the corrected display value. */
   sessionStartSec: number;
-  /** unix sec UTC; session end. */
+  /** unix sec UTC; session end. Legacy synthesized boundary. See
+   *  inferredSessionEndSec for the corrected display value. */
   sessionEndSec: number;
   /** ISO with offset; for display in the user's locale. */
   sessionStartLocal: string;
@@ -88,6 +92,19 @@ export interface SleepSession {
   transitions: SleepTransition[];
   /** 0-100, computed per D13 §6.4. */
   sleepScore: number;
+  /** Sprint 18 — HR-derived inferred bedtime (epoch sec UTC). When
+   *  present, this is what display layers SHOULD show; falls back to
+   *  sessionStartSec. Computed at ingest or by the reconcile hook
+   *  once HR samples are available. Never sent over the wire. */
+  inferredSessionStartSec?: number;
+  /** Sprint 18 — HR-derived inferred wake time (epoch sec UTC). When
+   *  present, this is what display layers SHOULD show; falls back to
+   *  sessionEndSec. */
+  inferredSessionEndSec?: number;
+  /** Sprint 18 — provenance of the inferred boundaries. 'hr_inferred'
+   *  when we found a HR-surge inflection within the wake window;
+   *  'fallback' when we used the tz-aware 07:00-local synthesis. */
+  wakeSource?: 'hr_inferred' | 'fallback';
 }
 
 export interface ActivityDay {

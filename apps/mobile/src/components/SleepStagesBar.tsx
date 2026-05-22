@@ -20,6 +20,7 @@
 
 import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useTheme } from '../theme';
+import { formatClockInTz, useUserTz } from '../utils/userTz';
 
 export interface SleepStagesBarProps {
   totalMinutes: number;
@@ -33,6 +34,15 @@ export interface SleepStagesBarProps {
   sessionStartSec?: number;
   /** Unix-sec when the user woke up. */
   sessionEndSec?: number;
+  /** Sprint 18 — provenance of the session's wake/bed times.
+   *  'fallback' surfaces an "approx." caption under the Woke chip so
+   *  the user knows the watch's HR data wasn't sufficient to pin
+   *  the actual wake moment. Undefined behaves like 'fallback' for
+   *  display purposes but is silent (legacy rows pre-Sprint-18). */
+  wakeSource?: 'hr_inferred' | 'fallback';
+  /** Sprint 18 — IANA timezone for clock formatting. Optional; when
+   *  omitted, falls back to `useUserTz()` (profile → device-OS). */
+  tz?: string;
   testID?: string;
   style?: StyleProp<ViewStyle>;
 }
@@ -50,13 +60,6 @@ function pct(part: number, total: number): number {
   return Math.max(0, Math.min(100, Math.round((part / total) * 100)));
 }
 
-function formatClock(sec: number): string {
-  return new Date(sec * 1000).toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-}
-
 export function SleepStagesBar({
   totalMinutes,
   deepMinutes,
@@ -64,10 +67,18 @@ export function SleepStagesBar({
   otherMinutes,
   sessionStartSec,
   sessionEndSec,
+  wakeSource,
+  tz,
   testID,
   style,
 }: SleepStagesBarProps) {
   const theme = useTheme();
+  // Tz resolution order: explicit prop → user profile → device OS.
+  // The hook is unconditionally called so React's rules of hooks hold;
+  // `tz` prop overrides when supplied (tests / explicit callers).
+  const resolvedTz = useUserTz();
+  const effectiveTz = tz ?? resolvedTz;
+  const formatClock = (sec: number): string => formatClockInTz(sec, effectiveTz);
   const sleepColor = theme.colors.vital.sleep;
   const otherFinal = otherMinutes ?? Math.max(0, totalMinutes - deepMinutes - lightMinutes);
   const deepPct = pct(deepMinutes, totalMinutes);
@@ -213,6 +224,21 @@ export function SleepStagesBar({
             >
               {formatClock(sessionEndSec!)}
             </Text>
+            {wakeSource === 'fallback' ? (
+              <Text
+                allowFontScaling={false}
+                testID={testID ? `${testID}-approx` : undefined}
+                style={{
+                  fontFamily: captionStyle.family,
+                  fontSize: captionStyle.size,
+                  lineHeight: captionStyle.lineHeight,
+                  color: theme.colors.text.tertiary,
+                  fontStyle: 'italic',
+                }}
+              >
+                approx.
+              </Text>
+            ) : null}
           </View>
         </View>
       ) : null}
