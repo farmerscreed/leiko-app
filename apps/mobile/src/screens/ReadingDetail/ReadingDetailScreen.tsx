@@ -310,35 +310,15 @@ export function ReadingDetailScreen({ navigation }: Props) {
           />
         </View>
 
-        {isSelf ? (
-          <Button
-            variant="ghost"
-            onPress={() => undefined}
-            accessibilityLabel="Why this reading? Opens explanation sheet."
-            testID="reading-detail-why-this"
-            style={{ marginBottom: theme.spacing.s }}
-          >
-            Why this reading?
-          </Button>
-        ) : (
-          <Button
-            variant="ghost"
-            onPress={() => undefined}
-            accessibilityLabel="Mark as not me. Hides this reading from the family."
-            testID="reading-detail-not-me"
-            style={{ marginBottom: theme.spacing.s }}
-          >
-            Mark as not me
-          </Button>
-        )}
-        <Button
-          variant="ghost"
-          onPress={() => undefined}
-          accessibilityLabel={isSelf ? 'Note for my doctor' : 'Add a note'}
-          testID="reading-detail-add-note"
-        >
-          {isSelf ? 'Note for my doctor' : 'Add a note'}
-        </Button>
+        {/* Sprint 18 — removed three ghost buttons that shipped to
+            users with onPress={() => undefined} ("Why this reading?",
+            "Mark as not me", "Add a note" / "Note for my doctor").
+            Tapping them did literally nothing — confusing UX. The
+            working "What does this mean?" pressable above already
+            opens the InlineExplainer; the other three were Sprint
+            7/13 placeholders that never got wired. Bring them back
+            when their real handlers land (notes UI; soft-hide for
+            "not me"; richer explainer for "why"). */}
 
         {/* Sprint 18 bench bug — an explicit Done CTA at the bottom of
             the scroll content. Calls goBack so it works in both nav

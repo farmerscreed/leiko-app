@@ -54,6 +54,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
 import { ScreenAnomalyBanner } from '../../components/ScreenAnomalyBanner';
 import { SyncReassuranceBanner } from '../../components/SyncReassuranceBanner';
+import { LoadingState } from '../../components/LoadingState';
+import { ErrorState } from '../../components/ErrorState';
 import { DailyPulseHero } from '../../components/DailyPulseHero';
 import { HomeLearnCard } from '../../components/HomeLearnCard';
 import { VitalTile } from '../../components/VitalTile';
@@ -110,6 +112,16 @@ export function ParentDashboard() {
   const parentRecent = useParentVitalsRecent(familyId);
   const emptyFallback = useMemo(() => emptyDailyPulse(), []);
   const data: DailyPulseData = parentPulse.data ?? emptyFallback;
+
+  // Sprint 18 — distinguish loading + error from "truly empty" so the
+  // caregiver isn't told their parent has no data while the initial
+  // fetch is still in flight or has errored. Matches the pattern used
+  // by all 5 VitalDetail screens. The 30s staleTime on the query means
+  // these branches mostly only fire on first mount / cold refresh.
+  const isInitialLoad =
+    (parentPulse.isLoading || parentRecent.isLoading) &&
+    parentPulse.data === null;
+  const loadError = parentPulse.error ?? parentRecent.error ?? null;
 
   // Realtime — one subscription per (table, family). INSERTs invalidate
   // the parent-pulse cache key; TanStack Query re-fetches on the next
@@ -241,6 +253,27 @@ export function ParentDashboard() {
 
         <SyncReassuranceBanner testID="parent-dashboard-sync-reassurance" />
 
+        {/* Sprint 18 — distinguish loading + error from "truly empty"
+            so the caregiver isn't told their parent has no data while
+            we're still fetching or just errored. The header + sync
+            reassurance banner above stay visible so the persona
+            context is consistent across both branches. Body resumes
+            in the else branch below. */}
+        {isInitialLoad ? (
+          <LoadingState
+            caption={`Loading ${headerText.parentName}'s data…`}
+            testID="parent-dashboard-loading"
+            style={{ marginTop: theme.spacing.xl }}
+          />
+        ) : loadError ? (
+          <View style={{ marginTop: theme.spacing.xl }}>
+            <ErrorState
+              onRetry={handleRefresh}
+              testID="parent-dashboard-error"
+            />
+          </View>
+        ) : (
+        <>
         <View
           style={{
             paddingHorizontal: theme.spacing.l,
@@ -398,6 +431,8 @@ export function ParentDashboard() {
             testID="parent-dashboard-tile-activity"
           />
         </ScrollView>
+        </>
+        )}
 
         {correlation ? (
           <View
