@@ -44,18 +44,24 @@ Update this log every time a new build artifact is produced.
 | **Status** | Built; installed on Phone 1; signup walked end-to-end. **Superseded** by v4 below (containing the 9 audit-pass fix buckets). |
 | **Used for** | First-pass smoke test on Phone 1. Revealed 9 buckets of bench bugs, all closed in commits `8d8000b` → `316301a`. |
 
-### v1.0.0 (versionCode 5 expected) — bundles sleep wake-time fix + brand icon
+### v1.0.0 (versionCode 6) — production-apk `.apk` bundling sleep fix + Halo Ember icon
 
 | Field | Value |
 |---|---|
-| **Artifact URL** | _pending — build queued after sleep fix + icon land in source_ |
-| **versionName** | `1.0.0` |
-| **versionCode** | `5` (autoIncrement from v4) |
+| **Artifact URL** | _pending — fill in once the build finishes (~15-25 min from queue). Pattern: `https://expo.dev/artifacts/eas/<id>.apk` from the build details page below._ |
+| **Build logs** | https://expo.dev/accounts/lawone-apps/projects/leiko/builds/1fd316e9-0e6f-4e1d-9daf-bd157d5aea92 |
 | **EAS profile** | `production-apk` |
-| **Built** | (not yet) |
-| **Status** | **Held.** Two new work items must land first to avoid an APK cycle for each: (1) sleep wake-time fix via HR-derived inference + `profile.timezone` consolidation (3-4h, brief at `plans/SLEEP_TIMEZONE_FIX_BRIEF.md`); (2) brand icon integration once founder picks Direction 1 or 4 from `branding/finalists.png` (~30-60min). |
-| **Why we're skipping v4 install** | Phone 1 is on v3; jumping straight to v5 lets us upgrade in one cycle (v3 → v5) instead of two (v3 → v4 → v5). v4 APK has been downloaded by founder but not installed. |
-| **Will bundle** | All 31 audit findings from v4 + Sprint 18 sleep wake-time fix + brand icon + adaptive icon for Android |
+| **Build type** | `apk` |
+| **versionName** | `1.0.0` |
+| **versionCode** | `6` (EAS remote ledger bumped from `5` — an interim build burned vc5 between v4 and this one; ledger advances even for cancelled / failed builds) |
+| **EAS credentials slot** | Same as the AAB / APK v3 / APK v4 |
+| **Built** | 2026-05-22 |
+| **Target backend** | prod Supabase `kqnzxjrpnjnczhgdwdqg.supabase.co` |
+| **Status** | Queued. Two source commits on `claude/competent-goldberg-737194`: `8959347` (sleep wake-time fix via HR-derived inference) + `49a65fa` (Halo Ember launcher icon + Android adaptive icon). |
+| **Branch tip when built** | `49a65fa` |
+| **Why we're skipping v4 install** | Phone 1 is on v3; jumping straight to v5 lets us upgrade in one cycle (v3 → v5) instead of two (v3 → v4 → v5). v4 APK was downloaded by founder but never installed. |
+| **Bundles** | All 31 audit findings from v4 + Sprint 18 sleep wake-time fix (HR-inferred wake + tz-aware display + Option-B historical backfill) + Halo Ember launcher icon (legacy mipmaps × 5 densities + Android adaptive icon layers + descriptors) |
+| **Used for** | Phone 1 in-place upgrade install; full regression of 5 vital detail screens + the 9 audit-pass buckets + sleep wake-time spot-check + launcher icon eyeball |
 
 ### v1.0.0 (versionCode 4) — production-apk `.apk` with audit-pass fixes — superseded by v5
 
