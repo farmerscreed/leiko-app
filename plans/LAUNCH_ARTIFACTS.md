@@ -44,7 +44,20 @@ Update this log every time a new build artifact is produced.
 | **Status** | Built; installed on Phone 1; signup walked end-to-end. **Superseded** by v4 below (containing the 9 audit-pass fix buckets). |
 | **Used for** | First-pass smoke test on Phone 1. Revealed 9 buckets of bench bugs, all closed in commits `8d8000b` → `316301a`. |
 
-### v1.0.0 (versionCode 4) — production-apk `.apk` with audit-pass fixes
+### v1.0.0 (versionCode 5 expected) — bundles sleep wake-time fix + brand icon
+
+| Field | Value |
+|---|---|
+| **Artifact URL** | _pending — build queued after sleep fix + icon land in source_ |
+| **versionName** | `1.0.0` |
+| **versionCode** | `5` (autoIncrement from v4) |
+| **EAS profile** | `production-apk` |
+| **Built** | (not yet) |
+| **Status** | **Held.** Two new work items must land first to avoid an APK cycle for each: (1) sleep wake-time fix via HR-derived inference + `profile.timezone` consolidation (3-4h, brief at `plans/SLEEP_TIMEZONE_FIX_BRIEF.md`); (2) brand icon integration once founder picks Direction 1 or 4 from `branding/finalists.png` (~30-60min). |
+| **Why we're skipping v4 install** | Phone 1 is on v3; jumping straight to v5 lets us upgrade in one cycle (v3 → v5) instead of two (v3 → v4 → v5). v4 APK has been downloaded by founder but not installed. |
+| **Will bundle** | All 31 audit findings from v4 + Sprint 18 sleep wake-time fix + brand icon + adaptive icon for Android |
+
+### v1.0.0 (versionCode 4) — production-apk `.apk` with audit-pass fixes — superseded by v5
 
 | Field | Value |
 |---|---|
@@ -57,7 +70,7 @@ Update this log every time a new build artifact is produced.
 | **EAS credentials slot** | Same as the AAB / APK v3 |
 | **Built** | 2026-05-22 |
 | **Target backend** | prod Supabase `kqnzxjrpnjnczhgdwdqg.supabase.co` |
-| **Status** | Built; ready for Phone 1 reinstall + retest |
+| **Status** | Built; **NOT installed** — founder chose to skip ahead to v5 to bundle the sleep wake-time fix + icon in one upgrade cycle. APK file lives at `%USERPROFILE%\Downloads\leiko-v1.0.0-vc4.apk` on the founder's machine in case v5 has issues and we need to fall back. |
 | **Branch tip when built** | `316301a` (audit-pass complete; next commit was `2919a71` docs only) |
 | **Bundles 31 audit findings** | SelfBuyerHome pair-watch · ReadingDetail back/close · Settings refresh · Sleep/HR/BP/SpO2/Activity full audits · ParentDashboard load/error · ghost-button removal |
 | **Used for** | Block 4 re-smoke-test on Phone 1 + full regression of the 5 vital detail screens; if clean, this is the artifact that goes to internal-beta testers via Drive link. |

@@ -1,104 +1,142 @@
-# Start here — Sprint 18 handoff (2026-05-22 PM)
+# Start here — Sprint 18 mid-session pause (2026-05-22 PM)
 
-Last touched: 2026-05-22 Lagos. Supersedes the 2026-05-20 handoff.
-Branch: `claude/competent-goldberg-737194`. Latest tip: `316301a`
-(check `git log -1` for newer).
+Last touched: 2026-05-22 evening Lagos. Supersedes the 2026-05-22 AM
+handoff (which was itself a fresh rewrite). Branch:
+`claude/competent-goldberg-737194`. Latest tip: `e70d4ed` (check
+`git log -1` for newer).
 
-## 90-second context
+**Why we paused:** the previous session hit 92% context. All
+state is preserved across the docs below; a new session should
+read CLAUDE.md → this file → the linked briefs and resume cleanly.
 
-Sprint 18 has been in motion for ~48 hours. **All engineering work is
-done**; the gating items are now founder-ops + bench verification.
+## 60-second context
 
-### What's shipped in source on this branch
+Sprint 18 closed 31 audit findings across 9 commits over 2026-05-21/22.
+The v4 APK (`bnwdtRMddqpEgpRsKt9xpS.apk`, versionCode 4) was built end
+of session and is ready to install on Phone 1. Founder paused
+mid-install-flow to investigate **two newly-discovered issues that
+must ship together as v5**:
 
-**Day 1 — SEC-1 (MMKV encryption at rest)** — `7d0455e`
+1. **Sleep wake-time is always 9 AM in Lagos.** Root-caused: the
+   U16PRO 0x07 sleep packet has no real wake time. The app
+   synthesizes `sessionEnd = day_UTC_midnight + 8h = 08:00 UTC`,
+   which formats as 09:00 in Lagos (UTC+1), 03:00 in NYC (UTC-5),
+   etc. Same hardcoded-UTC pattern lives in 4-5 spots in
+   `syncMultiVitals.ts`. Founder chose **Option B** (HR-derived
+   wake inference + timezone consolidation). Full brief at
+   **`plans/SLEEP_TIMEZONE_FIX_BRIEF.md`** — read this BEFORE
+   touching code.
 
-**Day 2 — Founder ops blitz** — completed end-to-end via founder + me:
-- OPS-1 migrations applied to prod (`kqnzxjrpnjnczhgdwdqg`)
-- OPS-2 pg_cron config via Supabase Vault (migration `0023` replaced
-  the GUC-based config that hosted Supabase blocked; `0d6d228` /
-  `19e1ea8`)
-- OPS-11 6 Edge Function secrets set (Anthropic / Resend / PDF×2 /
-  AI_TIER flags)
-- OPS-12 EAS production profile pointed at prod Supabase (`794d9f3`)
-- 17 Edge Functions deployed; `ai-tier-b` smoke-curl 200
-- Block 5 GitHub Actions secrets + `production` environment with
-  required-reviewer gate
-- Block 3 AAB built (versionCode 2, `5n4GUMxhcrLa5Z6Cgz9Cqr.aab`)
-- Block 4 APK built (versionCode 3, `kQ5uMNfwz7P6517WuvkAbW.apk`),
-  installed on Phone 1, signup walked end-to-end
+2. **App ships with no icon.** Five logo concepts were generated
+   earlier this session (`branding/concepts/`). Founder is choosing
+   between **Direction 1 — Two figures forming a heart** and
+   **Direction 4 — Sankofa heart**. Icon-tuned finalists are
+   rendered at all Android mipmap sizes + circular-mask preview in
+   **`branding/finalists.png`**. Awaiting founder pick. Once picked:
+   bake into `apps/mobile/android/app/src/main/res/mipmap-*` + add
+   adaptive icon foreground + update `app.json`. **Do NOT run
+   `expo prebuild`** — it stomps three load-bearing customizations
+   (see `memory/expo_prebuild_android_drift.md`).
 
-**Day 2-3 — Bench bugs surfaced + fixed in source** — 9 buckets:
+## v4 APK install state
 
-| # | What broke | Commit |
+The user downloaded the v4 APK (`leiko-v1.0.0-vc4.apk`, 99.7 MB) to
+`%USERPROFILE%\Downloads\`. They ran:
+- `adb devices` → `43230DLJH001YY device` ✓
+- `adb install -r leiko-v1.0.0-vc3.apk` → Success (re-installed v3
+  from the prior session — possibly accidental; v3 has all the
+  audit bugs)
+- Downloaded v4
+
+They have NOT yet run `adb install -r leiko-v1.0.0-vc4.apk` to put
+v4 on the device. They paused the install flow to investigate the
+sleep bug instead.
+
+**If you resume the v4 install path:** the command is
+`adb -s 43230DLJH001YY install -r $env:USERPROFILE\Downloads\leiko-v1.0.0-vc4.apk`.
+`-r` reinstalls keeping data; same keystore so the upgrade is
+in-place.
+
+**But the better plan** (founder agreed): hold v4 install until v5
+is built — that way Phone 1 jumps straight from v3-with-bugs to
+v5-with-everything (audit fixes + sleep fix + icon) in one cycle,
+not two.
+
+## What the next session does
+
+In this order:
+
+### 1. Get the founder's icon pick
+
+If they haven't responded, gently re-ask using the finalist sheet
+(`branding/finalists.png`). Two finalists: Direction 1 (Two
+figures) vs Direction 4 (Sankofa).
+
+### 2. Read the sleep brief in full
+
+`plans/SLEEP_TIMEZONE_FIX_BRIEF.md` — contains:
+- Exact line numbers for the synthesis bug
+- Where the display formatters also need fixing
+- Audit confirmation that the user's tz IS captured + stored (just
+  not consulted at the sync ingest path)
+- Full scope for the one-commit fix
+- Acceptance criteria
+- 6 test cases to write
+
+### 3. Execute the sleep fix in source
+
+Estimated 3-4 hours. One commit on `claude/competent-goldberg-737194`.
+Don't merge to main yet.
+
+### 4. Execute the icon work in source
+
+~30-60 minutes once direction is picked. Replace 5 mipmap PNGs +
+add adaptive icon XML + update app.json. Commit separately.
+
+### 5. Kick the v5 APK build
+
+`cd apps/mobile && npx eas-cli build --platform android --profile production-apk`
+
+Auto-increments to versionCode 5. Update `plans/LAUNCH_ARTIFACTS.md`
+with the URL when it lands.
+
+### 6. Phone 1: install v5, retest
+
+Walks `SPRINT_18_VERIFICATION.md` tests 1-5 + regression-checks the
+9 audit-pass buckets + verifies the sleep wake time is now correct
++ confirms the icon renders.
+
+## What's done (don't redo)
+
+| Item | Commit | Status |
 |---|---|---|
-| 1 | SelfBuyerHome had no inline "Pair your watch" CTA — sparse-tracker users dead-ended | `8d8000b` |
-| 2 | ReadingDetail back/close trap (3 separate root causes: tiny text Back, in-scroll, push-not-replace) | `6de2632` |
-| 3 | Settings → Profile showed `—` for everything because `useAuth.profile` wasn't refreshed after onboarding DB writes | `e41745d` |
-| 4 | **SleepDetail audit** — 6 findings (loading/error, fresh-label guard, chart width, history-aware copy, correlation placeholder) | `ff4ece8` |
-| 5 | **HRDetail audit** — 9 findings (loading/error, date-aligned correlation, label clarity, "Last 24h" caption, history-aware copy, stable nowSec) | `d53a66f` |
-| 6 | **BPDetail audit** — 6 findings (loading/error, freshness gate on 'now', share-row wiring, no-readings-today placeholder, hero/row time formatting) | `a4ac261` |
-| 7 | **SpO2Detail audit** — 3 findings (loading/error, correlation date-pair, Lowest single-source) | `1662ca8` |
-| 8 | **ActivityDetail audit** — 1 finding (loading/error) | `8b28165` |
-| 9 | **Production-readiness audit** — ParentDashboard loading/error + removed 3 ghost buttons on ReadingDetail | `316301a` |
+| Day 1 SEC-1 — MMKV encryption | `7d0455e` | ✅ shipped |
+| Day 2 OPS-1 migrations to prod | (founder) | ✅ |
+| Day 2 OPS-2 pg_cron via Vault | `0d6d228` + `19e1ea8` | ✅ |
+| Day 2 OPS-11 Edge Function secrets | (founder) | ✅ |
+| Day 2 OPS-12 EAS prod profile | `794d9f3` | ✅ |
+| Day 2 17 Edge Functions deployed | (founder) | ✅ |
+| Day 2 Block 5 GH Actions secrets | (founder) | ✅ |
+| Day 2 Block 3 AAB build | `5n4G...` | ✅ Play upload pending |
+| Day 2 Block 3 APK v3 build | `kQ5u...` | ✅ installed on Phone 1 (with bugs) |
+| 31 audit findings — 9 commits | `8d8000b → 316301a` | ✅ source-only |
+| Doc sweep + handoff | `2919a71` | ✅ |
+| v4 APK build | `bnwdtRMddqpEgpRsKt9xpS` | ✅ downloaded; NOT installed |
 
-**31 separate audit findings closed across 9 commits.** Every code-side
-launch-readiness bug discoverable from desk-side review is fixed.
+## What's still pending after v5
 
-### Also done
-
-- `plans/LAUNCH_ARTIFACTS.md` — single source of truth for build URLs +
-  store submission state
-- `plans/LAUNCH_DAY2_CHECKLIST.md` — tick-as-you-go founder runbook
-  (corrected for the Vault path; was originally GUC-based)
-- `plans/FOUNDER_OPS_PLAYBOOK.md` — long-form CLI reference (same
-  correction)
-- `branding/` — 5 logo concept directions + Hearth Tender philosophy
-  (waiting on founder pick before final icon export)
-
-## Bench state right now
-
-- **Phone 1** (Pixel 8, `43230DLJH001YY`) — running APK v3 (versionCode
-  3). Signed up as `tawokels@gmail.com` (the Resend-account-owning
-  email; needed because the sandbox `onboarding@resend.dev` sender
-  can only deliver to the account owner until DNS-verified). All
-  Sprint 18 source fixes are NOT on this APK — they're queued for
-  the next build cycle.
-- **Phone 2** (OnePlus Nord N30, `8fae80bc`) — untouched today.
-
-## What the next session needs to do
-
-The user just kicked off a new EAS `production-apk` build at the close
-of the 2026-05-22 session. The branch tip is `316301a`. When the build
-completes:
-
-1. **Update LAUNCH_ARTIFACTS.md** with the new APK URL + versionCode
-   (will be 4 if it auto-incremented from the v3 we built earlier).
-2. **Install on Phone 1** — uninstall the v3 APK first (SEC-1 will
-   migrate the encrypted MMKV; the SEC-1 migration is the test case
-   for users with existing data, but Phone 1 only has prod data so
-   the migration should be a clean upgrade).
-3. **Walk SPRINT_18_VERIFICATION.md again** with the new APK in hand.
-   FUN-7 / FUN-8 / QUA-1 / QUA-2 / QUA-3 each get a PASS/FAIL row.
-4. **Re-test the 31 source fixes** — at minimum the 5 vital-detail
-   screens (load/error states, range pills, correlation strips,
-   history-aware copy), the SelfBuyerHome pair-watch prompt, the
-   ReadingDetail Back+Done flow, Settings Profile populating after
-   onboarding, the ghost buttons being gone.
-5. **Catch any remaining bench bugs** the v3 round of testing missed.
-
-## Still pending (NOT engineering)
-
-| Item | Driver | ETA |
-|---|---|---|
-| Resend domain verification | Founder | When `leiko.app` DNS is up (Block 6.4) |
-| Apple Developer HealthKit + Background + Push entitlements | Founder | 24-72h Apple clock after enabling |
-| App Store Connect listing + 2 IAPs | Founder | 1-3 day approval |
-| Play Console listing + 2 subscriptions | Founder | 1-3 day approval |
-| DNS: `leiko.app` + `pair.leiko.app` + AASA + assetlinks hosting | Founder | 1-24h propagation |
-| iOS `expo prebuild --platform ios` | Founder (needs a Mac) | Day 3+ |
-| RevenueCat signup + IAP wiring | Founder | Blocked on Apple/Play IAP approval |
-| Logo pick + icon export | Founder taste + me | Whenever you decide |
+- **Block 6.1** Apple Developer entitlements (HealthKit + Background
+  + Push + Associated Domains) — 24-72h Apple clock
+- **Block 6.2** App Store Connect listing + 2 IAPs — 1-3 day approval
+- **Block 6.3** Play Console listing + 2 subscriptions — 1-3 day
+- **Block 6.4** DNS for `leiko.app` + `pair.leiko.app` + AASA +
+  assetlinks hosting — 1-24h propagation
+- **Block 6.5** Resend domain verification (post Block 6.4) — replaces
+  `onboarding@resend.dev` sandbox with `noreply@leiko.app`; removes
+  the per-account sender restriction
+- **iOS** `expo prebuild --platform ios` + APNs/FCM upload (needs Mac)
+- **RevenueCat** signup + IAP wiring (gated on Apple/Play IAP approval)
+- **SPRINT_18_VERIFICATION.md** tests 1-5 on real hardware
 
 ## Bench environment
 
@@ -106,7 +144,7 @@ completes:
 & "$PWD\scripts\dev-phone-reconnect.ps1"
 ```
 
-Re-apply adb reverses on every USB unplug/replug:
+Re-apply adb reverses every USB unplug/replug:
 ```
 adb -s 43230DLJH001YY reverse tcp:8081 tcp:8081
 adb -s 43230DLJH001YY reverse tcp:54321 tcp:54321
@@ -116,7 +154,7 @@ adb -s 8fae80bc       reverse tcp:54321 tcp:54321
 adb -s 8fae80bc       reverse tcp:54324 tcp:54324
 ```
 
-Metro launch (the env var is **non-negotiable**):
+Metro (the env var is non-negotiable):
 ```
 cd apps/mobile && EXPO_NO_METRO_WORKSPACE_ROOT=1 npx expo start --dev-client
 ```
@@ -126,52 +164,65 @@ Edge Functions:
 supabase functions serve --env-file supabase/functions/.env
 ```
 
+## Bench state
+
+- **Phone 1** (Pixel 8, `43230DLJH001YY`) — running APK v3 (versionCode
+  3) signed up as `tawokels@gmail.com`. All Sprint 18 audit fixes
+  are NOT on this APK. v4 downloaded but NOT installed (paused
+  pending v5 to do single upgrade cycle).
+- **Phone 2** (OnePlus Nord N30, `8fae80bc`) — untouched this session.
+
 ## Hard rules carried forward
 
-1. **expo prebuild stomps 3 Android customizations** — `minSdkVersion=26`
-   in build.gradle, `xmlns:tools` + `BLUETOOTH_SCAN
-   neverForLocation` in manifest, `bluetooth_le` uses-feature.
-   Restore by hand after every prebuild. Plus the malformed
-   `data-generated="true"` on autoVerify filters needs pruning.
-   See `memory/expo_prebuild_android_drift.md`.
-2. **Two FK-embed traps** — listMembers + listCaregivers both burnt us
-   with PGRST201 because `family_members` has two FKs to `users`
-   (`user_id` + `invited_by`). Disambiguate to
-   `users!family_members_user_id_fkey(...)` every time.
-3. **audit_log INSERT requires service_role** — client-side
-   `authenticated` role can READ but never INSERT. Audit emits go
-   through an Edge Function.
-4. **Visibility enforcement requires BOTH layers** — server RLS
-   (migration 0022) AND client purge hook (`useEnforceVisibility`).
-5. **Dark mode is the default** — don't reintroduce `'system'`.
-6. **`account_type` is immutable** — two-phone testing requires two
-   real accounts.
-7. **`onboarding@resend.dev` sandbox sender can only deliver to the
-   Resend-account-owning email** — for now `tawokels@gmail.com`.
-   Switching to `noreply@leiko.app` is gated on Block 6.4 DNS + Resend
-   domain verification.
-8. **pg_cron config is in Supabase Vault, not GUCs** — hosted
-   Supabase denies `ALTER DATABASE postgres SET app.settings.*`
-   with 42501. Migration 0023 switched the four cron helpers to
-   read from `vault.decrypted_secrets`. `functions_base_url` is the
-   project ROOT (`https://<ref>.supabase.co`), NOT `.../functions/v1`
-   — the helpers append the path themselves.
+1. **`expo prebuild` stomps three Android customizations** —
+   `minSdkVersion=26` in build.gradle, `xmlns:tools` + BLUETOOTH_SCAN
+   neverForLocation in manifest, `bluetooth_le` uses-feature. Plus
+   it adds a malformed `data-generated="true"` attribute on the
+   autoVerify filter. **Do not run prebuild for the icon bake.**
+   Manually edit the mipmap directories instead. See
+   `memory/expo_prebuild_android_drift.md`.
+2. **Sleep timestamps are synthesized as 08:00 UTC** — that's the
+   bug we're fixing. Don't reproduce the pattern anywhere else.
+3. **`profile.timezone` is the source of truth for display
+   formatting** — never use `[]` as the locale arg to
+   `toLocaleTimeString()`. Use the new `useUserTz()` helper.
+4. **Two FK-embed traps** — `family_members` has two FKs to
+   `users` (`user_id` + `invited_by`). Always disambiguate to
+   `users!family_members_user_id_fkey(...)`.
+5. **audit_log INSERT requires service_role** — client `authenticated`
+   role can READ but never INSERT. Audit emits go through Edge
+   Functions.
+6. **pg_cron config is in Supabase Vault, not GUCs** — migration
+   0023. `functions_base_url` is the project ROOT
+   (`https://<ref>.supabase.co`), NOT `.../functions/v1`.
+7. **`onboarding@resend.dev` sandbox sender can only deliver to
+   `tawokels@gmail.com`** until Block 6.5 lands real domain
+   verification.
+8. **Dark mode is the default**; **`account_type` is immutable**.
 
-## Background processes
+## Memory close-out from this session
 
-If the next session starts cold, restart both:
-- Metro: `cd apps/mobile && EXPO_NO_METRO_WORKSPACE_ROOT=1 npx expo start --dev-client`
-- Edge Functions: `supabase functions serve --env-file supabase/functions/.env`
+- `memory/sprint_18_audit_pass_close_out.md` — full AP1–AP10 catalogue
+  + single-source-of-truth template for the caregiver-scoped
+  load/error pattern. Read this BEFORE adding any new vital-detail
+  screen or correlation strip or comparative copy.
 
-## Open prompt (what to say to the next session)
+## Open prompt for the new session
 
-> Sprint 18 audit-pass complete. APK v4 build was kicked off at end of
-> last session. Read CLAUDE.md, then this file. Then check
-> `plans/LAUNCH_ARTIFACTS.md` for the new APK URL (founder will paste
-> when the build finishes).
+> Sprint 18 mid-session pause at 92% context. Branch tip `e70d4ed`.
+> Read CLAUDE.md, then `plans/NEXT_SESSION_START_HERE.md` (this
+> file), then `plans/SLEEP_TIMEZONE_FIX_BRIEF.md` in full.
 >
-> Next: install on Phone 1, walk SPRINT_18_VERIFICATION.md, retest the
-> 31 source fixes from the 9 audit commits, surface any remaining
-> bench bugs. After that, the gating items are all external-clock
-> founder-ops (Apple, Play, DNS, RevenueCat) — see the
-> Still-pending table in this file.
+> Two pieces of work to land in source for v5 APK:
+> 1. **Sleep wake-time fix** — Option B (HR-derived inference) +
+>    timezone consolidation. ~3-4h. Brief is fully scoped at
+>    plans/SLEEP_TIMEZONE_FIX_BRIEF.md including acceptance
+>    criteria + test cases.
+> 2. **Logo icon bake** — founder picks Direction 1 vs Direction 4
+>    from branding/finalists.png; then replace 5 mipmap PNGs +
+>    add adaptive icon + update app.json. DO NOT RUN PREBUILD.
+>    ~30-60 min once direction is picked.
+>
+> Once both land in source, kick the v5 APK build, update
+> plans/LAUNCH_ARTIFACTS.md with the URL, hand off to founder for
+> Phone 1 install + retest.

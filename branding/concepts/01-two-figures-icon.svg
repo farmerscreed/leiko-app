@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Direction 1 — icon-tuned. Heart fills ~72% of canvas (vs ~57%
+       in the comparison sheet) so it reads cleanly at the 48-192px
+       sizes Android renders launcher icons. The dark-dot "heads"
+       are larger so they survive the smallest mdpi (48px) render. -->
+
+  <defs>
+    <radialGradient id="canopy1" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#2A231C"/>
+      <stop offset="100%" stop-color="#1F1A14"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#canopy1)"/>
+
+  <!-- Heart scaled up and centred — left half. The 16px gap down the
+       middle reads as the seam between two leaning figures. -->
+  <path d="
+    M 512 280
+    C 478 196, 408 152, 332 152
+    C 220 152, 140 240, 140 352
+    C 140 540, 332 670, 504 832
+    L 504 280
+    Z
+  " fill="#E8A063"/>
+
+  <!-- Right half — mirrored. -->
+  <path d="
+    M 512 280
+    C 546 196, 616 152, 692 152
+    C 804 152, 884 240, 884 352
+    C 884 540, 692 670, 520 832
+    L 520 280
+    Z
+  " fill="#E8A063"/>
+
+  <!-- Bottom point — fuses the two halves into one heart silhouette. -->
+  <path d="
+    M 504 780
+    C 504 820, 512 870, 512 870
+    C 512 870, 520 820, 520 780
+    Z
+  " fill="#E8A063"/>
+
+  <!-- Heads — larger dark dots that survive 48px mdpi rendering. -->
+  <circle cx="332" cy="270" r="52" fill="#1F1A14" opacity="0.9"/>
+  <circle cx="692" cy="270" r="52" fill="#1F1A14" opacity="0.9"/>
+</svg>

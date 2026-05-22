@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Direction 4 — icon-tuned. Heart fills ~72% of canvas with the
+       Sankofa spiral on the right lobe scaled up so the curl reads
+       clearly at thumbnail sizes. The spiral terminal (inner dark
+       circle) is also enlarged so it survives mdpi rendering. -->
+
+  <defs>
+    <radialGradient id="canopy4" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#2A231C"/>
+      <stop offset="100%" stop-color="#1F1A14"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#canopy4)"/>
+
+  <!-- Heart left lobe + bottom — standard heart curve. -->
+  <path d="
+    M 512 860
+    C 332 700, 140 580, 140 392
+    C 140 280, 220 192, 332 192
+    C 408 192, 478 232, 512 312
+    L 512 860
+    Z
+  " fill="#E8A063"/>
+
+  <!-- Right lobe with Sankofa spiral. The lobe rises like a normal
+       heart, then curls inward + around, finishing in a tight inner
+       terminal — the "look-back" gesture. -->
+  <path d="
+    M 512 312
+    C 546 232, 616 192, 692 192
+    C 804 192, 884 280, 884 392
+    C 884 472, 832 538, 760 558
+    C 690 578, 624 542, 614 470
+    C 604 408, 654 364, 706 370
+    C 750 376, 776 410, 766 444
+    C 758 472, 732 484, 716 466
+    C 706 454, 710 442, 720 436
+    L 512 860
+    Z
+  " fill="#E8A063"/>
+
+  <!-- Spiral terminal — the "eye" of the look-back motion. Sized so
+       it reads as intentional, not as a defect, at thumbnail sizes. -->
+  <circle cx="722" cy="438" r="26" fill="#1F1A14"/>
+</svg>
