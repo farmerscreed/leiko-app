@@ -1,0 +1,2961 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1`] = `
+<RNCSafeAreaProvider
+  onInsetsChange={[Function]}
+  style={
+    [
+      {
+        "flex": 1,
+      },
+      undefined,
+    ]
+  }
+>
+  <RNCSafeAreaView
+    edges={
+      {
+        "bottom": "additive",
+        "left": "off",
+        "right": "off",
+        "top": "additive",
+      }
+    }
+    style={
+      [
+        {
+          "flex": 1,
+        },
+        {
+          "backgroundColor": "#0A0908",
+        },
+        undefined,
+      ]
+    }
+    testID="activity-detail"
+  >
+    <View
+      pointerEvents="none"
+      style={
+        [
+          {
+            "height": 360,
+            "left": 0,
+            "position": "absolute",
+            "right": 0,
+            "top": 0,
+          },
+          {
+            "backgroundColor": "#7CA56F",
+            "opacity": 0.08,
+          },
+        ]
+      }
+    />
+    <RCTScrollView
+      contentContainerStyle={
+        [
+          {
+            "flexGrow": 1,
+          },
+          {
+            "paddingBottom": 72,
+          },
+        ]
+      }
+      showsVerticalScrollIndicator={false}
+    >
+      <View>
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+                "justifyContent": "space-between",
+                "paddingBottom": 4,
+                "paddingHorizontal": 16,
+                "paddingTop": 4,
+              },
+              undefined,
+            ]
+          }
+          testID="activity-detail-header"
+        >
+          <View
+            accessibilityLabel="Back"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            hitSlop={8}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 99,
+                  "borderWidth": 0.5,
+                  "height": 38,
+                  "justifyContent": "center",
+                  "width": 38,
+                },
+                {
+                  "backgroundColor": "#120C07",
+                  "borderColor": "rgba(255,255,255,0.06)",
+                  "opacity": 1,
+                },
+              ]
+            }
+            testID="activity-detail-header-back"
+          >
+            <RNSVGSvgView
+              align="xMidYMid"
+              bbHeight={14}
+              bbWidth={14}
+              fill="none"
+              focusable={false}
+              height={14}
+              meetOrSlice={0}
+              minX={0}
+              minY={0}
+              style={
+                [
+                  {
+                    "backgroundColor": "transparent",
+                    "borderWidth": 0,
+                  },
+                  {
+                    "flex": 0,
+                    "height": 14,
+                    "width": 14,
+                  },
+                ]
+              }
+              vbHeight={24}
+              vbWidth={24}
+              width={14}
+            >
+              <RNSVGGroup
+                fill={null}
+                propList={
+                  [
+                    "fill",
+                  ]
+                }
+              >
+                <RNSVGPath
+                  d="M15 6 L9 12 L15 18"
+                  fill={
+                    {
+                      "payload": 4278190080,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "stroke",
+                      "strokeWidth",
+                      "strokeLinecap",
+                      "strokeLinejoin",
+                    ]
+                  }
+                  stroke={
+                    {
+                      "payload": 4294967295,
+                      "type": 0,
+                    }
+                  }
+                  strokeLinecap={1}
+                  strokeLinejoin={1}
+                  strokeWidth={2}
+                />
+              </RNSVGGroup>
+            </RNSVGSvgView>
+          </View>
+          <Text
+            accessibilityLabel="Activity"
+            accessibilityRole="header"
+            allowFontScaling={false}
+            style={
+              {
+                "color": "#7CA56F",
+                "fontFamily": "Inter_500Medium",
+                "fontSize": 11,
+                "letterSpacing": 0.55,
+                "lineHeight": 14,
+                "textTransform": "uppercase",
+              }
+            }
+          >
+            ACTIVITY
+          </Text>
+          <View
+            accessibilityLabel="More options"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": true,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            hitSlop={8}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 99,
+                  "borderWidth": 0.5,
+                  "height": 38,
+                  "justifyContent": "center",
+                  "width": 38,
+                },
+                {
+                  "backgroundColor": "#120C07",
+                  "borderColor": "rgba(255,255,255,0.06)",
+                  "opacity": 0.4,
+                },
+              ]
+            }
+            testID="activity-detail-header-menu"
+          >
+            <RNSVGSvgView
+              align="xMidYMid"
+              bbHeight={6}
+              bbWidth={22}
+              focusable={false}
+              height={6}
+              meetOrSlice={0}
+              minX={0}
+              minY={0}
+              style={
+                [
+                  {
+                    "backgroundColor": "transparent",
+                    "borderWidth": 0,
+                  },
+                  {
+                    "flex": 0,
+                    "height": 6,
+                    "width": 22,
+                  },
+                ]
+              }
+              vbHeight={6}
+              vbWidth={22}
+              width={22}
+            >
+              <RNSVGGroup
+                fill={
+                  {
+                    "payload": 4278190080,
+                    "type": 0,
+                  }
+                }
+              >
+                <RNSVGCircle
+                  cx={3}
+                  cy={3}
+                  fill={
+                    {
+                      "payload": 4286939002,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                  r={1.5}
+                />
+                <RNSVGCircle
+                  cx={11}
+                  cy={3}
+                  fill={
+                    {
+                      "payload": 4286939002,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                  r={1.5}
+                />
+                <RNSVGCircle
+                  cx={19}
+                  cy={3}
+                  fill={
+                    {
+                      "payload": 4286939002,
+                      "type": 0,
+                    }
+                  }
+                  propList={
+                    [
+                      "fill",
+                    ]
+                  }
+                  r={1.5}
+                />
+              </RNSVGGroup>
+            </RNSVGSvgView>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "marginTop": 8,
+            }
+          }
+        >
+          <View
+            accessibilityLabel="Today, 6,250 steps. 78% of 8,000."
+            accessibilityRole="text"
+            style={
+              [
+                {
+                  "paddingBottom": 22,
+                  "paddingHorizontal": 20,
+                  "paddingTop": 12,
+                  "position": "relative",
+                },
+                undefined,
+              ]
+            }
+            testID="activity-detail-hero"
+          >
+            <View
+              pointerEvents="none"
+              style={
+                [
+                  {
+                    "borderRadius": 999,
+                    "height": 220,
+                    "left": "50%",
+                    "position": "absolute",
+                    "top": 0,
+                    "transform": [
+                      {
+                        "translateX": -140,
+                      },
+                    ],
+                    "width": 280,
+                  },
+                  {
+                    "backgroundColor": "#7CA56F",
+                    "opacity": 0.18,
+                  },
+                ]
+              }
+            />
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "position": "relative",
+                }
+              }
+            >
+              <View
+                style={
+                  {
+                    "height": 120,
+                    "position": "relative",
+                    "width": 120,
+                  }
+                }
+                testID="activity-detail-hero-rings"
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "alignItems": "center",
+                        "justifyContent": "center",
+                        "position": "absolute",
+                      },
+                      {
+                        "height": 120,
+                        "width": 120,
+                      },
+                    ]
+                  }
+                >
+                  <View
+                    accessibilityRole="progressbar"
+                    accessibilityValue={
+                      {
+                        "max": 1,
+                        "min": 0,
+                        "now": 0.78125,
+                      }
+                    }
+                    style={
+                      [
+                        {
+                          "height": 120,
+                          "opacity": 1,
+                          "width": 120,
+                        },
+                        {
+                          "opacity": 1,
+                          "transform": [
+                            {
+                              "scale": 1,
+                            },
+                          ],
+                        },
+                        undefined,
+                      ]
+                    }
+                    testID="activity-detail-hero-ring-steps"
+                  >
+                    <RNSVGSvgView
+                      bbHeight={120}
+                      bbWidth={120}
+                      focusable={false}
+                      height={120}
+                      style={
+                        [
+                          {
+                            "backgroundColor": "transparent",
+                            "borderWidth": 0,
+                          },
+                          {
+                            "flex": 0,
+                            "height": 120,
+                            "width": 120,
+                          },
+                        ]
+                      }
+                      width={120}
+                    >
+                      <RNSVGGroup
+                        fill={
+                          {
+                            "payload": 4278190080,
+                            "type": 0,
+                          }
+                        }
+                      >
+                        <RNSVGCircle
+                          cx={60}
+                          cy={60}
+                          fill={null}
+                          propList={
+                            [
+                              "fill",
+                              "stroke",
+                              "strokeWidth",
+                              "strokeOpacity",
+                            ]
+                          }
+                          r={57}
+                          stroke={
+                            {
+                              "payload": 4286358895,
+                              "type": 0,
+                            }
+                          }
+                          strokeOpacity={0.12}
+                          strokeWidth={6}
+                        />
+                        <RNSVGCircle
+                          cx={60}
+                          cy={60}
+                          fill={null}
+                          matrix={
+                            [
+                              6.123233995736766e-17,
+                              -1,
+                              1,
+                              6.123233995736766e-17,
+                              -7.105427357601002e-15,
+                              120,
+                            ]
+                          }
+                          propList={
+                            [
+                              "fill",
+                              "stroke",
+                              "strokeWidth",
+                              "strokeDasharray",
+                              "strokeDashoffset",
+                              "strokeLinecap",
+                            ]
+                          }
+                          r={57}
+                          stroke={
+                            {
+                              "payload": 4286358895,
+                              "type": 0,
+                            }
+                          }
+                          strokeDasharray={
+                            [
+                              358.1415625092364,
+                              358.1415625092364,
+                            ]
+                          }
+                          strokeDashoffset={78.34346679889546}
+                          strokeLinecap={1}
+                          strokeWidth={6}
+                        />
+                        <RNSVGCircle
+                          cx={60}
+                          cy={60}
+                          fill={null}
+                          propList={
+                            [
+                              "fill",
+                              "stroke",
+                              "strokeWidth",
+                            ]
+                          }
+                          r={53}
+                          stroke={
+                            {
+                              "payload": 268435455,
+                              "type": 0,
+                            }
+                          }
+                          strokeWidth={1}
+                        />
+                      </RNSVGGroup>
+                    </RNSVGSvgView>
+                  </View>
+                </View>
+                <View
+                  style={
+                    [
+                      {
+                        "alignItems": "center",
+                        "justifyContent": "center",
+                        "position": "absolute",
+                      },
+                      {
+                        "height": 96,
+                        "left": 12,
+                        "top": 12,
+                        "width": 96,
+                      },
+                    ]
+                  }
+                >
+                  <View
+                    accessibilityRole="progressbar"
+                    accessibilityValue={
+                      {
+                        "max": 1,
+                        "min": 0,
+                        "now": 0,
+                      }
+                    }
+                    style={
+                      [
+                        {
+                          "height": 96,
+                          "opacity": 1,
+                          "width": 96,
+                        },
+                        {
+                          "opacity": 1,
+                          "transform": [
+                            {
+                              "scale": 1,
+                            },
+                          ],
+                        },
+                        {
+                          "opacity": 0.85,
+                        },
+                      ]
+                    }
+                    testID="activity-detail-hero-ring-calories"
+                  >
+                    <RNSVGSvgView
+                      bbHeight={96}
+                      bbWidth={96}
+                      focusable={false}
+                      height={96}
+                      style={
+                        [
+                          {
+                            "backgroundColor": "transparent",
+                            "borderWidth": 0,
+                          },
+                          {
+                            "flex": 0,
+                            "height": 96,
+                            "width": 96,
+                          },
+                        ]
+                      }
+                      width={96}
+                    >
+                      <RNSVGGroup
+                        fill={
+                          {
+                            "payload": 4278190080,
+                            "type": 0,
+                          }
+                        }
+                      >
+                        <RNSVGCircle
+                          cx={48}
+                          cy={48}
+                          fill={null}
+                          propList={
+                            [
+                              "fill",
+                              "stroke",
+                              "strokeWidth",
+                              "strokeOpacity",
+                            ]
+                          }
+                          r={45.5}
+                          stroke={
+                            {
+                              "payload": 4286358895,
+                              "type": 0,
+                            }
+                          }
+                          strokeOpacity={0.12}
+                          strokeWidth={5}
+                        />
+                        <RNSVGCircle
+                          cx={48}
+                          cy={48}
+                          fill={null}
+                          matrix={
+                            [
+                              6.123233995736766e-17,
+                              -1,
+                              1,
+                              6.123233995736766e-17,
+                              0,
+                              96,
+                            ]
+                          }
+                          propList={
+                            [
+                              "fill",
+                              "stroke",
+                              "strokeWidth",
+                              "strokeDasharray",
+                              "strokeDashoffset",
+                              "strokeLinecap",
+                            ]
+                          }
+                          r={45.5}
+                          stroke={
+                            {
+                              "payload": 4286358895,
+                              "type": 0,
+                            }
+                          }
+                          strokeDasharray={
+                            [
+                              285.88493147667117,
+                              285.88493147667117,
+                            ]
+                          }
+                          strokeDashoffset={285.88493147667117}
+                          strokeLinecap={1}
+                          strokeWidth={5}
+                        />
+                      </RNSVGGroup>
+                    </RNSVGSvgView>
+                  </View>
+                </View>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                    "marginLeft": 16,
+                    "minWidth": 0,
+                  }
+                }
+              >
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "Inter_500Medium",
+                      "fontSize": 11,
+                      "letterSpacing": 0.55,
+                      "lineHeight": 14,
+                      "marginBottom": 4,
+                      "textTransform": "uppercase",
+                    }
+                  }
+                  testID="activity-detail-hero-eyebrow"
+                >
+                  Today
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#FFFFFF",
+                      "fontFamily": "InstrumentSerif_400Regular",
+                      "fontSize": 56,
+                      "letterSpacing": -0.5,
+                      "lineHeight": 60,
+                    }
+                  }
+                  testID="activity-detail-hero-steps"
+                >
+                  6,250
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#7CA56F",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.5,
+                      "lineHeight": 16,
+                      "marginTop": 4,
+                      "textTransform": "uppercase",
+                    }
+                  }
+                  testID="activity-detail-hero-sub"
+                >
+                  steps · 78% of 8,000
+                </Text>
+              </View>
+            </View>
+            <View
+              style={
+                {
+                  "flexDirection": "row",
+                  "gap": 10,
+                  "justifyContent": "space-between",
+                  "marginTop": 16,
+                }
+              }
+              testID="activity-detail-hero-legend"
+            >
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                  }
+                }
+                testID="activity-detail-hero-legend-steps"
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 99,
+                        "height": 8,
+                        "width": 8,
+                      },
+                      {
+                        "backgroundColor": "#7CA56F",
+                      },
+                    ]
+                  }
+                />
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "Inter_500Medium",
+                      "fontSize": 9,
+                      "letterSpacing": 0.55,
+                      "marginLeft": 6,
+                      "textTransform": "uppercase",
+                    }
+                  }
+                >
+                  Steps
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#FFFFFF",
+                      "fontFamily": "InstrumentSerif_400Regular",
+                      "fontSize": 14,
+                      "marginLeft": 6,
+                    }
+                  }
+                  testID="activity-detail-hero-legend-steps-value"
+                >
+                  6,250
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "alignItems": "center",
+                    "flexDirection": "row",
+                  }
+                }
+                testID="activity-detail-hero-legend-calories"
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 99,
+                        "height": 8,
+                        "width": 8,
+                      },
+                      {
+                        "backgroundColor": "#E8C063",
+                      },
+                    ]
+                  }
+                />
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "Inter_500Medium",
+                      "fontSize": 9,
+                      "letterSpacing": 0.55,
+                      "marginLeft": 6,
+                      "textTransform": "uppercase",
+                    }
+                  }
+                >
+                  Calories
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#FFFFFF",
+                      "fontFamily": "InstrumentSerif_400Regular",
+                      "fontSize": 14,
+                      "marginLeft": 6,
+                    }
+                  }
+                  testID="activity-detail-hero-legend-calories-value"
+                >
+                  —
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "marginTop": 8,
+              "paddingHorizontal": 20,
+            }
+          }
+        >
+          <View
+            accessibilityRole="tablist"
+            style={
+              [
+                {
+                  "borderWidth": 0.5,
+                  "flexDirection": "row",
+                  "gap": 4,
+                },
+                {
+                  "backgroundColor": "#120C07",
+                  "borderColor": "rgba(255,255,255,0.06)",
+                  "borderRadius": 14,
+                  "padding": 4,
+                },
+                undefined,
+              ]
+            }
+            testID="activity-detail-range"
+          >
+            <View
+              accessibilityLabel="7d range"
+              accessibilityRole="tab"
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": true,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                [
+                  {
+                    "flex": 1,
+                    "paddingHorizontal": 12,
+                    "paddingVertical": 9,
+                  },
+                  {
+                    "backgroundColor": "#1D140D",
+                    "borderRadius": 8,
+                    "opacity": 1,
+                  },
+                ]
+              }
+              testID="activity-detail-range-7d"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#FFFFFF",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 13,
+                    "letterSpacing": 0.4,
+                    "lineHeight": 16,
+                    "textAlign": "center",
+                  }
+                }
+              >
+                7d
+              </Text>
+            </View>
+            <View
+              accessibilityLabel="30d range"
+              accessibilityRole="tab"
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": false,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                [
+                  {
+                    "flex": 1,
+                    "paddingHorizontal": 12,
+                    "paddingVertical": 9,
+                  },
+                  {
+                    "backgroundColor": "transparent",
+                    "borderRadius": 8,
+                    "opacity": 1,
+                  },
+                ]
+              }
+              testID="activity-detail-range-30d"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#857F7A",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 13,
+                    "letterSpacing": 0.4,
+                    "lineHeight": 16,
+                    "textAlign": "center",
+                  }
+                }
+              >
+                30d
+              </Text>
+            </View>
+            <View
+              accessibilityLabel="90d range"
+              accessibilityRole="tab"
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": false,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                [
+                  {
+                    "flex": 1,
+                    "paddingHorizontal": 12,
+                    "paddingVertical": 9,
+                  },
+                  {
+                    "backgroundColor": "transparent",
+                    "borderRadius": 8,
+                    "opacity": 1,
+                  },
+                ]
+              }
+              testID="activity-detail-range-90d"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#857F7A",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 13,
+                    "letterSpacing": 0.4,
+                    "lineHeight": 16,
+                    "textAlign": "center",
+                  }
+                }
+              >
+                90d
+              </Text>
+            </View>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "gap": 16,
+              "marginTop": 16,
+            }
+          }
+        >
+          <View
+            accessibilityLabel="Your typical day: ~7,100 steps, based on 6 days of activity"
+            accessibilityRole="text"
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "marginTop": 4,
+                  "paddingHorizontal": 20,
+                },
+                undefined,
+              ]
+            }
+            testID="activity-detail-baseline"
+          >
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#857F7A",
+                  "fontFamily": "Inter_500Medium",
+                  "fontSize": 11,
+                  "letterSpacing": 0.55,
+                  "lineHeight": 14,
+                  "marginBottom": 2,
+                  "textTransform": "uppercase",
+                }
+              }
+            >
+              Your typical day
+            </Text>
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#B8B2AA",
+                  "fontFamily": "JetBrainsMono_500Medium",
+                  "fontSize": 14,
+                  "letterSpacing": 0.2,
+                }
+              }
+              testID="activity-detail-baseline-body"
+            >
+              ~7,100 steps
+            </Text>
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#857F7A",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 12,
+                  "lineHeight": 16,
+                  "marginTop": 2,
+                }
+              }
+            >
+              based on 6 days of activity
+            </Text>
+          </View>
+          <View
+            style={
+              [
+                {
+                  "flexDirection": "row",
+                  "paddingHorizontal": 20,
+                },
+                {
+                  "gap": 12,
+                },
+                undefined,
+              ]
+            }
+            testID="activity-detail-stat-trio"
+          >
+            <View
+              accessibilityLabel="Daily avg: 6,636 steps · week"
+              accessibilityRole="text"
+              style={
+                [
+                  {
+                    "borderWidth": 0.5,
+                    "flex": 1,
+                  },
+                  {
+                    "backgroundColor": "#120C07",
+                    "borderColor": "rgba(255,255,255,0.06)",
+                    "borderRadius": 14,
+                    "padding": 12,
+                  },
+                ]
+              }
+              testID="activity-detail-stat-trio-0"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#857F7A",
+                    "fontFamily": "Inter_500Medium",
+                    "fontSize": 11,
+                    "letterSpacing": 0.55,
+                    "lineHeight": 14,
+                    "marginBottom": 4,
+                    "textTransform": "uppercase",
+                  }
+                }
+              >
+                Daily avg
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#FFFFFF",
+                    "fontFamily": "InstrumentSerif_400Regular",
+                    "fontSize": 22,
+                    "lineHeight": 28,
+                  }
+                }
+              >
+                6,636
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#857F7A",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 12,
+                    "letterSpacing": 0.4,
+                    "lineHeight": 16,
+                    "marginTop": 4,
+                  }
+                }
+              >
+                steps · week
+              </Text>
+            </View>
+            <View
+              accessibilityLabel="Best day: 9,000 Monday"
+              accessibilityRole="text"
+              style={
+                [
+                  {
+                    "borderWidth": 0.5,
+                    "flex": 1,
+                  },
+                  {
+                    "backgroundColor": "#120C07",
+                    "borderColor": "rgba(255,255,255,0.06)",
+                    "borderRadius": 14,
+                    "padding": 12,
+                  },
+                ]
+              }
+              testID="activity-detail-stat-trio-1"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#857F7A",
+                    "fontFamily": "Inter_500Medium",
+                    "fontSize": 11,
+                    "letterSpacing": 0.55,
+                    "lineHeight": 14,
+                    "marginBottom": 4,
+                    "textTransform": "uppercase",
+                  }
+                }
+              >
+                Best day
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#FFFFFF",
+                    "fontFamily": "InstrumentSerif_400Regular",
+                    "fontSize": 22,
+                    "lineHeight": 28,
+                  }
+                }
+              >
+                9,000
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#857F7A",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 12,
+                    "letterSpacing": 0.4,
+                    "lineHeight": 16,
+                    "marginTop": 4,
+                  }
+                }
+              >
+                Monday
+              </Text>
+            </View>
+            <View
+              accessibilityLabel="Streak: 0 days at goal"
+              accessibilityRole="text"
+              style={
+                [
+                  {
+                    "borderWidth": 0.5,
+                    "flex": 1,
+                  },
+                  {
+                    "backgroundColor": "#120C07",
+                    "borderColor": "rgba(255,255,255,0.06)",
+                    "borderRadius": 14,
+                    "padding": 12,
+                  },
+                ]
+              }
+              testID="activity-detail-stat-trio-2"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#857F7A",
+                    "fontFamily": "Inter_500Medium",
+                    "fontSize": 11,
+                    "letterSpacing": 0.55,
+                    "lineHeight": 14,
+                    "marginBottom": 4,
+                    "textTransform": "uppercase",
+                  }
+                }
+              >
+                Streak
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#FFFFFF",
+                    "fontFamily": "InstrumentSerif_400Regular",
+                    "fontSize": 22,
+                    "lineHeight": 28,
+                  }
+                }
+              >
+                0
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#857F7A",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 12,
+                    "letterSpacing": 0.4,
+                    "lineHeight": 16,
+                    "marginTop": 4,
+                  }
+                }
+              >
+                days at goal
+              </Text>
+            </View>
+          </View>
+          <View
+            testID="activity-detail-weekly-bars"
+          >
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#857F7A",
+                  "fontFamily": "Inter_500Medium",
+                  "fontSize": 11,
+                  "letterSpacing": 0.55,
+                  "lineHeight": 14,
+                  "marginBottom": 8,
+                  "marginHorizontal": 20,
+                  "textTransform": "uppercase",
+                }
+              }
+              testID="activity-detail-weekly-bars-section-label"
+            >
+              This week vs goal
+            </Text>
+            <View
+              style={
+                [
+                  {
+                    "borderWidth": 0.5,
+                  },
+                  {
+                    "backgroundColor": "#120C07",
+                    "borderColor": "rgba(255,255,255,0.06)",
+                    "borderRadius": 22,
+                    "marginHorizontal": 20,
+                    "padding": 16,
+                  },
+                ]
+              }
+            >
+              <View
+                style={
+                  [
+                    {
+                      "alignItems": "flex-end",
+                      "flexDirection": "row",
+                      "position": "relative",
+                    },
+                    {
+                      "gap": 8,
+                      "height": 120,
+                      "paddingBottom": 18,
+                    },
+                  ]
+                }
+              >
+                <View
+                  pointerEvents="none"
+                  style={
+                    [
+                      {
+                        "borderStyle": "dashed",
+                        "borderTopWidth": 1,
+                        "height": 1,
+                        "left": 0,
+                        "position": "absolute",
+                        "right": 0,
+                      },
+                      {
+                        "borderTopColor": "rgba(255,255,255,0.08)",
+                        "top": 34.00000000000001,
+                      },
+                    ]
+                  }
+                  testID="activity-weekly-bars-goal-line"
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "JetBrainsMono_500Medium",
+                        "fontSize": 8.5,
+                        "letterSpacing": 0.55,
+                        "position": "absolute",
+                        "right": 0,
+                        "textTransform": "uppercase",
+                        "top": -14,
+                      }
+                    }
+                  >
+                    goal 8k
+                  </Text>
+                </View>
+                <View
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flex": 1,
+                      "height": "100%",
+                      "justifyContent": "flex-end",
+                    }
+                  }
+                  testID="activity-detail-weekly-bars-bar-0"
+                >
+                  <View
+                    style={
+                      {
+                        "alignItems": "flex-end",
+                        "flex": 1,
+                        "flexDirection": "row",
+                        "justifyContent": "flex-end",
+                        "width": "100%",
+                      }
+                    }
+                  >
+                    <View
+                      pointerEvents="none"
+                      style={
+                        [
+                          {
+                            "borderRadius": 4,
+                            "transformOrigin": "bottom",
+                            "width": "100%",
+                          },
+                          {
+                            "backgroundColor": "#7CA56F",
+                            "borderColor": "transparent",
+                            "borderWidth": 0,
+                            "height": "35%",
+                            "opacity": 0.55,
+                          },
+                          {
+                            "transform": [
+                              {
+                                "scaleY": 0,
+                              },
+                            ],
+                          },
+                        ]
+                      }
+                    />
+                  </View>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "JetBrainsMono_500Medium",
+                        "fontSize": 8.5,
+                        "letterSpacing": 0.55,
+                        "marginTop": 4,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    S
+                  </Text>
+                </View>
+                <View
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flex": 1,
+                      "height": "100%",
+                      "justifyContent": "flex-end",
+                    }
+                  }
+                  testID="activity-detail-weekly-bars-bar-1"
+                >
+                  <View
+                    style={
+                      {
+                        "alignItems": "flex-end",
+                        "flex": 1,
+                        "flexDirection": "row",
+                        "justifyContent": "flex-end",
+                        "width": "100%",
+                      }
+                    }
+                  >
+                    <View
+                      pointerEvents="none"
+                      style={
+                        [
+                          {
+                            "borderRadius": 4,
+                            "transformOrigin": "bottom",
+                            "width": "100%",
+                          },
+                          {
+                            "backgroundColor": "#7CA56F",
+                            "borderColor": "transparent",
+                            "borderWidth": 0,
+                            "height": "54.166666666666664%",
+                            "opacity": 0.55,
+                          },
+                          {
+                            "transform": [
+                              {
+                                "scaleY": 0,
+                              },
+                            ],
+                          },
+                        ]
+                      }
+                    />
+                  </View>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "JetBrainsMono_500Medium",
+                        "fontSize": 8.5,
+                        "letterSpacing": 0.55,
+                        "marginTop": 4,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    S
+                  </Text>
+                </View>
+                <View
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flex": 1,
+                      "height": "100%",
+                      "justifyContent": "flex-end",
+                    }
+                  }
+                  testID="activity-detail-weekly-bars-bar-2"
+                >
+                  <View
+                    style={
+                      {
+                        "alignItems": "flex-end",
+                        "flex": 1,
+                        "flexDirection": "row",
+                        "justifyContent": "flex-end",
+                        "width": "100%",
+                      }
+                    }
+                  >
+                    <View
+                      pointerEvents="none"
+                      style={
+                        [
+                          {
+                            "borderRadius": 4,
+                            "transformOrigin": "bottom",
+                            "width": "100%",
+                          },
+                          {
+                            "backgroundColor": "#7CA56F",
+                            "borderColor": "transparent",
+                            "borderWidth": 0,
+                            "height": "75%",
+                            "opacity": 1,
+                          },
+                          {
+                            "transform": [
+                              {
+                                "scaleY": 0,
+                              },
+                            ],
+                          },
+                        ]
+                      }
+                    />
+                  </View>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "JetBrainsMono_500Medium",
+                        "fontSize": 8.5,
+                        "letterSpacing": 0.55,
+                        "marginTop": 4,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    M
+                  </Text>
+                </View>
+                <View
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flex": 1,
+                      "height": "100%",
+                      "justifyContent": "flex-end",
+                    }
+                  }
+                  testID="activity-detail-weekly-bars-bar-3"
+                >
+                  <View
+                    style={
+                      {
+                        "alignItems": "flex-end",
+                        "flex": 1,
+                        "flexDirection": "row",
+                        "justifyContent": "flex-end",
+                        "width": "100%",
+                      }
+                    }
+                  >
+                    <View
+                      pointerEvents="none"
+                      style={
+                        [
+                          {
+                            "borderRadius": 4,
+                            "transformOrigin": "bottom",
+                            "width": "100%",
+                          },
+                          {
+                            "backgroundColor": "#7CA56F",
+                            "borderColor": "transparent",
+                            "borderWidth": 0,
+                            "height": "45%",
+                            "opacity": 0.55,
+                          },
+                          {
+                            "transform": [
+                              {
+                                "scaleY": 0,
+                              },
+                            ],
+                          },
+                        ]
+                      }
+                    />
+                  </View>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "JetBrainsMono_500Medium",
+                        "fontSize": 8.5,
+                        "letterSpacing": 0.55,
+                        "marginTop": 4,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    T
+                  </Text>
+                </View>
+                <View
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flex": 1,
+                      "height": "100%",
+                      "justifyContent": "flex-end",
+                    }
+                  }
+                  testID="activity-detail-weekly-bars-bar-4"
+                >
+                  <View
+                    style={
+                      {
+                        "alignItems": "flex-end",
+                        "flex": 1,
+                        "flexDirection": "row",
+                        "justifyContent": "flex-end",
+                        "width": "100%",
+                      }
+                    }
+                  >
+                    <View
+                      pointerEvents="none"
+                      style={
+                        [
+                          {
+                            "borderRadius": 4,
+                            "transformOrigin": "bottom",
+                            "width": "100%",
+                          },
+                          {
+                            "backgroundColor": "#7CA56F",
+                            "borderColor": "transparent",
+                            "borderWidth": 0,
+                            "height": "59.166666666666664%",
+                            "opacity": 0.55,
+                          },
+                          {
+                            "transform": [
+                              {
+                                "scaleY": 0,
+                              },
+                            ],
+                          },
+                        ]
+                      }
+                    />
+                  </View>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "JetBrainsMono_500Medium",
+                        "fontSize": 8.5,
+                        "letterSpacing": 0.55,
+                        "marginTop": 4,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    W
+                  </Text>
+                </View>
+                <View
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flex": 1,
+                      "height": "100%",
+                      "justifyContent": "flex-end",
+                    }
+                  }
+                  testID="activity-detail-weekly-bars-bar-5"
+                >
+                  <View
+                    style={
+                      {
+                        "alignItems": "flex-end",
+                        "flex": 1,
+                        "flexDirection": "row",
+                        "justifyContent": "flex-end",
+                        "width": "100%",
+                      }
+                    }
+                  >
+                    <View
+                      pointerEvents="none"
+                      style={
+                        [
+                          {
+                            "borderRadius": 4,
+                            "transformOrigin": "bottom",
+                            "width": "100%",
+                          },
+                          {
+                            "backgroundColor": "#7CA56F",
+                            "borderColor": "transparent",
+                            "borderWidth": 0,
+                            "height": "66.66666666666666%",
+                            "opacity": 1,
+                          },
+                          {
+                            "transform": [
+                              {
+                                "scaleY": 0,
+                              },
+                            ],
+                          },
+                        ]
+                      }
+                    />
+                  </View>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "JetBrainsMono_500Medium",
+                        "fontSize": 8.5,
+                        "letterSpacing": 0.55,
+                        "marginTop": 4,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    T
+                  </Text>
+                </View>
+                <View
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flex": 1,
+                      "height": "100%",
+                      "justifyContent": "flex-end",
+                    }
+                  }
+                  testID="activity-detail-weekly-bars-bar-6"
+                >
+                  <View
+                    style={
+                      {
+                        "alignItems": "flex-end",
+                        "flex": 1,
+                        "flexDirection": "row",
+                        "justifyContent": "flex-end",
+                        "width": "100%",
+                      }
+                    }
+                  >
+                    <View
+                      pointerEvents="none"
+                      style={
+                        [
+                          {
+                            "borderRadius": 4,
+                            "transformOrigin": "bottom",
+                            "width": "100%",
+                          },
+                          {
+                            "backgroundColor": "#7CA56F",
+                            "borderColor": "#7CA56F",
+                            "borderWidth": 0.5,
+                            "height": "52.083333333333336%",
+                            "opacity": 0.55,
+                          },
+                          {
+                            "transform": [
+                              {
+                                "scaleY": 0,
+                              },
+                            ],
+                          },
+                        ]
+                      }
+                    />
+                  </View>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#FFFFFF",
+                        "fontFamily": "JetBrainsMono_500Medium",
+                        "fontSize": 8.5,
+                        "letterSpacing": 0.55,
+                        "marginTop": 4,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    F
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+          <View
+            accessibilityLabel="Leiko about your activity: You met your goal 2 times this week. Your daily average (6,636) is right at your usual."
+            accessibilityRole="text"
+            style={
+              [
+                {
+                  "borderWidth": 0.5,
+                },
+                {
+                  "backgroundColor": "#120C07",
+                  "borderColor": "rgba(255,255,255,0.06)",
+                  "borderRadius": 22,
+                  "marginHorizontal": 20,
+                  "padding": 16,
+                },
+                undefined,
+              ]
+            }
+            testID="activity-detail-insight"
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "marginBottom": 10,
+                }
+              }
+            >
+              <View
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "borderRadius": 99,
+                      "height": 18,
+                      "justifyContent": "center",
+                      "width": 18,
+                    },
+                    {
+                      "backgroundColor": "#7CA56F26",
+                    },
+                  ]
+                }
+              >
+                <RNSVGSvgView
+                  align="xMidYMid"
+                  bbHeight={11}
+                  bbWidth={11}
+                  className="sparkle-fill__svg-icon-phosphor"
+                  color="#7CA56F"
+                  fill="currentColor"
+                  focusable={false}
+                  height={11}
+                  meetOrSlice={0}
+                  minX={0}
+                  minY={0}
+                  style={
+                    [
+                      {
+                        "backgroundColor": "transparent",
+                        "borderWidth": 0,
+                      },
+                      [
+                        undefined,
+                        undefined,
+                        {},
+                      ],
+                      {
+                        "flex": 0,
+                        "height": 11,
+                        "width": 11,
+                      },
+                    ]
+                  }
+                  testID="phosphor-react-native-sparkle-fill"
+                  vbHeight={256}
+                  vbWidth={256}
+                  width={11}
+                >
+                  <RNSVGGroup
+                    fill={
+                      {
+                        "type": 2,
+                      }
+                    }
+                    propList={
+                      [
+                        "fill",
+                      ]
+                    }
+                  >
+                    <RNSVGGroup
+                      fill={
+                        {
+                          "payload": 4286358895,
+                          "type": 0,
+                        }
+                      }
+                      propList={
+                        [
+                          "fill",
+                        ]
+                      }
+                    >
+                      <RNSVGPath
+                        d="M208 144a15.78 15.78 0 0 1-10.42 14.94L146 178l-19 51.62a15.92 15.92 0 0 1-29.88 0L78 178l-51.62-19a15.92 15.92 0 0 1 0-29.88L78 110l19-51.62a15.92 15.92 0 0 1 29.88 0L146 110l51.62 19A15.78 15.78 0 0 1 208 144m-56-96h16v16a8 8 0 0 0 16 0V48h16a8 8 0 0 0 0-16h-16V16a8 8 0 0 0-16 0v16h-16a8 8 0 0 0 0 16m88 32h-8v-8a8 8 0 0 0-16 0v8h-8a8 8 0 0 0 0 16h8v8a8 8 0 0 0 16 0v-8h8a8 8 0 0 0 0-16"
+                        fill={
+                          {
+                            "payload": 4278190080,
+                            "type": 0,
+                          }
+                        }
+                      />
+                    </RNSVGGroup>
+                  </RNSVGGroup>
+                </RNSVGSvgView>
+              </View>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#7CA56F",
+                    "fontFamily": "Inter_500Medium",
+                    "fontSize": 11,
+                    "letterSpacing": 0.55,
+                    "lineHeight": 14,
+                    "marginLeft": 8,
+                    "textTransform": "uppercase",
+                  }
+                }
+              >
+                Leiko · about your activity
+              </Text>
+            </View>
+            <Text
+              style={
+                {
+                  "color": "#FFFFFF",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 15,
+                  "lineHeight": 22,
+                }
+              }
+            >
+              You met your goal 2 times this week. Your daily average (6,636) is right at your usual.
+            </Text>
+          </View>
+          <View
+            accessibilityHint="Opens explanation sheet"
+            accessibilityLabel="What does this mean? Opens explanation sheet."
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            hitSlop={12}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignSelf": "center",
+                "paddingVertical": 8,
+              }
+            }
+            testID="activity-detail-explainer-anchor"
+          >
+            <Text
+              style={
+                {
+                  "color": "#E8A063",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 15,
+                  "fontWeight": "500",
+                }
+              }
+            >
+              What does this mean?
+            </Text>
+          </View>
+          <View
+            testID="activity-detail-recent"
+          >
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#857F7A",
+                  "fontFamily": "Inter_500Medium",
+                  "fontSize": 11,
+                  "letterSpacing": 0.55,
+                  "lineHeight": 14,
+                  "marginBottom": 8,
+                  "paddingHorizontal": 20,
+                  "textTransform": "uppercase",
+                }
+              }
+              testID="activity-detail-recent-eyebrow"
+            >
+              Recent days
+            </Text>
+            <View
+              style={
+                [
+                  {
+                    "borderWidth": 0.5,
+                  },
+                  {
+                    "backgroundColor": "#120C07",
+                    "borderColor": "rgba(255,255,255,0.06)",
+                    "borderRadius": 22,
+                    "marginHorizontal": 20,
+                    "paddingHorizontal": 16,
+                  },
+                  undefined,
+                ]
+              }
+              testID="activity-detail-recent-list"
+            >
+              <View
+                accessibilityLabel="6,250, Today · in progress, now"
+                accessibilityRole="text"
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                    },
+                    {
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0.5,
+                      "opacity": 1,
+                      "paddingVertical": 12,
+                    },
+                  ]
+                }
+                testID="activity-detail-recent-list-row-today"
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#7CA56F",
+                      },
+                    ]
+                  }
+                />
+                <View
+                  style={
+                    {
+                      "flex": 1,
+                      "marginLeft": 12,
+                    }
+                  }
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#FFFFFF",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    6,250
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Today · in progress
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
+                    }
+                  }
+                >
+                  now
+                </Text>
+              </View>
+              <View
+                accessibilityLabel="8,000, Thursday · met goal, May 21"
+                accessibilityRole="text"
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                    },
+                    {
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0.5,
+                      "opacity": 1,
+                      "paddingVertical": 12,
+                    },
+                  ]
+                }
+                testID="activity-detail-recent-list-row-day-2026-05-21"
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#7CA56F",
+                      },
+                    ]
+                  }
+                />
+                <View
+                  style={
+                    {
+                      "flex": 1,
+                      "marginLeft": 12,
+                    }
+                  }
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#FFFFFF",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    8,000
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Thursday · met goal
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
+                    }
+                  }
+                >
+                  May 21
+                </Text>
+              </View>
+              <View
+                accessibilityLabel="7,100, Wednesday · light day, May 20"
+                accessibilityRole="text"
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                    },
+                    {
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0.5,
+                      "opacity": 1,
+                      "paddingVertical": 12,
+                    },
+                  ]
+                }
+                testID="activity-detail-recent-list-row-day-2026-05-20"
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#7CA56F",
+                      },
+                    ]
+                  }
+                />
+                <View
+                  style={
+                    {
+                      "flex": 1,
+                      "marginLeft": 12,
+                    }
+                  }
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#FFFFFF",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    7,100
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Wednesday · light day
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
+                    }
+                  }
+                >
+                  May 20
+                </Text>
+              </View>
+              <View
+                accessibilityLabel="5,400, Tuesday · light day, May 19"
+                accessibilityRole="text"
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                    },
+                    {
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0.5,
+                      "opacity": 1,
+                      "paddingVertical": 12,
+                    },
+                  ]
+                }
+                testID="activity-detail-recent-list-row-day-2026-05-19"
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#7CA56F",
+                      },
+                    ]
+                  }
+                />
+                <View
+                  style={
+                    {
+                      "flex": 1,
+                      "marginLeft": 12,
+                    }
+                  }
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#FFFFFF",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    5,400
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Tuesday · light day
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
+                    }
+                  }
+                >
+                  May 19
+                </Text>
+              </View>
+              <View
+                accessibilityLabel="9,000, Monday · met goal, May 18"
+                accessibilityRole="text"
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                    },
+                    {
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0,
+                      "opacity": 1,
+                      "paddingVertical": 12,
+                    },
+                  ]
+                }
+                testID="activity-detail-recent-list-row-day-2026-05-18"
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#7CA56F",
+                      },
+                    ]
+                  }
+                />
+                <View
+                  style={
+                    {
+                      "flex": 1,
+                      "marginLeft": 12,
+                    }
+                  }
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#FFFFFF",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    9,000
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Monday · met goal
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
+                    }
+                  }
+                >
+                  May 18
+                </Text>
+              </View>
+            </View>
+            <View
+              accessibilityLabel="Showing 5 of 7 readings · tap to show more"
+              accessibilityRole="button"
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              hitSlop={6}
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#120C07",
+                  "borderColor": "rgba(255,255,255,0.06)",
+                  "borderRadius": 14,
+                  "borderWidth": 0.5,
+                  "marginHorizontal": 20,
+                  "marginTop": 12,
+                  "opacity": 1,
+                  "paddingHorizontal": 16,
+                  "paddingVertical": 12,
+                }
+              }
+              testID="activity-detail-recent-footer"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#FFFFFF",
+                    "fontFamily": "Inter_400Regular",
+                    "fontSize": 12,
+                    "fontWeight": "500",
+                    "lineHeight": 16,
+                  }
+                }
+              >
+                Show more · 5 of 7
+              </Text>
+            </View>
+          </View>
+          <View>
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#857F7A",
+                  "fontFamily": "Inter_500Medium",
+                  "fontSize": 11,
+                  "letterSpacing": 0.55,
+                  "lineHeight": 14,
+                  "marginBottom": 8,
+                  "marginHorizontal": 20,
+                  "textTransform": "uppercase",
+                }
+              }
+            >
+              Daily step goal
+            </Text>
+            <View
+              accessibilityLabel="Daily step goal, 8,000 steps. Tap to change."
+              accessibilityRole="button"
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              hitSlop={6}
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                [
+                  {
+                    "alignItems": "center",
+                    "borderWidth": 0.5,
+                    "flexDirection": "row",
+                  },
+                  {
+                    "backgroundColor": "#120C07",
+                    "borderColor": "rgba(255,255,255,0.06)",
+                    "borderRadius": 22,
+                    "marginHorizontal": 20,
+                    "opacity": 1,
+                    "paddingHorizontal": 16,
+                    "paddingVertical": 16,
+                  },
+                ]
+              }
+              testID="activity-detail-goal-row"
+            >
+              <View
+                style={
+                  {
+                    "flex": 1,
+                  }
+                }
+              >
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#FFFFFF",
+                      "fontFamily": "InstrumentSerif_400Regular",
+                      "fontSize": 22,
+                      "lineHeight": 28,
+                    }
+                  }
+                >
+                  8,000
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 11,
+                      "letterSpacing": 0.4,
+                      "marginTop": 2,
+                      "textTransform": "uppercase",
+                    }
+                  }
+                >
+                  steps · tap to change
+                </Text>
+              </View>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#857F7A",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 22,
+                  }
+                }
+              >
+                ›
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </RCTScrollView>
+  </RNCSafeAreaView>
+</RNCSafeAreaProvider>
+`;

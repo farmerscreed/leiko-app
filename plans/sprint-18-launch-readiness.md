@@ -49,20 +49,67 @@ verification / hardening passes.
 
 ## Sprint 18 engineering progress (live)
 
-Tick as commits land. Updated 2026-05-20.
+Tick as commits land. Updated 2026-05-22.
+
+### Day 1-4 engineering
 
 | Item | Status | Commit | Notes |
 |---|---|---|---|
 | **SEC-1** MMKV encryption at rest | ✅ | `7d0455e` | Day 1 |
 | **FUN-5** Doctor-PDF AI narrative + cover note wired | ✅ | `bf370c3` | Day 3 |
+| **FUN-6** PDFShift signup | ✅ | (founder Day 2 Block 1) | PDFShift token in Edge Function secrets |
 | **QUA-2** Drop hardcoded HR fallback window | ✅ | `7475bbd` | Day 5 prep |
 | **QUA-8** Settings → Help & Support row + email row | ✅ | `ddc45e2` | Day 4 |
 | **QUA-5** iOS PrivacyInfo collected data types | ✅ | `241f55d` | Day 3 |
 | **QUA-7** App Store metadata + ITSAppUsesNonExemptEncryption | ✅ | `241f55d` | Day 3 |
 | **QUA-4** CI workflows | ✅ already in Sprint 16.6 | (existing) | re-verified |
-| **FUN-6** PDFShift signup | ⏳ founder Day 2 Block 1 | — | unblocks doctor-PDF in prod |
-| **OPS-1..12** founder ops blitz | ⏳ Day 2 | — | LAUNCH_DAY2_CHECKLIST.md |
-| **Day 5 bench** FUN-7 / FUN-8 / QUA-1 / QUA-2-verify / QUA-3 | ⏳ Day 5 | — | SPRINT_18_VERIFICATION.md |
+
+### Day 2 founder ops blitz
+
+| Item | Status | Notes |
+|---|---|---|
+| **OPS-1** migrations to prod | ✅ | 23 migrations (incl. 0023 Vault hotfix) on `kqnzxjrpnjnczhgdwdqg` |
+| **OPS-2** pg_cron config | ✅ | Vault path (hosted Supabase blocked the GUC approach); migration `0023_pg_cron_vault.sql` + 2 vault secrets |
+| **OPS-11** Edge Function secrets | ✅ | 6 set: ANTHROPIC, RESEND, PDF×2, AI_TIER×2 |
+| **Edge Functions deployed** | ✅ | 17 functions live; `ai-tier-b` smoke-curl 200 |
+| **OPS-12** EAS production profile → prod Supabase | ✅ | `794d9f3` |
+| **Block 3 AAB build** | ✅ | `5n4GUMxhcrLa5Z6Cgz9Cqr.aab` (versionCode 2) — Play Console upload pending |
+| **Block 3 APK build (production-apk profile)** | ✅ | `kQ5uMNfwz7P6517WuvkAbW.apk` (versionCode 3) — installed on Phone 1 |
+| **Block 4 Phone 1 smoke test** | ✅ partial | Signup + sign-in walked end-to-end with `tawokels@gmail.com` (Resend sandbox constraint); revealed 9 buckets of bench bugs (see below) |
+| **Block 5 GH Actions secrets + production env** | ✅ | EXPO_TOKEN / SUPABASE_ACCESS_TOKEN / SUPABASE_DB_PASSWORD + SUPABASE_PROJECT_REF variable + required-reviewer gate |
+
+### Day 2-3 bench-found audit pass — 9 fix buckets
+
+The on-device test cycle surfaced both UX issues and systemic
+anti-patterns. We audited every vital-detail screen + 23 other
+screens and closed 31 separate findings across 9 commits:
+
+| # | What broke | Commit | Findings |
+|---|---|---|---|
+| 1 | SelfBuyerHome — no inline "Pair your watch" CTA | `8d8000b` | 1 |
+| 2 | ReadingDetail — back/close trap (sticky chevron + Done + stack replace) | `6de2632` | 1 |
+| 3 | Settings — refresh profile after onboarding DB writes | `e41745d` | 1 |
+| 4 | SleepDetail audit — loading/error / fresh labels / chart width / history copy / correlation placeholder | `ff4ece8` | 6 |
+| 5 | HRDetail audit — loading/error / date-aligned correlation / label clarity / "Last 24h" caption / history copy / stable nowSec | `d53a66f` | 9 |
+| 6 | BPDetail audit — loading/error / fresh "now" gate / share-row wiring / no-today placeholder / hero+row time format | `a4ac261` | 6 |
+| 7 | SpO2Detail audit — loading/error / date-pair correlation / Lowest single-source | `1662ca8` | 3 |
+| 8 | ActivityDetail audit — loading/error | `8b28165` | 1 |
+| 9 | Production-readiness audit — ParentDashboard loading/error + 3 ghost buttons on ReadingDetail | `316301a` | 3 |
+| **Total** | | | **31** |
+
+### Day 5 — bench verification (still ahead)
+
+The new APK v4 (built end of 2026-05-22) bundles ALL 9 audit-pass
+buckets. Once installed on Phone 1:
+
+| Item | Status | Notes |
+|---|---|---|
+| **FUN-7** applyDeviceConfig pushes to watch | ⏳ | SPRINT_18_VERIFICATION.md Test 1 |
+| **FUN-8** Background-fetch fires | ⏳ | Test 2 |
+| **QUA-1** BP value mismatch race | ⏳ | Test 3 |
+| **QUA-2** HR interval (no fallback) — verify on-device | ⏳ | Test 4 |
+| **QUA-3** Android 14+ BLE foreground service survives Doze | ⏳ | Test 5 |
+| Regression check on the 31 audit fixes | ⏳ | All 5 vital details, Home, ReadingDetail, Settings, ParentDashboard |
 
 ---
 
