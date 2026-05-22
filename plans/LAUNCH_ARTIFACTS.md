@@ -44,20 +44,21 @@ Update this log every time a new build artifact is produced.
 | **Status** | Built; installed on Phone 1; signup walked end-to-end. **Superseded** by v4 below (containing the 9 audit-pass fix buckets). |
 | **Used for** | First-pass smoke test on Phone 1. Revealed 9 buckets of bench bugs, all closed in commits `8d8000b` → `316301a`. |
 
-### v1.0.0 (versionCode 4 expected) — production-apk `.apk` with audit-pass fixes
+### v1.0.0 (versionCode 4) — production-apk `.apk` with audit-pass fixes
 
 | Field | Value |
 |---|---|
-| **Artifact URL** | _pending — paste once EAS finishes_ |
-| **Build logs** | _pending_ |
+| **Artifact URL** | https://expo.dev/artifacts/eas/bnwdtRMddqpEgpRsKt9xpS.apk |
+| **Build logs** | https://expo.dev/accounts/lawone-apps/projects/leiko/builds (find by tip `316301a`) |
 | **EAS profile** | `production-apk` |
 | **Build type** | `apk` |
 | **versionName** | `1.0.0` |
-| **versionCode** | `4` (auto-increment expected; confirm from EAS output) |
+| **versionCode** | `4` (autoIncrement from previous v3) |
 | **EAS credentials slot** | Same as the AAB / APK v3 |
+| **Built** | 2026-05-22 |
 | **Target backend** | prod Supabase `kqnzxjrpnjnczhgdwdqg.supabase.co` |
-| **Status** | Built end of 2026-05-22 session; pending Phone 1 reinstall + retest |
-| **Branch tip when built** | `316301a` (see `git log --oneline` for full commit set) |
+| **Status** | Built; ready for Phone 1 reinstall + retest |
+| **Branch tip when built** | `316301a` (audit-pass complete; next commit was `2919a71` docs only) |
 | **Bundles 31 audit findings** | SelfBuyerHome pair-watch · ReadingDetail back/close · Settings refresh · Sleep/HR/BP/SpO2/Activity full audits · ParentDashboard load/error · ghost-button removal |
 | **Used for** | Block 4 re-smoke-test on Phone 1 + full regression of the 5 vital detail screens; if clean, this is the artifact that goes to internal-beta testers via Drive link. |
 
