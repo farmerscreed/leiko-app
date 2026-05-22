@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="108" height="108">
+  <!--
+    Leiko · Halo Ember — Android adaptive icon FOREGROUND layer.
+    108x108 canvas with content sized to fit the inner 72x72 safe zone
+    (Android masks the outer 18dp ring on circular/squircle launchers).
+    Source: Treatment C glyph (italic L + coral arc + pulse dot).
+  -->
+  <defs>
+    <linearGradient id="ringGradFg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#FBEBD6"/>
+      <stop offset="40%"  stop-color="#F5B98C"/>
+      <stop offset="100%" stop-color="#B8523A"/>
+    </linearGradient>
+    <filter id="arcGlowFg" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="0.7" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="dotGlowFg" x="-300%" y="-300%" width="600%" height="600%">
+      <feGaussianBlur stdDeviation="0.9" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Glyph placed in the 18..90 safe area = 72x72. Source coords
+       0..100; scale 72/100 = 0.72, translate (18, 18). -->
+  <g transform="translate(18 18) scale(0.72)">
+    <!-- Faint concentric rings. -->
+    <circle cx="50" cy="50" r="30" fill="none" stroke="#FBF8F3" stroke-opacity="0.30" stroke-width="0.6"/>
+    <circle cx="50" cy="50" r="18" fill="none" stroke="#FBF8F3" stroke-opacity="0.20" stroke-width="0.5"/>
+
+    <!-- The beam — rotated -115deg, dasharray 210/264. -->
+    <g transform="rotate(-115 50 50)">
+      <circle cx="50" cy="50" r="42" fill="none"
+              stroke="url(#ringGradFg)" stroke-width="2.8"
+              stroke-linecap="round"
+              stroke-dasharray="210 264"
+              filter="url(#arcGlowFg)"/>
+      <circle cx="50" cy="50" r="42" fill="none"
+              stroke="#E8A063" stroke-opacity="0.4"
+              stroke-width="0.8" stroke-linecap="round"
+              stroke-dasharray="210 264"/>
+    </g>
+
+    <!-- Italic "L" with black shadow twin under for depth. -->
+    <text x="32" y="62" font-family="'Instrument Serif', 'Times New Roman', serif"
+          font-size="36" font-style="italic"
+          fill="#000000" fill-opacity="0.8" letter-spacing="-1.5"
+          transform="translate(0 0.4)">L</text>
+    <text x="32" y="62" font-family="'Instrument Serif', 'Times New Roman', serif"
+          font-size="36" font-style="italic"
+          fill="#FBF8F3" letter-spacing="-1.5">L</text>
+
+    <!-- The pulse dot. -->
+    <g filter="url(#dotGlowFg)">
+      <circle cx="56" cy="58" r="5" fill="url(#ringGradFg)"/>
+      <circle cx="55" cy="57" r="2" fill="#FAE9CC"/>
+    </g>
+  </g>
+</svg>

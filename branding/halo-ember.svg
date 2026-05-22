@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!--
+    Leiko · Halo Ember — static icon master.
+    Source: new-design/project/Leiko Constellation 3D.html (Treatment C).
+    sRGB approximations of the source oklch palette; idle intensity (0.4
+    ish — the canonical, calm state). Animations stripped for static
+    launcher rendering.
+  -->
+  <defs>
+    <!-- Squircle clip — borderRadius ≈ 23.5% of side length, per the
+         source's `borderRadius: size * 0.235`. -->
+    <clipPath id="tileMask">
+      <rect x="0" y="0" width="1024" height="1024" rx="241" ry="241"/>
+    </clipPath>
+
+    <!-- Tile background — radial bloom from bottom center. -->
+    <radialGradient id="tileBg" cx="50%" cy="100%" r="100%">
+      <stop offset="0%"  stop-color="#C96442"/>
+      <stop offset="25%" stop-color="#E8A063" stop-opacity="0.5"/>
+      <stop offset="65%" stop-color="#1A1614"/>
+      <stop offset="100%" stop-color="#0A0907"/>
+    </radialGradient>
+
+    <!-- Top depth shadow. -->
+    <linearGradient id="topShadow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#000000" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Bottom inner glow — coral ember rising. -->
+    <radialGradient id="bottomGlow" cx="50%" cy="100%" r="70%">
+      <stop offset="0%"  stop-color="#E8A063" stop-opacity="0.4"/>
+      <stop offset="60%" stop-color="#E8A063" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Top sheen — soft white highlight. -->
+    <radialGradient id="topSheen" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"  stop-color="#FBF8F3" stop-opacity="0.18"/>
+      <stop offset="70%" stop-color="#FBF8F3" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- The luminous coral arc — gradient + glow. -->
+    <linearGradient id="ring3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%"   stop-color="#FBEBD6"/>
+      <stop offset="40%"  stop-color="#F5B98C"/>
+      <stop offset="100%" stop-color="#B8523A"/>
+    </linearGradient>
+
+    <filter id="arcGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <filter id="dotGlow" x="-300%" y="-300%" width="600%" height="600%">
+      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- The squircle tile. -->
+  <g clip-path="url(#tileMask)">
+    <!-- Base gradient. -->
+    <rect x="0" y="0" width="1024" height="1024" fill="url(#tileBg)"/>
+    <!-- Bottom coral inner-glow (replicates inset shadow). -->
+    <rect x="0" y="0" width="1024" height="1024" fill="url(#bottomGlow)"/>
+    <!-- Top depth shadow (40% of height). -->
+    <rect x="0" y="0" width="1024" height="409" fill="url(#topShadow)"/>
+    <!-- Top sheen ellipse. -->
+    <ellipse cx="512" cy="174" rx="358" ry="155" fill="url(#topSheen)"/>
+
+    <!-- Constellation glyph — centered 76% of tile (~778px square),
+         coordinate system 0..100. -->
+    <g transform="translate(123, 123) scale(7.78)">
+      <!-- Faint concentric rings (recessed). -->
+      <circle cx="50" cy="50" r="30" fill="none" stroke="#FBF8F3" stroke-opacity="0.14" stroke-width="0.6"/>
+      <circle cx="50" cy="50" r="18" fill="none" stroke="#FBF8F3" stroke-opacity="0.10" stroke-width="0.5"/>
+
+      <!-- The beam — a pure-light arc, rotated -115deg around the
+           ring center. Dasharray 210/264 leaves a ~286° visible arc. -->
+      <g transform="rotate(-115 50 50)">
+        <circle cx="50" cy="50" r="42" fill="none"
+                stroke="url(#ring3)" stroke-width="2.8"
+                stroke-linecap="round"
+                stroke-dasharray="210 264"
+                filter="url(#arcGlow)"/>
+        <!-- Beam echo — fainter coral underlay. -->
+        <circle cx="50" cy="50" r="42" fill="none"
+                stroke="#E8A063" stroke-opacity="0.4"
+                stroke-width="0.8" stroke-linecap="round"
+                stroke-dasharray="210 264"/>
+      </g>
+
+      <!-- Italic "L" — luminous. Dropshadow approximated by a black
+           offset twin underneath (a coarser stand-in for the source's
+           SVG drop-shadow filter). -->
+      <text x="32" y="62" font-family="'Instrument Serif', 'Times New Roman', serif"
+            font-size="36" font-style="italic"
+            fill="#000000" fill-opacity="0.8" letter-spacing="-1.5"
+            transform="translate(0 0.4)">L</text>
+      <text x="32" y="62" font-family="'Instrument Serif', 'Times New Roman', serif"
+            font-size="36" font-style="italic"
+            fill="#FBF8F3" letter-spacing="-1.5">L</text>
+
+      <!-- The pulse dot — hottest point. r=5 with inner r=2 highlight. -->
+      <g filter="url(#dotGlow)">
+        <circle cx="56" cy="58" r="5" fill="url(#ring3)"/>
+        <circle cx="55" cy="57" r="2" fill="#FAE9CC"/>
+      </g>
+    </g>
+  </g>
+</svg>
