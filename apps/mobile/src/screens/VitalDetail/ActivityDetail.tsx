@@ -70,6 +70,8 @@ import { useTheme } from '../../theme';
 import type { ActivityDay } from '../../types/vitals';
 import { BaselineReference } from '../../components/BaselineReference';
 import { StalenessHintRow } from '../../components/StalenessHintRow';
+import { LoadingState } from '../../components/LoadingState';
+import { ErrorState } from '../../components/ErrorState';
 import {
   activityBaseline,
   formatActivityBaseline,
@@ -165,6 +167,18 @@ export function ActivityDetail({
   const parentPulse = useParentDailyPulseData(scopedFamilyId);
   const parentRecent = useParentVitalsRecent(scopedFamilyId);
   const emptyFallback = useMemo(() => emptyDailyPulse(), []);
+
+  // Sprint 18 A1 — distinguish loading + error from "truly empty" on
+  // the caregiver-scoped path (matches Sleep S1+S3 / HR H1 / BP B1 /
+  // SpO2 SP1).
+  const isCaregiverScoped = scopedFamilyId !== null;
+  const isInitialParentLoad =
+    isCaregiverScoped &&
+    (parentPulse.isLoading || parentRecent.isLoading) &&
+    parentPulse.data === null;
+  const parentLoadError = isCaregiverScoped
+    ? (parentPulse.error ?? parentRecent.error ?? null)
+    : null;
 
   const data = scopedFamilyId
     ? parentPulse.data ?? emptyFallback
@@ -318,6 +332,21 @@ export function ActivityDetail({
           />
         }
       >
+        {/* Sprint 18 A1 — caregiver-scoped loading + error swap-in.
+            Mirrors Sleep / HR / BP / SpO2. The hero above still
+            renders so the persona header stays consistent. */}
+        {isInitialParentLoad ? (
+          <LoadingState testID="activity-detail-loading" />
+        ) : parentLoadError ? (
+          <ErrorState
+            onRetry={() => {
+              void parentPulse.refresh();
+              void parentRecent.refresh();
+            }}
+            testID="activity-detail-error"
+          />
+        ) : (
+        <>
         {!isEmpty && baselineBody ? (
           <BaselineReference
             body={baselineBody}
@@ -397,6 +426,8 @@ export function ActivityDetail({
           currentGoal={targetSteps}
           onPress={() => setGoalSheetOpen(true)}
         />
+        </>
+        )}
       </DetailShell>
       <ActivityGoalSheet
         open={goalSheetOpen}

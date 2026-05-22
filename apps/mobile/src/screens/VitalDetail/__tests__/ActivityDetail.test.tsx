@@ -74,6 +74,67 @@ jest.mock('../../../state/activity', () => ({
   },
 }));
 
+// Sprint 17a parent-scoped hooks land in ActivityDetail. Same
+// pre-existing missing-mocks bug as Sleep/HR/BP/SpO2.
+let mockParentPulse: {
+  data: unknown;
+  isLoading: boolean;
+  isRefreshing: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+} = {
+  data: null,
+  isLoading: false,
+  isRefreshing: false,
+  error: null,
+  refresh: async () => undefined,
+};
+let mockParentRecent: {
+  data: {
+    sleep: unknown[];
+    readings: unknown[];
+    hr: unknown[];
+    spo2: unknown[];
+    steps: unknown[];
+    calories: unknown[];
+  };
+  isLoading: boolean;
+  isRefreshing: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+} = {
+  data: { sleep: [], readings: [], hr: [], spo2: [], steps: [], calories: [] },
+  isLoading: false,
+  isRefreshing: false,
+  error: null,
+  refresh: async () => undefined,
+};
+const setMockParentPulse = (next: Partial<typeof mockParentPulse>) => {
+  mockParentPulse = { ...mockParentPulse, ...next };
+};
+const resetParentMocks = () => {
+  mockParentPulse = {
+    data: null,
+    isLoading: false,
+    isRefreshing: false,
+    error: null,
+    refresh: async () => undefined,
+  };
+  mockParentRecent = {
+    data: { sleep: [], readings: [], hr: [], spo2: [], steps: [], calories: [] },
+    isLoading: false,
+    isRefreshing: false,
+    error: null,
+    refresh: async () => undefined,
+  };
+};
+jest.mock('../../../hooks/useParentDailyPulseData', () => ({
+  useParentDailyPulseData: () => mockParentPulse,
+}));
+jest.mock('../../../hooks/useParentVitalsRecent', () => ({
+  useParentVitalsRecent: () => mockParentRecent,
+}));
+
 function withProviders(ui: ReactNode) {
   return (
     <SafeAreaProvider
@@ -112,6 +173,7 @@ beforeEach(() => {
   mockRecentSteps = [];
   mockPendingSteps = [];
   mockTodayCalories = null;
+  resetParentMocks();
 });
 
 describe('ActivityDetail — populated state', () => {
@@ -256,7 +318,7 @@ describe('ActivityDetail helpers — buildChartSeries', () => {
     expect(out.values[0]).toBe(1000);
   });
 
-  it('30d returns weekly aggregates (5 bins) with weekly goal', () => {
+  it('30d returns weekly aggregates (5 bins) with the daily goal as the reference line', () => {
     const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
     const days: ActivityDay[] = [];
     for (let i = 0; i < 30; i++) {
@@ -264,13 +326,15 @@ describe('ActivityDetail helpers — buildChartSeries', () => {
     }
     const out = buildChartSeries([], days, dailyGoal, '30d', nowSec);
     expect(out.values.length).toBeLessThanOrEqual(5);
-    expect(out.goal).toBe(dailyGoal * 7);
-    // Every bin should be the sum of its constituent days.
-    const total = out.values.reduce((a, b) => a + b, 0);
-    expect(total).toBe(30 * 5000);
+    // Sprint 16.5f — bin values are the AVERAGE daily step count over
+    // the bin (was: weekly total); goal stays at dailyGoal (was:
+    // dailyGoal × 7) so the reference line is directly comparable.
+    expect(out.goal).toBe(dailyGoal);
+    // With every day = 5000 steps, every bin's average is 5000.
+    for (const v of out.values) expect(v).toBe(5000);
   });
 
-  it('90d returns 13 weekly aggregates', () => {
+  it('90d returns up to 13 weekly aggregates with average-per-day bins', () => {
     const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
     const days: ActivityDay[] = [];
     for (let i = 0; i < 90; i++) {
@@ -278,7 +342,8 @@ describe('ActivityDetail helpers — buildChartSeries', () => {
     }
     const out = buildChartSeries([], days, dailyGoal, '90d', nowSec);
     expect(out.values).toHaveLength(13);
-    expect(out.values.reduce((a, b) => a + b, 0)).toBe(90 * 3000);
+    // Every bin's average should equal the per-day input (3000).
+    for (const v of out.values) expect(v).toBe(3000);
   });
 
   it('zero-fills missing days for 7d', () => {
@@ -393,16 +458,31 @@ describe('ActivityDetail helpers — computeStreakFromToday', () => {
     };
   }
 
-  it('counts consecutive met-goal days from today backwards', () => {
+  it('counts consecutive met-goal days from today backwards, allowing one skip per 7-day run', () => {
+    // Sprint 16.5f — computeStreakFromToday now allows ONE skip per
+    // 7 met-goal days so a single rest day doesn't reset the streak.
+    // Sequence: met, met, met, MISS, met → skip is consumed on the
+    // MISS day; streak continues through the prior met → 4.
     const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
     const days = [
       makeAt(nowSec, 9000),
       makeAt(nowSec - SECONDS_PER_DAY, 8500),
       makeAt(nowSec - 2 * SECONDS_PER_DAY, 8200),
-      makeAt(nowSec - 3 * SECONDS_PER_DAY, 5000), // breaks streak
-      makeAt(nowSec - 4 * SECONDS_PER_DAY, 9000),
+      makeAt(nowSec - 3 * SECONDS_PER_DAY, 5000), // miss — consumes the skip
+      makeAt(nowSec - 4 * SECONDS_PER_DAY, 9000), // counts (skip already used to bridge)
     ];
-    expect(computeStreakFromToday(days, 8000, nowSec)).toBe(3);
+    expect(computeStreakFromToday(days, 8000, nowSec)).toBe(4);
+  });
+
+  it('breaks the streak when TWO consecutive misses exhaust the skip budget', () => {
+    const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
+    const days = [
+      makeAt(nowSec, 9000),
+      makeAt(nowSec - SECONDS_PER_DAY, 5000), // miss — skip consumed
+      makeAt(nowSec - 2 * SECONDS_PER_DAY, 5000), // miss again — no more skips, streak ends
+      makeAt(nowSec - 3 * SECONDS_PER_DAY, 9000),
+    ];
+    expect(computeStreakFromToday(days, 8000, nowSec)).toBe(1);
   });
 
   it('returns 0 if today missed the goal', () => {
@@ -456,5 +536,31 @@ describe('ActivityDetail — snapshot', () => {
       withProviders(<ActivityDetail onBack={() => undefined} />),
     );
     expect(toJSON()).toMatchSnapshot();
+  });
+});
+
+// ─── Sprint 18 audit fixes ──────────────────────────────────────────────
+
+describe('ActivityDetail — caregiver-scoped loading + error (Sprint 18 A1)', () => {
+  it('shows a loading spinner — not the empty-state UI — when the parent fetch is in flight', () => {
+    setMockParentPulse({ isLoading: true, data: null });
+    render(
+      withProviders(
+        <ActivityDetail onBack={() => undefined} familyId="fam-44" />,
+      ),
+    );
+    expect(screen.getByTestId('activity-detail-loading')).toBeTruthy();
+    expect(screen.queryByTestId('activity-detail-insight')).toBeNull();
+  });
+
+  it('shows an ErrorState — not the empty-state UI — when the parent fetch errored', () => {
+    setMockParentPulse({ error: new Error('network down'), data: null });
+    render(
+      withProviders(
+        <ActivityDetail onBack={() => undefined} familyId="fam-44" />,
+      ),
+    );
+    expect(screen.getByTestId('activity-detail-error')).toBeTruthy();
+    expect(screen.queryByTestId('activity-detail-insight')).toBeNull();
   });
 });
