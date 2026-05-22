@@ -187,7 +187,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                   }
                   stroke={
                     {
-                      "payload": 4294308330,
+                      "payload": 4294967295,
                       "type": 0,
                     }
                   }
@@ -306,7 +306,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -322,7 +322,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -338,7 +338,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -671,7 +671,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "Inter_500Medium",
                       "fontSize": 11,
                       "letterSpacing": 0.55,
@@ -697,7 +697,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#F5F1EA",
+                        "color": "#FFFFFF",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 56,
                         "letterSpacing": -0.5,
@@ -712,7 +712,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 22,
                         "lineHeight": 28,
@@ -728,7 +728,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 12,
                       "letterSpacing": 0.5,
@@ -824,7 +824,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -888,7 +888,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -952,7 +952,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -1012,7 +1012,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "Inter_500Medium",
                     "fontSize": 11,
                     "letterSpacing": 0.55,
@@ -1028,7 +1028,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "InstrumentSerif_400Regular",
                     "fontSize": 22,
                     "lineHeight": 28,
@@ -1041,7 +1041,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "letterSpacing": 0.4,
@@ -1054,7 +1054,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
               </Text>
             </View>
             <View
-              accessibilityLabel="Lowest: 96 briefly · 4 am"
+              accessibilityLabel="Lowest: 94 briefly · 2:00 AM"
               accessibilityRole="text"
               style={
                 [
@@ -1076,7 +1076,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "Inter_500Medium",
                     "fontSize": 11,
                     "letterSpacing": 0.55,
@@ -1092,20 +1092,20 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "InstrumentSerif_400Regular",
                     "fontSize": 22,
                     "lineHeight": 28,
                   }
                 }
               >
-                96
+                94
               </Text>
               <Text
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "letterSpacing": 0.4,
@@ -1114,11 +1114,11 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                   }
                 }
               >
-                briefly · 4 am
+                briefly · 2:00 AM
               </Text>
             </View>
             <View
-              accessibilityLabel="Awake avg: 98 %"
+              accessibilityLabel="Awake avg: — %"
               accessibilityRole="text"
               style={
                 [
@@ -1140,7 +1140,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "Inter_500Medium",
                     "fontSize": 11,
                     "letterSpacing": 0.55,
@@ -1156,20 +1156,20 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "InstrumentSerif_400Regular",
                     "fontSize": 22,
                     "lineHeight": 28,
                   }
                 }
               >
-                98
+                —
               </Text>
               <Text
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "letterSpacing": 0.4,
@@ -1190,7 +1190,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
             }
           >
             <View
-              accessibilityLabel="Overnight · oxygen trend, latest 98, peak 98, low 94"
+              accessibilityLabel="Overnight · oxygen · last 7 days trend, latest 98, peak 98, low 94"
               testID="spo2-detail-chart"
             >
               <View
@@ -1207,7 +1207,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "Inter_500Medium",
                       "fontSize": 11,
                       "letterSpacing": 0.55,
@@ -1217,13 +1217,13 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                   }
                   testID="spo2-detail-chart-caption"
                 >
-                  Overnight · oxygen
+                  Overnight · oxygen · last 7 days
                 </Text>
                 <Text
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 12,
                       "letterSpacing": 0.4,
@@ -1232,7 +1232,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                   }
                   testID="spo2-detail-chart-subCaption"
                 >
-                  95–100 band
+                  91–100 band
                 </Text>
               </View>
               <RNSVGSvgView
@@ -1297,7 +1297,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                       }
                     }
                     fillOpacity={0.08}
-                    height={105}
+                    height={126}
                     propList={
                       [
                         "fill",
@@ -1324,7 +1324,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     }
                     stroke={
                       {
-                        "payload": 4294308330,
+                        "payload": 4294967295,
                         "type": 0,
                       }
                     }
@@ -1356,7 +1356,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     }
                     stroke={
                       {
-                        "payload": 4294308330,
+                        "payload": 4294967295,
                         "type": 0,
                       }
                     }
@@ -1388,7 +1388,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     }
                     stroke={
                       {
-                        "payload": 4294308330,
+                        "payload": 4294967295,
                         "type": 0,
                       }
                     }
@@ -1405,7 +1405,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     y2={116.5}
                   />
                   <RNSVGPath
-                    d="M 16 85 L 44.8 85 L 73.6 106 L 102.4 127 L 131.2 148 L 160 127 L 188.8 106 L 217.6 85 L 246.4 85 L 275.2 64 L 304 64 L 304 148 L 16 148 Z"
+                    d="M 16 78 L 73.6 92 L 131.2 106 L 188.8 78 L 246.4 64 L 304 50 L 304 148 L 16 148 Z"
                     fill={
                       {
                         "brushRef": "spo2-detail-chart-fill",
@@ -1419,7 +1419,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     }
                   />
                   <RNSVGPath
-                    d="M16 85 44.8 85 73.6 106 102.4 127 131.2 148 160 127 188.8 106 217.6 85 246.4 85 275.2 64 304 64"
+                    d="M16 78 73.6 92 131.2 106 188.8 78 246.4 64 304 50"
                     fill={null}
                     propList={
                       [
@@ -1451,8 +1451,8 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     testID="spo2-detail-chart-line"
                   />
                   <RNSVGCircle
-                    cx={275.2}
-                    cy={64}
+                    cx={304}
+                    cy={50}
                     fill={
                       {
                         "payload": 4278847752,
@@ -1481,7 +1481,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     dy={[]}
                     fill={
                       {
-                        "payload": 4294308330,
+                        "payload": 4294967295,
                         "type": 0,
                       }
                     }
@@ -1501,12 +1501,12 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     rotate={[]}
                     x={
                       [
-                        275.2,
+                        304,
                       ]
                     }
                     y={
                       [
-                        56,
+                        42,
                       ]
                     }
                   >
@@ -1528,7 +1528,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                   </RNSVGText>
                   <RNSVGCircle
                     cx={131.2}
-                    cy={148}
+                    cy={106}
                     fill={
                       {
                         "payload": 4278847752,
@@ -1557,7 +1557,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     dy={[]}
                     fill={
                       {
-                        "payload": 4288452752,
+                        "payload": 4286939002,
                         "type": 0,
                       }
                     }
@@ -1582,7 +1582,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     }
                     y={
                       [
-                        162,
+                        120,
                       ]
                     }
                   >
@@ -1604,7 +1604,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                   </RNSVGText>
                   <RNSVGCircle
                     cx={304}
-                    cy={64}
+                    cy={50}
                     fill={
                       {
                         "payload": 4284459176,
@@ -1769,7 +1769,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
             <Text
               style={
                 {
-                  "color": "#F5F1EA",
+                  "color": "#FFFFFF",
                   "fontFamily": "Inter_400Regular",
                   "fontSize": 15,
                   "lineHeight": 22,
@@ -1841,7 +1841,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
               allowFontScaling={false}
               style={
                 {
-                  "color": "#9C9890",
+                  "color": "#857F7A",
                   "fontFamily": "Inter_500Medium",
                   "fontSize": 11,
                   "letterSpacing": 0.55,
@@ -1874,7 +1874,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
               testID="spo2-detail-readings-list"
             >
               <View
-                accessibilityLabel="98%, Just now, 12:30 pm"
+                accessibilityLabel="98%, Latest today, 5:00 am"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -1919,7 +1919,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     },
                   ]
                 }
-                testID="spo2-detail-readings-list-row-spo2-1778239800"
+                testID="spo2-detail-readings-list-row-spo2-1778212800"
               >
                 <View
                   style={
@@ -1947,7 +1947,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#F5F1EA",
+                        "color": "#FFFFFF",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 22,
                         "lineHeight": 28,
@@ -1960,7 +1960,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "Inter_500Medium",
                         "fontSize": 11,
                         "letterSpacing": 0.55,
@@ -1970,14 +1970,14 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                       }
                     }
                   >
-                    Just now
+                    Latest today
                   </Text>
                 </View>
                 <Text
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 12,
                       "letterSpacing": 0.4,
@@ -1985,11 +1985,11 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     }
                   }
                 >
-                  12:30 pm
+                  5:00 am
                 </Text>
               </View>
               <View
-                accessibilityLabel="96%, Overnight low, last night"
+                accessibilityLabel="97%, Overnight reading, 4:00 am"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2034,7 +2034,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     },
                   ]
                 }
-                testID="spo2-detail-readings-list-row-spo2-overnight-avg"
+                testID="spo2-detail-readings-list-row-spo2-1778209200"
               >
                 <View
                   style={
@@ -2062,122 +2062,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#F5F1EA",
-                        "fontFamily": "InstrumentSerif_400Regular",
-                        "fontSize": 22,
-                        "lineHeight": 28,
-                      }
-                    }
-                  >
-                    96%
-                  </Text>
-                  <Text
-                    allowFontScaling={false}
-                    style={
-                      {
-                        "color": "#9C9890",
-                        "fontFamily": "Inter_500Medium",
-                        "fontSize": 11,
-                        "letterSpacing": 0.55,
-                        "lineHeight": 14,
-                        "marginTop": 3,
-                        "textTransform": "uppercase",
-                      }
-                    }
-                  >
-                    Overnight low
-                  </Text>
-                </View>
-                <Text
-                  allowFontScaling={false}
-                  style={
-                    {
-                      "color": "#9C9890",
-                      "fontFamily": "JetBrainsMono_500Medium",
-                      "fontSize": 12,
-                      "letterSpacing": 0.4,
-                      "lineHeight": 16,
-                    }
-                  }
-                >
-                  last night
-                </Text>
-              </View>
-              <View
-                accessibilityLabel="97%, Awake reading, Fri"
-                accessibilityRole="text"
-                accessibilityState={
-                  {
-                    "busy": undefined,
-                    "checked": undefined,
-                    "disabled": undefined,
-                    "expanded": undefined,
-                    "selected": undefined,
-                  }
-                }
-                accessibilityValue={
-                  {
-                    "max": undefined,
-                    "min": undefined,
-                    "now": undefined,
-                    "text": undefined,
-                  }
-                }
-                accessible={true}
-                collapsable={false}
-                focusable={true}
-                onBlur={[Function]}
-                onClick={[Function]}
-                onFocus={[Function]}
-                onResponderGrant={[Function]}
-                onResponderMove={[Function]}
-                onResponderRelease={[Function]}
-                onResponderTerminate={[Function]}
-                onResponderTerminationRequest={[Function]}
-                onStartShouldSetResponder={[Function]}
-                style={
-                  [
-                    {
-                      "alignItems": "center",
-                      "flexDirection": "row",
-                    },
-                    {
-                      "borderBottomColor": "rgba(255,255,255,0.08)",
-                      "borderBottomWidth": 0.5,
-                      "opacity": 1,
-                      "paddingVertical": 12,
-                    },
-                  ]
-                }
-                testID="spo2-detail-readings-list-row-spo2-1778236200"
-              >
-                <View
-                  style={
-                    [
-                      {
-                        "borderRadius": 3,
-                        "height": 32,
-                        "width": 6,
-                      },
-                      {
-                        "backgroundColor": "#5FA8A8",
-                      },
-                    ]
-                  }
-                />
-                <View
-                  style={
-                    {
-                      "flex": 1,
-                      "marginLeft": 12,
-                    }
-                  }
-                >
-                  <Text
-                    allowFontScaling={false}
-                    style={
-                      {
-                        "color": "#F5F1EA",
+                        "color": "#FFFFFF",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 22,
                         "lineHeight": 28,
@@ -2190,7 +2075,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "Inter_500Medium",
                         "fontSize": 11,
                         "letterSpacing": 0.55,
@@ -2200,14 +2085,14 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                       }
                     }
                   >
-                    Awake reading
+                    Overnight reading
                   </Text>
                 </View>
                 <Text
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 12,
                       "letterSpacing": 0.4,
@@ -2215,11 +2100,241 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     }
                   }
                 >
-                  Fri
+                  4:00 am
                 </Text>
               </View>
               <View
-                accessibilityLabel="96%, Awake reading, Fri"
+                accessibilityLabel="96%, Overnight reading, 3:00 am"
+                accessibilityRole="text"
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                    },
+                    {
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0.5,
+                      "opacity": 1,
+                      "paddingVertical": 12,
+                    },
+                  ]
+                }
+                testID="spo2-detail-readings-list-row-spo2-1778205600"
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#5FA8A8",
+                      },
+                    ]
+                  }
+                />
+                <View
+                  style={
+                    {
+                      "flex": 1,
+                      "marginLeft": 12,
+                    }
+                  }
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#FFFFFF",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    96%
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Overnight reading
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
+                    }
+                  }
+                >
+                  3:00 am
+                </Text>
+              </View>
+              <View
+                accessibilityLabel="94%, Overnight reading, 2:00 am"
+                accessibilityRole="text"
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                    },
+                    {
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0.5,
+                      "opacity": 1,
+                      "paddingVertical": 12,
+                    },
+                  ]
+                }
+                testID="spo2-detail-readings-list-row-spo2-1778202000"
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#5FA8A8",
+                      },
+                    ]
+                  }
+                />
+                <View
+                  style={
+                    {
+                      "flex": 1,
+                      "marginLeft": 12,
+                    }
+                  }
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#FFFFFF",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    94%
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Overnight reading
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
+                    }
+                  }
+                >
+                  2:00 am
+                </Text>
+              </View>
+              <View
+                accessibilityLabel="95%, Overnight reading, 1:00 am"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2264,7 +2379,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     },
                   ]
                 }
-                testID="spo2-detail-readings-list-row-spo2-1778232600"
+                testID="spo2-detail-readings-list-row-spo2-1778198400"
               >
                 <View
                   style={
@@ -2292,20 +2407,20 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#F5F1EA",
+                        "color": "#FFFFFF",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 22,
                         "lineHeight": 28,
                       }
                     }
                   >
-                    96%
+                    95%
                   </Text>
                   <Text
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "Inter_500Medium",
                         "fontSize": 11,
                         "letterSpacing": 0.55,
@@ -2315,14 +2430,14 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                       }
                     }
                   >
-                    Awake reading
+                    Overnight reading
                   </Text>
                 </View>
                 <Text
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 12,
                       "letterSpacing": 0.4,
@@ -2330,9 +2445,73 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     }
                   }
                 >
-                  Fri
+                  1:00 am
                 </Text>
               </View>
+            </View>
+            <View
+              accessibilityLabel="Showing 5 of 6 readings · tap to show more"
+              accessibilityRole="button"
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              hitSlop={6}
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#120C07",
+                  "borderColor": "rgba(255,255,255,0.06)",
+                  "borderRadius": 14,
+                  "borderWidth": 0.5,
+                  "marginHorizontal": 20,
+                  "marginTop": 12,
+                  "opacity": 1,
+                  "paddingHorizontal": 16,
+                  "paddingVertical": 12,
+                }
+              }
+              testID="spo2-detail-readings-footer"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#FFFFFF",
+                    "fontFamily": "Inter_400Regular",
+                    "fontSize": 12,
+                    "fontWeight": "500",
+                    "lineHeight": 16,
+                  }
+                }
+              >
+                Show more · 5 of 6
+              </Text>
             </View>
           </View>
         </View>

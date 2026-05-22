@@ -48,6 +48,8 @@ import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { CorrelationStrip, type VitalSeries } from '../../components/CorrelationStrip';
 import { BaselineReference } from '../../components/BaselineReference';
 import { StalenessHintRow } from '../../components/StalenessHintRow';
+import { LoadingState } from '../../components/LoadingState';
+import { ErrorState } from '../../components/ErrorState';
 import type { TrendRange } from '../../components/TimeRangePills';
 import { useSleep } from '../../state/sleep';
 import {
@@ -182,24 +184,42 @@ export function computeAwakeAverage(
   return Math.round(sum / awake.length);
 }
 
-/** Find the time-of-day of the lowest overnight sample. Sprint 16.5f
- *  — replaces the hardcoded "briefly · 4 am" string. */
-export function lowestOvernightTime(
+/** Sprint 18 SP3 — single source of truth for the "Lowest" stat. Picks
+ *  the overnight sample with the minimum percent across the chosen
+ *  range and returns BOTH its percent and a formatted time-of-day so
+ *  the StatTrio value and unit always describe the same sample. The
+ *  prior code derived `lowest` from `data.spo2.overnightLowsRecent`
+ *  (per-night minimums) but read `lowestUnit` from
+ *  `lowestOvernightTime(rangedSamples)` — different sources, possible
+ *  mismatch when last night's low fell on a different sample than the
+ *  range minimum. */
+export function findLowestOvernightSample(
   samples: ReadonlyArray<SpO2Sample>,
-): string {
+): { percent: number; time: string } | null {
   const overnight = samples.filter((s) => {
     const hr = new Date(s.measuredAtSec * 1000).getUTCHours();
     return hr >= OVERNIGHT_WINDOW_START_HOUR || hr < OVERNIGHT_WINDOW_END_HOUR;
   });
-  if (overnight.length === 0) return 'overnight';
+  if (overnight.length === 0) return null;
   const lowestSample = overnight.reduce((a, b) =>
     b.percent < a.percent ? b : a,
   );
   const t = new Date(lowestSample.measuredAtSec * 1000);
-  return `briefly · ${t.toLocaleTimeString(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-  })}`;
+  return {
+    percent: lowestSample.percent,
+    time: `briefly · ${t.toLocaleTimeString(undefined, {
+      hour: 'numeric',
+      minute: '2-digit',
+    })}`,
+  };
+}
+
+/** Back-compat shim — kept for any external callers. New code in
+ *  SpO2Detail uses `findLowestOvernightSample` for both fields. */
+export function lowestOvernightTime(
+  samples: ReadonlyArray<SpO2Sample>,
+): string {
+  return findLowestOvernightSample(samples)?.time ?? 'overnight';
 }
 
 /** Dynamic Y-axis range. Pre-16.5f was fixed [95, 100] which hid
@@ -295,6 +315,17 @@ export function SpO2Detail({
   const parentRecent = useParentVitalsRecent(scopedFamilyId);
   const emptyFallback = useMemo(() => emptyDailyPulse(), []);
 
+  // Sprint 18 SP1 — distinguish loading + error from "truly empty" on
+  // the caregiver-scoped path (matches Sleep S1+S3 / HR H1 / BP B1).
+  const isCaregiverScoped = scopedFamilyId !== null;
+  const isInitialParentLoad =
+    isCaregiverScoped &&
+    (parentPulse.isLoading || parentRecent.isLoading) &&
+    parentPulse.data === null;
+  const parentLoadError = isCaregiverScoped
+    ? (parentPulse.error ?? parentRecent.error ?? null)
+    : null;
+
   const data = scopedFamilyId
     ? parentPulse.data ?? emptyFallback
     : ownPulse;
@@ -347,20 +378,32 @@ export function SpO2Detail({
 
   // Stat-trio values — derived from real data within the chosen range.
   const overnightLows = data.spo2.overnightLowsRecent;
-  const lastOvernightLow =
-    overnightLows.length > 0
-      ? overnightLows[overnightLows.length - 1]
-      : null;
   const overnightAvg = useMemo(() => {
     if (overnightSeries.length === 0) return null;
     const sum = overnightSeries.reduce((a, b) => a + b, 0);
     return Math.round(sum / overnightSeries.length);
   }, [overnightSeries]);
-  const lowest = lastOvernightLow ?? (overnightSeries.length > 0 ? Math.min(...overnightSeries) : null);
-  const lowestUnit = useMemo(
-    () => lowestOvernightTime(rangedSamples),
+  // Sprint 18 SP3 — single source of truth: find the overnight sample
+  // with the minimum percent in the chosen range and use its percent
+  // AND time. Previously `lowest` came from
+  // `overnightLowsRecent[last]` (last-night-only) while `lowestUnit`
+  // came from `lowestOvernightTime(rangedSamples)` (range-wide). A
+  // user could see "Lowest 94% briefly · 4 am" where the 94% was
+  // from last night but 4 am was from a different night's lower
+  // sample — incoherent. Now both fields come from one sample.
+  // When the range has no overnight samples (e.g. the user has only
+  // daytime data so far) we fall back to the slice's pre-baked
+  // overnightLowsRecent so users with historical nights still see
+  // their existing data — keyed to "overnight" instead of a time.
+  const lowestSampleInRange = useMemo(
+    () => findLowestOvernightSample(rangedSamples),
     [rangedSamples],
   );
+  const overnightLowsRangeMin =
+    overnightLows.length > 0 ? Math.min(...overnightLows) : null;
+  const lowest =
+    lowestSampleInRange?.percent ?? overnightLowsRangeMin ?? null;
+  const lowestUnit = lowestSampleInRange?.time ?? 'overnight';
   const awakeAvg = useMemo(
     () => computeAwakeAverage(rangedSamples),
     [rangedSamples],
@@ -385,40 +428,74 @@ export function SpO2Detail({
     ? parentRecent.data.sleep
     : ownSleepRecent;
   const sleepPending = scopedFamilyId ? [] : ownSleepPending;
+  // Sprint 18 SP2 — pair the correlation by NIGHT (nightKey) instead
+  // of positional array index. The previous version's
+  // `overnightLows.slice(-n)` paired by position; a sparse tracker
+  // whose sleep nights and SpO2 overnight-low nights didn't align
+  // would see misleading dot pairings. The slice now exposes
+  // overnightLowsRecentByNight which carries the nightKey alongside
+  // the low; we key the sleep sessions by the same nightKey
+  // (anchored to "owning morning" UTC date) and intersect.
+  //
+  // Match the slice's `nightDateKey` exactly: a sample whose UTC
+  // hour ≥ 22 belongs to "tomorrow's" morning, otherwise to today.
+  const lowsByNight = useMemo(
+    () => useSpO2.getState().overnightLowsRecentByNight(),
+    // Recompute when the underlying recent/pending arrays change.
+    [spo2Recent, spo2Pending],
+  );
   const correlation = useMemo<{ spo2: VitalSeries; sleep: VitalSeries } | null>(() => {
     const allSleep = [...sleepPending, ...sleepRecent];
-    if (allSleep.length < 2 || overnightLows.length < 2) return null;
+    if (allSleep.length < 2 || lowsByNight.length < 2) return null;
     const days = RANGE_TO_DAYS[trendRange];
     const cutoffSec = Math.floor(Date.now() / 1000) - days * SECONDS_PER_DAY;
-    const sleepInRange = allSleep
-      .filter((s) => s.sessionEndSec >= cutoffSec)
-      .sort((a, b) => a.sessionEndSec - b.sessionEndSec);
+    const sleepInRange = allSleep.filter((s) => s.sessionEndSec >= cutoffSec);
     if (sleepInRange.length < 2) return null;
-    // Pair each sleep session with the closest overnight low in time.
-    const spo2Points: { t: number; value: number }[] = [];
-    const sleepPoints: { t: number; value: number }[] = [];
+    // Anchor each sleep session to a nightKey using the same rule the
+    // SpO2 slice's `nightDateKey` uses (UTC-based, with the 22:00+
+    // shift into "owning morning").
+    const dayKeyFor = (sessionEndSec: number): string => {
+      const d = new Date(sessionEndSec * 1000);
+      const hr = d.getUTCHours();
+      const anchored =
+        hr >= OVERNIGHT_WINDOW_START_HOUR
+          ? new Date(d.getTime() + SECONDS_PER_DAY * 1000)
+          : d;
+      return anchored.toISOString().slice(0, 10);
+    };
+    const sleepByNight = new Map<string, typeof sleepInRange[number]>();
     for (const s of sleepInRange) {
-      // Use the overnight low from that session's night — best-effort by
-      // index alignment, since the slice's lowsRecent is oldest-first.
-      sleepPoints.push({ t: s.sessionEndSec * 1000, value: s.sleepScore });
+      const key = dayKeyFor(s.sessionEndSec);
+      const existing = sleepByNight.get(key);
+      if (!existing || s.sessionEndSec > existing.sessionEndSec) {
+        sleepByNight.set(key, s);
+      }
     }
-    // Align overnightLows to sleep window — take the last N matching the
-    // sleep count.
-    const n = Math.min(sleepInRange.length, overnightLows.length);
-    const lows = overnightLows.slice(-n);
-    const sleepWindow = sleepInRange.slice(-n);
-    for (let i = 0; i < n; i++) {
-      spo2Points.push({
-        t: sleepWindow[i].sessionEndSec * 1000,
-        value: lows[i],
-      });
-    }
-    if (spo2Points.length < 2) return null;
+    const lowsMap = new Map<string, number>();
+    for (const e of lowsByNight) lowsMap.set(e.nightKey, e.low);
+    const matchedKeys = Array.from(sleepByNight.keys())
+      .filter((k) => lowsMap.has(k))
+      .sort();
+    if (matchedKeys.length < 2) return null;
+    const spo2Points: { t: number; value: number }[] = matchedKeys.map((k) => {
+      const session = sleepByNight.get(k);
+      return {
+        t: (session?.sessionEndSec ?? 0) * 1000,
+        value: lowsMap.get(k) as number,
+      };
+    });
+    const sleepPoints: { t: number; value: number }[] = matchedKeys.map((k) => {
+      const session = sleepByNight.get(k);
+      return {
+        t: (session?.sessionEndSec ?? 0) * 1000,
+        value: session?.sleepScore ?? 0,
+      };
+    });
     return {
       spo2: { type: 'spo2', points: spo2Points },
-      sleep: { type: 'sleep', points: sleepPoints.slice(-n) },
+      sleep: { type: 'sleep', points: sleepPoints },
     };
-  }, [overnightLows, sleepRecent, sleepPending, trendRange]);
+  }, [lowsByNight, sleepRecent, sleepPending, trendRange]);
 
   return (
     <DetailShell
@@ -442,7 +519,20 @@ export function SpO2Detail({
         />
       }
     >
-      {isEmpty ? (
+      {/* Sprint 18 SP1 — caregiver-scoped loading + error swap-in.
+          Mirrors Sleep / HR / BP. Hero above still renders so the
+          persona header stays consistent. */}
+      {isInitialParentLoad ? (
+        <LoadingState testID="spo2-detail-loading" />
+      ) : parentLoadError ? (
+        <ErrorState
+          onRetry={() => {
+            void parentPulse.refresh();
+            void parentRecent.refresh();
+          }}
+          testID="spo2-detail-error"
+        />
+      ) : isEmpty ? (
         <>
           <EmptyHelperLine />
           <VitalInsightCard

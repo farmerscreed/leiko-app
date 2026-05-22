@@ -36,6 +36,15 @@ interface SpO2State {
    *  Empty nights skipped (not zero-filled). Window interpreted in UTC
    *  for test determinism — production callers pass TZ-aware nowSec. */
   overnightLowsRecent: (nowSec?: number, nights?: number) => number[];
+  /** Sprint 18 — same data as overnightLowsRecent but each entry
+   *  carries the nightKey (the "owning morning" UTC date the sample
+   *  is anchored to) so consumers can date-align with other vitals'
+   *  per-night data instead of positional pairing. Oldest first.
+   *  Empty nights are skipped (not zero-filled). */
+  overnightLowsRecentByNight: (
+    nowSec?: number,
+    nights?: number,
+  ) => Array<{ nightKey: string; low: number }>;
   /**
    * Sprint 16.5e — seed historical samples from the server. Same
    * pattern as `useHR.seedFromServer`. The U16PRO watch's day-info
@@ -149,6 +158,12 @@ export const useSpO2 = create<SpO2State>((set, get) => ({
   },
 
   overnightLowsRecent: (nowSec, nights) => {
+    return get()
+      .overnightLowsRecentByNight(nowSec, nights)
+      .map((e) => e.low);
+  },
+
+  overnightLowsRecentByNight: (nowSec, nights) => {
     const now = nowSec ?? Math.floor(Date.now() / 1000);
     const N = nights ?? OVERNIGHT_DEFAULT_NIGHTS;
     const all = [...get().pending, ...get().recent];
@@ -161,7 +176,7 @@ export const useSpO2 = create<SpO2State>((set, get) => ({
       if (arr) arr.push(s);
       else byNight.set(key, [s]);
     }
-    const out: number[] = [];
+    const out: Array<{ nightKey: string; low: number }> = [];
     // Walk from oldest (now - N days) to newest (now), so result is
     // oldest-first as the brief specifies.
     for (let d = N; d >= 0; d--) {
@@ -169,7 +184,7 @@ export const useSpO2 = create<SpO2State>((set, get) => ({
       const samples = byNight.get(key);
       if (!samples || samples.length === 0) continue;
       const low = Math.min(...samples.map((s) => s.percent));
-      out.push(low);
+      out.push({ nightKey: key, low });
     }
     return out;
   },
