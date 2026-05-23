@@ -101,11 +101,15 @@ import {
 
 type Nav = NativeStackNavigationProp<CaregiverStackParamList>;
 
-// Sprint 10c.2 polish — invite capacity is now on, gated by the
-// caregiver-mode account type. The "+ Add someone" affordance routes
-// to Settings → Family where the invite sheet lives. A future polish
-// can also gate this on Plus tier + capacity remaining.
-const CAN_INVITE_FOR_NOW = true;
+// Sprint 19 — "+ Add someone" is now gated on the viewer being the
+// family_owner of at least one family in their circle. Co-caregivers
+// can't issue new invites; the send-family-invite Edge Function would
+// 403 anyway (it requires family_owner). Pre-Sprint-19 the gate was a
+// static `true`, which let the button render for invited caregivers
+// only for them to silently fail when tapped.
+function viewerCanInvite(parents: ReadonlyArray<{ viewerRole?: string }>): boolean {
+  return parents.some((p) => p.viewerRole === 'family_owner');
+}
 
 // Cinematic-transition timing. Outgoing view scales+fades out; incoming
 // scales+fades in. ~320ms total — short enough to feel snappy, long
@@ -500,7 +504,7 @@ export function CaregiverHome() {
         >
           <CaregiverActionBar
             count={merged.length}
-            canInvite={CAN_INVITE_FOR_NOW}
+            canInvite={viewerCanInvite(merged)}
             onInvitePress={() => navigation.navigate('Settings')}
             testID="caregiver-home-action-bar"
           />
@@ -1088,7 +1092,7 @@ export function mergeLocalLatest(
   return [merged, ...parents.slice(1)];
 }
 
-export { pickAnomalyForBanner };
+export { pickAnomalyForBanner, viewerCanInvite };
 
 const styles = StyleSheet.create({
   root: { flex: 1 },

@@ -149,10 +149,26 @@ export function caregiverPersonFromParent(
     bpLabel,
     headline,
     sentence,
-    relation: parent.parentRelationship || 'Family',
+    relation: formatRelation(parent.parentRelationship),
     vitalStrip: formatVitalStrip(bpLabel, parent.latestHr, parent.latestSpo2, parent.latestSleep),
     age,
   };
+}
+
+/** Sprint 19 — caregiver-side relationship label.
+ *
+ *  `families.parent_relationship === 'self'` is a self-buyer onboarding
+ *  signal — "the wearer is themselves." From a caregiver's perspective
+ *  (a co-caregiver invited into a self-buyer's family), seeing "Self"
+ *  in the eyebrow makes no sense — the wearer is THEIR loved one, not
+ *  themselves. We render "Wearer" as a neutral fallback. Sprint 19
+ *  Block 5 adds a per-caregiver label that takes precedence over this
+ *  fallback when the caregiver sets one. */
+export function formatRelation(parentRelationship: string | null | undefined): string {
+  const v = (parentRelationship ?? '').trim().toLowerCase();
+  if (!v) return 'Family';
+  if (v === 'self') return 'Wearer';
+  return parentRelationship as string;
 }
 
 function formatVitalStrip(

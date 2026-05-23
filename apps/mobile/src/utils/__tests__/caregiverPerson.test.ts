@@ -1,6 +1,7 @@
 import {
   caregiverPersonFromParent,
   caregiverPeopleFromParents,
+  formatRelation,
 } from '../caregiverPerson';
 import type {
   ParentSummary,
@@ -29,6 +30,7 @@ function summary(partial: Partial<ParentSummary> = {}): ParentSummary {
     parentDisplayName: partial.parentDisplayName ?? 'Marian Okeke',
     parentRelationship: partial.parentRelationship ?? 'Mom',
     parentYearOfBirth: partial.parentYearOfBirth ?? 1955,
+    viewerRole: partial.viewerRole ?? 'caregiver',
     latestReading: partial.latestReading ?? null,
     recentReadings: partial.recentReadings ?? [],
     latestHr: partial.latestHr ?? null,
@@ -395,5 +397,44 @@ describe('caregiverPeopleFromParents — list mapping', () => {
     expect(out.map((p) => p.id)).toEqual(['a', 'b', 'c']);
     expect(out.map((p) => p.initial)).toEqual(['A', 'B', 'C']);
     expect(out.map((p) => p.accentIndex)).toEqual([1, 2, 3]);
+  });
+});
+
+describe('formatRelation — Sprint 19 SELF-label leakage fix', () => {
+  it('returns "Wearer" when the family was created by a self-buyer', () => {
+    expect(formatRelation('self')).toBe('Wearer');
+    expect(formatRelation('SELF')).toBe('Wearer');
+    expect(formatRelation(' Self ')).toBe('Wearer');
+  });
+
+  it('returns "Family" when the relationship is missing or empty', () => {
+    expect(formatRelation(null)).toBe('Family');
+    expect(formatRelation(undefined)).toBe('Family');
+    expect(formatRelation('')).toBe('Family');
+    expect(formatRelation('   ')).toBe('Family');
+  });
+
+  it('returns the original label for caregiver-set relationships', () => {
+    expect(formatRelation('mother')).toBe('mother');
+    expect(formatRelation('Mom')).toBe('Mom');
+    expect(formatRelation('father')).toBe('father');
+  });
+
+  it('flows through caregiverPersonFromParent — self_buyer family renders Wearer, not Self', () => {
+    const out = caregiverPersonFromParent(
+      summary({ parentRelationship: 'self', parentDisplayName: 'TheOne' }),
+      0,
+      NOW,
+    );
+    expect(out.relation).toBe('Wearer');
+  });
+
+  it('flows through caregiverPersonFromParent — Mom relationship preserved', () => {
+    const out = caregiverPersonFromParent(
+      summary({ parentRelationship: 'Mom' }),
+      0,
+      NOW,
+    );
+    expect(out.relation).toBe('Mom');
   });
 });

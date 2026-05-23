@@ -16,7 +16,7 @@
 // itself doesn't need to filter by user_id.
 
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database, VitalType } from '../../types/database';
+import type { Database, FamilyRole, VitalType } from '../../types/database';
 
 const PER_PARENT_READING_LIMIT = 14; // ~2 weeks of once-daily; powers 7-day sparkline + buffer
 const MULTI_VITAL_LOOKBACK_DAYS = 7; // window for HR / SpO2 / sleep latest-per-vital
@@ -60,6 +60,10 @@ export interface ParentSummary {
   parentDisplayName: string;
   parentRelationship: string;
   parentYearOfBirth: number | null;
+  /** Sprint 19 — the viewer's role inside THIS family. Sourced from
+   *  the same family_members row the membership query already returns.
+   *  Drives the "+ Add someone" gate and any owner-only CTA. */
+  viewerRole: FamilyRole;
   /** Most recent BP reading; null if none yet. */
   latestReading: ReadingSummary | null;
   /** Newest-first; up to PER_PARENT_READING_LIMIT entries. Drives the sparkline. */
@@ -86,6 +90,7 @@ export async function fetchParentSummaries(
     .from('family_members')
     .select(
       `family_id,
+       role,
        families!inner(id, parent_display_name, parent_relationship, parent_year_of_birth)`,
     )
     .eq('user_id', userId)
@@ -195,6 +200,7 @@ export async function fetchParentSummaries(
       parentDisplayName: fam?.parent_display_name ?? '',
       parentRelationship: fam?.parent_relationship ?? '',
       parentYearOfBirth: fam?.parent_year_of_birth ?? null,
+      viewerRole: (m.role ?? 'caregiver') as FamilyRole,
       latestReading: recent[0] ?? null,
       recentReadings: recent,
       latestHr: vitals.hr,
