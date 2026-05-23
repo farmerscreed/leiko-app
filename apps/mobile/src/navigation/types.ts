@@ -87,6 +87,13 @@ export type CaregiverStackParamList = {
   // Sprint 11 — minimal "Ask Leiko" surface for the local intent
   // router. Sprint 12 layers Tier-B over the Tier-B placeholder.
   AskLeiko: undefined;
+  // Sprint 19 — add-another-parent flow. Reuses the FamilyParent input
+  // shape (name + relationship + timezone) but as a stand-alone screen
+  // outside the onboarding stack. Calls the `create_family` RPC to
+  // provision a second (or third…) family for the caregiver. Reached
+  // from the CaregiverHome action-bar chooser sheet + Settings →
+  // Family.
+  AddPerson: undefined;
 };
 
 // Sprint 4 — self-buyer onboarding stack. Five screens per
@@ -145,6 +152,12 @@ export type SelfBuyerStackParamList = {
   // Sprint 11 — minimal "Ask Leiko" surface for the local intent
   // router. Sprint 12 layers Tier-B over the Tier-B placeholder.
   AskLeiko: undefined;
+  // Sprint 19 — add-another-parent flow, mirrored from the caregiver
+  // stack so a hybrid-mode self-buyer with caregiving aspirations can
+  // also create a second family. Self-buyers won't typically reach
+  // this without the chooser sheet, but registering it keeps the
+  // navigator type unions symmetric.
+  AddPerson: undefined;
 };
 
 export type AuthScreenProps<R extends keyof AuthStackParamList> = NativeStackScreenProps<

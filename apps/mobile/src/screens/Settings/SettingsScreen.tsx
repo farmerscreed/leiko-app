@@ -187,6 +187,7 @@ type NavParamList = {
   ForYourDoctor: { range?: '7d' | '30d' | '90d' | '1y' | 'all_time' } | undefined;
   Pairing: undefined;
   Settings: undefined;
+  AddPerson: undefined;
 };
 
 export function SettingsScreen({ navigation }: Props) {
@@ -758,6 +759,18 @@ export function SettingsScreen({ navigation }: Props) {
             onPress={() => stackNavigation.navigate('FamilyMembers')}
             testID="settings-family-members"
           />
+          {/* Sprint 19 Block 2 — caregivers can set up additional
+              family circles to care for more than one person. Hidden
+              for self-buyers, who only ever have their own family. */}
+          {!isSelfBuyer ? (
+            <ListRow
+              variant="action"
+              title="Care for another person"
+              subtitle="Set up a new circle for someone else you look after."
+              onPress={() => stackNavigation.navigate('AddPerson')}
+              testID="settings-family-add-person"
+            />
+          ) : null}
           <ListRow
             variant="action"
             title={isSelfBuyer ? 'Invite a family member' : 'Invite a caregiver'}

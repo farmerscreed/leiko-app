@@ -46,6 +46,7 @@ import { ForYourDoctorScreen } from '../screens/ForYourDoctor/ForYourDoctorScree
 import { AuditLogScreen } from '../screens/AuditLog/AuditLogScreen';
 import { CaregiverVisibilityScreen } from '../screens/CaregiverVisibility/CaregiverVisibilityScreen';
 import { FamilyMembersScreen } from '../screens/FamilyMembers/FamilyMembersScreen';
+import { AddPersonScreen } from '../screens/Family/AddPersonScreen';
 import { LearnScreen } from '../screens/Learn/LearnScreen';
 import { LearnClusterScreen } from '../screens/Learn/LearnClusterScreen';
 import { ArticleScreen } from '../screens/Learn/ArticleScreen';
@@ -184,6 +185,7 @@ function CaregiverHomeNavigator() {
         name="FamilyMembers"
         component={FamilyMembersScreen}
       />
+      <CaregiverStack.Screen name="AddPerson" component={AddPersonScreen} />
       <CaregiverStack.Screen name="Learn" component={LearnScreen} />
       <CaregiverStack.Screen name="LearnCluster" component={LearnClusterScreen} />
       <CaregiverStack.Screen name="Article" component={ArticleScreen} />
@@ -246,6 +248,7 @@ function SelfBuyerHomeNavigator() {
         name="FamilyMembers"
         component={FamilyMembersScreen}
       />
+      <SelfBuyerStack.Screen name="AddPerson" component={AddPersonScreen} />
       <SelfBuyerStack.Screen name="Learn" component={LearnScreen} />
       <SelfBuyerStack.Screen name="LearnCluster" component={LearnClusterScreen} />
       <SelfBuyerStack.Screen name="Article" component={ArticleScreen} />

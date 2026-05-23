@@ -72,6 +72,7 @@ import { PersonCard } from '../../components/PersonCard';
 import { ViewToggle } from '../../components/ViewToggle';
 import { useCaregiverFamily } from '../../hooks/useCaregiverFamily';
 import { AcceptInviteSheet } from '../../components/AcceptInviteSheet';
+import { AddSomeoneChooserSheet } from '../../components/AddSomeoneChooserSheet';
 import { FamilyRemovalBanner } from '../../components/FamilyRemovalBanner';
 import { useFamilyRemovalBanner } from '../../hooks/useFamilyRemovalBanner';
 import { useAuth } from '../../state/auth';
@@ -184,6 +185,10 @@ export function CaregiverHome() {
   // on success we refresh the family list so the constellation
   // populates without a manual reload.
   const [acceptInviteVisible, setAcceptInviteVisible] = useState(false);
+  // Sprint 19 Block 2 — chooser sheet for the action-bar "+" CTA.
+  // Lets the caregiver pick between "Care for another person" (new
+  // family) and "Invite a caregiver" (co-caregiver to existing family).
+  const [addSomeoneVisible, setAddSomeoneVisible] = useState(false);
   const profileEmail = useAuth((s) => s.profile?.email ?? '');
 
   // Sprint 14.5 task 3 — home-seeded "Worth a read" Learn card. Same
@@ -505,7 +510,7 @@ export function CaregiverHome() {
           <CaregiverActionBar
             count={merged.length}
             canInvite={viewerCanInvite(merged)}
-            onInvitePress={() => navigation.navigate('Settings')}
+            onInvitePress={() => setAddSomeoneVisible(true)}
             testID="caregiver-home-action-bar"
           />
         </View>
@@ -550,6 +555,22 @@ export function CaregiverHome() {
           refresh();
         }}
         testID="caregiver-home-accept"
+      />
+      {/* Sprint 19 Block 2 — action-bar chooser. Picks between
+          "Care for another person" (new family) and "Invite a
+          caregiver" (existing flow). */}
+      <AddSomeoneChooserSheet
+        visible={addSomeoneVisible}
+        onDismiss={() => setAddSomeoneVisible(false)}
+        onAddPerson={() => {
+          setAddSomeoneVisible(false);
+          navigation.navigate('AddPerson');
+        }}
+        onInviteCaregiver={() => {
+          setAddSomeoneVisible(false);
+          navigation.navigate('Settings');
+        }}
+        testID="caregiver-home-add-someone"
       />
       <QuietHoursAffirmSlot />
     </SafeAreaView>
