@@ -44,6 +44,26 @@ Update this log every time a new build artifact is produced.
 | **Status** | Built; installed on Phone 1; signup walked end-to-end. **Superseded** by v4 below (containing the 9 audit-pass fix buckets). |
 | **Used for** | First-pass smoke test on Phone 1. Revealed 9 buckets of bench bugs, all closed in commits `8d8000b` → `316301a`. |
 
+### v1.0.0 (versionCode 9) — production-apk `.apk` bundling Sprint 19 (multi-account + caregiver model)
+
+| Field | Value |
+|---|---|
+| **Artifact URL** | _pending — fill in once the build finishes (~15-25 min from queue)_ |
+| **Build logs** | https://expo.dev/accounts/lawone-apps/projects/leiko/builds/08c78e5e-f17b-4122-8419-8ce434659c18 |
+| **Build ID** | `08c78e5e-f17b-4122-8419-8ce434659c18` |
+| **EAS profile** | `production-apk` |
+| **Build type** | `apk` |
+| **versionName** | `1.0.0` |
+| **versionCode** | `9` (EAS ledger advanced 6 → 9 across retries for transient GraphQL errors before the queue succeeded; vc7 + vc8 never produced artifacts) |
+| **EAS credentials slot** | Same as the AAB / APK v3 / APK v4 / APK v5 |
+| **Built** | 2026-05-23 |
+| **Target backend** | prod Supabase `kqnzxjrpnjnczhgdwdqg.supabase.co` |
+| **Branch tip when built** | `ed0179f` |
+| **Bundles** | Sprint 18 audit fixes (v4) + Sprint 18 sleep wake-time fix (v5) + Halo Ember icon (v5) + Sprint 19 Blocks 1-7: SELF-label hidden, +Add owner-gate, Care-for-another-person flow, Edit-family-details, Account switcher, Per-caregiver relationship label (with prod migration `0024_caregiver_relationship_label.sql` applied), real APP_VERSION + leiko.health URLs |
+| **Migration dependency** | `0024_caregiver_relationship_label.sql` MUST be applied to prod before install — verified 2026-05-23 via SQL probe (column exists, type=text, nullable=YES) |
+| **Edge Function redeploy** | `accept-family-invite` SHOULD be redeployed so v6's `caregiverRelationshipLabel` body field is honored; pending founder ops |
+| **Used for** | Phone 1 in-place upgrade install; Phone 2 retest of caregiver invite flow with the relationship-label chip |
+
 ### v1.0.0 (versionCode 6) — production-apk `.apk` bundling sleep fix + Halo Ember icon
 
 | Field | Value |
