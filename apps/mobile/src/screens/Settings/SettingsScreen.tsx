@@ -42,6 +42,7 @@ import {
 } from '../../services/users/accountActions';
 import { sendFamilyInvite } from '../../services/families/manageInvites';
 import { AcceptInviteSheet } from '../../components/AcceptInviteSheet';
+import { EditFamilyDetailsSheet } from '../../components/EditFamilyDetailsSheet';
 import { listCaregivers } from '../../services/families/visibility';
 import { useFamilyReadings } from '../../hooks/useFamilyReadings';
 import { useAuth } from '../../state/auth';
@@ -306,6 +307,15 @@ export function SettingsScreen({ navigation }: Props) {
   // without requiring a Settings remount.
   const { parents } = useFamilyReadings();
   const familyId = parents[0]?.familyId ?? null;
+
+  // Sprint 19 Block 3 — owner-only edit affordance. Pick the FIRST
+  // family the viewer is family_owner of as the edit target. Single-
+  // family users (the common case) just edit "their" family; multi-
+  // family caregivers edit the first row (sorted by latest-reading);
+  // per-family edit affordances on individual orbs land in a future
+  // sprint when the per-orb context menu does.
+  const ownedFamily = parents.find((p) => p.viewerRole === 'family_owner') ?? null;
+  const [editFamilyOpen, setEditFamilyOpen] = useState(false);
   const [caregiverCount, setCaregiverCount] = useState<number | null>(null);
   useEffect(() => {
     if (!isSelfBuyer || !familyId) {
@@ -759,6 +769,18 @@ export function SettingsScreen({ navigation }: Props) {
             onPress={() => stackNavigation.navigate('FamilyMembers')}
             testID="settings-family-members"
           />
+          {/* Sprint 19 Block 3 — owner-only edit affordance. Lets
+              someone who typed the wrong name during onboarding fix
+              it without re-signing-up (account_type is immutable). */}
+          {ownedFamily ? (
+            <ListRow
+              variant="action"
+              title="Edit family details"
+              subtitle={`Update ${ownedFamily.parentDisplayName || 'their'} name or relationship.`}
+              onPress={() => setEditFamilyOpen(true)}
+              testID="settings-family-edit-details"
+            />
+          ) : null}
           {/* Sprint 19 Block 2 — caregivers can set up additional
               family circles to care for more than one person. Hidden
               for self-buyers, who only ever have their own family. */}
@@ -1512,6 +1534,19 @@ export function SettingsScreen({ navigation }: Props) {
         onSuccess={() => setAcceptSuccess(true)}
         testID="settings-accept"
       />
+
+      {/* Sprint 19 Block 3 — owner-only edit family details. Only
+          mounted when there's a family the viewer owns. */}
+      {ownedFamily ? (
+        <EditFamilyDetailsSheet
+          visible={editFamilyOpen}
+          onDismiss={() => setEditFamilyOpen(false)}
+          familyId={ownedFamily.familyId}
+          initialName={ownedFamily.parentDisplayName}
+          initialRelationship={ownedFamily.parentRelationship}
+          testID="settings-family-edit-sheet"
+        />
+      ) : null}
 
       {/* Export paywall — for free users tapping Export my data */}
       <PaywallSheet

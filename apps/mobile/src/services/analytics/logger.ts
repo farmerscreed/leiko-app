@@ -99,6 +99,10 @@ export type AnalyticsEvent =
   | { name: 'family_add_another_started' }
   | { name: 'family_add_another_completed' }
   | { name: 'family_add_another_failed'; props?: { reason: string } }
+  // Sprint 19 — Edit family details (owner-only).
+  | { name: 'family_details_update_started' }
+  | { name: 'family_details_update_completed' }
+  | { name: 'family_details_update_failed'; props?: { reason: string } }
   // Sprint 17b — Family member management (owner remove + self leave).
   | { name: 'family_member_removed' }
   | { name: 'family_member_remove_failed'; props?: { reason: string } }
