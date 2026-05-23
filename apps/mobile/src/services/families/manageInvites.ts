@@ -28,6 +28,13 @@ export interface SendInviteResult {
 export interface AcceptInviteInput {
   code: string;
   email: string;
+  /** Sprint 19 Block 5 — per-caregiver label for the wearer.
+   *  Optional; when set, stored on family_members and preferred over
+   *  families.parent_relationship for display. Same encoding
+   *  convention as families.parent_relationship: 'mother' | 'father'
+   *  | 'aunt' | 'uncle' | 'daughter' | 'son' | 'niece' | 'nephew' |
+   *  'other' | 'other:<label>'. */
+  caregiverRelationshipLabel?: string;
 }
 
 export interface AcceptInviteResult {

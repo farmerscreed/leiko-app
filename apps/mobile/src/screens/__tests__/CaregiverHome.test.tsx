@@ -142,6 +142,7 @@ function parent(overrides: Partial<ParentSummary> & { familyId: string; parentDi
     parentRelationship: overrides.parentRelationship ?? 'Mom',
     parentYearOfBirth: overrides.parentYearOfBirth ?? 1955,
     viewerRole: overrides.viewerRole ?? 'family_owner',
+    caregiverRelationshipLabel: overrides.caregiverRelationshipLabel ?? null,
     latestReading: overrides.latestReading ?? null,
     recentReadings: overrides.recentReadings ?? [],
     latestHr: overrides.latestHr ?? null,

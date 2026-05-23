@@ -2,6 +2,7 @@ import {
   caregiverPersonFromParent,
   caregiverPeopleFromParents,
   formatRelation,
+  resolveRelation,
 } from '../caregiverPerson';
 import type {
   ParentSummary,
@@ -31,6 +32,7 @@ function summary(partial: Partial<ParentSummary> = {}): ParentSummary {
     parentRelationship: partial.parentRelationship ?? 'Mom',
     parentYearOfBirth: partial.parentYearOfBirth ?? 1955,
     viewerRole: partial.viewerRole ?? 'caregiver',
+    caregiverRelationshipLabel: partial.caregiverRelationshipLabel ?? null,
     latestReading: partial.latestReading ?? null,
     recentReadings: partial.recentReadings ?? [],
     latestHr: partial.latestHr ?? null,
@@ -436,5 +438,70 @@ describe('formatRelation — Sprint 19 SELF-label leakage fix', () => {
       NOW,
     );
     expect(out.relation).toBe('Mom');
+  });
+});
+
+describe('resolveRelation — Sprint 19 Block 5 per-caregiver label preference', () => {
+  it('prefers the per-caregiver label when present', () => {
+    // Even though families says 'self', the caregiver's label wins.
+    expect(resolveRelation('mother', 'self')).toBe('mother');
+    expect(resolveRelation('Friend', 'self')).toBe('Friend');
+  });
+
+  it('unwraps the other:<label> encoding for the caregiver label', () => {
+    expect(resolveRelation('other:Godfather', 'self')).toBe('Godfather');
+    expect(resolveRelation('other:Best Friend', 'father')).toBe('Best Friend');
+  });
+
+  it('falls back to family default when label is empty', () => {
+    expect(resolveRelation(null, 'mother')).toBe('mother');
+    expect(resolveRelation(undefined, 'father')).toBe('father');
+    expect(resolveRelation('', 'aunt')).toBe('aunt');
+    expect(resolveRelation('   ', 'uncle')).toBe('uncle');
+  });
+
+  it('falls back to "Wearer" when family default is self and no label', () => {
+    expect(resolveRelation(null, 'self')).toBe('Wearer');
+    expect(resolveRelation('', 'self')).toBe('Wearer');
+  });
+
+  it('falls back to "Family" when both are missing', () => {
+    expect(resolveRelation(null, null)).toBe('Family');
+    expect(resolveRelation('', '')).toBe('Family');
+  });
+
+  it('unwraps other:<label> on the family default too', () => {
+    expect(resolveRelation(null, 'other:Auntie')).toBe('Auntie');
+  });
+
+  it('renders bare "other" (no label) as Family', () => {
+    expect(resolveRelation('other', null)).toBe('Family');
+    expect(resolveRelation(null, 'other')).toBe('Family');
+  });
+
+  it('flows through caregiverPersonFromParent — label wins over self', () => {
+    const out = caregiverPersonFromParent(
+      summary({
+        parentRelationship: 'self',
+        parentDisplayName: 'TheOne',
+        caregiverRelationshipLabel: 'mother',
+      }),
+      0,
+      NOW,
+    );
+    expect(out.relation).toBe('mother');
+  });
+
+  it('flows through caregiverPersonFromParent — empty label falls back to family default', () => {
+    const out = caregiverPersonFromParent(
+      summary({
+        parentRelationship: 'father',
+        parentDisplayName: 'Papa',
+        caregiverRelationshipLabel: null,
+      }),
+      0,
+      NOW,
+    );
+    expect(out.relation).toBe('father');
   });
 });

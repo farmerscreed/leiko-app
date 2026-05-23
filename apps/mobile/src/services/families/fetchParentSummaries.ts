@@ -64,6 +64,11 @@ export interface ParentSummary {
    *  the same family_members row the membership query already returns.
    *  Drives the "+ Add someone" gate and any owner-only CTA. */
   viewerRole: FamilyRole;
+  /** Sprint 19 Block 5 — per-caregiver label for the wearer. When
+   *  present, display layers MUST prefer this over `parentRelationship`.
+   *  Empty / null means "fall back to families.parent_relationship via
+   *  formatRelation()". */
+  caregiverRelationshipLabel: string | null;
   /** Most recent BP reading; null if none yet. */
   latestReading: ReadingSummary | null;
   /** Newest-first; up to PER_PARENT_READING_LIMIT entries. Drives the sparkline. */
@@ -91,6 +96,7 @@ export async function fetchParentSummaries(
     .select(
       `family_id,
        role,
+       caregiver_relationship_label,
        families!inner(id, parent_display_name, parent_relationship, parent_year_of_birth)`,
     )
     .eq('user_id', userId)
@@ -195,12 +201,17 @@ export async function fetchParentSummaries(
       spo2: null,
       sleep_session: null,
     };
+    const rawLabel = (m as { caregiver_relationship_label?: unknown }).caregiver_relationship_label;
     return {
       familyId: m.family_id,
       parentDisplayName: fam?.parent_display_name ?? '',
       parentRelationship: fam?.parent_relationship ?? '',
       parentYearOfBirth: fam?.parent_year_of_birth ?? null,
       viewerRole: (m.role ?? 'caregiver') as FamilyRole,
+      caregiverRelationshipLabel:
+        typeof rawLabel === 'string' && rawLabel.trim().length > 0
+          ? rawLabel
+          : null,
       latestReading: recent[0] ?? null,
       recentReadings: recent,
       latestHr: vitals.hr,

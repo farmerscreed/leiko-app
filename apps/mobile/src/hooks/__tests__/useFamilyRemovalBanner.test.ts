@@ -19,6 +19,7 @@ function parent(
     parentRelationship: 'mother',
     parentYearOfBirth: 1955,
     viewerRole: 'caregiver',
+    caregiverRelationshipLabel: null,
     latestReading: null,
     recentReadings: [],
     latestHr: null,
