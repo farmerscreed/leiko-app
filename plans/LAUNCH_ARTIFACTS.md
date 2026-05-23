@@ -48,7 +48,7 @@ Update this log every time a new build artifact is produced.
 
 | Field | Value |
 |---|---|
-| **Artifact URL** | _pending — fill in once the build finishes (~15-25 min from queue)_ |
+| **Artifact URL** | https://expo.dev/artifacts/eas/25T2boRd5neco7rDC2gYDN.apk |
 | **Build logs** | https://expo.dev/accounts/lawone-apps/projects/leiko/builds/08c78e5e-f17b-4122-8419-8ce434659c18 |
 | **Build ID** | `08c78e5e-f17b-4122-8419-8ce434659c18` |
 | **EAS profile** | `production-apk` |
