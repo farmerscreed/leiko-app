@@ -76,13 +76,19 @@ import {
 import { useTheme } from '../../theme';
 import type { CaregiverScreenProps } from '../../navigation/types';
 import type { Gender, HypertensionStatus, UserRow, UserUpdate } from '../../types/database';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const appConfig: { expo?: { version?: string } } = require('../../../app.json');
 
 type ProfileField = 'yob' | 'gender' | 'height' | 'weight' | 'timezone';
 
-// App version is embedded at build time. Bump in lockstep with
-// app.json + package.json on every version commit. Showing "build" as
-// the EAS build number lands when EAS builds are wired (Sprint 17).
-const APP_VERSION = '0.0.0';
+// Sprint 19 Block 7 — read version from app.json at bundle time.
+// Pre-Sprint-19 this was a hardcoded '0.0.0' that diverged from the
+// real version. expo-application / expo-constants aren't in the
+// dependency set, so the cheap path is a static JSON import; the
+// bundler inlines the literal. EAS bumps the native versionCode
+// independently (remote ledger); the user-facing versionName lives
+// in app.json:expo.version and matches what ships in the APK.
+const APP_VERSION = appConfig.expo?.version ?? '0.0.0';
 
 const HYPERTENSION_LABEL: Record<HypertensionStatus, string> = {
   yes: 'Yes',
@@ -955,25 +961,25 @@ export function SettingsScreen({ navigation }: Props) {
           <ListRow
             variant="navigation"
             title="Terms of service"
-            onPress={() => void Linking.openURL('https://leiko.app/terms')}
+            onPress={() => void Linking.openURL('https://leiko.health/terms')}
             testID="settings-about-terms"
           />
           <ListRow
             variant="navigation"
             title="Privacy policy"
-            onPress={() => void Linking.openURL('https://leiko.app/privacy')}
+            onPress={() => void Linking.openURL('https://leiko.health/privacy')}
             testID="settings-about-privacy"
           />
           <ListRow
             variant="navigation"
             title="Help & support"
-            onPress={() => void Linking.openURL('https://leiko.app/support')}
+            onPress={() => void Linking.openURL('https://leiko.health/support')}
             testID="settings-about-help"
           />
           <ListRow
             variant="action"
             title="Email us"
-            onPress={() => void Linking.openURL('mailto:support@leiko.app')}
+            onPress={() => void Linking.openURL('mailto:support@leiko.health')}
             showDivider={false}
             testID="settings-about-email"
           />
