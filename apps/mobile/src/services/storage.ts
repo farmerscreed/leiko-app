@@ -191,6 +191,13 @@ export const STORAGE_KEYS = {
   // singleton slice's `recent` is purged and TanStack Query caches
   // are invalidated. Cleared on sign-out.
   lastKnownVisibility: 'leiko.family.lastKnownVisibility',
+  // Sprint 19 Block 4 — account switcher. JSON array of
+  // `{ email, lastSignedInAtMs }` for every account that has
+  // successfully signed in on this device. Used by
+  // AccountSwitchScreen to render the picker without requiring a
+  // server roundtrip. Survives sign-out — the list IS the point of
+  // the switcher.
+  knownAccounts: 'leiko.auth.knownAccounts',
 } as const;
 
 export const supabaseStorage = {

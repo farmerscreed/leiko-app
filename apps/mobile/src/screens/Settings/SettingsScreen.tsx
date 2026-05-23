@@ -189,6 +189,7 @@ type NavParamList = {
   Pairing: undefined;
   Settings: undefined;
   AddPerson: undefined;
+  AccountSwitch: undefined;
 };
 
 export function SettingsScreen({ navigation }: Props) {
@@ -980,6 +981,17 @@ export function SettingsScreen({ navigation }: Props) {
 
         {/* Account ----------------------------------------------------- */}
         <SettingsSection title="Account" testID="settings-section-account">
+          {/* Sprint 19 Block 4 — switch between accounts saved on
+              this device. Tap takes you to AccountSwitchScreen where
+              you can pick another known account or sign in with a
+              new email + delete the current account. */}
+          <ListRow
+            variant="navigation"
+            title="Switch account"
+            subtitle={profile?.email ? `Signed in as ${profile.email}` : 'Manage accounts on this device.'}
+            onPress={() => stackNavigation.navigate('AccountSwitch')}
+            testID="settings-account-switch"
+          />
           <ListRow
             variant="action"
             title="Sign out"

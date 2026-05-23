@@ -94,6 +94,11 @@ export type CaregiverStackParamList = {
   // from the CaregiverHome action-bar chooser sheet + Settings →
   // Family.
   AddPerson: undefined;
+  // Sprint 19 — account switcher. Lists every email that has signed
+  // in on this device; tap to sign out + OTP-in another. Reached
+  // from Settings → Profile → "Switch account" and from the
+  // "Signed in as X" chip at the top of Settings.
+  AccountSwitch: undefined;
 };
 
 // Sprint 4 — self-buyer onboarding stack. Five screens per
@@ -158,6 +163,8 @@ export type SelfBuyerStackParamList = {
   // this without the chooser sheet, but registering it keeps the
   // navigator type unions symmetric.
   AddPerson: undefined;
+  // Sprint 19 — account switcher, mirrored from the caregiver stack.
+  AccountSwitch: undefined;
 };
 
 export type AuthScreenProps<R extends keyof AuthStackParamList> = NativeStackScreenProps<

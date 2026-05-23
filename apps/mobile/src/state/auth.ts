@@ -25,6 +25,7 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 import { mmkv, STORAGE_KEYS } from '../services/storage';
 import { identifyPurchaser, logoutPurchaser } from '../services/purchases';
+import { useKnownAccounts } from './knownAccounts';
 import type { AccountType, UserRow } from '../types/database';
 
 type Status = 'loading' | 'unauthenticated' | 'authenticated';
@@ -144,6 +145,8 @@ export const useAuth = create<AuthState>((set, get) => ({
     // The fork choice has now been committed to the database — drop
     // it from MMKV so a future signed-out state doesn't replay it.
     if (data.session) get().clearPendingAccountType();
+    // Sprint 19 Block 4 — remember this account for the switcher.
+    if (data.session) useKnownAccounts.getState().add(email);
   },
 
   async refreshProfile() {
