@@ -199,12 +199,23 @@ export const useAuth = create<AuthState>((set, get) => ({
     // MMKV state alone (next session retries).
     if (profile) {
       try {
-        const { hasOnboarded } = await checkOnboardingState(profile.id);
+        const { hasOnboarded, primaryFamilyId } = await checkOnboardingState(profile.id);
         if (hasOnboarded) {
           if (profile.account_type === 'caregiver') {
             mmkv.set(STORAGE_KEYS.caregiverOnboardingComplete, true);
           } else if (profile.account_type === 'self_buyer') {
             mmkv.set(STORAGE_KEYS.selfBuyerOnboardingComplete, true);
+          }
+          // v7 hotfix — also seed currentFamilyId from the server when
+          // the user has any active family. Pre-fix the onboarding flag
+          // was set but currentFamilyId stayed null on a fresh install,
+          // which routed the user out of onboarding but into an empty
+          // home view that couldn't query any family data. Only write
+          // when MMKV is empty so the chooser-driven currentFamilyId
+          // (Sprint 19 Block 2) isn't clobbered for caregivers with
+          // multiple families.
+          if (primaryFamilyId && !mmkv.getString(STORAGE_KEYS.currentFamilyId)) {
+            mmkv.set(STORAGE_KEYS.currentFamilyId, primaryFamilyId);
           }
           useOnboarding.getState().hydrate();
         }
