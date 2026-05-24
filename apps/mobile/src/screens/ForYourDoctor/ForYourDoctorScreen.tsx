@@ -26,6 +26,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  Platform,
   Pressable,
   ScrollView,
   Share,
@@ -141,6 +142,37 @@ export function subtitleCopy(
     .replace('{possessive}', 'your')
     .replace('{possessive_doctor}', 'your')
     .replace('{range}', RANGE_WORD[range]);
+}
+
+/**
+ * Build the Share.share() payload. React Native's Share API is
+ * platform-asymmetric:
+ *   iOS    — reads `url` (preferred), `message`, `title`
+ *   Android — reads `message` and `title` only; `url` is IGNORED
+ * Pre-fix the Android share sheet was passing JUST the subtitle text
+ * to the target app (no PDF link), so users saw the screen subtitle
+ * arrive in WhatsApp/Mail instead of the PDF. Append the URL to the
+ * message so Android targets get something actionable. iOS still uses
+ * the `url` field, which gives a richer file-share affordance.
+ *
+ * This is a JS-only fix that ships in the next APK rebuild. A proper
+ * "share the file directly" path needs expo-file-system + expo-sharing
+ * (download to local cache, share local URI) — both are native modules
+ * and require a fresh native build, deferred.
+ */
+export function buildSharePayload(
+  url: string,
+  accountType: AccountType,
+  range: DoctorPdfRange,
+  parentLabel: string,
+): { url?: string; message: string } {
+  const subtitle = subtitleCopy(accountType, range, parentLabel);
+  if (Platform.OS === 'android') {
+    // Android needs the URL inside `message` because Share.share
+    // ignores the `url` field on this platform.
+    return { message: `${subtitle}\n\n${url}` };
+  }
+  return { url, message: subtitle };
 }
 
 function dateRangeLabel(range: DoctorPdfRange, nowMs: number = Date.now()): string {
@@ -313,10 +345,7 @@ export function ForYourDoctorScreen(props: Nav) {
       writeLastGenerated(info);
       setLastGenerated(info);
       try {
-        await Share.share({
-          url: result.url,
-          message: subtitleCopy(accountType, range, parentLabel),
-        });
+        await Share.share(buildSharePayload(result.url, accountType, range, parentLabel));
       } catch {
         // OS sheet dismissed — nothing to do.
       }
@@ -354,10 +383,9 @@ export function ForYourDoctorScreen(props: Nav) {
   const onReShare = useCallback(async () => {
     if (!lastGenerated) return;
     try {
-      await Share.share({
-        url: lastGenerated.url,
-        message: subtitleCopy(accountType, lastGenerated.range, parentLabel),
-      });
+      await Share.share(
+        buildSharePayload(lastGenerated.url, accountType, lastGenerated.range, parentLabel),
+      );
     } catch {
       // OS sheet dismissed — fall back to a fresh generate.
       void onGenerate();

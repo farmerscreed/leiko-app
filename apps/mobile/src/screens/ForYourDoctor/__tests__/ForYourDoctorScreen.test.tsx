@@ -1,11 +1,12 @@
 import { type ReactNode } from 'react';
-import { Share } from 'react-native';
+import { Platform, Share } from 'react-native';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '../../../theme';
 import {
   ForYourDoctorScreen,
   FYD_STRINGS,
+  buildSharePayload,
 } from '../ForYourDoctorScreen';
 import { lintVoiceText } from '../../../services/voice/voiceLint';
 import type { AccountType, UserRow } from '../../../types/database';
@@ -314,5 +315,34 @@ describe('ForYourDoctorScreen — voice gate', () => {
       ]) as Array<[string, string]>,
   )('%s passes voice-lint', (_key, copy) => {
     expect(lintVoiceText(copy).passes).toBe(true);
+  });
+});
+
+describe('buildSharePayload — platform asymmetry', () => {
+  // RN's Share.share ignores `url` on Android; pre-fix the share sheet
+  // sent JUST the subtitle text with no PDF link, so users were getting
+  // the screen subtitle in WhatsApp/Mail instead of the report.
+  const url = 'https://signed.example/report.pdf';
+  const accountType = 'self_buyer' as const;
+  const range = '7d' as const;
+  const parentLabel = 'you';
+
+  afterEach(() => {
+    // Restore default test platform (jest-expo defaults to 'ios').
+    Object.defineProperty(Platform, 'OS', { configurable: true, value: 'ios' });
+  });
+
+  it('iOS uses the `url` field and a plain subtitle as the message', () => {
+    Object.defineProperty(Platform, 'OS', { configurable: true, value: 'ios' });
+    const payload = buildSharePayload(url, accountType, range, parentLabel);
+    expect(payload.url).toBe(url);
+    expect(payload.message).not.toContain(url);
+  });
+
+  it('Android omits `url` and appends the URL to the message so the link is actually shared', () => {
+    Object.defineProperty(Platform, 'OS', { configurable: true, value: 'android' });
+    const payload = buildSharePayload(url, accountType, range, parentLabel);
+    expect(payload.url).toBeUndefined();
+    expect(payload.message).toContain(url);
   });
 });
