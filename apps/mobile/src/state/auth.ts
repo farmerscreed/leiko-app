@@ -25,7 +25,9 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 import { mmkv, STORAGE_KEYS } from '../services/storage';
 import { identifyPurchaser, logoutPurchaser } from '../services/purchases';
+import { checkOnboardingState } from '../services/users/checkOnboardingState';
 import { useKnownAccounts } from './knownAccounts';
+import { useOnboarding } from './onboarding';
 import type { AccountType, UserRow } from '../types/database';
 
 type Status = 'loading' | 'unauthenticated' | 'authenticated';
@@ -171,6 +173,31 @@ export const useAuth = create<AuthState>((set, get) => ({
       return;
     }
     const profile = await fetchProfile(session.user.id);
+    // Sprint 19 Block 8 — derive onboarding-complete from server
+    // state. Without this, a returning user on a fresh install (or
+    // post-MMKV-wipe) signs in cleanly but the navigator sends them
+    // back through onboarding because the per-device MMKV flag is
+    // false. The fix queries `family_members` for any active row and
+    // back-fills the appropriate MMKV flag, then hydrates the
+    // useOnboarding store so the navigator re-evaluates.
+    //
+    // Quietly best-effort: a network failure here leaves the existing
+    // MMKV state alone (next session retries).
+    if (profile) {
+      try {
+        const { hasOnboarded } = await checkOnboardingState(profile.id);
+        if (hasOnboarded) {
+          if (profile.account_type === 'caregiver') {
+            mmkv.set(STORAGE_KEYS.caregiverOnboardingComplete, true);
+          } else if (profile.account_type === 'self_buyer') {
+            mmkv.set(STORAGE_KEYS.selfBuyerOnboardingComplete, true);
+          }
+          useOnboarding.getState().hydrate();
+        }
+      } catch {
+        // Best-effort — leave MMKV alone on failure.
+      }
+    }
     set({ session, profile, status: 'authenticated' });
     // Identify with RevenueCat once we have the profile. The webhook is
     // the source of truth for entitlement; this call only ties future
