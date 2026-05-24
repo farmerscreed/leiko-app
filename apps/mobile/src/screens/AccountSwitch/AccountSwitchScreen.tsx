@@ -28,6 +28,7 @@ import { BottomSheet } from '../../components/BottomSheet';
 import { Button } from '../../components/Button';
 import { ListRow } from '../../components/ListRow';
 import { SettingsSection } from '../../components/SettingsSection';
+import { navigationRef } from '../../navigation/navigationRef';
 import { useAuth } from '../../state/auth';
 import { useKnownAccounts } from '../../state/knownAccounts';
 import { deleteAccount } from '../../services/users/accountActions';
@@ -80,29 +81,51 @@ export function AccountSwitchScreen() {
     setActionError(null);
   };
 
-  // Navigate to the unauthenticated stack so the OTP can land. The
-  // root navigator already swaps stacks when auth status flips to
-  // 'unauthenticated' — we just need to make sure no caregiver/
-  // self-buyer route is held on top of it.
-  const resetToAuth = () => {
-    navigation.dispatch(
-      CommonActions.reset({ index: 0, routes: [{ name: 'CaregiverHome' as never }] }),
-    );
+  // Sprint 19 Block 9 — route the AuthStack to the right screen
+  // post-signOut. Pre-Block-9 we tried to navigate via the local
+  // CaregiverStack ref AFTER signOut had already unmounted it, which
+  // silently no-op'd. The user landed on AccountTypeFork with no
+  // signal that an OTP was already in their inbox.
+  //
+  // The fix: use the root `navigationRef` (attached to
+  // NavigationContainer). After the RootNavigator re-renders the
+  // AuthStack, the next macrotask tick has a mounted AuthStack we
+  // can reset into. yield via setTimeout(0) so React commits the
+  // stack swap before we dispatch.
+  const resetAuthTo = (target: 'OTPVerify' | 'SignIn', otpEmail?: string) => {
+    setTimeout(() => {
+      if (!navigationRef.isReady()) return;
+      const routes: Array<{ name: string; params?: Record<string, unknown> }> =
+        target === 'OTPVerify' && otpEmail
+          ? [
+              { name: 'AccountTypeFork' },
+              { name: 'OTPVerify', params: { email: otpEmail, mode: 'signin' } },
+            ]
+          : target === 'SignIn'
+            ? [{ name: 'AccountTypeFork' }, { name: 'SignIn' }]
+            : [{ name: 'AccountTypeFork' }];
+      (navigationRef as unknown as {
+        dispatch: (action: unknown) => void;
+      }).dispatch(
+        CommonActions.reset({ index: routes.length - 1, routes }),
+      );
+    }, 0);
   };
 
   const confirmSwitch = async () => {
     if (sheet.kind !== 'switch' || pending) return;
     setPending(true);
     setActionError(null);
+    const email = sheet.email;
     try {
       await signOut();
-      await signInWithOtp(sheet.email);
-      // After signOut, the root navigator will re-render AuthNavigator.
-      // We don't navigate manually; the auth fork will route into OTP.
-      // The user types the code from their inbox.
+      await signInWithOtp(email);
+      // Land the user on OTPVerify with their email + signin mode so
+      // the next thing they see is the code-entry screen, not a fork
+      // they have to navigate themselves.
       setPending(false);
       closeSheet();
-      resetToAuth();
+      resetAuthTo('OTPVerify', email);
     } catch (e) {
       setActionError(
         e instanceof Error
@@ -134,7 +157,7 @@ export function AccountSwitchScreen() {
       forget(currentEmail);
       setPending(false);
       closeSheet();
-      resetToAuth();
+      resetAuthTo('SignIn');
     } catch (e) {
       setActionError(
         e instanceof Error
@@ -283,11 +306,13 @@ export function AccountSwitchScreen() {
           <Button
             variant="primary"
             onPress={() => {
-              // Sign out + reset to auth stack. Fresh OTP flow.
+              // Sign out + drop the user on SignIn so they can type
+              // a new email + receive an OTP. Pre-Block-9 this just
+              // signed out + landed on AccountTypeFork.
               void (async () => {
                 try {
                   await signOut();
-                  resetToAuth();
+                  resetAuthTo('SignIn');
                 } catch {
                   // ignore; signOut errors surface via auth state
                 }

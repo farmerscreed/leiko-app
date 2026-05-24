@@ -21,6 +21,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../../components/Button';
+import { OnboardingEyebrow } from '../../../components/OnboardingEyebrow';
 import { TimezonePicker } from '../../../components/TimezonePicker';
 import { useTheme } from '../../../theme';
 import { useOnboarding } from '../../../state/onboarding';
@@ -106,6 +107,8 @@ export function SelfBuyerYouScreen({
               Back
             </Text>
           </Pressable>
+
+          <OnboardingEyebrow persona="Myself" step={1} total={2} />
 
           <Text
             accessibilityRole="header"

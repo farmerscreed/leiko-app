@@ -45,7 +45,15 @@ interface AuthState {
 
   signUpWithOtp: (email: string) => Promise<void>;
   signInWithOtp: (email: string) => Promise<void>;
-  verifyOtp: (email: string, token: string) => Promise<void>;
+  /** Sprint 19 Block 9 — optional `delayMs` defers the session flip
+   *  (and the resulting navigator transition) by N ms so the OTP
+   *  screen can render a brief "Welcome back" success state. Default
+   *  0 preserves existing behaviour for tests + non-UI callers. */
+  verifyOtp: (
+    email: string,
+    token: string,
+    options?: { delayMs?: number },
+  ) => Promise<void>;
   signOut: () => Promise<void>;
 
   /** Refresh the profile from Supabase. Settings → Profile edits call
@@ -132,13 +140,19 @@ export const useAuth = create<AuthState>((set, get) => ({
     set({ lastOtpEmail: email });
   },
 
-  async verifyOtp(email, token) {
+  async verifyOtp(email, token, options) {
     const { data, error } = await supabase.auth.verifyOtp({
       email,
       token,
       type: 'email',
     });
     if (error) throw error;
+    // Sprint 19 Block 9 — optional delay before the session flip so
+    // OTPVerify can render a brief "Welcome back" success view.
+    const delayMs = options?.delayMs ?? 0;
+    if (delayMs > 0) {
+      await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+    }
     // Successful verification triggers handle_new_user (first-time)
     // and onAuthStateChange. Set state directly here too so the
     // calling screen sees the change synchronously without waiting

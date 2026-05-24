@@ -9,6 +9,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AcceptInviteSheet } from '../../../components/AcceptInviteSheet';
 import { Card } from '../../../components/Card';
+import { OnboardingEyebrow } from '../../../components/OnboardingEyebrow';
 import { Pill } from '../../../components/Pill';
 import { useTheme } from '../../../theme';
 import { useAuth } from '../../../state/auth';
@@ -96,6 +97,8 @@ export function CaregiverFamilyWatchScreen({
             Back
           </Text>
         </Pressable>
+
+        <OnboardingEyebrow persona="Caregiver" step={3} total={3} />
 
         <Text
           accessibilityRole="header"
