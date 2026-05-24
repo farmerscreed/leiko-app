@@ -35,6 +35,10 @@ import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 import { fetchReportData } from './data.ts';
 import { renderReport } from './template.ts';
+import {
+  buildRasterizerRequest,
+  detectRasterizerVendor,
+} from './rasterizer.ts';
 import type { PdfRequest, Range } from './types.ts';
 
 const VALID_RANGES: Range[] = ['7d', '30d', '90d', '1y'];
@@ -196,26 +200,21 @@ function rangeToDates(range: Range): { startDate: string; endDate: string } {
 async function rasterize(html: string): Promise<Uint8Array> {
   const url = envOrThrow('PDF_RASTERIZER_URL');
   const token = Deno.env.get('PDF_RASTERIZER_TOKEN');
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  // POST shape mirrors Browserless's /pdf endpoint and PDFShift's API:
-  // both accept { html: "..." } and respond with the PDF bytes.
-  const res = await fetch(url, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      html,
-      options: {
-        format: 'Letter',
-        printBackground: true,
-        margin: { top: '18mm', bottom: '18mm', left: '18mm', right: '18mm' },
-      },
-    }),
-  });
+  const vendor = detectRasterizerVendor(url);
+  const { headers, body } = buildRasterizerRequest({ vendor, html, token });
+
+  const res = await fetch(url, { method: 'POST', headers, body });
   if (!res.ok) {
-    throw new Error(`rasterizer_failed_${res.status}`);
+    // Surface a snippet of the response body when we can — PDFShift
+    // returns JSON with a useful error message; Browserless returns
+    // plain text. Capped to 200 chars so logs stay tidy.
+    let detail = '';
+    try {
+      detail = (await res.text()).slice(0, 200);
+    } catch {
+      // ignore
+    }
+    throw new Error(`rasterizer_failed_${res.status}${detail ? `: ${detail}` : ''}`);
   }
   return new Uint8Array(await res.arrayBuffer());
 }
