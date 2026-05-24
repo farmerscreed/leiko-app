@@ -46,12 +46,16 @@ Deno.test('detectRasterizerVendor — generic / self-hosted falls through', () =
 
 // ── buildRasterizerRequest — PDFShift ─────────────────────────────
 
-Deno.test('buildRasterizerRequest pdfshift — uses Basic auth with empty password', () => {
+Deno.test('buildRasterizerRequest pdfshift — sends X-API-Key + Basic auth (covers both legacy and current key formats)', () => {
   const { headers } = buildRasterizerRequest({
     vendor: 'pdfshift',
     html: '<p>hi</p>',
     token: 'api_sk_test123',
   });
+  // Current `sk_*` keys are matched by X-API-Key; legacy `api_sk_*`
+  // keys are matched by HTTP Basic. PDFShift accepts whichever key
+  // shape the issued credential belongs to and ignores the other.
+  assertEquals(headers['X-API-Key'], 'api_sk_test123');
   // btoa("api_sk_test123:") = YXBpX3NrX3Rlc3QxMjM6
   assertEquals(headers['Authorization'], 'Basic YXBpX3NrX3Rlc3QxMjM6');
 });
@@ -74,13 +78,14 @@ Deno.test('buildRasterizerRequest pdfshift — body uses `source` + top-level fi
   assertEquals(parsed.html, undefined);
 });
 
-Deno.test('buildRasterizerRequest pdfshift — token omitted means no Authorization header', () => {
+Deno.test('buildRasterizerRequest pdfshift — token omitted means no auth headers at all', () => {
   const { headers } = buildRasterizerRequest({
     vendor: 'pdfshift',
     html: '<p>hi</p>',
     token: undefined,
   });
   assertEquals(headers['Authorization'], undefined);
+  assertEquals(headers['X-API-Key'], undefined);
 });
 
 // ── buildRasterizerRequest — Browserless / generic ────────────────
