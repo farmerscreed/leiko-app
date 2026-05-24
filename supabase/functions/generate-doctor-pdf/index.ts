@@ -119,6 +119,12 @@ function parseBody(body: unknown): PdfRequest {
   if (typeof b.range !== 'string' || !VALID_RANGES.includes(b.range as Range)) {
     throw new Error('range_invalid');
   }
+  const trimmedStr = (v: unknown, cap: number): string | undefined => {
+    if (typeof v !== 'string') return undefined;
+    const t = v.trim();
+    if (t.length === 0) return undefined;
+    return t.slice(0, cap);
+  };
   return {
     familyId: b.familyId,
     userId: b.userId,
@@ -127,10 +133,11 @@ function parseBody(body: unknown): PdfRequest {
     includeComments: b.includeComments !== false,
     // Sprint 16.5h — opaque cover-note string. Capped at 300 chars on
     // the server side as a defensive guard; the screen also caps it.
-    coverNote:
-      typeof b.coverNote === 'string' && b.coverNote.trim().length > 0
-        ? b.coverNote.slice(0, 300)
-        : undefined,
+    coverNote: trimmedStr(b.coverNote, 300),
+    // Sprint 19 PDF v2 — optional structured clinical context fields.
+    medications: trimmedStr(b.medications, 300),
+    symptoms: trimmedStr(b.symptoms, 300),
+    targetBp: trimmedStr(b.targetBp, 60),
   };
 }
 

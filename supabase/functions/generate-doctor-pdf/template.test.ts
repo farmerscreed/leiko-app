@@ -26,10 +26,23 @@ function fixture(overrides: Partial<ReportData> = {}): ReportData {
     range: '30d',
     rangeLabel: 'Past 30 days',
     generatedAtIso: '2026-05-08T12:00:00Z',
+    executiveSummary: {
+      bpHeadline: '124/80 mmHg avg · 12% Stage 1+',
+      hrHeadline: 'Resting 64 bpm · range 56–88',
+      spo2Headline: 'Avg overnight low 94% · nadir 92%',
+      sleepHeadline: '7h 00m avg · 28 nights',
+      activityHeadline: '6.8k steps/day · 18/28 at target',
+      keyFindings: [
+        'BP within target band on most days.',
+      ],
+    },
     bp: {
       avgSys: 124,
       avgDia: 80,
       pctInRange: 0.86,
+      avgPulsePressure: 44,
+      pctStage1Plus: 0.12,
+      pctStage2Plus: 0.04,
       points: [
         { day: '2026-04-08', sys: 122, dia: 79, pulse: 70, count: 1 },
       ],
@@ -41,6 +54,7 @@ function fixture(overrides: Partial<ReportData> = {}): ReportData {
           dia: 92,
           pulse: 78,
           classification: 'stage2',
+          flags: [],
         },
         {
           day: '2026-04-22',
@@ -48,32 +62,58 @@ function fixture(overrides: Partial<ReportData> = {}): ReportData {
           dia: 88,
           pulse: 76,
           classification: 'stage1',
+          flags: [],
         },
       ],
       count: 25,
+      sufficiency: { level: 'sufficient', label: '25 readings over 24 days.' },
+      clinicalContext: {
+        paragraphs: ['Average 124/80 mmHg across 25 readings over 24 days.'],
+      },
     },
     hr: {
       avgResting: 64,
+      minObserved: 56,
+      maxObserved: 88,
       points: [{ day: '2026-04-08', restingBpm: 64, count: 5 }],
       count: 120,
+      sufficiency: { level: 'sufficient', label: '120 samples over 28 days.' },
+      clinicalContext: {
+        paragraphs: ['Resting heart rate averaged 64 bpm across 120 samples over 28 days. Observed range 56–88 bpm.'],
+      },
     },
     spo2: {
       avgMinPercent: 94,
+      minObserved: 92,
       daysBelow90: 0,
+      eventsBelow93: 1,
       points: [
         { day: '2026-04-08', avgPercent: 96, minPercent: 94, count: 3 },
       ],
       count: 90,
+      sufficiency: { level: 'sufficient', label: '28 days observed.' },
+      clinicalContext: {
+        paragraphs: ['Average overnight low 94% across 28 days. Single lowest observation 92%.'],
+      },
     },
     sleep: {
       avgTotalMinutes: 420,
       points: [{ day: '2026-04-08', totalMinutes: 420, deepMinutes: 100 }],
       count: 28,
+      sufficiency: { level: 'sufficient', label: '28 nights observed.' },
+      clinicalContext: {
+        paragraphs: ['Average total sleep 7h 00m across 28 nights. Deep sleep averaged 100m (24% of total).'],
+      },
     },
     activity: {
       avgSteps: 6800,
+      daysAtTarget: 18,
       points: [{ day: '2026-04-08', totalSteps: 6800 }],
       count: 28,
+      sufficiency: { level: 'sufficient', label: '28 days observed.' },
+      clinicalContext: {
+        paragraphs: ['Averaged 6.8k steps/day across 28 days. Reached the 6,000-step reference on 18 of 28 days.'],
+      },
     },
     correlations: [
       {
@@ -180,18 +220,143 @@ Deno.test('renderReport — cross-vital section uses meaningful narratives', () 
   assertStringIncludes(html, 'On nights you slept under 6 hours');
 });
 
+// ─── Sprint 19 PDF v2 — clinical-depth pass ──────────────────────────
+
+Deno.test('renderReport — Executive Summary renders all five vital headlines on the cover', () => {
+  const html = renderReport(fixture());
+  assertStringIncludes(html, 'At a glance');
+  assertStringIncludes(html, '124/80 mmHg avg');
+  assertStringIncludes(html, 'Resting 64 bpm');
+  assertStringIncludes(html, 'Avg overnight low 94%');
+  assertStringIncludes(html, '7h 00m avg');
+  assertStringIncludes(html, '6.8k steps/day');
+});
+
+Deno.test('renderReport — clinical-context paragraphs render under each section header', () => {
+  const html = renderReport(fixture());
+  assertStringIncludes(html, 'Average 124/80 mmHg across 25 readings');
+  assertStringIncludes(html, 'Resting heart rate averaged 64 bpm');
+  assertStringIncludes(html, 'Single lowest observation 92%');
+});
+
+Deno.test('renderReport — reference footnotes appear under every populated section', () => {
+  const html = renderReport(fixture());
+  assertStringIncludes(html, 'Reference: ACC/AHA 2017 categories');
+  assertStringIncludes(html, 'AHA adult resting heart rate 60');
+  assertStringIncludes(html, 'SpO2 ≥95% typical');
+  assertStringIncludes(html, 'NSF adult sleep 7');
+  assertStringIncludes(html, '6,000 steps/day');
+});
+
+Deno.test('renderReport — running page header repeats on every section page 2+', () => {
+  const html = renderReport(fixture());
+  // Cover has no running header; sections 2+ do. Count occurrences.
+  const occurrences = (html.match(/class="page-header"/g) ?? []).length;
+  // 7 sections after the cover.
+  assertEquals(occurrences, 7);
+});
+
+Deno.test('renderReport — insufficient-data state replaces averages/charts for sparse vitals', () => {
+  const html = renderReport(
+    fixture({
+      sleep: {
+        avgTotalMinutes: 425,
+        points: [{ day: '2026-04-08', totalMinutes: 425, deepMinutes: 90 }],
+        count: 1,
+        sufficiency: { level: 'insufficient', label: '1 of ≥3 nights needed.' },
+        clinicalContext: {
+          paragraphs: ['1 night of data — not enough to characterise a pattern.'],
+        },
+      },
+    }),
+  );
+  assertStringIncludes(html, 'Not enough data over this range to characterise a pattern.');
+  assertStringIncludes(html, '1 of ≥3 nights needed.');
+  // The misleading "Average total · 7h 05m" tile must NOT render.
+  const tileMatches = html.match(/Average total/g);
+  assertEquals(tileMatches, null);
+});
+
+Deno.test('renderReport — flag chips render on BP abnormal table when present', () => {
+  const html = renderReport(
+    fixture({
+      bp: {
+        avgSys: 142,
+        avgDia: 88,
+        pctInRange: 0.2,
+        avgPulsePressure: 54,
+        pctStage1Plus: 0.9,
+        pctStage2Plus: 0.7,
+        points: [{ day: '2026-04-08', sys: 142, dia: 88, pulse: 54, count: 1 }],
+        distribution: { normal: 1, elevated: 0, stage1: 2, stage2: 7, crisis: 0 },
+        topAbnormal: [
+          {
+            day: '2026-04-22',
+            sys: 142,
+            dia: 80,
+            pulse: 54,
+            classification: 'stage2',
+            flags: [
+              { reason: 'bradycardia', label: 'Bradycardia · 54 bpm' },
+              { reason: 'elevated_pp', label: 'Wide PP · 62' },
+            ],
+          },
+        ],
+        count: 10,
+        sufficiency: { level: 'sufficient', label: '10 readings over 7 days.' },
+        clinicalContext: { paragraphs: ['Average 142/88 mmHg.'] },
+      },
+    }),
+  );
+  assertStringIncludes(html, 'class="flag-chip flag-bradycardia"');
+  assertStringIncludes(html, 'Bradycardia · 54 bpm');
+  assertStringIncludes(html, 'Wide PP · 62');
+});
+
+Deno.test('renderReport — clinical-context fields render on cover when provided', () => {
+  const html = renderReport(
+    fixture({
+      clinicalFields: {
+        medications: 'lisinopril 10mg daily',
+        symptoms: 'occasional morning dizziness',
+        targetBp: '<130/80',
+      },
+    }),
+  );
+  assertStringIncludes(html, 'Clinical context');
+  assertStringIncludes(html, 'lisinopril 10mg daily');
+  assertStringIncludes(html, 'occasional morning dizziness');
+  assertStringIncludes(html, '&lt;130/80');
+});
+
+Deno.test('renderReport — clinical-context fields block absent when none supplied', () => {
+  const html = renderReport(fixture());
+  // Eyebrow string only appears when block renders.
+  const matches = html.match(/class="clinical-eyebrow"/g);
+  assertEquals(matches, null);
+});
+
 Deno.test('renderReport — empty cross-vital section uses voice-passing fallback', () => {
   const html = renderReport(fixture({ correlations: [] }));
+  // Sprint 19 PDF v2 — copy now explains data sufficiency rather
+  // than just saying "no patterns", so the clinician knows whether
+  // to expect richer output from a longer-range report.
   assertStringIncludes(
     html,
-    'No cross-vital patterns reached the meaningful threshold over the selected range.',
+    'No cross-vital correlations reached the meaningful threshold yet.',
   );
 });
 
 Deno.test('renderReport — empty sleep section degrades gracefully', () => {
   const html = renderReport(
     fixture({
-      sleep: { avgTotalMinutes: null, points: [], count: 0 },
+      sleep: {
+        avgTotalMinutes: null,
+        points: [],
+        count: 0,
+        sufficiency: { level: 'none', label: 'No sleep sessions recorded in this range.' },
+        clinicalContext: { paragraphs: [] },
+      },
     }),
   );
   assertStringIncludes(html, 'No sleep sessions recorded over the period.');
