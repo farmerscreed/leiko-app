@@ -1,228 +1,164 @@
-# Start here — Sprint 18 mid-session pause (2026-05-22 PM)
+# Start here — Sprint 19 close-out + next session (2026-05-24)
 
-Last touched: 2026-05-22 evening Lagos. Supersedes the 2026-05-22 AM
-handoff (which was itself a fresh rewrite). Branch:
-`claude/competent-goldberg-737194`. Latest tip: `e70d4ed` (check
-`git log -1` for newer).
-
-**Why we paused:** the previous session hit 92% context. All
-state is preserved across the docs below; a new session should
-read CLAUDE.md → this file → the linked briefs and resume cleanly.
+Last touched: 2026-05-24 evening. Branch `claude/competent-goldberg-737194`,
+tip `5f6d8e3`. Pushed to origin. Supersedes the 2026-05-22 handoff.
 
 ## 60-second context
 
-Sprint 18 closed 31 audit findings across 9 commits over 2026-05-21/22.
-The v4 APK (`bnwdtRMddqpEgpRsKt9xpS.apk`, versionCode 4) was built end
-of session and is ready to install on Phone 1. Founder paused
-mid-install-flow to investigate **two newly-discovered issues that
-must ship together as v5**:
+Sprint 19 shipped **Blocks 1-10** (multi-account + caregiver model + auth
+hardening + doctor PDF polish + PDFShift adapter fix) across 13 commits
+on top of v5. v6 APK is on Phone 1 already; **v7 has NOT been built** —
+needs to be kicked next session.
 
-1. **Sleep wake-time is always 9 AM in Lagos.** Root-caused: the
-   U16PRO 0x07 sleep packet has no real wake time. The app
-   synthesizes `sessionEnd = day_UTC_midnight + 8h = 08:00 UTC`,
-   which formats as 09:00 in Lagos (UTC+1), 03:00 in NYC (UTC-5),
-   etc. Same hardcoded-UTC pattern lives in 4-5 spots in
-   `syncMultiVitals.ts`. Founder chose **Option B** (HR-derived
-   wake inference + timezone consolidation). Full brief at
-   **`plans/SLEEP_TIMEZONE_FIX_BRIEF.md`** — read this BEFORE
-   touching code.
+## What's working RIGHT NOW (no further action)
 
-2. **App ships with no icon.** Five logo concepts were generated
-   earlier this session (`branding/concepts/`). Founder is choosing
-   between **Direction 1 — Two figures forming a heart** and
-   **Direction 4 — Sankofa heart**. Icon-tuned finalists are
-   rendered at all Android mipmap sizes + circular-mask preview in
-   **`branding/finalists.png`**. Awaiting founder pick. Once picked:
-   bake into `apps/mobile/android/app/src/main/res/mipmap-*` + add
-   adaptive icon foreground + update `app.json`. **Do NOT run
-   `expo prebuild`** — it stomps three load-bearing customizations
-   (see `memory/expo_prebuild_android_drift.md`).
+- ✅ All Sprint 19 source on origin at `5f6d8e3`
+- ✅ Migration `0024_caregiver_relationship_label.sql` applied to prod
+- ✅ `generate-doctor-pdf` Edge Function deployed (with PDFShift Basic-auth fix)
+- ✅ `accept-family-invite` Edge Function deployed (with relationship-label column)
+- ✅ Lawrence's family (`21b057bb-…`) set to `subscription_status = 'plus'` in prod
+- ✅ Doctor PDF can now generate on v6 — visuals from Block 10 land via the
+  deployed Edge Function (mobile didn't need a rebuild for the template work)
+- ✅ Sprint 19 sprint card lives at `plans/sprint-19-multi-account-caregiver-model.md`
 
-## v4 APK install state
+## What blocks v7 ship
 
-The user downloaded the v4 APK (`leiko-v1.0.0-vc4.apk`, 99.7 MB) to
-`%USERPROFILE%\Downloads\`. They ran:
-- `adb devices` → `43230DLJH001YY device` ✓
-- `adb install -r leiko-v1.0.0-vc3.apk` → Success (re-installed v3
-  from the prior session — possibly accidental; v3 has all the
-  audit bugs)
-- Downloaded v4
+1. **Build v7 APK.** Branch tip `5f6d8e3`. EAS will auto-bump to versionCode 10
+   or higher. Command from `apps/mobile/`:
 
-They have NOT yet run `adb install -r leiko-v1.0.0-vc4.apk` to put
-v4 on the device. They paused the install flow to investigate the
-sleep bug instead.
+   ```
+   $env:NODE_OPTIONS = '--dns-result-order=ipv4first'  # avoids the v6-cycle GraphQL flakes
+   npx --yes eas-cli@latest build --platform android --profile production-apk --non-interactive --no-wait
+   ```
 
-**If you resume the v4 install path:** the command is
-`adb -s 43230DLJH001YY install -r $env:USERPROFILE\Downloads\leiko-v1.0.0-vc4.apk`.
-`-r` reinstalls keeping data; same keystore so the upgrade is
-in-place.
+   v7 carries:
+   - **Block 1** SELF-label hidden + invite owner-gate (cosmetic v6 → v7 parity)
+   - **Block 2** Care-for-another-person + chooser sheet
+   - **Block 3** Edit-family-details sheet
+   - **Block 4** Account switcher + delete-account confirm
+   - **Block 5** Per-caregiver relationship label (chip on AcceptInviteSheet)
+   - **Block 7** APP_VERSION reads from app.json; leiko.health URLs
+   - **Block 8** ⭐ Fresh-install onboarding-redirect fix
+     (returning users on a clean device skip onboarding)
+   - **Block 9** Account-switch routes to OTPVerify; friendly SignIn errors;
+     self-buyer "Add a watch later" card; OTP welcome + digit count +
+     use-a-different-email link; persona breadcrumb on form screens
+   - **Block 10** (template lives in source but server already deployed) —
+     SVG charts + Halo Ember letterhead + colour-coded sections
 
-**But the better plan** (founder agreed): hold v4 install until v5
-is built — that way Phone 1 jumps straight from v3-with-bugs to
-v5-with-everything (audit fixes + sleep fix + icon) in one cycle,
-not two.
+2. **`generate-doctor-prep-ai` is returning 502.** Edge Function CRASHES at boot
+   or in handler (the request log shows `EDGE_FUNCTION_ERROR` with content-length
+   75). Next session: pull the function's own error event from
+   `https://supabase.com/dashboard/project/kqnzxjrpnjnczhgdwdqg/functions/generate-doctor-prep-ai/logs`
+   and paste the FULL `event_message` (not just the request status). Likely
+   suspects:
+   - Anthropic key format issue (`ANTHROPIC_API_KEY` is set per secrets list,
+     but the value may be wrong shape — should start with `sk-ant-`)
+   - Tier-C cascade path crashing because `AI_TIER_C_PROD_DATA_ENABLED` is set
+     but a dependency isn't (embedding cache / token counter / etc.)
+   - Output-guard Layer 2 cosine check failing on cold start
+   
+   **Non-blocking for PDF generation** — `generate-doctor-pdf` gracefully
+   degrades when prep-ai 502s (just renders data-only sections, no AI cover or
+   cross-vital observations paragraph). Phone 1 should be getting a working
+   PDF right now.
 
-## What the next session does
+## What's still pending after v7
 
-In this order:
-
-### 1. Get the founder's icon pick
-
-If they haven't responded, gently re-ask using the finalist sheet
-(`branding/finalists.png`). Two finalists: Direction 1 (Two
-figures) vs Direction 4 (Sankofa).
-
-### 2. Read the sleep brief in full
-
-`plans/SLEEP_TIMEZONE_FIX_BRIEF.md` — contains:
-- Exact line numbers for the synthesis bug
-- Where the display formatters also need fixing
-- Audit confirmation that the user's tz IS captured + stored (just
-  not consulted at the sync ingest path)
-- Full scope for the one-commit fix
-- Acceptance criteria
-- 6 test cases to write
-
-### 3. Execute the sleep fix in source
-
-Estimated 3-4 hours. One commit on `claude/competent-goldberg-737194`.
-Don't merge to main yet.
-
-### 4. Execute the icon work in source
-
-~30-60 minutes once direction is picked. Replace 5 mipmap PNGs +
-add adaptive icon XML + update app.json. Commit separately.
-
-### 5. Kick the v5 APK build
-
-`cd apps/mobile && npx eas-cli build --platform android --profile production-apk`
-
-Auto-increments to versionCode 5. Update `plans/LAUNCH_ARTIFACTS.md`
-with the URL when it lands.
-
-### 6. Phone 1: install v5, retest
-
-Walks `SPRINT_18_VERIFICATION.md` tests 1-5 + regression-checks the
-9 audit-pass buckets + verifies the sleep wake time is now correct
-+ confirms the icon renders.
-
-## What's done (don't redo)
-
-| Item | Commit | Status |
+| Item | Owner | Notes |
 |---|---|---|
-| Day 1 SEC-1 — MMKV encryption | `7d0455e` | ✅ shipped |
-| Day 2 OPS-1 migrations to prod | (founder) | ✅ |
-| Day 2 OPS-2 pg_cron via Vault | `0d6d228` + `19e1ea8` | ✅ |
-| Day 2 OPS-11 Edge Function secrets | (founder) | ✅ |
-| Day 2 OPS-12 EAS prod profile | `794d9f3` | ✅ |
-| Day 2 17 Edge Functions deployed | (founder) | ✅ |
-| Day 2 Block 5 GH Actions secrets | (founder) | ✅ |
-| Day 2 Block 3 AAB build | `5n4G...` | ✅ Play upload pending |
-| Day 2 Block 3 APK v3 build | `kQ5u...` | ✅ installed on Phone 1 (with bugs) |
-| 31 audit findings — 9 commits | `8d8000b → 316301a` | ✅ source-only |
-| Doc sweep + handoff | `2919a71` | ✅ |
-| v4 APK build | `bnwdtRMddqpEgpRsKt9xpS` | ✅ downloaded; NOT installed |
+| `RESEND_FROM_EMAIL` Supabase secret | Founder | Once leiko.health DNS verifies at Resend, set to `noreply@leiko.health`. Until then, family invites generate codes but skip the email send. |
+| `REVENUECAT_WEBHOOK_SECRET` + RC dashboard setup | Founder | Block 6.x launch readiness. Required before real Plus purchases work. |
+| Apple/Play IAP products (`com.leiko.app.plus.monthly` + `.annual`) | Founder | App Store Connect + Play Console, 24-72h approval |
+| iOS prebuild + APNs/FCM (needs Mac) | Founder | Block 6.1 |
+| Website `leiko.health/{terms,privacy,support}` | Website agent | Block 6.4. Prompt given founder 2026-05-23. |
+| Prep-ai 502 diagnosis | Next session | Pull error event + patch. |
+| Sprint 18 sleep wake-time on-device verification | Founder | Carried from Sprint 18; never ran the test plan on Phone 1 with real watch overnight. |
+| 28 stale snapshot tests (Sprint 16.6 palette drift) | Cleanup sprint | Pre-existing; not blocking CI per se but noisy. |
 
-## What's still pending after v5
+## Bench state (carried forward)
 
-- **Block 6.1** Apple Developer entitlements (HealthKit + Background
-  + Push + Associated Domains) — 24-72h Apple clock
-- **Block 6.2** App Store Connect listing + 2 IAPs — 1-3 day approval
-- **Block 6.3** Play Console listing + 2 subscriptions — 1-3 day
-- **Block 6.4** DNS for `leiko.app` + `pair.leiko.app` + AASA +
-  assetlinks hosting — 1-24h propagation
-- **Block 6.5** Resend domain verification (post Block 6.4) — replaces
-  `onboarding@resend.dev` sandbox with `noreply@leiko.app`; removes
-  the per-account sender restriction
-- **iOS** `expo prebuild --platform ios` + APNs/FCM upload (needs Mac)
-- **RevenueCat** signup + IAP wiring (gated on Apple/Play IAP approval)
-- **SPRINT_18_VERIFICATION.md** tests 1-5 on real hardware
+- **Phone 1** (Pixel 8, `43230DLJH001YY`) — APK v6 installed; signed in as
+  `lawonecloud@gmail.com` (account_type `self_buyer`, Plus tier). Lawrence's
+  family has 51 BP readings. PDFShift quota check pending.
+- **Phone 2** (OnePlus Nord N30, `8fae80bc`) — not touched recently.
+- **Test accounts**:
+  - `lawonecloud@gmail.com` — self_buyer, family_owner of Lawrence (`21b057bb-…`)
+  - `lawonelimited@gmail.com` — self_buyer, family_owner of TheOne (`b14f53e6-…`) — stale test data
+  - `btamunokiri@hotmail.com` — caregiver, member of TheOne (`b14f53e6-…`)
+- **Lawrence family is Plus**; the other two are Free.
 
-## Bench environment
+## Sprint 19 commits (this session, oldest → newest)
 
-```powershell
-& "$PWD\scripts\dev-phone-reconnect.ps1"
+```
+2fdd6ed  fix(caregiver): hide SELF relationship leakage + gate invite on owner role  (Block 1)
+23572c2  feat(caregiver): add 'Care for another person' flow + action-bar chooser    (Block 2)
+38907ea  feat(family): owner edit-family-details from Settings → Family              (Block 3)
+d3becf7  feat(auth): account switcher — remember signed-in emails on this device      (Block 4)
+0105560  feat(family): per-caregiver relationship label (Sprint 19 Block 5)          (Block 5)
+0cf5c12  docs(launch): record v6 APK build queued                                    (Block 6)
+8467df3  docs(launch): record v6 APK URL                                             (Block 6)
+9cfa14f  fix(auth): derive onboarding-complete from server, not per-device MMKV      (Block 8)
+3427df6  fix(auth+onboarding): account-switch routing + 6 other hardening items      (Block 9)
+957c986  feat(doctor-pdf): inline SVG charts + branded letterhead + colour sections  (Block 10)
+5f6d8e3  fix(doctor-pdf): adapt rasterizer auth + body shape per vendor (PDFShift)   (Block 10 follow-up)
+ed0179f  fix(settings): real app version + leiko.health URLs                         (Block 7)
+b8efa12  docs(launch): record v6 APK URL stub
+d05639a  docs(launch): record v6 APK build queued
 ```
 
-Re-apply adb reverses every USB unplug/replug:
-```
-adb -s 43230DLJH001YY reverse tcp:8081 tcp:8081
-adb -s 43230DLJH001YY reverse tcp:54321 tcp:54321
-adb -s 43230DLJH001YY reverse tcp:54324 tcp:54324
-adb -s 8fae80bc       reverse tcp:8081 tcp:8081
-adb -s 8fae80bc       reverse tcp:54321 tcp:54321
-adb -s 8fae80bc       reverse tcp:54324 tcp:54324
-```
+## Resend domain setup (founder TODO)
 
-Metro (the env var is non-negotiable):
-```
-cd apps/mobile && EXPO_NO_METRO_WORKSPACE_ROOT=1 npx expo start --dev-client
-```
+Verified leiko.health DNS records at Resend:
+- `MX send → feedback-smtp.us-east-1.amazonses.com priority 10`
+- `TXT send → v=spf1 include:amazonses.com ~all`
+- `TXT resend._domainkey → (DKIM key from dashboard)`
+- `TXT _dmarc → v=DMARC1; p=none;` (optional, recommended)
 
-Edge Functions:
-```
-supabase functions serve --env-file supabase/functions/.env
-```
-
-## Bench state
-
-- **Phone 1** (Pixel 8, `43230DLJH001YY`) — running APK v3 (versionCode
-  3) signed up as `tawokels@gmail.com`. All Sprint 18 audit fixes
-  are NOT on this APK. v4 downloaded but NOT installed (paused
-  pending v5 to do single upgrade cycle).
-- **Phone 2** (OnePlus Nord N30, `8fae80bc`) — untouched this session.
+Once verified in Resend dashboard → set `RESEND_FROM_EMAIL=noreply@leiko.health`
+in Supabase secrets → redeploy `send-family-invite`.
 
 ## Hard rules carried forward
 
-1. **`expo prebuild` stomps three Android customizations** —
-   `minSdkVersion=26` in build.gradle, `xmlns:tools` + BLUETOOTH_SCAN
-   neverForLocation in manifest, `bluetooth_le` uses-feature. Plus
-   it adds a malformed `data-generated="true"` attribute on the
-   autoVerify filter. **Do not run prebuild for the icon bake.**
-   Manually edit the mipmap directories instead. See
-   `memory/expo_prebuild_android_drift.md`.
-2. **Sleep timestamps are synthesized as 08:00 UTC** — that's the
-   bug we're fixing. Don't reproduce the pattern anywhere else.
-3. **`profile.timezone` is the source of truth for display
-   formatting** — never use `[]` as the locale arg to
-   `toLocaleTimeString()`. Use the new `useUserTz()` helper.
-4. **Two FK-embed traps** — `family_members` has two FKs to
-   `users` (`user_id` + `invited_by`). Always disambiguate to
-   `users!family_members_user_id_fkey(...)`.
-5. **audit_log INSERT requires service_role** — client `authenticated`
-   role can READ but never INSERT. Audit emits go through Edge
-   Functions.
-6. **pg_cron config is in Supabase Vault, not GUCs** — migration
-   0023. `functions_base_url` is the project ROOT
-   (`https://<ref>.supabase.co`), NOT `.../functions/v1`.
-7. **`onboarding@resend.dev` sandbox sender can only deliver to
-   `tawokels@gmail.com`** until Block 6.5 lands real domain
-   verification.
-8. **Dark mode is the default**; **`account_type` is immutable**.
+1. **`expo prebuild` stomps three Android customizations** — see
+   `memory/expo_prebuild_android_drift.md`. Never run prebuild during
+   manual icon / asset baking.
+2. **`account_type` is immutable**. Account switcher does NOT change
+   account_type — it signs out + signs in a different user.
+3. **`accept-family-invite` writes the per-caregiver label** to
+   `family_members.caregiver_relationship_label` (migration 0024).
+   Display layer prefers per-caregiver label over family default;
+   formatRelation('self') → 'Wearer' as the safety-net fallback.
+4. **Doctor PDF AI prep is best-effort** — `generate-doctor-pdf`
+   degrades to data-only when prep-ai 502s. Don't bake AI as a hard
+   dependency.
+5. **PDFShift uses HTTP Basic auth** (API key as username, empty
+   password), NOT Bearer. `rasterizer.ts` adapter handles this; do
+   not regress the Browserless code path.
 
 ## Memory close-out from this session
 
-- `memory/sprint_18_audit_pass_close_out.md` — full AP1–AP10 catalogue
-  + single-source-of-truth template for the caregiver-scoped
-  load/error pattern. Read this BEFORE adding any new vital-detail
-  screen or correlation strip or comparative copy.
+Worth adding once memory tool is back online:
 
-## Open prompt for the new session
+- Sprint 19 close-out across Blocks 1-10
+- PDFShift vendor adapter pattern (Basic auth + `source` field, not Bearer + `html`)
+- Block 8 onboarding-derive-from-server pattern (`checkOnboardingState` query)
 
-> Sprint 18 mid-session pause at 92% context. Branch tip `e70d4ed`.
-> Read CLAUDE.md, then `plans/NEXT_SESSION_START_HERE.md` (this
-> file), then `plans/SLEEP_TIMEZONE_FIX_BRIEF.md` in full.
+## Open prompt for the next session
+
+> Sprint 19 ready to ship as v7. Branch tip `5f6d8e3`. Read CLAUDE.md +
+> `plans/NEXT_SESSION_START_HERE.md` + the Sprint 19 sprint card.
 >
-> Two pieces of work to land in source for v5 APK:
-> 1. **Sleep wake-time fix** — Option B (HR-derived inference) +
->    timezone consolidation. ~3-4h. Brief is fully scoped at
->    plans/SLEEP_TIMEZONE_FIX_BRIEF.md including acceptance
->    criteria + test cases.
-> 2. **Logo icon bake** — founder picks Direction 1 vs Direction 4
->    from branding/finalists.png; then replace 5 mipmap PNGs +
->    add adaptive icon + update app.json. DO NOT RUN PREBUILD.
->    ~30-60 min once direction is picked.
+> Two work items in order:
+> 1. **Kick v7 APK build** via `npx eas-cli@latest build --platform android
+>    --profile production-apk --non-interactive --no-wait` from
+>    `apps/mobile/`. If GraphQL flakes (intermittent api.expo.dev issue
+>    seen 2026-05-22/23), set `NODE_OPTIONS=--dns-result-order=ipv4first`
+>    and retry. Update `plans/LAUNCH_ARTIFACTS.md` with the URL.
+> 2. **Diagnose prep-ai 502.** Open
+>    `https://supabase.com/dashboard/project/kqnzxjrpnjnczhgdwdqg/functions/generate-doctor-prep-ai/logs`
+>    and pull the actual `event_message` for the most recent crash. Patch
+>    the cause. Re-test by tapping Generate PDF on Phone 1 → confirm AI
+>    cover + observations paragraphs land on the rendered PDF.
 >
-> Once both land in source, kick the v5 APK build, update
-> plans/LAUNCH_ARTIFACTS.md with the URL, hand off to founder for
-> Phone 1 install + retest.
+> After both: hand off to founder for Phone 1 install + retest.
