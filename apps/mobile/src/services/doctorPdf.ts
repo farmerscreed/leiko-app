@@ -43,6 +43,15 @@ export interface GenerateDoctorPdfInput {
    * (see `doctorPdfState.ts`) so the user's draft survives re-mounts.
    */
   coverNote?: string;
+  /**
+   * Sprint 19 PDF v2 — optional structured clinical-context fields
+   * rendered as a dedicated block on the PDF cover. Each is
+   * independently optional and capped server-side (300 chars for
+   * medications/symptoms, 60 for target BP).
+   */
+  medications?: string;
+  symptoms?: string;
+  targetBp?: string;
 }
 
 export interface DoctorPdfOk {
@@ -166,6 +175,18 @@ export async function generateDoctorPdf(
           // change.
           ...(input.coverNote && input.coverNote.trim().length > 0
             ? { coverNote: input.coverNote.trim() }
+            : {}),
+          // Sprint 19 PDF v2 — only sent when populated. Server caps
+          // each independently and ignores unknown fields, so older
+          // function versions tolerate these gracefully.
+          ...(input.medications && input.medications.trim().length > 0
+            ? { medications: input.medications.trim() }
+            : {}),
+          ...(input.symptoms && input.symptoms.trim().length > 0
+            ? { symptoms: input.symptoms.trim() }
+            : {}),
+          ...(input.targetBp && input.targetBp.trim().length > 0
+            ? { targetBp: input.targetBp.trim() }
             : {}),
         },
       }),

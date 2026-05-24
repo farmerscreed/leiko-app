@@ -49,6 +49,7 @@ import { ErrorState } from '../../components/ErrorState';
 import { PaywallSheet } from '../../components/PaywallSheet';
 import { DoctorCoverPreview } from '../../components/DoctorCoverPreview';
 import { DoctorNoteField } from '../../components/DoctorNoteField';
+import { ClinicalContextFields } from '../../components/ClinicalContextFields';
 import { BaselineReference } from '../../components/BaselineReference';
 import { ForYourDoctorRangeChipsRow } from './ForYourDoctorRangeChipsRow';
 import {
@@ -64,6 +65,12 @@ import {
   readLastGenerated,
   writeLastGenerated,
   formatLastGenerated,
+  readMedications,
+  writeMedications,
+  readSymptoms,
+  writeSymptoms,
+  readTargetBp,
+  writeTargetBp,
 } from '../../services/doctorPdfState';
 import { useReadings } from '../../state/readings';
 import { bpBaseline, formatBPBaseline } from '../../utils/vitalBaselines';
@@ -236,6 +243,11 @@ export function ForYourDoctorScreen(props: Nav) {
   const [includeComments, setIncludeComments] = useState(true);
   // Sprint 16.5h — note seeded from MMKV so a draft survives nav away.
   const [note, setNote] = useState<string>(() => readCoverNote());
+  // Sprint 19 PDF v2 — structured clinical-context fields, same MMKV
+  // pattern. Each persists independently so a partial draft survives.
+  const [medications, setMedications] = useState<string>(() => readMedications());
+  const [symptoms, setSymptoms] = useState<string>(() => readSymptoms());
+  const [targetBp, setTargetBp] = useState<string>(() => readTargetBp());
   const [phase, setPhase] = useState<Phase>('default');
   const [paywallVisible, setPaywallVisible] = useState(false);
   const [sandboxNotice, setSandboxNotice] = useState(false);
@@ -246,6 +258,15 @@ export function ForYourDoctorScreen(props: Nav) {
   useEffect(() => {
     writeCoverNote(note);
   }, [note]);
+  useEffect(() => {
+    writeMedications(medications);
+  }, [medications]);
+  useEffect(() => {
+    writeSymptoms(symptoms);
+  }, [symptoms]);
+  useEffect(() => {
+    writeTargetBp(targetBp);
+  }, [targetBp]);
 
   const trends = useTrendsData(familyId, range);
 
@@ -332,6 +353,9 @@ export function ForYourDoctorScreen(props: Nav) {
       includeNotes,
       includeComments,
       coverNote: note,
+      medications,
+      symptoms,
+      targetBp,
     });
     if (result.status === 'ok') {
       logger.track('doctor_pdf_generated', { bytes: result.bytes });
@@ -371,6 +395,9 @@ export function ForYourDoctorScreen(props: Nav) {
     includeNotes,
     includeComments,
     note,
+    medications,
+    symptoms,
+    targetBp,
     parentLabel,
     isPlus,
     isOffline,
@@ -514,6 +541,18 @@ export function ForYourDoctorScreen(props: Nav) {
               accountType={accountType}
               parentLabel={parentLabel}
               testID="fyd-note"
+            />
+
+            <ClinicalContextFields
+              medications={medications}
+              symptoms={symptoms}
+              targetBp={targetBp}
+              onChangeMedications={setMedications}
+              onChangeSymptoms={setSymptoms}
+              onChangeTargetBp={setTargetBp}
+              accountType={accountType}
+              parentLabel={parentLabel}
+              testID="fyd-clinical"
             />
 
             <View

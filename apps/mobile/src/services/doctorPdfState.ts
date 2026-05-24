@@ -15,6 +15,17 @@ import type { DoctorPdfRange } from './doctorPdf';
 
 const NOTE_KEY = 'fyd:coverNote';
 const LAST_GENERATED_KEY = 'fyd:lastGenerated';
+// Sprint 19 PDF v2 — structured clinical-context fields. Each lives
+// in its own MMKV slot so a partial fill doesn't get reset when
+// another field is edited. Capped per-field so a runaway paste
+// doesn't bloat MMKV.
+const MEDICATIONS_KEY = 'fyd:medications';
+const SYMPTOMS_KEY = 'fyd:symptoms';
+const TARGET_BP_KEY = 'fyd:targetBp';
+
+const MEDICATIONS_CAP = 500;
+const SYMPTOMS_CAP = 500;
+const TARGET_BP_CAP = 60;
 
 export interface LastGeneratedInfo {
   /** Signed Supabase Storage URL — may be expired by the time the user
@@ -62,6 +73,44 @@ export function readLastGenerated(): LastGeneratedInfo | null {
 
 export function writeLastGenerated(info: LastGeneratedInfo): void {
   mmkv.set(LAST_GENERATED_KEY, JSON.stringify(info));
+}
+
+// ── Sprint 19 PDF v2 — clinical-context fields ────────────────────
+
+export function readMedications(): string {
+  return mmkv.getString(MEDICATIONS_KEY) ?? '';
+}
+
+export function writeMedications(value: string): void {
+  if (value.length === 0) {
+    mmkv.remove(MEDICATIONS_KEY);
+    return;
+  }
+  mmkv.set(MEDICATIONS_KEY, value.slice(0, MEDICATIONS_CAP));
+}
+
+export function readSymptoms(): string {
+  return mmkv.getString(SYMPTOMS_KEY) ?? '';
+}
+
+export function writeSymptoms(value: string): void {
+  if (value.length === 0) {
+    mmkv.remove(SYMPTOMS_KEY);
+    return;
+  }
+  mmkv.set(SYMPTOMS_KEY, value.slice(0, SYMPTOMS_CAP));
+}
+
+export function readTargetBp(): string {
+  return mmkv.getString(TARGET_BP_KEY) ?? '';
+}
+
+export function writeTargetBp(value: string): void {
+  if (value.length === 0) {
+    mmkv.remove(TARGET_BP_KEY);
+    return;
+  }
+  mmkv.set(TARGET_BP_KEY, value.slice(0, TARGET_BP_CAP));
 }
 
 /** Format the "Last generated: 2h ago" caption. Pure helper. */

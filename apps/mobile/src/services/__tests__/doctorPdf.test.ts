@@ -100,4 +100,27 @@ describe('generateDoctorPdf', () => {
       expect(result.reason).toBe('network_error');
     }
   });
+
+  // Sprint 19 PDF v2 — only forwards populated clinical-context fields.
+  it('forwards populated clinical-context fields and omits empty ones', async () => {
+    let bodyCapture: unknown = null;
+    await generateDoctorPdf(
+      {
+        familyId: 'f',
+        userId: 'u',
+        range: '30d',
+        medications: 'lisinopril 10mg daily',
+        symptoms: '   ', // whitespace-only → omitted
+        targetBp: '<130/80',
+      },
+      makeClient(async (_name, opts) => {
+        bodyCapture = opts.body;
+        return { data: { url: 'https://x', bytes: 1, storagePath: 'p' }, error: null };
+      }),
+    );
+    const body = bodyCapture as Record<string, unknown>;
+    expect(body.medications).toBe('lisinopril 10mg daily');
+    expect(body.targetBp).toBe('<130/80');
+    expect(body.symptoms).toBeUndefined();
+  });
 });
