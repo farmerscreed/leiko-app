@@ -368,6 +368,7 @@ async function handle(req: Request): Promise<Response> {
   });
   if ('error' in cover) {
     clearTimeout(timeout);
+    console.warn('prep-ai cover failed', cover.error);
     return json({ status: 'error', error: cover.error, stage: 'cover' }, 502);
   }
 
@@ -398,6 +399,7 @@ async function handle(req: Request): Promise<Response> {
     });
     if ('error' in obs) {
       clearTimeout(timeout);
+      console.warn('prep-ai observations failed', obs.error);
       return json({ status: 'error', error: obs.error, stage: 'observations' }, 502);
     }
     observationsBody = obs.body;

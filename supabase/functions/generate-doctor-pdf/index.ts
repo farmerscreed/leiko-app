@@ -164,9 +164,13 @@ async function fetchAiSections(
       },
     );
     if (!res.ok) {
-      // 503 = no Anthropic key, 401 = bad jwt, 500 = scrub/internal.
-      // Any of these → ship without AI. Log so we can attribute.
-      console.warn('generate-doctor-pdf: prep-ai non-ok', res.status);
+      // 503 = no Anthropic key, 401 = bad jwt, 500 = scrub/internal,
+      // 502 = upstream Anthropic call failed (key, quota, network).
+      // Any of these → ship without AI. Log status + body snippet so
+      // we can attribute the cause without bouncing to function logs.
+      let snippet = '';
+      try { snippet = (await res.text()).slice(0, 240); } catch { /* ignore */ }
+      console.warn('generate-doctor-pdf: prep-ai non-ok', res.status, snippet);
       return { cover: null, observations: null };
     }
     const payload = (await res.json()) as Record<string, unknown>;
