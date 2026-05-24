@@ -8,9 +8,11 @@
 // PDFShift auth history (2026-05-24 incident):
 //   The legacy `api_sk_*` keys used HTTP Basic auth (key as username,
 //   empty password). The current `sk_*` keys (issued from the v3
-//   dashboard) require `X-API-Key` header — Basic auth on a `sk_*`
-//   key returns "The provided API Key was not found." 401. We send
-//   BOTH headers so either key generation works without redeploy.
+//   dashboard) require `X-API-Key` header. Empirically PDFShift
+//   short-circuits on the FIRST auth header it sees — if you send
+//   both, the wrong one is checked first and the whole request 401s
+//   even when the right header is also present. So we pick exactly
+//   one based on key prefix.
 //
 // We auto-detect by URL hostname so the same Edge Function works with
 // either vendor. Self-hosted or generic Puppeteer endpoints get the
@@ -48,15 +50,19 @@ export function buildRasterizerRequest(
 
   if (vendor === 'pdfshift') {
     // PDFShift v3 API:
-    //   - Auth: X-API-Key header for current `sk_*` keys; Basic auth
-    //     for legacy `api_sk_*` keys. We send both — PDFShift accepts
-    //     whichever matches the issued key without complaining about
-    //     the other being present.
+    //   - Auth: pick ONE header by key prefix. `api_sk_*` (legacy) →
+    //     HTTP Basic. Everything else (current `sk_*` keys + any
+    //     future format) → X-API-Key. Sending both 401s the request
+    //     because PDFShift checks Authorization first and never
+    //     falls through.
     //   - Body: top-level fields. NOT a nested options object.
     //   Reference: https://docs.pdfshift.io/
     if (token) {
-      headers['X-API-Key'] = token;
-      headers['Authorization'] = `Basic ${btoa(`${token}:`)}`;
+      if (token.startsWith('api_sk_')) {
+        headers['Authorization'] = `Basic ${btoa(`${token}:`)}`;
+      } else {
+        headers['X-API-Key'] = token;
+      }
     }
     body = JSON.stringify({
       source: html,
