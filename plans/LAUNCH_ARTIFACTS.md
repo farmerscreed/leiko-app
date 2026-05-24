@@ -44,6 +44,26 @@ Update this log every time a new build artifact is produced.
 | **Status** | Built; installed on Phone 1; signup walked end-to-end. **Superseded** by v4 below (containing the 9 audit-pass fix buckets). |
 | **Used for** | First-pass smoke test on Phone 1. Revealed 9 buckets of bench bugs, all closed in commits `8d8000b` → `316301a`. |
 
+### v1.0.0 (versionCode 10) — production-apk `.apk` bundling Sprint 19 close-out + doctor PDF v2
+
+| Field | Value |
+|---|---|
+| **Artifact URL** | ⏳ Build in progress |
+| **Build logs** | https://expo.dev/accounts/lawone-apps/projects/leiko/builds/6d59adad-530b-42c1-b53a-2e72015afe50 |
+| **Build ID** | `6d59adad-530b-42c1-b53a-2e72015afe50` |
+| **EAS profile** | `production-apk` |
+| **Build type** | `apk` |
+| **versionName** | `1.0.0` |
+| **versionCode** | `10` (auto-incremented from `9`) |
+| **EAS credentials slot** | Same as v3 / v4 / v5 / v6 |
+| **Built** | 2026-05-24 (queued) |
+| **Target backend** | prod Supabase `kqnzxjrpnjnczhgdwdqg.supabase.co` |
+| **Branch tip when built** | `bcde4f9` |
+| **Bundles** | Carries everything in v6 (vc9) plus: Android Share.share URL-in-message fix (PDF link actually shares to Android targets now); doctor PDF v2 — all 10 founder-review items (activity steps bug fix, sufficiency flags, per-vital clinical-context paragraphs, cover Executive Summary, BP-flag chips, cross-vital sufficiency footnote, running page header, layout density, reference footnotes, structured clinical-context fields on the For Your Doctor screen) |
+| **Migration dependency** | None new (`0024_caregiver_relationship_label.sql` + `0025_storage_reports_bucket.sql` already applied to prod) |
+| **Edge Function dependency** | `generate-doctor-pdf` already deployed at v13 carrying the v2 template + rasterizer X-API-Key fix |
+| **Used for** | Phone 1 in-place upgrade — bench-test the redesigned doctor PDF end-to-end (generate, share to Android target, open the PDF, verify Executive Summary + clinical-context paragraphs + flag chips render with real data) |
+
 ### v1.0.0 (versionCode 9) — production-apk `.apk` bundling Sprint 19 (multi-account + caregiver model)
 
 | Field | Value |
