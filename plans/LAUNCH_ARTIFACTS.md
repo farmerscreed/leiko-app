@@ -44,6 +44,24 @@ Update this log every time a new build artifact is produced.
 | **Status** | Built; installed on Phone 1; signup walked end-to-end. **Superseded** by v4 below (containing the 9 audit-pass fix buckets). |
 | **Used for** | First-pass smoke test on Phone 1. Revealed 9 buckets of bench bugs, all closed in commits `8d8000b` → `316301a`. |
 
+### v1.0.0 (versionCode 11) — production-apk `.apk` with Block 8 onboarding-recovery hotfix
+
+| Field | Value |
+|---|---|
+| **Artifact URL** | ⏳ Build in progress |
+| **Build logs** | https://expo.dev/accounts/lawone-apps/projects/leiko/builds/fae73445-d485-4e6a-b0cb-736b1288aaed |
+| **Build ID** | `fae73445-d485-4e6a-b0cb-736b1288aaed` |
+| **EAS profile** | `production-apk` |
+| **Build type** | `apk` |
+| **versionName** | `1.0.0` |
+| **versionCode** | `11` (auto-incremented from `10`) |
+| **Built** | 2026-05-24 evening (queued) |
+| **Target backend** | prod Supabase `kqnzxjrpnjnczhgdwdqg.supabase.co` |
+| **Branch tip when built** | `ba90a1d` |
+| **Bundles** | Carries everything in v7 (vc10) plus: Block 8 onboarding-recovery hotfix (checkOnboardingState now uses get_user_onboarding_state() SECURITY DEFINER RPC instead of direct family_members query; bypasses RLS timing / supabase-js quirks; also seeds MMKV.currentFamilyId from the server so the user lands in the right family on fresh install) |
+| **Migration dependency** | `0026_get_user_onboarding_state.sql` MUST be applied to prod first — applied 2026-05-24 evening |
+| **Used for** | Phone 1 fresh-install retest (replaces v7 install which was stuck routing through onboarding for lawonecloud) |
+
 ### v1.0.0 (versionCode 10) — production-apk `.apk` bundling Sprint 19 close-out + doctor PDF v2
 
 | Field | Value |
