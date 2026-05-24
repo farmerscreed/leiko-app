@@ -297,8 +297,9 @@ Deno.serve(async (req: Request) => {
     const result = await uploadAndSign(serviceClient, pdf, body);
     return json(result, 200);
   } catch (e) {
-    console.error('generate-doctor-pdf error', e);
-    const message = e instanceof Error ? e.message : 'unknown';
+    const err = e as Error;
+    console.error('generate-doctor-pdf error', err?.stack || err?.message || err);
+    const message = err instanceof Error ? err.message : 'unknown';
     const status = message.includes('not_in_family') || message.includes('jwt') || message.includes('authorization') ? 403 : 500;
     return json({ error: message }, status);
   }
