@@ -33,6 +33,15 @@ if (mode !== 'apk' && mode !== 'aab') {
   fail('Usage: node scripts/release-android.js <apk|aab>');
 }
 
+// Pin Metro's server root to apps/mobile/ instead of letting Expo CLI
+// walk up to the monorepo workspace root. Without this, production
+// bundling via gradle's export:embed task breaks: the gradle plugin
+// passes --entry-file index.js (relative to apps/mobile/) but Expo
+// resolves it against the auto-detected workspace root, so it looks
+// for kena-app/index.js and dies. The env var is the documented
+// escape hatch from @expo/config/build/paths/paths.js:getMetroServerRoot.
+process.env.EXPO_NO_METRO_WORKSPACE_ROOT = '1';
+
 const APP_DIR = path.resolve(__dirname, '..');
 const ANDROID_DIR = path.join(APP_DIR, 'android');
 const BUILD_GRADLE = path.join(ANDROID_DIR, 'app', 'build.gradle');
