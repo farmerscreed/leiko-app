@@ -39,10 +39,20 @@ export type BlePermissionResult =
 
 export async function requestBlePermissions(): Promise<BlePermissionResult> {
   if (Platform.OS !== 'android') return { granted: true };
-  const required = [
-    PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-    PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
-  ];
+  // Android 12+ (API 31) uses the runtime BLUETOOTH_{SCAN,CONNECT}
+  // permissions; we declare BLUETOOTH_SCAN with neverForLocation so
+  // location is not required. Android 6-11 (API 23-30) instead gates
+  // BLE scanning on the runtime ACCESS_FINE_LOCATION permission — the
+  // legacy BLUETOOTH / BLUETOOTH_ADMIN install-time permissions on
+  // their own are not enough; without fine-location, startDeviceScan
+  // succeeds but never returns any device. Request the correct set
+  // for the OS version we're on.
+  const required = Platform.Version >= 31
+    ? [
+        PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+        PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+      ]
+    : [PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION];
   const result = await PermissionsAndroid.requestMultiple(required);
   const denied: string[] = [];
   for (const p of required) {
