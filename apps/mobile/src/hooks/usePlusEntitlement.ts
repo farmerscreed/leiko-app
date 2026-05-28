@@ -46,6 +46,16 @@ export interface PlusEntitlement {
   isPlus: boolean;
   isLoading: boolean;
   refetch: () => Promise<void>;
+  /**
+   * Optimistically tag the entitlement query cache as Plus right after a
+   * local RevenueCat purchase resolves. The RC webhook is still
+   * authoritative; this just bridges the few seconds between Google
+   * Play returning "purchased" on-device and the webhook landing in
+   * Supabase, so the user does not see the paywall blink back to "free"
+   * after a successful buy. The realtime UPDATE that follows will
+   * overwrite this with the server-side tier (which will agree).
+   */
+  markPlusOptimistic: () => void;
 }
 
 const PLUS_TIERS: ReadonlySet<SubscriptionStatus> = new Set([
@@ -143,6 +153,27 @@ export function usePlusEntitlement(
     isLoading: query.isLoading,
     refetch: async () => {
       await query.refetch();
+    },
+    markPlusOptimistic: () => {
+      const existing = query.data;
+      // Only flip free → plus optimistically; never downgrade a real
+      // server-side value. If the server is already plus/trial/grace
+      // we have nothing to do.
+      if (existing && isPlusTier(existing.tier)) return;
+      queryClient.setQueryData<FetchResult>(
+        [ENTITLEMENT_KEY, userId],
+        {
+          familyId: existing?.familyId ?? null,
+          tier: 'plus',
+        },
+      );
+      // Schedule a real fetch so the optimistic value gets reconciled
+      // against the server once the webhook has had time to land.
+      // Three seconds is the worst-case RC → Supabase webhook latency
+      // we've seen in practice; the realtime channel usually beats it.
+      setTimeout(() => {
+        void query.refetch();
+      }, 3000);
     },
   };
 }

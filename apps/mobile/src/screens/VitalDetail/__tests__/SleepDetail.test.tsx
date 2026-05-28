@@ -437,6 +437,17 @@ describe('SleepDetail — correlation empty-state placeholder (Sprint 18 P5)', (
 });
 
 describe('SleepDetail — snapshot', () => {
+  // Pin the wall clock so the rendered relative timestamps don't
+  // drift as the test machine's clock advances.
+  const FROZEN = new Date('2026-05-08T16:30:00Z').getTime();
+  beforeAll(() => {
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+    jest.setSystemTime(FROZEN);
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   it('matches the dark-mode snapshot with a session', () => {
     const session = makeSleep({
       endSec: 1_715_212_800, // fixed instant for deterministic snapshot

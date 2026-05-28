@@ -125,8 +125,11 @@
         "backgroundColor": "#0A0907"
       },
       "permissions": [
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_ADMIN",
         "android.permission.BLUETOOTH_SCAN",
         "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE",
         "android.permission.WAKE_LOCK",
@@ -168,7 +171,24 @@
       "expo-notifications",
       "expo-secure-store",
       "@kingstinct/react-native-healthkit",
-      "react-native-health-connect"
+      "react-native-health-connect",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26,
+            "manifestQueries": {
+              "intent": [
+                {
+                  "action": "VIEW",
+                  "category": ["BROWSABLE"],
+                  "data": { "scheme": "https" }
+                }
+              ]
+            }
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {

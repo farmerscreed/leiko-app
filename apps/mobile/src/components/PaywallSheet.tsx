@@ -105,7 +105,7 @@ export function PaywallSheet({
 }: PaywallSheetProps) {
   const theme = useTheme();
   const copy = copyForMode(accountType);
-  const { refetch: refetchEntitlement } = usePlusEntitlement();
+  const { refetch: refetchEntitlement, markPlusOptimistic } = usePlusEntitlement();
 
   const [period, setPeriod] = useState<PurchasePeriod>('annual');
   const [offerings, setOfferings] = useState<OfferingsSnapshot>({
@@ -136,10 +136,13 @@ export function PaywallSheet({
     setError(null);
     setPending('purchasing');
     try {
-      await purchasePeriod(period);
+      const result = await purchasePeriod(period);
       // The webhook is the source of truth, but it may be a few seconds
-      // out. Refetch the entitlement so the gated surface unblocks
-      // immediately on the user's next interaction.
+      // out. If the local RC SDK already reports Plus active, flip the
+      // entitlement cache optimistically so the gated surface unblocks
+      // before the user's next tap — the realtime channel will
+      // reconcile with the server value once the webhook lands.
+      if (result.isPlusActive) markPlusOptimistic();
       await refetchEntitlement();
       onDismiss();
     } catch {
@@ -147,14 +150,15 @@ export function PaywallSheet({
     } finally {
       setPending('idle');
     }
-  }, [period, pending, refetchEntitlement, onDismiss]);
+  }, [period, pending, markPlusOptimistic, refetchEntitlement, onDismiss]);
 
   const onRestorePress = useCallback(async () => {
     if (pending !== 'idle') return;
     setError(null);
     setPending('restoring');
     try {
-      await restorePurchases();
+      const result = await restorePurchases();
+      if (result.isPlusActive) markPlusOptimistic();
       await refetchEntitlement();
       onDismiss();
     } catch {
@@ -162,7 +166,7 @@ export function PaywallSheet({
     } finally {
       setPending('idle');
     }
-  }, [pending, refetchEntitlement, onDismiss]);
+  }, [pending, markPlusOptimistic, refetchEntitlement, onDismiss]);
 
   const headlineStyle = theme.type('headline');
   const bodyStyle = theme.type('bodyL');
