@@ -1,7 +1,10 @@
 // Typed Supabase client. Singleton — created once at module load.
 //
-// Storage: MMKV via supabaseStorage (see ./storage.ts). The auth-js client
-// persists session JWTs through this adapter.
+// Storage: expo-secure-store via secureSupabaseStorage (Keystore on
+// Android, Keychain on iOS). The auth-js client persists session JWTs
+// through this adapter. On the first launch of a build that includes
+// this change, the adapter copies any existing MMKV-stored session
+// across so the user is not silently signed out.
 //
 // Env vars (Expo public, baked into the bundle at build time):
 //   EXPO_PUBLIC_SUPABASE_URL      — http://127.0.0.1:54321 in local Docker
@@ -12,7 +15,7 @@
 // "build.*.env" later.
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { supabaseStorage } from './storage';
+import { secureSupabaseStorage } from './secureStorage';
 import type { Database } from '../types/database';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -28,7 +31,7 @@ if (!url || !anonKey) {
 
 export const supabase: SupabaseClient<Database> = createClient<Database>(url, anonKey, {
   auth: {
-    storage: supabaseStorage,
+    storage: secureSupabaseStorage,
     storageKey: 'leiko.auth.session',
     autoRefreshToken: true,
     persistSession: true,
