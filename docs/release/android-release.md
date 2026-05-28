@@ -4,6 +4,35 @@ A single-source reference for cutting Leiko Android builds that the Play
 Store will accept. Read this once, then `npm run release:android:aab`
 forever after.
 
+## Account policy — read this first
+
+**Every external service for Leiko is signed up under
+`primethebrain@gmail.com`.** That includes:
+
+- Google Play Console (the $25 developer account)
+- Google Cloud Console (Google OAuth client IDs, Play service account)
+- Expo / EAS (`npx expo login` → `primethebrain`)
+- RevenueCat
+- Sentry
+- PostHog
+- Cloudflare (already set up for `dl.leiko.app`)
+- Apple Developer (when iOS lands; not used yet)
+
+When you onboard a new service, sign up under primethebrain. When you
+hand a project off, transfer ownership to primethebrain. When a
+recovery email lands in a different inbox, it is a bug — fix the
+service's owner record, do not just forward the email.
+
+To verify the local CLI session before a release:
+
+```powershell
+npx expo whoami     # must print: primethebrain
+npx eas whoami      # must print: primethebrain, OR error "not logged in" (fine — first build will prompt)
+```
+
+If `expo whoami` returns anything else, run `npx expo logout` then
+`npx expo login` and try again before continuing.
+
 ## One-time setup (you do this once and never again)
 
 ### 1. Generate the upload keystore
