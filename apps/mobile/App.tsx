@@ -35,10 +35,15 @@ import { ComponentGallery } from './src/dev/ComponentGallery';
 import { DebugLauncher } from './src/dev/DebugLauncher';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { ThemeProvider, type ThemeMode } from './src/theme';
+import { initSentry, wrapWithSentry } from './src/services/sentry';
+
+// Initialise Sentry before any other module gets a chance to throw.
+// No-ops when EXPO_PUBLIC_SENTRY_DSN isn't set.
+initSentry();
 
 const DEV_GALLERY_ENABLED = process.env.EXPO_PUBLIC_DEV_GALLERY === 'true';
 
-export default function App() {
+function App() {
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -95,3 +100,7 @@ function Root() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
 });
+
+// Wrap the root so any render-side crash becomes a Sentry event. The
+// wrap is a no-op when initSentry() short-circuited on a missing DSN.
+export default wrapWithSentry(App);

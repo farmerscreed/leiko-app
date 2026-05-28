@@ -25,6 +25,7 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 import { mmkv, STORAGE_KEYS } from '../services/storage';
 import { identifyPurchaser, logoutPurchaser } from '../services/purchases';
+import { linkSentryToUser } from '../services/sentry';
 import type { AccountType, UserRow } from '../types/database';
 
 type Status = 'loading' | 'unauthenticated' | 'authenticated';
@@ -164,11 +165,15 @@ export const useAuth = create<AuthState>((set, get) => ({
 
   async _setSession(session) {
     if (!session) {
+      linkSentryToUser(null);
       set({ session: null, profile: null, status: 'unauthenticated' });
       return;
     }
     const profile = await fetchProfile(session.user.id);
     set({ session, profile, status: 'authenticated' });
+    // Stitch future crashes to this user. Only the row id leaves the
+    // device — sendDefaultPii is off so no email / IP is attached.
+    linkSentryToUser(session.user.id);
     // Identify with RevenueCat once we have the profile. The webhook is
     // the source of truth for entitlement; this call only ties future
     // purchase events to the right Supabase user.
