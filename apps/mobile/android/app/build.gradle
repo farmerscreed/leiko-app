@@ -97,6 +97,23 @@ android {
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
+    // Release signing is env-driven so the keystore never lives in
+    // source. Set these four env vars in your shell, ~/.gradle/gradle.properties,
+    // or your CI secret store before running `./gradlew assembleRelease`:
+    //   LEIKO_RELEASE_STORE_FILE       — absolute path to the .jks keystore
+    //   LEIKO_RELEASE_STORE_PASSWORD   — keystore password
+    //   LEIKO_RELEASE_KEY_ALIAS        — key alias inside the keystore
+    //   LEIKO_RELEASE_KEY_PASSWORD     — key password
+    // When any of them is missing the release build falls back to the
+    // debug keystore and prints a warning; that build is fine for
+    // sideload-testing but NOT acceptable for Play Store upload, since
+    // the Play Store rejects APKs signed with the well-known debug key.
+    def releaseStoreFile = System.getenv('LEIKO_RELEASE_STORE_FILE')
+    def releaseStorePassword = System.getenv('LEIKO_RELEASE_STORE_PASSWORD')
+    def releaseKeyAlias = System.getenv('LEIKO_RELEASE_KEY_ALIAS')
+    def releaseKeyPassword = System.getenv('LEIKO_RELEASE_KEY_PASSWORD')
+    def hasReleaseSigningConfig = releaseStoreFile && releaseStorePassword && releaseKeyAlias && releaseKeyPassword
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -104,15 +121,26 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        if (hasReleaseSigningConfig) {
+            release {
+                storeFile file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            if (hasReleaseSigningConfig) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+                logger.warn('LEIKO_RELEASE_* env vars not set; release build will be signed with the debug keystore. Do NOT upload this APK to the Play Store.')
+            }
             def enableShrinkResources = findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'false'
             shrinkResources enableShrinkResources.toBoolean()
             minifyEnabled enableMinifyInReleaseBuilds
