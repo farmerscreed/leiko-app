@@ -378,9 +378,9 @@ describe('<SettingsScreen /> — About', () => {
     renderScreen();
     expect(screen.getByTestId('settings-about-version')).toBeTruthy();
     fireEvent.press(screen.getByTestId('settings-about-terms'));
-    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.app/terms');
+    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.health/terms');
     fireEvent.press(screen.getByTestId('settings-about-privacy'));
-    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.app/privacy');
+    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.health/privacy');
     fireEvent.press(screen.getByTestId('settings-about-help'));
     expect(linkingSpy).toHaveBeenCalledWith('mailto:support@leiko.app');
   });
