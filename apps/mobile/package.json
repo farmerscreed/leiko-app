@@ -12,7 +12,9 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "build:articles": "tsx scripts/build-articles.ts"
+    "build:articles": "tsx scripts/build-articles.ts",
+    "release:android:apk": "node scripts/release-android.js apk",
+    "release:android:aab": "node scripts/release-android.js aab"
   },
   "dependencies": {
     "@expo-google-fonts/instrument-serif": "^0.4.1",
@@ -56,6 +58,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/react": "19.1.17",
     "eslint": "9.39.4",
+    "expo-build-properties": "~1.0.10",
     "jest": "30.3.0",
     "jest-expo": "^54.0.17",
     "js-yaml": "^4.1.1",

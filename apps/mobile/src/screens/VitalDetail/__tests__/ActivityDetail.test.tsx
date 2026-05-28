@@ -220,6 +220,19 @@ describe('ActivityDetail — goal sheet wiring', () => {
 });
 
 describe('ActivityDetail — snapshot', () => {
+  // Pin the wall clock so the day-of-week labels rendered from
+  // makeDay(dayOffset) are deterministic across runs. Without this the
+  // snapshot drifts every wall-clock day as labels like "Sat" / "Mon"
+  // shift relative to whatever the test machine thinks today is.
+  const FROZEN = new Date('2026-05-08T16:30:00Z').getTime();
+  beforeAll(() => {
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+    jest.setSystemTime(FROZEN);
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   it('matches snapshot in dark mode (populated)', () => {
     mockPendingSteps = [makeDay(0, 6250)];
     mockRecentSteps = [

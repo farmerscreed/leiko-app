@@ -15,6 +15,9 @@ module.exports = [
       'metro.config.js',
       'jest.config.js',
       'eslint.config.js',
+      // Build/release driver — runs under bare node, not React Native.
+      // Lints would only flag node globals that don't exist in RN.
+      'scripts/release-android.js',
     ],
   },
   js.configs.recommended,
