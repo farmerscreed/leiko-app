@@ -169,11 +169,28 @@ process.on('SIGINT', () => { restore(); process.exit(130); });
 // ---------- 6) Run gradle ----------------------------------------------------
 const task = mode === 'aab' ? 'bundleRelease' : 'assembleRelease';
 step(`Running ./gradlew ${task}`);
+// Resolve the gradle wrapper to an absolute path. On Windows, spawnSync
+// does not search the cwd for relative executables; without the absolute
+// path it fails with status: null + error: ENOENT and no gradle output.
+const gradlewExe = path.join(
+  ANDROID_DIR,
+  process.platform === 'win32' ? 'gradlew.bat' : 'gradlew',
+);
 const result = spawnSync(
-  process.platform === 'win32' ? 'gradlew.bat' : './gradlew',
+  gradlewExe,
   [task, '--no-daemon'],
   { cwd: ANDROID_DIR, stdio: 'inherit' },
 );
+if (result.error) {
+  console.error(`\n  ✗ ${result.error.message}`);
+  if (result.error.code === 'ENOENT') {
+    console.error(
+      `    Tried to launch: ${gradlewExe}\n` +
+        `    Confirm the file exists and is executable.`,
+    );
+  }
+  fail(`Gradle ${task} could not start`);
+}
 if (result.status !== 0) {
   fail(`Gradle ${task} failed with exit code ${result.status}`);
 }
