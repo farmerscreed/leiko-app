@@ -77,13 +77,15 @@ import {
 import { useTheme } from '../../theme';
 import type { CaregiverScreenProps } from '../../navigation/types';
 import type { Gender, HypertensionStatus, UserRow, UserUpdate } from '../../types/database';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const appJson = require('../../../app.json') as { expo?: { version?: string } };
 
 type ProfileField = 'yob' | 'gender' | 'height' | 'weight' | 'timezone';
 
-// App version is embedded at build time. Bump in lockstep with
-// app.json + package.json on every version commit. Showing "build" as
-// the EAS build number lands when EAS builds are wired (Sprint 17).
-const APP_VERSION = '0.0.0';
+// Single source of truth for the version string: apps/mobile/app.json's
+// expo.version field. Bump there on every release; the Settings "About"
+// row and the version row in Doctor PDF read it from this constant.
+const APP_VERSION = appJson.expo?.version ?? '0.0.0';
 
 const HYPERTENSION_LABEL: Record<HypertensionStatus, string> = {
   yes: 'Yes',
@@ -909,13 +911,13 @@ export function SettingsScreen({ navigation }: Props) {
           <ListRow
             variant="navigation"
             title="Terms of service"
-            onPress={() => void Linking.openURL('https://leiko.app/terms')}
+            onPress={() => void Linking.openURL('https://leiko.health/terms')}
             testID="settings-about-terms"
           />
           <ListRow
             variant="navigation"
             title="Privacy policy"
-            onPress={() => void Linking.openURL('https://leiko.app/privacy')}
+            onPress={() => void Linking.openURL('https://leiko.health/privacy')}
             testID="settings-about-privacy"
           />
           <ListRow

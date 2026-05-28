@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+ (API 31) replacement for the legacy allowBackup/
+  fullBackupContent attributes. We exclude EVERYTHING from cloud backup
+  and device-to-device transfer because Leiko stores health-grade
+  vitals + auth session tokens; restoring them onto a different
+  device would land them in the wrong user's app sandbox.
+
+  Users opt back into cross-device continuity by signing in with the
+  same email (the OTP flow rehydrates the Supabase session).
+-->
+<data-extraction-rules>
+  <cloud-backup>
+    <exclude domain="root"/>
+    <exclude domain="file"/>
+    <exclude domain="database"/>
+    <exclude domain="sharedpref"/>
+    <exclude domain="external"/>
+  </cloud-backup>
+  <device-transfer>
+    <exclude domain="root"/>
+    <exclude domain="file"/>
+    <exclude domain="database"/>
+    <exclude domain="sharedpref"/>
+    <exclude domain="external"/>
+  </device-transfer>
+</data-extraction-rules>
