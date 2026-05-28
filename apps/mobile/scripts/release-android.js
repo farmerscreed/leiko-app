@@ -179,7 +179,15 @@ const gradlewExe = path.join(
 const result = spawnSync(
   gradlewExe,
   [task, '--no-daemon'],
-  { cwd: ANDROID_DIR, stdio: 'inherit' },
+  {
+    cwd: ANDROID_DIR,
+    stdio: 'inherit',
+    // Node 20.12+ refuses to launch .bat / .cmd directly without going
+    // through cmd.exe (CVE-2024-27980 hardening). shell: true routes
+    // the call through the platform shell which can resolve .bat.
+    // Harmless on non-Windows.
+    shell: process.platform === 'win32',
+  },
 );
 if (result.error) {
   console.error(`\n  ✗ ${result.error.message}`);
