@@ -1,0 +1,124 @@
+# Android release — one-time setup + ongoing playbook
+
+A single-source reference for cutting Leiko Android builds that the Play
+Store will accept. Read this once, then `npm run release:android:aab`
+forever after.
+
+## One-time setup (you do this once and never again)
+
+### 1. Generate the upload keystore
+
+This file is the irreplaceable identity for every future Leiko Android
+upload. Losing it means starting a new Play Store listing under a new
+package name. Back it up to at least two places (1Password + an
+encrypted USB is the usual move).
+
+```bash
+keytool -genkey -v \
+  -keystore ~/secrets/leiko-release.jks \
+  -keyalg RSA -keysize 2048 -validity 25000 \
+  -alias leiko
+```
+
+`keytool` will prompt for two passwords (keystore + key) — use the same
+one for both unless you have a reason not to. Write them in 1Password.
+
+### 2. Create `~/secrets/leiko-release.env`
+
+```bash
+# Source this before any release build:  source ~/secrets/leiko-release.env
+
+# Signing
+export LEIKO_RELEASE_STORE_FILE=/Users/you/secrets/leiko-release.jks
+export LEIKO_RELEASE_STORE_PASSWORD=...
+export LEIKO_RELEASE_KEY_ALIAS=leiko
+export LEIKO_RELEASE_KEY_PASSWORD=...
+
+# Versioning (bump versionCode for every upload; versionName lives in app.json)
+export LEIKO_VERSION_CODE=8
+
+# Required runtime env (app throws on boot without these)
+export EXPO_PUBLIC_SUPABASE_URL=https://kqnzxjrpnjnczhgdwdqg.supabase.co
+export EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...
+
+# Optional but strongly recommended
+export EXPO_PUBLIC_SENTRY_DSN=https://...@sentry.io/...
+export EXPO_PUBLIC_POSTHOG_API_KEY=phc_...
+export EXPO_PUBLIC_POSTHOG_HOST=https://eu.posthog.com
+export EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY=goog_...
+
+# Sentry sourcemap upload (only needed if you want symbolicated traces)
+export SENTRY_AUTH_TOKEN=...
+export SENTRY_ORG=...
+export SENTRY_PROJECT=leiko-mobile
+```
+
+The file is gitignored by default (under `~/secrets/`). Never commit it.
+
+### 3. First release build
+
+```bash
+cd apps/mobile
+source ~/secrets/leiko-release.env
+
+# Dry-run shows what will happen + lets you sanity-check the env:
+npm run release:android:aab
+
+# When the printout looks right, run it for real:
+LEIKO_RELEASE_ACK=yes npm run release:android:aab
+```
+
+The script verifies your keystore is not the well-known Android debug
+key, patches `versionCode` + `versionName` into `build.gradle` for the
+duration of the build, runs `./gradlew bundleRelease`, and restores
+`build.gradle` so the diff is never committed.
+
+The output AAB lives at:
+
+```
+apps/mobile/android/app/build/outputs/bundle/release/app-release.aab
+```
+
+Verify the signature:
+
+```bash
+apksigner verify --print-certs app/build/outputs/bundle/release/app-release.aab
+```
+
+The SHA-256 fingerprint should match the one you wrote in 1Password.
+
+## Every release after the first
+
+1. Decide the new `versionName` (`1.0.1` → `1.0.2`) and `versionCode`
+   (must be strictly greater than the previous Play Store upload).
+2. Update `apps/mobile/app.json` `expo.version` to the new
+   `versionName` and commit.
+3. Bump `LEIKO_VERSION_CODE` in your local env (or your CI secret).
+4. `source ~/secrets/leiko-release.env`
+5. `LEIKO_RELEASE_ACK=yes npm run release:android:aab`
+6. Upload the AAB to the Play Console internal-testing track.
+
+## APK vs AAB
+
+- **AAB (`release:android:aab`)** is what the Play Store accepts.
+- **APK (`release:android:apk`)** is what you sideload onto your own
+  test device. Same signing config; just different gradle task.
+
+## If the script complains
+
+| Error | Fix |
+| --- | --- |
+| `Env var LEIKO_RELEASE_STORE_FILE is not set` | `source ~/secrets/leiko-release.env` |
+| `LEIKO_RELEASE_STORE_FILE points at the well-known Android debug keystore` | You set the path to your repo's `apps/mobile/android/app/debug.keystore`. Point it at your real keystore instead. |
+| `LEIKO_VERSION_CODE env var must be set to a positive integer` | `export LEIKO_VERSION_CODE=8` (or whatever the next integer is) |
+| `Required runtime env var EXPO_PUBLIC_SUPABASE_URL is not set` | Source the env file. The app throws on boot without it. |
+
+## When the manifest hardening regresses
+
+The audit PR (#1) added `allowBackup="false"`, the legacy BLE
+permissions, and `dataExtractionRules` directly to
+`android/app/src/main/AndroidManifest.xml`. Those edits do **not**
+survive `npx expo prebuild --clean`. Until we land a config plugin
+that re-injects them, do not run `expo prebuild --clean` against this
+repo without re-applying the audit-PR manifest diff afterwards. The
+non-clean `npx expo prebuild` form preserves existing files.

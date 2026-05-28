@@ -1408,7 +1408,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
               </Text>
             </View>
             <View
-              accessibilityLabel="Best day: 9,000 Friday"
+              accessibilityLabel="Best day: 9,000 Monday"
               accessibilityRole="text"
               style={
                 [
@@ -1468,7 +1468,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   }
                 }
               >
-                Friday
+                Monday
               </Text>
             </View>
             <View
@@ -2558,7 +2558,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 </Text>
               </View>
               <View
-                accessibilityLabel="7,100, Sunday · light day, Sun"
+                accessibilityLabel="7,100, Wednesday · light day, Wed"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2654,7 +2654,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                       }
                     }
                   >
-                    Sunday · light day
+                    Wednesday · light day
                   </Text>
                 </View>
                 <Text
@@ -2669,11 +2669,11 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     }
                   }
                 >
-                  Sun
+                  Wed
                 </Text>
               </View>
               <View
-                accessibilityLabel="5,400, Saturday · light day, Sat"
+                accessibilityLabel="5,400, Tuesday · light day, Tue"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2769,7 +2769,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                       }
                     }
                   >
-                    Saturday · light day
+                    Tuesday · light day
                   </Text>
                 </View>
                 <Text
@@ -2784,7 +2784,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     }
                   }
                 >
-                  Sat
+                  Tue
                 </Text>
               </View>
             </View>

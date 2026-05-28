@@ -282,6 +282,18 @@ describe('HRDetail — back button wiring', () => {
 });
 
 describe('HRDetail — dark-mode snapshot', () => {
+  // Pin the wall clock so the rendered relative timestamp strings
+  // ("Today, X:XX PM" / "Yesterday at X:XX PM") don't drift as the
+  // test machine's clock advances.
+  const FROZEN = new Date('2026-05-08T16:30:00Z').getTime();
+  beforeAll(() => {
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+    jest.setSystemTime(FROZEN);
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   it('matches snapshot with full data in dark mode', () => {
     const now = NOW_SEC();
     setMockData({

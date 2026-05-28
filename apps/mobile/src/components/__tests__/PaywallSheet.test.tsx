@@ -4,6 +4,7 @@ import { PaywallSheet } from '../PaywallSheet';
 import { ThemeProvider } from '../../theme';
 
 const mockRefetch = jest.fn().mockResolvedValue(undefined);
+const mockMarkPlusOptimistic = jest.fn();
 
 jest.mock('../../hooks/usePlusEntitlement', () => ({
   usePlusEntitlement: () => ({
@@ -11,6 +12,7 @@ jest.mock('../../hooks/usePlusEntitlement', () => ({
     isPlus: false,
     isLoading: false,
     refetch: mockRefetch,
+    markPlusOptimistic: mockMarkPlusOptimistic,
   }),
   isPlusTier: (t: string) => ['plus', 'plus_trial', 'plus_grace'].includes(t),
 }));
@@ -21,8 +23,11 @@ jest.mock('../../services/purchases', () => ({
     annual: 'com.leiko.app.plus.annual',
   },
   fetchOfferings: jest.fn().mockResolvedValue({ monthly: null, annual: null }),
-  purchasePeriod: jest.fn(),
-  restorePurchases: jest.fn(),
+  // Default to isPlusActive: true so the existing purchase-success
+  // tests stay green; the new optimistic-mark coverage lives in
+  // dedicated test cases that override these mocks per-test.
+  purchasePeriod: jest.fn().mockResolvedValue({ productId: '', isPlusActive: true }),
+  restorePurchases: jest.fn().mockResolvedValue({ productId: '', isPlusActive: true }),
 }));
 
 import {
@@ -165,6 +170,54 @@ describe('PaywallSheet — purchase + restore + dismiss', () => {
     });
     expect(mockRefetch).toHaveBeenCalled();
     expect(onDismiss).toHaveBeenCalled();
+  });
+
+  it('optimistically flips the cache to Plus when RC SDK reports active', async () => {
+    (purchasePeriod as jest.Mock).mockResolvedValueOnce({
+      productId: 'com.leiko.app.plus.annual',
+      isPlusActive: true,
+    });
+    render(
+      withTheme(
+        <PaywallSheet
+          visible
+          onDismiss={() => undefined}
+          accountType="self_buyer"
+          trigger="pdf_export"
+        />,
+      ),
+    );
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('paywall-sheet:cta-trial'));
+    });
+    await waitFor(() => {
+      expect(purchasePeriod).toHaveBeenCalled();
+    });
+    expect(mockMarkPlusOptimistic).toHaveBeenCalled();
+  });
+
+  it('does NOT flip the cache when RC SDK reports no active entitlement', async () => {
+    (purchasePeriod as jest.Mock).mockResolvedValueOnce({
+      productId: 'com.leiko.app.plus.annual',
+      isPlusActive: false,
+    });
+    render(
+      withTheme(
+        <PaywallSheet
+          visible
+          onDismiss={() => undefined}
+          accountType="self_buyer"
+          trigger="pdf_export"
+        />,
+      ),
+    );
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('paywall-sheet:cta-trial'));
+    });
+    await waitFor(() => {
+      expect(purchasePeriod).toHaveBeenCalled();
+    });
+    expect(mockMarkPlusOptimistic).not.toHaveBeenCalled();
   });
 
   it('shows a quiet error message when the purchase throws', async () => {
