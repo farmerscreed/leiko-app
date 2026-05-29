@@ -1,15 +1,19 @@
-// Analytics logger shim — Sprint 5.
+// Analytics logger shim — Sprint 5; PostHog wired post-audit.
 //
-// PostHog wiring lands in Sprint 11/12. Until then, every track() call
-// goes to console (dev) and a small MMKV ring buffer (so we can flush
-// the queue once PostHog initialises). Call sites stay; the impl swap
-// is one file.
+// Behaviour:
+//   • Every track() call still logs to console in __DEV__.
+//   • If PostHog is configured (EXPO_PUBLIC_POSTHOG_API_KEY set) the
+//     event goes straight to PostHog AND the pre-init MMKV ring
+//     buffer is drained the first time we successfully send.
+//   • If PostHog is NOT configured, events queue in MMKV exactly as
+//     they used to — peekRecent / drainQueue / queueLength still work.
 //
 // Per CLAUDE.md data rule: reading values (BP, HR, SpO2) NEVER appear
 // in analytics events. Pass deviceId / family_id / counts / categories
-// only.
+// only. The AnalyticsEvent union below enforces this at compile time.
 
 import { mmkv } from '../storage';
+import { capturePosthog, getPosthog, initPosthog } from './posthog';
 
 const RING_BUFFER_KEY = 'leiko.analytics.queue';
 const RING_BUFFER_LIMIT = 200;
@@ -232,11 +236,58 @@ type EventProps<N extends EventName> = Extract<AnalyticsEvent, { name: N }> exte
   ? P
   : never;
 
+let drainedBuffer = false;
+
+function drainBufferToPosthog(): void {
+  if (drainedBuffer) return;
+  const ph = getPosthog();
+  if (!ph) return;
+  const queue = readQueue();
+  if (queue.length === 0) {
+    drainedBuffer = true;
+    return;
+  }
+  for (const entry of queue) {
+    try {
+      ph.capture(entry.name, {
+        ...(entry.props && typeof entry.props === 'object' ? entry.props : {}),
+        // Stamp the original capture time so a delayed flush doesn't
+        // back-date events to "now" in PostHog's UI.
+        $timestamp: new Date(entry.ts).toISOString(),
+        $is_buffered: true,
+      });
+    } catch {
+      // PostHog SDK swallows transport errors internally; this catch
+      // is purely defensive against a malformed entry.
+    }
+  }
+  // Wipe the local buffer on a best-effort basis. If PostHog later
+  // turns out to have rejected an event, we lose that one — acceptable
+  // given the alternative is the buffer growing unbounded across
+  // re-foregrounds.
+  mmkv.set(RING_BUFFER_KEY, '[]');
+  drainedBuffer = true;
+}
+
 export function track<N extends EventName>(name: N, props?: EventProps<N>): void {
   const entry = { name, props: props ?? null, ts: Date.now() };
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
     console.log('[analytics]', name, props ?? '');
   }
+  // Kick off init on first track call. Idempotent — only the first
+  // caller actually configures the client; everyone else awaits the
+  // same promise. We don't await here so analytics call sites stay
+  // synchronous.
+  void initPosthog().then(drainBufferToPosthog);
+
+  const ph = getPosthog();
+  if (ph) {
+    drainBufferToPosthog();
+    capturePosthog(name, (props ?? {}) as Record<string, unknown>);
+    return;
+  }
+  // Pre-PostHog (or never-PostHog) path: buffer to MMKV. Same shape
+  // the dev DebugLauncher already reads via peekRecent / queueLength.
   const queue = readQueue();
   queue.push(entry);
   writeQueue(queue);

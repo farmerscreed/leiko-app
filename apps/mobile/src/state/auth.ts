@@ -29,6 +29,7 @@ import { checkOnboardingState } from '../services/users/checkOnboardingState';
 import { useKnownAccounts } from './knownAccounts';
 import { useOnboarding } from './onboarding';
 import { linkSentryToUser } from '../services/sentry';
+import { linkPosthogToUser } from '../services/analytics/posthog';
 import type { AccountType, UserRow } from '../types/database';
 
 type Status = 'loading' | 'unauthenticated' | 'authenticated';
@@ -185,6 +186,7 @@ export const useAuth = create<AuthState>((set, get) => ({
   async _setSession(session) {
     if (!session) {
       linkSentryToUser(null);
+      linkPosthogToUser(null);
       set({ session: null, profile: null, status: 'unauthenticated' });
       return;
     }
@@ -233,10 +235,15 @@ export const useAuth = create<AuthState>((set, get) => ({
     // the source of truth for entitlement; this call only ties future
     // purchase events to the right Supabase user.
     if (profile) {
+      const familyId = mmkv.getString(STORAGE_KEYS.currentFamilyId) ?? null;
       void identifyPurchaser(profile.id, {
         accountType: profile.account_type,
-        familyId: mmkv.getString(STORAGE_KEYS.currentFamilyId) ?? null,
+        familyId,
       });
+      // Stitch future PostHog events to this user. Identity travels
+      // as row-id + account_type + family_id only; email and raw
+      // metadata never leave the device.
+      linkPosthogToUser(profile.id, { accountType: profile.account_type, familyId });
     }
   },
 }));
