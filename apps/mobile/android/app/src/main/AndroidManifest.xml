@@ -7,9 +7,9 @@
        at runtime for BLE scanning to work. minSdk is 26, so the
        legacy block is bounded with maxSdkVersion="30" to avoid asking
        newer devices for location they don't need. -->
-  <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
-  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30"/>
-  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30"/>
+  <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" tools:replace="android:maxSdkVersion"/>
+  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" tools:replace="android:maxSdkVersion"/>
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" tools:replace="android:maxSdkVersion"/>
   <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
   <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" tools:targetApi="s"/>
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
