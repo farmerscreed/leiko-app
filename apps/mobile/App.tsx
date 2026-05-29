@@ -22,6 +22,12 @@
 //
 // Wrapping order matters and lives inside PostBootShell:
 //   GestureHandlerRootView → SafeAreaProvider → ThemeProvider → RootNavigator
+//
+// Observability: initSentry() runs at module load, BEFORE any other
+// component evaluates, so a render-side crash in PostBootShell still
+// reaches Sentry. wrapWithSentry on the exported default catches
+// uncaught errors that bubble past component boundaries. Both no-op
+// when EXPO_PUBLIC_SENTRY_DSN isn't set in the build env.
 
 import { useEffect, useState, type ComponentType } from 'react';
 import {
@@ -48,8 +54,13 @@ import {
   runMmkvMigration,
   type MigrationResult,
 } from './src/services/secureBoot.migrate';
+import { initSentry, wrapWithSentry } from './src/services/sentry';
 
-export default function App() {
+// Initialise Sentry before any other module gets a chance to throw.
+// No-ops when EXPO_PUBLIC_SENTRY_DSN isn't set.
+initSentry();
+
+function App() {
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -186,3 +197,7 @@ async function emitBootTelemetry(args: {
     /* telemetry must never crash the app */
   }
 }
+
+// Wrap the root so any render-side crash becomes a Sentry event. The
+// wrap is a no-op when initSentry() short-circuited on a missing DSN.
+export default wrapWithSentry(App);

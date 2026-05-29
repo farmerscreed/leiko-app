@@ -172,6 +172,7 @@
       "expo-secure-store",
       "@kingstinct/react-native-healthkit",
       "react-native-health-connect",
+      "@sentry/react-native/expo",
       [
         "expo-build-properties",
         {
