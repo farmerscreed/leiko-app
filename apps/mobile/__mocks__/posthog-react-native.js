@@ -1,3 +1,4 @@
+/* global module */
 // posthog-react-native mock. Real native module is never reached
 // in jest; services/analytics/posthog.ts loadNative() require() call
 // resolves to this shim instead.

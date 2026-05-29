@@ -1,3 +1,4 @@
+/* global module, jest */
 // Sentry mock — Jest never reaches the real native module.
 // All exports are no-op shims so services/sentry.ts loads cleanly in
 // tests without pulling the native bridge.
