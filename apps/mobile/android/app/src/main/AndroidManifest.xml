@@ -10,6 +10,15 @@
   <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" tools:node="replace"/>
   <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" tools:node="replace"/>
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" tools:node="replace"/>
+  <!-- A transitive AAR (likely from androidx) injects ACCESS_FINE_LOCATION
+       as <uses-permission-sdk-23> rather than <uses-permission>. Even after
+       our tools:node="replace" on the <uses-permission> element, Play
+       Console sees the sdk-23 variant as a second declaration of the same
+       permission with a different (absent) maxSdkVersion and rejects the
+       AAB with "Duplicate declarations ... in manifest with different
+       maxSdkVersions". Strip the sdk-23 variant; our <uses-permission>
+       above is the canonical declaration. -->
+  <uses-permission-sdk-23 android:name="android.permission.ACCESS_FINE_LOCATION" tools:node="remove"/>
   <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
   <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" tools:targetApi="s"/>
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
