@@ -122,157 +122,218 @@
 </style>
 </head>
 <body>
-<h1>The Leiko Ads Playbook</h1>
-<p><strong>A field manual for launching paid acquisition on a lean budget, from Nigeria + diaspora into US mainstream</strong></p>
-<p>Built for: Leiko Android (com.leiko.app) | Maker: Lawrence O. (<a href="mailto:primethebrain@gmail.com">primethebrain@gmail.com</a>)
-Last updated: May 2026 | Source: leiko-app/docs/marketing/leiko-ads-playbook.md</p>
+<h1>The Leiko Ads Playbook — v2</h1>
+<p><strong>A hardware-DTC + reservation-funnel field manual for paid acquisition on a lean budget, from Nigeria + diaspora into US mainstream.</strong></p>
+<p>Built for: Leiko (com.leiko.app) | Maker: Lawrence O. (<a href="mailto:primethebrain@gmail.com">primethebrain@gmail.com</a>)
+Last updated: May 2026 | Source: leiko-app/docs/marketing/leiko-ads-playbook.md
+What&#39;s new in v2: reframed around watch sales + reservations. App is the supporting cast, not the hero. Original v1 preserved at leiko-ads-playbook-v1.md.</p>
+<hr>
+<h2>Why v2 exists</h2>
+<p>The first version of this playbook optimised for <strong>app installs</strong>. That was the wrong primary metric. The actual product hierarchy is:</p>
+<ol>
+<li><strong>The watch</strong> ($200 Leiko / $250 Leiko Pro) — hardware, FDA-listed, EU MDR Class IIa, ISO 13485 certified. The real revenue driver.</li>
+<li><strong>The app</strong> — companion that pairs with the watch, shows the readings, runs the family circle. Without the watch, the app is a husk.</li>
+<li><strong>Leiko Plus subscription</strong> ($4.99/mo or $39.99/yr) — upsell to a fraction of watch owners after 30+ days of use.</li>
+</ol>
+<p>So v2 reorients the entire acquisition funnel around <strong>watch reservations</strong> as the primary conversion event, with app installs as the secondary supporting layer, and subscription as the third-order upsell.</p>
+<p>The reservation model means: instead of asking cold ad traffic to pay $200 upfront for a watch from a brand they&#39;ve never heard of, we ask them to pay a <strong>$50 refundable, credited-toward-purchase deposit</strong> to lock in their watch from the next production run. This collapses conversion friction, builds a public demand signal, and funds the next manufacturing run.</p>
 <hr>
 <h2>Table of contents</h2>
 <ul>
 <li><a href="#part-1--strategy">Part 1 — Strategy</a></li>
-<li><a href="#part-2--brand-voice-rules-for-ads">Part 2 — Brand voice rules for ads</a></li>
-<li><a href="#part-3--platform-deep-dives">Part 3 — Platform deep dives</a></li>
-<li><a href="#part-4--the-five-core-creative-angles">Part 4 — The five core creative angles</a></li>
-<li><a href="#part-5--ai-tool-stack-with-pricing">Part 5 — AI tool stack with pricing</a></li>
-<li><a href="#part-6--prompt-library">Part 6 — Prompt library (Midjourney, DALL-E, Runway, ElevenLabs, Suno, Claude)</a></li>
-<li><a href="#part-7--step-by-step-platform-setup">Part 7 — Step-by-step platform setup</a></li>
-<li><a href="#part-8--conversion-tracking-what-needs-to-be-wired-in-the-app">Part 8 — Conversion tracking (what needs to be wired in the app)</a></li>
-<li><a href="#part-9--targeting-recipes">Part 9 — Targeting recipes (Nigeria + diaspora + US)</a></li>
-<li><a href="#part-10--budget-framework">Part 10 — Budget framework</a></li>
-<li><a href="#part-11--the-first-30-days-day-by-day">Part 11 — The first 30 days, day by day</a></li>
-<li><a href="#part-12--measurement-and-kpis">Part 12 — Measurement and KPIs</a></li>
-<li><a href="#part-13--compliance-and-policy">Part 13 — Compliance and policy</a></li>
-<li><a href="#part-14--templates-and-ready-to-fork-campaigns">Part 14 — Templates and ready-to-fork campaigns</a></li>
-<li><a href="#part-15--resources-and-glossary">Part 15 — Resources and glossary</a></li>
+<li><a href="#part-2--product-story-what-were-actually-selling">Part 2 — Product story: what we&#39;re actually selling</a></li>
+<li><a href="#part-3--brand-voice-rules-for-ads">Part 3 — Brand voice rules for ads</a></li>
+<li><a href="#part-4--platform-deep-dives">Part 4 — Platform deep dives</a></li>
+<li><a href="#part-5--the-five-core-creative-angles-re-ordered">Part 5 — The five core creative angles (re-ordered)</a></li>
+<li><a href="#part-6--ai-tool-stack-with-pricing">Part 6 — AI tool stack with pricing</a></li>
+<li><a href="#part-7--prompt-library">Part 7 — Prompt library</a></li>
+<li><a href="#part-8--step-by-step-platform-setup">Part 8 — Step-by-step platform setup</a></li>
+<li><a href="#part-9--reservation-funnel-design">Part 9 — Reservation funnel design</a></li>
+<li><a href="#part-10--conversion-tracking">Part 10 — Conversion tracking</a></li>
+<li><a href="#part-11--targeting-recipes">Part 11 — Targeting recipes</a></li>
+<li><a href="#part-12--budget-framework">Part 12 — Budget framework</a></li>
+<li><a href="#part-13--the-first-30-days-day-by-day">Part 13 — The first 30 days, day by day</a></li>
+<li><a href="#part-14--measurement-and-kpis">Part 14 — Measurement and KPIs</a></li>
+<li><a href="#part-15--compliance-and-policy">Part 15 — Compliance and policy</a></li>
+<li><a href="#part-16--templates-and-ready-to-fork-campaigns">Part 16 — Templates and ready-to-fork campaigns</a></li>
+<li><a href="#part-17--resources-and-glossary">Part 17 — Resources and glossary</a></li>
 </ul>
 <hr>
 <h1>Part 1 — Strategy</h1>
-<h2>The constraints that shape every decision in this playbook</h2>
-<p>You have three real constraints and one hidden asset. Naming them upfront keeps the strategy honest.</p>
-<p><strong>Constraint 1: Inventory.</strong> Roughly 30 Leiko watches in Nigeria. The whole funnel — ads → app installs → trial starts → paid subscribers → watch buyers — eventually bottlenecks on hardware. The math: if your trial-to-paid rate is 40% and your watch-attach rate among paid is, say, 60%, then 30 watches absorb ~125 paid subscribers worth of demand. You don&#39;t need huge ad spend to saturate that.</p>
-<p><strong>Constraint 2: Capital.</strong> $500-2,000 per month, Phase 1. This is a learning budget, not a scaling budget. The goal isn&#39;t to optimize for cheapest installs in absolute terms — it&#39;s to learn what messaging, audience, and creative converts. By the time inventory replenishes and you can raise budgets, you should have battle-tested ads.</p>
-<p><strong>Constraint 3: Geography.</strong> The watches are in Nigeria. The buyers with money are in the US. These two facts compete. Most founders would either ignore Nigeria (chase the US market) or accept slow growth (Nigeria-only). The diaspora bridge solves it.</p>
-<p><strong>Hidden asset: The Nigerian-American diaspora.</strong> Adult children of Nigerian parents, now living in Houston, Atlanta, London, Maryland, Toronto. They have US-level spending power. They emotionally identify with the product (their parents have hypertension; that&#39;s part of why they immigrated to begin with — better healthcare access). They will pay to ship a watch back to Lagos. Meta lets you target them precisely.</p>
-<h2>Phase 1: Nigeria + US-based Nigerian diaspora (days 0-45)</h2>
-<p>Single highest-leverage move you can make on a lean budget.</p>
-<p><strong>Three reasons it works:</strong></p>
-<ol>
-<li><p><strong>CPM arbitrage.</strong> Nigerian Meta CPMs run $1-5 vs $15-40 in the US for the caregiving demo. Same budget buys you 10× the impressions and 10× the data. You learn fast.</p>
-</li>
-<li><p><strong>Diaspora has both characteristics:</strong> they&#39;re reachable cheaply via Meta&#39;s &quot;Nigeria connection&quot; + &quot;United States location&quot; overlap, and they buy at US prices.</p>
-</li>
-<li><p><strong>Inventory matches addressable demand.</strong> 30 watches × ~50% close rate from interested to purchased = ~60 active sales conversations. Phase 1 generates exactly this scale of demand. Anything more would waste hardware you don&#39;t have.</p>
-</li>
-</ol>
-<p><strong>Targeting split for Phase 1:</strong></p>
+<h2>The three constraints and the one hidden asset</h2>
+<p>The strategy that follows respects all four. Naming them upfront:</p>
+<p><strong>Constraint 1: Inventory.</strong> 30 Leiko watches in Nigeria, immediate. Beyond that, units come from a manufacturing run that we want this campaign to fund.</p>
+<p><strong>Constraint 2: Capital.</strong> $500-2,000/mo ad budget in Phase 1. This is a learning + signal budget, not a scaling budget.</p>
+<p><strong>Constraint 3: Geography.</strong> Watches are in Nigeria. Bulk capital is in the US. The diaspora bridges them.</p>
+<p><strong>Hidden asset: Regulatory pedigree.</strong> FDA Establishment Registration, EU MDR Class IIa classification, ISO 13485 manufacturing. No mainstream &quot;BP smartwatch&quot; competitor has this. This is a marketing moat most product founders would kill for.</p>
+<h2>The reservation funnel</h2>
+<p>The single most important change in v2: we are not asking cold traffic to buy a $200 watch. We are asking them to <strong>reserve their spot in the next batch with a $50 refundable deposit, credited toward purchase</strong>.</p>
+<pre><code>Ad
+ ↓
+leiko.health/reserve
+ ↓
+Email + ship-to address + $50 deposit (Paystack NG / Stripe US)
+ ↓
+Confirmation page + reservation number (&quot;You&#39;re #1247&quot;)
+ ↓
+[Watch ships, weeks or months later]
+ ↓
+&quot;Your Leiko is ready — $150 remaining&quot; → user completes purchase
+ ↓
+Watch arrives → QR code in box → app install → pairs with watch
+ ↓
+30+ days of use → in-app Leiko Plus subscription prompt
+</code></pre>
+<p>Three things make this powerful:</p>
+<p><strong>a) Conversion friction collapses.</strong> Asking $50 instead of $200 raises the click-to-conversion rate by roughly 4-6×. A $1,500/mo ad budget that would have generated ~10-15 outright watch purchases now generates 60-100 reservations.</p>
+<p><strong>b) The demand signal becomes a marketing asset.</strong> &quot;5,000+ people have reserved Leiko&quot; appears on the landing page, in PR pitches, in investor decks, and reinforces every subsequent ad. The number compounds.</p>
+<p><strong>c) Reservations fund production.</strong> $50 × 100 reservations = $5,000 in production capital, ahead of the manufacturing run. The campaign is self-funding instead of capital-burning.</p>
+<h2>Phase 1: Nigeria + US-Nigerian diaspora — reservations primary (days 0-45)</h2>
+<p><strong>Why these two audiences:</strong></p>
+<ul>
+<li><strong>Nigeria</strong> — low Meta CPM ($1-5), watches are local for the first 30 buyers, founder home market, organic word-of-mouth easy</li>
+<li><strong>US-Nigerian diaspora</strong> — US-level spending power, emotional connection to the product (their parents have hypertension), they ship watches back to Lagos relatives (you confirmed cross-border shipping is supported)</li>
+</ul>
+<p><strong>Budget split:</strong></p>
 <table>
 <thead>
 <tr>
 <th>Audience</th>
 <th>Budget %</th>
-<th>Platform</th>
-<th>Why</th>
+<th>Primary platforms</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>Nigeria — middle-class urban (Lagos, Abuja, PH)</td>
+<td>Nigeria — middle-class urban (Lagos, Abuja, PH, Ibadan, Kano)</td>
 <td>45%</td>
-<td>Meta + Google UAC</td>
-<td>Watches are local; CPM is low</td>
+<td>Meta, Google Search</td>
 </tr>
 <tr>
-<td>US-based Nigerian-American caregivers</td>
+<td>US-based Nigerian-American caregivers (Houston, ATL, DC, MD, NJ, NYC, LA)</td>
 <td>40%</td>
-<td>Meta only</td>
-<td>Diaspora is a Meta strength; Google can&#39;t segment this well</td>
+<td>Meta only (best diaspora targeting)</td>
 </tr>
 <tr>
 <td>Testing buffer (new angles, new platforms)</td>
 <td>15%</td>
-<td>Whatever&#39;s promising</td>
-<td>Keeps the experiment loop alive</td>
+<td>TikTok pilot, alternate landing pages</td>
 </tr>
 </tbody></table>
-<p><strong>Phase 1 spend examples:</strong></p>
-<ul>
-<li><strong>$500/mo budget</strong>: $225 Nigeria, $200 diaspora, $75 testing</li>
-<li><strong>$1,000/mo budget</strong>: $450 Nigeria, $400 diaspora, $150 testing</li>
-<li><strong>$2,000/mo budget</strong>: $900 Nigeria, $800 diaspora, $300 testing</li>
-</ul>
 <p><strong>Phase 1 success criteria (45 days):</strong></p>
 <ul>
-<li>1,000+ installs total</li>
-<li>CPI under $3 (Nigeria) / under $12 (diaspora)</li>
-<li>100+ trial starts</li>
-<li>40+ paid subscribers</li>
-<li>3 creative angles validated as &quot;this works&quot;</li>
-<li>US-mainstream waitlist of 500+ emails</li>
+<li>800-1,500 reservations total</li>
+<li>CPA per reservation under $15 (Nigeria) / under $30 (diaspora)</li>
+<li>All 30 current-inventory watches sold to early Nigerian reservers</li>
+<li>A waitlist of 500-1,200 deposit-paying reservation holders for the next batch</li>
+<li>2-3 creative angles validated as winners</li>
 </ul>
 <h2>Phase 2: US mainstream (days 45-120)</h2>
-<p>Once Phase 1 is producing data and inventory has caught up, expand to mainstream US.</p>
-<p>You&#39;ll arrive at Phase 2 with proven creative, validated targeting, and a warm US waitlist. That&#39;s a far stronger starting position than launching cold.</p>
-<p><strong>Phase 2 mix:</strong></p>
+<p>Once Phase 1 is running and the manufacturing run is underway, expand to mainstream US.</p>
+<p>You arrive at Phase 2 with battle-tested creative, a real demand signal, and a warm reservation pool to convert when stock ships. That&#39;s a far stronger starting position than launching cold.</p>
+<p><strong>Phase 2 budget mix:</strong></p>
 <table>
 <thead>
 <tr>
 <th>Audience</th>
 <th>Budget %</th>
-<th>Why</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>US mainstream caregivers (no Nigerian connection)</td>
+<td>US mainstream caregivers</td>
 <td>50%</td>
-<td>The mass market</td>
 </tr>
 <tr>
 <td>Nigerian diaspora (continued)</td>
 <td>25%</td>
-<td>Still cheaper, still converts</td>
 </tr>
 <tr>
 <td>Nigeria local (continued)</td>
 <td>15%</td>
-<td>Don&#39;t abandon the founding market</td>
 </tr>
 <tr>
 <td>Testing buffer</td>
 <td>10%</td>
-<td>New angles</td>
 </tr>
 </tbody></table>
 <p>Phase 2 budgets typically 3-5× Phase 1.</p>
-<h2>The diaspora bridge — a separate note</h2>
-<p>This is unusual enough to call out. Most BP / health apps don&#39;t have a strong diaspora play. Leiko does because:</p>
-<ul>
-<li>The founder is Nigerian-American</li>
-<li>The product was designed for cross-border family care</li>
-<li>Nigerian families are tightly emotionally connected even after migration</li>
-<li>High hypertension prevalence in West African genetics — the demographic NEEDS this</li>
-<li>Nigerian-American median household income is <strong>higher than the US average</strong> ($62K+)</li>
-</ul>
-<p>Translation: the diaspora isn&#39;t a fallback. It&#39;s potentially your highest-converting audience.</p>
-<h2>The &quot;US waitlist&quot; tactic</h2>
-<p>While inventory is in Nigeria only, US-targeted ads should land on a leiko.health page with this above-the-fold structure:</p>
-<ol>
-<li>The product pitch (same as the home page)</li>
-<li>A clear &quot;<strong>Get notified when Leiko ships to the US</strong>&quot; form</li>
-<li>Email capture only — no payment, no commitment</li>
-<li>Optional: SMS opt-in with country-code US</li>
-</ol>
-<p>By the time you have US inventory (Phase 2), this list is your warmest audience for a launch-day push. Conversion rates on cold-traffic-to-waitlist average 5-10%; conversion rates on waitlist-to-purchase often hit 15-30% in launch windows.</p>
-<p>You can build this page in 2-3 hours with the existing leiko.health stack. Use the same agent that built the privacy/terms pages.</p>
 <hr>
-<h1>Part 2 — Brand voice rules for ads</h1>
-<p>Every ad you publish — image, video, headline, voiceover, description — must pass these rules. They protect Leiko&#39;s brand AND keep your ads in Meta/Google&#39;s good graces. Health categories are where ad accounts get nuked.</p>
-<h2>Words that must never appear in any ad</h2>
-<p>These are non-negotiable. Both your brand spec (docs/05-voice-and-claims.md) and platform policy enforce them.</p>
+<h1>Part 2 — Product story: what we&#39;re actually selling</h1>
+<p>This section is the most important in the manual. If your ads don&#39;t tell this story clearly, no amount of budget optimisation matters.</p>
+<h2>The product in one sentence</h2>
+<p><strong>Leiko is the wristwatch + app system that shows you what your daily life does to your blood pressure — using a real cuff, FDA-listed, so the numbers are ones you can actually trust.</strong></p>
+<p>That sentence carries three claims, each of which can be the lead in an ad:</p>
+<ol>
+<li><strong>The cuff is real, not optical</strong> — competitive moat</li>
+<li><strong>Your daily life shows up in the numbers</strong> — the unique product magic</li>
+<li><strong>FDA-listed, EU MDR Class IIa, ISO 13485</strong> — credibility moat</li>
+</ol>
+<h2>The three pillars in detail</h2>
+<h3>Pillar 1: A real cuff, not an estimate</h3>
+<p>Every other &quot;BP smartwatch&quot; (Apple Watch, Galaxy Watch, Fitbit, Wahoo, Aktiia) measures blood pressure by guessing from your pulse signal — the optical (PPG) method. None of them have FDA clearance for blood pressure measurement, because PPG-based BP measurement physically can&#39;t get cleared at the accuracy required for a medical claim.</p>
+<p>Leiko&#39;s wristwatch contains an actual inflating micro-cuff. Same oscillometric method as the cuff at your doctor&#39;s office. The cuff inflates, holds, deflates, reports a number. Trustworthy.</p>
+<p>In ad language:</p>
+<blockquote>
+<p>&quot;Most BP smartwatches estimate. Leiko measures. With a real cuff.&quot;
+&quot;The only consumer wristwatch with a real inflating cuff.&quot;</p>
+</blockquote>
+<h3>Pillar 2: Your daily life shows up in the numbers</h3>
+<p>The point of consistent tracking isn&#39;t the number — it&#39;s the <strong>pattern</strong>. Leiko&#39;s app quietly correlates your blood pressure with the rest of your day:</p>
 <ul>
-<li><strong>patient</strong> — use &quot;you&quot;, &quot;your parent&quot;, &quot;your loved one&quot;, &quot;the person you care for&quot;</li>
+<li>&quot;Your BP was 12 points lower today after your 7am walk.&quot;</li>
+<li>&quot;Your resting heart rate has settled three points lower over the past week.&quot;</li>
+<li>&quot;You averaged 6.8 hours of sleep last week. Your morning BP averages 8 points higher when sleep is under 7 hours.&quot;</li>
+<li>&quot;On days when you take a midday walk, your evening BP averages 11 points lower.&quot;</li>
+</ul>
+<p>This is <strong>the product magic</strong>. Not just data — visible cause and effect that lets the user change their life with evidence instead of guesses. This pulls in wellness/biohacking/longevity audiences who&#39;d never click an ad for &quot;a blood pressure monitor&quot;.</p>
+<p>In ad language:</p>
+<blockquote>
+<p>&quot;See what your day does to your numbers.&quot;
+&quot;A real cuff. A clear pattern. Your evidence to change.&quot;
+&quot;What&#39;s actually lowering your blood pressure? Your watch finally knows.&quot;</p>
+</blockquote>
+<h3>Pillar 3: FDA-listed, EU MDR Class IIa, ISO 13485</h3>
+<p>Three regulatory credentials that almost no other consumer BP watch has:</p>
+<ul>
+<li><strong>FDA Establishment Registration #3011654863</strong> — registered with the US Food and Drug Administration as a medical device manufacturing site</li>
+<li><strong>EU MDR Class IIa</strong> — classified in the European Medical Device Regulation framework alongside glucose meters and other home diagnostic devices</li>
+<li><strong>ISO 13485</strong> — built in a facility certified to the international standard for medical device quality management systems</li>
+</ul>
+<p>In ad language:</p>
+<blockquote>
+<p>&quot;FDA-listed. EU Class IIa. Built in an ISO 13485 facility. Not a sports tracker.&quot;
+&quot;The clinical pedigree of a doctor&#39;s-office cuff. On your wrist.&quot;
+&quot;Most BP smartwatches are sports trackers in disguise. Leiko is the real thing.&quot;</p>
+</blockquote>
+<h2>The app&#39;s job in this story</h2>
+<p>The app does NOT lead the ads. It supports the watch. Specifically:</p>
+<ul>
+<li><strong>The home screen of the app</strong> shows the five vitals view (BP, HR, SpO2, sleep, activity) — visible to anyone who picks up the watch owner&#39;s phone</li>
+<li><strong>The Family Circle</strong> lets up to 5 invited people see the watch owner&#39;s readings — turns the watch into a family-connected product, not just a personal device</li>
+<li><strong>The &quot;For your doctor&quot; PDF</strong> lets the watch owner take real data into their next appointment</li>
+<li><strong>Ask Leiko</strong> answers plain-English questions about readings</li>
+<li><strong>The correlations + trends view</strong> is where Pillar 2 (&quot;your day shows up in your numbers&quot;) actually lives</li>
+</ul>
+<p>The app is what makes the watch USEFUL after purchase. In ads, the app is the credibility signal that the watch is part of a complete system — but the watch is the hero.</p>
+<h2>The subscription&#39;s job in this story</h2>
+<p>Leiko Plus ($4.99/mo, $39.99/yr) is <strong>a post-purchase upsell</strong>, not an acquisition channel. It unlocks:</p>
+<ul>
+<li>The richer &quot;For your doctor&quot; PDF with charts and a cover letter</li>
+<li>Full trends history beyond the free 7-day window</li>
+<li>Higher monthly Ask Leiko quota</li>
+<li>Weekly cross-vital summaries</li>
+<li>Quiet anomaly notices</li>
+</ul>
+<p>This is invisible in cold ad creative. The subscription gets pitched <strong>inside the app after 30+ days of use</strong>, when the watch owner has already become a user.</p>
+<hr>
+<h1>Part 3 — Brand voice rules for ads</h1>
+<p>Every ad you publish — image, video, headline, voiceover, description — must pass both Leiko&#39;s voice rules AND ad-platform health policy. The good news: both rule sets align. The bad news: a single violation can disable your ad account.</p>
+<h2>Words that must never appear in any ad</h2>
+<ul>
+<li><strong>patient</strong> — use &quot;you&quot;, &quot;your parent&quot;, &quot;the person you care for&quot;</li>
 <li><strong>diagnose / diagnosis / diagnostic</strong> — Leiko doesn&#39;t diagnose. Use &quot;track&quot;, &quot;see&quot;, &quot;measure&quot;</li>
 <li><strong>treat / treatment / cure</strong> — Use &quot;track&quot;, &quot;understand&quot;, &quot;watch over&quot;</li>
-<li><strong>predict / prevent</strong> — when applied to disease. (&quot;Predict your sleep schedule&quot; is fine; &quot;predict heart attack&quot; is not.)</li>
-<li><strong>silent killer / ticking time bomb / before it&#39;s too late</strong> — fear bait. Always banned.</li>
+<li><strong>predict / prevent</strong> applied to disease — &quot;predict your sleep&quot; is fine; &quot;prevent stroke&quot; is not</li>
+<li><strong>silent killer / ticking time bomb / before it&#39;s too late</strong> — fear bait, always banned</li>
 <li><strong>medical advice</strong> — Leiko doesn&#39;t give it. Use &quot;Talk to your doctor&quot;</li>
 <li><strong>dangerous level / critical level</strong> — alarmist. Use &quot;worth a second look&quot;</li>
 <li><strong>lower your blood pressure / reduce your BP</strong> — outcome promises Meta will reject</li>
@@ -282,706 +343,634 @@ Last updated: May 2026 | Source: leiko-app/docs/marketing/leiko-ads-playbook.md<
 <li>&quot;Take a real blood pressure reading&quot;</li>
 <li>&quot;Watch over your health&quot;</li>
 <li>&quot;See how your day shows up in your numbers&quot;</li>
+<li>&quot;See what&#39;s actually moving the needle&quot;</li>
 <li>&quot;Talk to your doctor&quot;</li>
-<li>&quot;Track your vitals&quot;</li>
-<li>&quot;Stay close to the people you care for&quot;</li>
-<li>&quot;A calmer way to understand your readings&quot;</li>
+<li>&quot;FDA-listed. EU Class IIa.&quot;</li>
+<li>&quot;Built in an ISO 13485 facility&quot;</li>
+<li>&quot;Real cuff. Real number.&quot;</li>
+<li>&quot;Reserve your Leiko for the next batch&quot;</li>
 </ul>
 <h2>Visual rules</h2>
 <ul>
-<li><strong>No red</strong> anywhere in ad creative. Red is Leiko&#39;s confirmed-urgent state in the app — using it in marketing breaks the brand&#39;s &quot;no fear language&quot; rule and trains users to associate red with alarm.</li>
-<li><strong>No fear imagery</strong>. No clutching chest, no worried doctor frowns, no flashing warning numbers.</li>
-<li><strong>No &quot;before / after&quot;</strong> showing falling BP numbers. Outcome promises.</li>
-<li><strong>No stock-photo white coats</strong>. Generic &quot;trustworthy doctor&quot; stock is overused and reads as inauthentic.</li>
+<li><strong>No red</strong> anywhere in ad creative — red is reserved for the app&#39;s &quot;confirmed-urgent&quot; state, using it in marketing breaks the calm brand</li>
+<li><strong>No fear imagery</strong> — no clutching chest, no worried doctor, no flashing warning numbers</li>
+<li><strong>No &quot;before / after&quot; outcome shots</strong> showing BP falling — outcome promises</li>
+<li><strong>No stock-photo white coats</strong> — too generic, reads as inauthentic</li>
+<li><strong>Show the actual watch hardware</strong> — real product photography always, especially in the hero shot</li>
 </ul>
 <h2>What&#39;s allowed</h2>
 <ul>
-<li>Warm, calm color palette: <code>#0A0907</code> dark warm, <code>#E8A063</code> copper accent, cream</li>
+<li>Warm calm palette: dark warm <code>#0A0907</code>, copper <code>#E8A063</code>, cream</li>
 <li>Real product photography</li>
 <li>Editorial illustration</li>
 <li>Caregiver scenes (adult child + parent, partner + partner)</li>
-<li>Real screenshots of the app (with permission to use)</li>
+<li>Real app screenshots</li>
+<li>Trust badges (FDA-listed, EU Class IIa, ISO 13485) — important and underused in v1</li>
 </ul>
 <h2>The &quot;would a worried mother believe it&quot; test</h2>
-<p>Before publishing any ad, read it as if you were Mum reading it on Facebook. If it makes her anxious or doubtful, it fails. Calm confidence is the win.</p>
+<p>Before publishing any ad, read it as if you were Mum scrolling on Facebook. If it makes her anxious or doubtful, it fails. <strong>Calm confidence is the win.</strong></p>
 <hr>
-<h1>Part 3 — Platform deep dives</h1>
-<p>Four platforms matter for Phase 1, plus one regional channel. Ranked by your specific situation.</p>
-<h2>3.1 Meta (Facebook + Instagram) — primary, ~70% of budget</h2>
-<p><strong>Why it&#39;s #1 for Leiko:</strong></p>
-<ul>
-<li>Best demographic targeting for caregivers (40-65, married, parents)</li>
-<li>Best diaspora targeting (the &quot;Nigeria connection&quot; interest layer combined with US geographic)</li>
-<li>Strongest emotional storytelling format (Reels, Stories, image)</li>
-<li>Most mature attribution (Conversions API + Pixel + Mobile Measurement)</li>
-<li>Both founder markets (Nigeria, US) are Meta-dominant</li>
-</ul>
-<p><strong>Account structure:</strong></p>
+<h1>Part 4 — Platform deep dives</h1>
+<p>Three platforms matter for Phase 1, ranked by fit for Leiko&#39;s hardware-DTC + reservation funnel.</p>
+<h2>4.1 Meta (Facebook + Instagram) — primary, ~70% of budget</h2>
+<p><strong>Why #1</strong>: Best demographic targeting for caregivers (40-65, married, parents). Best diaspora targeting (the &quot;Nigerian connection&quot; + &quot;United States&quot; combo nothing else can match). Sales-objective ads (with a Pixel on leiko.health) optimise toward purchases — exactly the conversion event we care about. Carousel format works for &quot;see all 5 vitals&quot; storytelling.</p>
+<p><strong>The shift from v1</strong>: Use <strong>Sales objective</strong>, not App Promotion. Conversion event is <strong>&quot;Reservation Completed&quot;</strong> (a Pixel event fired when the user pays the $50 deposit on leiko.health/reserve), not &quot;App Install&quot;.</p>
+<p><strong>Account structure</strong>:</p>
 <pre><code>Meta Business Manager (primethebrain@gmail.com)
 └── Ad Account: Leiko
-    ├── Pixel: Leiko Web (for the marketing site)
-    ├── App ID: com.leiko.app (linked via SDK)
+    ├── Pixel: Leiko Web (on leiko.health) — primary conversion source
+    ├── App: com.leiko.app (linked via SDK, secondary)
     └── Campaigns:
-        ├── CAMP 1 — Nigeria, App Install objective
-        ├── CAMP 2 — US Diaspora, App Install objective
-        ├── CAMP 3 — US mainstream, Waitlist signup objective
-        └── CAMP 4 — Retargeting, Trial signup objective
+        ├── CAMP 1 — Sales — Nigeria reservations
+        ├── CAMP 2 — Sales — US diaspora reservations
+        ├── CAMP 3 — Sales — US mainstream waitlist (no payment yet, just email + name)
+        ├── CAMP 4 — Retargeting — visitors who didn&#39;t reserve
+        └── CAMP 5 — App Install — secondary brand layer (lower budget)
 </code></pre>
-<p><strong>Best formats for Leiko:</strong></p>
+<p><strong>Best formats</strong>:</p>
 <ul>
-<li><strong>Reels (9:16, 15-30s)</strong> — currently highest reach, lowest CPM</li>
-<li><strong>Feed image (1:1 or 4:5 portrait)</strong> — for emotional stills</li>
-<li><strong>Stories (9:16, 15s)</strong> — quick lifestyle moments</li>
-<li><strong>Carousel (1:1, 2-5 cards)</strong> — for &quot;5 vitals&quot; format</li>
-<li><strong>Video feed (1:1, 4-15s)</strong> — for product demos</li>
+<li><strong>Carousel ads (4-6 cards)</strong> — show the watch, then the cuff inflating, then the app, then the family circle, then the FDA badge. Each card builds the story.</li>
+<li><strong>Reels (9:16, 15-30s)</strong> — the watch inflating + a quick line of voiceover lands at low CPM</li>
+<li><strong>Single image (1:1 or 4:5)</strong> — for the FDA-badge trust ads</li>
+<li><strong>Stories (9:16, 15s)</strong> — quick &quot;reserve yours&quot; CTAs</li>
 </ul>
-<p><strong>Bidding:</strong></p>
+<p><strong>Bidding</strong>:</p>
 <ul>
-<li>Phase 1: use <strong>Cost cap</strong> bidding at your target CPI ($3 Nigeria, $12 diaspora)</li>
-<li>Phase 2: switch to <strong>Lowest cost</strong> with no cap once you have data</li>
+<li>Phase 1: <strong>Cost cap</strong> at your target CPA ($15 NG / $30 diaspora). Start tight; loosen if delivery is slow.</li>
+<li>Phase 2: Switch to <strong>Lowest cost</strong> with no cap once you have data.</li>
 </ul>
-<h2>3.2 Google Ads (UAC + Search) — secondary, ~20% of budget</h2>
-<p><strong>Why #2:</strong></p>
-<ul>
-<li>Captures high-intent search (&quot;blood pressure monitor&quot;, &quot;BP watch&quot;)</li>
-<li>UAC auto-distributes across YouTube + Search + Display + Play Store</li>
-<li>Less sophisticated demographic targeting than Meta, but better intent capture</li>
-<li>Strongest channel for Play Store discoverability</li>
-</ul>
-<p><strong>Account structure:</strong></p>
+<h2>4.2 Google Ads (Search + Performance Max) — secondary, ~20% of budget</h2>
+<p><strong>The shift from v1</strong>: Move from UAC (Universal App Campaigns) to <strong>Search + Performance Max with leiko.health as the destination</strong>. Google Search captures high-intent buyers Googling &quot;blood pressure smartwatch&quot; or &quot;FDA cleared BP watch&quot;, which has much higher purchase intent than app-install ads.</p>
+<p><strong>Account structure</strong>:</p>
 <pre><code>Google Ads (primethebrain@gmail.com)
-├── App campaign — Installs (UAC)
-├── App campaign — In-app conversions (once you have 50+ subscribers)
-└── Search — branded + competitor terms
+├── Search — branded (&quot;leiko&quot;, &quot;leiko watch&quot;)
+├── Search — commercial intent (&quot;blood pressure watch&quot;, &quot;FDA BP smartwatch&quot;, &quot;real cuff smartwatch&quot;)
+├── Search — competitor (&quot;Omron HeartGuide alternative&quot;, &quot;Aktiia review&quot;, &quot;Apple Watch BP accuracy&quot;)
+└── Performance Max — broad shopping-style campaign
 </code></pre>
-<p><strong>Best formats:</strong></p>
+<p><strong>Best formats</strong>:</p>
 <ul>
-<li><strong>UAC Installs</strong> — set a target CPI ($3-12 depending on geo), feed Google your store listing + 5 headlines + 5 descriptions + 20 image assets + 3 videos</li>
-<li><strong>UAC In-app actions</strong> — same setup but optimized toward trial-start or subscribe events (requires conversion tracking; see Part 8)</li>
-<li><strong>Search ads</strong> (advanced) — bid on &quot;blood pressure monitor&quot;, &quot;track parent&#39;s blood pressure&quot; — only worth setting up after Phase 1</li>
+<li><strong>Search ads</strong> — text headlines + descriptions, destination leiko.health/reserve</li>
+<li><strong>Performance Max</strong> — auto-distributes across Search, YouTube, Display, Discover from your supplied assets</li>
 </ul>
-<h2>3.3 TikTok For Business — testing slot, ~5-10% of budget</h2>
-<p><strong>Why #3:</strong></p>
+<p><strong>Bidding</strong>:</p>
 <ul>
-<li>Lowest CPM of the major platforms ($2-6 in Nigeria, $8-15 in US)</li>
-<li>Caregiver-aged audience is now strong on TikTok (35-55 segment growing fastest)</li>
-<li>UGC-style ads work well; doesn&#39;t reward over-polished production</li>
-<li>Excellent for video-first creative</li>
+<li>Search: <strong>Maximise conversions</strong> with target CPA of $25 NG / $50 diaspora</li>
+<li>Performance Max: same target CPA</li>
 </ul>
-<p><strong>Best for:</strong></p>
+<p><strong>Skipping</strong>: UAC for app installs in Phase 1. Add back in Phase 2 as a secondary brand layer.</p>
+<h2>4.3 TikTok For Business — testing slot, ~5-10% of budget</h2>
+<p><strong>Why #3</strong>: Lowest CPM of major platforms. Caregiver demographic on TikTok grows fastest. UGC-style works well. Excellent for video-first creative.</p>
+<p><strong>Best formats</strong>:</p>
 <ul>
-<li>Founder-on-camera ads (&quot;I built this for my mum&quot;)</li>
-<li>Authentic product demos</li>
-<li>Education (&quot;3 things your blood pressure reading tells you&quot;)</li>
+<li><strong>In-Feed video</strong> (9:16, 15-30s) — founder talking to camera, real product b-roll</li>
+<li><strong>Spark Ads</strong> — boost organic posts (or partner creator&#39;s posts) to extend reach</li>
 </ul>
-<p><strong>Lower priority because:</strong></p>
+<p><strong>Conversion path</strong>: TikTok pixel on leiko.health, optimise for &quot;Complete Registration&quot; event (the reservation form submit).</p>
+<h2>4.4 What we&#39;re NOT doing in Phase 1</h2>
 <ul>
-<li>Less mature attribution</li>
-<li>Smaller audience for Nigerian diaspora specifically</li>
-<li>Conversion tracking via TikTok pixel is less reliable than Meta</li>
+<li>YouTube In-Stream — deferred to Phase 2 (needs video production scale)</li>
+<li>App-install-primary ads — deferred to secondary 20% layer</li>
+<li>LinkedIn / X / Reddit — not where this audience converts</li>
+<li>Display network blanket — too broad for a hardware DTC launch</li>
 </ul>
-<h2>3.4 YouTube — long-game, deferred to Phase 2</h2>
-<p><strong>Why deferred:</strong></p>
-<ul>
-<li>YouTube In-Stream needs video production (more capital + time than other formats)</li>
-<li>Slower attribution loops</li>
-<li>Better as a content channel than ads channel for v1</li>
-</ul>
-<p><strong>When to revisit:</strong></p>
-<ul>
-<li>Phase 2 if you start producing educational content (caregiver tips, BP explainer videos)</li>
-<li>Use YouTube ads to retarget viewers of your organic content</li>
-</ul>
-<h2>3.5 WhatsApp Status Ads (via Meta) — Nigeria-specific, included in Meta budget</h2>
-<p>WhatsApp Status placements buy through your normal Meta campaign setup. Tick &quot;WhatsApp Status&quot; as a placement on your Nigeria campaigns. Works well because Nigerian smartphone use is WhatsApp-dominant.</p>
 <hr>
-<h1>Part 4 — The five core creative angles</h1>
-<p>In Phase 1 run <strong>all five angles in parallel</strong>. Three variants per angle. Total: 15 ads in rotation. Kill the bottom 3-5 after 7 days. Add 3-5 new variants of the top performers in week 2.</p>
-<h2>Angle A — The Caregiver Hook</h2>
-<p><strong>Premise</strong>: An adult child watches over a parent&#39;s health from a distance. The ad invites them to do that with less worry.</p>
-<p><strong>Headline</strong>: &quot;I check Mum&#39;s blood pressure without having to call.&quot;</p>
-<p><strong>Visual concept</strong>: Adult child (40s, warm lighting, calm expression) glancing at a phone screen showing the Leiko app. Optional: a parent&#39;s photo on a bedside table in the background.</p>
-<p><strong>Voice</strong>: warm, reflective. Not sad. Not happy. Calm.</p>
-<p><strong>CTA</strong>: &quot;Watch over your family. Try Leiko free for 7 days.&quot;</p>
-<p><strong>Target audience</strong>: Adult children of Nigerian parents (the diaspora), age 35-55, interests = caregiving + family.</p>
-<h2>Angle B — The Differentiator Hook</h2>
-<p><strong>Premise</strong>: Most &quot;BP watches&quot; don&#39;t actually measure blood pressure — they estimate it from heart rate. Leiko has a real cuff.</p>
+<h1>Part 5 — The five core creative angles (re-ordered)</h1>
+<p>Run all five in parallel from week 1. Three variants per angle. Kill the bottom 5 after week 1; refresh winners weekly.</p>
+<h2>Angle 1 — The Real Cuff Differentiator (NEW HERO ANGLE)</h2>
+<p><strong>Premise</strong>: Every other &quot;BP smartwatch&quot; estimates. Leiko measures. With a real cuff. Lead with the hardware moat.</p>
 <p><strong>Headline</strong>: &quot;A real cuff. A real number. Not an estimate.&quot;</p>
-<p><strong>Visual concept</strong>: Close-up of the Leiko watch on a wrist, mid-inflation. The cuff visibly inflating. Result number appears at the end.</p>
-<p><strong>Voice</strong>: confident, slightly intellectual. Not aggressive.</p>
-<p><strong>CTA</strong>: &quot;See the difference. Download Leiko.&quot;</p>
-<p><strong>Target audience</strong>: Adults 40-65 who&#39;ve researched BP wearables — Meta interest &quot;blood pressure monitor&quot;.</p>
-<h2>Angle C — The Insight Hook</h2>
-<p><strong>Premise</strong>: The point of tracking is to learn what affects you. Leiko connects the dots between actions and numbers.</p>
+<p><strong>Visual</strong>: Close-up of the Leiko watch on a wrist, the fabric cuff visibly inflating, holding, then deflating. End on a calm reading like &quot;118/76&quot; with a steady checkmark.</p>
+<p><strong>Voiceover (if video)</strong>: &quot;Most blood pressure smartwatches estimate from your pulse. Leiko measures with a real cuff — the same method as the cuff at your doctor&#39;s office. Reserve yours for the next batch.&quot;</p>
+<p><strong>CTA</strong>: &quot;Reserve yours for $50. Pay the rest when it ships.&quot;</p>
+<p><strong>Target</strong>: Adults 40-65, interests &quot;blood pressure monitor&quot;, &quot;wearables&quot;, &quot;health gadgets&quot;. Strongest for self-buyers.</p>
+<h2>Angle 2 — The Regulatory Pedigree (NEW)</h2>
+<p><strong>Premise</strong>: We have FDA + EU + ISO certifications. Almost no smartwatch competitor does. This is rare and worth saying.</p>
+<p><strong>Headline</strong>: &quot;FDA-listed. EU-classified. Built in an ISO 13485 facility.&quot;</p>
+<p><strong>Visual</strong>: A clean badge composition — watch in the center, three credibility badges (FDA, EU MDR Class IIa, ISO 13485) arranged around it. Warm dark background. Copper accents.</p>
+<p><strong>Voiceover</strong>: &quot;Most BP smartwatches are sports trackers in disguise. Leiko is FDA-listed, EU classified, and made in a facility certified to ISO 13485 — the international standard for medical device manufacturing. Reserve yours for the next batch.&quot;</p>
+<p><strong>CTA</strong>: &quot;Reserve your Leiko. $50 today, $150 when it ships.&quot;</p>
+<p><strong>Target</strong>: Adults 45-65 who&#39;ve done research on BP devices. Skews more clinical, less emotional. Use for retargeting visitors who saw Angle 1 but didn&#39;t convert.</p>
+<h2>Angle 3 — See What Your Day Does (NEW PRIMARY)</h2>
+<p><strong>Premise</strong>: Tracking is pointless without insight. Leiko shows you cause and effect.</p>
 <p><strong>Headline</strong>: &quot;See what your day does to your numbers.&quot;</p>
-<p><strong>Visual concept</strong>: A trends chart on the phone showing BP rising after a stressful day, then settling after a walk. Real screenshot, composed nicely.</p>
-<p><strong>Voice</strong>: curious, thoughtful.</p>
-<p><strong>CTA</strong>: &quot;Try it free for 7 days.&quot;</p>
-<p><strong>Target audience</strong>: Self-buyers, age 35-60, interests = wellness, mindfulness, fitness tracking.</p>
-<h2>Angle D — The Self-Buyer Hook</h2>
-<p><strong>Premise</strong>: Calm daily habit. Take a reading every morning. Drink your tea. Move on.</p>
-<p><strong>Headline</strong>: &quot;Take real readings, every morning. Calmly.&quot;</p>
-<p><strong>Visual concept</strong>: Morning kitchen counter scene. Watch on wrist. Cup of tea. Soft light through window.</p>
-<p><strong>Voice</strong>: gentle, ritualistic.</p>
-<p><strong>CTA</strong>: &quot;Start your morning right.&quot;</p>
-<p><strong>Target audience</strong>: Adults 45-65 newly aware of hypertension, no caregiver dimension.</p>
-<h2>Angle E — The Doctor-Share Hook</h2>
-<p><strong>Premise</strong>: Make doctor visits easier. One PDF replaces five minutes of small talk.</p>
+<p><strong>Visual</strong>: A real screenshot of the app&#39;s trends view showing a BP line that dips after an annotated &quot;1-hour walk&quot; point and stays elevated after an annotated &quot;short sleep&quot; point. Hand-lettered annotations.</p>
+<p><strong>Voiceover</strong>: &quot;An hour-long walk. Eight hours of sleep. A stressful meeting. Each one moves your blood pressure. Leiko shows you exactly how much, so you can choose what to change. Reserve yours for the next batch.&quot;</p>
+<p><strong>CTA</strong>: &quot;Get your evidence. Reserve Leiko.&quot;</p>
+<p><strong>Target</strong>: Self-improvers, wellness/biohacking interests, 35-55. Lifestyle-tracking adjacent. Strongest for self-buyers who are NOT yet hypertensive but want data.</p>
+<h2>Angle 4 — The Caregiver</h2>
+<p><strong>Premise</strong>: Watch over your loved one&#39;s health without having to call.</p>
+<p><strong>Headline</strong>: &quot;I see Mum&#39;s blood pressure without having to call.&quot;</p>
+<p><strong>Visual</strong>: Adult child (40s, warm lighting, calm expression) glancing at their phone showing the Leiko Family Circle view. Optional: parent&#39;s photo softly out of focus.</p>
+<p><strong>Voiceover</strong>: &quot;She lives in Lagos. I live in Houston. With Leiko, I see her blood pressure as she takes it — and so does her doctor. Reserve a Leiko for the parent you watch over.&quot;</p>
+<p><strong>CTA</strong>: &quot;Reserve one for them. $50 today.&quot;</p>
+<p><strong>Target</strong>: Diaspora caregivers especially — Nigerian-Americans 35-55 with parents back home. Also works for any adult-child-of-aging-parent demographic.</p>
+<h2>Angle 5 — The Doctor-Share</h2>
+<p><strong>Premise</strong>: Make doctor visits useful. One PDF replaces five minutes of &quot;do you remember last week?&quot;</p>
 <p><strong>Headline</strong>: &quot;One tap. Your doctor has everything.&quot;</p>
-<p><strong>Visual concept</strong>: Hand offering a phone to a doctor in a clinic setting. The doctor&#39;s expression reads &quot;this is exactly what I needed.&quot;</p>
-<p><strong>Voice</strong>: practical, efficient.</p>
-<p><strong>CTA</strong>: &quot;Get the PDF. Skip the small talk.&quot;</p>
-<p><strong>Target audience</strong>: Self-buyers and caregivers, age 40-65, recently had a doctor visit.</p>
-<hr>
-<h1>Part 5 — AI tool stack with pricing</h1>
-<p>Every tool you need for Phase 1 creative production, with current pricing and what to use each for.</p>
-<h2>Images</h2>
+<p><strong>Visual</strong>: Hand offering a phone displaying a clean PDF summary to a doctor in a clinic. Warm window light. Doctor&#39;s face not shown.</p>
+<p><strong>Voiceover</strong>: &quot;Bring your doctor a clear PDF of your last 30 days. Instead of guessing what your numbers looked like last Tuesday. Reserve your Leiko today.&quot;</p>
+<p><strong>CTA</strong>: &quot;Skip the guesswork. Reserve Leiko.&quot;</p>
+<p><strong>Target</strong>: Adults 40-65 who recently had a doctor visit. Works for both self-buyers and caregivers.</p>
+<h2>How the angles compete</h2>
 <table>
 <thead>
 <tr>
-<th>Tool</th>
-<th>Cost</th>
-<th>Use for</th>
-<th>Notes</th>
+<th>Angle</th>
+<th>Best for</th>
+<th>Cost per reservation</th>
+<th>Volume</th>
 </tr>
 </thead>
 <tbody><tr>
-<td><strong>Midjourney v6</strong></td>
-<td>$10/mo (Basic) or $30/mo (Standard)</td>
-<td>Highest aesthetic quality — lifestyle, emotional scenes</td>
-<td>Discord-based UI; takes practice. Standard plan gives unlimited slow GPU which is plenty.</td>
+<td>1 — Real Cuff</td>
+<td>Self-buyers, mid-funnel</td>
+<td>Lowest</td>
+<td>High</td>
 </tr>
 <tr>
-<td><strong>DALL-E 3 (ChatGPT Plus)</strong></td>
-<td>$20/mo</td>
-<td>Quick variations, integrated with copy generation in same chat</td>
-<td>Easier UI. Slightly less aesthetic control than Midjourney.</td>
+<td>2 — Pedigree</td>
+<td>Researchers, retargeting</td>
+<td>Medium</td>
+<td>Low but high-quality</td>
 </tr>
 <tr>
-<td><strong>Adobe Firefly</strong></td>
-<td>Included with Creative Cloud, or $5/mo standalone</td>
-<td>Commercial-safe licensing (important for ad use)</td>
-<td>Better for compositing into existing designs</td>
+<td>3 — Insight</td>
+<td>Wellness, biohacking</td>
+<td>Medium</td>
+<td>Medium</td>
 </tr>
 <tr>
-<td><strong>Recraft</strong></td>
-<td>Free tier; $12/mo Pro</td>
-<td>Vector + raster, good for icon-style and product mockups</td>
-<td>Decent for product compositions</td>
+<td>4 — Caregiver</td>
+<td>Diaspora</td>
+<td>Medium</td>
+<td>High in diaspora</td>
+</tr>
+<tr>
+<td>5 — Doctor-share</td>
+<td>Both audiences</td>
+<td>Medium-low</td>
+<td>Medium</td>
 </tr>
 </tbody></table>
-<p><strong>My pick for you</strong>: Midjourney Standard ($30/mo) + ChatGPT Plus ($20/mo). That&#39;s $50/mo total, covers 95% of image needs.</p>
-<h2>Video</h2>
+<p><strong>Expect</strong> Angles 1 and 4 to drive volume; Angles 2 and 3 to drive higher-quality reservations.</p>
+<hr>
+<h1>Part 6 — AI tool stack with pricing</h1>
+<p>Same as v1 — the tool stack doesn&#39;t change with the strategy. Reproduced here for the standalone manual.</p>
 <table>
 <thead>
 <tr>
+<th>Job</th>
 <th>Tool</th>
 <th>Cost</th>
-<th>Use for</th>
-<th>Notes</th>
+<th>Why</th>
 </tr>
 </thead>
 <tbody><tr>
-<td><strong>Runway Gen-3</strong></td>
-<td>$15/mo (Standard) or $35/mo (Pro)</td>
-<td>Short cinematic clips (4-10s)</td>
-<td>Best motion quality. Pro gives 4K + 16s clips.</td>
+<td>Image generation</td>
+<td><strong>Midjourney v6 Standard</strong></td>
+<td>$30/mo</td>
+<td>Best aesthetic control</td>
 </tr>
 <tr>
-<td><strong>Pika 2.1</strong></td>
-<td>$10/mo (Standard)</td>
-<td>Quick experimental video</td>
-<td>Lower fidelity but faster.</td>
+<td>Quick image variations</td>
+<td><strong>DALL-E 3 in ChatGPT Plus</strong></td>
+<td>$20/mo</td>
+<td>Integrated with copy generation</td>
 </tr>
 <tr>
-<td><strong>Sora</strong></td>
-<td>Requires ChatGPT Plus + waitlist access</td>
-<td>Best quality when available</td>
-<td>Not always accessible.</td>
+<td>Short video clips</td>
+<td><strong>Runway Gen-3 Standard</strong></td>
+<td>$15/mo</td>
+<td>Best motion quality</td>
 </tr>
 <tr>
+<td>Voiceovers</td>
+<td><strong>ElevenLabs Creator</strong></td>
+<td>$22/mo</td>
+<td>Required for commercial use rights</td>
+</tr>
+<tr>
+<td>Music beds</td>
+<td><strong>Suno v4 Pro</strong></td>
+<td>$10/mo</td>
+<td>Royalty-free</td>
+</tr>
+<tr>
+<td>Ad copy</td>
+<td><strong>Claude Pro</strong></td>
+<td>$20/mo</td>
+<td>Best at honoring voice rules</td>
+</tr>
+<tr>
+<td>Editing</td>
 <td><strong>CapCut Desktop</strong></td>
 <td>Free</td>
-<td>Editing, captions, B-roll mixing</td>
-<td>Critical — you need this for assembling clips.</td>
+<td>Critical</td>
 </tr>
 </tbody></table>
-<p><strong>My pick for you</strong>: Runway Gen-3 Standard ($15/mo) + CapCut (free).</p>
-<h2>Voice</h2>
-<table>
-<thead>
-<tr>
-<th>Tool</th>
-<th>Cost</th>
-<th>Use for</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>ElevenLabs</strong></td>
-<td>$5/mo (Starter) or $22/mo (Creator)</td>
-<td>Voiceovers in any voice + language</td>
-<td>Best quality. Supports Nigerian English. Creator tier needed for commercial use.</td>
-</tr>
-<tr>
-<td><strong>Descript Overdub</strong></td>
-<td>$12/mo (Hobbyist)</td>
-<td>Voice cloning your own voice</td>
-<td>Only worth it if you want to scale founder VO without recording.</td>
-</tr>
-</tbody></table>
-<p><strong>My pick for you</strong>: ElevenLabs Creator ($22/mo). Critical for commercial use rights.</p>
-<h2>Music</h2>
-<table>
-<thead>
-<tr>
-<th>Tool</th>
-<th>Cost</th>
-<th>Use for</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>Suno v4</strong></td>
-<td>$10/mo (Pro) or $30/mo (Premier)</td>
-<td>Generated music beds</td>
-<td>Best quality. Pro is enough.</td>
-</tr>
-<tr>
-<td><strong>Udio</strong></td>
-<td>$10/mo (Standard)</td>
-<td>Alternative</td>
-<td>Comparable to Suno.</td>
-</tr>
-<tr>
-<td><strong>Epidemic Sound</strong></td>
-<td>$19/mo</td>
-<td>Library of licensed real music</td>
-<td>Use for &quot;this needs to feel human&quot; moments.</td>
-</tr>
-</tbody></table>
-<p><strong>My pick for you</strong>: Suno Pro ($10/mo). Add Epidemic Sound ($19/mo) only if you need real music.</p>
-<h2>Copy</h2>
-<table>
-<thead>
-<tr>
-<th>Tool</th>
-<th>Cost</th>
-<th>Use for</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>Claude 4.7</strong></td>
-<td>$20/mo (Pro)</td>
-<td>Ad copy + voice-checking</td>
-<td>Best at following voice rules.</td>
-</tr>
-<tr>
-<td><strong>ChatGPT Plus</strong></td>
-<td>$20/mo</td>
-<td>Quick variations + DALL-E integration</td>
-<td>Already on the image list.</td>
-</tr>
-</tbody></table>
-<p><strong>My pick for you</strong>: Claude Pro ($20/mo) — best at honoring Leiko&#39;s voice rules.</p>
-<h2>Total monthly AI stack</h2>
-<p>For full DIY production:</p>
-<pre><code>Midjourney Standard      $30
-ChatGPT Plus              $20
-Runway Standard           $15
-ElevenLabs Creator        $22
-Suno Pro                  $10
-Claude Pro                $20
-CapCut                     $0
-─────────────────────
-Total                    $117/mo
-</code></pre>
-<p>That&#39;s 6-23% of your Phase 1 ad budget. Acceptable.</p>
-<p><strong>Lean variant (skip if you don&#39;t need video):</strong></p>
-<pre><code>Midjourney Standard      $30
-Claude Pro                $20
-ElevenLabs Starter        $5
-CapCut                     $0
-─────────────────────
-Total                     $55/mo
-</code></pre>
-<p>Use static images only. Video can come in Phase 2.</p>
-<hr>
-<h1>Part 6 — Prompt library</h1>
-<p>Ready-to-paste prompts for every angle, every tool. Copy, paste, iterate.</p>
-<h2>6.1 Midjourney v6 — image prompts</h2>
-<p>Add <code>--ar 1:1</code> for feed squares, <code>--ar 9:16</code> for stories/reels, <code>--ar 4:5</code> for portrait feed, <code>--ar 16:9</code> for landscape banner.</p>
-<h3>Angle A — Caregiver</h3>
-<pre><code>Editorial photograph of a Nigerian-American woman in her 40s sitting at a sunlit kitchen counter, holding her smartphone with a calm expression, soft warm morning light, deep dark warm background, copper and cream tones, shallow depth of field, looking at the phone with quiet attention, a framed photo of her elderly mother visible softly out of focus in background, candid feel, New Yorker magazine aesthetic, no text overlay --ar 4:5 --v 6
-</code></pre>
-<pre><code>Editorial photograph of an adult son in his late 30s on a quiet evening, glancing at his phone with the Leiko app open, warm low light, dark green and copper palette, deep blacks but never pure, contemplative not worried expression, blurred suggestion of family photo on shelf behind, cinematic restraint, no text --ar 1:1 --v 6
-</code></pre>
-<h3>Angle B — Differentiator</h3>
-<pre><code>Hyperrealistic close-up product photograph of a black sport smartwatch on a person&#39;s wrist, the watch has a visible inflated fabric cuff wrapping around the wrist mid-measurement, dark warm background, single soft light from above, copper accent, no logos visible, professional medical device photography aesthetic, sharp focus on the cuff and skin texture, calm mood --ar 4:5 --v 6
-</code></pre>
-<pre><code>Editorial split-screen photograph: left side shows a generic sports smartwatch reading &quot;120/80?&quot; with a question mark in optical-pulse aesthetic; right side shows the Leiko watch with a clearly inflated cuff reading &quot;118/76&quot; with a steady checkmark; muted warm palette, dark warm background, copper accents, no fear language, calm comparison --ar 16:9 --v 6
-</code></pre>
-<h3>Angle C — Insight</h3>
-<pre><code>Editorial illustration of a flowing line chart of blood pressure readings overlaying a calm morning scene of tea, a journal, and a smartwatch on a wooden surface, the chart line gently rises and falls with annotated dots showing &quot;after long walk&quot;, &quot;after stressful meeting&quot;, &quot;after good sleep&quot;, warm dark palette, hand-lettered annotations in italic serif, calm thoughtful mood, no fear, no red --ar 1:1 --v 6
-</code></pre>
-<h3>Angle D — Self-buyer</h3>
-<pre><code>Editorial morning kitchen scene photograph, soft light through a window, a person&#39;s hand wearing the Leiko smartwatch reaching for a steaming cup of tea, no face visible only hand and forearm, warm wooden countertop, copper accents on the watch, dark green ceramic mug, calm ritualistic atmosphere, shot from slightly above, shallow depth of field, no text, calm and quiet --ar 4:5 --v 6
-</code></pre>
-<h3>Angle E — Doctor-share</h3>
-<pre><code>Editorial photograph from a doctor&#39;s office: warm hand offering a smartphone displaying a clean medical PDF summary across a wooden consultation desk, doctor&#39;s hands (no face) reaching forward to accept the phone, warm copper light through window blinds, dark green clinic interior, calm professional mood, no text overlay, no white coats, no fear --ar 1:1 --v 6
-</code></pre>
-<h3>Variations to iterate on</h3>
-<p>After your first batch of 5, add ONE element at a time:</p>
+<p><strong>Total monthly stack</strong>: $117/mo. About 6-23% of your Phase 1 ad budget. Acceptable.</p>
+<p><strong>Lean variant (static images only, no video)</strong>:</p>
 <ul>
-<li>Different age (older parent, younger caregiver)</li>
-<li>Different ethnicity for diaspora vs Nigeria audiences (test both Nigerian and African-American)</li>
-<li>Different time of day (morning, evening)</li>
-<li>Different location (home, doctor&#39;s office, outdoor walk)</li>
-<li>Different posture (sitting, standing, lying)</li>
+<li>Midjourney + Claude + ElevenLabs Starter ($5) + CapCut = $55/mo</li>
 </ul>
-<h2>6.2 DALL-E 3 — image prompts</h2>
-<p>DALL-E 3 lives inside ChatGPT. Wrap prompts as instructions:</p>
-<pre><code>Generate a square 1024×1024 photorealistic editorial image for a calm health app advertisement. 
+<hr>
+<h1>Part 7 — Prompt library</h1>
+<p>Ready-to-paste prompts for the v2 hero angles. Add <code>--ar 1:1</code> for feed squares, <code>--ar 9:16</code> for stories/reels, <code>--ar 4:5</code> for portrait feed, <code>--ar 16:9</code> for landscape.</p>
+<h2>7.1 Midjourney — Angle 1 (Real Cuff)</h2>
+<pre><code>Macro product photography of a black sport smartwatch on a person&#39;s wrist, the watch has a clearly visible inflated fabric cuff wrapping around the wrist mid-blood-pressure measurement, shot from above at slight angle, dark warm background, single soft top light, copper accent on the watch crown, no logos visible, professional medical device photography aesthetic, sharp focus on the cuff and skin texture, calm confident mood, no text overlay --ar 4:5 --v 6
+</code></pre>
+<h2>7.2 Midjourney — Angle 2 (Pedigree)</h2>
+<pre><code>Editorial badge composition photograph: a Leiko sport smartwatch in the center, three small badges arranged in a quiet triangle around it labeled &quot;FDA LISTED&quot; &quot;EU MDR CLASS IIA&quot; &quot;ISO 13485 CERTIFIED&quot;, warm dark background, copper accents on the badges, premium product photography, calm trustworthy mood, no text overlay beyond the badges, minimal composition with negative space --ar 1:1 --v 6
+</code></pre>
+<h2>7.3 Midjourney — Angle 3 (Insight / Day shows up in numbers)</h2>
+<pre><code>Editorial illustration of a flowing blood pressure trend chart line over a calm morning scene: a smartwatch, a wooden countertop, a cup of tea, and a journal. The chart line gently rises and falls, with hand-lettered italic serif annotations pointing to specific dots: &quot;after 1-hour walk&quot;, &quot;after stressful meeting&quot;, &quot;after 8 hours sleep&quot;. Warm dark palette with copper line color. Calm thoughtful mood, no fear, no red, no text overlay beyond the annotations --ar 1:1 --v 6
+</code></pre>
+<h2>7.4 Midjourney — Angle 4 (Caregiver)</h2>
+<pre><code>Editorial photograph of a Nigerian-American woman in her 40s sitting at a sunlit kitchen counter in a US home, holding her smartphone with a calm expression, the phone screen visibly showing a Family Circle view with vitals. Soft warm morning light, deep dark warm background, copper and cream tones, shallow depth of field. A framed photo of her elderly mother visible softly out of focus in background. Candid feel, New Yorker magazine aesthetic, no text overlay --ar 4:5 --v 6
+</code></pre>
+<h2>7.5 Midjourney — Angle 5 (Doctor-share)</h2>
+<pre><code>Editorial photograph from a warm doctor&#39;s office: a warm hand offering a smartphone displaying a clean medical PDF summary across a wooden consultation desk, doctor&#39;s hands (no face visible) reaching forward to accept the phone. Warm copper light through window blinds, dark green clinic interior, calm professional mood, no white coats, no fear imagery, no text overlay --ar 1:1 --v 6
+</code></pre>
+<h2>7.6 Runway Gen-3 — video prompts</h2>
+<h3>Angle 1 — Watch inflate Reel (8s)</h3>
+<pre><code>Macro close-up of a black smartwatch on a person&#39;s wrist. The fabric cuff slowly inflates over three seconds, holds taut for two seconds, then deflates. Soft top light, dark warm background, single copper accent on the crown. No text. Subtle shallow focus shift at the end revealing a calm reading on the watch face.
+</code></pre>
+<h3>Angle 3 — Trends reveal Reel (12s)</h3>
+<pre><code>Top-down view of hands holding a smartphone showing a calm blood pressure trends chart in dark mode. The line gently animates from left to right, with subtle annotations appearing along the way: &quot;after walk&quot; (line drops), &quot;after short sleep&quot; (line rises slightly). Soft kitchen-counter background out of focus. Warm editorial palette.
+</code></pre>
+<h3>Angle 4 — Caregiver Reel (15s)</h3>
+<pre><code>Smooth slow camera push-in on a Nigerian-American woman in her 40s at a sunlit kitchen counter, morning light. She glances at her phone with a small, calm half-smile. Subtle camera drift. Calm warm editorial palette. Soft focus depth shift toward the end.
+</code></pre>
+<h2>7.7 ElevenLabs — voiceover scripts</h2>
+<p>Use the Adam voice (warm masculine, US English) or Bella voice (warm feminine). For NG targeting, try Charlie (Nigerian English) if available.</p>
+<h3>Angle 1 (12s)</h3>
+<pre><code>Most blood pressure smartwatches estimate. Leiko measures, with a real cuff.
+The same method as the cuff at your doctor&#39;s office.
+Reserve yours for the next batch — fifty dollars today, the rest when it ships.
+</code></pre>
+<h3>Angle 2 (14s)</h3>
+<pre><code>Most blood pressure smartwatches are sports trackers in disguise.
+Leiko is F D A listed, classified under European medical device regulation, and built in a facility certified to I S O 13485.
+A real medical device, on your wrist.
+Reserve yours today.
+</code></pre>
+<h3>Angle 3 (15s)</h3>
+<pre><code>A morning walk. Eight hours of sleep. A stressful meeting.
+Each one moves your blood pressure.
+Leiko shows you exactly how much — so you can change what matters, with evidence instead of guesses.
+Reserve yours for the next batch.
+</code></pre>
+<h3>Angle 4 (15s)</h3>
+<pre><code>She lives in Lagos. I live in Houston.
+With Leiko, I see her blood pressure as she takes it, and so does her doctor.
+Reserve a Leiko for the parent you watch over.
+Fifty dollars today, the rest when it ships.
+</code></pre>
+<h3>Angle 5 (12s)</h3>
+<pre><code>Bring your doctor a clear PDF instead of guessing what your numbers looked like last Tuesday.
+Leiko makes it in one tap.
+Reserve yours for the next batch.
+</code></pre>
+<p>Set ElevenLabs voice settings: Stability 60%, Similarity 75%, Style 35%.</p>
+<h2>7.8 Claude — ad copy prompts</h2>
+<h3>Generate 10 Meta ad headlines for Angle 1</h3>
+<pre><code>You are writing Meta ad headlines for Leiko, a wristwatch with a real inflating blood-pressure cuff (vs the optical estimates other smartwatches use). The watch is FDA-listed, EU MDR Class IIa, ISO 13485 certified. We are running a reservation campaign — users pay a $50 refundable deposit to lock in their watch from the next manufacturing run, credited toward the $200 final purchase.
 
-Scene: A Nigerian-American woman in her 40s sitting at a sunlit kitchen counter, holding her smartphone with a calm expression. Soft warm morning light. Deep dark warm background. Copper and cream tones. Shallow depth of field. She is looking at her phone with quiet attention. A framed photo of her elderly mother is visible softly out of focus in the background.
+Leiko&#39;s voice rules forbid: &quot;patient&quot;, &quot;diagnose&quot;, &quot;diagnosis&quot;, &quot;treat&quot;, &quot;treatment&quot;, &quot;cure&quot;, &quot;predict&quot; or &quot;prevent&quot; applied to disease, &quot;silent killer&quot;, &quot;ticking time bomb&quot;, &quot;before it&#39;s too late&quot;, &quot;medical advice&quot;, &quot;dangerous level&quot;, &quot;critical level&quot;, &quot;lower your blood pressure&quot; (outcome promise).
 
-Style: New Yorker magazine aesthetic. Editorial. Restrained. No text overlay. No medical equipment visible. No white coats. No red accents. No alarming expressions.
-
-Mood: Calm confidence.
+Write 10 short Meta ad headlines (under 40 characters each) for the &quot;Real Cuff&quot; angle — leading with the differentiation that Leiko is a real BP cuff, not an estimate. Tone: confident, calm, slightly intellectual. Each headline should be repeatable and memorable. Output as a numbered list. Mark anything that pushes the voice rules with a (RISKY) tag.
 </code></pre>
-<p>Repeat for each angle. DALL-E tends to need slightly more verbose prompts than Midjourney.</p>
-<h2>6.3 Runway Gen-3 — video prompts</h2>
-<p>Runway prompts are shorter than image prompts. Lead with the motion.</p>
-<h3>Caregiver Reel (10s)</h3>
-<pre><code>Smooth slow push-in on a Nigerian woman in her 40s at a kitchen counter, morning light, her gentle smile at the phone in her hand. Subtle camera drift. Calm warm editorial palette. Soft focus depth shift toward end.
+<h3>Generate Meta primary text for Angle 4</h3>
+<pre><code>Same brand + voice rules as before. Write 5 Meta ad primary text blocks (under 125 characters each) for the &quot;Caregiver&quot; angle — the use case where a US-based Nigerian-American adult child reserves a Leiko watch for their parent in Nigeria. Tone: warm, calm, dignified. Each should land the emotional pull without sentimentality. End each with a CTA toward the $50 reservation. Output as a numbered list.
 </code></pre>
-<h3>Watch inflate Reel (8s)</h3>
-<pre><code>Macro close-up of a black smartwatch on a person&#39;s wrist. The fabric cuff slowly inflates, holds for two seconds, then deflates. Soft top-light, dark warm background, single copper accent. No text. Subtle shallow focus.
-</code></pre>
-<h3>Trends Reveal Reel (10s)</h3>
-<pre><code>Top-down view of hands holding a smartphone showing a calm blood pressure trends chart. The line gently animates left to right, showing peaks and valleys. Soft kitchen-counter background out of focus. Warm editorial palette. No text overlay.
-</code></pre>
-<h3>Doctor handoff Reel (10s)</h3>
-<pre><code>Slow lateral camera move across a wooden consultation desk. A warm hand passes a smartphone to a doctor&#39;s waiting hand. Soft window light. No faces shown. Calm warm clinic interior. No white coats. No fear.
-</code></pre>
-<h2>6.4 ElevenLabs — voiceover scripts</h2>
-<p>Pick the <strong>Adam</strong> voice (warm masculine, US English) or <strong>Bella</strong> voice (warm feminine, US English) for diaspora targeting. For Nigeria targeting, use the <strong>Charlie</strong> voice (Nigerian English available in newer voice clones) or scripts work in clear US English.</p>
-<h3>Caregiver VO (15s)</h3>
-<pre><code>You don&#39;t always need to call to know they&#39;re okay. 
-Leiko shows you their blood pressure as they take it. 
-Calm. Real. From anywhere.
-
-Try Leiko free for seven days.
-</code></pre>
-<h3>Differentiator VO (12s)</h3>
-<pre><code>Most smartwatches estimate your blood pressure from heart rate. 
-Leiko measures it. With a real cuff. 
-The kind your doctor uses.
-
-Try Leiko free for seven days.
-</code></pre>
-<h3>Insight VO (15s)</h3>
-<pre><code>The point of tracking isn&#39;t the number. 
-It&#39;s the pattern. 
-Leiko shows you what your day did to your readings — calmly.
-
-Try Leiko free for seven days.
-</code></pre>
-<h3>Self-buyer VO (12s)</h3>
-<pre><code>A calmer morning. A real reading. A clearer view of what your numbers mean.
-
-Try Leiko free for seven days.
-</code></pre>
-<h3>Doctor-share VO (10s)</h3>
-<pre><code>Bring your doctor a clean summary instead of a long story. 
-Leiko makes the PDF in one tap.
-
-Start your free trial.
-</code></pre>
-<p>Set ElevenLabs voice settings: <strong>Stability 60%, Similarity 75%, Style 35%</strong>. Tweak per voice. Generate 2-3 takes; pick the calmest.</p>
-<h2>6.5 Suno v4 — music prompts</h2>
-<p>Generate a single 30-second instrumental loop for each angle. Use it under your VO.</p>
-<h3>General Leiko mood</h3>
-<pre><code>Calm warm editorial instrumental, soft piano with subtle warm strings, slow tempo around 72 BPM, no drums, gentle ambient bed, melancholic but hopeful, no vocals, two minutes long but with a clear start and end
-</code></pre>
-<h3>Caregiver / emotional</h3>
-<pre><code>Soft acoustic guitar with warm pad in the background, gentle finger-picked melody, sparse and contemplative, no drums, 65 BPM, no vocals, perfect for a quiet family moment in advertising, two minutes
-</code></pre>
-<h3>Differentiator / confident</h3>
-<pre><code>Modern minimalist instrumental, clean piano motif with subtle electronic pulse, calm but forward-moving, no vocals, 78 BPM, professional and trustworthy mood, two minutes
-</code></pre>
-<p>Click &quot;instrumental only&quot; in Suno and &quot;Custom mode&quot; to use these as full prompts.</p>
-<h2>6.6 Claude — ad copy prompts</h2>
-<p>Lead with the voice rules. This is critical.</p>
-<h3>Generate 10 Meta ad headlines for the Caregiver angle</h3>
-<pre><code>You are a brand copywriter for Leiko, a blood-pressure tracking app + watch product. Leiko&#39;s voice rules forbid: &quot;patient&quot;, &quot;diagnose&quot;, &quot;diagnosis&quot;, &quot;treat&quot;, &quot;treatment&quot;, &quot;cure&quot;, &quot;predict&quot; or &quot;prevent&quot; applied to disease, &quot;silent killer&quot;, &quot;ticking time bomb&quot;, &quot;before it&#39;s too late&quot;, &quot;medical advice&quot;, &quot;dangerous level&quot;, &quot;critical level&quot;, &quot;lower your blood pressure&quot; (outcome promises).
-
-Write 10 short Meta ad headlines (under 40 characters each) for the &quot;Caregiver&quot; angle — the use case where an adult child watches over a parent&#39;s blood pressure from a distance. Tone: calm, warm, dignified, never alarmist. Lead with the feeling, not the feature.
-
-Output as a numbered list. Mark anything that pushes the voice rules with a (RISKY) tag.
-</code></pre>
-<h3>Generate 5 Meta ad descriptions for the Self-buyer angle</h3>
-<pre><code>Same rules as before. Write 5 Meta ad primary text blocks (under 125 characters each) for the &quot;Self-buyer&quot; angle — adult, age 45-65, just starting to take their blood pressure seriously. Tone: calm ritual. Each block should be one or two sentences. End each with a clear CTA.
-</code></pre>
-<h3>Voice-check an ad before publishing</h3>
-<pre><code>Review this ad headline + description for Leiko. Flag any phrases that violate Leiko&#39;s voice rules (forbidden words: patient, diagnose, treat, cure, predict/prevent disease, silent killer, ticking time bomb, before it&#39;s too late, medical advice, dangerous/critical level, lower your blood pressure).
+<h3>Voice-check before publishing</h3>
+<pre><code>Review this ad for Leiko. Flag any phrase that violates Leiko&#39;s voice rules (forbidden: patient, diagnose, treat, cure, predict/prevent disease, silent killer, ticking time bomb, before it&#39;s too late, medical advice, dangerous/critical level, lower your blood pressure). Also flag anything that promises a health outcome.
 
 Headline: &lt;paste&gt;
-Description: &lt;paste&gt;
+Primary text: &lt;paste&gt;
+CTA: &lt;paste&gt;
 
-If it passes, say &quot;PASS&quot;. If it fails, point at the specific phrase and suggest a rewrite.
+If clean, say PASS. If issues, point at the specific phrase and suggest a rewrite.
 </code></pre>
 <hr>
-<h1>Part 7 — Step-by-step platform setup</h1>
-<p>Sequenced exactly the way you&#39;d do it on a Monday morning, account by account.</p>
-<h2>7.1 Meta Business Manager (one-time setup, 30 min)</h2>
+<h1>Part 8 — Step-by-step platform setup</h1>
+<p>Sequenced for a Monday morning.</p>
+<h2>8.1 Meta Business Manager (one-time, 30 min)</h2>
 <ol>
-<li>Go to <a href="https://business.facebook.com/overview">https://business.facebook.com/overview</a></li>
-<li>Click <strong>Create Account</strong> if you don&#39;t have one</li>
-<li>Sign in as <a href="mailto:primethebrain@gmail.com">primethebrain@gmail.com</a></li>
-<li>Account name: <code>Leiko</code>, Account email: same Gmail</li>
-<li>Add yourself as <strong>Admin</strong> under People settings</li>
-<li><strong>Create Ad Account</strong>:<ul>
-<li>Name: <code>Leiko Ads</code></li>
-<li>Time zone: <code>Africa/Lagos</code> (your operational time zone)</li>
-<li>Currency: <code>USD</code> (so reporting matches your budgets in this manual)</li>
-<li>Payment method: add a credit card</li>
+<li><a href="https://business.facebook.com/overview">https://business.facebook.com/overview</a> → Create Account → <a href="mailto:primethebrain@gmail.com">primethebrain@gmail.com</a></li>
+<li>Account name: <code>Leiko</code>, currency <code>USD</code>, time zone <code>Africa/Lagos</code></li>
+<li>Add yourself as Admin</li>
+<li><strong>Create Ad Account</strong> <code>Leiko Ads</code>, USD, Africa/Lagos</li>
+<li>Add a credit card</li>
+<li><strong>Install Pixel on leiko.health</strong> under Events Manager → Web → Pixel name <code>Leiko Web</code> → paste the pixel code into the marketing site (give the snippet to the agent maintaining leiko.health, takes 5 minutes)</li>
+<li><strong>Add App</strong> under Events Manager → App <code>com.leiko.app</code> → Android → links to Play Store listing (this is for the secondary App Install layer)</li>
+<li><strong>Verify domain</strong> → add <code>leiko.health</code> and add the meta tag to the site</li>
+<li><strong>Create Custom Conversions</strong>:<ul>
+<li>&quot;Reservation Completed&quot; — fires on /reserve/thank-you URL with value = $50</li>
+<li>&quot;Reservation Started&quot; — fires on /reserve URL view</li>
+<li>&quot;Waitlist Joined&quot; — fires on /us-waitlist/thank-you URL</li>
 </ul>
 </li>
-<li><strong>Create Pixel</strong> under Events Manager:<ul>
-<li>Name: <code>Leiko Web</code></li>
-<li>Source: Website</li>
-<li>Install: paste the pixel into the marketing site (the agent who built leiko.health can do this in 5 minutes)</li>
-</ul>
-</li>
-<li><strong>Add App</strong> under Events Manager:<ul>
-<li>App ID: <code>com.leiko.app</code></li>
-<li>Platform: Android (Google Play)</li>
-<li>This connects to your Play Store listing</li>
-</ul>
-</li>
-<li><strong>Create Domain</strong> under Brand Safety:<ul>
-<li>Add <code>leiko.health</code> as a verified domain (requires adding a meta tag to your marketing site)</li>
-</ul>
-</li>
-<li><strong>Create the Conversions API connection</strong> for server-side events (we&#39;ll wire this in Part 8)</li>
 </ol>
-<h2>7.2 First Meta campaign (60 min)</h2>
+<h2>8.2 First Meta campaign — Nigeria Reservations (60 min)</h2>
 <ol>
-<li><strong>Ads Manager → Create</strong></li>
-<li><strong>Objective</strong>: App Promotion</li>
-<li><strong>Campaign name</strong>: <code>LK_Phase1_Caregiver_Nigeria_Apr2026</code></li>
-<li><strong>Budget</strong>: Daily budget, $10</li>
-<li><strong>Ad Set</strong>:<ul>
-<li>Name: <code>Caregiver_Nigeria_Lagos_Abuja_PH</code></li>
-<li>App: select your Leiko Android app</li>
-<li>Promote: App installs</li>
-<li>Optimization for ad delivery: Installs (later, switch to &quot;App events&quot; once events fire)</li>
-<li>Cost per result goal: $3</li>
+<li>Ads Manager → <strong>Create</strong></li>
+<li><strong>Objective</strong>: Sales</li>
+<li><strong>Campaign name</strong>: <code>LK_P1_Reservations_NG_Apr2026</code></li>
+<li><strong>Budget</strong>: Daily $10</li>
+<li><strong>Ad set</strong>:<ul>
+<li>Name: <code>RealCuff_Angle1_Lagos_Abuja_PH</code></li>
+<li>Conversion location: Website</li>
+<li>Conversion event: &quot;Reservation Completed&quot;</li>
+<li>Optimization: Conversions</li>
+<li>Cost cap: $15 per reservation</li>
 </ul>
 </li>
 <li><strong>Audience</strong>:<ul>
-<li>Locations: Nigeria → Lagos, Abuja, Port Harcourt, Ibadan, Kano</li>
+<li>Locations: Nigeria → Lagos, FCT (Abuja), Rivers (PH), Oyo (Ibadan), Kano</li>
 <li>Age: 35-65</li>
-<li>Detailed targeting:<ul>
-<li>Interests: Caregiving, Family + relationships, Parenting, Mindfulness, Older adults</li>
-<li>Behaviors: &quot;Engaged with health-related content&quot;</li>
+<li>Detailed targeting: blood pressure monitor + health + caregiving + parenting + older adults</li>
 </ul>
 </li>
-<li>Estimated audience size should be 800K-2M for Nigeria urban</li>
+<li><strong>Placements</strong>: Automatic (FB feed + IG feed + Reels + Stories + WhatsApp Status)</li>
+<li><strong>Ad creative</strong> — 3 ads for Angle 1:<ul>
+<li>Primary text + headline + description from Claude</li>
+<li>Creative from Midjourney + Runway</li>
+<li>CTA: &quot;Reserve Now&quot; → leiko.health/reserve</li>
 </ul>
 </li>
-<li><strong>Placements</strong>: Automatic (let Meta optimize), include Facebook, Instagram, Stories, Reels, WhatsApp Status</li>
-<li><strong>Ad creative</strong>:<ul>
-<li>Upload your top 3 Caregiver-angle images (from Midjourney)</li>
-<li>Primary text: 3 variations from Claude prompts</li>
-<li>Headline: 3 variations</li>
-<li>CTA: &quot;Install Now&quot;</li>
-<li>Destination: Google Play Store URL</li>
-</ul>
-</li>
-<li><strong>Review and publish</strong></li>
+<li>Publish</li>
 </ol>
-<p>Repeat for the <strong>Caregiver_USDiaspora</strong> campaign with:</p>
+<p>Repeat for the <strong>US Diaspora Reservations</strong> campaign with:</p>
 <ul>
-<li>Locations: United States</li>
-<li>Detailed targeting: ADD &quot;Nigeria&quot; as a connection interest + Behaviors &gt; Multicultural Affinity &gt; African-American + Interests &gt; caregiving</li>
-<li>Cost per result: $12</li>
+<li>Locations: US (Houston, Dallas, Atlanta, NYC, DC, MD, NJ, LA, SF)</li>
+<li>Behaviors: African-American + Recent migrant</li>
+<li>Interests: Nigeria + Nigerian music + Naija news</li>
+<li>Cost cap: $30 per reservation</li>
+<li>Same 3 Angle-1 ads (creative localized only if needed)</li>
 </ul>
-<h2>7.3 Google Ads Universal App Campaign (UAC)</h2>
+<h2>8.3 Google Ads Search — Nigeria (45 min)</h2>
 <ol>
-<li><a href="https://ads.google.com">https://ads.google.com</a> → sign in as primethebrain</li>
-<li>Create a new account, currency USD, time zone Africa/Lagos</li>
-<li><strong>Add payment method</strong></li>
+<li><a href="https://ads.google.com">https://ads.google.com</a> → primethebrain</li>
+<li>Currency USD, time zone Africa/Lagos</li>
 <li><strong>Create campaign</strong>:<ul>
-<li>Campaign type: <strong>App promotion</strong></li>
-<li>Goal: Install volume</li>
-<li>App: search for <code>com.leiko.app</code> (your Play Store app)</li>
-<li>Campaign name: <code>LK_Phase1_UAC_Nigeria</code></li>
+<li>Goal: Sales</li>
+<li>Type: Search</li>
+<li>Bidding: Maximise conversions, target CPA $25</li>
 </ul>
 </li>
+<li><strong>Campaign name</strong>: <code>LK_P1_Search_NG_Apr2026</code></li>
 <li><strong>Locations</strong>: Nigeria</li>
-<li><strong>Languages</strong>: English</li>
 <li><strong>Daily budget</strong>: $5</li>
-<li><strong>Target CPI</strong>: $3</li>
-<li><strong>Asset groups</strong> — upload:<ul>
-<li>5 headlines (30 chars each, from Claude): &quot;A calmer way to track BP&quot;, &quot;Real cuff. Real number.&quot;, &quot;Watch over your family&quot;, &quot;Take a real reading&quot;, &quot;Trial free for 7 days&quot;</li>
+<li><strong>Keywords</strong> (use exact + phrase match):<ul>
+<li><code>blood pressure smartwatch</code></li>
+<li><code>BP watch</code></li>
+<li><code>real cuff smartwatch</code></li>
+<li><code>wrist blood pressure monitor</code></li>
+<li><code>FDA blood pressure watch</code></li>
+<li><code>Omron HeartGuide alternative</code></li>
+<li><code>blood pressure monitor Nigeria</code></li>
+</ul>
+</li>
+<li><strong>Negative keywords</strong>:<ul>
+<li><code>free</code>, <code>cheap</code>, <code>discount</code>, <code>manual</code> (filter low-intent)</li>
+</ul>
+</li>
+<li><strong>Ads</strong> — 3 responsive search ads:<ul>
+<li>5 headlines (30 chars each)</li>
 <li>5 descriptions (90 chars each)</li>
-<li>20 image assets (Midjourney outputs at 1200×628, 1200×1200, 600×314)</li>
-<li>3 video assets (Runway outputs, 8-15s, 16:9 and 9:16)</li>
-<li>HTML5 banners (optional, skip for Phase 1)</li>
+<li>Final URL: leiko.health/reserve</li>
+<li>Optional sitelinks: /how-it-works, /science, /reviews</li>
 </ul>
 </li>
-<li><strong>Save campaign</strong></li>
 </ol>
-<p>Repeat for <strong>LK_Phase1_UAC_USDiaspora</strong> with locations = US and adjusted CPI.</p>
-<h2>7.4 TikTok For Business (optional, after Meta + Google live)</h2>
+<p>Repeat for the <strong>US Diaspora Search</strong> campaign — same keywords with US location targeting at $50 CPA.</p>
+<h2>8.4 TikTok For Business (optional after Meta + Google live)</h2>
 <ol>
-<li><a href="https://business.tiktok.com">https://business.tiktok.com</a> → create account as primethebrain</li>
-<li>Account name: <code>Leiko</code></li>
-<li>Currency: USD, time zone Africa/Lagos</li>
-<li><strong>Install TikTok Pixel</strong> on leiko.health (events for waitlist signup)</li>
-<li><strong>Create campaign</strong>:<ul>
-<li>Objective: App promotion → Installs</li>
-<li>Campaign name: <code>LK_Phase1_TikTok_NG</code></li>
-<li>Optimization: Click → Install</li>
-</ul>
-</li>
-<li><strong>Ad group</strong>:<ul>
+<li><a href="https://business.tiktok.com">https://business.tiktok.com</a> → primethebrain</li>
+<li>Install TikTok Pixel on leiko.health</li>
+<li>Create campaign:<ul>
+<li>Objective: Conversions → Complete Registration</li>
+<li>Campaign: <code>LK_P1_TikTok_NG</code></li>
+<li>Daily $5</li>
 <li>Locations: Nigeria</li>
-<li>Age: 30-55 (TikTok skews younger)</li>
-<li>Interests: family + parenting + health</li>
-<li>Daily budget: $5</li>
+<li>Age 30-55, interests family + parenting + health</li>
 </ul>
 </li>
-<li><strong>Ad creative</strong>:<ul>
-<li>Spark Ads if you have organic posts on a TikTok account</li>
-<li>In-Feed video ads otherwise (Runway-generated 9:16 vertical, 15s)</li>
-<li>3 video variants minimum</li>
-</ul>
-</li>
-<li><strong>Save</strong></li>
+<li>Ad creative: 3 Runway videos (9:16 vertical, 15-30s)</li>
+<li>Launch</li>
 </ol>
-<h2>7.5 Marketing-site waitlist page (for US-targeted ads while inventory is Nigeria-only)</h2>
-<p>This is a parallel task you give to whoever builds leiko.health. Brief:</p>
-<pre><code>Add a /us-waitlist page to leiko.health. Above-the-fold:
-- Same hero block as the main page
-- A clear callout: &quot;Leiko ships to Nigeria today, US shipping arrives later this year.&quot;
-- An email-capture form: &quot;Get notified when Leiko ships to the US.&quot;
-- Optional SMS country-code US opt-in
-- After submit: a confirmation page, plus the email is sent to Supabase via the existing /api/reserve endpoint (mark these as waitlist_us in the reservation type field)
+<h2>8.5 The leiko.health/reserve page</h2>
+<p>This is the most important conversion surface in the whole system. Brief for the marketing-site agent (separate task from this playbook):</p>
+<pre><code>Add a /reserve page to leiko.health.
 
-This page is where US-targeted Meta + Google ads will land in Phase 1, before US inventory arrives.
+Page structure:
+1. Hero — the Leiko watch product photography, plus a clear price box:
+   - &quot;Reserve your Leiko for $50 today.&quot;
+   - &quot;The remaining $150 ($200 - $50) is due when your watch is ready to ship.&quot;
+   - &quot;$50 is fully refundable any time before your watch ships.&quot;
+2. Three trust badges — FDA Establishment Registration #3011654863, EU MDR Class IIa, ISO 13485 — small, prominent, linkable to verification sources.
+3. The 5 pillars in a single scroll: real cuff, 5 vitals, family-circle, doctor PDF, plain-language insights.
+4. A demand-signal counter: &quot;X people have reserved their Leiko.&quot; (live count from Supabase)
+5. The reservation form:
+   - Name
+   - Email
+   - Shipping country (dropdown)
+   - Shipping address (optional, can complete later)
+   - Phone (optional)
+   - Variant: [ ] Leiko $200  [ ] Leiko Pro $250
+   - Payment: $50 via Stripe (US, UK, EU) or Paystack (NG, ZA, KE)
+6. After payment: confirmation page with reservation number, expected ship window, and &quot;Share Leiko with someone you care for&quot; social buttons.
+
+Pixel events to fire:
+- Pageview: &quot;ReservationPageView&quot;
+- Form start: &quot;ReservationStarted&quot;
+- Payment success: &quot;ReservationCompleted&quot; with value=$50 currency=USD
+- Each pixel goes to Meta, Google, TikTok respectively
 </code></pre>
 <hr>
-<h1>Part 8 — Conversion tracking (what needs to be wired in the app)</h1>
-<p>Without proper conversion tracking, Meta + Google can&#39;t optimize, and you&#39;re flying blind on which ads convert. Here&#39;s what needs to land in the app code.</p>
-<h2>8.1 Meta SDK + Conversions API</h2>
-<p><strong>What it does</strong>: Tells Meta &quot;this user from your ad just installed&quot;, &quot;this user just started a trial&quot;, &quot;this user just subscribed&quot;. Meta uses these events to optimize delivery and find more people like the converters.</p>
-<p><strong>Why both SDK and CAPI</strong>: SDK fires events client-side (subject to iOS ATT and Android privacy restrictions); CAPI fires events server-side (more reliable, always counted).</p>
-<p><strong>Engineering work</strong> (I do this in a PR when you&#39;re ready):</p>
+<h1>Part 9 — Reservation funnel design</h1>
+<p>The single page on leiko.health is the conversion bottleneck. Design choices here will move CPA up or down by 30-50% with no change to ad spend.</p>
+<h2>9.1 The deposit math</h2>
+<table>
+<thead>
+<tr>
+<th>Element</th>
+<th>Value</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Deposit</td>
+<td><strong>$50</strong></td>
+<td>25% of $200 — substantial enough to deter tire-kickers, small enough that both audiences can commit. Refundable framing reverses the psychological cost.</td>
+</tr>
+<tr>
+<td>Credited toward purchase</td>
+<td>Yes</td>
+<td>Users feel they&#39;re saving, not spending</td>
+</tr>
+<tr>
+<td>Refund policy</td>
+<td>Full refund any time before ship date; nominal $5 fee after first batch ships</td>
+<td>Generous but with friction beyond a certain point</td>
+</tr>
+<tr>
+<td>Hold mechanism</td>
+<td>Stripe (US/UK/EU) or Paystack (NG/ZA/KE) &quot;manual capture&quot; mode — authorize on day 1, capture when the watch is ready</td>
+<td>No actual money moves to your account until you ship; reduces fraud + chargeback risk</td>
+</tr>
+</tbody></table>
+<h2>9.2 Above-the-fold structure</h2>
+<p>In order of priority on the /reserve page:</p>
 <ol>
-<li>Install <code>react-native-fbsdk-next</code></li>
-<li>Initialize FB SDK in <code>App.tsx</code> after Sentry + PostHog init</li>
-<li>Fire <code>logEvent(&#39;fb_mobile_activate_app&#39;)</code> on every app open (auto-fires after SDK setup)</li>
-<li>Fire <code>logEvent(&#39;fb_mobile_complete_registration&#39;)</code> on first successful sign-in</li>
-<li>Fire <code>logEvent(&#39;StartTrial&#39;)</code> on successful purchase of either monthly or annual subscription</li>
-<li>Fire <code>logEvent(&#39;Subscribe&#39;, value: $price)</code> on first successful renewal</li>
-<li>Server-side, in the <code>/revenuecat-webhook</code> Supabase function, mirror these events to Meta&#39;s Conversions API endpoint with the user&#39;s email hash + IP + user-agent for matching</li>
+<li><strong>Hero shot of the watch</strong> (real product photography, NOT AI-generated)</li>
+<li><strong>Price box</strong> — &quot;Reserve your Leiko for $50 today. $150 due at ship.&quot;</li>
+<li><strong>One-line value prop</strong> — &quot;A real cuff watch that shows you what your day does to your numbers.&quot;</li>
+<li><strong>Trust strip</strong> — three small badges: FDA / EU / ISO</li>
+<li><strong>Demand counter</strong> — &quot;X people have reserved their Leiko.&quot;</li>
+<li><strong>The reservation form</strong> — short, single column, mobile-first</li>
 </ol>
-<p>Roughly 2-3 hour task. Let me know when you want this PR and I&#39;ll open it.</p>
-<h2>8.2 Google UAC tracking</h2>
-<p><strong>What it does</strong>: Tells Google Ads &quot;this Play Store install came from a UAC ad&quot;, &quot;this user just subscribed&quot;.</p>
-<p><strong>Engineering work</strong>:</p>
+<p>The user should be able to <strong>reach the form within one mobile scroll</strong> from the hero.</p>
+<h2>9.3 The five trust signals (use all five on the reserve page)</h2>
+<p>Most BP-watch ads fall down on trust. Leiko has more trust ammo than most. Use it.</p>
 <ol>
-<li>Google&#39;s App Conversion Tracking is automatic for installs (Play Store tells Google directly when a UAC click leads to an install)</li>
-<li>For in-app events (trial-start, subscribe), wire <code>react-native-google-mobile-ads</code> events OR call the <strong>Google Analytics for Firebase SDK</strong> which exports events to Google Ads automatically</li>
-<li>Either approach: 2-hour task</li>
+<li><strong>FDA Establishment Registration #3011654863</strong> — link to verifiable FDA database</li>
+<li><strong>EU MDR Class IIa</strong> classification — link to verifiable EUDAMED entry when available</li>
+<li><strong>ISO 13485 manufacturing facility certification</strong> — link to verifiable certificate when available</li>
+<li><strong>Real cuff demonstration video</strong> — 8-second loop of the actual cuff inflating on a real wrist</li>
+<li><strong>The team / about</strong> — founder&#39;s face + name + bio (your real face, your real name)</li>
 </ol>
-<h2>8.3 TikTok Pixel</h2>
-<p><strong>What it does</strong>: Mirror of Meta — TikTok needs to know which clicks led to installs and subscribes.</p>
-<p><strong>Engineering work</strong>:</p>
+<h2>9.4 The post-reservation experience</h2>
+<p>Don&#39;t let the user disappear after they pay $50. The post-purchase experience should:</p>
 <ol>
-<li>Install <code>react-native-tiktok-business-sdk</code> (community lib)</li>
-<li>Initialize on app open</li>
-<li>Fire <code>track(&#39;CompleteRegistration&#39;)</code> on first sign-in</li>
-<li>Fire <code>track(&#39;Subscribe&#39;)</code> on first purchase</li>
-<li>1-hour task</li>
+<li><strong>Confirmation page</strong> — thank you + reservation number + expected ship window + share buttons</li>
+<li><strong>Email 1 (immediate)</strong> — receipt + what to expect next</li>
+<li><strong>Email 2 (day 7)</strong> — &quot;while you wait&quot; content: how the watch works, what your first reading will look like</li>
+<li><strong>Email 3 (day 21)</strong> — social proof: people who&#39;ve already received their watch</li>
+<li><strong>Email 4 (when batch ships)</strong> — &quot;Your Leiko is ready! Complete your purchase for $150&quot;</li>
 </ol>
-<h2>8.4 AppsFlyer (cross-platform attribution, optional, recommended once spend &gt;$2k/mo)</h2>
-<p><strong>What it does</strong>: A single SDK that handles attribution from all paid sources (Meta, Google, TikTok, ...) and de-duplicates installs across platforms. Without AppsFlyer, each platform claims credit for the same install.</p>
-<p><strong>Engineering work</strong> (only if scaling beyond Phase 1):</p>
-<ol>
-<li>Install <code>react-native-appsflyer</code></li>
-<li>Add your AppsFlyer dev key (free tier covers up to 12K monthly installs)</li>
-<li>AppsFlyer dashboard shows attribution truth</li>
-<li>2-hour task</li>
-</ol>
-<p><strong>My recommendation</strong>: Skip in Phase 1. Add in Phase 2 when budget exceeds $2k/mo or you start running 3+ platforms.</p>
+<p>Use Resend or Mailchimp for the email sequence. The marketing site likely already has Resend wired from your existing /api/contact endpoint.</p>
+<h2>9.5 The refund policy</h2>
+<p>Be generous. The framing matters more than the absolute policy.</p>
+<ul>
+<li><strong>Full refund</strong> before the watch ships, processed within 5 business days</li>
+<li><strong>One-click refund</strong> in their account (don&#39;t make them email)</li>
+<li><strong>Small fee ($5)</strong> for refunds after the first ship batch, only because we&#39;ve committed manufacturing</li>
+<li><strong>No questions asked</strong> for everything else</li>
+</ul>
+<p>This generous framing actually INCREASES reservation conversion because the perceived risk drops to near-zero.</p>
 <hr>
-<h1>Part 9 — Targeting recipes</h1>
-<p>Concrete, copy-pasteable targeting setups for Phase 1.</p>
-<h2>9.1 Meta — Nigeria local</h2>
-<p><strong>Locations</strong>: Nigeria → Lagos State, Federal Capital Territory (Abuja), Rivers (Port Harcourt), Oyo (Ibadan), Kano</p>
-<p><strong>Languages</strong>: English</p>
-<p><strong>Age</strong>: 35-65</p>
-<p><strong>Detailed targeting (Include any)</strong>:</p>
+<h1>Part 10 — Conversion tracking</h1>
+<p>The Pixel on leiko.health is more important than any SDK in the app. The app is a downstream event; the website is where the money happens in Phase 1.</p>
+<h2>10.1 Meta Pixel on leiko.health</h2>
+<p>What needs to fire:</p>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>When</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>PageView</strong></td>
+<td>Every page load</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>ViewContent</strong></td>
+<td>/reserve page view</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>InitiateCheckout</strong></td>
+<td>User starts filling the form</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Purchase</strong></td>
+<td>Stripe/Paystack returns success</td>
+<td>$50, USD</td>
+</tr>
+</tbody></table>
+<p>The standard Meta Pixel JavaScript handles this. The marketing-site agent adds it in 10 minutes.</p>
+<p><strong>Also</strong>: set up the <strong>Conversions API (CAPI)</strong> server-side. When Stripe/Paystack confirms a reservation, send the same event to Meta&#39;s CAPI endpoint with the user&#39;s hashed email + IP. This server-side mirror is more reliable than the browser-side Pixel (Safari ITP, ad blockers, etc.).</p>
+<h2>10.2 Google Tag Manager / Google Ads conversion tracking</h2>
+<p>Add the Google Ads conversion tag on the reservation thank-you page. Conversion value = $50. Set the conversion action category as &quot;Sign-up&quot; or &quot;Reservation&quot;.</p>
+<h2>10.3 TikTok Pixel</h2>
+<p>TikTok&#39;s &quot;Complete Registration&quot; event on the reservation thank-you page.</p>
+<h2>10.4 What we wire in the app</h2>
+<p>The app-side tracking is <strong>secondary</strong> in Phase 1, but doesn&#39;t disappear:</p>
 <ul>
-<li>Interests: Caregiving, Family + relationships, Parenting, Mindfulness, Older adults, Health and wellness</li>
-<li>Behaviors: Engaged Shoppers, Frequent travelers (Nigerian internal)</li>
+<li>Meta SDK fires <code>fb_mobile_activate_app</code> on open</li>
+<li>PostHog fires user-level events (already wired)</li>
+<li>Sentry catches crashes (already wired)</li>
 </ul>
-<p><strong>Detailed targeting (Exclude)</strong>:</p>
+<p>The new event to add post-Phase-1: when a user installs the app via the in-box QR code AND pairs the watch, we fire a &quot;WatchPairedFromReservation&quot; event that we can match back to the original reservation (via email or device ID matching) — this closes the loop on attribution.</p>
+<p>Let me know when you want PR #8 to wire the Meta SDK + Conversions API. About 3 hours of engineering.</p>
+<hr>
+<h1>Part 11 — Targeting recipes</h1>
+<p>Concrete copy-pasteable targeting for Phase 1.</p>
+<h2>11.1 Meta — Nigeria reservations</h2>
 <ul>
-<li>Demographics &gt; Education &gt; High school (filters out younger uneducated cohort)</li>
+<li><strong>Locations</strong>: Nigeria → Lagos, FCT, Rivers, Oyo, Kano (urban only)</li>
+<li><strong>Age</strong>: 35-65</li>
+<li><strong>Languages</strong>: English</li>
+<li><strong>Detailed targeting Include any</strong>:<ul>
+<li>Interests: Blood pressure monitor, Smartwatch, Health and wellness, Caregiving, Family + parenting, Older adults</li>
+<li>Behaviors: Engaged shoppers</li>
 </ul>
-<p><strong>Estimated reach</strong>: 800K-2M</p>
-<h2>9.2 Meta — US Nigerian diaspora</h2>
-<p><strong>Locations</strong>: United States → exclude small cities, include Houston, Dallas, Atlanta, New York, Washington DC, Maryland, New Jersey, Chicago, Los Angeles, San Francisco</p>
-<p><strong>Languages</strong>: English (US)</p>
-<p><strong>Age</strong>: 30-55</p>
-<p><strong>Detailed targeting (Include all)</strong>:</p>
-<ul>
-<li>Demographics &gt; Life events &gt; Recent migrant (helps capture recent first-gen immigrants)</li>
-<li>Behaviors &gt; Multicultural Affinity &gt; African-American (Meta&#39;s closest proxy for Nigerian-Americans)</li>
-<li>Interests: Nigeria, Nigerian cuisine, Naija news, Lagos, Davido, Burna Boy, Wizkid (cultural connection signals)</li>
+</li>
+<li><strong>Exclude</strong>: Education &gt; High school only (filters out younger uneducated cohort)</li>
+<li><strong>Estimated reach</strong>: 800K-2M</li>
 </ul>
-<p><strong>Detailed targeting (Or include)</strong>:</p>
+<h2>11.2 Meta — US-Nigerian diaspora reservations</h2>
 <ul>
-<li>Friends of people who like the &quot;Naija in America&quot; or &quot;Nigerian Diaspora&quot; pages</li>
+<li><strong>Locations</strong>: US → Houston, Dallas, Atlanta, NYC, DC, Maryland, New Jersey, Chicago, LA, SF</li>
+<li><strong>Age</strong>: 30-55</li>
+<li><strong>Languages</strong>: English (US)</li>
+<li><strong>Detailed targeting Include all</strong>:<ul>
+<li>Behaviors &gt; Multicultural Affinity &gt; African-American (Meta&#39;s closest Nigerian-American proxy)</li>
+<li>Interests: Nigeria, Nigerian cuisine, Naija news, Lagos, Burna Boy, Davido, Wizkid, Nollywood</li>
 </ul>
-<p><strong>Estimated reach</strong>: 200K-600K</p>
-<h2>9.3 Meta — US mainstream (Phase 2 only)</h2>
-<p><strong>Locations</strong>: United States</p>
-<p><strong>Age</strong>: 40-65</p>
-<p><strong>Detailed targeting</strong>:</p>
-<ul>
-<li>Interests: Caregiving, AARP, Family health, Blood pressure monitors</li>
-<li>Behaviors: Family-based health decision makers</li>
+</li>
+<li><strong>Or include</strong>:<ul>
+<li>Friends of pages &quot;Nigerian Diaspora&quot;, &quot;Naija in America&quot;, &quot;Nigerian community&quot; pages</li>
 </ul>
-<p><strong>Estimated reach</strong>: 5M+</p>
-<h2>9.4 Google UAC — Nigeria</h2>
-<p><strong>Locations</strong>: Nigeria</p>
-<p><strong>Languages</strong>: English</p>
-<p><strong>Bidding</strong>: Target CPI $3</p>
-<p><strong>Audience signals</strong> (UAC&#39;s version of targeting):</p>
-<ul>
-<li>Interest categories: Family + Parenting, Health, Older adults</li>
-<li>Custom audiences: people who searched &quot;blood pressure monitor&quot; or &quot;wearable health&quot;</li>
+</li>
+<li><strong>Estimated reach</strong>: 200K-600K</li>
 </ul>
-<h2>9.5 Google UAC — US Nigerian diaspora</h2>
-<p><strong>Locations</strong>: United States — specifically the metros listed above</p>
-<p><strong>Languages</strong>: English</p>
-<p><strong>Bidding</strong>: Target CPI $12</p>
-<p><strong>Audience signals</strong>:</p>
+<h2>11.3 Meta — US mainstream (Phase 2 only)</h2>
 <ul>
-<li>Custom audience: people who watched Nigerian YouTube creators (BBNaija, Mark Angel Comedy, Pulse Nigeria)</li>
-<li>Custom audience: searches for &quot;Nigerian&quot;, &quot;Naija&quot;, &quot;Lagos&quot;</li>
+<li><strong>Locations</strong>: United States</li>
+<li><strong>Age</strong>: 40-65</li>
+<li><strong>Detailed targeting</strong>: Interests Caregiving, AARP, Family health, Blood pressure monitors</li>
+<li><strong>Behaviors</strong>: Family-based health decision makers</li>
+<li><strong>Estimated reach</strong>: 5M+</li>
+</ul>
+<h2>11.4 Google Search — Nigeria keywords</h2>
+<ul>
+<li><code>blood pressure smartwatch</code> (exact + phrase)</li>
+<li><code>BP watch</code> (exact + phrase)</li>
+<li><code>wrist blood pressure monitor</code> (exact + phrase)</li>
+<li><code>real cuff smartwatch</code> (exact + phrase)</li>
+<li><code>FDA blood pressure watch</code> (exact)</li>
+<li><code>Omron HeartGuide alternative</code> (exact)</li>
+<li><code>blood pressure monitor Nigeria</code> (phrase)</li>
+<li>Negatives: <code>free</code>, <code>cheap</code>, <code>discount</code>, <code>manual</code></li>
+</ul>
+<h2>11.5 Google Search — US diaspora keywords</h2>
+<p>Same as above plus:</p>
+<ul>
+<li><code>blood pressure watch for parents</code></li>
+<li><code>wearable BP monitor doctor</code></li>
+<li><code>FDA cleared smartwatch BP</code></li>
 </ul>
 <hr>
-<h1>Part 10 — Budget framework</h1>
-<h2>10.1 Phase 1 daily split</h2>
-<p>For a <strong>$1,000/mo budget</strong> (the middle of your $500-2k range):</p>
+<h1>Part 12 — Budget framework</h1>
+<h2>12.1 Phase 1 daily split at $1,000/mo</h2>
 <table>
 <thead>
 <tr>
@@ -992,37 +981,37 @@ This page is where US-targeted Meta + Google ads will land in Phase 1, before US
 </tr>
 </thead>
 <tbody><tr>
-<td>Meta</td>
+<td>Meta Sales</td>
 <td>Nigeria</td>
-<td>$10</td>
-<td>$300</td>
+<td>$11</td>
+<td>$330</td>
 </tr>
 <tr>
-<td>Meta</td>
+<td>Meta Sales</td>
 <td>US diaspora</td>
 <td>$10</td>
 <td>$300</td>
 </tr>
 <tr>
-<td>Google UAC</td>
+<td>Google Search</td>
 <td>Nigeria</td>
 <td>$4</td>
 <td>$120</td>
 </tr>
 <tr>
-<td>Google UAC</td>
+<td>Google Search</td>
 <td>US diaspora</td>
 <td>$4</td>
 <td>$120</td>
 </tr>
 <tr>
-<td>TikTok</td>
-<td>Nigeria + diaspora</td>
-<td>$4</td>
-<td>$120</td>
+<td>Meta App Install (secondary brand)</td>
+<td>Both</td>
+<td>$3</td>
+<td>$90</td>
 </tr>
 <tr>
-<td>Buffer / new tests</td>
+<td>Testing buffer / new angles</td>
 <td>Various</td>
 <td>$1.30</td>
 <td>$40</td>
@@ -1034,7 +1023,7 @@ This page is where US-targeted Meta + Google ads will land in Phase 1, before US
 <td><strong>$1,000</strong></td>
 </tr>
 </tbody></table>
-<p>For <strong>$500/mo budget</strong>:</p>
+<h2>12.2 Phase 1 daily split at $500/mo</h2>
 <table>
 <thead>
 <tr>
@@ -1045,31 +1034,31 @@ This page is where US-targeted Meta + Google ads will land in Phase 1, before US
 </tr>
 </thead>
 <tbody><tr>
-<td>Meta</td>
+<td>Meta Sales</td>
 <td>Nigeria</td>
-<td>$5</td>
-<td>$150</td>
+<td>$6</td>
+<td>$180</td>
 </tr>
 <tr>
-<td>Meta</td>
+<td>Meta Sales</td>
 <td>US diaspora</td>
 <td>$5</td>
 <td>$150</td>
 </tr>
 <tr>
-<td>Google UAC</td>
+<td>Google Search</td>
 <td>Nigeria</td>
 <td>$3</td>
 <td>$90</td>
 </tr>
 <tr>
-<td>Google UAC</td>
+<td>Google Search</td>
 <td>US diaspora</td>
-<td>$3</td>
-<td>$90</td>
+<td>$2</td>
+<td>$60</td>
 </tr>
 <tr>
-<td>Buffer</td>
+<td>Testing buffer</td>
 <td>Various</td>
 <td>$0.65</td>
 <td>$20</td>
@@ -1081,414 +1070,302 @@ This page is where US-targeted Meta + Google ads will land in Phase 1, before US
 <td><strong>$500</strong></td>
 </tr>
 </tbody></table>
-<p>(Skip TikTok at $500/mo. Add in week 3 if Meta + Google are working.)</p>
-<p>For <strong>$2,000/mo budget</strong>:</p>
-<p>Same split as $1,000/mo doubled. Add TikTok at $10/day.</p>
-<h2>10.2 Bid strategies</h2>
+<p>Skip TikTok + Meta App Install at this budget. Add in week 3 if Meta Sales + Google are working.</p>
+<h2>12.3 Phase 1 daily split at $2,000/mo</h2>
+<p>Double the $1,000/mo allocation. Add TikTok at $10/day. Add Meta App Install at $10/day.</p>
+<h2>12.4 Bid strategies</h2>
 <table>
 <thead>
 <tr>
 <th>Platform</th>
 <th>Strategy</th>
-<th>Settings</th>
+<th>Target</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>Meta</td>
-<td>Cost cap → Lowest cost</td>
-<td>Start with Cost cap at $3 (NG) / $12 (US). Switch to Lowest cost when CPA stable.</td>
+<td>Meta Sales (NG)</td>
+<td>Cost cap</td>
+<td>$15 per Reservation</td>
 </tr>
 <tr>
-<td>Google UAC</td>
-<td>Target CPI</td>
-<td>$3 (NG) / $12 (US)</td>
+<td>Meta Sales (US diaspora)</td>
+<td>Cost cap</td>
+<td>$30 per Reservation</td>
+</tr>
+<tr>
+<td>Google Search (NG)</td>
+<td>Maximise conversions</td>
+<td>$25 CPA</td>
+</tr>
+<tr>
+<td>Google Search (US diaspora)</td>
+<td>Maximise conversions</td>
+<td>$50 CPA</td>
 </tr>
 <tr>
 <td>TikTok</td>
 <td>Cost cap</td>
-<td>$3 (NG) / $10 (US)</td>
+<td>$20 per Reservation (NG)</td>
 </tr>
 </tbody></table>
-<h2>10.3 When to scale, when to cut</h2>
+<p>Phase 2: switch all to <strong>Lowest cost</strong> with no cap once you have 50+ conversions per campaign.</p>
+<h2>12.5 When to scale, when to cut</h2>
 <p><strong>Scale a campaign if</strong>:</p>
 <ul>
-<li>CPI is at or below target for 7 consecutive days</li>
-<li>Trial conversion rate is 15%+ from install</li>
-<li>You have inventory headroom</li>
+<li>CPA at or below target for 7 consecutive days</li>
+<li>Reservation volume of 5+/day at minimum budget</li>
+<li>You have ship-window headroom</li>
 </ul>
 <p><strong>Cut a campaign if</strong>:</p>
 <ul>
-<li>CPI is 50%+ above target for 7 days</li>
-<li>Install volume is &lt;10/day at minimum budget (algorithm starvation)</li>
-<li>0 trials after 50+ installs (the audience doesn&#39;t convert)</li>
+<li>CPA 50%+ above target for 7 days</li>
+<li>Reservation volume &lt;2/day at minimum budget (algorithm starvation)</li>
+<li>0 reservations after 100 link clicks (audience doesn&#39;t convert)</li>
 </ul>
-<p><strong>Scaling moves</strong>: increase budget by 20% per week, not more. Sudden 100% budget jumps reset the learning phase.</p>
-<h2>10.4 When to kill a creative</h2>
-<p>Use the &quot;<strong>3-7-30 rule</strong>&quot;:</p>
-<ul>
-<li><strong>Day 3</strong>: Hide ads with CTR &lt; 0.5%. They&#39;re DOA.</li>
-<li><strong>Day 7</strong>: Hide ads where CPI is 50% above campaign average.</li>
-<li><strong>Day 30</strong>: Refresh creative or kill — ad fatigue sets in around day 21-30 for most creative.</li>
-</ul>
+<p><strong>Scaling moves</strong>: increase budget by 20% per week, not more.</p>
 <hr>
-<h1>Part 11 — The first 30 days, day by day</h1>
-<h2>Week 1 — Foundation</h2>
-<p><strong>Day 1 (Mon)</strong>: Sign up for Meta Business Manager, Google Ads, TikTok For Business as <a href="mailto:primethebrain@gmail.com">primethebrain@gmail.com</a>. Add credit card to each. Build the waitlist page on leiko.health (brief the marketing-site agent today).</p>
-<p><strong>Day 2 (Tue)</strong>: Generate first batch of AI creative — 5 Midjourney images (one per angle), 3 Runway videos (Caregiver, Differentiator, Insight). Voice-check headlines with Claude.</p>
-<p><strong>Day 3 (Wed)</strong>: Set up the <strong>Meta Caregiver Nigeria</strong> campaign + the <strong>Meta Caregiver US diaspora</strong> campaign. Daily budget $5 each. Don&#39;t launch yet.</p>
-<p><strong>Day 4 (Thu)</strong>: Set up the <strong>Google UAC Nigeria</strong> campaign + <strong>Google UAC US diaspora</strong>. Daily budget $4 each. Don&#39;t launch yet.</p>
-<p><strong>Day 5 (Fri)</strong>: Last quality check — voice rules, image quality, landing destinations correct. Launch ALL 4 campaigns Friday end of day.</p>
-<p><strong>Day 6-7 (weekend)</strong>: Don&#39;t touch anything. Let them run. Algorithms need 48h of data minimum.</p>
+<h1>Part 13 — The first 30 days, day by day</h1>
+<h2>Week 1 — Foundation + reservation page</h2>
+<p><strong>Day 1 (Mon)</strong>: Sign up Meta + Google + TikTok ad accounts. Brief the marketing-site agent on the /reserve page + Pixel installation.</p>
+<p><strong>Day 2 (Tue)</strong>: Generate first batch of AI creative — Midjourney images for 5 angles, Runway videos for top 3. Voice-check headlines.</p>
+<p><strong>Day 3 (Wed)</strong>: Set up Meta Sales campaigns (Nigeria + diaspora) at $5-10/day. Don&#39;t launch yet.</p>
+<p><strong>Day 4 (Thu)</strong>: Set up Google Search campaigns. Don&#39;t launch yet.</p>
+<p><strong>Day 5 (Fri)</strong>: /reserve page goes live on leiko.health with Pixel installed. Test the flow yourself end-to-end (use a real $50 payment then refund yourself). Launch all 4 campaigns Friday end of day.</p>
+<p><strong>Day 6-7 (weekend)</strong>: Don&#39;t touch. Let the algorithms learn.</p>
 <h2>Week 2 — First learnings</h2>
 <p><strong>Day 8 (Mon)</strong>: Review week 1 data.</p>
 <ul>
-<li>Which campaign has lowest CPI?</li>
-<li>Which ad creative has highest CTR?</li>
-<li>Trial starts from any campaign yet?</li>
+<li>Total reservations?</li>
+<li>CPA per platform?</li>
+<li>Which angle is winning?</li>
 </ul>
-<p>Generate 5 new creative variations of your top 2 angles.</p>
-<p><strong>Day 9 (Tue)</strong>: Add 5 new ad variants to the top-performing campaigns. Pause the bottom 3 ads from each campaign.</p>
-<p><strong>Day 10 (Wed)</strong>: If Meta Nigeria CPI is on target, raise daily budget by 20% (e.g., $5 → $6). Otherwise, hold.</p>
-<p><strong>Day 11-12</strong>: Add Angle B (Differentiator) and Angle C (Insight) variants. You&#39;re now running 3 angles in rotation.</p>
+<p>Generate 5 new creative variations of top 2 angles.</p>
+<p><strong>Day 9 (Tue)</strong>: Add 5 new variants to top-performing campaigns. Pause bottom 3 ads per campaign.</p>
+<p><strong>Day 10 (Wed)</strong>: If CPA is on target, raise daily budgets by 20%.</p>
+<p><strong>Day 11-12</strong>: Add Angles 2 (Pedigree) and 3 (Insight) as new ad sets. Now running 3 angles.</p>
 <p><strong>Day 13-14 (weekend)</strong>: Don&#39;t touch.</p>
-<h2>Week 3 — Add TikTok + first scale moves</h2>
-<p><strong>Day 15 (Mon)</strong>: Review week 2 data. By now:</p>
-<ul>
-<li>One platform should be the clear winner (likely Meta Nigeria)</li>
-<li>One angle should be the clear winner (likely Caregiver or Differentiator)</li>
-<li>50-200 installs should have flowed in</li>
-<li>5-30 trial starts</li>
-</ul>
-<p><strong>Day 16-17</strong>: If you have budget headroom, launch <strong>TikTok Nigeria</strong> at $5/day with your top 3 video variants.</p>
-<p><strong>Day 18-19</strong>: Add the <strong>Self-buyer</strong> angle (Angle D) as a new campaign. Test against the proven top angle.</p>
+<h2>Week 3 — Add TikTok + first scale</h2>
+<p><strong>Day 15 (Mon)</strong>: Review week 2. By now expect 50-150 reservations cumulative.</p>
+<p><strong>Day 16-17</strong>: Launch TikTok Nigeria at $5/day with top 3 video variants.</p>
+<p><strong>Day 18-19</strong>: Add Angle 4 (Caregiver) and Angle 5 (Doctor-share) for US diaspora specifically.</p>
 <p><strong>Day 20-21 (weekend)</strong>: Don&#39;t touch.</p>
-<h2>Week 4 — Optimize + prep Phase 2</h2>
-<p><strong>Day 22 (Mon)</strong>: Major review. By now:</p>
-<ul>
-<li>200-500 installs cumulative</li>
-<li>30-80 trial starts</li>
-<li>8-30 paid subscribers</li>
-<li>1-2 angles clearly winning</li>
-<li>Initial customer feedback in (read PostHog + Sentry data)</li>
-</ul>
-<p><strong>Day 23-24</strong>: Refresh creative — 5 new variants of the top angle. Existing creative will start to fatigue.</p>
-<p><strong>Day 25-26</strong>: If waitlist signups from US-mainstream Meta are flowing, ramp the US-mainstream campaign to $8-10/day.</p>
-<p><strong>Day 27-28</strong>: Document what worked. Update this playbook with learnings.</p>
-<p><strong>Day 29-30</strong>: Plan Phase 2. Inventory should be replenishing — line up US mainstream launch.</p>
-<h2>Day 31+ — into Phase 2</h2>
-<p>You&#39;re now ready to expand to US mainstream with proven creative. Budget scales to $2-5k/mo. Add YouTube. Consider AppsFlyer attribution.</p>
+<h2>Week 4 — Optimise + prep Phase 2</h2>
+<p><strong>Day 22 (Mon)</strong>: Major review. Expect 200-500 reservations cumulative.</p>
+<p><strong>Day 23-24</strong>: Refresh creative — 5 new variants of top angle to fight ad fatigue.</p>
+<p><strong>Day 25-26</strong>: If US-mainstream interest is showing up in your data, set up the US-mainstream campaign (different from diaspora) at $10/day.</p>
+<p><strong>Day 27-28</strong>: Document what worked. Update playbook with learnings.</p>
+<p><strong>Day 29-30</strong>: Plan Phase 2 — manufacturing run kickoff, batch-1 ship window communication to reservation pool.</p>
 <hr>
-<h1>Part 12 — Measurement and KPIs</h1>
-<h2>12.1 The numbers you watch every day</h2>
+<h1>Part 14 — Measurement and KPIs</h1>
+<h2>14.1 The numbers you watch every day</h2>
 <p><strong>Top of funnel</strong>:</p>
 <ul>
-<li><strong>Impressions</strong> — total ad views</li>
-<li><strong>CPM</strong> (Cost Per 1,000 impressions) — health of bidding</li>
-<li><strong>CTR</strong> (Click-Through Rate) — % of impressions that clicked. Target: 1-3% on Meta, 0.5-1.5% on Google UAC.</li>
+<li>Impressions, CTR, CPM per platform</li>
 </ul>
 <p><strong>Middle of funnel</strong>:</p>
 <ul>
-<li><strong>CPI</strong> (Cost Per Install) — total $ spent / installs from ads</li>
-<li><strong>Install rate</strong> — installs / clicks. Target: 30%+ for Play Store traffic.</li>
+<li>Reservation page views</li>
+<li>Form starts</li>
+<li>Form completions</li>
+<li><strong>CPA per reservation</strong> — primary metric</li>
 </ul>
-<p><strong>Bottom of funnel</strong>:</p>
+<p><strong>Bottom of funnel (post-Phase-1)</strong>:</p>
 <ul>
-<li><strong>Trial-start rate</strong> — trials / installs. Target: 15-25%.</li>
-<li><strong>Trial-to-paid rate</strong> — paid subs / trial starts. Target: 30-50%.</li>
-<li><strong>CAC</strong> (Customer Acquisition Cost) — total ad spend / paid subscribers. Target: under $120 (3× LTV).</li>
+<li>Reservation → purchase conversion (60-80% target with $50 deposit)</li>
+<li>Watch arrival → app install rate (target 80%+, given the QR card in box)</li>
+<li>App install → subscription rate (target 5-15% in first 90 days)</li>
 </ul>
-<p><strong>LTV</strong> (Lifetime Value): With $4.99/mo and an average customer lifetime of 8 months (industry average for health subscriptions), LTV = $40. With $39.99/yr annual = $40 in the first year alone. Realistic target LTV by month 12 of a customer relationship: $60-80.</p>
-<h2>12.2 Where to read each number</h2>
-<table>
-<thead>
-<tr>
-<th>Metric</th>
-<th>Source</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Impressions, CTR, CPM, CPI (per platform)</td>
-<td>Meta Ads Manager, Google Ads, TikTok Manager</td>
-</tr>
-<tr>
-<td>Installs (true total)</td>
-<td>Play Console → Statistics → Acquisition</td>
-</tr>
-<tr>
-<td>Trial-start rate</td>
-<td>PostHog → Funnels → Install → push_token_registered → ai_tier_b_started (or similar Plus trigger)</td>
-</tr>
-<tr>
-<td>Trial-to-paid</td>
-<td>RevenueCat → Customers → filter by trial-started → see conversion</td>
-</tr>
-<tr>
-<td>CAC</td>
-<td>Total monthly ad spend (sum of platforms) / paid subscriber count</td>
-</tr>
-</tbody></table>
-<h2>12.3 Weekly review template</h2>
-<p>Every Monday, fill in:</p>
-<pre><code>Week of:        [date]
-Total spend:    $___
-Installs:       ___ (target: 50+/wk by week 2)
-Trial starts:   ___
-Paid subs:      ___
-CPI:            $___ (target: &lt;$5 NG, &lt;$12 US)
-CAC:            $___ (target: &lt;$120)
-LTV/CAC ratio:  ___ (target: &gt;3:1)
-
-Top creative:   ____________
-Bottom creative:____________
-Notes:          ____________
+<h2>14.2 Weekly review template</h2>
+<pre><code>Week of:           [date]
+Total spend:       $___
+Reservations:      ___ (target: 15+/wk by week 2)
+CPA:               $___ (target: &lt;$15 NG, &lt;$30 US diaspora)
+Deposits collected:$___ (≈ reservations × $50)
+Top creative:      ____________
+Bottom creative:   ____________
+Notes:             ____________
 </code></pre>
-<h2>12.4 What to do when numbers are bad</h2>
-<ul>
-<li><strong>Low CTR (&lt; 0.5%)</strong> → creative is wrong. Generate new images, new headlines.</li>
-<li><strong>High CTR but low install rate (&lt; 20%)</strong> → Play Store listing is the problem. Improve screenshots, description, app icon.</li>
-<li><strong>High install rate but low trial start (&lt; 10%)</strong> → in-app paywall isn&#39;t compelling. Check the Settings → Export my data flow.</li>
-<li><strong>High trial start but low trial-to-paid (&lt; 20%)</strong> → in-app value isn&#39;t matching the ad promise. Read PostHog funnel for the drop-off.</li>
-</ul>
+<h2>14.3 The real success metric</h2>
+<p>Forget CAC vs LTV for a moment. The real Phase 1 success metric is:</p>
+<blockquote>
+<p><strong>&quot;Did we collect more in $50 reservation deposits than we spent on ads?&quot;</strong></p>
+</blockquote>
+<p>If yes — even before any watch actually ships — you&#39;ve built a self-funding acquisition engine. That&#39;s the proof point you want for Phase 2 budget expansion.</p>
+<p>Math: at $15 CPA per reservation and $50 deposit each, you net $35 per reservation immediately. The full $200 watch revenue comes later when batch 1 ships.</p>
 <hr>
-<h1>Part 13 — Compliance and policy</h1>
-<p>Health ads are the most heavily moderated category on every platform. One violation can disable your ad account. Read this section once and bookmark.</p>
-<h2>13.1 Meta health ad policy — the highlights</h2>
-<p><strong>Always rejected</strong>:</p>
-<ul>
-<li>Before/after photos showing health improvement</li>
-<li>&quot;Cure&quot;, &quot;treat&quot;, &quot;diagnose&quot; — any medical claim</li>
-<li>Promising weight loss / BP reduction / specific outcome</li>
-<li>Implying users are sick (&quot;Are you suffering from...?&quot;)</li>
-<li>Targeting personal attributes about health (&quot;you have hypertension...&quot;)</li>
-</ul>
-<p><strong>Often rejected</strong>:</p>
-<ul>
-<li>Faces of &quot;real customers&quot; giving testimonials (without explicit consent + clear disclosure)</li>
-<li>Pre-existing health condition imagery</li>
-<li>Medical equipment in clinical settings (without context)</li>
-</ul>
-<p><strong>Usually OK</strong>:</p>
-<ul>
-<li>Watching over your family</li>
-<li>Tracking your numbers</li>
-<li>Talk to your doctor</li>
-<li>Educational content with no specific health claims</li>
-</ul>
-<h2>13.2 Google health ad policy — the highlights</h2>
-<p><strong>Always rejected</strong>:</p>
-<ul>
-<li>Same as Meta (cure/treat/diagnose)</li>
-<li>Specific outcome promises</li>
-<li>Health-condition targeting in audience signals</li>
-</ul>
-<p><strong>Special note</strong>: Google requires you certify your app&#39;s compliance with healthcare-related laws (HIPAA in US, NDPR in Nigeria). Leiko isn&#39;t HIPAA-regulated (not a covered entity) but you should still tick the &quot;applicable laws&quot; certification.</p>
-<h2>13.3 TikTok health ad policy</h2>
-<p>Most restrictive of the three. TikTok generally blocks:</p>
-<ul>
-<li>Any prescription medical content</li>
-<li>Any health condition mentioned by name (including hypertension)</li>
-<li>Any &quot;diagnosis&quot; or &quot;treatment&quot; framing</li>
-</ul>
-<p>What works on TikTok: lifestyle framing (&quot;a calmer morning&quot;), founder authenticity (&quot;I built this for my mum&quot;), educational not promotional.</p>
-<h2>13.4 Voice-rule compliance check (before publishing every ad)</h2>
-<p>Run every ad through this checklist:</p>
+<h1>Part 15 — Compliance and policy</h1>
+<h2>15.1 The big three rules</h2>
+<ol>
+<li><strong>No outcome promises</strong>. &quot;Lower your BP&quot; / &quot;Cure hypertension&quot; / &quot;Live longer&quot;. All forbidden, all flagged by platforms.</li>
+<li><strong>No fear language</strong>. &quot;Silent killer&quot; / &quot;Before it&#39;s too late&quot;. Forbidden by Leiko&#39;s voice rules AND platform policy.</li>
+<li><strong>No medical claims about the app</strong>. &quot;Diagnose&quot; / &quot;Treat&quot; / &quot;Cure&quot;. The hardware has FDA Establishment Registration but that&#39;s manufacturing-site registration, not a treatment claim.</li>
+</ol>
+<h2>15.2 The 10-box voice-rule check (run before publishing every ad)</h2>
 <pre><code>[ ] No &quot;patient&quot; anywhere
 [ ] No &quot;diagnose / treat / cure / prevent disease&quot;
 [ ] No &quot;silent killer / ticking time bomb / before it&#39;s too late&quot;
 [ ] No &quot;medical advice&quot;
 [ ] No &quot;dangerous level / critical level&quot;
 [ ] No outcome promises (&quot;lower your BP&quot;, &quot;live longer&quot;)
-[ ] No red colors
+[ ] No red colors in creative
 [ ] No fear imagery (clutching chest, worried doctor, alarming numbers)
-[ ] No fake testimonials (real customer with consent, OR no testimonial)
-[ ] CTA leads to install, not a medical claim
+[ ] FDA / EU / ISO claims are factually correct
+[ ] CTA leads to reservation, not a medical claim
 </code></pre>
-<p>If all 10 boxes are clear, the ad will (a) honor your voice spec and (b) pass platform review.</p>
-<h2>13.5 What to do if an ad is rejected</h2>
+<h2>15.3 The certifications — what you can and can&#39;t say</h2>
+<p><strong>Can say</strong>:</p>
+<ul>
+<li>&quot;FDA-listed&quot;</li>
+<li>&quot;FDA Establishment Registration #3011654863&quot;</li>
+<li>&quot;EU MDR Class IIa&quot;</li>
+<li>&quot;Built in an ISO 13485 facility&quot;</li>
+<li>&quot;The same method as the cuff at your doctor&#39;s office&quot; (factually true — oscillometric)</li>
+</ul>
+<p><strong>Cannot say</strong>:</p>
+<ul>
+<li>&quot;FDA-cleared for treatment&quot; (Leiko&#39;s FDA registration is for the manufacturing site, not a treatment indication)</li>
+<li>&quot;Diagnostic device&quot; (it&#39;s monitoring, not diagnostic)</li>
+<li>&quot;Doctor-recommended&quot; (unless you have actual endorsements with documentation)</li>
+</ul>
+<p>If in doubt: cite the specific registration number and let the reader verify. Numbers + verifiable links are platform-safe.</p>
+<h2>15.4 What to do if an ad is rejected</h2>
 <ol>
-<li><strong>Don&#39;t appeal immediately</strong>. Read the reason. Often the issue is one word.</li>
-<li><strong>Edit the offending element</strong>. Don&#39;t re-submit the same ad.</li>
-<li><strong>If appeal needed</strong>: provide context — &quot;this is a wellness app, not a medical device; the watch is FDA-listed but the mobile app itself is consumer-grade tracking.&quot;</li>
-<li><strong>If repeated rejections</strong> (3+ on similar grounds): your account is at risk. Stop publishing on that platform, talk to your account rep (Meta has one once spend exceeds $5k/mo).</li>
+<li>Don&#39;t appeal immediately. Read the rejection reason.</li>
+<li>Edit the offending element. Don&#39;t resubmit unchanged.</li>
+<li>If repeated rejections (3+) on the same grounds: your account is at risk. Pause that platform; contact your rep if you have one.</li>
 </ol>
 <hr>
-<h1>Part 14 — Templates and ready-to-fork campaigns</h1>
-<h2>14.1 Meta campaign template: Caregiver Nigeria</h2>
-<pre><code>Campaign objective:    App Promotion
-Campaign name:         LK_P1_Caregiver_NG_Apr2026
-Budget type:           Daily, $10
-Bid strategy:          Cost cap, $3 per install
+<h1>Part 16 — Templates and ready-to-fork campaigns</h1>
+<h2>16.1 Meta Sales Reservations — Nigeria</h2>
+<pre><code>Campaign objective:    Sales
+Campaign name:         LK_P1_Reservations_NG_Apr2026
+Budget type:           Daily, $11
+Bid strategy:          Cost cap, $15 per Reservation
 
-Ad set name:           Caregiver_NG_UrbanCore
-Ad set objective:      Install volume
-Optimization for:      Installs (later: App Events &gt; StartTrial)
+Ad set name:           RealCuff_Angle1_NG_UrbanCore
+Conversion location:   Website
+Conversion event:      &quot;Reservation Completed&quot;
+Optimization:          Conversions
+Audience location:     NG &gt; Lagos, Abuja, PH, Ibadan, Kano
+Audience age:          35-65
+Audience interests:    Blood pressure monitor + smartwatch + health + caregiving + parenting + older adults
+Audience exclude:      High-school education only
+Placements:            Automatic
 
-Audience location:     Nigeria &gt; Lagos, Abuja, PH, Ibadan, Kano
-Audience language:     English
-Audience age:          35 - 65
-Audience interests:    Caregiving + Parenting + Family + Mindfulness + Older adults
-Audience exclude:      High school education only
+Ad 1 (Angle 1 - Real Cuff):
+  Primary text:        &quot;Most BP smartwatches estimate. Leiko measures. With a real inflating cuff — the same method as the cuff at your doctor&#39;s office.&quot;
+  Headline:            &quot;A real cuff. A real number.&quot;
+  Description:         &quot;Reserve yours for $50 today. The rest when it ships.&quot;
+  CTA button:          &quot;Sign Up&quot;
+  Destination:         https://leiko.health/reserve
+  Creative:            [Midjourney watch + cuff close-up image]
 
-Placements:            Automatic (FB feed + IG feed + Reels + Stories + WA Status)
+Ad 2 (Angle 2 - Pedigree):
+  Primary text:        &quot;Most BP smartwatches are sports trackers in disguise. Leiko is FDA-listed, EU-classified, and built in an ISO 13485 facility. The real thing.&quot;
+  Headline:            &quot;FDA. EU. ISO 13485.&quot;
+  Description:         &quot;Reserve for $50. Refundable.&quot;
+  CTA button:          &quot;Sign Up&quot;
+  Destination:         https://leiko.health/reserve
+  Creative:            [Midjourney badge composition image]
 
-Ad 1:
-  Primary text:        &quot;You don&#39;t always need to call to know they&#39;re okay.&quot;
-  Headline:            &quot;Watch over your family. Calmly.&quot;
-  Description:         &quot;Try Leiko free for 7 days. Cancel anytime.&quot;
-  CTA:                 &quot;Install Now&quot;
-  Destination:         Play Store URL
-  Creative:            [Midjourney caregiver image 1]
-
-Ad 2:
-  Primary text:        &quot;I check Mum&#39;s blood pressure from here. Without having to call.&quot;
-  Headline:            &quot;Real readings. Real watching.&quot;
-  Description:         &quot;7-day free trial. From $4.99/mo.&quot;
-  CTA:                 &quot;Install Now&quot;
-  Destination:         Play Store URL
-  Creative:            [Midjourney caregiver image 2]
-
-Ad 3:
-  Primary text:        &quot;A real cuff watch. An app that lets your family see the readings.&quot;
-  Headline:            &quot;Closer than a phone call.&quot;
-  Description:         &quot;Try Leiko free for 7 days.&quot;
-  CTA:                 &quot;Install Now&quot;
-  Destination:         Play Store URL
-  Creative:            [Runway caregiver video clip, 12s]
+Ad 3 (Angle 3 - Insight):
+  Primary text:        &quot;An hour-long walk. Eight hours of sleep. Each one moves your blood pressure. Leiko shows you exactly how much.&quot;
+  Headline:            &quot;See what your day does.&quot;
+  Description:         &quot;Reserve yours for $50. Credited toward purchase.&quot;
+  CTA button:          &quot;Sign Up&quot;
+  Destination:         https://leiko.health/reserve
+  Creative:            [Midjourney trends + countertop image]
 </code></pre>
-<h2>14.2 Meta campaign template: US Diaspora</h2>
-<p>Same as above, swap:</p>
+<h2>16.2 Meta Sales Reservations — US Diaspora</h2>
+<p>Same as 16.1 with:</p>
 <ul>
-<li>Audience location: US (Houston, Dallas, Atlanta, NYC, DC, MD)</li>
-<li>Audience interests: + Nigerian culture + Naija news + Nigerian musicians</li>
-<li>Cost cap: $12</li>
+<li>Locations: US (Houston, Dallas, Atlanta, NYC, DC, MD, NJ, LA, SF)</li>
+<li>Behaviors: African-American + Recent migrant</li>
+<li>Interests: Nigeria + Naija + Burna Boy + Davido + Wizkid + Nollywood + caregiving</li>
+<li>Cost cap: $30</li>
 <li>Daily budget: $10</li>
+<li>Swap Ad 1 for the Caregiver angle (it converts better here than Real Cuff)</li>
 </ul>
-<h2>14.3 Google UAC template</h2>
-<pre><code>Campaign type:         App promotion
-Goal:                  Install volume
-App:                   com.leiko.app
-Campaign name:         LK_P1_UAC_NG
+<h2>16.3 Google Search — Nigeria</h2>
+<pre><code>Campaign goal:         Sales
+Campaign type:         Search
+Campaign name:         LK_P1_Search_NG_Apr2026
 Locations:             Nigeria
 Languages:             English
 Daily budget:          $4
-Target CPI:            $3
+Bidding:               Maximise conversions, target CPA $25
 
-Asset group 1 — Caregiver:
-  Headlines (30 chars max):
-    1. &quot;Watch your family&#39;s vitals&quot;
-    2. &quot;Real cuff, real readings&quot;
-    3. &quot;Try Leiko free for 7 days&quot;
-    4. &quot;A calmer way to track BP&quot;
-    5. &quot;Stay close, even at distance&quot;
-  Long headline (90 chars):
-    &quot;A clinical-method blood pressure watch with an app your whole family can see.&quot;
-  Descriptions (90 chars):
-    1. &quot;Real cuff watch + family-aware app. Try free for 7 days.&quot;
-    2. &quot;See readings as they come in. Talk to your doctor with one tap.&quot;
-    3. &quot;Built for caregivers. Calm. Honest. Real readings.&quot;
-    4. &quot;Track BP, HR, oxygen, sleep, activity. Plain language.&quot;
-    5. &quot;Trial free for 7 days, then $4.99/mo. Cancel anytime.&quot;
-  Images (20 assets):
-    - 5× Midjourney caregiver scenes (1200×1200)
-    - 5× Midjourney product shots (1200×628)
-    - 5× Midjourney trends/insight visuals (1200×1200)
-    - 5× clean screenshots from real app
-  Videos (3 assets):
-    - Runway caregiver clip (15s, 9:16)
-    - Runway watch-inflate clip (8s, 16:9)
-    - Founder talking to camera (20s, 9:16)
+Keywords (exact + phrase):
+  &quot;blood pressure smartwatch&quot;
+  &quot;BP watch&quot;
+  &quot;wrist blood pressure monitor&quot;
+  &quot;real cuff smartwatch&quot;
+  &quot;FDA blood pressure watch&quot;
+  &quot;Omron HeartGuide alternative&quot;
+  &quot;blood pressure monitor Nigeria&quot;
+
+Negative keywords:
+  &quot;free&quot;, &quot;cheap&quot;, &quot;discount&quot;, &quot;manual&quot;
+
+Responsive Search Ad:
+  Headlines (30 chars each):
+    1. &quot;A real cuff BP watch&quot;
+    2. &quot;FDA-listed BP watch&quot;
+    3. &quot;Reserve Leiko for $50&quot;
+    4. &quot;Real readings, real cuff&quot;
+    5. &quot;Watch your family&#39;s BP&quot;
+  Descriptions (90 chars each):
+    1. &quot;Real inflating cuff. FDA-listed. Built in ISO 13485 facility. Reserve for $50.&quot;
+    2. &quot;Most BP smartwatches estimate. Leiko measures. Reserve yours for the next batch.&quot;
+    3. &quot;Track BP, HR, oxygen, sleep, activity. See what your day does. Reserve from $50.&quot;
+  Final URL: https://leiko.health/reserve
 </code></pre>
-<h2>14.4 A/B test framework</h2>
-<p>For any ad element you&#39;re testing, follow this structure:</p>
-<ol>
-<li><strong>Hypothesis</strong>: &quot;Adding &#39;free&#39; to the headline increases CTR by 20%.&quot;</li>
-<li><strong>Control</strong>: Existing best ad</li>
-<li><strong>Variant</strong>: Same ad with one word changed</li>
-<li><strong>Duration</strong>: 7 days minimum</li>
-<li><strong>Sample size</strong>: ≥1,000 impressions per variant</li>
-<li><strong>Decision criterion</strong>: 95% statistical significance (use Meta&#39;s built-in A/B tool)</li>
-</ol>
-<p>Don&#39;t test multiple variables at once. Don&#39;t pause early. Don&#39;t read the result before 7 days.</p>
+<h2>16.4 A/B test template</h2>
+<pre><code>Hypothesis:   &quot;Replacing the price with &#39;fully refundable&#39; in the headline increases CPA-to-reservation by 15%.&quot;
+Control:      Current best ad
+Variant:      Same ad with one headline word changed
+Duration:     7 days minimum, 14 days preferred
+Sample size:  ≥1,000 impressions per variant
+Decision:     95% statistical significance via Meta&#39;s built-in A/B tool
+</code></pre>
+<p>Don&#39;t test multiple variables at once. Don&#39;t pause early. Don&#39;t read results before 7 days.</p>
 <hr>
-<h1>Part 15 — Resources and glossary</h1>
-<h2>15.1 Glossary</h2>
+<h1>Part 17 — Resources and glossary</h1>
+<h2>17.1 Glossary (v2 updates)</h2>
 <ul>
-<li><strong>CPM</strong> — Cost per 1,000 impressions</li>
-<li><strong>CTR</strong> — Click-through rate (clicks / impressions)</li>
-<li><strong>CPI</strong> — Cost per install</li>
-<li><strong>CPA</strong> — Cost per action (any custom event)</li>
-<li><strong>CAC</strong> — Customer acquisition cost (ad spend / paying customers)</li>
-<li><strong>LTV</strong> — Lifetime value (total revenue per customer)</li>
-<li><strong>ROAS</strong> — Return on ad spend (revenue / ad spend)</li>
-<li><strong>UAC</strong> — Universal App Campaign (Google&#39;s auto-optimizing app ad format)</li>
-<li><strong>CAPI</strong> — Conversions API (Meta&#39;s server-side event endpoint)</li>
-<li><strong>MMP</strong> — Mobile Measurement Partner (AppsFlyer, Adjust)</li>
-<li><strong>SKAN</strong> — SKAdNetwork (Apple&#39;s privacy-preserving attribution)</li>
+<li><strong>CPA</strong> — Cost Per Acquisition (in v2: per reservation)</li>
+<li><strong>Reservation</strong> — $50 deposit-locking of a watch from the next batch</li>
+<li><strong>CAC</strong> — Customer Acquisition Cost (per actual watch buyer, when batch ships)</li>
+<li><strong>LTV</strong> — Lifetime Value (watch revenue + subscription revenue over customer lifetime)</li>
+<li><strong>Pixel</strong> — Meta&#39;s web tracking snippet for conversion events</li>
+<li><strong>CAPI</strong> — Conversions API (Meta&#39;s server-side event mirror)</li>
+<li><strong>MMP</strong> — Mobile Measurement Partner (AppsFlyer, Adjust — Phase 2)</li>
+<li><strong>Cost cap</strong> — Meta bid strategy that limits average cost per conversion</li>
+<li><strong>Maximise conversions</strong> — Google&#39;s auto-bidding strategy for conversion volume</li>
 </ul>
-<h2>15.2 Tools (with my picks bolded)</h2>
-<p><strong>Image generation</strong>:</p>
+<h2>17.2 Tools (my picks bolded)</h2>
 <ul>
 <li><strong>Midjourney</strong> ($30/mo Standard)</li>
-<li>DALL-E 3 (in ChatGPT Plus, $20/mo)</li>
-<li>Adobe Firefly (Creative Cloud)</li>
-</ul>
-<p><strong>Video generation</strong>:</p>
-<ul>
+<li><strong>Claude Pro</strong> ($20/mo)</li>
+<li><strong>ElevenLabs Creator</strong> ($22/mo)</li>
 <li><strong>Runway Gen-3</strong> ($15/mo Standard)</li>
-<li>Pika 2.1 ($10/mo)</li>
-<li>Sora (waitlist)</li>
+<li><strong>Suno Pro</strong> ($10/mo)</li>
+<li><strong>CapCut</strong> (free)</li>
 </ul>
-<p><strong>Voice</strong>:</p>
+<h2>17.3 Useful reading</h2>
 <ul>
-<li><strong>ElevenLabs</strong> ($22/mo Creator)</li>
-<li>Descript Overdub ($12/mo Hobbyist)</li>
-</ul>
-<p><strong>Music</strong>:</p>
-<ul>
-<li><strong>Suno v4</strong> ($10/mo Pro)</li>
-<li>Udio ($10/mo)</li>
-<li>Epidemic Sound ($19/mo) — for licensed real music</li>
-</ul>
-<p><strong>Copy</strong>:</p>
-<ul>
-<li><strong>Claude 4.7</strong> ($20/mo Pro)</li>
-</ul>
-<p><strong>Editing</strong>:</p>
-<ul>
-<li><strong>CapCut Desktop</strong> (free)</li>
-</ul>
-<p><strong>Attribution (Phase 2+)</strong>:</p>
-<ul>
-<li>AppsFlyer (free tier up to 12K installs/mo)</li>
-<li>Adjust (similar)</li>
-</ul>
-<h2>15.3 Useful reading</h2>
-<ul>
-<li><strong>Andrew Chen</strong> — &quot;Cold start problem&quot; book + andrewchen.com — best founder-level acquisition reading</li>
 <li><strong>Demand Curve blog</strong> — short tactical ad guides</li>
-<li><strong>AppsFlyer benchmarks</strong> — industry CAC, retention, LTV by category</li>
-<li><strong>Meta Blueprint</strong> — free official Meta ad certification training (free)</li>
+<li><strong>Reforge — Brian Balfour</strong> — growth fundamentals</li>
+<li><strong>AppsFlyer benchmarks</strong> — industry CAC by category</li>
+<li><strong>Meta Blueprint</strong> — free official Meta ad training</li>
 <li><strong>Google Ads Academy</strong> — free official Google Ads training</li>
+<li><strong>Kickstarter campaign post-mortems</strong> — Search &quot;Kickstarter analytics teardown&quot; for case studies of reservation campaigns</li>
 </ul>
-<h2>15.4 Useful templates</h2>
-<ul>
-<li>This document</li>
-<li>Notion template &quot;Performance Marketing Operating System&quot; (free, search Notion gallery)</li>
-<li>Northbeam Slack community (acquisition specialists, $99/mo)</li>
-</ul>
-<h2>15.5 Founders who&#39;ve written about this</h2>
-<ul>
-<li>Justin Mares (Traction)</li>
-<li>Brian Balfour (Reforge)</li>
-<li>Eric Bahn (Caregiving-app-specific writing)</li>
-<li>AJ Wilcox (LinkedIn-specific, useful if you ever pivot to B2B)</li>
-</ul>
-<hr>
-<h2>Final word</h2>
-<p>You&#39;ll be tempted to optimize every dial in week 1. Don&#39;t. Spend $500-1k learning. Read your data weekly. Iterate creative every 14 days. Trust the algorithms more than your instincts in the first 30 days — they have more data than you.</p>
-<p>The Phase 1 → Phase 2 logic gives you the cleanest path from where you are (lean budget, Nigeria inventory, US capital target) to where you want to be (scalable acquisition, both markets, repeatable creative). Stick to it.</p>
-<p>When you launch your first campaign, take a screenshot. Stick it on your wall. The first $1 of paid acquisition is a milestone — most founders never get here.</p>
-<p>— End of manual —</p>
+<h2>17.4 The single rule that matters most</h2>
+<p>You&#39;ll be tempted to optimise every dial in week 1. Don&#39;t. Spend $500-1k learning. Read your data weekly. Iterate creative every 14 days. Trust the algorithms more than your instincts in the first 30 days — they have more data than you.</p>
+<p>The Phase 1 → Phase 2 logic gives you the cleanest path from where you are (lean budget, Nigerian inventory, US capital target) to where you want to be (self-funding reservations engine, both markets, repeatable creative). Stick to it.</p>
+<p>When you collect your first $50 deposit, take a screenshot. Stick it on your wall. The first $50 of paid-acquisition revenue is a milestone — most founders never get here.</p>
+<p>— End of manual v2 —</p>
 
 
 </body>
