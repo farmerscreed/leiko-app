@@ -12,6 +12,7 @@ import { mmkv, STORAGE_KEYS } from '../services/storage';
 import { createPendingVitalBuffer } from '../services/pendingVitalBuffer';
 import { logger } from '../services/analytics/logger';
 import type { SpO2Sample } from '../types/vitals';
+import { zonedHour, zonedDateKey } from '../utils/timezone';
 
 const RECENT_SAMPLES_CAP = 200;
 const OVERNIGHT_WINDOW_START_HOUR = 22; // 22:00 user-local
@@ -35,15 +36,20 @@ interface SpO2State {
    *  in the user-local 22:00–06:00 window for that calendar night.
    *  Empty nights skipped (not zero-filled). Window interpreted in UTC
    *  for test determinism — production callers pass TZ-aware nowSec. */
-  overnightLowsRecent: (nowSec?: number, nights?: number) => number[];
+  overnightLowsRecent: (
+    nowSec?: number,
+    nights?: number,
+    timeZone?: string | null,
+  ) => number[];
   /** Sprint 18 — same data as overnightLowsRecent but each entry
-   *  carries the nightKey (the "owning morning" UTC date the sample
+   *  carries the nightKey (the "owning morning" date the sample
    *  is anchored to) so consumers can date-align with other vitals'
    *  per-night data instead of positional pairing. Oldest first.
    *  Empty nights are skipped (not zero-filled). */
   overnightLowsRecentByNight: (
     nowSec?: number,
     nights?: number,
+    timeZone?: string | null,
   ) => Array<{ nightKey: string; low: number }>;
   /**
    * Sprint 16.5e — seed historical samples from the server. Same
@@ -88,20 +94,19 @@ function dedupRecent(rows: SpO2Sample[]): SpO2Sample[] {
   return out;
 }
 
-function inOvernightWindow(measuredAtSec: number): boolean {
-  const hr = new Date(measuredAtSec * 1000).getUTCHours();
+function inOvernightWindow(measuredAtSec: number, timeZone?: string | null): boolean {
+  const hr = zonedHour(measuredAtSec, timeZone);
   return hr >= OVERNIGHT_WINDOW_START_HOUR || hr < OVERNIGHT_WINDOW_END_HOUR;
 }
 
-/** Anchor each overnight sample to its "owning morning" UTC date —
- *  matches hr.ts so the two slices align on what counts as one night. */
-function nightDateKey(measuredAtSec: number): string {
-  const d = new Date(measuredAtSec * 1000);
-  const hr = d.getUTCHours();
-  const anchored = hr >= OVERNIGHT_WINDOW_START_HOUR
-    ? new Date(d.getTime() + SECONDS_PER_DAY * 1000)
-    : d;
-  return anchored.toISOString().slice(0, 10);
+/** Anchor each overnight sample to its "owning morning" date in the
+ *  user's timezone — matches hr.ts so the two slices align on what
+ *  counts as one night. `timeZone` omitted/UTC keeps UTC behaviour. */
+function nightDateKey(measuredAtSec: number, timeZone?: string | null): string {
+  const hr = zonedHour(measuredAtSec, timeZone);
+  const anchorSec =
+    hr >= OVERNIGHT_WINDOW_START_HOUR ? measuredAtSec + SECONDS_PER_DAY : measuredAtSec;
+  return zonedDateKey(anchorSec, timeZone);
 }
 
 export const useSpO2 = create<SpO2State>((set, get) => ({
@@ -157,21 +162,21 @@ export const useSpO2 = create<SpO2State>((set, get) => ({
     return latest.percent;
   },
 
-  overnightLowsRecent: (nowSec, nights) => {
+  overnightLowsRecent: (nowSec, nights, timeZone) => {
     return get()
-      .overnightLowsRecentByNight(nowSec, nights)
+      .overnightLowsRecentByNight(nowSec, nights, timeZone)
       .map((e) => e.low);
   },
 
-  overnightLowsRecentByNight: (nowSec, nights) => {
+  overnightLowsRecentByNight: (nowSec, nights, timeZone) => {
     const now = nowSec ?? Math.floor(Date.now() / 1000);
     const N = nights ?? OVERNIGHT_DEFAULT_NIGHTS;
     const all = [...get().pending, ...get().recent];
     if (all.length === 0) return [];
     const byNight = new Map<string, SpO2Sample[]>();
     for (const s of all) {
-      if (!inOvernightWindow(s.measuredAtSec)) continue;
-      const key = nightDateKey(s.measuredAtSec);
+      if (!inOvernightWindow(s.measuredAtSec, timeZone)) continue;
+      const key = nightDateKey(s.measuredAtSec, timeZone);
       const arr = byNight.get(key);
       if (arr) arr.push(s);
       else byNight.set(key, [s]);
@@ -180,7 +185,7 @@ export const useSpO2 = create<SpO2State>((set, get) => ({
     // Walk from oldest (now - N days) to newest (now), so result is
     // oldest-first as the brief specifies.
     for (let d = N; d >= 0; d--) {
-      const key = nightDateKey(now - d * SECONDS_PER_DAY);
+      const key = nightDateKey(now - d * SECONDS_PER_DAY, timeZone);
       const samples = byNight.get(key);
       if (!samples || samples.length === 0) continue;
       const low = Math.min(...samples.map((s) => s.percent));

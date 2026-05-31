@@ -60,6 +60,7 @@ import type { RecentReading } from '../../components/RecentReadingsList';
 import { useDailyPulseData, emptyDailyPulse } from '../../state/dailyPulse';
 import { useHR } from '../../state/hr';
 import { useSleep } from '../../state/sleep';
+import { useAuth } from '../../state/auth';
 import { useParentDailyPulseData } from '../../hooks/useParentDailyPulseData';
 import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { hrFill } from '../../utils/vitalThemes';
@@ -407,6 +408,13 @@ export function HRDetail({
     ? parentPulse.data ?? emptyFallback
     : ownPulse;
   const restingToday = data.hr.restingToday;
+  // Display value for the hero — resting today → recent resting → latest
+  // sample. Falls back so the hero stops blanking when only a daytime
+  // reading exists, while resting-specific copy below (insight, baseline,
+  // "resting this morning" prose) stays on `restingToday` so we never
+  // narrate a daytime value as "resting".
+  const displayBpm = data.hr.displayBpm;
+  const isLatestFallback = data.hr.displaySource === 'latest';
 
   // Sprint 16.5e — mirror DetailShell's range so the recent-readings
   // list, the sleep × resting-HR correlation, and the zone-card
@@ -434,6 +442,10 @@ export function HRDetail({
   // can pull-to-refresh or re-enter the screen to re-anchor.
   const nowSec = useMemo(() => Math.floor(Date.now() / 1000), []);
 
+  // Same user timezone the hero uses (via dailyPulse) so the recent
+  // resting series here is bucketed consistently. Null → UTC.
+  const timeZone = useAuth((s) => s.profile?.timezone ?? null);
+
   const rangedSamples = useMemo(() => {
     const cutoff = nowSec - RANGE_TO_DAYS[range] * SECONDS_PER_DAY;
     return allSamples.filter((s) => s.measuredAtSec >= cutoff);
@@ -456,8 +468,8 @@ export function HRDetail({
   // Sprint 18 H3 — switch to the date-keyed accessor so the
   // correlation downstream can pair by night.
   const restingByNight = useMemo(
-    () => useHR.getState().restingBpmRecentByNight(nowSec),
-    [nowSec, hrRecent, hrPending],
+    () => useHR.getState().restingBpmRecentByNight(nowSec, timeZone),
+    [nowSec, hrRecent, hrPending, timeZone],
   );
 
   const { restingAvg, peakToday, rangeToday } = useMemo(
@@ -490,12 +502,17 @@ export function HRDetail({
 
   const recentRows = useMemo(() => buildHRRecentRows(rangedSamples), [rangedSamples]);
 
+  // Resting-specific copy (insight card, baseline) stays gated on a
+  // true resting value; the hero number uses the display fallback so it
+  // shows a daytime reading rather than blanking.
   const hasData = restingToday !== null;
+  const hasDisplay = displayBpm !== null;
   const hasZoneData = zones.some((z) => z.pct > 0);
 
   // Sprint 16 — per D13 §6.6, surface a stale caption when the latest
-  // HR sample is older than 6h.
-  const staleness = hasData
+  // HR sample is older than 6h. Gate on the displayed value so a
+  // daytime-only reading still gets a staleness check.
+  const staleness = hasDisplay
     ? checkStaleness('hr', data.hr.latestSampleSec, nowSec)
     : 'no_data';
   const staleCaption =
@@ -506,13 +523,22 @@ export function HRDetail({
   // Sprint 18 P-H1 — "within your range" framing assumes a known range
   // and shouldn't fire before the user has any baseline. Once the
   // baseline computes, "within your range" makes sense; before that,
-  // a neutral "bpm" reads honestly.
-  const heroPrimary = hasData ? String(Math.round(restingToday!)) : '—';
-  const heroSub = staleCaption ?? (hasData ? 'Now · resting' : 'Heart rate');
-  const heroRange = hasData
-    ? baseline !== null
-      ? 'bpm · within your range'
-      : 'bpm · resting'
+  // a neutral "bpm" reads honestly. The latest-fallback path uses
+  // neutral wording so we never imply a daytime reading is resting.
+  const heroPrimary = hasDisplay ? String(Math.round(displayBpm!)) : '—';
+  const heroSub =
+    staleCaption ??
+    (hasDisplay
+      ? isLatestFallback
+        ? 'Latest reading'
+        : 'Now · resting'
+      : 'Heart rate');
+  const heroRange = hasDisplay
+    ? isLatestFallback
+      ? 'bpm · latest reading'
+      : baseline !== null
+        ? 'bpm · within your range'
+        : 'bpm · resting'
     : 'Wear the watch to start tracking your heart rate.';
 
   return (
@@ -526,7 +552,7 @@ export function HRDetail({
           primary={heroPrimary}
           sub={heroSub}
           range={heroRange}
-          ringFill={hrFill(restingToday)}
+          ringFill={hrFill(displayBpm)}
           livePulse={false}
           testID="hr-detail-hero"
         />

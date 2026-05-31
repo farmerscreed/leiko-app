@@ -151,6 +151,16 @@ export function computeHRLatestSampleAt(samples: HRSample[]): number | null {
   ).measuredAtSec;
 }
 
+/** bpm of the most recent HR sample (any time of day). Mirrors
+ *  computeHRLatestSampleAt but returns `.bpm`. Drives the "latest"
+ *  rung of the HR display fallback for parent-scoped data. */
+export function computeHRLatestBpm(samples: HRSample[]): number | null {
+  if (samples.length === 0) return null;
+  return samples.reduce((a, b) =>
+    b.measuredAtSec > a.measuredAtSec ? b : a,
+  ).bpm;
+}
+
 export function computeSpO2LatestPercent(
   samples: SpO2Sample[],
 ): number | null {

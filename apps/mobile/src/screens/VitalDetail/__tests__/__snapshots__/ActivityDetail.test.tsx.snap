@@ -2192,7 +2192,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
               testID="activity-detail-recent-list"
             >
               <View
-                accessibilityLabel="6,250, Today · in progress, now"
+                accessibilityLabel="6,250, Today · so far, now"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2288,7 +2288,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                       }
                     }
                   >
-                    Today · in progress
+                    Today · so far
                   </Text>
                 </View>
                 <Text
@@ -2307,7 +2307,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 </Text>
               </View>
               <View
-                accessibilityLabel="8,000, Thursday · met goal, May 21"
+                accessibilityLabel="8,000, Thursday · met goal, May 7"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2352,7 +2352,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     },
                   ]
                 }
-                testID="activity-detail-recent-list-row-day-2026-05-21"
+                testID="activity-detail-recent-list-row-day-2026-05-07"
               >
                 <View
                   style={
@@ -2418,11 +2418,11 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     }
                   }
                 >
-                  May 21
+                  May 7
                 </Text>
               </View>
               <View
-                accessibilityLabel="7,100, Wednesday · light day, May 20"
+                accessibilityLabel="7,100, Wednesday · light day, May 6"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2467,7 +2467,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     },
                   ]
                 }
-                testID="activity-detail-recent-list-row-day-2026-05-20"
+                testID="activity-detail-recent-list-row-day-2026-05-06"
               >
                 <View
                   style={
@@ -2533,11 +2533,11 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     }
                   }
                 >
-                  May 20
+                  May 6
                 </Text>
               </View>
               <View
-                accessibilityLabel="5,400, Tuesday · light day, May 19"
+                accessibilityLabel="5,400, Tuesday · light day, May 5"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2582,7 +2582,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     },
                   ]
                 }
-                testID="activity-detail-recent-list-row-day-2026-05-19"
+                testID="activity-detail-recent-list-row-day-2026-05-05"
               >
                 <View
                   style={
@@ -2648,11 +2648,11 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     }
                   }
                 >
-                  May 19
+                  May 5
                 </Text>
               </View>
               <View
-                accessibilityLabel="9,000, Monday · met goal, May 18"
+                accessibilityLabel="9,000, Monday · met goal, May 4"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2697,7 +2697,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     },
                   ]
                 }
-                testID="activity-detail-recent-list-row-day-2026-05-18"
+                testID="activity-detail-recent-list-row-day-2026-05-04"
               >
                 <View
                   style={
@@ -2763,7 +2763,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     }
                   }
                 >
-                  May 18
+                  May 4
                 </Text>
               </View>
             </View>

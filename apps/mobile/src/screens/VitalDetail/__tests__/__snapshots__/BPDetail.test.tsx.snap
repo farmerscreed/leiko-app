@@ -2097,7 +2097,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
               testID="bp-detail-readings-list"
             >
               <View
-                accessibilityLabel="122/78, Today afternoon, 4:30 PM"
+                accessibilityLabel="122/78, Today afternoon, 3:30 PM"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2208,7 +2208,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                     }
                   }
                 >
-                  4:30 PM
+                  3:30 PM
                 </Text>
               </View>
             </View>

@@ -66,6 +66,7 @@ import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import { useActivity } from '../../state/activity';
+import { useAuth } from '../../state/auth';
 import { useTheme } from '../../theme';
 import type { ActivityDay } from '../../types/vitals';
 import { BaselineReference } from '../../components/BaselineReference';
@@ -156,11 +157,14 @@ export function ActivityDetail({
   onLearnOpen,
   familyId,
 }: ActivityDetailProps) {
+  // Same user timezone the rest of the app uses for day boundaries so
+  // today's calories bucket matches the hero. Null → UTC.
+  const timeZone = useAuth((s) => s.profile?.timezone ?? null);
   // Sprint 17a — both data sources called unconditionally.
   const ownPulse = useDailyPulseData();
   const ownRecentSteps = useActivity((s) => s.recentSteps);
   const ownPendingSteps = useActivity((s) => s.pendingSteps);
-  const ownTodayCalories = useActivity((s) => s.todayCalories());
+  const ownTodayCalories = useActivity((s) => s.todayCalories(undefined, timeZone));
   const ownRecentCalories = useActivity((s) => s.recentCalories);
   const ownPendingCalories = useActivity((s) => s.pendingCalories);
   const scopedFamilyId = familyId ?? null;

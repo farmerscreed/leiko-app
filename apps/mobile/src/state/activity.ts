@@ -17,6 +17,7 @@ import { mmkv, STORAGE_KEYS } from '../services/storage';
 import { createPendingVitalBuffer } from '../services/pendingVitalBuffer';
 import { logger } from '../services/analytics/logger';
 import type { ActivityDay, CaloriesDay } from '../types/vitals';
+import { zonedDateKey } from '../utils/timezone';
 
 const RECENT_DAYS_CAP = 90;        // rolling 90-day window per vital
 const RECENT_DEFAULT_DAYS = 14;
@@ -39,8 +40,8 @@ interface ActivityState {
    *  local YYYY-MM-DD of nowSec — interpreted in UTC for test
    *  determinism (matches fixtures.js dayLocal()). Production callers
    *  pass a TZ-aware nowSec; the fixture builder also uses UTC. */
-  todaySteps: (nowSec?: number) => ActivityDay | null;
-  todayCalories: (nowSec?: number) => CaloriesDay | null;
+  todaySteps: (nowSec?: number, timeZone?: string | null) => ActivityDay | null;
+  todayCalories: (nowSec?: number, timeZone?: string | null) => CaloriesDay | null;
   /** Per-day step totals for the last N days, oldest first. Empty
    *  days skipped (not zero-filled). */
   recentStepDays: (nowSec?: number, days?: number) => number[];
@@ -103,8 +104,8 @@ function dedupBy<T>(rows: T[], keyOf: (r: T) => string): T[] {
   return out;
 }
 
-function todayKey(nowSec: number): string {
-  return new Date(nowSec * 1000).toISOString().slice(0, 10);
+function todayKey(nowSec: number, timeZone?: string | null): string {
+  return zonedDateKey(nowSec, timeZone);
 }
 
 export const useActivity = create<ActivityState>((set, get) => ({
@@ -181,16 +182,16 @@ export const useActivity = create<ActivityState>((set, get) => ({
     });
   },
 
-  todaySteps: (nowSec) => {
+  todaySteps: (nowSec, timeZone) => {
     const now = nowSec ?? Math.floor(Date.now() / 1000);
-    const key = todayKey(now);
+    const key = todayKey(now, timeZone);
     const all = [...get().pendingSteps, ...get().recentSteps];
     return all.find((d) => d.dayLocal === key) ?? null;
   },
 
-  todayCalories: (nowSec) => {
+  todayCalories: (nowSec, timeZone) => {
     const now = nowSec ?? Math.floor(Date.now() / 1000);
-    const key = todayKey(now);
+    const key = todayKey(now, timeZone);
     const all = [...get().pendingCalories, ...get().recentCalories];
     return all.find((d) => d.dayLocal === key) ?? null;
   },

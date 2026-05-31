@@ -585,7 +585,7 @@ exports[`BPTwinLineChart — render matches snapshot 1`] = `
         dy={[]}
         fill={
           {
-            "payload": 4288452752,
+            "payload": 4286939002,
             "type": 0,
           }
         }
@@ -636,7 +636,7 @@ exports[`BPTwinLineChart — render matches snapshot 1`] = `
         dy={[]}
         fill={
           {
-            "payload": 4288452752,
+            "payload": 4286939002,
             "type": 0,
           }
         }
@@ -687,7 +687,7 @@ exports[`BPTwinLineChart — render matches snapshot 1`] = `
         dy={[]}
         fill={
           {
-            "payload": 4288452752,
+            "payload": 4286939002,
             "type": 0,
           }
         }
@@ -738,7 +738,7 @@ exports[`BPTwinLineChart — render matches snapshot 1`] = `
         dy={[]}
         fill={
           {
-            "payload": 4288452752,
+            "payload": 4286939002,
             "type": 0,
           }
         }
@@ -789,7 +789,7 @@ exports[`BPTwinLineChart — render matches snapshot 1`] = `
         dy={[]}
         fill={
           {
-            "payload": 4288452752,
+            "payload": 4286939002,
             "type": 0,
           }
         }
@@ -840,7 +840,7 @@ exports[`BPTwinLineChart — render matches snapshot 1`] = `
         dy={[]}
         fill={
           {
-            "payload": 4288452752,
+            "payload": 4286939002,
             "type": 0,
           }
         }
@@ -891,7 +891,7 @@ exports[`BPTwinLineChart — render matches snapshot 1`] = `
         dy={[]}
         fill={
           {
-            "payload": 4288452752,
+            "payload": 4286939002,
             "type": 0,
           }
         }
@@ -942,7 +942,7 @@ exports[`BPTwinLineChart — render matches snapshot 1`] = `
         dy={[]}
         fill={
           {
-            "payload": 4288452752,
+            "payload": 4286939002,
             "type": 0,
           }
         }
@@ -1034,7 +1034,7 @@ exports[`BPTwinLineChart — render matches snapshot 1`] = `
         allowFontScaling={false}
         style={
           {
-            "color": "#9C9890",
+            "color": "#857F7A",
             "fontFamily": "Inter_500Medium",
             "fontSize": 11,
             "letterSpacing": 0.55,
@@ -1074,7 +1074,7 @@ exports[`BPTwinLineChart — render matches snapshot 1`] = `
         allowFontScaling={false}
         style={
           {
-            "color": "#9C9890",
+            "color": "#857F7A",
             "fontFamily": "Inter_500Medium",
             "fontSize": 11,
             "letterSpacing": 0.55,

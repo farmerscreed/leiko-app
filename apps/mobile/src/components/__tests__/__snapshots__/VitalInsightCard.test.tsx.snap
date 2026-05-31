@@ -139,7 +139,7 @@ exports[`VitalInsightCard matches snapshot 1`] = `
   <Text
     style={
       {
-        "color": "#F5F1EA",
+        "color": "#FFFFFF",
         "fontFamily": "Inter_400Regular",
         "fontSize": 15,
         "lineHeight": 22,

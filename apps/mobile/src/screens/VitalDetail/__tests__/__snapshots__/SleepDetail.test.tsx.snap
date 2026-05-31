@@ -1067,7 +1067,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                     }
                   }
                 >
-                  5:18 PM
+                  4:18 PM
                 </Text>
               </View>
               <Text
@@ -1124,7 +1124,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                     }
                   }
                 >
-                  1:00 AM
+                  12:00 AM
                 </Text>
               </View>
             </View>
@@ -1741,7 +1741,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                   }
                 }
               >
-                May 16
+                May 2
               </Text>
               <Text
                 allowFontScaling={false}

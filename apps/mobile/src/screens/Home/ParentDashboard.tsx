@@ -381,13 +381,13 @@ export function ParentDashboard() {
           <VitalTile
             vitalType="hr"
             value={
-              data.hr.restingToday !== null
-                ? String(Math.round(data.hr.restingToday))
+              data.hr.displayBpm !== null
+                ? String(Math.round(data.hr.displayBpm))
                 : '—'
             }
-            secondary="bpm resting"
+            secondary={data.hr.displaySource === 'latest' ? 'bpm latest' : 'bpm resting'}
             ringFill={heroVitals.hr.fill}
-            state={data.hr.restingToday !== null ? 'normal' : 'no-data'}
+            state={data.hr.displayBpm !== null ? 'normal' : 'no-data'}
             onPress={() => handleVitalPress('hr')}
             testID="parent-dashboard-tile-hr"
           />

@@ -2170,7 +2170,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
               testID="hr-detail-recent-list"
             >
               <View
-                accessibilityLabel="64, Latest · resting, 11:20 PM"
+                accessibilityLabel="64, Latest · resting, 3:30 PM"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2215,7 +2215,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                     },
                   ]
                 }
-                testID="hr-detail-recent-list-row-hr-1779402008"
+                testID="hr-detail-recent-list-row-hr-1778254200"
               >
                 <View
                   style={
@@ -2281,11 +2281,11 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                     }
                   }
                 >
-                  11:20 PM
+                  3:30 PM
                 </Text>
               </View>
               <View
-                accessibilityLabel="70, Steady, 6:20 PM"
+                accessibilityLabel="70, Steady, 10:30 AM"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2330,7 +2330,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                     },
                   ]
                 }
-                testID="hr-detail-recent-list-row-hr-1779384008"
+                testID="hr-detail-recent-list-row-hr-1778236200"
               >
                 <View
                   style={
@@ -2396,11 +2396,11 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                     }
                   }
                 >
-                  6:20 PM
+                  10:30 AM
                 </Text>
               </View>
               <View
-                accessibilityLabel="78, Steady, 12:20 PM"
+                accessibilityLabel="78, Steady, 4:30 AM"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2445,7 +2445,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                     },
                   ]
                 }
-                testID="hr-detail-recent-list-row-hr-1779362408"
+                testID="hr-detail-recent-list-row-hr-1778214600"
               >
                 <View
                   style={
@@ -2511,7 +2511,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                     }
                   }
                 >
-                  12:20 PM
+                  4:30 AM
                 </Text>
               </View>
             </View>

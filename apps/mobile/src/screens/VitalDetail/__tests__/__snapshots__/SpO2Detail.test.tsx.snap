@@ -1054,7 +1054,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
               </Text>
             </View>
             <View
-              accessibilityLabel="Lowest: 94 briefly · 2:00 AM"
+              accessibilityLabel="Lowest: 94 briefly · 1:00 AM"
               accessibilityRole="text"
               style={
                 [
@@ -1114,7 +1114,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                   }
                 }
               >
-                briefly · 2:00 AM
+                briefly · 1:00 AM
               </Text>
             </View>
             <View
@@ -1874,7 +1874,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
               testID="spo2-detail-readings-list"
             >
               <View
-                accessibilityLabel="98%, Latest today, 5:00 am"
+                accessibilityLabel="98%, Latest today, 4:00 am"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -1985,11 +1985,11 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     }
                   }
                 >
-                  5:00 am
+                  4:00 am
                 </Text>
               </View>
               <View
-                accessibilityLabel="97%, Overnight reading, 4:00 am"
+                accessibilityLabel="97%, Overnight reading, 3:00 am"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2100,11 +2100,11 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     }
                   }
                 >
-                  4:00 am
+                  3:00 am
                 </Text>
               </View>
               <View
-                accessibilityLabel="96%, Overnight reading, 3:00 am"
+                accessibilityLabel="96%, Overnight reading, 2:00 am"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2215,11 +2215,11 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     }
                   }
                 >
-                  3:00 am
+                  2:00 am
                 </Text>
               </View>
               <View
-                accessibilityLabel="94%, Overnight reading, 2:00 am"
+                accessibilityLabel="94%, Overnight reading, 1:00 am"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2330,11 +2330,11 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     }
                   }
                 >
-                  2:00 am
+                  1:00 am
                 </Text>
               </View>
               <View
-                accessibilityLabel="95%, Overnight reading, 1:00 am"
+                accessibilityLabel="95%, Overnight reading, 12:00 am"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2445,7 +2445,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     }
                   }
                 >
-                  1:00 am
+                  12:00 am
                 </Text>
               </View>
             </View>
