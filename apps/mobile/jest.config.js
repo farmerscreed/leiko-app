@@ -29,6 +29,15 @@ module.exports = {
       // the rn-project's defaults so pure tests don't need a real
       // Supabase running.
       setupFiles: ['<rootDir>/jest.setup.pure.js'],
+      // The pure project has no real react-native (it bypasses
+      // jest-expo). The BLE foreground-service wrapper is the first
+      // pure-graph module to import `react-native` — map it to a
+      // minimal stub so ts-jest doesn't choke on RN's untransformed
+      // ESM. Scoped to this project only; the rn project keeps the
+      // real react-native from jest-expo.
+      moduleNameMapper: {
+        '^react-native$': '<rootDir>/jest/react-native.pure-mock.js',
+      },
       testMatch: [
         '<rootDir>/__tests__/**/*.test.ts?(x)',
         '<rootDir>/src/theme/**/__tests__/**/*.test.ts?(x)',

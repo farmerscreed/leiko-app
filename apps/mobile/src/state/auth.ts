@@ -30,6 +30,7 @@ import { useKnownAccounts } from './knownAccounts';
 import { useOnboarding } from './onboarding';
 import { linkSentryToUser } from '../services/sentry';
 import { linkPosthogToUser } from '../services/analytics/posthog';
+import { stopBleForegroundService } from '../services/ble/foregroundService';
 import type { AccountType, UserRow } from '../types/database';
 
 type Status = 'loading' | 'unauthenticated' | 'authenticated';
@@ -175,6 +176,10 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   async signOut() {
+    // Stop the BLE foreground service before tearing down the session —
+    // a signed-out app has no business holding the watch link or the
+    // persistent notification open. No-op on iOS / when not running.
+    void stopBleForegroundService();
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     // Best-effort: clear the RevenueCat subscriber so a different user

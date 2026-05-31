@@ -40,6 +40,10 @@ import {
 } from '../services/ble/bleManager';
 import { setTime } from '../services/ble/commands/setTime';
 import { findWatch } from '../services/ble/commands/findWatch';
+import {
+  startBleForegroundService,
+  stopBleForegroundService,
+} from '../services/ble/foregroundService';
 import type { UrionDevice } from '../services/ble/UrionDevice';
 
 export type DiscoveredDevice = {
@@ -314,6 +318,10 @@ export const usePairing = create<PairingState>((set, get) => ({
         pairedDevice: paired,
         _activeDevice: null,
       });
+      // Spin up the Android foreground service so the OS keeps the
+      // process + BLE link alive while backgrounded (Family Circle's
+      // "see readings as they arrive" promise). No-op on iOS.
+      void startBleForegroundService();
     } catch (e) {
       const reason = e instanceof Error ? e.message : 'unknown';
       logger.track('ble_pair_failed', { macSuffix, reason });
@@ -332,6 +340,9 @@ export const usePairing = create<PairingState>((set, get) => ({
   },
 
   forget: async () => {
+    // Tear down the foreground service first — there's no watch to keep
+    // a link to once it's forgotten, so the notification must go too.
+    void stopBleForegroundService();
     const current = get().pairedDevice;
     if (current) logger.track('ble_forget_device', { deviceId: current.bleId });
     mmkv.remove(STORAGE_KEYS.pairedDevice);
