@@ -49,9 +49,16 @@ function makeReadingAtLocal(
 }
 
 /** Build a tight habit cluster around 07:30 local across 14 days. */
+// History of ~7:30 morning readings on days 13..1 — i.e. strictly
+// BEFORE "today" (day 14), which every test below uses as `now`. The
+// freshest reading is therefore yesterday, so the dispatcher's
+// recent-reading suppression (a reading within the last 4h) does NOT
+// fire. (Day 14's own reading would be in the future relative to
+// now=06:00 and is intentionally excluded here; the dedicated
+// "within the last 4 hours" test adds a fresh same-day reading itself.)
 function habitualMornings(): LocalReading[] {
   const readings: LocalReading[] = [];
-  for (let day = 14; day >= 1; day -= 1) {
+  for (let day = 13; day >= 1; day -= 1) {
     const drift = (day % 3) * 5;
     readings.push(makeReadingAtLocal(day, 7, 30 + drift, day));
   }

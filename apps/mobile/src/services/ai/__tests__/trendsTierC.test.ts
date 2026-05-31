@@ -154,16 +154,18 @@ describe('pickCitedDayIndex', () => {
       {
         bp: makeBPSeries([
           ['2026-05-01', 122, 78],
-          ['2026-05-02', 123, 79],
-          ['2026-05-03', 121, 77],
+          ['2026-05-02', 122, 78],
+          ['2026-05-03', 122, 78],
           ['2026-05-04', 122, 78],
-          ['2026-05-05', 123, 79],
+          ['2026-05-05', 122, 78],
           ['2026-05-06', 122, 78],
         ]),
       },
     );
-    // Max deviation is 1 mmHg, well below SD of ~0.8. Engine returns
-    // null rather than pin a near-mean day.
+    // Perfectly flat series → SD 0 and max deviation 0, so maxDev > SD
+    // is false and the engine returns null rather than pin a near-mean
+    // day. (A near-flat 121–123 series is NOT "too uniform": its 1–2
+    // mmHg outlier exceeds the ~0.76 SD and is correctly surfaced.)
     expect(pickCitedDayIndex(uniform, 'bp')).toBeNull();
   });
 });
