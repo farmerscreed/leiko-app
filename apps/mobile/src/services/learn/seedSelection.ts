@@ -34,7 +34,7 @@
 // re-fire after the 90-day window has lapsed.
 
 import type { CompiledArticle } from './ast';
-import { bpTier, type ArticleCategory, type BPTier } from './types';
+import { bpTier, type BPTier } from './types';
 
 /** A subset of D13 §6 — `in_pattern` is the calm baseline; the
  *  algorithm only acts on the two non-baseline tiers. */
@@ -154,7 +154,6 @@ export function selectSeededCard(
   const ranked = [...input.articles]
     .filter(a => !input.isHidden(a.frontmatter.id))
     .filter(a => !everRead(a.frontmatter.id))
-    .filter(a => isRegionAllowed(a.frontmatter.category, input.region))
     .sort((a, b) => {
       const ap = a.frontmatter.inline_explainer_priority;
       const bp = b.frontmatter.inline_explainer_priority;
@@ -195,15 +194,6 @@ function dayIndexTarget(dayIndex: number): string | null {
   return null;
 }
 
-/**
- * Region routing — v1.0 ships as a no-op. Every article is allowed
- * for every region. The hook is in place so when CULTURAL articles
- * land for Nigerian readers the routing can prefer them without a
- * downstream refactor.
- */
-function isRegionAllowed(
-  _category: ArticleCategory,
-  _region: string | null | undefined,
-): boolean {
-  return true;
-}
+// Region routing landed as a v1.0 no-op and has been removed until
+// CULTURAL articles for Nigerian readers actually need it; the
+// `region` input field is retained as the forward hook.
