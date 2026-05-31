@@ -143,7 +143,7 @@ describe('SelfBuyer Intro3 — copy + nav', () => {
         <SelfBuyerIntro3Screen navigation={nav} route={makeRoute('Intro3')} />,
       ),
     );
-    fireEvent.press(screen.getByTestId('self-buyer-intro3-get-started'));
+    fireEvent.press(screen.getByTestId('self-buyer-intro3-continue'));
     expect(nav.navigate).toHaveBeenCalledWith('You');
 
     (nav.navigate as jest.Mock).mockClear();

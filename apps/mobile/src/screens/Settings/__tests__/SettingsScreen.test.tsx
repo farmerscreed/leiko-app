@@ -319,15 +319,19 @@ describe('<SettingsScreen /> — Profile field editor (Sprint 12.5.2)', () => {
   });
 
   it('persists timezone via the "use device timezone" button', async () => {
-    mockProfile = makeProfile({ timezone: 'UTC' });
+    // Stored zone must differ from the device zone, else the button is
+    // disabled (already current). The test runner is pinned to UTC
+    // (jest.config), so seed a non-UTC stored value to keep it enabled.
+    mockProfile = makeProfile({ timezone: 'Africa/Lagos' });
     renderScreen();
     fireEvent.press(screen.getByTestId('settings-profile-timezone'));
     await act(async () => {
       fireEvent.press(screen.getByTestId('settings-demographics-timezone-use-device'));
     });
     await waitFor(() => {
+      // Saves the device-resolved zone (UTC under the pinned test clock).
       expect(mockUpdateProfile).toHaveBeenCalledWith('user-1', expect.objectContaining({
-        timezone: expect.any(String),
+        timezone: 'UTC',
       }));
     });
   });
@@ -378,15 +382,15 @@ describe('<SettingsScreen /> — About', () => {
     renderScreen();
     expect(screen.getByTestId('settings-about-version')).toBeTruthy();
     fireEvent.press(screen.getByTestId('settings-about-terms'));
-    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.app/terms');
+    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.health/terms');
     fireEvent.press(screen.getByTestId('settings-about-privacy'));
-    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.app/privacy');
+    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.health/privacy');
     // Sprint 18 / QUA-8 — Help row now opens the web support page;
     // mailto moved to its own "Email us" row below.
     fireEvent.press(screen.getByTestId('settings-about-help'));
-    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.app/support');
+    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.health/support');
     fireEvent.press(screen.getByTestId('settings-about-email'));
-    expect(linkingSpy).toHaveBeenCalledWith('mailto:support@leiko.app');
+    expect(linkingSpy).toHaveBeenCalledWith('mailto:support@leiko.health');
   });
 });
 

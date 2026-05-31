@@ -176,10 +176,13 @@ describe('ForYourDoctorScreen — title + entry', () => {
     expect(screen.getAllByText('doctor').length).toBeGreaterThan(0);
   });
 
-  it("flips to 'For her doctor' in caregiver mode", () => {
+  it("uses the parent's name in caregiver mode", () => {
+    // Sprint 16.5h — caregiver title now reads "For <Parent>'s doctor"
+    // (the family member's name), not "For her doctor". The mocked
+    // family parent's display name is "Test".
     mockAccountType = 'caregiver';
     renderScreen();
-    expect(screen.getByText(/For her /)).toBeTruthy();
+    expect(screen.getByText(/For Test's /)).toBeTruthy();
   });
 
   it('the header eyebrow reads "Leiko · Share"', () => {
@@ -199,8 +202,11 @@ describe('ForYourDoctorScreen — title + entry', () => {
 describe('ForYourDoctorScreen — range chips + paywall', () => {
   it('renders 4 range chips', () => {
     renderScreen();
-    for (const r of ['7d', '30d', '90d', '1y'] as const) {
-      expect(screen.getByTestId(`fyd-range:${r}`)).toBeTruthy();
+    // Free user: 7d unlocked; 30d/90d/1y render as Plus-locked chips
+    // (testID fyd-range:<label-lowercased>-locked).
+    expect(screen.getByTestId('fyd-range:7d')).toBeTruthy();
+    for (const label of ['30d', '90d', '1y'] as const) {
+      expect(screen.getByTestId(`fyd-range:${label}-locked`)).toBeTruthy();
     }
   });
 
@@ -216,7 +222,8 @@ describe('ForYourDoctorScreen — range chips + paywall', () => {
 
   it('a free user tapping a Plus-gated chip opens the paywall', () => {
     renderScreen();
-    fireEvent.press(screen.getByTestId('fyd-range:30d'));
+    // Free user: the 30d chip is a locked chip.
+    fireEvent.press(screen.getByTestId('fyd-range:30d-locked'));
     expect(screen.getByText('Understand your numbers')).toBeTruthy();
   });
 

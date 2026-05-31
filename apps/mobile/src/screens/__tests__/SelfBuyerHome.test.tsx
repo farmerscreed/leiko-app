@@ -402,9 +402,12 @@ describe('SelfBuyerHome — navigation wiring', () => {
     expect(mockNavigate).toHaveBeenCalledWith('Settings');
   });
 
-  it('Avatar tap → navigates to Settings', () => {
+  it('Settings affordance tap → navigates to Settings', () => {
+    // Sprint 17b redesign: the header's initial-bubble avatar became a
+    // gear "settings" affordance; testID self-buyer-home-avatar →
+    // self-buyer-home-settings.
     render(withProviders(<SelfBuyerHome />));
-    fireEvent.press(screen.getByTestId('self-buyer-home-avatar'));
+    fireEvent.press(screen.getByTestId('self-buyer-home-settings'));
     expect(mockNavigate).toHaveBeenCalledWith('Settings');
   });
 });
