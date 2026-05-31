@@ -1,0 +1,70 @@
+// Foreground service wrapper. Keeps the BLE link to the Leiko watch
+// alive while the app is backgrounded, with a persistent system
+// notification ("Leiko · Connected to your watch") visible to the
+// user. Required by Play Console policy for the
+// FOREGROUND_SERVICE_CONNECTED_DEVICE permission, and structurally
+// important because the Family Circle feature depends on near-
+// real-time syncing while the user isn't actively in the app.
+//
+// On iOS this whole module is a no-op — iOS background BLE is
+// handled differently (Core Bluetooth background mode + state
+// preservation/restoration). The wrapper signature stays the same
+// across platforms so call sites don't need Platform checks.
+
+import { NativeModules, Platform } from 'react-native';
+import { logger } from '../analytics/logger';
+
+interface NativeApi {
+  start(): Promise<boolean>;
+  stop(): Promise<boolean>;
+}
+
+const native: NativeApi | undefined =
+  Platform.OS === 'android'
+    ? (NativeModules.LeikoBleForegroundService as NativeApi | undefined)
+    : undefined;
+
+let running = false;
+
+/** Idempotent — calling start() twice in a row is safe. */
+export async function startBleForegroundService(): Promise<void> {
+  if (Platform.OS !== 'android') return;
+  if (running) return;
+  if (!native) {
+    logger.track('ble_fg_unavailable', { reason: 'native_module_missing' });
+    return;
+  }
+  try {
+    await native.start();
+    running = true;
+    logger.track('ble_fg_started');
+  } catch (e) {
+    logger.track('ble_fg_start_failed', {
+      reason: e instanceof Error ? e.message : 'unknown',
+    });
+  }
+}
+
+export async function stopBleForegroundService(): Promise<void> {
+  if (Platform.OS !== 'android') return;
+  if (!running) return;
+  if (!native) return;
+  try {
+    await native.stop();
+    running = false;
+    logger.track('ble_fg_stopped');
+  } catch (e) {
+    logger.track('ble_fg_stop_failed', {
+      reason: e instanceof Error ? e.message : 'unknown',
+    });
+  }
+}
+
+export function isBleForegroundServiceRunning(): boolean {
+  return running;
+}
+
+/** Test surface */
+export function _resetBleForegroundServiceForTests(): void {
+  running = false;
+}

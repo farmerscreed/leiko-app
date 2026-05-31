@@ -1,3 +1,8 @@
 <resources>
   <string name="app_name">Leiko</string>
+  <string name="ble_channel_name">Watch connection</string>
+  <string name="ble_channel_description">Keeps your Leiko watch connected and your readings flowing.</string>
+  <string name="ble_notification_title">Leiko</string>
+  <string name="ble_notification_text">Connected to your watch</string>
+  <string name="ble_notification_stop">Stop</string>
 </resources>

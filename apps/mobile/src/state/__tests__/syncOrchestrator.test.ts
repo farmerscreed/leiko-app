@@ -16,8 +16,14 @@ const mockTakeReadingPhase = { current: 'idle' as string };
 
 // Pure project has no react-native mock; stub the bits the orchestrator
 // imports. AppState.addEventListener returns a NativeEventSubscription
-// shape; the orchestrator only ever calls .remove() on it.
+// shape; the orchestrator only ever calls .remove() on it. This local
+// factory overrides the pure project's moduleNameMapper react-native
+// stub, so it must also carry Platform — the orchestrator transitively
+// pulls the BLE foreground-service wrapper (via state/auth), which
+// reads Platform.OS at module load.
 jest.mock('react-native', () => ({
+  Platform: { OS: 'android' },
+  NativeModules: {},
   AppState: {
     currentState: 'active',
     addEventListener: jest.fn(() => ({ remove: jest.fn() })),

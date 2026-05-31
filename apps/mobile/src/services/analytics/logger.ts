@@ -33,6 +33,15 @@ export type AnalyticsEvent =
   | { name: 'ble_permission_denied'; props?: { permission: string } }
   | { name: 'ble_bluetooth_off' }
   | { name: 'ble_forget_device'; props?: { deviceId?: string } }
+  // BLE foreground service lifecycle (Android only). Keeps the OS
+  // process + connection alive while backgrounded; the persistent
+  // notification is required by Play Console for
+  // FOREGROUND_SERVICE_CONNECTED_DEVICE. No reading values ever appear.
+  | { name: 'ble_fg_started' }
+  | { name: 'ble_fg_stopped' }
+  | { name: 'ble_fg_unavailable'; props?: { reason: string } }
+  | { name: 'ble_fg_start_failed'; props?: { reason: string } }
+  | { name: 'ble_fg_stop_failed'; props?: { reason: string } }
   // Sprint 6 — reading capture lifecycle. Per CLAUDE.md data rule,
   // event payloads NEVER include sys/dia/pulse values, only counts +
   // categories.
