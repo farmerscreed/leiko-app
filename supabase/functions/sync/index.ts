@@ -337,7 +337,8 @@ async function handleMultiVitals(
     await logRejected(serviceClient, familyId, userId, 'sleep_session', rejected);
     if (accepted.length > 0) {
       const rows = mapSleepSessions(accepted, familyId, deviceId);
-      const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows);
+      // Mutable: re-synced sessions reconcile totals + inferred wake.
+      const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows, { mutable: true });
       if (errored) return json({ error: 'sleep_insert_failed', detail: errored }, 500);
       counts.inserted.sleep = inserted;
       counts.duplicates.sleep = duplicates;
@@ -350,7 +351,8 @@ async function handleMultiVitals(
     await logRejected(serviceClient, familyId, userId, 'steps_day', rejected);
     if (accepted.length > 0) {
       const rows = mapActivityDays(accepted, familyId, deviceId);
-      const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows);
+      // Mutable: steps accumulate through the day — last read wins.
+      const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows, { mutable: true });
       if (errored) return json({ error: 'activity_insert_failed', detail: errored }, 500);
       counts.inserted.steps = inserted;
       counts.duplicates.steps = duplicates;
@@ -363,7 +365,8 @@ async function handleMultiVitals(
     await logRejected(serviceClient, familyId, userId, 'calories_day', rejected);
     if (accepted.length > 0) {
       const rows = mapCaloriesDays(accepted, familyId, deviceId);
-      const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows);
+      // Mutable: kcal accumulate through the day — last read wins.
+      const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows, { mutable: true });
       if (errored) return json({ error: 'calories_insert_failed', detail: errored }, 500);
       counts.inserted.calories = inserted;
       counts.duplicates.calories = duplicates;
@@ -455,12 +458,31 @@ async function insertReadings(
 async function insertVitalRows(
   serviceClient: SupabaseClient,
   rows: VitalsOtherRow[],
+  // `mutable` distinguishes the two upsert semantics on the shared
+  // (device_id, vital_type, measured_at) dedupe key:
+  //
+  //   false (default) — immutable POINT samples (hr / spo2). Each has a
+  //     unique timestamp, so a conflict is a genuine re-sync duplicate:
+  //     ignore it (idempotent).
+  //
+  //   true — mutable DAILY aggregates (steps_day, calories_day) and
+  //     reconciled sleep_session. Their measured_at is the day's
+  //     midnight (steps/calories) or the synthesized session start
+  //     (sleep) — CONSTANT across the day/night — while the value keeps
+  //     changing: steps accumulate, sleep totals + inferred wake get
+  //     reconciled. ignoreDuplicates here froze the row at the first
+  //     sync of the day (e.g. 0 steps before the user walked), so the
+  //     caregiver view — which reads the server — never saw the updated
+  //     count even though the device's local store had it. Update on
+  //     conflict so the latest read wins.
+  options: { mutable?: boolean } = {},
 ): Promise<InsertSummary> {
+  const ignoreDuplicates = !options.mutable;
   const { error, count } = await serviceClient
     .from('vitals_other')
     .upsert(rows, {
       onConflict: 'device_id,vital_type,measured_at',
-      ignoreDuplicates: true,
+      ignoreDuplicates,
       count: 'exact',
     });
   if (error) return { inserted: 0, duplicates: 0, errored: error.message };
