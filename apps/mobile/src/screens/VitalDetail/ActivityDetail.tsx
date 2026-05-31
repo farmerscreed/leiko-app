@@ -51,6 +51,7 @@ import { useDailyPulseData } from '../../state/dailyPulse';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import { useActivity } from '../../state/activity';
+import { useAuth } from '../../state/auth';
 import { useTheme } from '../../theme';
 import type { ActivityDay } from '../../types/vitals';
 
@@ -82,7 +83,8 @@ export function ActivityDetail({
   const data = useDailyPulseData();
   const recentStepsRows = useActivity((s) => s.recentSteps);
   const pendingStepsRows = useActivity((s) => s.pendingSteps);
-  const todayCalories = useActivity((s) => s.todayCalories());
+  const timeZone = useAuth((s) => s.profile?.timezone ?? null);
+  const todayCalories = useActivity((s) => s.todayCalories(undefined, timeZone));
 
   const stepsToday = data.activity.stepsToday;
   const targetSteps = data.activity.targetSteps;

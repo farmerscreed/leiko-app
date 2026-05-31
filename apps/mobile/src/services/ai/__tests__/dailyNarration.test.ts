@@ -19,6 +19,8 @@ function makeData(overrides: Partial<DailyPulseData> = {}): DailyPulseData {
     },
     hr: {
       restingToday: 64,
+      displayBpm: 64,
+      displaySource: 'resting-today',
       latestSampleSec: 1_777_036_401,
       classification: { tier: 'in_pattern' } as never,
       staleness: 'fresh' as never,
@@ -196,7 +198,7 @@ it('falls through to hr → sleep → activity → spo2 when prior vitals missin
 it('returns null central when nothing populated', () => {
   const data = makeData({
     bp: { latest: null, latestSampleSec: null, classification: null, staleness: 'never' as never },
-    hr: { restingToday: null, latestSampleSec: null, classification: null, staleness: 'never' as never },
+    hr: { restingToday: null, displayBpm: null, displaySource: null, latestSampleSec: null, classification: null, staleness: 'never' as never },
     spo2: { latestPercent: null, overnightLowsRecent: [], latestSampleSec: null, classification: null, staleness: 'never' as never },
     sleep: { session: null, classification: null, staleness: 'never' as never },
     activity: { stepsToday: 0, targetSteps: 8000, latestSampleSec: null, classification: null, staleness: 'never' as never },

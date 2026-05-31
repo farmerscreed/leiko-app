@@ -25,6 +25,7 @@ import { mmkv, STORAGE_KEYS } from '../services/storage';
 import { createPendingVitalBuffer } from '../services/pendingVitalBuffer';
 import { logger } from '../services/analytics/logger';
 import type { HRSample } from '../types/vitals';
+import { zonedHour, zonedDateKey } from '../utils/timezone';
 
 const RECENT_SAMPLES_CAP = 200;     // ~7 days at 30-min auto-sampling
 const SLEEP_WINDOW_START_HOUR = 22; // 22:00 user-local
@@ -53,11 +54,11 @@ interface HRState {
    *  nowSec; the same hour-of-day arithmetic produces user-local
    *  results because the watch shifts samples to TRUE UTC at ingest
    *  per D13 §3.5. */
-  restingBpmToday: (nowSec?: number) => number | null;
+  restingBpmToday: (nowSec?: number, timeZone?: string | null) => number | null;
   /** Last RESTING_RECENT_DAYS days of restingBpmToday, oldest first.
    *  Empty entries are skipped (not zero-filled) so classifyHR sees
    *  baseline length = days-with-data. */
-  restingBpmRecent: (nowSec?: number) => number[];
+  restingBpmRecent: (nowSec?: number, timeZone?: string | null) => number[];
   reset: () => void;
 }
 
@@ -92,25 +93,25 @@ function dedupRecent(rows: HRSample[]): HRSample[] {
   return out;
 }
 
-/** UTC-anchored sleep window check. The window 22:00–06:00 spans the
- *  midnight boundary, so we accept hours >= 22 OR hours < 6. */
-function inSleepWindow(measuredAtSec: number): boolean {
-  const hr = new Date(measuredAtSec * 1000).getUTCHours();
+/** Sleep window check, evaluated in the user's timezone. The window
+ *  22:00–06:00 spans the midnight boundary, so we accept hours >= 22 OR
+ *  hours < 6. `timeZone` omitted/UTC keeps the original UTC behaviour. */
+function inSleepWindow(measuredAtSec: number, timeZone?: string | null): boolean {
+  const hr = zonedHour(measuredAtSec, timeZone);
   return hr >= SLEEP_WINDOW_START_HOUR || hr < SLEEP_WINDOW_END_HOUR;
 }
 
 /** Sleep night identity: a sample at 23:00 on May 6 and 03:00 on May 7
  *  belong to the SAME night. We anchor each sample to its "owning
- *  morning" (the date when the user wakes up). For an evening sample
- *  (hour >= 22), the owning morning is the next UTC date; for an early-
- *  morning sample (hour < 6), it's the same UTC date. */
-function nightDateKey(measuredAtSec: number): string {
-  const d = new Date(measuredAtSec * 1000);
-  const hr = d.getUTCHours();
-  const anchored = hr >= SLEEP_WINDOW_START_HOUR
-    ? new Date(d.getTime() + SECONDS_PER_DAY * 1000)
-    : d;
-  return anchored.toISOString().slice(0, 10);
+ *  morning" (the date when the user wakes up), in the user's timezone.
+ *  For an evening sample (hour >= 22), the owning morning is the next
+ *  local date; for an early-morning sample (hour < 6), it's the same
+ *  local date. `timeZone` omitted/UTC keeps the original UTC behaviour. */
+function nightDateKey(measuredAtSec: number, timeZone?: string | null): string {
+  const hr = zonedHour(measuredAtSec, timeZone);
+  const anchorSec =
+    hr >= SLEEP_WINDOW_START_HOUR ? measuredAtSec + SECONDS_PER_DAY : measuredAtSec;
+  return zonedDateKey(anchorSec, timeZone);
 }
 
 function rollingMinAverage(samples: HRSample[]): number | null {
@@ -191,29 +192,31 @@ export const useHR = create<HRState>((set, get) => ({
     return all.reduce((a, b) => (b.measuredAtSec > a.measuredAtSec ? b : a));
   },
 
-  restingBpmToday: (nowSec) => {
+  restingBpmToday: (nowSec, timeZone) => {
     const now = nowSec ?? Math.floor(Date.now() / 1000);
     const all = [...get().pending, ...get().recent];
     if (all.length < 2) return null;
     // Tonight's sleep window starts at the most recent 22:00 boundary;
     // for "today" we want the window that ends within `now`'s morning.
-    const todayKey = nightDateKey(now);
+    const todayKey = nightDateKey(now, timeZone);
     const windowSamples = all.filter(
-      (s) => inSleepWindow(s.measuredAtSec) && nightDateKey(s.measuredAtSec) === todayKey,
+      (s) =>
+        inSleepWindow(s.measuredAtSec, timeZone) &&
+        nightDateKey(s.measuredAtSec, timeZone) === todayKey,
     );
     if (windowSamples.length < 2) return null;
     return rollingMinAverage(windowSamples);
   },
 
-  restingBpmRecent: (nowSec) => {
+  restingBpmRecent: (nowSec, timeZone) => {
     const now = nowSec ?? Math.floor(Date.now() / 1000);
     const all = [...get().pending, ...get().recent];
     if (all.length === 0) return [];
     // Build a map of nightKey → samples in the sleep window.
     const byNight = new Map<string, HRSample[]>();
     for (const s of all) {
-      if (!inSleepWindow(s.measuredAtSec)) continue;
-      const key = nightDateKey(s.measuredAtSec);
+      if (!inSleepWindow(s.measuredAtSec, timeZone)) continue;
+      const key = nightDateKey(s.measuredAtSec, timeZone);
       const arr = byNight.get(key);
       if (arr) arr.push(s);
       else byNight.set(key, [s]);
@@ -221,10 +224,10 @@ export const useHR = create<HRState>((set, get) => ({
     // Walk back RESTING_RECENT_DAYS days from "yesterday" (the day
     // before today's nightKey) so today's restingBpm is NOT included
     // — classifyHR consumes today separately.
-    const todayKey = nightDateKey(now);
+    const todayKey = nightDateKey(now, timeZone);
     const out: number[] = [];
     for (let d = RESTING_RECENT_DAYS; d >= 1; d--) {
-      const nightKey = nightDateKey(now - d * SECONDS_PER_DAY);
+      const nightKey = nightDateKey(now - d * SECONDS_PER_DAY, timeZone);
       if (nightKey === todayKey) continue;
       const samples = byNight.get(nightKey);
       if (!samples || samples.length < 2) continue;

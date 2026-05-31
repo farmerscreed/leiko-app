@@ -220,6 +220,20 @@ describe('ActivityDetail — goal sheet wiring', () => {
 });
 
 describe('ActivityDetail — snapshot', () => {
+  // Pin the wall clock so the rendered weekday labels (e.g. "Best day:
+  // 9,000 Friday") are deterministic across runs. Without this the
+  // snapshot drifts every day as "today" advances. 2026-05-08 is a
+  // Friday in UTC; combined with the UTC test timezone the day-of-week
+  // labels are stable everywhere. Mirrors BPDetail / SpO2Detail.
+  const FROZEN = new Date('2026-05-08T16:30:00Z').getTime();
+  beforeAll(() => {
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+    jest.setSystemTime(FROZEN);
+  });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   it('matches snapshot in dark mode (populated)', () => {
     mockPendingSteps = [makeDay(0, 6250)];
     mockRecentSteps = [

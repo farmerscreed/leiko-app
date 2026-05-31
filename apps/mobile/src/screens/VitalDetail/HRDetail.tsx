@@ -43,6 +43,7 @@ import { HRZonesCard, type HRZone } from '../../components/HRZonesCard';
 import { useDailyPulseData } from '../../state/dailyPulse';
 import { useHR } from '../../state/hr';
 import { useSleep } from '../../state/sleep';
+import { useAuth } from '../../state/auth';
 import { hrFill } from '../../utils/vitalThemes';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
@@ -205,6 +206,12 @@ export interface HRDetailProps {
 export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) {
   const data = useDailyPulseData();
   const restingToday = data.hr.restingToday;
+  // Display value for the hero — resting today → recent resting → latest
+  // sample. Falls back so the hero stops blanking when only a daytime
+  // reading exists, while resting-specific copy below stays on
+  // `restingToday` so we never narrate a daytime value as "resting".
+  const displayBpm = data.hr.displayBpm;
+  const isLatestFallback = data.hr.displaySource === 'latest';
 
   // Pull the live HR samples + the recent restingBpm series + last sleep
   // sessions. These selectors return the underlying arrays; for the
@@ -226,6 +233,9 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
   );
 
   const nowSec = Math.floor(Date.now() / 1000);
+  // Same user timezone the hero uses (via dailyPulse), so the recent
+  // resting series here is bucketed consistently. Null → UTC.
+  const timeZone = useAuth((s) => s.profile?.timezone ?? null);
 
   const trendData = useMemo(
     () => buildTodayTrendData(allSamples, nowSec),
@@ -238,27 +248,31 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
         allSamples,
         // restingBpmRecent is computed on the slice; we ask for it
         // explicitly via getState() since it's a derived selector.
-        useHR.getState().restingBpmRecent(nowSec),
+        useHR.getState().restingBpmRecent(nowSec, timeZone),
         nowSec,
       ),
-    [allSamples, nowSec],
+    [allSamples, nowSec, timeZone],
   );
 
   const correlation = useMemo(
     () =>
       buildSleepHRCorrelation(
-        useHR.getState().restingBpmRecent(nowSec),
+        useHR.getState().restingBpmRecent(nowSec, timeZone),
         allSleepSessions,
       ),
-    [allSleepSessions, nowSec],
+    [allSleepSessions, nowSec, timeZone],
   );
 
-  const hasData = restingToday !== null;
+  // Resting-specific copy (insight card, "within your range") stays
+  // gated on a true resting value; the hero number uses the display
+  // fallback so it shows a daytime reading rather than blanking.
+  const hasResting = restingToday !== null;
+  const hasDisplay = displayBpm !== null;
   const hasZoneData = zones.some((z) => z.pct > 0);
 
   // Sprint 16 — per D13 §6.6, surface a stale caption when the latest
   // HR sample is older than 6h.
-  const staleness = hasData
+  const staleness = hasDisplay
     ? checkStaleness('hr', data.hr.latestSampleSec, nowSec)
     : 'no_data';
   const staleCaption =
@@ -267,12 +281,22 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
       : null;
 
   // Hero copy — voice-rule clean. "Within your range" lifts from the
-  // design source; the empty-state copy is plain language with no fear
-  // framing per docs/05-voice-and-claims.md.
-  const heroPrimary = hasData ? String(Math.round(restingToday!)) : '—';
-  const heroSub = staleCaption ?? (hasData ? 'Now · resting' : 'Heart rate');
-  const heroRange = hasData
-    ? 'bpm · within your range'
+  // design source and assumes a resting value; the latest-fallback path
+  // uses neutral wording so we never imply a daytime reading is resting.
+  // Empty-state copy is plain language with no fear framing per
+  // docs/05-voice-and-claims.md.
+  const heroPrimary = hasDisplay ? String(Math.round(displayBpm!)) : '—';
+  const heroSub =
+    staleCaption ??
+    (hasDisplay
+      ? isLatestFallback
+        ? 'Latest reading'
+        : 'Now · resting'
+      : 'Heart rate');
+  const heroRange = hasDisplay
+    ? isLatestFallback
+      ? 'bpm · latest reading'
+      : 'bpm · within your range'
     : 'Wear the watch to start tracking your heart rate.';
 
   return (
@@ -285,7 +309,7 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
           primary={heroPrimary}
           sub={heroSub}
           range={heroRange}
-          ringFill={hrFill(restingToday)}
+          ringFill={hrFill(displayBpm)}
           livePulse={false}
           testID="hr-detail-hero"
         />
@@ -347,7 +371,7 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
 
       <VitalInsightCard
         vital="hr"
-        body={hasData ? INSIGHT_BODY_HAS_DATA : INSIGHT_BODY_EMPTY}
+        body={hasResting ? INSIGHT_BODY_HAS_DATA : INSIGHT_BODY_EMPTY}
         testID="hr-detail-insight"
       />
 
