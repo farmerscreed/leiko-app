@@ -43,6 +43,7 @@ import { HRZonesCard, type HRZone } from '../../components/HRZonesCard';
 import { useDailyPulseData } from '../../state/dailyPulse';
 import { useHR } from '../../state/hr';
 import { useSleep } from '../../state/sleep';
+import { useAuth } from '../../state/auth';
 import { hrFill } from '../../utils/vitalThemes';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
@@ -232,6 +233,9 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
   );
 
   const nowSec = Math.floor(Date.now() / 1000);
+  // Same user timezone the hero uses (via dailyPulse), so the recent
+  // resting series here is bucketed consistently. Null → UTC.
+  const timeZone = useAuth((s) => s.profile?.timezone ?? null);
 
   const trendData = useMemo(
     () => buildTodayTrendData(allSamples, nowSec),
@@ -244,19 +248,19 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
         allSamples,
         // restingBpmRecent is computed on the slice; we ask for it
         // explicitly via getState() since it's a derived selector.
-        useHR.getState().restingBpmRecent(nowSec),
+        useHR.getState().restingBpmRecent(nowSec, timeZone),
         nowSec,
       ),
-    [allSamples, nowSec],
+    [allSamples, nowSec, timeZone],
   );
 
   const correlation = useMemo(
     () =>
       buildSleepHRCorrelation(
-        useHR.getState().restingBpmRecent(nowSec),
+        useHR.getState().restingBpmRecent(nowSec, timeZone),
         allSleepSessions,
       ),
-    [allSleepSessions, nowSec],
+    [allSleepSessions, nowSec, timeZone],
   );
 
   // Resting-specific copy (insight card, "within your range") stays

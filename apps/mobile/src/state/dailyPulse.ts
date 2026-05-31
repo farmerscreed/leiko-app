@@ -21,6 +21,7 @@ import { useHR } from './hr';
 import { useSpO2 } from './spo2';
 import { useSleep } from './sleep';
 import { useActivity } from './activity';
+import { useAuth } from './auth';
 import {
   classifyHR,
   classifySpO2,
@@ -289,21 +290,27 @@ export function useDailyPulseData(nowSec?: number): DailyPulseData {
   // The actual snapshot is read fresh from getState() once we know we
   // need to recompute (zustand's selector returning the same primitive
   // skips the re-render entirely).
+  // User's stored IANA timezone drives day boundaries + the overnight
+  // window for the aggregators. Subscribed so editing it in Settings
+  // recomputes "today". Null/absent → UTC (the aggregators' default).
+  const timeZone = useAuth((s) => s.profile?.timezone ?? null);
+
   useReadings((s) => s.latest()?.measuredAtSec ?? null);
-  useHR((s) => s.restingBpmToday(now));
-  useHR((s) => s.restingBpmRecent(now).length);
+  useHR((s) => s.restingBpmToday(now, timeZone));
+  useHR((s) => s.restingBpmRecent(now, timeZone).length);
   useHR((s) => s.pending.length + s.recent.length);
   useSpO2((s) => s.latestPercent(now));
-  useSpO2((s) => s.overnightLowsRecent(now).length);
+  useSpO2((s) => s.overnightLowsRecent(now, undefined, timeZone).length);
   useSpO2((s) => s.pending.length + s.recent.length);
   useSleep((s) => s.lastNightSession(now)?.sessionStartSec ?? null);
-  useActivity((s) => s.todaySteps(now)?.dayLocal ?? null);
+  useActivity((s) => s.todaySteps(now, timeZone)?.dayLocal ?? null);
 
-  const snapshot = buildSnapshot(now);
+  const snapshot = buildSnapshot(now, timeZone);
   return composeDailyPulseData(snapshot, now);
 }
 
-function buildSnapshot(nowSec: number): DailyPulseSnapshot {
+function buildSnapshot(nowSec: number, timeZone?: string | null): DailyPulseSnapshot {
+  const tz = timeZone ?? useAuth.getState().profile?.timezone ?? null;
   const hrAll = [
     ...useHR.getState().pending,
     ...useHR.getState().recent,
@@ -314,8 +321,8 @@ function buildSnapshot(nowSec: number): DailyPulseSnapshot {
   ];
   return {
     bpLatest: useReadings.getState().latest(),
-    hrRestingToday: useHR.getState().restingBpmToday(nowSec),
-    hrRestingRecent: useHR.getState().restingBpmRecent(nowSec),
+    hrRestingToday: useHR.getState().restingBpmToday(nowSec, tz),
+    hrRestingRecent: useHR.getState().restingBpmRecent(nowSec, tz),
     hrLatestSampleAt:
       hrAll.length === 0
         ? null
@@ -327,13 +334,13 @@ function buildSnapshot(nowSec: number): DailyPulseSnapshot {
         : hrAll.reduce((a, b) => (b.measuredAtSec > a.measuredAtSec ? b : a))
             .bpm,
     spo2LatestPercent: useSpO2.getState().latestPercent(nowSec),
-    spo2OvernightLowsRecent: useSpO2.getState().overnightLowsRecent(nowSec),
+    spo2OvernightLowsRecent: useSpO2.getState().overnightLowsRecent(nowSec, undefined, tz),
     spo2LatestSampleAt:
       spo2All.length === 0
         ? null
         : spo2All.reduce((a, b) => (b.measuredAtSec > a.measuredAtSec ? b : a))
             .measuredAtSec,
     sleepSession: useSleep.getState().lastNightSession(nowSec),
-    activityToday: useActivity.getState().todaySteps(nowSec),
+    activityToday: useActivity.getState().todaySteps(nowSec, tz),
   };
 }
