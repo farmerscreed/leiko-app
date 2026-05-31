@@ -67,5 +67,10 @@
         <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE"/>
       </intent-filter>
     </activity>
+    <service
+        android:name=".ble.LeikoBleForegroundService"
+        android:exported="false"
+        android:foregroundServiceType="connectedDevice"
+        android:stopWithTask="false" />
   </application>
 </manifest>

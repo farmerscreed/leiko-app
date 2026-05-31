@@ -72,6 +72,7 @@ import {
   stopBackgroundSync,
 } from '../services/sync/backgroundSync';
 import { inferModel, setDeviceMetaProvider } from '../services/sync/postReading';
+import { startBleForegroundService } from '../services/ble/foregroundService';
 import { scheduleNextLearnedTimeReminder } from '../services/reminders/dispatcher';
 import {
   configureNotificationHandler,
@@ -322,6 +323,13 @@ export function RootNavigator() {
   useEffect(() => {
     void hydrate();
     hydratePairing();
+    // If a watch was already paired in a prior session, re-arm the
+    // Android foreground service on cold start so background BLE sync
+    // survives Doze. hydratePairing() above populates pairedDevice
+    // synchronously from MMKV. No-op on iOS / when no watch is paired.
+    if (usePairing.getState().pairedDevice) {
+      void startBleForegroundService();
+    }
     hydrateReadings();
     // Best-effort: try to sync any pending readings on app cold start
     // (offline captures from a previous session).
