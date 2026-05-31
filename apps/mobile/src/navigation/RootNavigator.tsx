@@ -71,6 +71,7 @@ import {
   startBackgroundSync,
   stopBackgroundSync,
 } from '../services/sync/backgroundSync';
+import { getOrCreateClientDeviceId } from '../services/storage';
 import { inferModel, setDeviceMetaProvider } from '../services/sync/postReading';
 import { startBleForegroundService } from '../services/ble/foregroundService';
 import { scheduleNextLearnedTimeReminder } from '../services/reminders/dispatcher';
@@ -109,6 +110,7 @@ setDeviceMetaProvider(() => {
     macSuffix: paired.macSuffix,
     name: paired.name,
     model: inferModel(paired.name),
+    clientDeviceId: getOrCreateClientDeviceId(),
   };
 });
 import type {

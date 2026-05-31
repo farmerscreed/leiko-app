@@ -19,6 +19,7 @@
 // Sprint 6 ships a single-reading endpoint. Sprint 9+ may move to
 // batched POSTs once trends backfill exists.
 
+import { getOrCreateClientDeviceId } from '../storage';
 import { supabase } from '../supabase';
 import type { LocalReading } from '../../state/readings';
 
@@ -33,6 +34,10 @@ export interface DeviceMeta {
   macSuffix: string;
   name: string | null;
   model: 'U16H' | 'U19M';
+  // Stable per-install identity (getOrCreateClientDeviceId). The server
+  // dedupes device rows on this instead of the rotating BLE MAC, so a
+  // reconnect/re-pair no longer creates a duplicate device.
+  clientDeviceId: string;
 }
 
 interface SyncRequestBody {
@@ -83,6 +88,7 @@ export async function postReading(
       macSuffix: 'man0',
       name: 'manual entry',
       model: 'U16H',
+      clientDeviceId: getOrCreateClientDeviceId(),
     },
     reading: {
       measuredAtSec: row.measuredAtSec,

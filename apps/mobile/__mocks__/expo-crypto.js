@@ -21,7 +21,18 @@ function __setRandomBytesForTests(bytes) {
   nextBytes = bytes;
 }
 
+// storage.getOrCreateClientDeviceId() uses randomUUID() to mint the
+// stable per-install device identity. Deterministic counter-based output
+// keeps tests stable while still returning distinct values per call.
+let uuidCounter = 0;
+function randomUUID() {
+  uuidCounter += 1;
+  const hex = uuidCounter.toString(16).padStart(12, '0');
+  return `00000000-0000-4000-8000-${hex}`;
+}
+
 module.exports = {
   getRandomBytesAsync,
+  randomUUID,
   __setRandomBytesForTests,
 };

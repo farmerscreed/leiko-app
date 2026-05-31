@@ -17,6 +17,7 @@
 // In test contexts secureBoot is not initialised, so this module opens
 // the legacy plain instance — same behaviour the test suite expects.
 
+import { randomUUID } from 'expo-crypto';
 import { createMMKV, type MMKV } from 'react-native-mmkv';
 import { getCachedKey, getCachedStatus } from './secureBoot';
 
@@ -54,6 +55,13 @@ export const STORAGE_KEYS = {
   // Paired Urion device for the current user/family. Sprint 5.
   // Stored as JSON: { id, mac, model, deviceId (Supabase row id), pairedAt }.
   pairedDevice: 'leiko.ble.pairedDevice',
+  // Stable per-install identity for THIS user's watch. The Urion firmware
+  // advertises a rotating BLE MAC, so the connection id (pairedDevice.bleId)
+  // changes across reconnects/re-pairs — which made the server mint a new
+  // device row each time and split vitals across duplicate identities.
+  // This UUID is generated once (getOrCreateClientDeviceId) and reused for
+  // every sync so the server can key device identity on something stable.
+  clientDeviceId: 'leiko.ble.clientDeviceId',
   // Readings buffer — Sprint 6. Two arrays of LocalReading rows:
   //   pending: not yet successfully POSTed to /sync
   //   recent:  synced + persisted, capped at RECENT_READINGS_CAP for UI
@@ -199,6 +207,19 @@ export const STORAGE_KEYS = {
   // the switcher.
   knownAccounts: 'leiko.auth.knownAccounts',
 } as const;
+
+// Returns this install's stable watch identity, generating + persisting
+// it on first call. Used as the device key the server dedupes on, so a
+// rotating BLE MAC can no longer spawn duplicate device rows. Survives
+// reconnects and re-pairs (it is NOT tied to pairedDevice, which is
+// rewritten on every pair); resets only on reinstall/storage clear.
+export function getOrCreateClientDeviceId(): string {
+  const existing = mmkv.getString(STORAGE_KEYS.clientDeviceId);
+  if (existing) return existing;
+  const id = randomUUID();
+  mmkv.set(STORAGE_KEYS.clientDeviceId, id);
+  return id;
+}
 
 export const supabaseStorage = {
   getItem: (key: string): string | null => mmkv.getString(key) ?? null,

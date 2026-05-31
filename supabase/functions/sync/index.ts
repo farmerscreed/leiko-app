@@ -159,28 +159,78 @@ async function ensureDeviceRow(
   userId: string,
   device: DeviceMeta,
 ): Promise<DeviceUpsertResult> {
-  // Upsert device by mac_address. The active-mac index is partial on
-  // unpaired_at IS NULL, so a forgotten-then-re-paired device may have
-  // multiple rows — pick the most recent active one.
-  const { data: existingDevice } = await serviceClient
-    .from('devices')
-    .select('id')
-    .eq('family_id', familyId)
-    .eq('mac_address', device.bleId)
-    .is('unpaired_at', null)
-    .order('paired_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // Device identity resolution. The Urion firmware advertises a ROTATING
+  // BLE MAC, so keying on mac_address minted a fresh device row on every
+  // reconnect/re-pair and split a single watch's vitals across duplicate
+  // identities. When the client sends a stable clientDeviceId we key on
+  // that instead; mac_address is kept as informational (refreshed to the
+  // latest MAC on each sync). The legacy MAC path is preserved for older
+  // clients that don't send clientDeviceId yet.
+  const clientDeviceId = device.clientDeviceId ?? null;
 
-  if (existingDevice) {
-    return { deviceId: existingDevice.id as string };
+  if (clientDeviceId) {
+    // 1) Exact match on the stable identity — the steady-state path.
+    const { data: byClient } = await serviceClient
+      .from('devices')
+      .select('id')
+      .eq('family_id', familyId)
+      .eq('client_device_id', clientDeviceId)
+      .is('unpaired_at', null)
+      .order('paired_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (byClient) {
+      // Keep the stored MAC current so ops/debugging reflects reality.
+      await serviceClient
+        .from('devices')
+        .update({ mac_address: device.bleId })
+        .eq('id', byClient.id as string);
+      return { deviceId: byClient.id as string };
+    }
+
+    // 2) Migration path: first sync from an updated client. Adopt the
+    //    family's existing active device (Leiko is one-watch-per-family)
+    //    instead of creating a duplicate, binding the stable id onto it.
+    const { data: activeDevices } = await serviceClient
+      .from('devices')
+      .select('id')
+      .eq('family_id', familyId)
+      .is('unpaired_at', null)
+      .is('client_device_id', null)
+      .order('paired_at', { ascending: false })
+      .limit(2);
+    if (activeDevices && activeDevices.length === 1) {
+      const adoptId = activeDevices[0].id as string;
+      const adopt = await serviceClient
+        .from('devices')
+        .update({ client_device_id: clientDeviceId, mac_address: device.bleId })
+        .eq('id', adoptId)
+        .select('id')
+        .single();
+      if (!adopt.error) return { deviceId: adopt.data.id as string };
+      // Fall through to insert if the adopt update raced/failed.
+    }
+  } else {
+    // Legacy clients (no stable id): match by active MAC as before.
+    const { data: byMac } = await serviceClient
+      .from('devices')
+      .select('id')
+      .eq('family_id', familyId)
+      .eq('mac_address', device.bleId)
+      .is('unpaired_at', null)
+      .order('paired_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (byMac) return { deviceId: byMac.id as string };
   }
+
   const insertDevice = await serviceClient
     .from('devices')
     .insert({
       family_id: familyId,
       serial_number: device.bleId.replace(/[^0-9a-f]/gi, ''),
       mac_address: device.bleId,
+      client_device_id: clientDeviceId,
       model: device.model,
       paired_by_user_id: userId,
     })
@@ -350,8 +400,10 @@ async function handleMultiVitals(
     counts.rejected.steps = rejected.length;
     await logRejected(serviceClient, familyId, userId, 'steps_day', rejected);
     if (accepted.length > 0) {
-      const rows = mapActivityDays(accepted, familyId, deviceId);
-      // Mutable: steps accumulate through the day — last read wins.
+      const mapped = mapActivityDays(accepted, familyId, deviceId);
+      // Only update when the count increases — never let a purged-day
+      // backfill 0 overwrite a real total.
+      const rows = await dropNonIncreasingDailyRows(serviceClient, mapped);
       const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows, { mutable: true });
       if (errored) return json({ error: 'activity_insert_failed', detail: errored }, 500);
       counts.inserted.steps = inserted;
@@ -364,8 +416,9 @@ async function handleMultiVitals(
     counts.rejected.calories = rejected.length;
     await logRejected(serviceClient, familyId, userId, 'calories_day', rejected);
     if (accepted.length > 0) {
-      const rows = mapCaloriesDays(accepted, familyId, deviceId);
-      // Mutable: kcal accumulate through the day — last read wins.
+      const mapped = mapCaloriesDays(accepted, familyId, deviceId);
+      // Only update when kcal increases — same purged-day-0 guard as steps.
+      const rows = await dropNonIncreasingDailyRows(serviceClient, mapped);
       const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows, { mutable: true });
       if (errored) return json({ error: 'calories_insert_failed', detail: errored }, 500);
       counts.inserted.calories = inserted;
@@ -453,6 +506,38 @@ async function insertReadings(
     errored: null,
     insertedReadingIds: insertedRows.map((r) => r.id as string),
   };
+}
+
+// Monotonic-daily guard for steps_day / calories_day. These accumulate
+// through the day, so a later sync legitimately UPDATES the row (0 -> 38).
+// But a backfill of a day the watch has purged reports 0, and an
+// unconditional update would let that 0 clobber a real count (e.g. a real
+// 1529 from when the day was live). Drop incoming rows that do not
+// strictly exceed what's already stored; the survivors then update on
+// conflict. Homogeneous batch (one device_id + vital_type) per call.
+async function dropNonIncreasingDailyRows(
+  serviceClient: SupabaseClient,
+  rows: VitalsOtherRow[],
+): Promise<VitalsOtherRow[]> {
+  if (rows.length === 0) return rows;
+  const deviceId = rows[0].device_id;
+  const vitalType = rows[0].vital_type;
+  const { data: existing } = await serviceClient
+    .from('vitals_other')
+    .select('measured_at, value_int')
+    .eq('device_id', deviceId)
+    .eq('vital_type', vitalType)
+    .in('measured_at', rows.map((r) => r.measured_at));
+  const storedByAt = new Map<string, number>(
+    (existing ?? []).map((e) => [
+      new Date(e.measured_at as string).toISOString(),
+      (e.value_int as number | null) ?? 0,
+    ]),
+  );
+  return rows.filter((r) => {
+    const stored = storedByAt.get(new Date(r.measured_at).toISOString());
+    return stored === undefined || (r.value_int ?? 0) > stored;
+  });
 }
 
 async function insertVitalRows(
