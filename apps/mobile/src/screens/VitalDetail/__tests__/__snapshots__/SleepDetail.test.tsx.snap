@@ -1200,10 +1200,10 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
               }
               testID="sleep-detail-hypnogram-eyebrow"
             >
-              Stages · 5:18 PM – 1:00 AM
+              Stages · 4:18 PM – 12:00 AM
             </Text>
             <View
-              accessibilityLabel="Sleep stages from 5:18 PM to 1:00 AM."
+              accessibilityLabel="Sleep stages from 4:18 PM to 12:00 AM."
               accessibilityRole="image"
               style={
                 [
@@ -1990,7 +1990,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                     }
                   }
                 >
-                  5p
+                  4p
                 </Text>
                 <Text
                   allowFontScaling={false}
@@ -2003,7 +2003,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                     }
                   }
                 >
-                  9p
+                  8p
                 </Text>
                 <Text
                   allowFontScaling={false}
@@ -2016,7 +2016,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                     }
                   }
                 >
-                  1a
+                  12a
                 </Text>
               </View>
               <View

@@ -14,6 +14,16 @@
 // memory/jest_expo_deferred.md. Splitting projects sidesteps it: pure tests
 // never touch the winter polyfill.
 
+// Pin the test timezone to UTC for every worker, deterministically.
+// This is set in the config (parent process, before workers fork) so
+// each worker inherits TZ=UTC at startup — V8 binds Date's zone once at
+// process init, so setting it in a setupFile is too late and an
+// explicit host `TZ=...` would win. Pinning here means snapshot/date
+// tests render identically on CI (UTC) and a dev laptop in any zone
+// (e.g. Lagos, UTC+1). Per-user app timezone handling is unaffected —
+// this only governs the test runner's wall clock.
+process.env.TZ = 'UTC';
+
 module.exports = {
   rootDir: __dirname,
   projects: [

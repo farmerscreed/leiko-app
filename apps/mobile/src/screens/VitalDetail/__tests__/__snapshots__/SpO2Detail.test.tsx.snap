@@ -1874,7 +1874,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
               testID="spo2-detail-readings-list"
             >
               <View
-                accessibilityLabel="98%, Just now, 12:30 pm"
+                accessibilityLabel="98%, Just now, 11:30 am"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -1985,7 +1985,7 @@ exports[`SpO2Detail — populated surface matches the dark-mode snapshot for an 
                     }
                   }
                 >
-                  12:30 pm
+                  11:30 am
                 </Text>
               </View>
               <View

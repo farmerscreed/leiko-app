@@ -319,15 +319,20 @@ describe('<SettingsScreen /> — Profile field editor (Sprint 12.5.2)', () => {
   });
 
   it('persists timezone via the "use device timezone" button', async () => {
-    mockProfile = makeProfile({ timezone: 'UTC' });
+    // Stored timezone must differ from the device zone, otherwise the
+    // "use device timezone" button is disabled (it's already current).
+    // The test runner is pinned to UTC (jest.setup), so seed a non-UTC
+    // stored value to keep the button enabled and exercise the save.
+    mockProfile = makeProfile({ timezone: 'Africa/Lagos' });
     renderScreen();
     fireEvent.press(screen.getByTestId('settings-profile-timezone'));
     await act(async () => {
       fireEvent.press(screen.getByTestId('settings-demographics-timezone-use-device'));
     });
     await waitFor(() => {
+      // Saves the device-resolved zone (UTC under the pinned test clock).
       expect(mockUpdateProfile).toHaveBeenCalledWith('user-1', expect.objectContaining({
-        timezone: expect.any(String),
+        timezone: 'UTC',
       }));
     });
   });
