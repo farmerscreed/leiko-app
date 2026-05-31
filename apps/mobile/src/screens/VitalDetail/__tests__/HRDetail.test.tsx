@@ -266,6 +266,42 @@ describe('HRDetail — empty state', () => {
   });
 });
 
+describe('HRDetail — latest-sample fallback (no resting HR)', () => {
+  beforeEach(() => {
+    const now = NOW_SEC();
+    // No resting HR today and no recent resting nights, but a fresh
+    // daytime sample exists — the hero should show it rather than blank.
+    setMockData({
+      bpLatest: null,
+      hrRestingToday: null,
+      hrRestingRecent: [],
+      hrLatestSampleAt: now - 30 * 60,
+      hrLatestBpm: 84,
+      spo2LatestPercent: null,
+      spo2OvernightLowsRecent: [],
+      spo2LatestSampleAt: null,
+      sleepSession: null,
+      activityToday: null,
+    });
+  });
+
+  it('shows the latest bpm in the hero instead of an em-dash', () => {
+    render(withProviders(<HRDetail onBack={() => undefined} />));
+    expect(screen.getByTestId('hr-detail-hero-primary').props.children).toBe('84');
+  });
+
+  it('labels the hero as a latest reading, not resting', () => {
+    render(withProviders(<HRDetail onBack={() => undefined} />));
+    expect(screen.getByText('Latest reading')).toBeTruthy();
+    expect(screen.queryByText('Now · resting')).toBeNull();
+  });
+
+  it('keeps the pre-baseline insight body (no resting comparison)', () => {
+    render(withProviders(<HRDetail onBack={() => undefined} />));
+    expect(screen.getByText(/After a few nights of sleep/i)).toBeTruthy();
+  });
+});
+
 describe('HRDetail — back button wiring', () => {
   it('routes back-button taps via the embedded DetailHeader', () => {
     const onBack = jest.fn();

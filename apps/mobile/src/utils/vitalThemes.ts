@@ -93,7 +93,7 @@ export function fillForVital(vital: VitalType, data: DailyPulseData): number {
     case 'bp':
       return bpFillFromTier(data.bp.classification?.tier);
     case 'hr':
-      return hrFill(data.hr.restingToday);
+      return hrFill(data.hr.displayBpm);
     case 'spo2':
       return spo2Fill(data.spo2.latestPercent);
     case 'sleep':

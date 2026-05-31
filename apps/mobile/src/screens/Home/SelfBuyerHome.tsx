@@ -306,10 +306,10 @@ export function SelfBuyerHome() {
           />
           <VitalTile
             vitalType="hr"
-            value={data.hr.restingToday !== null ? String(Math.round(data.hr.restingToday)) : '—'}
-            secondary="bpm resting"
+            value={data.hr.displayBpm !== null ? String(Math.round(data.hr.displayBpm)) : '—'}
+            secondary={data.hr.displaySource === 'latest' ? 'bpm latest' : 'bpm resting'}
             ringFill={heroVitals.hr.fill}
-            state={data.hr.restingToday !== null ? 'normal' : 'no-data'}
+            state={data.hr.displayBpm !== null ? 'normal' : 'no-data'}
             onPress={() => handleVitalPress('hr')}
             testID="self-buyer-home-tile-hr"
           />
@@ -799,8 +799,8 @@ export function buildHeroVitals(
   data: ReturnType<typeof useDailyPulseData>,
 ): DailyPulseHeroVitals {
   const bpFill = bpFillFromTier(data.bp.classification?.tier);
-  const hrFill = data.hr.restingToday !== null
-    ? clamp01((data.hr.restingToday - 40) / 80)
+  const hrFill = data.hr.displayBpm !== null
+    ? clamp01((data.hr.displayBpm - 40) / 80)
     : 0;
   const spo2Fill = data.spo2.latestPercent !== null
     ? clamp01((data.spo2.latestPercent - 85) / 15)
@@ -824,7 +824,7 @@ export function buildHeroVitals(
       // rollingMinAverage returns float; round at every display
       // boundary so the hero / tiles never show "63.3333…".
       display:
-        data.hr.restingToday !== null ? String(Math.round(data.hr.restingToday)) : '—',
+        data.hr.displayBpm !== null ? String(Math.round(data.hr.displayBpm)) : '—',
       unit: 'bpm',
     },
     spo2: {

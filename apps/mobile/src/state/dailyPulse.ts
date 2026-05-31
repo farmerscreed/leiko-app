@@ -45,8 +45,34 @@ export interface BPSlice {
   staleness: VitalStaleness;
 }
 
+/**
+ * Where the HR tile/hero's displayed value came from. Lets the UI label
+ * it honestly ("bpm resting" vs "bpm latest") and lets prose consumers
+ * keep using the strict resting value rather than narrating a daytime
+ * sample as "resting this morning".
+ */
+export type HRDisplaySource =
+  | 'resting-today'
+  | 'resting-recent'
+  | 'latest'
+  | null;
+
 export interface HRSlice {
+  /**
+   * Strict resting HR for today's sleep window, or null. Unchanged —
+   * prose/narration/baseline consumers keep reading this so they never
+   * describe a daytime value as "resting".
+   */
   restingToday: number | null;
+  /**
+   * Value the HR tile/hero should show, resolved through the fallback
+   * chain: today's resting HR → most recent resting HR → latest HR
+   * sample (any time of day) → null. Only null when there is no HR data
+   * at all, so the tile stops blanking when only a daytime reading exists.
+   */
+  displayBpm: number | null;
+  /** Provenance of `displayBpm` — drives the resting/latest label. */
+  displaySource: HRDisplaySource;
   /** unix sec UTC of the most recent HR sample (any window); null when none. */
   latestSampleSec: number | null;
   classification: HRClassification | null;
@@ -100,6 +126,12 @@ export interface DailyPulseSnapshot {
   hrRestingRecent: number[];
   /** Most recent HR sample's measuredAtSec (any window) — drives staleness. */
   hrLatestSampleAt: number | null;
+  /**
+   * bpm of the most recent HR sample, any time of day. Drives the
+   * "latest" rung of the HR display fallback. Optional so existing
+   * snapshot literals (e.g. tests) default to no latest fallback.
+   */
+  hrLatestBpm?: number | null;
   spo2LatestPercent: number | null;
   spo2OvernightLowsRecent: number[];
   spo2LatestSampleAt: number | null;
@@ -111,6 +143,30 @@ const DEFAULT_TARGET_STEPS = 6000;
 
 function todayLocalKey(nowSec: number): string {
   return new Date(nowSec * 1000).toISOString().slice(0, 10);
+}
+
+/**
+ * Resolve the HR value to display and where it came from. Fallback
+ * chain per the HR tile spec: today's resting HR → most recent resting
+ * HR (restingRecent is oldest-first, so the last entry is newest) →
+ * latest HR sample of any time of day → null when there's no HR at all.
+ */
+function resolveHRDisplay(snapshot: DailyPulseSnapshot): {
+  bpm: number | null;
+  source: HRDisplaySource;
+} {
+  if (snapshot.hrRestingToday !== null) {
+    return { bpm: snapshot.hrRestingToday, source: 'resting-today' };
+  }
+  const recent = snapshot.hrRestingRecent;
+  if (recent.length > 0) {
+    return { bpm: recent[recent.length - 1], source: 'resting-recent' };
+  }
+  const latest = snapshot.hrLatestBpm ?? null;
+  if (latest !== null) {
+    return { bpm: latest, source: 'latest' };
+  }
+  return { bpm: null, source: null };
 }
 
 /**
@@ -139,9 +195,14 @@ export function composeDailyPulseData(
     ),
   };
 
+  const hrDisplay = resolveHRDisplay(snapshot);
   const hr: HRSlice = {
     restingToday: snapshot.hrRestingToday,
+    displayBpm: hrDisplay.bpm,
+    displaySource: hrDisplay.source,
     latestSampleSec: snapshot.hrLatestSampleAt,
+    // Classification stays strictly resting — a daytime fallback value
+    // must not drive the HR tier (a normal active HR would read "high").
     classification:
       snapshot.hrRestingToday !== null
         ? classifyHR({
@@ -260,6 +321,11 @@ function buildSnapshot(nowSec: number): DailyPulseSnapshot {
         ? null
         : hrAll.reduce((a, b) => (b.measuredAtSec > a.measuredAtSec ? b : a))
             .measuredAtSec,
+    hrLatestBpm:
+      hrAll.length === 0
+        ? null
+        : hrAll.reduce((a, b) => (b.measuredAtSec > a.measuredAtSec ? b : a))
+            .bpm,
     spo2LatestPercent: useSpO2.getState().latestPercent(nowSec),
     spo2OvernightLowsRecent: useSpO2.getState().overnightLowsRecent(nowSec),
     spo2LatestSampleAt:
