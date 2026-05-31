@@ -226,5 +226,17 @@ export function computeActivityToday(
 ): ActivityDay | null {
   if (days.length === 0) return null;
   const todayLocal = new Date(nowSec * 1000).toISOString().slice(0, 10);
-  return days.find((d) => d.dayLocal === todayLocal) ?? null;
+  // There can be MORE than one row for today: a rotating BLE MAC mints a
+  // second device row (ensureDeviceRow keys on mac_address), so the same
+  // calendar day gets duplicate steps_day rows under different
+  // device_ids — typically a zero-filled backfill shadowing the real
+  // count. `.find` would break that tie arbitrarily and could surface
+  // the 0. Steps only accumulate within a day, so the largest value is
+  // the most complete read; pick it and a shadow 0 can never win.
+  let best: ActivityDay | null = null;
+  for (const d of days) {
+    if (d.dayLocal !== todayLocal) continue;
+    if (best === null || d.totalSteps > best.totalSteps) best = d;
+  }
+  return best;
 }

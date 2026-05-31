@@ -267,4 +267,16 @@ describe('computeActivityToday', () => {
       computeActivityToday([activityDay(yesterday, 4500)], NOW_SEC),
     ).toBeNull();
   });
+
+  it('picks the highest count when a duplicate day-row shadows it with 0', () => {
+    // Repro of the rotating-MAC duplicate: a second device row backfilled
+    // today as 0 while the active device wrote the real 38. Order is
+    // arbitrary from the query (same measured_at), so both orderings must
+    // resolve to the real count, never the shadow 0.
+    const today = '2026-05-19';
+    const shadow = activityDay(today, 0);
+    const real = activityDay(today, 38);
+    expect(computeActivityToday([shadow, real], NOW_SEC)?.totalSteps).toBe(38);
+    expect(computeActivityToday([real, shadow], NOW_SEC)?.totalSteps).toBe(38);
+  });
 });
