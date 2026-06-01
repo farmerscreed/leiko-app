@@ -408,6 +408,7 @@ export function CaregiverHome() {
         <SharedHeader
           theme={theme}
           onSettingsPress={() => navigation.navigate('Settings')}
+          onAskLeikoPress={() => setAskLeikoVisible(true)}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
           showToggle={merged.length > 0}
@@ -604,14 +605,9 @@ export function CaregiverHome() {
         familyId={merged[0]?.familyId ?? null}
       />
 
-      {/* Sprint 12 follow-up — floating Ask Leiko button. Caregivers
-          benefit from the same single-tap question affordance the
-          self-buyer Home gained. The sheet hosts the same surface as
-          the AskLeiko route. */}
-      <CaregiverAskLeikoFAB
-        theme={theme}
-        onPress={() => setAskLeikoVisible(true)}
-      />
+      {/* Ask Leiko now lives in the header (see SharedHeader) — moved off
+          a bottom FAB that collided with the Phase 3 tab bar. The sheet
+          host stays here. */}
       <AskLeikoSheet
         visible={askLeikoVisible}
         onDismiss={() => setAskLeikoVisible(false)}
@@ -655,57 +651,6 @@ export function CaregiverHome() {
 function QuietHoursAffirmSlot() {
   const { visible, dismiss } = useQuietHoursAffirm();
   return <QuietHoursAffirmSheet visible={visible} onDone={dismiss} />;
-}
-
-interface CaregiverAskLeikoFABProps {
-  theme: Theme;
-  onPress: () => void;
-}
-
-function CaregiverAskLeikoFAB({ theme, onPress }: CaregiverAskLeikoFABProps) {
-  const labelStyle = theme.type('labelUppercase');
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel="Ask Leiko"
-      accessibilityHint="Opens a popup to ask a question about your circle's numbers"
-      onPress={onPress}
-      testID="caregiver-home-ask-leiko-fab"
-      style={({ pressed }) => ({
-        position: 'absolute',
-        right: theme.spacing.xl,
-        // Caregiver Home doesn't have its own tab bar, so the FAB sits
-        // a comfortable thumb-distance above the safe-area bottom.
-        bottom: theme.spacing.xxxxl,
-        height: 56,
-        paddingHorizontal: theme.spacing.l,
-        borderRadius: 28,
-        backgroundColor: pressed
-          ? theme.colors.brand.primaryPressed
-          : theme.colors.brand.coral,
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'row',
-        ...theme.elevation.medium.ios,
-        ...theme.elevation.medium.android,
-      })}
-    >
-      <Text
-        allowFontScaling={false}
-        style={{
-          fontFamily: labelStyle.family,
-          fontSize: labelStyle.size,
-          lineHeight: labelStyle.lineHeight,
-          letterSpacing: labelStyle.letterSpacing,
-          textTransform: 'uppercase',
-          color: theme.colors.text.onBrand,
-          fontWeight: '500',
-        }}
-      >
-        Ask Leiko
-      </Text>
-    </Pressable>
-  );
 }
 
 // -----------------------------------------------------------------------------
@@ -795,12 +740,14 @@ function humanizeCount(n: number): string {
 function SharedHeader({
   theme,
   onSettingsPress,
+  onAskLeikoPress,
   viewMode,
   onViewModeChange,
   showToggle,
 }: {
   theme: Theme;
   onSettingsPress: () => void;
+  onAskLeikoPress: () => void;
   viewMode: CaregiverViewMode;
   onViewModeChange: (next: CaregiverViewMode) => void;
   showToggle: boolean;
@@ -846,6 +793,30 @@ function SharedHeader({
           >
             {dateLabel}
           </Text>
+          {/* Ask Leiko — moved off a bottom FAB (it collided with the new
+              tab bar) into the header as a quiet icon affordance beside
+              the gear. Sparkle glyph reads as "assistant"; permanent and
+              out of the bottom navigation zone. */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Ask Leiko"
+            accessibilityHint="Opens a popup to ask a question about your circle's numbers"
+            onPress={onAskLeikoPress}
+            hitSlop={12}
+            testID="caregiver-home-ask-leiko"
+            style={({ pressed }) => ({ opacity: pressed ? 0.65 : 1 })}
+          >
+            <Text
+              allowFontScaling={false}
+              style={{
+                fontSize: 18,
+                color: theme.colors.brand.coral,
+                lineHeight: 18,
+              }}
+            >
+              {'✦'}
+            </Text>
+          </Pressable>
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Open settings"

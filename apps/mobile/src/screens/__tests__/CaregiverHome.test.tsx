@@ -420,10 +420,10 @@ describe('<CaregiverHome /> — view toggle (Sprint 7.7b)', () => {
   });
 });
 
-describe('<CaregiverHome /> — Ask Leiko (Sprint 12 follow-up)', () => {
-  it('renders the floating Ask Leiko button', () => {
+describe('<CaregiverHome /> — Ask Leiko', () => {
+  it('renders the Ask Leiko affordance in the header (moved off the bottom FAB)', () => {
     render(withProviders(<CaregiverHome />));
-    expect(screen.getByTestId('caregiver-home-ask-leiko-fab')).toBeTruthy();
+    expect(screen.getByTestId('caregiver-home-ask-leiko')).toBeTruthy();
   });
 });
 
