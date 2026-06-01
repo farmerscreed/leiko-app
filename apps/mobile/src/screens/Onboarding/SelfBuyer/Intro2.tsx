@@ -13,8 +13,8 @@ export function SelfBuyerIntro2Screen({
     <OnboardingHero
       icon={StethoscopeIcon}
       iconAccessibilityLabel="A watch beside a stylised arm-cuff, equally weighted"
-      headline="Same accuracy as your doctor's cuff."
-      body="The watch uses an inflatable cuff — the same method clinicians use — measured from your wrist instead of your arm."
+      headline="As accurate as your doctor's cuff."
+      body="The watch uses an inflatable cuff — the same method clinicians use — measured from the wrist."
       pageCurrent={2}
       pageTotal={3}
       pagerTestID="self-buyer-intro-pager"

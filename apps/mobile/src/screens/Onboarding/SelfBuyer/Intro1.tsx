@@ -15,8 +15,8 @@ export function SelfBuyerIntro1Screen({
     <OnboardingHero
       icon={PulseIcon}
       iconAccessibilityLabel="A hand resting open, soft glow above the wrist"
-      headline="Your blood pressure, in your own words."
-      body="Leiko helps you understand what your numbers mean — in plain language, on your terms."
+      headline="Your readings, and the people you love."
+      body="Leiko helps you understand your own numbers — and keep a gentle eye on the people you care for."
       pageCurrent={1}
       pageTotal={3}
       pagerTestID="self-buyer-intro-pager"

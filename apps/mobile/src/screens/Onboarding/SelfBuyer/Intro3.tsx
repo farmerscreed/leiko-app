@@ -13,8 +13,8 @@ export function SelfBuyerIntro3Screen({
     <OnboardingHero
       icon={ChartLineUpIcon}
       iconAccessibilityLabel="A hand passing a folded note across a table"
-      headline="See your trends. Show them to your doctor."
-      body="A clear weekly summary, the kind you can save and share at your next appointment."
+      headline="See the trends. Share them with a doctor."
+      body="A clear weekly summary, the kind that's easy to save and bring to an appointment."
       pageCurrent={3}
       pageTotal={3}
       pagerTestID="self-buyer-intro-pager"

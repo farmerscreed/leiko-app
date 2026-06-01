@@ -51,10 +51,10 @@ describe('SelfBuyer Intro1 — copy + nav', () => {
         />,
       ),
     );
-    expect(screen.getByText('Your blood pressure, in your own words.')).toBeTruthy();
+    expect(screen.getByText('Your readings, and the people you love.')).toBeTruthy();
     expect(
       screen.getByText(
-        'Leiko helps you understand what your numbers mean — in plain language, on your terms.',
+        'Leiko helps you understand your own numbers — and keep a gentle eye on the people you care for.',
       ),
     ).toBeTruthy();
   });
@@ -94,10 +94,10 @@ describe('SelfBuyer Intro2 — copy + nav', () => {
         />,
       ),
     );
-    expect(screen.getByText("Same accuracy as your doctor's cuff.")).toBeTruthy();
+    expect(screen.getByText("As accurate as your doctor's cuff.")).toBeTruthy();
     expect(
       screen.getByText(
-        'The watch uses an inflatable cuff — the same method clinicians use — measured from your wrist instead of your arm.',
+        'The watch uses an inflatable cuff — the same method clinicians use — measured from the wrist.',
       ),
     ).toBeTruthy();
   });
@@ -128,10 +128,10 @@ describe('SelfBuyer Intro3 — copy + nav', () => {
         />,
       ),
     );
-    expect(screen.getByText('See your trends. Show them to your doctor.')).toBeTruthy();
+    expect(screen.getByText('See the trends. Share them with a doctor.')).toBeTruthy();
     expect(
       screen.getByText(
-        'A clear weekly summary, the kind you can save and share at your next appointment.',
+        "A clear weekly summary, the kind that's easy to save and bring to an appointment.",
       ),
     ).toBeTruthy();
   });
