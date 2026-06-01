@@ -509,7 +509,7 @@ describe('<CaregiverHome /> — voice rules', () => {
 });
 
 describe('<CaregiverHome /> — Take a reading (wearer-only, ADR-0006 Phase 3)', () => {
-  it('shows Take a reading when the viewer has a self-circle (wearer)', () => {
+  it('shows the bottom tab bar (with Take a reading) when the viewer is a wearer', () => {
     mockHookResult.parents = [
       parent({
         familyId: 'me',
@@ -519,10 +519,14 @@ describe('<CaregiverHome /> — Take a reading (wearer-only, ADR-0006 Phase 3)',
       }),
     ];
     render(withProviders(<CaregiverHome />));
-    expect(screen.getByTestId('caregiver-home-take-reading')).toBeTruthy();
+    expect(screen.getByTestId('caregiver-home-tab-bar')).toBeTruthy();
+    // The centre "+" Take-a-reading lives inside the tab bar.
+    expect(
+      screen.getByTestId('caregiver-home-tab-bar-tab-take_reading'),
+    ).toBeTruthy();
   });
 
-  it('hides Take a reading for a pure caregiver (no self-circle)', () => {
+  it('hides the tab bar for a pure caregiver (no self-circle)', () => {
     mockHookResult.parents = [
       parent({
         familyId: 'mum',
@@ -532,6 +536,6 @@ describe('<CaregiverHome /> — Take a reading (wearer-only, ADR-0006 Phase 3)',
       }),
     ];
     render(withProviders(<CaregiverHome />));
-    expect(screen.queryByTestId('caregiver-home-take-reading')).toBeNull();
+    expect(screen.queryByTestId('caregiver-home-tab-bar')).toBeNull();
   });
 });

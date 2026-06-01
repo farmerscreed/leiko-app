@@ -59,6 +59,7 @@ import { useSeededLearnCard } from '../../hooks/useSeededLearnCard';
 import { Button } from '../../components/Button';
 import { SixthReadingPaywallHost } from '../../components/SixthReadingPaywallHost';
 import { CaregiverActionBar } from '../../components/CaregiverActionBar';
+import { HomeTabBar } from '../../components/HomeTabBar';
 import {
   ConstellationField,
   type ConstellationPerson,
@@ -539,24 +540,13 @@ export function CaregiverHome() {
             position: 'absolute',
             left: theme.spacing.l,
             right: theme.spacing.l,
-            bottom: theme.spacing.xxl,
-            gap: theme.spacing.s,
+            // Sit above the bottom tab bar when the viewer is a wearer
+            // (tab bar bottom=xxl, height 60), else at the usual spot.
+            bottom: viewerIsWearer
+              ? theme.spacing.xxl + 60 + theme.spacing.s
+              : theme.spacing.xxl,
           }}
         >
-          {/* ADR-0006 Phase 3 — Take a reading, wearer-only. A pure
-              caregiver never sees this (they don't take readings; D8a
-              Q-D8a-4). Opens the same TakeReading walkthrough the old
-              self-buyer home used. */}
-          {viewerIsWearer ? (
-            <Button
-              variant="accent"
-              onPress={() => navigation.navigate('TakeReading')}
-              accessibilityLabel="Take a reading"
-              testID="caregiver-home-take-reading"
-            >
-              Take a reading
-            </Button>
-          ) : null}
           <CaregiverActionBar
             count={merged.length}
             canInvite={viewerCanInvite(merged)}
@@ -564,6 +554,37 @@ export function CaregiverHome() {
             testID="caregiver-home-action-bar"
           />
         </View>
+      ) : null}
+
+      {/* ADR-0006 Phase 3 — bottom navigation, wearer-only. Reuses the
+          shared HomeTabBar (Home · Trends · [+ Take a reading] · Learn ·
+          Settings) so the unified home matches the original self-buyer
+          home's look. A pure caregiver doesn't get the tab bar (they
+          don't take readings — D8a Q-D8a-4 — and reach Settings via the
+          header gear). */}
+      {viewerIsWearer ? (
+        <HomeTabBar
+          active="home"
+          testID="caregiver-home-tab-bar"
+          onSelect={(tab) => {
+            switch (tab) {
+              case 'home':
+                return;
+              case 'trends':
+                navigation.navigate('Trends');
+                return;
+              case 'take_reading':
+                navigation.navigate('TakeReading');
+                return;
+              case 'learn':
+                navigation.navigate('Learn');
+                return;
+              case 'settings':
+                navigation.navigate('Settings');
+                return;
+            }
+          }}
+        />
       ) : null}
       {/* ADR-0006 Phase 2 — the health-platform opt-in is a personal
           (self-wearer) concern and lives on the SelfBuyerHome personal
