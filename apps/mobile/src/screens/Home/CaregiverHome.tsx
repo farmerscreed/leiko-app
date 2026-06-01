@@ -57,7 +57,6 @@ import { AskLeikoSheet } from '../../components/AskLeikoSheet';
 import { HomeLearnCard } from '../../components/HomeLearnCard';
 import { useSeededLearnCard } from '../../hooks/useSeededLearnCard';
 import { Button } from '../../components/Button';
-import { HealthPlatformPermissionPrompt } from '../../components/HealthPlatformPermissionPrompt';
 import { SixthReadingPaywallHost } from '../../components/SixthReadingPaywallHost';
 import { CaregiverActionBar } from '../../components/CaregiverActionBar';
 import {
@@ -532,12 +531,15 @@ export function CaregiverHome() {
           />
         </View>
       ) : null}
-      {/* Sprint 9.5 / Task 8 — Apple Health / Health Connect opt-in
-          (D13 §12.5). Parent (own phone) asked on first home render.
-          The component's account_type gate returns null for caregivers
-          so this mount is safe even though both personas currently
-          route through CaregiverHome (parent-split is a later sprint). */}
-      <HealthPlatformPermissionPrompt />
+      {/* ADR-0006 Phase 2 — the health-platform opt-in is a personal
+          (self-wearer) concern and lives on the SelfBuyerHome personal
+          view, reached by tapping the "You" node. It was previously
+          mounted here on the assumption only caregivers see this screen
+          (its account_type gate returns null for caregivers). Now that a
+          self_buyer LANDS on this constellation, mounting it here opened
+          its BottomSheet backdrop over the home on first run and swallowed
+          all touches ("renders but taps dead"). Removed from the
+          constellation; SelfBuyerHome keeps the prompt at the right altitude. */}
       {/* Sprint 10a — D8a §9.1 6th-reading auto-paywall. Fires once per
           family per month for free users; no-ops on Plus tiers. The
           host component is the only paywall mount on home — Trends
