@@ -95,10 +95,11 @@ import type {
   ReadingSummary,
 } from '../../services/families/fetchParentSummaries';
 import type { LocalReading } from '../../state/readings';
+import { type CaregiverPerson } from '../../utils/caregiverPerson';
 import {
-  caregiverPeopleFromParents,
-  type CaregiverPerson,
-} from '../../utils/caregiverPerson';
+  buildConstellationNodes,
+  isSelfCircle,
+} from '../../utils/constellationNodes';
 
 type Nav = NativeStackNavigationProp<CaregiverStackParamList>;
 
@@ -139,7 +140,10 @@ const CARDS_GLOW_INNER = '#3D2D1F'; // ≈ oklch(28% 0.04 50)
 export function CaregiverHome() {
   const theme = useTheme();
   const navigation = useNavigation<Nav>();
-  const { parents, people, isLoading, isRefreshing, refresh } = useCaregiverFamily();
+  // `people` from useCaregiverFamily is no longer consumed directly —
+  // ADR-0006 Phase 2 derives ordered nodes via buildConstellationNodes
+  // from `parents`/`merged` below.
+  const { parents, isLoading, isRefreshing, refresh } = useCaregiverFamily();
   // Sprint 17b — detect "you were removed from a family" between
   // refetches and surface a calm banner. Backstop for the
   // `family_removed` push when push is suppressed for any reason.
@@ -167,12 +171,15 @@ export function CaregiverHome() {
     () => mergeLocalLatest(parents, localLatest),
     [parents, localLatest],
   );
+  // ADR-0006 Phase 2 — order nodes by urgency and flag the viewer's own
+  // self-circle. buildConstellationNodes returns ConstellationNode[], a
+  // superset of CaregiverPerson (adds `isSelf`), so every downstream
+  // consumer (constellationPeople / legendPeople / cardData / anomaly)
+  // keeps working unchanged — they now just receive an at-risk-first
+  // ordering with the "You" node anchored per the focal rule.
   const mergedPeople = useMemo(
-    () =>
-      merged === parents
-        ? people
-        : caregiverPeopleFromParents(merged, Date.now()),
-    [merged, parents, people],
+    () => buildConstellationNodes(merged, Date.now()),
+    [merged],
   );
 
   const anomaly = useMemo(() => pickAnomalyForBanner(mergedPeople), [mergedPeople]);
@@ -200,6 +207,16 @@ export function CaregiverHome() {
     (id: string) => {
       const target = merged.find((p) => p.familyId === id);
       if (!target) return;
+      // ADR-0006 Phase 2 — tapping the viewer's OWN node ("You") opens the
+      // immersive personal view via ParentDashboard, which exists on this
+      // (caregiver) stack and reads the self-circle's data from the server.
+      // (Cross-stack routing to the self-buyer SelfBuyerHome — with its
+      // Take-a-reading FAB — is the Phase 3 navigation unification; for
+      // now ParentDashboard renders the full pulse for the self node too.)
+      if (isSelfCircle(target)) {
+        navigation.navigate('ParentDashboard', { familyId: id });
+        return;
+      }
       // Sprint 16.6 fix — only route to ReadingDetail when the reading
       // is in this phone's local MMKV (i.e. the caregiver IS the
       // parent — hybrid mode — and took the reading here). Cross-phone

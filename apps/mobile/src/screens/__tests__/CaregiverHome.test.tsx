@@ -33,7 +33,6 @@ const mockHookResult = {
   refresh: mockRefresh,
 };
 
-const EMPTY_VITAL_STRIP = { bp: '—', hr: '—', spo2: '—', sleep: '—' };
 
 jest.mock('../../hooks/useCaregiverFamily', () => ({
   useCaregiverFamily: () => mockHookResult,
@@ -288,27 +287,23 @@ describe('<CaregiverHome /> — populated state', () => {
 
 describe('<CaregiverHome /> — anomaly banner', () => {
   function setupOnePerson(status: 'clear' | 'attention' | 'urgent') {
+    // ADR-0006 Phase 2 — status is DERIVED from the reading by
+    // buildConstellationNodes now (not injected via `people`). Use BP
+    // that classifies to the intended tier (classification.ts:
+    // >=180/120 urgent; >160/100 attention; else clear/in_pattern).
+    const bp =
+      status === 'urgent'
+        ? { systolic: 188, diastolic: 122 }
+        : status === 'attention'
+          ? { systolic: 168, diastolic: 104 }
+          : { systolic: 122, diastolic: 78 };
     mockHookResult.parents = [
       parent({
         familyId: 'fam-1',
         parentDisplayName: 'Marian Okeke',
         parentRelationship: 'Mom',
-        latestReading: reading({ id: 'r1', systolic: 122, diastolic: 78 }),
+        latestReading: reading({ id: 'r1', ...bp }),
       }),
-    ];
-    mockHookResult.people = [
-      {
-        id: 'fam-1',
-        fullName: 'Marian Okeke',
-        initial: 'M',
-        accentIndex: 1,
-        status,
-        bpLabel: '122/78',
-        headline: 'headline',
-        sentence: 'sentence',
-        relation: 'Mom',
-        vitalStrip: EMPTY_VITAL_STRIP,
-      },
     ];
   }
 
@@ -332,76 +327,52 @@ describe('<CaregiverHome /> — anomaly banner', () => {
   });
 
   it('confirmed-urgent wins over calm-concerned (most-severe-wins)', () => {
+    // Status derived from readings: Marian attention (168/104), Emeka
+    // urgent (188/122). Most-severe-wins → Emeka's banner.
     mockHookResult.parents = [
       parent({
         familyId: 'fam-1',
         parentDisplayName: 'Marian Okeke',
         parentRelationship: 'Mom',
-        latestReading: reading({ id: 'r1' }),
+        latestReading: reading({ id: 'r1', systolic: 168, diastolic: 104 }),
       }),
       parent({
         familyId: 'fam-2',
         parentDisplayName: 'Emeka Okeke',
         parentRelationship: 'Dad',
-        latestReading: reading({ id: 'r2' }),
+        latestReading: reading({ id: 'r2', systolic: 188, diastolic: 122 }),
       }),
     ];
-    mockHookResult.people = [
-      {
-        id: 'fam-1',
-        fullName: 'Marian Okeke',
-        initial: 'M',
-        accentIndex: 1,
-        status: 'attention',
-        bpLabel: '122/78',
-        headline: 'h',
-        sentence: 's',
-        relation: 'Mom',
-        vitalStrip: EMPTY_VITAL_STRIP,
-      },
-      {
-        id: 'fam-2',
-        fullName: 'Emeka Okeke',
-        initial: 'E',
-        accentIndex: 2,
-        status: 'urgent',
-        bpLabel: '188/120',
-        headline: 'h',
-        sentence: 's',
-        relation: 'Dad',
-        vitalStrip: EMPTY_VITAL_STRIP,
-      },
-    ];
     render(withProviders(<CaregiverHome />));
-    // Confirmed-urgent (Dad) wins; calm-concerned (Marian) is suppressed.
+    // Confirmed-urgent (Dad) wins; calm-concerned (Marian) is suppressed
+    // in the BANNER. (Marian's attention headline "Worth a chat …" still
+    // renders in her legend row — that's per-person copy, not the banner,
+    // so we assert on the banner's specific title, not a loose substring.)
     expect(screen.getByText('Talk to Emeka now')).toBeTruthy();
-    expect(screen.queryByText(/Worth a chat/)).toBeNull();
+    expect(screen.queryByText('Worth a chat with Marian')).toBeNull();
   });
 });
 
 describe('<CaregiverHome /> — view toggle (Sprint 7.7b)', () => {
   function setupThree() {
+    // ADR-0006 Phase 2 — the vital strip is now DERIVED from the parent's
+    // latestHr/latestSpo2/latestSleep (not injected via `people`). Populate
+    // them so the derived strip renders 64 / 98% / 7:42 (462 min).
     mockHookResult.parents = [
       parent({
         familyId: 'fam-1',
         parentDisplayName: 'Marian Okeke',
         parentRelationship: 'Mom',
-        latestReading: reading({ id: 'r-mom' }),
+        latestReading: reading({ id: 'r-mom', systolic: 122, diastolic: 78 }),
+        latestHr: { measuredAt: new Date().toISOString(), bpm: 64 },
+        latestSpo2: { measuredAt: new Date().toISOString(), percent: 98 },
+        latestSleep: {
+          measuredAt: new Date().toISOString(),
+          totalMinutes: 462,
+          deepMinutes: null,
+          lightMinutes: null,
+        },
       }),
-    ];
-    mockHookResult.people = [
-      {
-        id: 'fam-1',
-        fullName: 'Marian Okeke',
-        initial: 'M',
-        accentIndex: 1,
-        status: 'clear',
-        bpLabel: '122/78',
-        headline: 'h',
-        sentence: 'BP 122/78 a moment ago. Inside the usual band.',
-        relation: 'Mom',
-        vitalStrip: { bp: '122/78', hr: '64', spo2: '98%', sleep: '7:42' },
-      },
     ];
   }
 
