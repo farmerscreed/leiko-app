@@ -91,11 +91,43 @@ The model is built on **one concept** and **two independent capabilities**:
    honouring the "red = confirmed-urgent only / calm-before-clever" rule
    in CLAUDE.md.
 
-3. **Invites: the wearer invites, the follower accepts.** The data owner
-   controls access. The "Invite someone to follow" affordance appears
-   **only on circles the viewer wears**; on circles they merely follow it
-   is absent. (Resolves the "who generates the code" question and the
-   "deactivate the unnecessary side" request.)
+3. **Invites: either party may initiate; the wearer always consents and
+   holds the visibility controls.** The protective principle is *wearer
+   consent*, not *who clicks first* — so two directions coexist:
+
+   - **Caregiver-initiated (primary).** "+ Add someone I care for" on the
+     home creates a **pending invite not tied to any circle**, and presents
+     **both** a shareable link **and** a 6-digit code (and can email them).
+     This is the common remote case and removes the "where do I find the
+     generate-code button?" discoverability problem — the *motivated*
+     party (the caregiver) generates and sends; the wearer just responds.
+     The invite resolves — attaching the caregiver as a follower — **only
+     once the wearer onboards and pairs their own watch (which is what
+     creates their circle).** A circle is NEVER pre-created for an
+     invitee; the caregiver link creates a *pending edge*, not a phantom
+     circle. (This keeps the "wrong wearer stamped on a circle" bug class
+     dead.)
+
+   - **Wearer-initiated (secondary).** In Settings → "Following your
+     readings", "Invite someone to follow my readings" generates a
+     link + 6-digit code tied to the wearer's **existing** circle, so it
+     **resolves immediately** on accept. This is the proactive-sharer /
+     D8a hybrid case.
+
+   **Dual delivery, always (link + code).** The inviter cannot know
+   whether the recipient already has Leiko, so every invite carries both:
+   the **link** deep-links a not-yet-installed user through app-store
+   install into the accept flow; the **6-digit code** lets an
+   already-installed user accept by typing it in their app. Both map to
+   the same `invitations` row (`url_token` + `pairing_code` already exist
+   in the schema). Invites may also be **emailed** (existing Resend
+   integration in `send-family-invite`); email copy passes the voice gate,
+   and only the invitee email *domain* is audit-logged (no-PHI rule). The
+   existing **7-day expiry + single-use consumption** is retained as the
+   security boundary for the emailed code.
+
+   The "Invite someone to follow" affordance appears **only on circles the
+   viewer wears**; on circles they merely follow, it is absent.
 
 4. **Settings → Family collapses from ~6 sections to 2, role-aware:**
    - On a circle you wear → **"Following your readings"**: invite CTA +
@@ -168,9 +200,21 @@ intent is "inert", not "deleted."
 - **Sync** (`supabase/functions/sync/index.ts`): family resolved from the
   bound device; deterministic membership fallback. (Builds on the
   `mutable`-daily-vitals + `clientDeviceId` changes already on the branch.)
-- **RPC / migration**: `create_family` idempotency guard; possible
-  migration to formalise device→circle binding. Any data-model change
-  remains main-thread + ADR-gated per CLAUDE.md.
+- **RPC / migration**: `create_family` is refactored to be **self-circle
+  only** — it stops branching on `account_type` and is only ever called by
+  a user pairing *their own* watch in onboarding (wearer always = caller).
+  Caregivers never call it; "+ Add someone I care for" is an invite-accept,
+  not a circle creation. Adds an idempotency guard for the self-circle;
+  possible migration to formalise device→circle binding. Any data-model
+  change remains main-thread + ADR-gated per CLAUDE.md.
+- **Pending invites (net-new plumbing)**: caregiver-initiated invites can
+  target someone **not yet on Leiko**, so the invite cannot reference a
+  `family_id` at creation time. This needs an `invitations` accommodation
+  (a pending/contact-keyed invite that **resolves to a follower edge once
+  the invitee onboards + pairs their watch**, creating their circle). Deep-
+  link install→accept routing is required so a link resolves post-install.
+  This is the single piece of genuinely new infrastructure the model adds;
+  everything else reuses existing primitives.
 - **Spec docs**: D8a §1.2/§1.3/§14.1 and `docs/01-data-model.md`
   account_type semantics are amended to record the unified model. D8a's
   self-buyer *content* (voice, paywall framing, hero card) survives as the
@@ -190,10 +234,16 @@ intent is "inert", not "deleted."
 - **Billing model for multi-circle.** Subscription is per-circle today;
   "one subscriber, many circles" is a commercial decision tracked
   separately, not in this ADR.
-- **Remote non-technical-parent setup at scale.** v1 assumes a family
-  member does the in-person first-time setup (install + pair + share
-  code) for a non-technical wearer. If field reality demands
-  caregiver-driven remote setup, the invite direction is revisited.
+- **Phantom-wearer setup (caregiver pairs someone else's watch to their
+  own phone).** Demoted to an edge case, not a core flow. The canonical
+  model is **remote wearer → own phone → own watch → cloud → caregiver
+  pulls** (founder-confirmed: the remote person is not reliably co-located,
+  so attaching their watch to the caregiver's phone defeats real-time
+  monitoring). A genuinely phone-less wearer who must share a caregiver's
+  phone is handled later, if at all.
+- **Wearer with no phone at all.** The model assumes each wearer has a
+  phone to sync their own watch. Truly phone-less wearers are out of scope
+  for v1.
 - **Full parallel multi-session auth** (Sprint 19 non-goal) stays
   deferred.
 
@@ -227,3 +277,8 @@ intent is "inert", not "deleted."
   unnecessary: if the home is unified from day one, there is no
   graduation — adding a person is just tapping "+ Add someone." (Founder
   agreed to hold this.)
+- **Single invite direction (wearer-initiated only).** Rejected: forces
+  the wearer to hunt for a "generate code" button and requires the wearer
+  to act first, which fails the common remote case where the caregiver is
+  the motivated party. Replaced with two directions under one consent
+  principle (wearer always approves), with caregiver-initiated as primary.
