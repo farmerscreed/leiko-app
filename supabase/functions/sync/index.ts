@@ -245,17 +245,20 @@ async function bindDeviceInFamily(
   device: DeviceMeta,
 ): Promise<DeviceUpsertResult> {
   const clientDeviceId = device.clientDeviceId ?? null;
+  const serial = device.bleId.replace(/[^0-9a-f]/gi, '');
 
   if (clientDeviceId) {
-    // Migration path: first sync from an updated client. Adopt the family's
-    // existing active device (one watch per circle) instead of creating a
-    // duplicate, binding the stable id onto it.
+    // One watch per circle. If the circle already has a single active
+    // device, it IS this watch — adopt it and (re)stamp the current stable
+    // id + MAC onto it. We deliberately do NOT require client_device_id to
+    // be null: a reinstall mints a NEW clientDeviceId (MMKV was wiped), so
+    // the existing active device may already carry an OLD stable id. Still
+    // the same physical watch — re-stamp rather than insert a duplicate.
     const { data: activeDevices } = await serviceClient
       .from('devices')
       .select('id')
       .eq('family_id', familyId)
       .is('unpaired_at', null)
-      .is('client_device_id', null)
       .order('paired_at', { ascending: false })
       .limit(2);
     if (activeDevices && activeDevices.length === 1) {
@@ -283,11 +286,40 @@ async function bindDeviceInFamily(
     if (byMac) return { deviceId: byMac.id as string };
   }
 
+  // Before inserting, reactivate a soft-retired device that already holds
+  // this serial. serial_number is GLOBALLY unique (not partial on
+  // unpaired_at), so a fresh insert with a previously-seen serial — e.g.
+  // the rotated MAC of a device retired during cleanup — would 23505. The
+  // rotating Urion MAC means serial isn't a reliable identity, but reusing
+  // the existing row avoids the unique violation and keeps history intact.
+  const { data: bySerial } = await serviceClient
+    .from('devices')
+    .select('id')
+    .eq('serial_number', serial)
+    .limit(1)
+    .maybeSingle();
+  if (bySerial) {
+    const reactivate = await serviceClient
+      .from('devices')
+      .update({
+        family_id: familyId,
+        mac_address: device.bleId,
+        client_device_id: clientDeviceId,
+        unpaired_at: null,
+        paired_by_user_id: userId,
+      })
+      .eq('id', bySerial.id as string)
+      .select('id')
+      .single();
+    if (!reactivate.error) return { deviceId: reactivate.data.id as string };
+    return { error: 'device_insert_failed', detail: reactivate.error.message };
+  }
+
   const insertDevice = await serviceClient
     .from('devices')
     .insert({
       family_id: familyId,
-      serial_number: device.bleId.replace(/[^0-9a-f]/gi, ''),
+      serial_number: serial,
       mac_address: device.bleId,
       client_device_id: clientDeviceId,
       model: device.model,

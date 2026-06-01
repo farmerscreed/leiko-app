@@ -197,3 +197,37 @@ Deno.test('legacy client without clientDeviceId resolves via owned circle + MAC'
   const res = await resolveFamilyAndDevice(client, 'user-1', legacy);
   assertEquals(res, { familyId: 'fam-OWN', deviceId: 'dev-legacy' });
 });
+
+// ── 6. Reinstall: new clientDeviceId, owned circle has ONE active device
+// that already carries an OLD stable id → re-stamp (adopt), do NOT insert.
+// This is the regression for the 500 the founder hit after an app reinstall.
+Deno.test('reinstall re-stamps the circle\'s single active device (no duplicate insert)', async () => {
+  const calls: Call[] = [];
+  const client = makeClient((call) => {
+    // new stable id matches no device globally
+    if (call.table === 'devices' && call.op === 'select' && 'client_device_id' in call.filters) {
+      return { data: null, error: null };
+    }
+    if (call.table === 'family_members' && call.filters.role === 'family_owner') {
+      return { data: { family_id: 'fam-OWN' }, error: null };
+    }
+    // owned-circle active-device lookup (.limit(2)) returns exactly one
+    // active device, which already carries an old stable id.
+    if (call.table === 'devices' && call.op === 'select' && call.filters.family_id === 'fam-OWN') {
+      return { data: [{ id: 'dev-existing' }], error: null };
+    }
+    // re-stamp update succeeds
+    if (call.table === 'devices' && call.op === 'update') {
+      return { data: { id: 'dev-existing' }, error: null };
+    }
+    return { data: null, error: null };
+  }, calls);
+
+  const res = await resolveFamilyAndDevice(client, 'user-1', DEVICE);
+  assertEquals(res, { familyId: 'fam-OWN', deviceId: 'dev-existing' });
+  // No insert should have happened.
+  assertEquals(
+    calls.some((c) => c.table === 'devices' && c.op === 'insert'),
+    false,
+  );
+});
