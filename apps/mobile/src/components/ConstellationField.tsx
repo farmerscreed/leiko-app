@@ -37,7 +37,14 @@
 // reduced motion the pulse ring renders at its rest opacity (0).
 
 import { useEffect } from 'react';
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import Animated, {
   Easing,
   useAnimatedProps,
@@ -72,6 +79,12 @@ export interface ConstellationPerson {
 export interface ConstellationFieldProps {
   /** Up to 3 supported in v1 — extras are dropped with a dev warning. */
   people: ConstellationPerson[];
+  /** ADR-0006 Phase 3 — when the viewer is a wearer, their own circle is
+   *  the CENTRE "You" anchor (showing their reading + name), not an
+   *  orbiting node. Pass it here and exclude it from `people`. Caregivers
+   *  (no self circle) leave this undefined → the bare "You" dot renders
+   *  as before. */
+  selfNode?: ConstellationPerson;
   onSelectPerson?: (id: string) => void;
   testID?: string;
   style?: StyleProp<ViewStyle>;
@@ -121,6 +134,7 @@ function clampPeople(people: ConstellationPerson[]): ConstellationPerson[] {
 
 export function ConstellationField({
   people,
+  selfNode,
   onSelectPerson,
   testID,
   style,
@@ -257,35 +271,99 @@ export function ConstellationField({
         />
       </Svg>
 
-      {/* "You" label — sits just below the centre dot in mono uppercase */}
-      <View
-        pointerEvents="none"
-        style={{
-          position: 'absolute',
-          left: CX,
-          top: CY + 10,
-          transform: [{ translateX: -16 }],
-        }}
-      >
-        <Text
-          allowFontScaling={false}
+      {/* Centre "You" anchor. ADR-0006 Phase 3: when the viewer is a
+          wearer (selfNode present), the centre shows THEIR name + reading
+          and is tappable — they are the protagonist of their own
+          constellation, not a redundant orbiting node. Caregivers (no
+          selfNode) keep the quiet bare "You" label. */}
+      {selfNode ? (
+        <Pressable
+          onPress={
+            onSelectPerson ? () => onSelectPerson(selfNode.id) : undefined
+          }
+          accessibilityRole="button"
+          accessibilityLabel={`You — ${selfNode.fullName}, ${selfNode.bpLabel}`}
+          testID={testID ? `${testID}-self` : undefined}
           style={{
-            fontFamily: theme.fontFamilies.numeric,
-            // Design: 8.5pt mono uppercase, letter-spacing 0.20em
-            // (~1.7pt at 8.5pt). The earlier 11pt bump made the
-            // label compete with the orb portraits for attention;
-            // small + quiet is the intent.
-            fontSize: 8.5,
-            lineHeight: 11,
-            letterSpacing: 1.7,
-            fontWeight: '500',
-            color: youLabelColor,
-            textTransform: 'uppercase',
+            position: 'absolute',
+            left: CX,
+            top: CY + 10,
+            transform: [{ translateX: -52 }],
+            width: 104,
+            alignItems: 'center',
           }}
         >
-          You
-        </Text>
-      </View>
+          <Text
+            allowFontScaling={false}
+            style={{
+              fontFamily: theme.fontFamilies.numeric,
+              fontSize: 8.5,
+              lineHeight: 11,
+              letterSpacing: 1.7,
+              fontWeight: '500',
+              color: youLabelColor,
+              textTransform: 'uppercase',
+            }}
+          >
+            You
+          </Text>
+          <Text
+            allowFontScaling={false}
+            numberOfLines={1}
+            style={{
+              fontFamily: theme.fontFamilies.editorial,
+              fontSize: 15,
+              lineHeight: 20,
+              color: theme.colors.text.primary,
+              marginTop: 2,
+            }}
+          >
+            {selfNode.fullName}
+          </Text>
+          {selfNode.bpLabel !== '—' ? (
+            <Text
+              allowFontScaling={false}
+              style={{
+                fontFamily: theme.fontFamilies.numeric,
+                fontSize: 13,
+                lineHeight: 17,
+                color: theme.colors.brand.coral,
+              }}
+            >
+              {selfNode.bpLabel}
+            </Text>
+          ) : null}
+        </Pressable>
+      ) : (
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            left: CX,
+            top: CY + 10,
+            transform: [{ translateX: -16 }],
+          }}
+        >
+          <Text
+            allowFontScaling={false}
+            style={{
+              fontFamily: theme.fontFamilies.numeric,
+              // Design: 8.5pt mono uppercase, letter-spacing 0.20em
+              // (~1.7pt at 8.5pt). The earlier 11pt bump made the
+              // label compete with the orb portraits for attention;
+              // small + quiet is the intent.
+              fontSize: 8.5,
+              lineHeight: 11,
+              letterSpacing: 1.7,
+              fontWeight: '500',
+              color: youLabelColor,
+              textTransform: 'uppercase',
+            }}
+          >
+            You
+          </Text>
+        </View>
+      )}
 
       {/* Person orbs — absolutely positioned over the SVG */}
       {visible.map((person, i) => {

@@ -247,14 +247,27 @@ export function CaregiverHome() {
     [merged, navigation, pairedDevice],
   );
 
-  const constellationPeople: ConstellationPerson[] = mergedPeople.map((p) => ({
+  // ADR-0006 Phase 3 — the viewer's own circle is the CENTRE "You" anchor,
+  // not an orbiting node. Split it out so the constellation shows self in
+  // the middle and only the people they care for orbit. Caregivers (no
+  // self node) → selfConstellationNode is undefined and all nodes orbit,
+  // exactly as before.
+  const toConstellationPerson = (p: (typeof mergedPeople)[number]): ConstellationPerson => ({
     id: p.id,
     initial: p.initial,
     fullName: p.fullName,
     accent: theme.colors.person[p.accentIndex],
     status: p.status,
     bpLabel: p.bpLabel,
-  }));
+  });
+  const selfConstellationNode: ConstellationPerson | undefined = mergedPeople.find(
+    (p) => p.isSelf,
+  )
+    ? toConstellationPerson(mergedPeople.find((p) => p.isSelf)!)
+    : undefined;
+  const constellationPeople: ConstellationPerson[] = mergedPeople
+    .filter((p) => !p.isSelf)
+    .map(toConstellationPerson);
 
   const legendPeople: LegendPerson[] = mergedPeople.map((p) => ({
     id: p.id,
@@ -461,6 +474,7 @@ export function CaregiverHome() {
               >
                 <ConstellationField
                   people={constellationPeople}
+                  selfNode={selfConstellationNode}
                   onSelectPerson={handlePersonPress}
                   testID="caregiver-home-constellation"
                 />
