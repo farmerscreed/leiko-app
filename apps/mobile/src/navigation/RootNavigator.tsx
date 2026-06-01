@@ -226,9 +226,16 @@ function SelfBuyerHomeNavigator() {
   // surfaced to the user.
   return (
     <SelfBuyerStack.Navigator
-      initialRouteName="SelfBuyerHome"
+      initialRouteName="CaregiverHome"
       screenOptions={{ headerShown: false }}
     >
+      {/* ADR-0006 Phase 2/3 — unified constellation home is the landing
+          screen for every persona. The self-buyer's own self-circle shows
+          as the "You" node; tapping it opens the immersive personal view
+          (ParentDashboard). The legacy SelfBuyerHome stays registered as
+          that detail target and for deep-links. */}
+      <SelfBuyerStack.Screen name="CaregiverHome" component={CaregiverHome} />
+      <SelfBuyerStack.Screen name="ParentDashboard" component={ParentDashboard} />
       <SelfBuyerStack.Screen name="SelfBuyerHome" component={SelfBuyerHome} />
       <SelfBuyerStack.Screen
         name="SelfBuyerHomePlaceholder"

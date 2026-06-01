@@ -118,6 +118,14 @@ export type SelfBuyerOnboardingStackParamList = {
 // now). The placeholder route name is kept available so existing tests + dev
 // flows don't break — it is no longer the initial route.
 export type SelfBuyerStackParamList = {
+  // ADR-0006 Phase 2/3 — the unified constellation home. Every user
+  // (self-buyer included) now lands here; their own self-circle renders
+  // as the "You" node. Reuses the caregiver CaregiverHome component +
+  // ParentDashboard immersive detail, so both are registered on this
+  // stack too. The legacy SelfBuyerHome stays registered as the "You"
+  // node's personal detail target.
+  CaregiverHome: undefined;
+  ParentDashboard: { familyId: string };
   SelfBuyerHome: undefined;
   SelfBuyerHomePlaceholder: undefined;
   Pairing: undefined;
