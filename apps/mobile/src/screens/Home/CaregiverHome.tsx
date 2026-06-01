@@ -97,6 +97,7 @@ import type { LocalReading } from '../../state/readings';
 import { type CaregiverPerson } from '../../utils/caregiverPerson';
 import {
   buildConstellationNodes,
+  hasSelfNode,
   isSelfCircle,
 } from '../../utils/constellationNodes';
 
@@ -180,6 +181,10 @@ export function CaregiverHome() {
     () => buildConstellationNodes(merged, Date.now()),
     [merged],
   );
+  // ADR-0006 Phase 3 — the viewer is a WEARER when they have a self-circle.
+  // Only wearers get the Take-a-reading affordance (a pure caregiver never
+  // takes readings — the parent does, on the watch; D8a Q-D8a-4).
+  const viewerIsWearer = useMemo(() => hasSelfNode(mergedPeople), [mergedPeople]);
 
   const anomaly = useMemo(() => pickAnomalyForBanner(mergedPeople), [mergedPeople]);
 
@@ -535,8 +540,23 @@ export function CaregiverHome() {
             left: theme.spacing.l,
             right: theme.spacing.l,
             bottom: theme.spacing.xxl,
+            gap: theme.spacing.s,
           }}
         >
+          {/* ADR-0006 Phase 3 — Take a reading, wearer-only. A pure
+              caregiver never sees this (they don't take readings; D8a
+              Q-D8a-4). Opens the same TakeReading walkthrough the old
+              self-buyer home used. */}
+          {viewerIsWearer ? (
+            <Button
+              variant="accent"
+              onPress={() => navigation.navigate('TakeReading')}
+              accessibilityLabel="Take a reading"
+              testID="caregiver-home-take-reading"
+            >
+              Take a reading
+            </Button>
+          ) : null}
           <CaregiverActionBar
             count={merged.length}
             canInvite={viewerCanInvite(merged)}

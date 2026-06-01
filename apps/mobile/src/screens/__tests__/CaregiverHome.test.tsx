@@ -507,3 +507,31 @@ describe('<CaregiverHome /> — voice rules', () => {
     expect(screen.getByText(text)).toBeTruthy();
   });
 });
+
+describe('<CaregiverHome /> — Take a reading (wearer-only, ADR-0006 Phase 3)', () => {
+  it('shows Take a reading when the viewer has a self-circle (wearer)', () => {
+    mockHookResult.parents = [
+      parent({
+        familyId: 'me',
+        parentDisplayName: 'Lawrence',
+        parentRelationship: 'self',
+        latestReading: reading({ id: 'r-self', systolic: 118, diastolic: 78 }),
+      }),
+    ];
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-take-reading')).toBeTruthy();
+  });
+
+  it('hides Take a reading for a pure caregiver (no self-circle)', () => {
+    mockHookResult.parents = [
+      parent({
+        familyId: 'mum',
+        parentDisplayName: 'Marian',
+        parentRelationship: 'Mom',
+        latestReading: reading({ id: 'r-mum', systolic: 122, diastolic: 78 }),
+      }),
+    ];
+    render(withProviders(<CaregiverHome />));
+    expect(screen.queryByTestId('caregiver-home-take-reading')).toBeNull();
+  });
+});
