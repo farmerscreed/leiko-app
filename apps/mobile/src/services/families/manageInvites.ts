@@ -95,3 +95,53 @@ export async function acceptFamilyInvite(
   logger.track('family_invite_accept_completed', { familyId: data.familyId });
   return data;
 }
+
+// ── ADR-0006 caregiver-initiated PENDING invite ──────────────────────
+
+export interface SendCareInviteInput {
+  /** Email of the person you want to care for (not yet on Leiko). */
+  inviteeEmail: string;
+  /** Friendly label for your pending list, e.g. "Mum". */
+  inviteeLabel?: string;
+}
+
+/** Create a PENDING invite (no circle yet) for someone you want to follow.
+ *  Returns a code + url_token to share; resolves when they onboard + pair
+ *  and call resolveCareInvite. */
+export async function sendCareInvite(
+  input: SendCareInviteInput,
+  client: SupabaseClient<Database> = defaultSupabase,
+): Promise<SendInviteResult> {
+  logger.track('care_invite_send_started');
+  const { data, error } = await client.functions.invoke<SendInviteResult>(
+    'send-care-invite',
+    { body: input },
+  );
+  if (error) {
+    logger.track('care_invite_send_failed', { reason: mapError(error) ?? 'unknown' });
+    throw error;
+  }
+  if (!data?.pairingCode) throw new Error('invalid_response');
+  logger.track('care_invite_send_completed');
+  return data;
+}
+
+/** WEARER side: resolve a pending care invite after pairing. Attaches the
+ *  original inviter as a caregiver of the wearer's circle. */
+export async function resolveCareInvite(
+  input: { code: string },
+  client: SupabaseClient<Database> = defaultSupabase,
+): Promise<AcceptInviteResult> {
+  logger.track('care_invite_resolve_started');
+  const { data, error } = await client.functions.invoke<AcceptInviteResult>(
+    'resolve-care-invite',
+    { body: input },
+  );
+  if (error) {
+    logger.track('care_invite_resolve_failed', { reason: mapError(error) ?? 'unknown' });
+    throw error;
+  }
+  if (!data?.familyId) throw new Error('invalid_response');
+  logger.track('care_invite_resolve_completed', { familyId: data.familyId });
+  return data;
+}

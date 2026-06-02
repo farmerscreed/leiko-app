@@ -108,6 +108,13 @@ export type AnalyticsEvent =
   | { name: 'family_invite_accept_started' }
   | { name: 'family_invite_accept_completed'; props?: { familyId: string } }
   | { name: 'family_invite_accept_failed'; props?: { reason: string } }
+  // ADR-0006 — caregiver-initiated pending invite (send + wearer-resolve).
+  | { name: 'care_invite_send_started' }
+  | { name: 'care_invite_send_completed' }
+  | { name: 'care_invite_send_failed'; props?: { reason: string } }
+  | { name: 'care_invite_resolve_started' }
+  | { name: 'care_invite_resolve_completed'; props?: { familyId: string } }
+  | { name: 'care_invite_resolve_failed'; props?: { reason: string } }
   // Sprint 19 — Care for another person (caregiver-side create_family).
   | { name: 'family_add_another_started' }
   | { name: 'family_add_another_completed' }
