@@ -70,9 +70,11 @@ jest.mock('../../../services/users/accountActions', () => ({
 
 const mockSendInvite = jest.fn();
 const mockAcceptInvite = jest.fn();
+const mockResolveCareInvite = jest.fn();
 jest.mock('../../../services/families/manageInvites', () => ({
   sendFamilyInvite: (...args: unknown[]) => mockSendInvite(...args),
   acceptFamilyInvite: (...args: unknown[]) => mockAcceptInvite(...args),
+  resolveCareInvite: (...args: unknown[]) => mockResolveCareInvite(...args),
 }));
 
 // Sprint 10c.2 / ADR-0006 Phase 4 — Settings uses useFamilyReadings to
@@ -558,6 +560,7 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
   beforeEach(() => {
     mockSendInvite.mockReset();
     mockAcceptInvite.mockReset();
+    mockResolveCareInvite.mockReset();
   });
 
   it('renders the invite + accept rows for a caregiver', () => {
@@ -662,7 +665,10 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
   });
 
   it('surfaces the not-found error message on a wrong code', async () => {
+    // A genuinely wrong code matches neither a caregiver invite nor a
+    // pending care invite — both paths reject not-found.
     mockAcceptInvite.mockRejectedValue(new Error('invitation_not_found'));
+    mockResolveCareInvite.mockRejectedValue(new Error('invitation_not_found'));
     renderScreen();
     fireEvent.press(screen.getByTestId('settings-family-accept'));
     fireEvent.changeText(screen.getByTestId('settings-accept-email-input'), 'me@example.com');

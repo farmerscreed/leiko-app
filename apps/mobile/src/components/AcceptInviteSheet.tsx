@@ -25,7 +25,7 @@ import { ScrollView, Text, TextInput, View } from 'react-native';
 import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
 import { Pill } from './Pill';
-import { acceptFamilyInvite } from '../services/families/manageInvites';
+import { acceptFamilyInvite, resolveCareInvite } from '../services/families/manageInvites';
 import { useTheme } from '../theme';
 
 type RelationshipChip =
@@ -122,15 +122,32 @@ export function AcceptInviteSheet({
     setPending(true);
     try {
       const labelEncoded = encodeRelationship(relChip, relCustom);
-      const result = await acceptFamilyInvite({
-        code,
-        email: email.trim(),
-        // Sprint 19 Block 5 — optional per-caregiver label for the
-        // wearer. When provided, the Edge Function stores it on
-        // family_members.caregiver_relationship_label. NULL =
-        // dashboard falls back to families.parent_relationship.
-        ...(labelEncoded ? { caregiverRelationshipLabel: labelEncoded } : {}),
-      });
+      let result: { familyId: string };
+      try {
+        // First try a 'caregiver' invite (join an existing circle).
+        result = await acceptFamilyInvite({
+          code,
+          email: email.trim(),
+          // Sprint 19 Block 5 — optional per-caregiver label for the
+          // wearer. When provided, the Edge Function stores it on
+          // family_members.caregiver_relationship_label. NULL =
+          // dashboard falls back to families.parent_relationship.
+          ...(labelEncoded ? { caregiverRelationshipLabel: labelEncoded } : {}),
+        });
+      } catch (e) {
+        // ADR-0006 — if the code isn't a caregiver invite, it may be a
+        // caregiver-INITIATED pending invite (kind 'parent_pairing'). The
+        // person typing it is the WEARER; resolve it so the inviter
+        // becomes their follower. accept-family-invite returns
+        // invitation_not_found for a parent_pairing code (it filters on
+        // kind='caregiver'), which is our signal to try resolve.
+        const msg = e instanceof Error ? e.message : '';
+        if (/invitation_not_found/i.test(msg)) {
+          result = await resolveCareInvite({ code });
+        } else {
+          throw e;
+        }
+      }
       if (showSuccessState) {
         setSuccess(true);
       }
@@ -146,7 +163,9 @@ export function AcceptInviteSheet({
               ? 'That code has expired. Ask for a new one.'
               : /invitation_already_accepted|already_member/i.test(msg)
                 ? "You're already in this circle."
-                : "We couldn't join the circle. Try again in a moment.",
+                : /no_circle_yet/i.test(msg)
+                  ? 'Set up your own watch first, then enter this code.'
+                  : "We couldn't join the circle. Try again in a moment.",
       );
     } finally {
       setPending(false);
