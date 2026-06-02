@@ -158,3 +158,56 @@ export async function resolveCareInvite(
   logger.track('care_invite_resolve_completed', { familyId: data.familyId });
   return data;
 }
+
+// ── ADR-0007 unified "Connect" ───────────────────────────────────────
+// One code; the backend (connect-accept) resolves who-follows-whom from
+// who wears a watch. Replaces the four send/accept/resolve functions
+// above (kept during the back-compat window).
+
+export interface AcceptConnectResult {
+  ok: true;
+  familyId: string | null;
+  outcome: 'accepter_follows' | 'sharer_follows' | 'pending';
+  canFollowBack: boolean;
+}
+
+/** Generate a connect code to share. Direction is decided at accept time. */
+export async function createConnect(
+  input: SendInviteInput,
+  client: SupabaseClient<Database> = defaultSupabase,
+): Promise<SendInviteResult> {
+  logger.track('connect_create_started');
+  const { data, error } = await client.functions.invoke<SendInviteResult>(
+    'connect-create',
+    { body: input },
+  );
+  if (error) {
+    const reasoned = await withServerReason(error);
+    logger.track('connect_create_failed', { reason: reasoned.message });
+    throw reasoned;
+  }
+  if (!data?.pairingCode) throw new Error('invalid_response');
+  logger.track('connect_create_completed');
+  return data;
+}
+
+/** Accept a connect code. The backend wires the relationship by watch
+ *  ownership and returns the outcome (+ canFollowBack when both wear). */
+export async function acceptConnect(
+  input: { code: string; email: string; caregiverRelationshipLabel?: string },
+  client: SupabaseClient<Database> = defaultSupabase,
+): Promise<AcceptConnectResult> {
+  logger.track('connect_accept_started');
+  const { data, error } = await client.functions.invoke<AcceptConnectResult>(
+    'connect-accept',
+    { body: input },
+  );
+  if (error) {
+    const reasoned = await withServerReason(error);
+    logger.track('connect_accept_failed', { reason: reasoned.message });
+    throw reasoned;
+  }
+  if (!data?.outcome) throw new Error('invalid_response');
+  logger.track('connect_accept_completed', { outcome: data.outcome });
+  return data;
+}

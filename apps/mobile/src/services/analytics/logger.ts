@@ -115,6 +115,13 @@ export type AnalyticsEvent =
   | { name: 'care_invite_resolve_started' }
   | { name: 'care_invite_resolve_completed'; props?: { familyId: string } }
   | { name: 'care_invite_resolve_failed'; props?: { reason: string } }
+  // ADR-0007 — unified Connect (one code, backend infers direction).
+  | { name: 'connect_create_started' }
+  | { name: 'connect_create_completed' }
+  | { name: 'connect_create_failed'; props?: { reason: string } }
+  | { name: 'connect_accept_started' }
+  | { name: 'connect_accept_completed'; props?: { outcome: string } }
+  | { name: 'connect_accept_failed'; props?: { reason: string } }
   // Sprint 19 — Care for another person (caregiver-side create_family).
   | { name: 'family_add_another_started' }
   | { name: 'family_add_another_completed' }
