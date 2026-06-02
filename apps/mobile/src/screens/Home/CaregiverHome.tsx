@@ -73,6 +73,7 @@ import { ViewToggle } from '../../components/ViewToggle';
 import { useCaregiverFamily } from '../../hooks/useCaregiverFamily';
 import { AcceptInviteSheet } from '../../components/AcceptInviteSheet';
 import { CareInviteSheet } from '../../components/CareInviteSheet';
+import { tryResolvePendingCareInvite } from '../../services/families/pendingCareInvite';
 import { FamilyRemovalBanner } from '../../components/FamilyRemovalBanner';
 import { useFamilyRemovalBanner } from '../../hooks/useFamilyRemovalBanner';
 import { useAuth } from '../../state/auth';
@@ -169,6 +170,22 @@ export function CaregiverHome() {
   useHydrateActivityFromServer();
   useHydrateHRFromServer();
   useHydrateSpO2FromServer();
+
+  // ADR-0006 — close the pending-care-invite loop. If the wearer arrived
+  // via a join link, the code was stashed; by the time they reach home
+  // their circle exists (onboarding paired the watch), so resolve it now
+  // and refresh so the new follower shows. No-op when nothing is stashed.
+  useEffect(() => {
+    let cancelled = false;
+    void tryResolvePendingCareInvite().then((familyId) => {
+      if (!cancelled && familyId) refresh();
+    });
+    return () => {
+      cancelled = true;
+    };
+    // Run once on mount; refresh identity is stable from the query hook.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Owning-phone first-paint merge: if local latest is newer than the
   // server view, prepend it. Same logic the legacy screen used.

@@ -62,6 +62,11 @@ export const STORAGE_KEYS = {
   // This UUID is generated once (getOrCreateClientDeviceId) and reused for
   // every sync so the server can key device identity on something stable.
   clientDeviceId: 'leiko.ble.clientDeviceId',
+  // ADR-0006 — a 6-digit care-invite code captured from a tapped join
+  // link before the wearer has onboarded/paired. After they pair (their
+  // circle exists), resolveCareInvite is called with this code to attach
+  // the inviter as a follower, then the key is cleared.
+  pendingCareInviteCode: 'leiko.invite.pendingCareCode',
   // Readings buffer — Sprint 6. Two arrays of LocalReading rows:
   //   pending: not yet successfully POSTed to /sync
   //   recent:  synced + persisted, capped at RECENT_READINGS_CAP for UI

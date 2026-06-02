@@ -30,6 +30,7 @@
 
 import { logger } from '../analytics/logger';
 import { navigationRef } from '../../navigation/navigationRef';
+import { stashPendingCareInvite } from '../families/pendingCareInvite';
 import { parseDeepLink, type ParsedDeepLink } from './deepLinkParser';
 
 export { parseDeepLink, type ParsedDeepLink };
@@ -80,8 +81,12 @@ export function dispatchDeepLink(parsed: ParsedDeepLink): void {
       navigationRef.navigate('FamilyMembers' as never);
       return;
     case 'join':
-      // ADR-0006 — a tapped invite link routes to Settings with the
-      // code/email prefilled; Settings auto-opens the accept-invite sheet.
+      // ADR-0006 — a tapped invite link. Stash the code so that once the
+      // wearer has paired (their circle exists), the pending care invite
+      // resolves and the inviter is attached as a follower. Also route to
+      // Settings with the code prefilled, so an already-set-up user can
+      // accept immediately via the accept sheet.
+      if (parsed.inviteCode) stashPendingCareInvite(parsed.inviteCode);
       (navigationRef as unknown as { navigate: (n: string, p: unknown) => void }).navigate(
         'Settings',
         {
