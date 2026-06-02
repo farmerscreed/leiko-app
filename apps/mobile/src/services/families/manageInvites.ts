@@ -17,6 +17,10 @@ export interface SendInviteInput {
 export interface SendInviteResult {
   invitationId: string;
   pairingCode: string;
+  /** ADR-0006 — url_token for building a shareable deep link, so a
+   *  not-yet-installed recipient can be routed through install → accept.
+   *  Optional for back-compat with an older edge-function deployment. */
+  urlToken?: string;
   expiresAt: string;
   /** Sprint 16.6 FUN-1: true when the server emailed the code via
    *  Resend. False when the Edge Function's RESEND_API_KEY is unset

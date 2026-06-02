@@ -251,6 +251,7 @@ export function SettingsScreen({ navigation }: Props) {
   const [invitePending, setInvitePending] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [inviteUrlToken, setInviteUrlToken] = useState<string | null>(null);
 
   // Sprint 16.6 — accept-invite UI lives in the shared AcceptInviteSheet
   // component now. Only `acceptSheetOpen` + `acceptSuccess` remain here:
@@ -794,6 +795,7 @@ export function SettingsScreen({ navigation }: Props) {
                 setInvitePermission('readings');
                 setInviteError(null);
                 setInviteCode(null);
+                setInviteUrlToken(null);
                 setInviteSheetOpen(true);
               }}
               testID="settings-family-invite"
@@ -1345,13 +1347,21 @@ export function SettingsScreen({ navigation }: Props) {
               </View>
               <Button
                 variant="primary"
-                onPress={() =>
-                  void Share.share({
-                    title: 'Leiko invite',
-                    message: `Your Leiko invite code is ${inviteCode}. Open Leiko, tap Settings → I have an invite code, and enter ${inviteEmail}.`,
-                  })
-                }
-                accessibilityLabel="Share invite code"
+                onPress={() => {
+                  // ADR-0006 dual delivery: include a tappable link (for a
+                  // not-yet-installed recipient) AND the 6-digit code (for
+                  // someone who already has Leiko). The link carries the
+                  // invite's url_token; the deep-link handler routes it to
+                  // the accept flow after install.
+                  const link = inviteUrlToken
+                    ? `https://leiko.app/join?token=${encodeURIComponent(inviteUrlToken)}`
+                    : null;
+                  const message = link
+                    ? `Follow my readings on Leiko.\n\nTap to join: ${link}\n\nAlready have Leiko? Enter code ${inviteCode} (for ${inviteEmail}). Works for 7 days.`
+                    : `Your Leiko invite code is ${inviteCode}. Open Leiko, tap Settings → Care for another person, and enter ${inviteEmail}.`;
+                  void Share.share({ title: 'Leiko invite', message });
+                }}
+                accessibilityLabel="Share invite"
                 testID="settings-invite-share"
               >
                 Share invite
@@ -1519,6 +1529,7 @@ export function SettingsScreen({ navigation }: Props) {
                       inviteeLabel: inviteLabel.trim() || undefined,
                     });
                     setInviteCode(result.pairingCode);
+                    setInviteUrlToken(result.urlToken ?? null);
                   } catch (e) {
                     setInviteError(
                       e instanceof Error && /not_family_owner/i.test(e.message)

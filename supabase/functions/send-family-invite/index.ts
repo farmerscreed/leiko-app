@@ -38,6 +38,11 @@ interface RequestBody {
 interface ResponseShape {
   invitationId: string;
   pairingCode: string;
+  /** ADR-0006 — shareable deep link carrying the invite's url_token. The
+   *  client builds a tappable https://leiko.app/join?... URL from this so
+   *  a not-yet-installed recipient can be routed through install → accept.
+   *  The 6-digit pairingCode remains for already-installed recipients. */
+  urlToken: string;
   expiresAt: string;
   /** True when the Resend email send returned 2xx. False when the
    *  email path is disabled (no API key configured) or the send
@@ -207,7 +212,7 @@ Deno.serve(async (req: Request) => {
         pairing_code: code,
         expires_at: expiresAt,
       })
-      .select('id')
+      .select('id, url_token')
       .single();
 
     if (insertResult.error) {
@@ -265,6 +270,7 @@ Deno.serve(async (req: Request) => {
     const resp: ResponseShape = {
       invitationId: insertResult.data.id as string,
       pairingCode: code,
+      urlToken: insertResult.data.url_token as string,
       expiresAt,
       emailSent,
     };
