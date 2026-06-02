@@ -152,19 +152,35 @@ export function PersonOrb({
       return;
     }
     const dur = pulseDuration(status);
-    // Sequence: rest → peak → rest, then withRepeat keeps it going.
+    // ADR follow-up — a gentle HEARTBEAT rhythm instead of a plain sine.
+    // A real beat is "lub-dub … rest": two quick swells close together,
+    // then a longer pause. Kept slow + soft (calm-before-clever; never
+    // alarming). Opacity breathes smoothly across the whole cycle; the
+    // SCALE carries the double-beat. Reduced motion still disables it.
+    const beat1 = Math.round(dur * 0.12); // first swell up
+    const beat1d = Math.round(dur * 0.1); // settle
+    const beat2 = Math.round(dur * 0.1); // second swell up (smaller)
+    const beat2d = Math.round(dur * 0.1); // settle
+    const rest = dur - (beat1 + beat1d + beat2 + beat2d); // long quiet
     haloOpacity.value = withRepeat(
       withSequence(
-        withTiming(0.95, { duration: dur / 2, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0.55, { duration: dur / 2, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.95, { duration: beat1, easing: Easing.out(Easing.ease) }),
+        withTiming(0.7, { duration: beat1d + beat2 + beat2d, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.55, { duration: rest, easing: Easing.inOut(Easing.ease) }),
       ),
       -1,
       false,
     );
     haloScale.value = withRepeat(
       withSequence(
-        withTiming(1.08, { duration: dur / 2, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: dur / 2, easing: Easing.inOut(Easing.ease) }),
+        // lub
+        withTiming(1.08, { duration: beat1, easing: Easing.out(Easing.ease) }),
+        withTiming(1.02, { duration: beat1d, easing: Easing.in(Easing.ease) }),
+        // dub (slightly smaller)
+        withTiming(1.06, { duration: beat2, easing: Easing.out(Easing.ease) }),
+        withTiming(1.0, { duration: beat2d, easing: Easing.in(Easing.ease) }),
+        // long rest at baseline
+        withTiming(1.0, { duration: rest, easing: Easing.linear }),
       ),
       -1,
       false,
