@@ -40,7 +40,7 @@ import {
   deleteAccount,
   exportFamilyData,
 } from '../../services/users/accountActions';
-import { sendFamilyInvite } from '../../services/families/manageInvites';
+import { createConnect } from '../../services/families/manageInvites';
 import { AcceptInviteSheet } from '../../components/AcceptInviteSheet';
 import { EditFamilyDetailsSheet } from '../../components/EditFamilyDetailsSheet';
 import { listCaregivers } from '../../services/families/visibility';
@@ -1552,7 +1552,7 @@ export function SettingsScreen({ navigation }: Props) {
                   setInviteError(null);
                   setInvitePending(true);
                   try {
-                    const result = await sendFamilyInvite({
+                    const result = await createConnect({
                       inviteeEmail: inviteEmail.trim(),
                       inviteeLabel: inviteLabel.trim() || undefined,
                     });
@@ -1561,11 +1561,9 @@ export function SettingsScreen({ navigation }: Props) {
                   } catch (e) {
                     const msg = e instanceof Error ? e.message : '';
                     setInviteError(
-                      /not_family_owner/i.test(msg)
-                        ? 'Only the family owner can send invites.'
-                        : /invalid_email/i.test(msg)
-                          ? 'That email doesn’t look right. Check it and try again.'
-                          : "We couldn't send the invite. Try again in a moment.",
+                      /invalid_email/i.test(msg)
+                        ? 'That email doesn’t look right. Check it and try again.'
+                        : "We couldn't send the invite. Try again in a moment.",
                     );
                   } finally {
                     setInvitePending(false);

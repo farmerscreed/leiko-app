@@ -4,9 +4,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '../../theme';
 import { CareInviteSheet } from '../CareInviteSheet';
 
-const mockSendCareInvite = jest.fn();
+const mockCreateConnect = jest.fn();
 jest.mock('../../services/families/manageInvites', () => ({
-  sendCareInvite: (...args: unknown[]) => mockSendCareInvite(...args),
+  createConnect: (...args: unknown[]) => mockCreateConnect(...args),
 }));
 
 function withProviders(ui: ReactNode) {
@@ -23,7 +23,7 @@ function withProviders(ui: ReactNode) {
 }
 
 beforeEach(() => {
-  mockSendCareInvite.mockReset();
+  mockCreateConnect.mockReset();
 });
 
 describe('CareInviteSheet', () => {
@@ -40,11 +40,11 @@ describe('CareInviteSheet', () => {
       fireEvent.press(screen.getByTestId('care-invite-send'));
     });
     expect(screen.getByTestId('care-invite-error')).toBeTruthy();
-    expect(mockSendCareInvite).not.toHaveBeenCalled();
+    expect(mockCreateConnect).not.toHaveBeenCalled();
   });
 
   it('sends a pending invite and surfaces the code to share', async () => {
-    mockSendCareInvite.mockResolvedValue({
+    mockCreateConnect.mockResolvedValue({
       invitationId: 'inv-1',
       pairingCode: '246810',
       urlToken: 'tok-abc',
@@ -57,7 +57,7 @@ describe('CareInviteSheet', () => {
       fireEvent.press(screen.getByTestId('care-invite-send'));
     });
     await waitFor(() => {
-      expect(mockSendCareInvite).toHaveBeenCalledWith({ inviteeEmail: 'mum@example.com' });
+      expect(mockCreateConnect).toHaveBeenCalledWith({ inviteeEmail: 'mum@example.com' });
     });
     expect(screen.getByTestId('care-invite-code')).toBeTruthy();
     expect(screen.getByText('246810')).toBeTruthy();
@@ -65,7 +65,7 @@ describe('CareInviteSheet', () => {
   });
 
   it('surfaces a friendly error when the send fails', async () => {
-    mockSendCareInvite.mockRejectedValue(new Error('boom'));
+    mockCreateConnect.mockRejectedValue(new Error('boom'));
     render(withProviders(<CareInviteSheet visible onDismiss={jest.fn()} />));
     fireEvent.changeText(screen.getByTestId('care-invite-email-input'), 'mum@example.com');
     await act(async () => {

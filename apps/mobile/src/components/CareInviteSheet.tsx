@@ -17,7 +17,7 @@ import { Share, StyleSheet, Text, TextInput, View } from 'react-native';
 import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
 import { useTheme } from '../theme';
-import { sendCareInvite } from '../services/families/manageInvites';
+import { createConnect } from '../services/families/manageInvites';
 
 export interface CareInviteSheetProps {
   visible: boolean;
@@ -58,14 +58,19 @@ export function CareInviteSheet({ visible, onDismiss, testID = 'care-invite-shee
     setPending(true);
     setError(null);
     try {
-      const result = await sendCareInvite({
+      const result = await createConnect({
         inviteeEmail: trimmed,
         inviteeLabel: label.trim() || undefined,
       });
       setCode(result.pairingCode);
       setUrlToken(result.urlToken ?? null);
-    } catch {
-      setError("We couldn't create that invite. Please try again.");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '';
+      setError(
+        /invalid_email/i.test(msg)
+          ? 'That email doesn’t look right. Check it and try again.'
+          : "We couldn't create that invite. Please try again.",
+      );
     } finally {
       setPending(false);
     }

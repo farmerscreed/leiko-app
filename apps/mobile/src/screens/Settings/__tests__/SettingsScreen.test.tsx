@@ -68,13 +68,12 @@ jest.mock('../../../services/users/accountActions', () => ({
   deleteAccount: jest.fn().mockResolvedValue({ deletedAt: '2026-05-09T00:00:00Z' }),
 }));
 
-const mockSendInvite = jest.fn();
-const mockAcceptInvite = jest.fn();
-const mockResolveCareInvite = jest.fn();
+const mockCreateConnect = jest.fn();
+const mockAcceptConnect = jest.fn();
 jest.mock('../../../services/families/manageInvites', () => ({
-  sendFamilyInvite: (...args: unknown[]) => mockSendInvite(...args),
-  acceptFamilyInvite: (...args: unknown[]) => mockAcceptInvite(...args),
-  resolveCareInvite: (...args: unknown[]) => mockResolveCareInvite(...args),
+  // ADR-0007 unified connect (replaces send/accept/resolve mocks).
+  createConnect: (...args: unknown[]) => mockCreateConnect(...args),
+  acceptConnect: (...args: unknown[]) => mockAcceptConnect(...args),
 }));
 
 // Sprint 10c.2 / ADR-0006 Phase 4 — Settings uses useFamilyReadings to
@@ -558,9 +557,8 @@ describe('<SettingsScreen /> — Privacy (Sprint 10b.3)', () => {
 
 describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
   beforeEach(() => {
-    mockSendInvite.mockReset();
-    mockAcceptInvite.mockReset();
-    mockResolveCareInvite.mockReset();
+    mockCreateConnect.mockReset();
+    mockAcceptConnect.mockReset();
   });
 
   it('renders the invite + accept rows for a caregiver', () => {
@@ -611,7 +609,7 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
   });
 
   it('opens the invite sheet, sends the invite, and surfaces the code', async () => {
-    mockSendInvite.mockResolvedValue({
+    mockCreateConnect.mockResolvedValue({
       invitationId: 'inv-1',
       pairingCode: '482910',
       expiresAt: '2026-05-16T00:00:00Z',
@@ -623,7 +621,7 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
       fireEvent.press(screen.getByTestId('settings-invite-send'));
     });
     await waitFor(() => {
-      expect(mockSendInvite).toHaveBeenCalledWith({
+      expect(mockCreateConnect).toHaveBeenCalledWith({
         inviteeEmail: 'sister@example.com',
         inviteeLabel: undefined,
       });
@@ -632,8 +630,8 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
     expect(screen.getByText('482910')).toBeTruthy();
   });
 
-  it('surfaces a friendly error when the user is not a family_owner', async () => {
-    mockSendInvite.mockRejectedValue(new Error('not_family_owner'));
+  it('surfaces a friendly error when the email is invalid', async () => {
+    mockCreateConnect.mockRejectedValue(new Error('invalid_email'));
     renderScreen();
     fireEvent.press(screen.getByTestId('settings-family-invite'));
     fireEvent.changeText(screen.getByTestId('settings-invite-email-input'), 'sister@example.com');
@@ -643,11 +641,18 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
     await waitFor(() => {
       expect(screen.getByTestId('settings-invite-error')).toBeTruthy();
     });
-    expect(screen.getByText('Only the family owner can send invites.')).toBeTruthy();
+    expect(
+      screen.getByText('That email doesn’t look right. Check it and try again.'),
+    ).toBeTruthy();
   });
 
   it('opens the accept sheet, joins the family, and shows the success state', async () => {
-    mockAcceptInvite.mockResolvedValue({ familyId: 'fam-2' });
+    mockAcceptConnect.mockResolvedValue({
+      ok: true,
+      familyId: 'fam-2',
+      outcome: 'accepter_follows',
+      canFollowBack: false,
+    });
     renderScreen();
     fireEvent.press(screen.getByTestId('settings-family-accept'));
     fireEvent.changeText(screen.getByTestId('settings-accept-email-input'), 'me@example.com');
@@ -656,7 +661,7 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
       fireEvent.press(screen.getByTestId('settings-accept-join'));
     });
     await waitFor(() => {
-      expect(mockAcceptInvite).toHaveBeenCalledWith({
+      expect(mockAcceptConnect).toHaveBeenCalledWith({
         code: '482910',
         email: 'me@example.com',
       });
@@ -665,10 +670,8 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
   });
 
   it('surfaces the not-found error message on a wrong code', async () => {
-    // A genuinely wrong code matches neither a caregiver invite nor a
-    // pending care invite — both paths reject not-found.
-    mockAcceptInvite.mockRejectedValue(new Error('invitation_not_found'));
-    mockResolveCareInvite.mockRejectedValue(new Error('invitation_not_found'));
+    // A wrong code resolves to no invitation.
+    mockAcceptConnect.mockRejectedValue(new Error('invitation_not_found'));
     renderScreen();
     fireEvent.press(screen.getByTestId('settings-family-accept'));
     fireEvent.changeText(screen.getByTestId('settings-accept-email-input'), 'me@example.com');

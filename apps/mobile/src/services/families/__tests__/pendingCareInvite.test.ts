@@ -6,13 +6,7 @@ import {
 } from '../pendingCareInvite';
 import { mmkv, STORAGE_KEYS } from '../../storage';
 
-const mockResolve = jest.fn();
-jest.mock('../manageInvites', () => ({
-  resolveCareInvite: (...args: unknown[]) => mockResolve(...args),
-}));
-
 beforeEach(() => {
-  mockResolve.mockReset();
   mmkv.remove(STORAGE_KEYS.pendingCareInviteCode);
 });
 
@@ -35,30 +29,12 @@ describe('pendingCareInvite stash', () => {
 });
 
 describe('tryResolvePendingCareInvite', () => {
-  it('no-ops when nothing is stashed', async () => {
-    expect(await tryResolvePendingCareInvite()).toBeNull();
-    expect(mockResolve).not.toHaveBeenCalled();
-  });
-
-  it('resolves and clears on success', async () => {
+  // ADR-0007: auto-resolve is a no-op now (connect-accept needs the
+  // accepter's email, which a stashed deep-link code doesn't carry). The
+  // person completes via the "Enter a code" sheet. Kept as a stable
+  // no-op entry point.
+  it('is a no-op and returns null', async () => {
     stashPendingCareInvite('246810');
-    mockResolve.mockResolvedValue({ familyId: 'fam-9' });
-    expect(await tryResolvePendingCareInvite()).toBe('fam-9');
-    expect(mockResolve).toHaveBeenCalledWith({ code: '246810' });
-    expect(getPendingCareInvite()).toBeNull();
-  });
-
-  it('KEEPS the stash on no_circle_yet (retry after pairing)', async () => {
-    stashPendingCareInvite('246810');
-    mockResolve.mockRejectedValue(new Error('no_circle_yet'));
     expect(await tryResolvePendingCareInvite()).toBeNull();
-    expect(getPendingCareInvite()).toBe('246810');
-  });
-
-  it('clears the stash on a terminal error (expired etc.)', async () => {
-    stashPendingCareInvite('246810');
-    mockResolve.mockRejectedValue(new Error('invitation_expired'));
-    expect(await tryResolvePendingCareInvite()).toBeNull();
-    expect(getPendingCareInvite()).toBeNull();
   });
 });

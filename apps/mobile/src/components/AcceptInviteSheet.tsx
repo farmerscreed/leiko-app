@@ -25,7 +25,7 @@ import { ScrollView, Text, TextInput, View } from 'react-native';
 import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
 import { Pill } from './Pill';
-import { acceptFamilyInvite, resolveCareInvite } from '../services/families/manageInvites';
+import { acceptConnect } from '../services/families/manageInvites';
 import { useTheme } from '../theme';
 
 type RelationshipChip =
@@ -72,7 +72,7 @@ export interface AcceptInviteSheetProps {
   /** Called after a successful invite acceptance with the resolved
    *  familyId. The consumer decides what happens next (close the
    *  sheet, navigate, finalize onboarding, etc.). */
-  onSuccess?: (result: { familyId: string }) => void;
+  onSuccess?: (result: { familyId: string; outcome?: string }) => void;
   /** When true (default), the sheet swaps to a "You're in" confirmation
    *  state on success and waits for the user to tap Done. When false,
    *  the sheet closes immediately on success and fires onSuccess —
@@ -122,36 +122,19 @@ export function AcceptInviteSheet({
     setPending(true);
     try {
       const labelEncoded = encodeRelationship(relChip, relCustom);
-      let result: { familyId: string };
-      try {
-        // First try a 'caregiver' invite (join an existing circle).
-        result = await acceptFamilyInvite({
-          code,
-          email: email.trim(),
-          // Sprint 19 Block 5 — optional per-caregiver label for the
-          // wearer. When provided, the Edge Function stores it on
-          // family_members.caregiver_relationship_label. NULL =
-          // dashboard falls back to families.parent_relationship.
-          ...(labelEncoded ? { caregiverRelationshipLabel: labelEncoded } : {}),
-        });
-      } catch (e) {
-        // ADR-0006 — if the code isn't a caregiver invite, it may be a
-        // caregiver-INITIATED pending invite (kind 'parent_pairing'). The
-        // person typing it is the WEARER; resolve it so the inviter
-        // becomes their follower. accept-family-invite returns
-        // invitation_not_found for a parent_pairing code (it filters on
-        // kind='caregiver'), which is our signal to try resolve.
-        const msg = e instanceof Error ? e.message : '';
-        if (/invitation_not_found/i.test(msg)) {
-          result = await resolveCareInvite({ code });
-        } else {
-          throw e;
-        }
-      }
+      // ADR-0007 — one unified accept. The backend resolves direction from
+      // who wears a watch and returns the outcome.
+      const result = await acceptConnect({
+        code,
+        email: email.trim(),
+        ...(labelEncoded ? { caregiverRelationshipLabel: labelEncoded } : {}),
+      });
       if (showSuccessState) {
         setSuccess(true);
       }
-      onSuccess?.(result);
+      // familyId is null only for the pending case (neither wears a watch
+      // yet); consumers that need an id can ignore until it resolves.
+      onSuccess?.({ familyId: result.familyId ?? '', outcome: result.outcome });
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'unknown';
       setError(
@@ -161,11 +144,9 @@ export function AcceptInviteSheet({
             ? "That email doesn't match the invite."
             : /invitation_expired/i.test(msg)
               ? 'That code has expired. Ask for a new one.'
-              : /invitation_already_accepted|already_member/i.test(msg)
-                ? "You're already in this circle."
-                : /no_circle_yet/i.test(msg)
-                  ? 'Set up your own watch first, then enter this code.'
-                  : "We couldn't join the circle. Try again in a moment.",
+              : /invitation_already_accepted/i.test(msg)
+                ? "That code has already been used."
+                : "We couldn't connect. Try again in a moment.",
       );
     } finally {
       setPending(false);
