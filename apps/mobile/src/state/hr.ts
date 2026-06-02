@@ -43,6 +43,8 @@ interface HRState {
   hydrate: () => void;
   /** Synchronous MMKV write. Returns the row. */
   addPending: (sample: HRSample) => HRSample;
+  /** Batch insert (backfill) — one MMKV write + one set() for N samples. */
+  addPendingBatch: (samples: HRSample[]) => void;
   /** Move acknowledged rows from pending → recent (cap respected). */
   acceptSyncResult: (acceptedKeys: string[]) => void;
   /** Latest sample regardless of pending/recent. */
@@ -180,6 +182,22 @@ export const useHR = create<HRState>((set, get) => ({
     set({ pending });
     logger.track('vital_persisted', { vital_type: 'hr', count: 1 });
     return sample;
+  },
+
+  // Batch insert for backfill. The per-sample addPending does a full MMKV
+  // read+filter+write AND a Zustand set() AND a log PER SAMPLE — O(n^2)
+  // plus a render storm when a cold start replays ~1,800 samples
+  // (cursor.hr=0 after an install/MMKV wipe). addPendingBatch dedups by
+  // measuredAtSec and writes the whole set ONCE with a single set()/log.
+  addPendingBatch: (samples) => {
+    if (samples.length === 0) return;
+    const byKey = new Map<string, HRSample>();
+    for (const s of buffer.readAll()) byKey.set(String(s.measuredAtSec), s);
+    for (const s of samples) byKey.set(String(s.measuredAtSec), s);
+    const merged = Array.from(byKey.values());
+    buffer.replace(merged);
+    set({ pending: merged });
+    logger.track('vital_persisted', { vital_type: 'hr', count: samples.length });
   },
 
   acceptSyncResult: (acceptedKeys) => {

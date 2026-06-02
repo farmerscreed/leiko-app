@@ -280,7 +280,7 @@ async function syncHRStep(
     );
   }
 
-  const addPending = useHR.getState().addPending;
+  const addPendingBatch = useHR.getState().addPendingBatch;
   let newestRaw = cursor.hr;
   let totalPulled = 0;
 
@@ -317,6 +317,10 @@ async function syncHRStep(
       cursor.hr > 0
         ? samples.filter((s) => s.timestampSec > cursor.hr)
         : samples;
+    // Build the day's samples in memory, then persist in ONE batch.
+    // Per-sample addPending caused an O(n^2) MMKV + render storm on
+    // cold-start backfill (~1,800 samples) that froze the home.
+    const batch: HRSample[] = [];
     for (const s of fresh) {
       const sample: HRSample = {
         // Sprint 16.5c: HR raw timestamps from the watch encode
@@ -334,9 +338,10 @@ async function syncHRStep(
         motionState: 'unknown',
         isSpotCheck: false,
       };
-      addPending(sample);
+      batch.push(sample);
       if (s.timestampSec > newestRaw) newestRaw = s.timestampSec;
     }
+    addPendingBatch(batch);
     totalPulled += fresh.length;
   }
 
