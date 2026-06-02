@@ -45,13 +45,24 @@ export interface AcceptInviteResult {
   familyId: string;
 }
 
-interface FunctionError {
-  message: string;
-}
-
-function mapError(error: FunctionError | null | undefined): string | null {
-  if (!error) return null;
-  return error.message;
+// supabase-js functions.invoke wraps a non-2xx response in a
+// FunctionsHttpError whose `.message` is the generic "Edge Function
+// returned a non-2xx status code" — the actual {error: "..."} body lives
+// on `.context` (the Response). This reads that body so callers get the
+// real reason (e.g. 'invalid_email', 'not_family_owner', 'no_circle_yet').
+// Returns a NEW Error whose message is the server error code when found,
+// else the original error.
+async function withServerReason(error: unknown): Promise<Error> {
+  const ctx = (error as { context?: Response } | null)?.context;
+  if (ctx && typeof ctx.json === 'function') {
+    try {
+      const body = (await ctx.clone().json()) as { error?: string };
+      if (body?.error) return new Error(body.error);
+    } catch {
+      // body wasn't JSON / already consumed — fall through
+    }
+  }
+  return error instanceof Error ? error : new Error('unknown');
 }
 
 export async function sendFamilyInvite(
@@ -64,9 +75,9 @@ export async function sendFamilyInvite(
     { body: input },
   );
   if (error) {
-    const mapped = mapError(error) ?? 'unknown';
-    logger.track('family_invite_send_failed', { reason: mapped });
-    throw error;
+    const reasoned = await withServerReason(error);
+    logger.track('family_invite_send_failed', { reason: reasoned.message });
+    throw reasoned;
   }
   if (!data?.pairingCode) {
     throw new Error('invalid_response');
@@ -85,9 +96,9 @@ export async function acceptFamilyInvite(
     { body: input },
   );
   if (error) {
-    const mapped = mapError(error) ?? 'unknown';
-    logger.track('family_invite_accept_failed', { reason: mapped });
-    throw error;
+    const reasoned = await withServerReason(error);
+    logger.track('family_invite_accept_failed', { reason: reasoned.message });
+    throw reasoned;
   }
   if (!data?.familyId) {
     throw new Error('invalid_response');
@@ -118,8 +129,9 @@ export async function sendCareInvite(
     { body: input },
   );
   if (error) {
-    logger.track('care_invite_send_failed', { reason: mapError(error) ?? 'unknown' });
-    throw error;
+    const reasoned = await withServerReason(error);
+    logger.track('care_invite_send_failed', { reason: reasoned.message });
+    throw reasoned;
   }
   if (!data?.pairingCode) throw new Error('invalid_response');
   logger.track('care_invite_send_completed');
@@ -138,8 +150,9 @@ export async function resolveCareInvite(
     { body: input },
   );
   if (error) {
-    logger.track('care_invite_resolve_failed', { reason: mapError(error) ?? 'unknown' });
-    throw error;
+    const reasoned = await withServerReason(error);
+    logger.track('care_invite_resolve_failed', { reason: reasoned.message });
+    throw reasoned;
   }
   if (!data?.familyId) throw new Error('invalid_response');
   logger.track('care_invite_resolve_completed', { familyId: data.familyId });

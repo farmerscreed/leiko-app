@@ -1559,10 +1559,13 @@ export function SettingsScreen({ navigation }: Props) {
                     setInviteCode(result.pairingCode);
                     setInviteUrlToken(result.urlToken ?? null);
                   } catch (e) {
+                    const msg = e instanceof Error ? e.message : '';
                     setInviteError(
-                      e instanceof Error && /not_family_owner/i.test(e.message)
+                      /not_family_owner/i.test(msg)
                         ? 'Only the family owner can send invites.'
-                        : "We couldn't send the invite. Try again in a moment.",
+                        : /invalid_email/i.test(msg)
+                          ? 'That email doesn’t look right. Check it and try again.'
+                          : "We couldn't send the invite. Try again in a moment.",
                     );
                   } finally {
                     setInvitePending(false);
