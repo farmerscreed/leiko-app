@@ -15,13 +15,12 @@
 // never touch the winter polyfill.
 
 // Pin the test timezone to UTC for every worker, deterministically.
-// This is set in the config (parent process, before workers fork) so
-// each worker inherits TZ=UTC at startup — V8 binds Date's zone once at
-// process init, so setting it in a setupFile is too late and an
-// explicit host `TZ=...` would win. Pinning here means snapshot/date
-// tests render identically on CI (UTC) and a dev laptop in any zone
-// (e.g. Lagos, UTC+1). Per-user app timezone handling is unaffected —
-// this only governs the test runner's wall clock.
+// Set in the config (parent process, before workers fork) so each
+// worker inherits TZ=UTC at startup — V8 binds Date's zone once at
+// process init, so a setupFile is too late and an explicit host
+// `TZ=...` would win. This makes snapshot/date tests render identically
+// on CI (UTC) and a dev laptop in any zone. Per-user app timezone
+// handling is unaffected — this only governs the test runner's clock.
 process.env.TZ = 'UTC';
 
 module.exports = {
@@ -39,6 +38,15 @@ module.exports = {
       // the rn-project's defaults so pure tests don't need a real
       // Supabase running.
       setupFiles: ['<rootDir>/jest.setup.pure.js'],
+      // The pure project has no real react-native (it bypasses
+      // jest-expo). The BLE foreground-service wrapper is the first
+      // pure-graph module to import `react-native` — map it to a
+      // minimal stub so ts-jest doesn't choke on RN's untransformed
+      // ESM. Scoped to this project only; the rn project keeps the
+      // real react-native from jest-expo.
+      moduleNameMapper: {
+        '^react-native$': '<rootDir>/jest/react-native.pure-mock.js',
+      },
       testMatch: [
         '<rootDir>/__tests__/**/*.test.ts?(x)',
         '<rootDir>/src/theme/**/__tests__/**/*.test.ts?(x)',

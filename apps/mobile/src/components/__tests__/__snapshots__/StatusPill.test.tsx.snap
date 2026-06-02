@@ -503,8 +503,8 @@ exports[`StatusPill — status × mode snapshot matrix renders status=urgent mod
       {
         "alignItems": "center",
         "alignSelf": "flex-start",
-        "backgroundColor": "#EE343B24",
-        "borderColor": "#EE343B59",
+        "backgroundColor": "#DC563124",
+        "borderColor": "#DC563159",
         "borderRadius": 99,
         "borderWidth": 0.5,
         "flexDirection": "row",
@@ -522,14 +522,14 @@ exports[`StatusPill — status × mode snapshot matrix renders status=urgent mod
     style={
       [
         {
-          "backgroundColor": "#EE343B",
+          "backgroundColor": "#DC5631",
           "borderRadius": 99,
           "height": 5,
           "width": 5,
         },
         {
           "elevation": 0,
-          "shadowColor": "#EE343B",
+          "shadowColor": "#DC5631",
           "shadowOffset": {
             "height": 0,
             "width": 0,
@@ -544,7 +544,7 @@ exports[`StatusPill — status × mode snapshot matrix renders status=urgent mod
     allowFontScaling={false}
     style={
       {
-        "color": "#EE343B",
+        "color": "#DC5631",
         "fontFamily": "JetBrainsMono_500Medium",
         "fontSize": 10,
         "letterSpacing": 0.95,
@@ -567,8 +567,8 @@ exports[`StatusPill — status × mode snapshot matrix renders status=urgent mod
       {
         "alignItems": "center",
         "alignSelf": "flex-start",
-        "backgroundColor": "#EE343B24",
-        "borderColor": "#EE343B59",
+        "backgroundColor": "#DC563124",
+        "borderColor": "#DC563159",
         "borderRadius": 99,
         "borderWidth": 0.5,
         "flexDirection": "row",
@@ -586,14 +586,14 @@ exports[`StatusPill — status × mode snapshot matrix renders status=urgent mod
     style={
       [
         {
-          "backgroundColor": "#EE343B",
+          "backgroundColor": "#DC5631",
           "borderRadius": 99,
           "height": 5,
           "width": 5,
         },
         {
           "elevation": 0,
-          "shadowColor": "#EE343B",
+          "shadowColor": "#DC5631",
           "shadowOffset": {
             "height": 0,
             "width": 0,
@@ -608,7 +608,7 @@ exports[`StatusPill — status × mode snapshot matrix renders status=urgent mod
     allowFontScaling={false}
     style={
       {
-        "color": "#EE343B",
+        "color": "#DC5631",
         "fontFamily": "JetBrainsMono_500Medium",
         "fontSize": 10,
         "letterSpacing": 0.95,

@@ -17,25 +17,25 @@ import type { SelfBuyerOnboardingScreenProps } from '../../navigation/types';
 
 const mockComplete = jest.fn();
 
+// Self-contained mock (no requireActual): state/onboarding ↔ state/auth
+// form a circular import, and requireActual'ing onboarding here used to
+// crash at module load ("Cannot read properties of undefined (reading
+// 'setState')") because auth was mid-evaluation. The screen only reads
+// completeSelfBuyer / finalizing / finalizeError; the test drives the
+// latter two via setState. A tiny zustand-like stub covers both.
+let mockOnboardingState: Record<string, unknown> = {};
 jest.mock('../../state/onboarding', () => {
-  const actual = jest.requireActual('../../state/onboarding');
-  return {
-    ...actual,
-    useOnboarding: Object.assign(
-      <T,>(selector: (s: ReturnType<typeof actual.useOnboarding.getState>) => T) =>
-        selector({
-          ...actual.useOnboarding.getState(),
-          completeSelfBuyer: mockComplete,
-        }),
-      {
-        getState: () => ({
-          ...actual.useOnboarding.getState(),
-          completeSelfBuyer: mockComplete,
-        }),
-        setState: actual.useOnboarding.setState,
+  const useOnboarding = Object.assign(
+    <T,>(selector: (s: Record<string, unknown>) => T): T =>
+      selector({ ...mockOnboardingState, completeSelfBuyer: mockComplete }),
+    {
+      getState: () => ({ ...mockOnboardingState, completeSelfBuyer: mockComplete }),
+      setState: (patch: Record<string, unknown>) => {
+        mockOnboardingState = { ...mockOnboardingState, ...patch };
       },
-    ),
-  };
+    },
+  );
+  return { useOnboarding };
 });
 
 function withProviders(ui: ReactNode) {

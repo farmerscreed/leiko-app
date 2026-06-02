@@ -45,6 +45,22 @@ interface ActivityState {
   /** Per-day step totals for the last N days, oldest first. Empty
    *  days skipped (not zero-filled). */
   recentStepDays: (nowSec?: number, days?: number) => number[];
+  /**
+   * Sprint 16.5e — seed historical step days from the server. The
+   * U16PRO watch's day-info storage rolls over within ~3-5 days, so a
+   * fresh sync after a reset returns only today's row even when the
+   * server retains 11+ days. Mirrors `useSleep.seedFromServer` — accepts
+   * the server's authoritative list, dedups against `pendingSteps` +
+   * `recentSteps` by `dayLocal`, merges, sorts desc, caps at
+   * `RECENT_DAYS_CAP`. Returns the number of NEW rows added.
+   */
+  seedStepsFromServer: (rows: ActivityDay[]) => number;
+  /** Same as `seedStepsFromServer` but for the calories slice. */
+  seedCaloriesFromServer: (rows: CaloriesDay[]) => number;
+  /** Sprint 17b — visibility purge. Clears BOTH recent arrays
+   *  (steps + calories) since the activity visibility toggle covers
+   *  the combined "activity" surface. Pending preserved. */
+  clearRecent: () => void;
   reset: () => void;
 }
 
@@ -199,6 +215,52 @@ export const useActivity = create<ActivityState>((set, get) => ({
       out.push(day.totalSteps);
     }
     return out;
+  },
+
+  seedStepsFromServer: (rows) => {
+    if (rows.length === 0) return 0;
+    const existingRecent = get().recentSteps;
+    const existingKeys = new Set(existingRecent.map((d) => d.dayLocal));
+    const pendingKeys = new Set(get().pendingSteps.map((d) => d.dayLocal));
+    const newRows = rows.filter(
+      (d) => !existingKeys.has(d.dayLocal) && !pendingKeys.has(d.dayLocal),
+    );
+    if (newRows.length === 0) return 0;
+    const merged = dedupBy(
+      [...newRows, ...existingRecent].sort((a, b) =>
+        b.dayLocal.localeCompare(a.dayLocal),
+      ),
+      (d) => d.dayLocal,
+    ).slice(0, RECENT_DAYS_CAP);
+    set({ recentSteps: merged });
+    persistRecentSteps(merged);
+    return newRows.length;
+  },
+
+  seedCaloriesFromServer: (rows) => {
+    if (rows.length === 0) return 0;
+    const existingRecent = get().recentCalories;
+    const existingKeys = new Set(existingRecent.map((d) => d.dayLocal));
+    const pendingKeys = new Set(get().pendingCalories.map((d) => d.dayLocal));
+    const newRows = rows.filter(
+      (d) => !existingKeys.has(d.dayLocal) && !pendingKeys.has(d.dayLocal),
+    );
+    if (newRows.length === 0) return 0;
+    const merged = dedupBy(
+      [...newRows, ...existingRecent].sort((a, b) =>
+        b.dayLocal.localeCompare(a.dayLocal),
+      ),
+      (d) => d.dayLocal,
+    ).slice(0, RECENT_DAYS_CAP);
+    set({ recentCalories: merged });
+    persistRecentCalories(merged);
+    return newRows.length;
+  },
+
+  clearRecent: () => {
+    set({ recentSteps: [], recentCalories: [] });
+    mmkv.remove(STORAGE_KEYS.recentActivity);
+    mmkv.remove(STORAGE_KEYS.recentCalories);
   },
 
   reset: () => {

@@ -9,9 +9,11 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Card } from '../../../components/Card';
+import { OnboardingEyebrow } from '../../../components/OnboardingEyebrow';
 import { Pill } from '../../../components/Pill';
 import { useTheme } from '../../../theme';
 import { useOnboarding } from '../../../state/onboarding';
+import { mmkv, STORAGE_KEYS } from '../../../services/storage';
 import type { SelfBuyerOnboardingScreenProps } from '../../../navigation/types';
 
 export function SelfBuyerWatchScreen({
@@ -22,7 +24,7 @@ export function SelfBuyerWatchScreen({
   const finalizing = useOnboarding((s) => s.finalizing);
   const finalizeError = useOnboarding((s) => s.finalizeError);
 
-  const [pressed, setPressed] = useState<'have' | null>(null);
+  const [pressed, setPressed] = useState<'have' | 'later' | null>(null);
 
   const headline = theme.type('displayM');
   const body = theme.type('bodyL');
@@ -32,6 +34,29 @@ export function SelfBuyerWatchScreen({
   const handleHaveWatch = async () => {
     if (finalizing) return;
     setPressed('have');
+    try {
+      // ADR-0006 — "I have it" now actually leads to pairing. Pairing
+      // lives on the home stack (not onboarding); completeSelfBuyer flips
+      // the gate that swaps onboarding -> home. Set a one-shot flag so the
+      // home navigator opens Pairing immediately on arrival.
+      mmkv.set(STORAGE_KEYS.pairOnLaunch, true);
+      await completeSelfBuyer();
+    } catch {
+      mmkv.remove(STORAGE_KEYS.pairOnLaunch);
+      setPressed(null);
+    }
+  };
+
+  // Sprint 19 Block 9 — "Add a watch later" parity with caregiver
+  // FamilyWatch. Pre-Block-9 the only enabled card was "I have it",
+  // which forced a self-buyer-without-a-watch (beta testers; people
+  // ordering one separately) to misrepresent their state to get
+  // through onboarding. completeSelfBuyer doesn't actually pair —
+  // pairing lives in Settings → Devices regardless — so this card
+  // shares the same handler with a more honest label.
+  const handleAddLater = async () => {
+    if (finalizing) return;
+    setPressed('later');
     try {
       await completeSelfBuyer();
     } catch {
@@ -71,6 +96,8 @@ export function SelfBuyerWatchScreen({
             Back
           </Text>
         </Pressable>
+
+        <OnboardingEyebrow persona="Myself" step={2} total={2} />
 
         <Text
           accessibilityRole="header"
@@ -181,6 +208,56 @@ export function SelfBuyerWatchScreen({
           >
             We're getting the shop ready. We'll let you know when it opens.
           </Text>
+        </Card>
+
+        {/* Sprint 19 Block 9 — "Add a watch later" parity with the
+            caregiver FamilyWatch screen. Same handler as "I have it"
+            (completeSelfBuyer doesn't actually pair — pairing lives
+            in Settings → Devices); the label is honest about the
+            state. */}
+        <Card
+          elevation="low"
+          onPress={handleAddLater}
+          disabled={finalizing}
+          accessibilityLabel="Add a watch later. Finish setup now and pair from Settings when you're ready."
+          testID="self-buyer-watch-later"
+          style={{ marginBottom: theme.spacing.l }}
+        >
+          <Text
+            style={{
+              color: theme.colors.text.primary,
+              fontSize: title.size,
+              lineHeight: title.lineHeight,
+              fontWeight: title.weight as '600',
+              fontFamily: title.family,
+              marginBottom: theme.spacing.xs,
+            }}
+          >
+            Add a watch later
+          </Text>
+          <Text
+            style={{
+              color: theme.colors.text.secondary,
+              fontSize: body.size,
+              lineHeight: body.lineHeight,
+              fontFamily: body.family,
+            }}
+          >
+            Finish setting up now. You can pair a watch from Settings whenever it's ready.
+          </Text>
+          {pressed === 'later' && finalizing ? (
+            <Text
+              style={{
+                color: theme.colors.text.secondary,
+                fontSize: caption.size,
+                fontFamily: caption.family,
+                marginTop: theme.spacing.s,
+              }}
+              accessibilityLiveRegion="polite"
+            >
+              Setting things up…
+            </Text>
+          ) : null}
         </Card>
 
         {finalizeError ? (

@@ -39,6 +39,12 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import Svg, {
+  Circle as SvgCircle,
+  Defs,
+  RadialGradient,
+  Stop,
+} from 'react-native-svg';
 import { Portrait } from './Portrait';
 import { useTheme } from '../theme';
 import { useReducedMotion } from '../theme/useReducedMotion';
@@ -69,7 +75,12 @@ const ENTRANCE_EASING = Easing.bezier(0.22, 1, 0.36, 1);
 const PULSE_NORMAL_MS = 4000;
 const PULSE_ATTENTION_MS = 1600;
 
-const HALO_INSET = -16; // halo bleeds 16pt outside the orb body
+const HALO_INSET = -16; // halo SVG bleeds 16pt outside the orb body
+// Sprint 16.6 — the halo is now a true radial gradient (accent → 0%
+// at the edge) painted in SVG, so the previous halo-bleed clip of the
+// label is structurally impossible: the outer rim of the halo SVG is
+// at 0% opacity, indistinguishable from the canvas. The label can
+// sit at the design's `diameter + 4` again, right under the orb.
 const LABEL_GAP = 4;
 
 function isAttentionStatus(s: Status): boolean {
@@ -141,19 +152,35 @@ export function PersonOrb({
       return;
     }
     const dur = pulseDuration(status);
-    // Sequence: rest → peak → rest, then withRepeat keeps it going.
+    // ADR follow-up — a gentle HEARTBEAT rhythm instead of a plain sine.
+    // A real beat is "lub-dub … rest": two quick swells close together,
+    // then a longer pause. Kept slow + soft (calm-before-clever; never
+    // alarming). Opacity breathes smoothly across the whole cycle; the
+    // SCALE carries the double-beat. Reduced motion still disables it.
+    const beat1 = Math.round(dur * 0.12); // first swell up
+    const beat1d = Math.round(dur * 0.1); // settle
+    const beat2 = Math.round(dur * 0.1); // second swell up (smaller)
+    const beat2d = Math.round(dur * 0.1); // settle
+    const rest = dur - (beat1 + beat1d + beat2 + beat2d); // long quiet
     haloOpacity.value = withRepeat(
       withSequence(
-        withTiming(0.95, { duration: dur / 2, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0.55, { duration: dur / 2, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.95, { duration: beat1, easing: Easing.out(Easing.ease) }),
+        withTiming(0.7, { duration: beat1d + beat2 + beat2d, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.55, { duration: rest, easing: Easing.inOut(Easing.ease) }),
       ),
       -1,
       false,
     );
     haloScale.value = withRepeat(
       withSequence(
-        withTiming(1.08, { duration: dur / 2, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: dur / 2, easing: Easing.inOut(Easing.ease) }),
+        // lub
+        withTiming(1.08, { duration: beat1, easing: Easing.out(Easing.ease) }),
+        withTiming(1.02, { duration: beat1d, easing: Easing.in(Easing.ease) }),
+        // dub (slightly smaller)
+        withTiming(1.06, { duration: beat2, easing: Easing.out(Easing.ease) }),
+        withTiming(1.0, { duration: beat2d, easing: Easing.in(Easing.ease) }),
+        // long rest at baseline
+        withTiming(1.0, { duration: rest, easing: Easing.linear }),
       ),
       -1,
       false,
@@ -206,7 +233,11 @@ export function PersonOrb({
         })}
       >
         <View style={{ width: diameter, height: diameter }}>
-          {/* Halo — sits behind the orb, animated opacity/scale */}
+          {/* Halo — true radial gradient SVG sitting behind the orb, with
+              animated opacity + scale on the wrapping Animated.View. The
+              gradient fades from accent 35% at the centre to 0% at the
+              outer rim, exactly matching the design's `radial-gradient(
+              circle, ${accent} / .35 0%, transparent 60%)`. */}
           <Animated.View
             pointerEvents="none"
             style={[
@@ -216,12 +247,27 @@ export function PersonOrb({
                 left: HALO_INSET,
                 right: HALO_INSET,
                 bottom: HALO_INSET,
-                borderRadius: 9999,
-                backgroundColor: accent + '59', // 35% — radial gradient stand-in
               },
               haloAnimatedStyle,
             ]}
-          />
+          >
+            <Svg width="100%" height="100%">
+              <Defs>
+                <RadialGradient
+                  id="cg-orb-halo"
+                  cx="50%"
+                  cy="50%"
+                  r="50%"
+                  fx="50%"
+                  fy="50%"
+                >
+                  <Stop offset="0%" stopColor={accent} stopOpacity={0.35} />
+                  <Stop offset="100%" stopColor={accent} stopOpacity={0} />
+                </RadialGradient>
+              </Defs>
+              <SvgCircle cx="50%" cy="50%" r="50%" fill="url(#cg-orb-halo)" />
+            </Svg>
+          </Animated.View>
 
           {/* Orb body — composes Portrait + glow + status overlay */}
           <View style={[orbShadow, { opacity: orbBodyOpacity }]}>
@@ -279,7 +325,9 @@ export function PersonOrb({
           ) : null}
         </View>
 
-        {/* Name + BP label below the orb */}
+        {/* Name + BP label sit right under the orb. With the gradient
+            halo fading to 0 at its rim there's no clipping; the
+            design's `top: pos.r + 4` geometry is restored. */}
         <View
           pointerEvents="none"
           style={{
@@ -293,9 +341,14 @@ export function PersonOrb({
           <Text
             allowFontScaling={false}
             style={{
+              // Instrument Serif 14pt per the design. text.primary
+              // resolves to the single warm bone-cream #F9F6EE
+              // (Sprint 16.6 palette consolidation after on-device
+              // A/B test).
               fontFamily: theme.fontFamilies.editorial,
               fontSize: 14,
-              lineHeight: 16,
+              lineHeight: 18,
+              letterSpacing: -0.07, // ~-0.005em at 14pt
               color: theme.colors.text.primary,
             }}
           >
@@ -305,8 +358,13 @@ export function PersonOrb({
             allowFontScaling={false}
             style={{
               fontFamily: theme.fontFamilies.numeric,
+              // Sprint 16.6 — back to design's 10pt for the BP label.
+              // The earlier 12pt bump compensated for unreadable
+              // contrast that the bg + halo + palette work has now
+              // resolved at the source.
               fontSize: 10,
               lineHeight: 12,
+              fontWeight: '500',
               color: accent,
               letterSpacing: 0.4,
               marginTop: 1,

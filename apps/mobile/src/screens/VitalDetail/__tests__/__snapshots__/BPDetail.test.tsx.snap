@@ -187,7 +187,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                   }
                   stroke={
                     {
-                      "payload": 4294308330,
+                      "payload": 4294967295,
                       "type": 0,
                     }
                   }
@@ -306,7 +306,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -322,7 +322,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -338,7 +338,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -671,7 +671,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "Inter_500Medium",
                       "fontSize": 11,
                       "letterSpacing": 0.55,
@@ -697,7 +697,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#F5F1EA",
+                        "color": "#FFFFFF",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 56,
                         "letterSpacing": -0.5,
@@ -712,7 +712,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 22,
                         "lineHeight": 28,
@@ -728,7 +728,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 12,
                       "letterSpacing": 0.5,
@@ -824,7 +824,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -888,7 +888,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -952,7 +952,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -1012,7 +1012,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "Inter_500Medium",
                     "fontSize": 11,
                     "letterSpacing": 0.55,
@@ -1028,7 +1028,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "InstrumentSerif_400Regular",
                     "fontSize": 22,
                     "lineHeight": 28,
@@ -1041,7 +1041,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "letterSpacing": 0.4,
@@ -1054,7 +1054,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
               </Text>
             </View>
             <View
-              accessibilityLabel="Lowest: 122/78 Fri"
+              accessibilityLabel="Lowest: 122/78 Fri · May 8"
               accessibilityRole="text"
               style={
                 [
@@ -1076,7 +1076,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "Inter_500Medium",
                     "fontSize": 11,
                     "letterSpacing": 0.55,
@@ -1092,7 +1092,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "InstrumentSerif_400Regular",
                     "fontSize": 22,
                     "lineHeight": 28,
@@ -1105,7 +1105,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "letterSpacing": 0.4,
@@ -1114,11 +1114,11 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                   }
                 }
               >
-                Fri
+                Fri · May 8
               </Text>
             </View>
             <View
-              accessibilityLabel="Highest: 122/78 Fri"
+              accessibilityLabel="Highest: 122/78 Fri · May 8"
               accessibilityRole="text"
               style={
                 [
@@ -1140,7 +1140,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "Inter_500Medium",
                     "fontSize": 11,
                     "letterSpacing": 0.55,
@@ -1156,7 +1156,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "InstrumentSerif_400Regular",
                     "fontSize": 22,
                     "lineHeight": 28,
@@ -1169,7 +1169,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "letterSpacing": 0.4,
@@ -1178,7 +1178,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                   }
                 }
               >
-                Fri
+                Fri · May 8
               </Text>
             </View>
           </View>
@@ -1196,7 +1196,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
               allowFontScaling={false}
               style={
                 {
-                  "color": "#9C9890",
+                  "color": "#857F7A",
                   "fontFamily": "Inter_500Medium",
                   "fontSize": 11,
                   "letterSpacing": 0.55,
@@ -1302,298 +1302,10 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       strokeLinecap={1}
                       strokeOpacity={0.25}
                       strokeWidth={6}
-                      x1={16}
-                      x2={16}
-                      y1={60.14999999999999}
-                      y2={134.7}
-                    />
-                    <RNSVGLine
-                      fill={
-                        {
-                          "payload": 4278190080,
-                          "type": 0,
-                        }
-                      }
-                      propList={
-                        [
-                          "stroke",
-                          "strokeWidth",
-                          "strokeOpacity",
-                          "strokeLinecap",
-                        ]
-                      }
-                      stroke={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      strokeLinecap={1}
-                      strokeOpacity={0.25}
-                      strokeWidth={6}
-                      x1={57.142857142857146}
-                      x2={57.142857142857146}
-                      y1={67.25}
-                      y2={138.25}
-                    />
-                    <RNSVGLine
-                      fill={
-                        {
-                          "payload": 4278190080,
-                          "type": 0,
-                        }
-                      }
-                      propList={
-                        [
-                          "stroke",
-                          "strokeWidth",
-                          "strokeOpacity",
-                          "strokeLinecap",
-                        ]
-                      }
-                      stroke={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      strokeLinecap={1}
-                      strokeOpacity={0.25}
-                      strokeWidth={6}
-                      x1={98.28571428571429}
-                      x2={98.28571428571429}
-                      y1={45.95}
-                      y2={124.05}
-                    />
-                    <RNSVGLine
-                      fill={
-                        {
-                          "payload": 4278190080,
-                          "type": 0,
-                        }
-                      }
-                      propList={
-                        [
-                          "stroke",
-                          "strokeWidth",
-                          "strokeOpacity",
-                          "strokeLinecap",
-                        ]
-                      }
-                      stroke={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      strokeLinecap={1}
-                      strokeOpacity={0.25}
-                      strokeWidth={6}
-                      x1={139.42857142857144}
-                      x2={139.42857142857144}
-                      y1={42.39999999999999}
-                      y2={122.275}
-                    />
-                    <RNSVGLine
-                      fill={
-                        {
-                          "payload": 4278190080,
-                          "type": 0,
-                        }
-                      }
-                      propList={
-                        [
-                          "stroke",
-                          "strokeWidth",
-                          "strokeOpacity",
-                          "strokeLinecap",
-                        ]
-                      }
-                      stroke={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      strokeLinecap={1}
-                      strokeOpacity={0.25}
-                      strokeWidth={6}
-                      x1={180.57142857142858}
-                      x2={180.57142857142858}
-                      y1={35.3}
-                      y2={116.94999999999999}
-                    />
-                    <RNSVGLine
-                      fill={
-                        {
-                          "payload": 4278190080,
-                          "type": 0,
-                        }
-                      }
-                      propList={
-                        [
-                          "stroke",
-                          "strokeWidth",
-                          "strokeOpacity",
-                          "strokeLinecap",
-                        ]
-                      }
-                      stroke={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      strokeLinecap={1}
-                      strokeOpacity={0.25}
-                      strokeWidth={6}
                       x1={221.71428571428572}
                       x2={221.71428571428572}
                       y1={45.95}
                       y2={124.05}
-                    />
-                    <RNSVGLine
-                      fill={
-                        {
-                          "payload": 4278190080,
-                          "type": 0,
-                        }
-                      }
-                      propList={
-                        [
-                          "stroke",
-                          "strokeWidth",
-                          "strokeOpacity",
-                          "strokeLinecap",
-                        ]
-                      }
-                      stroke={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      strokeLinecap={1}
-                      strokeOpacity={0.25}
-                      strokeWidth={6}
-                      x1={262.8571428571429}
-                      x2={262.8571428571429}
-                      y1={38.85000000000001}
-                      y2={118.725}
-                    />
-                    <RNSVGLine
-                      fill={
-                        {
-                          "payload": 4278190080,
-                          "type": 0,
-                        }
-                      }
-                      propList={
-                        [
-                          "stroke",
-                          "strokeWidth",
-                          "strokeOpacity",
-                          "strokeLinecap",
-                        ]
-                      }
-                      stroke={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      strokeLinecap={1}
-                      strokeOpacity={0.25}
-                      strokeWidth={6}
-                      x1={304}
-                      x2={304}
-                      y1={49.5}
-                      y2={127.6}
-                    />
-                    <RNSVGCircle
-                      cx={16}
-                      cy={60.14999999999999}
-                      fill={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      propList={
-                        [
-                          "fill",
-                        ]
-                      }
-                      r={3}
-                      testID="bp-detail-chart-sys-dot-0"
-                    />
-                    <RNSVGCircle
-                      cx={57.142857142857146}
-                      cy={67.25}
-                      fill={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      propList={
-                        [
-                          "fill",
-                        ]
-                      }
-                      r={3}
-                      testID="bp-detail-chart-sys-dot-1"
-                    />
-                    <RNSVGCircle
-                      cx={98.28571428571429}
-                      cy={45.95}
-                      fill={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      propList={
-                        [
-                          "fill",
-                        ]
-                      }
-                      r={3}
-                      testID="bp-detail-chart-sys-dot-2"
-                    />
-                    <RNSVGCircle
-                      cx={139.42857142857144}
-                      cy={42.39999999999999}
-                      fill={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      propList={
-                        [
-                          "fill",
-                        ]
-                      }
-                      r={3}
-                      testID="bp-detail-chart-sys-dot-3"
-                    />
-                    <RNSVGCircle
-                      cx={180.57142857142858}
-                      cy={35.3}
-                      fill={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      propList={
-                        [
-                          "fill",
-                        ]
-                      }
-                      r={3}
-                      testID="bp-detail-chart-sys-dot-4"
                     />
                     <RNSVGCircle
                       cx={221.71428571428572}
@@ -1611,135 +1323,6 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       }
                       r={3}
                       testID="bp-detail-chart-sys-dot-5"
-                    />
-                    <RNSVGCircle
-                      cx={262.8571428571429}
-                      cy={38.85000000000001}
-                      fill={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      propList={
-                        [
-                          "fill",
-                        ]
-                      }
-                      r={3}
-                      testID="bp-detail-chart-sys-dot-6"
-                    />
-                    <RNSVGCircle
-                      cx={304}
-                      cy={49.5}
-                      fill={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      propList={
-                        [
-                          "fill",
-                        ]
-                      }
-                      r={3}
-                      testID="bp-detail-chart-sys-dot-7"
-                    />
-                    <RNSVGCircle
-                      cx={16}
-                      cy={134.7}
-                      fill={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      fillOpacity={0.6}
-                      propList={
-                        [
-                          "fill",
-                          "fillOpacity",
-                        ]
-                      }
-                      r={3}
-                      testID="bp-detail-chart-dia-dot-0"
-                    />
-                    <RNSVGCircle
-                      cx={57.142857142857146}
-                      cy={138.25}
-                      fill={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      fillOpacity={0.6}
-                      propList={
-                        [
-                          "fill",
-                          "fillOpacity",
-                        ]
-                      }
-                      r={3}
-                      testID="bp-detail-chart-dia-dot-1"
-                    />
-                    <RNSVGCircle
-                      cx={98.28571428571429}
-                      cy={124.05}
-                      fill={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      fillOpacity={0.6}
-                      propList={
-                        [
-                          "fill",
-                          "fillOpacity",
-                        ]
-                      }
-                      r={3}
-                      testID="bp-detail-chart-dia-dot-2"
-                    />
-                    <RNSVGCircle
-                      cx={139.42857142857144}
-                      cy={122.275}
-                      fill={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      fillOpacity={0.6}
-                      propList={
-                        [
-                          "fill",
-                          "fillOpacity",
-                        ]
-                      }
-                      r={3}
-                      testID="bp-detail-chart-dia-dot-3"
-                    />
-                    <RNSVGCircle
-                      cx={180.57142857142858}
-                      cy={116.94999999999999}
-                      fill={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      fillOpacity={0.6}
-                      propList={
-                        [
-                          "fill",
-                          "fillOpacity",
-                        ]
-                      }
-                      r={3}
-                      testID="bp-detail-chart-dia-dot-4"
                     />
                     <RNSVGCircle
                       cx={221.71428571428572}
@@ -1760,51 +1343,13 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       r={3}
                       testID="bp-detail-chart-dia-dot-5"
                     />
-                    <RNSVGCircle
-                      cx={262.8571428571429}
-                      cy={118.725}
-                      fill={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      fillOpacity={0.6}
-                      propList={
-                        [
-                          "fill",
-                          "fillOpacity",
-                        ]
-                      }
-                      r={3}
-                      testID="bp-detail-chart-dia-dot-6"
-                    />
-                    <RNSVGCircle
-                      cx={304}
-                      cy={127.6}
-                      fill={
-                        {
-                          "payload": 4293435491,
-                          "type": 0,
-                        }
-                      }
-                      fillOpacity={0.6}
-                      propList={
-                        [
-                          "fill",
-                          "fillOpacity",
-                        ]
-                      }
-                      r={3}
-                      testID="bp-detail-chart-dia-dot-7"
-                    />
                     <RNSVGText
                       content={null}
                       dx={[]}
                       dy={[]}
                       fill={
                         {
-                          "payload": 4288452752,
+                          "payload": 4286939002,
                           "type": 0,
                         }
                       }
@@ -1855,7 +1400,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       dy={[]}
                       fill={
                         {
-                          "payload": 4288452752,
+                          "payload": 4286939002,
                           "type": 0,
                         }
                       }
@@ -1906,7 +1451,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       dy={[]}
                       fill={
                         {
-                          "payload": 4288452752,
+                          "payload": 4286939002,
                           "type": 0,
                         }
                       }
@@ -1957,7 +1502,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       dy={[]}
                       fill={
                         {
-                          "payload": 4288452752,
+                          "payload": 4286939002,
                           "type": 0,
                         }
                       }
@@ -2008,7 +1553,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       dy={[]}
                       fill={
                         {
-                          "payload": 4288452752,
+                          "payload": 4286939002,
                           "type": 0,
                         }
                       }
@@ -2059,7 +1604,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       dy={[]}
                       fill={
                         {
-                          "payload": 4288452752,
+                          "payload": 4286939002,
                           "type": 0,
                         }
                       }
@@ -2110,7 +1655,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       dy={[]}
                       fill={
                         {
-                          "payload": 4288452752,
+                          "payload": 4286939002,
                           "type": 0,
                         }
                       }
@@ -2161,7 +1706,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       dy={[]}
                       fill={
                         {
-                          "payload": 4288452752,
+                          "payload": 4286939002,
                           "type": 0,
                         }
                       }
@@ -2253,7 +1798,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       allowFontScaling={false}
                       style={
                         {
-                          "color": "#9C9890",
+                          "color": "#857F7A",
                           "fontFamily": "Inter_500Medium",
                           "fontSize": 11,
                           "letterSpacing": 0.55,
@@ -2293,7 +1838,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       allowFontScaling={false}
                       style={
                         {
-                          "color": "#9C9890",
+                          "color": "#857F7A",
                           "fontFamily": "Inter_500Medium",
                           "fontSize": 11,
                           "letterSpacing": 0.55,
@@ -2310,7 +1855,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
             </View>
           </View>
           <View
-            accessibilityLabel="Leiko about your blood pressure: Your morning numbers tend to climb roughly 8 points after coffee — a normal physiological response. The afternoon dip you usually see is here too. Talk to your doctor if you'd like to understand the morning band."
+            accessibilityLabel="Leiko about your blood pressure: After about a week of readings, this card will compare your current numbers to your usual range and call out anything worth noting."
             accessibilityRole="text"
             style={
               [
@@ -2447,14 +1992,14 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
             <Text
               style={
                 {
-                  "color": "#F5F1EA",
+                  "color": "#FFFFFF",
                   "fontFamily": "Inter_400Regular",
                   "fontSize": 15,
                   "lineHeight": 22,
                 }
               }
             >
-              Your morning numbers tend to climb roughly 8 points after coffee — a normal physiological response. The afternoon dip you usually see is here too. Talk to your doctor if you'd like to understand the morning band.
+              After about a week of readings, this card will compare your current numbers to your usual range and call out anything worth noting.
             </Text>
           </View>
           <View
@@ -2519,7 +2064,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
               allowFontScaling={false}
               style={
                 {
-                  "color": "#9C9890",
+                  "color": "#857F7A",
                   "fontFamily": "Inter_500Medium",
                   "fontSize": 11,
                   "letterSpacing": 0.55,
@@ -2552,7 +2097,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
               testID="bp-detail-readings-list"
             >
               <View
-                accessibilityLabel="122/78, Today afternoon, now"
+                accessibilityLabel="122/78, Today afternoon, 3:30 PM"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2625,7 +2170,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#F5F1EA",
+                        "color": "#FFFFFF",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 22,
                         "lineHeight": 28,
@@ -2638,7 +2183,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "Inter_500Medium",
                         "fontSize": 11,
                         "letterSpacing": 0.55,
@@ -2655,7 +2200,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 12,
                       "letterSpacing": 0.4,
@@ -2663,7 +2208,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                     }
                   }
                 >
-                  now
+                  3:30 PM
                 </Text>
               </View>
             </View>

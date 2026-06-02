@@ -7,7 +7,15 @@ import { type ReactNode } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '../../../theme';
-import { ActivityDetail } from '../ActivityDetail';
+import {
+  ActivityDetail,
+  buildChartSeries,
+  buildRangedDays,
+  buildRecentReadings,
+  chartTitle,
+  computeStreakFromToday,
+  rangeShortLabel,
+} from '../ActivityDetail';
 import {
   composeDailyPulseData,
   type DailyPulseData,
@@ -66,6 +74,67 @@ jest.mock('../../../state/activity', () => ({
   },
 }));
 
+// Sprint 17a parent-scoped hooks land in ActivityDetail. Same
+// pre-existing missing-mocks bug as Sleep/HR/BP/SpO2.
+let mockParentPulse: {
+  data: unknown;
+  isLoading: boolean;
+  isRefreshing: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+} = {
+  data: null,
+  isLoading: false,
+  isRefreshing: false,
+  error: null,
+  refresh: async () => undefined,
+};
+let mockParentRecent: {
+  data: {
+    sleep: unknown[];
+    readings: unknown[];
+    hr: unknown[];
+    spo2: unknown[];
+    steps: unknown[];
+    calories: unknown[];
+  };
+  isLoading: boolean;
+  isRefreshing: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+} = {
+  data: { sleep: [], readings: [], hr: [], spo2: [], steps: [], calories: [] },
+  isLoading: false,
+  isRefreshing: false,
+  error: null,
+  refresh: async () => undefined,
+};
+const setMockParentPulse = (next: Partial<typeof mockParentPulse>) => {
+  mockParentPulse = { ...mockParentPulse, ...next };
+};
+const resetParentMocks = () => {
+  mockParentPulse = {
+    data: null,
+    isLoading: false,
+    isRefreshing: false,
+    error: null,
+    refresh: async () => undefined,
+  };
+  mockParentRecent = {
+    data: { sleep: [], readings: [], hr: [], spo2: [], steps: [], calories: [] },
+    isLoading: false,
+    isRefreshing: false,
+    error: null,
+    refresh: async () => undefined,
+  };
+};
+jest.mock('../../../hooks/useParentDailyPulseData', () => ({
+  useParentDailyPulseData: () => mockParentPulse,
+}));
+jest.mock('../../../hooks/useParentVitalsRecent', () => ({
+  useParentVitalsRecent: () => mockParentRecent,
+}));
+
 function withProviders(ui: ReactNode) {
   return (
     <SafeAreaProvider
@@ -104,6 +173,7 @@ beforeEach(() => {
   mockRecentSteps = [];
   mockPendingSteps = [];
   mockTodayCalories = null;
+  resetParentMocks();
 });
 
 describe('ActivityDetail — populated state', () => {
@@ -219,12 +289,242 @@ describe('ActivityDetail — goal sheet wiring', () => {
   });
 });
 
+// ---- Sprint 16.5e — pure helper tests --------------------------------
+
+describe('ActivityDetail helpers — buildChartSeries', () => {
+  const dailyGoal = 8000;
+
+  function makeAt(unixSec: number, totalSteps: number): ActivityDay {
+    return {
+      dayLocal: new Date(unixSec * 1000).toISOString().slice(0, 10),
+      measuredAtSec: unixSec,
+      totalSteps,
+      targetSteps: dailyGoal,
+      lastSampleAtSec: unixSec,
+      hourly: new Array(24).fill(0),
+    };
+  }
+
+  it('7d returns 7 daily bars with the daily goal', () => {
+    const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
+    const days = [0, 1, 2, 3, 4, 5, 6].map((i) =>
+      makeAt(nowSec - i * SECONDS_PER_DAY, (7 - i) * 1000),
+    );
+    const out = buildChartSeries([], days, dailyGoal, '7d', nowSec);
+    expect(out.values).toHaveLength(7);
+    expect(out.goal).toBe(dailyGoal);
+    // Index 6 is today (newest).
+    expect(out.values[6]).toBe(7000);
+    expect(out.values[0]).toBe(1000);
+  });
+
+  it('30d returns weekly aggregates (5 bins) with the daily goal as the reference line', () => {
+    const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
+    const days: ActivityDay[] = [];
+    for (let i = 0; i < 30; i++) {
+      days.push(makeAt(nowSec - i * SECONDS_PER_DAY, 5000));
+    }
+    const out = buildChartSeries([], days, dailyGoal, '30d', nowSec);
+    expect(out.values.length).toBeLessThanOrEqual(5);
+    // Sprint 16.5f — bin values are the AVERAGE daily step count over
+    // the bin (was: weekly total); goal stays at dailyGoal (was:
+    // dailyGoal × 7) so the reference line is directly comparable.
+    expect(out.goal).toBe(dailyGoal);
+    // With every day = 5000 steps, every bin's average is 5000.
+    for (const v of out.values) expect(v).toBe(5000);
+  });
+
+  it('90d returns up to 13 weekly aggregates with average-per-day bins', () => {
+    const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
+    const days: ActivityDay[] = [];
+    for (let i = 0; i < 90; i++) {
+      days.push(makeAt(nowSec - i * SECONDS_PER_DAY, 3000));
+    }
+    const out = buildChartSeries([], days, dailyGoal, '90d', nowSec);
+    expect(out.values).toHaveLength(13);
+    // Every bin's average should equal the per-day input (3000).
+    for (const v of out.values) expect(v).toBe(3000);
+  });
+
+  it('zero-fills missing days for 7d', () => {
+    const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
+    // Only today + 3 days ago — others are gaps.
+    const days = [
+      makeAt(nowSec, 9000),
+      makeAt(nowSec - 3 * SECONDS_PER_DAY, 4000),
+    ];
+    const out = buildChartSeries([], days, dailyGoal, '7d', nowSec);
+    expect(out.values).toHaveLength(7);
+    expect(out.values[6]).toBe(9000); // today
+    expect(out.values[3]).toBe(4000); // 3d ago
+    expect(out.values[5]).toBe(0);
+    expect(out.values[4]).toBe(0);
+  });
+});
+
+describe('ActivityDetail helpers — buildRangedDays', () => {
+  function makeAt(unixSec: number, totalSteps: number): ActivityDay {
+    return {
+      dayLocal: new Date(unixSec * 1000).toISOString().slice(0, 10),
+      measuredAtSec: unixSec,
+      totalSteps,
+      targetSteps: 8000,
+      lastSampleAtSec: unixSec,
+      hourly: new Array(24).fill(0),
+    };
+  }
+
+  it('returns days within the range, newest first, no hard cap', () => {
+    const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
+    const days = [0, 1, 5, 10, 25].map((i) =>
+      makeAt(nowSec - i * SECONDS_PER_DAY, 1000 * (i + 1)),
+    );
+    const out = buildRangedDays([], days, '30d', nowSec);
+    // All 5 fall within 30 days; newest first.
+    expect(out).toHaveLength(5);
+    expect(out[0].dayLocal).toBe(new Date(nowSec * 1000).toISOString().slice(0, 10));
+    expect(out[4].dayLocal).toBe(
+      new Date((nowSec - 25 * SECONDS_PER_DAY) * 1000).toISOString().slice(0, 10),
+    );
+  });
+
+  it('excludes days outside the range', () => {
+    const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
+    const days = [
+      makeAt(nowSec, 1000),
+      makeAt(nowSec - 60 * SECONDS_PER_DAY, 5000),
+    ];
+    const out = buildRangedDays([], days, '7d', nowSec);
+    expect(out).toHaveLength(1);
+    expect(out[0].totalSteps).toBe(1000);
+  });
+
+  it('dedups pending vs recent (pending wins)', () => {
+    const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
+    const today = makeAt(nowSec, 9999);
+    const todayDup = makeAt(nowSec, 1234);
+    const out = buildRangedDays([today], [todayDup], '7d', nowSec);
+    expect(out).toHaveLength(1);
+    expect(out[0].totalSteps).toBe(9999);
+  });
+});
+
+describe('ActivityDetail helpers — buildRecentReadings (no hard cap)', () => {
+  function makeAt(unixSec: number, totalSteps: number): ActivityDay {
+    return {
+      dayLocal: new Date(unixSec * 1000).toISOString().slice(0, 10),
+      measuredAtSec: unixSec,
+      totalSteps,
+      targetSteps: 8000,
+      lastSampleAtSec: unixSec,
+      hourly: new Array(24).fill(0),
+    };
+  }
+
+  it('returns today + every non-zero day in range (was capped at 3 prior days)', () => {
+    const nowSec = Math.floor(Date.now() / 1000);
+    // 15 prior non-zero days — pre-16.5e only 3 would surface.
+    const days: ActivityDay[] = [];
+    for (let i = 1; i <= 15; i++) {
+      days.push(makeAt(nowSec - i * SECONDS_PER_DAY, 5000));
+    }
+    const rows = buildRecentReadings(7200, days, 8000);
+    // Today + 15 prior = 16 rows. (vs. pre-fix maximum of 4)
+    expect(rows).toHaveLength(16);
+    expect(rows[0].id).toBe('today');
+  });
+
+  it('skips zero-step days', () => {
+    const nowSec = Math.floor(Date.now() / 1000);
+    const days = [
+      makeAt(nowSec - SECONDS_PER_DAY, 5000),
+      makeAt(nowSec - 2 * SECONDS_PER_DAY, 0),
+      makeAt(nowSec - 3 * SECONDS_PER_DAY, 6000),
+    ];
+    const rows = buildRecentReadings(7200, days, 8000);
+    expect(rows).toHaveLength(3); // today + 2 non-zero days
+  });
+});
+
+describe('ActivityDetail helpers — computeStreakFromToday', () => {
+  function makeAt(unixSec: number, totalSteps: number): ActivityDay {
+    return {
+      dayLocal: new Date(unixSec * 1000).toISOString().slice(0, 10),
+      measuredAtSec: unixSec,
+      totalSteps,
+      targetSteps: 8000,
+      lastSampleAtSec: unixSec,
+      hourly: new Array(24).fill(0),
+    };
+  }
+
+  it('counts consecutive met-goal days from today backwards, allowing one skip per 7-day run', () => {
+    // Sprint 16.5f — computeStreakFromToday now allows ONE skip per
+    // 7 met-goal days so a single rest day doesn't reset the streak.
+    // Sequence: met, met, met, MISS, met → skip is consumed on the
+    // MISS day; streak continues through the prior met → 4.
+    const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
+    const days = [
+      makeAt(nowSec, 9000),
+      makeAt(nowSec - SECONDS_PER_DAY, 8500),
+      makeAt(nowSec - 2 * SECONDS_PER_DAY, 8200),
+      makeAt(nowSec - 3 * SECONDS_PER_DAY, 5000), // miss — consumes the skip
+      makeAt(nowSec - 4 * SECONDS_PER_DAY, 9000), // counts (skip already used to bridge)
+    ];
+    expect(computeStreakFromToday(days, 8000, nowSec)).toBe(4);
+  });
+
+  it('breaks the streak when TWO consecutive misses exhaust the skip budget', () => {
+    const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
+    const days = [
+      makeAt(nowSec, 9000),
+      makeAt(nowSec - SECONDS_PER_DAY, 5000), // miss — skip consumed
+      makeAt(nowSec - 2 * SECONDS_PER_DAY, 5000), // miss again — no more skips, streak ends
+      makeAt(nowSec - 3 * SECONDS_PER_DAY, 9000),
+    ];
+    expect(computeStreakFromToday(days, 8000, nowSec)).toBe(1);
+  });
+
+  it('returns 0 if today missed the goal', () => {
+    const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
+    const days = [makeAt(nowSec, 5000), makeAt(nowSec - SECONDS_PER_DAY, 9000)];
+    expect(computeStreakFromToday(days, 8000, nowSec)).toBe(0);
+  });
+
+  it('returns 0 on empty input', () => {
+    expect(computeStreakFromToday([], 8000)).toBe(0);
+  });
+
+  it('stops at a gap (missing day)', () => {
+    const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
+    const days = [
+      makeAt(nowSec, 9000),
+      // skip yesterday
+      makeAt(nowSec - 2 * SECONDS_PER_DAY, 9000),
+    ];
+    expect(computeStreakFromToday(days, 8000, nowSec)).toBe(1);
+  });
+});
+
+describe('ActivityDetail helpers — labels', () => {
+  it('rangeShortLabel covers all ranges', () => {
+    expect(rangeShortLabel('7d')).toBe('week');
+    expect(rangeShortLabel('30d')).toBe('month');
+    expect(rangeShortLabel('90d')).toBe('90 days');
+  });
+
+  it('chartTitle covers all ranges', () => {
+    expect(chartTitle('7d')).toBe('This week vs goal');
+    expect(chartTitle('30d')).toBe('Last 30 days · weekly');
+    expect(chartTitle('90d')).toBe('Last 90 days · weekly');
+  });
+});
+
 describe('ActivityDetail — snapshot', () => {
-  // Pin the wall clock so the rendered weekday labels (e.g. "Best day:
-  // 9,000 Friday") are deterministic across runs. Without this the
-  // snapshot drifts every day as "today" advances. 2026-05-08 is a
-  // Friday in UTC; combined with the UTC test timezone the day-of-week
-  // labels are stable everywhere. Mirrors BPDetail / SpO2Detail.
+  // Pin the wall clock so the day-of-week labels rendered from
+  // makeDay(dayOffset) are deterministic across runs. Without this the
+  // snapshot drifts every wall-clock day as labels like "Sat" / "Mon"
+  // shift relative to whatever the test machine thinks today is.
   const FROZEN = new Date('2026-05-08T16:30:00Z').getTime();
   beforeAll(() => {
     jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
@@ -249,5 +549,31 @@ describe('ActivityDetail — snapshot', () => {
       withProviders(<ActivityDetail onBack={() => undefined} />),
     );
     expect(toJSON()).toMatchSnapshot();
+  });
+});
+
+// ─── Sprint 18 audit fixes ──────────────────────────────────────────────
+
+describe('ActivityDetail — caregiver-scoped loading + error (Sprint 18 A1)', () => {
+  it('shows a loading spinner — not the empty-state UI — when the parent fetch is in flight', () => {
+    setMockParentPulse({ isLoading: true, data: null });
+    render(
+      withProviders(
+        <ActivityDetail onBack={() => undefined} familyId="fam-44" />,
+      ),
+    );
+    expect(screen.getByTestId('activity-detail-loading')).toBeTruthy();
+    expect(screen.queryByTestId('activity-detail-insight')).toBeNull();
+  });
+
+  it('shows an ErrorState — not the empty-state UI — when the parent fetch errored', () => {
+    setMockParentPulse({ error: new Error('network down'), data: null });
+    render(
+      withProviders(
+        <ActivityDetail onBack={() => undefined} familyId="fam-44" />,
+      ),
+    );
+    expect(screen.getByTestId('activity-detail-error')).toBeTruthy();
+    expect(screen.queryByTestId('activity-detail-insight')).toBeNull();
   });
 });

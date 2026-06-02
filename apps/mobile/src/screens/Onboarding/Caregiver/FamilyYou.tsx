@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../../components/Button';
+import { OnboardingEyebrow } from '../../../components/OnboardingEyebrow';
 import { Pill } from '../../../components/Pill';
 import { useTheme } from '../../../theme';
 import { useOnboarding, type CaregiverRelationship } from '../../../state/onboarding';
@@ -96,6 +97,8 @@ export function CaregiverFamilyYouScreen({
               Back
             </Text>
           </Pressable>
+
+          <OnboardingEyebrow persona="Caregiver" step={1} total={3} />
 
           <Text
             accessibilityRole="header"

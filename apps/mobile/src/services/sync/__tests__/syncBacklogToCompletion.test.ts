@@ -1,12 +1,22 @@
-// Cursor-loop unit test. Mocks syncBacklog itself — the integration
-// against MockDevice is already covered by syncBacklog.test.ts;
-// here we only care about the loop's exit conditions.
+// Sprint 16.5c: Phase-2 walk-back was gated off because it was
+// flooding the Edge Function with per-record legacy /sync POSTs and
+// crowding out the multi-vitals POST. The function now performs a
+// single forward TS=0 batch. `backfillBPHistoryOlderThan` is still
+// exported from `syncBacklog.ts` for deliberate one-shot use; these
+// tests just assert that the routine loop never invokes it.
 
 const mockSyncBacklog: jest.Mock = jest.fn();
+const mockBackfill: jest.Mock = jest.fn();
 
 jest.mock('../syncBacklog', () => ({
   syncBacklog: (device: unknown, deviceBleId: string, opts?: unknown) =>
     mockSyncBacklog(device, deviceBleId, opts),
+  backfillBPHistoryOlderThan: (
+    device: unknown,
+    deviceBleId: string,
+    anchorTs: number,
+    opts?: unknown,
+  ) => mockBackfill(device, deviceBleId, anchorTs, opts),
 }));
 
 import { syncBacklogToCompletion } from '../syncBacklogToCompletion';
@@ -14,14 +24,19 @@ import type { UrionDevice } from '../../ble/UrionDevice';
 
 beforeEach(() => {
   mockSyncBacklog.mockReset();
+  mockBackfill.mockReset();
 });
 
 const fakeDevice = {} as unknown as UrionDevice;
 const fakeBleId = 'AA:BB:CC:DD:E4:F2';
 
-describe('syncBacklogToCompletion — cursor loop', () => {
-  it('stops after a single empty page and reports one batch', async () => {
-    mockSyncBacklog.mockResolvedValueOnce({ pulled: 0, latestTimestampSec: null });
+describe('syncBacklogToCompletion — single forward batch (Sprint 16.5c)', () => {
+  it('runs syncBacklog once and never calls the walk-back helper', async () => {
+    mockSyncBacklog.mockResolvedValueOnce({
+      pulled: 0,
+      latestTimestampSec: null,
+      oldestTimestampSecInBatch: null,
+    });
 
     const result = await syncBacklogToCompletion(fakeDevice, fakeBleId);
 
@@ -32,45 +47,54 @@ describe('syncBacklogToCompletion — cursor loop', () => {
       latestTimestampSec: null,
     });
     expect(mockSyncBacklog).toHaveBeenCalledTimes(1);
+    expect(mockBackfill).not.toHaveBeenCalled();
   });
 
-  it('keeps looping while batches return rows, stopping on empty', async () => {
-    mockSyncBacklog
-      .mockResolvedValueOnce({ pulled: 50, latestTimestampSec: 1737100000 })
-      .mockResolvedValueOnce({ pulled: 50, latestTimestampSec: 1737200000 })
-      .mockResolvedValueOnce({ pulled: 17, latestTimestampSec: 1737300000 })
-      .mockResolvedValueOnce({ pulled: 0, latestTimestampSec: null });
+  it('does NOT walk backward even when the forward batch returns 50 records', async () => {
+    // Pre-16.5c, a full 50-record forward batch would trigger Phase 2
+    // walk-back. After the gating, the loop ends here regardless of
+    // how full the forward batch was.
+    mockSyncBacklog.mockResolvedValueOnce({
+      pulled: 50,
+      latestTimestampSec: 1737200000,
+      oldestTimestampSecInBatch: 1737100000,
+    });
 
     const result = await syncBacklogToCompletion(fakeDevice, fakeBleId);
 
-    expect(result.totalPulled).toBe(117);
-    expect(result.batches).toBe(4);
-    expect(result.hitBatchCap).toBe(false);
-    // Empty page returns null for latestTimestampSec; we keep the
-    // last productive cursor so the orchestrator can surface it.
-    expect(result.latestTimestampSec).toBe(1737300000);
+    expect(result).toEqual({
+      totalPulled: 50,
+      batches: 1,
+      hitBatchCap: false,
+      latestTimestampSec: 1737200000,
+    });
+    expect(mockSyncBacklog).toHaveBeenCalledTimes(1);
+    expect(mockBackfill).not.toHaveBeenCalled();
   });
 
-  it('sends setTime on the first batch only (skipSetTime threads through)', async () => {
-    mockSyncBacklog
-      .mockResolvedValueOnce({ pulled: 50, latestTimestampSec: 1737000000 })
-      .mockResolvedValueOnce({ pulled: 0, latestTimestampSec: null });
+  it('threads skipSetTime=false through to the forward call', async () => {
+    mockSyncBacklog.mockResolvedValueOnce({
+      pulled: 1,
+      latestTimestampSec: 1737000000,
+      oldestTimestampSecInBatch: 1737000000,
+    });
 
     await syncBacklogToCompletion(fakeDevice, fakeBleId);
 
-    const firstCallOpts = mockSyncBacklog.mock.calls[0][2];
-    const secondCallOpts = mockSyncBacklog.mock.calls[1][2];
-    expect(firstCallOpts.skipSetTime).toBe(false);
-    expect(secondCallOpts.skipSetTime).toBe(true);
+    const forwardOpts = mockSyncBacklog.mock.calls[0][2];
+    expect(forwardOpts.skipSetTime).toBe(false);
   });
 
-  it('hits the batch cap when the watch never returns an empty page', async () => {
-    mockSyncBacklog.mockResolvedValue({ pulled: 50, latestTimestampSec: 1737000000 });
+  it('forwards a custom timeoutMs through to syncBacklog', async () => {
+    mockSyncBacklog.mockResolvedValueOnce({
+      pulled: 0,
+      latestTimestampSec: null,
+      oldestTimestampSecInBatch: null,
+    });
 
-    const result = await syncBacklogToCompletion(fakeDevice, fakeBleId);
+    await syncBacklogToCompletion(fakeDevice, fakeBleId, { timeoutMs: 5_000 });
 
-    expect(result.batches).toBe(20);
-    expect(result.hitBatchCap).toBe(true);
-    expect(result.totalPulled).toBe(50 * 20);
+    const forwardOpts = mockSyncBacklog.mock.calls[0][2];
+    expect(forwardOpts.timeoutMs).toBe(5_000);
   });
 });

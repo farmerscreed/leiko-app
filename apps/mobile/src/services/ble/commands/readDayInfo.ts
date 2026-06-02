@@ -39,6 +39,14 @@
 import { ParsedPacket, buildPacket } from '../io';
 import { CommandTimeoutError, type UrionDevice } from '../UrionDevice';
 
+// BLE_TRACE — Sprint 16.5a Phase A forensic-capture instrumentation.
+// See apps/mobile/src/services/ble/UrionDevice.ts for the convention.
+const BLE_TRACE = typeof __DEV__ !== 'undefined' && __DEV__;
+
+function payloadHex(payload: Uint8Array): string {
+  return Array.from(payload, (b) => b.toString(16).padStart(2, '0')).join(' ');
+}
+
 export interface ActivityDayRecord {
   daysAgo: number;
   yearOfCentury: number; // 25 = 2025
@@ -180,6 +188,14 @@ export async function readDayInfo(
     const unsub = device.onNotify((packet: ParsedPacket) => {
       if (packet.command !== 0x07) return;
       const index = packet.payload[0];
+      if (BLE_TRACE) {
+        // Full payload dump — Phase A wants to see every byte so we can
+        // spot regions we're not parsing (REM, awake counts, transitions).
+        console.log(
+          `[ble-trace] readDayInfo packet idx=0x${index.toString(16).padStart(2, '0')} ` +
+            `daysAgo=${options.daysAgo} payload=${payloadHex(packet.payload)}`,
+        );
+      }
       if (index === ACTIVITY_INDEX && !activitySeen) {
         activitySeen = true;
         activity = parseActivityPacket(packet);

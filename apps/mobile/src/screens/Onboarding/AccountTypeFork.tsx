@@ -1,14 +1,21 @@
-// AccountTypeFork — D6 US-1, D8a §3.1, docs/04-screens/onboarding-fork.md.
+// AccountTypeFork — ADR-0006 Phase 3 (unified model).
 //
-// Both CTAs are button.primary by spec (D8a §3.1.2): equal visual weight
-// respects the user's choice and avoids biasing self-buyers toward the
-// caregiver path. The tertiary "Sign in" link below them is a Sprint 2
-// extension for returning users (proposed in the sprint plan and added
-// to onboarding-fork.md in the same commit).
+// HISTORY: this screen used to fork account_type into 'caregiver' vs
+// 'self_buyer', which selected two entirely separate navigation trees and
+// home screens. ADR-0006 collapses that: there is ONE unified experience
+// (the constellation home where the viewer is a node and can both wear a
+// watch and follow people they care for). So both CTAs now onboard the
+// user as 'self_buyer' — the self-owning persona that the unified home is
+// built on — and the screen reframes from "who are you setting up for?"
+// (an identity fork) to a calm welcome that names what Leiko can do.
 //
-// On tap, the choice is cached in MMKV via setPendingAccountType. The
-// commit to public.users.account_type happens later, at sign-up, via
-// raw_user_meta_data → handle_new_user trigger.
+// We keep account_type = 'self_buyer' rather than ripping the column out:
+// the root navigator still branches on it, and self_buyer resolves to the
+// unified constellation home. Existing 'caregiver' accounts continue to
+// work unchanged. account_type is committed at sign-up via
+// raw_user_meta_data → handle_new_user; here we just cache the pending
+// value in MMKV. (Removing the column / nav branch entirely is a later,
+// higher-risk step deliberately deferred per ADR-0006.)
 
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,11 +31,16 @@ export function AccountTypeForkScreen({ navigation }: AuthScreenProps<'AccountTy
 
   const headline = theme.type('displayL');
   const body = theme.type('bodyL');
-  const caption = theme.type('caption');
   const link = theme.type('bodyM');
 
-  const handleChoice = (kind: AccountType) => {
-    setPendingAccountType(kind);
+  // ADR-0006 — every new user onboards as 'self_buyer' (the self-owning
+  // persona the unified constellation home is built on). The two CTAs are
+  // framing only — both lead to the same unified onboarding; the user
+  // pairs their own watch and/or adds people they care for afterward, on
+  // the home. account_type is no longer an identity fork.
+  const UNIFIED_ACCOUNT_TYPE: AccountType = 'self_buyer';
+  const handleContinue = () => {
+    setPendingAccountType(UNIFIED_ACCOUNT_TYPE);
     navigation.navigate('SignUp');
   };
 
@@ -84,7 +96,7 @@ export function AccountTypeForkScreen({ navigation }: AuthScreenProps<'AccountTy
             marginBottom: theme.spacing.m,
           }}
         >
-          Who are you setting up for?
+          Welcome to Leiko
         </Text>
 
         <Text
@@ -95,67 +107,28 @@ export function AccountTypeForkScreen({ navigation }: AuthScreenProps<'AccountTy
             fontWeight: body.weight as '400',
             fontFamily: body.family,
             textAlign: 'center',
-            maxWidth: 280,
+            maxWidth: 300,
             marginBottom: theme.spacing.xxxl,
           }}
         >
-          Leiko works for both — the path just looks a little different.
+          Track your own readings and keep an eye on the people you care
+          for — all in one place.
         </Text>
 
         <View
           accessible
           accessibilityRole="button"
-          accessibilityLabel="Someone I care for. A parent, partner, or other family member."
-          style={{ width: '100%', marginBottom: theme.spacing.l }}
-        >
-          <Button
-            variant="primary"
-            onPress={() => handleChoice('caregiver')}
-            testID="fork-caregiver"
-            style={{ width: '100%' }}
-          >
-            Someone I care for
-          </Button>
-          <Text
-            style={{
-              color: theme.colors.text.secondary,
-              fontSize: caption.size,
-              lineHeight: caption.lineHeight,
-              fontFamily: caption.family,
-              textAlign: 'center',
-              marginTop: theme.spacing.xs,
-            }}
-          >
-            A parent, partner, or other family member
-          </Text>
-        </View>
-
-        <View
-          accessible
-          accessibilityRole="button"
-          accessibilityLabel="Myself. I have or want to track my own blood pressure."
+          accessibilityLabel="Get started"
           style={{ width: '100%', marginBottom: theme.spacing.xxl }}
         >
           <Button
             variant="primary"
-            onPress={() => handleChoice('self_buyer')}
-            testID="fork-self-buyer"
+            onPress={handleContinue}
+            testID="fork-get-started"
             style={{ width: '100%' }}
           >
-            Myself
+            Get started
           </Button>
-          <Text
-            style={{
-              color: theme.colors.text.secondary,
-              fontSize: caption.size,
-              lineHeight: caption.lineHeight,
-              fontFamily: caption.family,
-              textAlign: 'center',
-              marginTop: theme.spacing.xs,
-            }}
-          >
-            I have or want to track my own blood pressure
-          </Text>
         </View>
 
         <Pressable

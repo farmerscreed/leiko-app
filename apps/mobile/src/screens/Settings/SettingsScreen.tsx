@@ -28,7 +28,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BottomSheet } from '../../components/BottomSheet';
 import { Button } from '../../components/Button';
@@ -40,12 +40,12 @@ import {
   deleteAccount,
   exportFamilyData,
 } from '../../services/users/accountActions';
-import {
-  acceptFamilyInvite,
-  sendFamilyInvite,
-} from '../../services/families/manageInvites';
+import { createConnect } from '../../services/families/manageInvites';
+import { AcceptInviteSheet } from '../../components/AcceptInviteSheet';
+import { EditFamilyDetailsSheet } from '../../components/EditFamilyDetailsSheet';
 import { listCaregivers } from '../../services/families/visibility';
 import { useFamilyReadings } from '../../hooks/useFamilyReadings';
+import { isSelfCircle } from '../../utils/constellationNodes';
 import { useAuth } from '../../state/auth';
 import { useNotifications } from '../../state/notifications';
 import { usePairing } from '../../state/pairing';
@@ -77,13 +77,19 @@ import {
 import { useTheme } from '../../theme';
 import type { CaregiverScreenProps } from '../../navigation/types';
 import type { Gender, HypertensionStatus, UserRow, UserUpdate } from '../../types/database';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const appConfig: { expo?: { version?: string } } = require('../../../app.json');
 
 type ProfileField = 'yob' | 'gender' | 'height' | 'weight' | 'timezone';
 
-// App version is embedded at build time. Bump in lockstep with
-// app.json + package.json on every version commit. Showing "build" as
-// the EAS build number lands when EAS builds are wired (Sprint 17).
-const APP_VERSION = '0.0.0';
+// Sprint 19 Block 7 — read version from app.json at bundle time.
+// Pre-Sprint-19 this was a hardcoded '0.0.0' that diverged from the
+// real version. expo-application / expo-constants aren't in the
+// dependency set, so the cheap path is a static JSON import; the
+// bundler inlines the literal. EAS bumps the native versionCode
+// independently (remote ledger); the user-facing versionName lives
+// in app.json:expo.version and matches what ships in the APK.
+const APP_VERSION = appConfig.expo?.version ?? '0.0.0';
 
 const HYPERTENSION_LABEL: Record<HypertensionStatus, string> = {
   yes: 'Yes',
@@ -128,7 +134,10 @@ function formatSleepTarget(minutes: number): string {
 }
 
 function formatStepsTarget(value: number): string {
-  return `${value.toLocaleString('en-US')} steps`;
+  // Sprint 16.5i — device-locale-aware (was hardcoded 'en-US'). Steps
+  // are a count; Nigerian + US locales both render this with
+  // thousands separators, just different glyphs.
+  return `${value.toLocaleString()} steps`;
 }
 
 function buildStepsOptions(): number[] {
@@ -186,6 +195,8 @@ type NavParamList = {
   ForYourDoctor: { range?: '7d' | '30d' | '90d' | '1y' | 'all_time' } | undefined;
   Pairing: undefined;
   Settings: undefined;
+  AddPerson: undefined;
+  AccountSwitch: undefined;
 };
 
 export function SettingsScreen({ navigation }: Props) {
@@ -197,6 +208,16 @@ export function SettingsScreen({ navigation }: Props) {
   const signOut = useAuth((s) => s.signOut);
   const pairedDevice = usePairing((s) => s.pairedDevice);
   const forget = usePairing((s) => s.forget);
+
+  // Sprint 18 bench bug — defensive backstop. Onboarding completion
+  // paths in state/onboarding.ts now refresh profile after the DB
+  // update, but if any future code path forgets, this still rehydrates
+  // the auth-store profile from public.users every time Settings
+  // mounts. Cheap, idempotent, prevents the "I filled in my name in
+  // onboarding but Settings shows nothing" trap from ever recurring.
+  useEffect(() => {
+    void refreshProfile();
+  }, [refreshProfile]);
 
   // Notifications.
   const notif = useNotifications();
@@ -230,13 +251,30 @@ export function SettingsScreen({ navigation }: Props) {
   const [invitePending, setInvitePending] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [inviteUrlToken, setInviteUrlToken] = useState<string | null>(null);
 
+  // Sprint 16.6 — accept-invite UI lives in the shared AcceptInviteSheet
+  // component now. Only `acceptSheetOpen` + `acceptSuccess` remain here:
+  // acceptSheetOpen drives mounting; acceptSuccess triggers the
+  // post-accept family-list refresh effect at line 317.
   const [acceptSheetOpen, setAcceptSheetOpen] = useState(false);
-  const [acceptCode, setAcceptCode] = useState('');
-  const [acceptEmail, setAcceptEmail] = useState('');
-  const [acceptPending, setAcceptPending] = useState(false);
-  const [acceptError, setAcceptError] = useState<string | null>(null);
   const [acceptSuccess, setAcceptSuccess] = useState(false);
+  // ADR-0006 — a tapped invite link deep-links to Settings with the code
+  // prefilled; this seeds the accept sheet.
+  const [acceptPrefillCode, setAcceptPrefillCode] = useState('');
+  const [acceptPrefillEmail, setAcceptPrefillEmail] = useState('');
+  const route = useRoute();
+  useEffect(() => {
+    const params = route.params as
+      | { inviteCode?: string; inviteEmail?: string }
+      | undefined;
+    if (params?.inviteCode || params?.inviteEmail) {
+      setAcceptPrefillCode(params.inviteCode ?? '');
+      setAcceptPrefillEmail(params.inviteEmail ?? '');
+      setAcceptSuccess(false);
+      setAcceptSheetOpen(true);
+    }
+  }, [route.params]);
 
   // Vital setup (auto-HR / auto-SpO2 / goals).
   const autoHrEnabled = useVitalSetup((s) => s.autoHrEnabled);
@@ -294,6 +332,21 @@ export function SettingsScreen({ navigation }: Props) {
   // without requiring a Settings remount.
   const { parents } = useFamilyReadings();
   const familyId = parents[0]?.familyId ?? null;
+
+  // Sprint 19 Block 3 — owner-only edit affordance. Pick the FIRST
+  // family the viewer is family_owner of as the edit target. Single-
+  // family users (the common case) just edit "their" family; multi-
+  // family caregivers edit the first row (sorted by latest-reading);
+  // per-family edit affordances on individual orbs land in a future
+  // sprint when the per-orb context menu does.
+  const ownedFamily = parents.find((p) => p.viewerRole === 'family_owner') ?? null;
+  // ADR-0006 Phase 4 — split circles by the single question that drives
+  // the whole unified model: am I the WEARER of this circle, or a
+  // FOLLOWER of it? A circle I wear is my own self-circle (relationship
+  // 'self', and I family_own it); everything else I'm following.
+  const wornCircle = parents.find((p) => isSelfCircle(p)) ?? null;
+  const followedCircles = parents.filter((p) => !isSelfCircle(p));
+  const [editFamilyOpen, setEditFamilyOpen] = useState(false);
   const [caregiverCount, setCaregiverCount] = useState<number | null>(null);
   useEffect(() => {
     if (!isSelfBuyer || !familyId) {
@@ -731,68 +784,93 @@ export function SettingsScreen({ navigation }: Props) {
         </SettingsSection>
 
         {/* Family ------------------------------------------------------ */}
-        <SettingsSection title="Family" testID="settings-section-family">
-          <ListRow
-            variant="navigation"
-            title="Family members"
-            subtitle={
-              caregiverCount === null
-                ? 'Loading…'
-                : caregiverCount === 0
-                  ? 'Just you for now.'
-                  : caregiverCount === 1
-                    ? '1 caregiver in your circle.'
-                    : `${caregiverCount} caregivers in your circle.`
-            }
-            onPress={() => stackNavigation.navigate('FamilyMembers')}
-            testID="settings-family-members"
-          />
+        {/* ADR-0006 Phase 4 — the family surface collapses from ~6
+            persona-gated rows into TWO role-aware sections, driven by the
+            single question "am I the wearer of this circle, or a follower?"
+
+            1. "Following your readings" — shown when you WEAR a watch
+               (you own a self-circle): invite someone to follow + manage
+               what each follower sees + edit your own details.
+            2. "People you follow" — a row per circle you follow, opening
+               its members/leave surface.
+
+            Plus a single "Join with a code" action for accepting an
+            invite to follow someone else. */}
+        {wornCircle ? (
+          <SettingsSection
+            title="Following your readings"
+            testID="settings-section-following-you"
+          >
+            <ListRow
+              variant="action"
+              title="Invite someone to follow"
+              subtitle="They’ll see your readings. You choose what they can see."
+              onPress={() => {
+                setInviteEmail('');
+                setInviteLabel('');
+                setInvitePermission('readings');
+                setInviteError(null);
+                setInviteCode(null);
+                setInviteUrlToken(null);
+                setInviteSheetOpen(true);
+              }}
+              testID="settings-family-invite"
+            />
+            {(caregiverCount ?? 0) > 0 ? (
+              <ListRow
+                variant="navigation"
+                title="Who sees my readings"
+                subtitle={
+                  caregiverCount === 1
+                    ? '1 person follows your readings.'
+                    : `${caregiverCount ?? 0} people follow your readings.`
+                }
+                onPress={() => stackNavigation.navigate('CaregiverVisibility')}
+                testID="settings-family-visibility"
+              />
+            ) : null}
+            <ListRow
+              variant="action"
+              title="Edit my details"
+              subtitle="Update your name or year of birth."
+              onPress={() => setEditFamilyOpen(true)}
+              showDivider={false}
+              testID="settings-family-edit-details"
+            />
+          </SettingsSection>
+        ) : null}
+
+        {followedCircles.length > 0 ? (
+          <SettingsSection
+            title="People you care for"
+            testID="settings-section-following"
+          >
+            {followedCircles.map((c, i) => (
+              <ListRow
+                key={c.familyId}
+                variant="navigation"
+                title={c.parentDisplayName || 'Someone you care for'}
+                subtitle="You’re following their readings."
+                onPress={() => stackNavigation.navigate('FamilyMembers')}
+                showDivider={i < followedCircles.length - 1}
+                testID={`settings-followed-${c.familyId}`}
+              />
+            ))}
+          </SettingsSection>
+        ) : null}
+
+        <SettingsSection title="Add someone" testID="settings-section-add">
           <ListRow
             variant="action"
-            title={isSelfBuyer ? 'Invite a family member' : 'Invite a caregiver'}
-            subtitle={
-              isSelfBuyer
-                ? 'They can see your readings.'
-                : 'They can see your parent’s readings.'
-            }
+            title="Care for another person"
+            subtitle="Enter the code they shared to follow their readings."
             onPress={() => {
-              setInviteEmail('');
-              setInviteLabel('');
-              setInvitePermission('readings');
-              setInviteError(null);
-              setInviteCode(null);
-              setInviteSheetOpen(true);
-            }}
-            testID="settings-family-invite"
-          />
-          <ListRow
-            variant="action"
-            title="I have an invite code"
-            subtitle="Join a family circle someone invited you to."
-            onPress={() => {
-              setAcceptCode('');
-              setAcceptEmail(profile?.email ?? '');
-              setAcceptError(null);
               setAcceptSuccess(false);
               setAcceptSheetOpen(true);
             }}
-            showDivider={isSelfBuyer && (caregiverCount ?? 0) > 0}
+            showDivider={false}
             testID="settings-family-accept"
           />
-          {isSelfBuyer && (caregiverCount ?? 0) > 0 ? (
-            <ListRow
-              variant="navigation"
-              title="Manage who sees my readings"
-              subtitle={
-                caregiverCount === 1
-                  ? '1 caregiver in your circle.'
-                  : `${caregiverCount ?? 0} caregivers in your circle.`
-              }
-              onPress={() => stackNavigation.navigate('CaregiverVisibility')}
-              showDivider={false}
-              testID="settings-family-visibility"
-            />
-          ) : null}
         </SettingsSection>
 
         {/* Share ------------------------------------------------------ */}
@@ -909,26 +987,43 @@ export function SettingsScreen({ navigation }: Props) {
           <ListRow
             variant="navigation"
             title="Terms of service"
-            onPress={() => void Linking.openURL('https://leiko.app/terms')}
+            onPress={() => void Linking.openURL('https://leiko.health/terms')}
             testID="settings-about-terms"
           />
           <ListRow
             variant="navigation"
             title="Privacy policy"
-            onPress={() => void Linking.openURL('https://leiko.app/privacy')}
+            onPress={() => void Linking.openURL('https://leiko.health/privacy')}
             testID="settings-about-privacy"
           />
           <ListRow
-            variant="action"
-            title="Help"
-            onPress={() => void Linking.openURL('mailto:support@leiko.app')}
-            showDivider={false}
+            variant="navigation"
+            title="Help & support"
+            onPress={() => void Linking.openURL('https://leiko.health/support')}
             testID="settings-about-help"
+          />
+          <ListRow
+            variant="action"
+            title="Email us"
+            onPress={() => void Linking.openURL('mailto:support@leiko.health')}
+            showDivider={false}
+            testID="settings-about-email"
           />
         </SettingsSection>
 
         {/* Account ----------------------------------------------------- */}
         <SettingsSection title="Account" testID="settings-section-account">
+          {/* Sprint 19 Block 4 — switch between accounts saved on
+              this device. Tap takes you to AccountSwitchScreen where
+              you can pick another known account or sign in with a
+              new email + delete the current account. */}
+          <ListRow
+            variant="navigation"
+            title="Switch account"
+            subtitle={profile?.email ? `Signed in as ${profile.email}` : 'Manage accounts on this device.'}
+            onPress={() => stackNavigation.navigate('AccountSwitch')}
+            testID="settings-account-switch"
+          />
           <ListRow
             variant="action"
             title="Sign out"
@@ -1268,13 +1363,21 @@ export function SettingsScreen({ navigation }: Props) {
               </View>
               <Button
                 variant="primary"
-                onPress={() =>
-                  void Share.share({
-                    title: 'Leiko invite',
-                    message: `Your Leiko invite code is ${inviteCode}. Open Leiko, tap Settings → I have an invite code, and enter ${inviteEmail}.`,
-                  })
-                }
-                accessibilityLabel="Share invite code"
+                onPress={() => {
+                  // ADR-0006 dual delivery: include a tappable link (for a
+                  // not-yet-installed recipient) AND the 6-digit code (for
+                  // someone who already has Leiko). The link carries the
+                  // invite's url_token; the deep-link handler routes it to
+                  // the accept flow after install.
+                  const link = inviteUrlToken
+                    ? `https://leiko.app/join?token=${encodeURIComponent(inviteUrlToken)}`
+                    : null;
+                  const message = link
+                    ? `Follow my readings on Leiko.\n\nTap to join: ${link}\n\nAlready have Leiko? Enter code ${inviteCode} (for ${inviteEmail}). Works for 7 days.`
+                    : `Your Leiko invite code is ${inviteCode}. Open Leiko, tap Settings → Care for another person, and enter ${inviteEmail}.`;
+                  void Share.share({ title: 'Leiko invite', message });
+                }}
+                accessibilityLabel="Share invite"
                 testID="settings-invite-share"
               >
                 Share invite
@@ -1294,6 +1397,18 @@ export function SettingsScreen({ navigation }: Props) {
             <>
               <Text
                 style={{
+                  color: theme.colors.text.primary,
+                  fontSize: bodyStyle.size,
+                  lineHeight: bodyStyle.lineHeight,
+                  fontFamily: bodyStyle.family,
+                  fontStyle: 'italic',
+                  marginBottom: theme.spacing.s,
+                }}
+              >
+                &ldquo;Let my daughter keep an eye on me.&rdquo;
+              </Text>
+              <Text
+                style={{
                   color: theme.colors.text.secondary,
                   fontSize: bodyStyle.size,
                   lineHeight: bodyStyle.lineHeight,
@@ -1301,8 +1416,8 @@ export function SettingsScreen({ navigation }: Props) {
                   marginBottom: theme.spacing.m,
                 }}
               >
-                We&apos;ll create a 6-digit code you can share with them. They enter
-                it in their own Leiko app to join the circle.
+                We&apos;ll create a 6-digit code you can share. They enter it in
+                their own Leiko app to follow your readings.
               </Text>
               <TextInput
                 value={inviteLabel}
@@ -1437,15 +1552,17 @@ export function SettingsScreen({ navigation }: Props) {
                   setInviteError(null);
                   setInvitePending(true);
                   try {
-                    const result = await sendFamilyInvite({
+                    const result = await createConnect({
                       inviteeEmail: inviteEmail.trim(),
                       inviteeLabel: inviteLabel.trim() || undefined,
                     });
                     setInviteCode(result.pairingCode);
+                    setInviteUrlToken(result.urlToken ?? null);
                   } catch (e) {
+                    const msg = e instanceof Error ? e.message : '';
                     setInviteError(
-                      e instanceof Error && /not_family_owner/i.test(e.message)
-                        ? 'Only the family owner can send invites.'
+                      /invalid_email/i.test(msg)
+                        ? 'That email doesn’t look right. Check it and try again.'
                         : "We couldn't send the invite. Try again in a moment.",
                     );
                   } finally {
@@ -1472,156 +1589,31 @@ export function SettingsScreen({ navigation }: Props) {
         </View>
       </BottomSheet>
 
-      {/* Accept invite */}
-      <BottomSheet
+      {/* Accept invite — Sprint 16.6, extracted into AcceptInviteSheet so
+          CaregiverHome empty-state + FamilyWatch onboarding can reuse it.
+          testID prefix preserves the existing settings-accept-{slot}
+          contract that the Settings tests assert on. */}
+      <AcceptInviteSheet
         visible={acceptSheetOpen}
         onDismiss={() => setAcceptSheetOpen(false)}
-        size="default"
-        surface="solid"
-        title={acceptSuccess ? "You're in" : 'Join a family circle'}
-        testID="settings-accept-sheet"
-      >
-        <View style={{ paddingHorizontal: theme.spacing.l, paddingBottom: theme.spacing.l }}>
-          {acceptSuccess ? (
-            <>
-              <Text
-                style={{
-                  color: theme.colors.text.secondary,
-                  fontSize: bodyStyle.size,
-                  lineHeight: bodyStyle.lineHeight,
-                  fontFamily: bodyStyle.family,
-                  marginBottom: theme.spacing.m,
-                }}
-              >
-                You&apos;ve joined the circle. Their readings will appear on your home screen.
-              </Text>
-              <Button
-                variant="primary"
-                onPress={() => setAcceptSheetOpen(false)}
-                accessibilityLabel="Done"
-                testID="settings-accept-done"
-              >
-                Done
-              </Button>
-            </>
-          ) : (
-            <>
-              <Text
-                style={{
-                  color: theme.colors.text.secondary,
-                  fontSize: bodyStyle.size,
-                  lineHeight: bodyStyle.lineHeight,
-                  fontFamily: bodyStyle.family,
-                  marginBottom: theme.spacing.m,
-                }}
-              >
-                Type the email the inviter used and the 6-digit code they shared with you.
-              </Text>
-              <TextInput
-                value={acceptEmail}
-                onChangeText={setAcceptEmail}
-                placeholder="Your email"
-                placeholderTextColor={theme.colors.text.tertiary}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                style={{
-                  borderWidth: 1,
-                  borderColor: theme.colors.border.subtle,
-                  borderRadius: theme.radii.m,
-                  paddingHorizontal: theme.spacing.m,
-                  paddingVertical: theme.spacing.s,
-                  color: theme.colors.text.primary,
-                  fontSize: bodyStyle.size,
-                  fontFamily: bodyStyle.family,
-                  marginBottom: theme.spacing.m,
-                }}
-                testID="settings-accept-email-input"
-              />
-              <TextInput
-                value={acceptCode}
-                onChangeText={setAcceptCode}
-                placeholder="6-digit code"
-                placeholderTextColor={theme.colors.text.tertiary}
-                keyboardType="number-pad"
-                maxLength={6}
-                style={{
-                  borderWidth: 1,
-                  borderColor: theme.colors.border.subtle,
-                  borderRadius: theme.radii.m,
-                  paddingHorizontal: theme.spacing.m,
-                  paddingVertical: theme.spacing.s,
-                  color: theme.colors.text.primary,
-                  fontSize: bodyStyle.size,
-                  fontFamily: bodyStyle.family,
-                  marginBottom: theme.spacing.m,
-                  letterSpacing: 4,
-                }}
-                testID="settings-accept-code-input"
-              />
-              {acceptError ? (
-                <Text
-                  style={{
-                    color: theme.colors.text.secondary,
-                    fontSize: theme.type('label').size,
-                    fontFamily: theme.type('label').family,
-                    marginBottom: theme.spacing.m,
-                  }}
-                  testID="settings-accept-error"
-                >
-                  {acceptError}
-                </Text>
-              ) : null}
-              <Button
-                variant="primary"
-                disabled={
-                  acceptPending || acceptCode.length !== 6 || acceptEmail.trim().length === 0
-                }
-                loading={acceptPending}
-                onPress={async () => {
-                  setAcceptError(null);
-                  setAcceptPending(true);
-                  try {
-                    await acceptFamilyInvite({
-                      code: acceptCode,
-                      email: acceptEmail.trim(),
-                    });
-                    setAcceptSuccess(true);
-                  } catch (e) {
-                    const msg = e instanceof Error ? e.message : 'unknown';
-                    setAcceptError(
-                      /invitation_not_found/i.test(msg)
-                        ? "We couldn't find that code. Double-check and try again."
-                        : /email_mismatch/i.test(msg)
-                          ? "That email doesn't match the invite."
-                          : /invitation_expired/i.test(msg)
-                            ? 'That code has expired. Ask for a new one.'
-                            : /invitation_already_accepted/i.test(msg)
-                              ? "You're already in this circle."
-                              : "We couldn't join the circle. Try again in a moment.",
-                    );
-                  } finally {
-                    setAcceptPending(false);
-                  }
-                }}
-                accessibilityLabel="Join family circle"
-                testID="settings-accept-join"
-              >
-                Join family circle
-              </Button>
-              <View style={{ marginTop: theme.spacing.s }}>
-                <Button
-                  variant="ghost"
-                  onPress={() => setAcceptSheetOpen(false)}
-                  accessibilityLabel="Cancel"
-                  testID="settings-accept-cancel"
-                >
-                  Cancel
-                </Button>
-              </View>
-            </>
-          )}
-        </View>
-      </BottomSheet>
+        initialEmail={acceptPrefillEmail || profile?.email || ''}
+        initialCode={acceptPrefillCode}
+        onSuccess={() => setAcceptSuccess(true)}
+        testID="settings-accept"
+      />
+
+      {/* Sprint 19 Block 3 — owner-only edit family details. Only
+          mounted when there's a family the viewer owns. */}
+      {ownedFamily ? (
+        <EditFamilyDetailsSheet
+          visible={editFamilyOpen}
+          onDismiss={() => setEditFamilyOpen(false)}
+          familyId={ownedFamily.familyId}
+          initialName={ownedFamily.parentDisplayName}
+          initialRelationship={ownedFamily.parentRelationship}
+          testID="settings-family-edit-sheet"
+        />
+      ) : null}
 
       {/* Export paywall — for free users tapping Export my data */}
       <PaywallSheet

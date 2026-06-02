@@ -175,7 +175,7 @@ export function ConstellationLegend({
                     fontSize: 9,
                     lineHeight: 12,
                     color: theme.colors.text.tertiary,
-                    letterSpacing: 0.9, // 0.10em at 9pt
+                    letterSpacing: 0.9,
                     textTransform: 'uppercase',
                   }}
                 >
@@ -187,10 +187,15 @@ export function ConstellationLegend({
                 numberOfLines={1}
                 ellipsizeMode="tail"
                 style={{
+                  // Secondary token now resolves to a warm cream
+                  // #F5EFE2 (~96% luminance) — bright enough to read
+                  // cleanly on Android, warm enough to carry the
+                  // editorial register.
+                  fontFamily: theme.fontFamilies.body,
                   fontSize: 11.5,
-                  lineHeight: 16, // ~1.35
+                  lineHeight: 16,
                   color: theme.colors.text.secondary,
-                  marginTop: 1,
+                  marginTop: 2,
                 }}
               >
                 {p.headline}

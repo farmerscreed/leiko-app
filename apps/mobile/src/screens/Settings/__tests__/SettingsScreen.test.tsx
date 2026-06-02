@@ -16,6 +16,7 @@ import { type ReactNode } from 'react';
 import { Linking } from 'react-native';
 import { fireEvent, render, screen, waitFor, act } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '../../../theme';
 import { SettingsScreen } from '../SettingsScreen';
 import type { UserRow } from '../../../types/database';
@@ -59,6 +60,8 @@ jest.mock('../../../services/users/updateProfile', () => ({
 // for the AuditLog nav. Stub it.
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
+  // ADR-0006 — Settings reads route.params for deep-linked invite codes.
+  useRoute: () => ({ params: undefined }),
 }));
 
 jest.mock('../../../services/users/accountActions', () => ({
@@ -66,19 +69,27 @@ jest.mock('../../../services/users/accountActions', () => ({
   deleteAccount: jest.fn().mockResolvedValue({ deletedAt: '2026-05-09T00:00:00Z' }),
 }));
 
-const mockSendInvite = jest.fn();
-const mockAcceptInvite = jest.fn();
+const mockCreateConnect = jest.fn();
+const mockAcceptConnect = jest.fn();
 jest.mock('../../../services/families/manageInvites', () => ({
-  sendFamilyInvite: (...args: unknown[]) => mockSendInvite(...args),
-  acceptFamilyInvite: (...args: unknown[]) => mockAcceptInvite(...args),
+  // ADR-0007 unified connect (replaces send/accept/resolve mocks).
+  createConnect: (...args: unknown[]) => mockCreateConnect(...args),
+  acceptConnect: (...args: unknown[]) => mockAcceptConnect(...args),
 }));
 
-// Sprint 10c.2 — Settings now uses useFamilyReadings to drive the
-// hybrid-mode visibility row gate. Stub it to a single-family fixture
-// so the QueryClientProvider isn't required.
+// Sprint 10c.2 / ADR-0006 Phase 4 — Settings uses useFamilyReadings to
+// split the family surface into wearer vs follower sections. Mutable
+// fixture so tests can simulate "I wear a circle" vs "I follow circles".
+// Default: a single self-circle (the viewer is a wearer).
+let mockParents: Array<{
+  familyId: string;
+  parentDisplayName?: string;
+  parentRelationship?: string;
+  viewerRole?: string;
+}> = [{ familyId: 'fam-1', parentDisplayName: 'Lawrence', parentRelationship: 'self', viewerRole: 'family_owner' }];
 jest.mock('../../../hooks/useFamilyReadings', () => ({
   useFamilyReadings: () => ({
-    parents: [{ familyId: 'fam-1' }],
+    parents: mockParents,
     isLoading: false,
     isRefreshing: false,
     error: null,
@@ -147,11 +158,16 @@ function renderScreen(): ReturnType<typeof render> {
     goBack: () => void;
     navigate: (route: string) => void;
   };
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
   const wrap = (node: ReactNode) =>
     (
-      <SafeAreaProvider initialMetrics={{ frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 47, bottom: 34, left: 0, right: 0 } }}>
-        <ThemeProvider mode="caregiver">{node}</ThemeProvider>
-      </SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <SafeAreaProvider initialMetrics={{ frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 47, bottom: 34, left: 0, right: 0 } }}>
+          <ThemeProvider mode="caregiver">{node}</ThemeProvider>
+        </SafeAreaProvider>
+      </QueryClientProvider>
     );
   return render(
     wrap(
@@ -166,6 +182,10 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockProfile = makeProfile();
   mockPairedDevice = null;
+  // Default: the viewer wears a self-circle they own (family_owner) so the
+  // "Following your readings" section + EditFamilyDetails mount. The render
+  // wrapper supplies a QueryClientProvider for the latter.
+  mockParents = [{ familyId: 'fam-1', parentDisplayName: 'Lawrence', parentRelationship: 'self', viewerRole: 'family_owner' }];
 });
 
 describe('<SettingsScreen /> — Profile', () => {
@@ -319,10 +339,9 @@ describe('<SettingsScreen /> — Profile field editor (Sprint 12.5.2)', () => {
   });
 
   it('persists timezone via the "use device timezone" button', async () => {
-    // Stored timezone must differ from the device zone, otherwise the
-    // "use device timezone" button is disabled (it's already current).
-    // The test runner is pinned to UTC (jest.setup), so seed a non-UTC
-    // stored value to keep the button enabled and exercise the save.
+    // Stored zone must differ from the device zone, else the button is
+    // disabled (already current). The test runner is pinned to UTC
+    // (jest.config), so seed a non-UTC stored value to keep it enabled.
     mockProfile = makeProfile({ timezone: 'Africa/Lagos' });
     renderScreen();
     fireEvent.press(screen.getByTestId('settings-profile-timezone'));
@@ -379,15 +398,19 @@ describe('<SettingsScreen /> — Watch', () => {
 });
 
 describe('<SettingsScreen /> — About', () => {
-  it('renders the version row + opens terms / privacy / help via Linking', () => {
+  it('renders the version row + opens terms / privacy / help & support / email via Linking', () => {
     renderScreen();
     expect(screen.getByTestId('settings-about-version')).toBeTruthy();
     fireEvent.press(screen.getByTestId('settings-about-terms'));
-    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.app/terms');
+    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.health/terms');
     fireEvent.press(screen.getByTestId('settings-about-privacy'));
-    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.app/privacy');
+    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.health/privacy');
+    // Sprint 18 / QUA-8 — Help row now opens the web support page;
+    // mailto moved to its own "Email us" row below.
     fireEvent.press(screen.getByTestId('settings-about-help'));
-    expect(linkingSpy).toHaveBeenCalledWith('mailto:support@leiko.app');
+    expect(linkingSpy).toHaveBeenCalledWith('https://leiko.health/support');
+    fireEvent.press(screen.getByTestId('settings-about-email'));
+    expect(linkingSpy).toHaveBeenCalledWith('mailto:support@leiko.health');
   });
 });
 
@@ -539,8 +562,8 @@ describe('<SettingsScreen /> — Privacy (Sprint 10b.3)', () => {
 
 describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
   beforeEach(() => {
-    mockSendInvite.mockReset();
-    mockAcceptInvite.mockReset();
+    mockCreateConnect.mockReset();
+    mockAcceptConnect.mockReset();
   });
 
   it('renders the invite + accept rows for a caregiver', () => {
@@ -549,14 +572,49 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
     expect(screen.getByTestId('settings-family-accept')).toBeTruthy();
   });
 
-  it('shows the self-buyer subtitle on the invite row when account_type=self_buyer', () => {
-    mockProfile = makeProfile({ account_type: 'self_buyer' });
+  describe('role-aware family sections (ADR-0006 Phase 4)', () => {
+    it('shows "Following your readings" with invite when the viewer wears a circle', () => {
+      mockParents = [{ familyId: 'fam-1', parentDisplayName: 'Lawrence', parentRelationship: 'self', viewerRole: 'family_owner' }];
+      renderScreen();
+      expect(screen.getByTestId('settings-section-following-you')).toBeTruthy();
+      expect(screen.getByTestId('settings-family-invite')).toBeTruthy();
+    });
+
+    it('hides "Following your readings" when the viewer wears no circle', () => {
+      mockParents = [{ familyId: 'mum', parentRelationship: 'Mom' }];
+      renderScreen();
+      expect(screen.queryByTestId('settings-section-following-you')).toBeNull();
+      expect(screen.queryByTestId('settings-family-invite')).toBeNull();
+    });
+
+    it('lists circles the viewer follows under "People you care for"', () => {
+      mockParents = [
+        { familyId: 'me', parentDisplayName: 'Lawrence', parentRelationship: 'self', viewerRole: 'family_owner' },
+        { familyId: 'mum', parentRelationship: 'Mom', parentDisplayName: 'Marian' },
+      ];
+      renderScreen();
+      expect(screen.getByTestId('settings-section-following')).toBeTruthy();
+      expect(screen.getByTestId('settings-followed-mum')).toBeTruthy();
+      expect(screen.getByText('Marian')).toBeTruthy();
+    });
+
+    it('always offers "Care for another person" (join with a code)', () => {
+      mockParents = [{ familyId: 'me', parentDisplayName: 'Lawrence', parentRelationship: 'self', viewerRole: 'family_owner' }];
+      renderScreen();
+      expect(screen.getByTestId('settings-section-add')).toBeTruthy();
+      expect(screen.getByTestId('settings-family-accept')).toBeTruthy();
+    });
+  });
+
+  it('shows the unified invite subtitle (wearer controls visibility)', () => {
     renderScreen();
-    expect(screen.getByText('They can see your readings.')).toBeTruthy();
+    expect(
+      screen.getByText('They’ll see your readings. You choose what they can see.'),
+    ).toBeTruthy();
   });
 
   it('opens the invite sheet, sends the invite, and surfaces the code', async () => {
-    mockSendInvite.mockResolvedValue({
+    mockCreateConnect.mockResolvedValue({
       invitationId: 'inv-1',
       pairingCode: '482910',
       expiresAt: '2026-05-16T00:00:00Z',
@@ -568,7 +626,7 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
       fireEvent.press(screen.getByTestId('settings-invite-send'));
     });
     await waitFor(() => {
-      expect(mockSendInvite).toHaveBeenCalledWith({
+      expect(mockCreateConnect).toHaveBeenCalledWith({
         inviteeEmail: 'sister@example.com',
         inviteeLabel: undefined,
       });
@@ -577,8 +635,8 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
     expect(screen.getByText('482910')).toBeTruthy();
   });
 
-  it('surfaces a friendly error when the user is not a family_owner', async () => {
-    mockSendInvite.mockRejectedValue(new Error('not_family_owner'));
+  it('surfaces a friendly error when the email is invalid', async () => {
+    mockCreateConnect.mockRejectedValue(new Error('invalid_email'));
     renderScreen();
     fireEvent.press(screen.getByTestId('settings-family-invite'));
     fireEvent.changeText(screen.getByTestId('settings-invite-email-input'), 'sister@example.com');
@@ -588,11 +646,18 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
     await waitFor(() => {
       expect(screen.getByTestId('settings-invite-error')).toBeTruthy();
     });
-    expect(screen.getByText('Only the family owner can send invites.')).toBeTruthy();
+    expect(
+      screen.getByText('That email doesn’t look right. Check it and try again.'),
+    ).toBeTruthy();
   });
 
   it('opens the accept sheet, joins the family, and shows the success state', async () => {
-    mockAcceptInvite.mockResolvedValue({ familyId: 'fam-2' });
+    mockAcceptConnect.mockResolvedValue({
+      ok: true,
+      familyId: 'fam-2',
+      outcome: 'accepter_follows',
+      canFollowBack: false,
+    });
     renderScreen();
     fireEvent.press(screen.getByTestId('settings-family-accept'));
     fireEvent.changeText(screen.getByTestId('settings-accept-email-input'), 'me@example.com');
@@ -601,7 +666,7 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
       fireEvent.press(screen.getByTestId('settings-accept-join'));
     });
     await waitFor(() => {
-      expect(mockAcceptInvite).toHaveBeenCalledWith({
+      expect(mockAcceptConnect).toHaveBeenCalledWith({
         code: '482910',
         email: 'me@example.com',
       });
@@ -610,7 +675,8 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
   });
 
   it('surfaces the not-found error message on a wrong code', async () => {
-    mockAcceptInvite.mockRejectedValue(new Error('invitation_not_found'));
+    // A wrong code resolves to no invitation.
+    mockAcceptConnect.mockRejectedValue(new Error('invitation_not_found'));
     renderScreen();
     fireEvent.press(screen.getByTestId('settings-family-accept'));
     fireEvent.changeText(screen.getByTestId('settings-accept-email-input'), 'me@example.com');
@@ -681,7 +747,8 @@ describe('<SettingsScreen /> — voice rules', () => {
     'About',
     'Account',
     'Sign out',
-    'Help',
+    'Help & support',
+    'Email us',
     'Terms of service',
     'Privacy policy',
   ])('renders voice-rule clean string: %s', (text) => {

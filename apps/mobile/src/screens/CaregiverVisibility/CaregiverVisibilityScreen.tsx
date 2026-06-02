@@ -151,6 +151,11 @@ export function CaregiverVisibilityScreen({ navigation }: Props) {
           </Text>
         </View>
 
+        {/* Sprint 17b — collapse error + loading into a single
+            conditional chain so a thrown error doesn't render
+            "Loading…" *and* the error message simultaneously
+            (previously the two blocks were independent and both
+            could be visible at once). */}
         {error ? (
           <View
             style={{
@@ -169,9 +174,7 @@ export function CaregiverVisibilityScreen({ navigation }: Props) {
               {error}
             </Text>
           </View>
-        ) : null}
-
-        {caregivers === null ? (
+        ) : caregivers === null ? (
           <Text
             style={{
               color: theme.colors.text.tertiary,

@@ -1,4 +1,4 @@
-// /send-family-invite — Sprint 10c.1.
+// /send-family-invite — Sprint 10c.1 + Sprint 16.6 FUN-1.
 //
 // Per CLAUDE.md + D8a §10.3:
 //   "Family invites use email + 6-digit code, never URL tokens."
@@ -14,12 +14,15 @@
 // (accepted_at flips it out of the active window).
 //
 // Per CLAUDE.md voice + data rules: no PHI logged. Audit row records
-// {invitee_email_domain, has_label} — never the email itself.
+// {invitee_email_domain, has_label, email_attempted, email_sent} —
+// never the email itself.
 //
-// Email transport: deferred. The inviter sees the code in-app and
-// shares it manually (per the Settings UI in 10c.1). When SMTP / a
-// provider lands at launch-prep, this Function can fan out an email
-// alongside the response.
+// Email transport (Sprint 16.6 FUN-1): if RESEND_API_KEY +
+// RESEND_FROM_EMAIL are set, we fan out an invite email via Resend's
+// REST API after the invitations row is inserted. If either env var
+// is missing, we skip the email and rely on the in-app code as the
+// fallback (the inviter sees it on screen and can share manually).
+// Email failures NEVER fail the request — the invite still exists.
 
 // deno-lint-ignore-file no-explicit-any
 import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2';
@@ -35,11 +38,97 @@ interface RequestBody {
 interface ResponseShape {
   invitationId: string;
   pairingCode: string;
+  /** ADR-0006 — shareable deep link carrying the invite's url_token. The
+   *  client builds a tappable https://leiko.app/join?... URL from this so
+   *  a not-yet-installed recipient can be routed through install → accept.
+   *  The 6-digit pairingCode remains for already-installed recipients. */
+  urlToken: string;
   expiresAt: string;
+  /** True when the Resend email send returned 2xx. False when the
+   *  email path is disabled (no API key configured) or the send
+   *  failed. The caller may use this to choose between "we emailed
+   *  the code" and "share this code yourself" copy. */
+  emailSent: boolean;
 }
 
 const CODE_RETRY_LIMIT = 6;
 const EXPIRY_DAYS = 7;
+
+/**
+ * Best-effort invite email via Resend. Returns `true` on a 2xx
+ * response from the Resend API; `false` for any other outcome
+ * (missing env, network error, 4xx/5xx). Never throws.
+ *
+ * Voice rules apply to the subject + body — no fear language,
+ * no "patient" / "diagnose" / promise-of-outcome phrasing.
+ */
+async function sendInviteEmail(args: {
+  toEmail: string;
+  code: string;
+  inviterDisplayName: string | null;
+  inviteeLabel: string | null;
+}): Promise<boolean> {
+  const apiKey = Deno.env.get('RESEND_API_KEY');
+  const fromEmail = Deno.env.get('RESEND_FROM_EMAIL');
+  if (!apiKey || !fromEmail) return false;
+
+  const inviter = args.inviterDisplayName?.trim() || 'A family member';
+  const greeting = args.inviteeLabel ? `Hi ${args.inviteeLabel},` : 'Hi,';
+  const subject = args.inviterDisplayName
+    ? `${inviter} invited you to Leiko`
+    : 'You have been invited to Leiko';
+
+  const text = [
+    greeting,
+    '',
+    `${inviter} uses Leiko to keep close to the people they care about, and they would like to share readings with you.`,
+    '',
+    `Your invite code: ${args.code}`,
+    '',
+    'Open the Leiko app, go to Settings → Family, and enter this code to connect. It expires in 7 days.',
+    '',
+    "If you weren't expecting this, you can ignore the email.",
+    '',
+    '— The Leiko team',
+  ].join('\n');
+
+  const safeInviter = inviter.replace(/[<>&]/g, (c) =>
+    c === '<' ? '&lt;' : c === '>' ? '&gt;' : '&amp;',
+  );
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; color: #1A1A1A;">
+      <p>${greeting}</p>
+      <p><strong>${safeInviter}</strong> uses Leiko to keep close to the people they care about, and they would like to share readings with you.</p>
+      <p style="margin: 32px 0; padding: 16px 24px; background: #FAF6F0; border-radius: 12px; text-align: center;">
+        <span style="font-size: 14px; color: #6B6B6B; display: block;">Your invite code</span>
+        <span style="font-size: 32px; letter-spacing: 4px; font-weight: 600; color: #1A1A1A;">${args.code}</span>
+      </p>
+      <p>Open the Leiko app, go to <strong>Settings → Family</strong>, and enter this code to connect. It expires in 7 days.</p>
+      <p style="color: #6B6B6B; font-size: 14px;">If you weren't expecting this, you can ignore the email.</p>
+      <p style="color: #6B6B6B; font-size: 14px;">— The Leiko team</p>
+    </div>
+  `.trim();
+
+  try {
+    const resp = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: fromEmail,
+        to: args.toEmail,
+        subject,
+        text,
+        html,
+      }),
+    });
+    return resp.ok;
+  } catch {
+    return false;
+  }
+}
 
 function json(body: unknown, status: number): Response {
   return new Response(JSON.stringify(body), {
@@ -123,7 +212,7 @@ Deno.serve(async (req: Request) => {
         pairing_code: code,
         expires_at: expiresAt,
       })
-      .select('id')
+      .select('id, url_token')
       .single();
 
     if (insertResult.error) {
@@ -137,6 +226,27 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Look up inviter display name for the email body. Best-effort —
+    // a null name falls back to a generic phrasing.
+    const { data: inviterRow } = await serviceClient
+      .from('users')
+      .select('display_name')
+      .eq('id', userId)
+      .maybeSingle();
+    const inviterDisplayName = inviterRow?.display_name ?? null;
+
+    const emailAttempted = Boolean(
+      Deno.env.get('RESEND_API_KEY') && Deno.env.get('RESEND_FROM_EMAIL'),
+    );
+    const emailSent = emailAttempted
+      ? await sendInviteEmail({
+          toEmail: inviteeEmail,
+          code,
+          inviterDisplayName,
+          inviteeLabel,
+        })
+      : false;
+
     // Best-effort audit (no PHI).
     try {
       const domain = inviteeEmail.includes('@')
@@ -149,6 +259,8 @@ Deno.serve(async (req: Request) => {
         metadata: {
           invitee_email_domain: domain,
           has_label: inviteeLabel !== null,
+          email_attempted: emailAttempted,
+          email_sent: emailSent,
         },
       });
     } catch {
@@ -158,7 +270,9 @@ Deno.serve(async (req: Request) => {
     const resp: ResponseShape = {
       invitationId: insertResult.data.id as string,
       pairingCode: code,
+      urlToken: insertResult.data.url_token as string,
       expiresAt,
+      emailSent,
     };
     return json(resp, 200);
   }

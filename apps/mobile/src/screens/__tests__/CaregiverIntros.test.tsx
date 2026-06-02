@@ -142,7 +142,7 @@ describe('Intro3 — copy + nav', () => {
         <CaregiverIntro3Screen navigation={nav} route={makeRoute('Intro3')} />,
       ),
     );
-    fireEvent.press(screen.getByTestId('caregiver-intro3-get-started'));
+    fireEvent.press(screen.getByTestId('caregiver-intro3-continue'));
     expect(nav.navigate).toHaveBeenCalledWith('FamilyYou');
 
     (nav.navigate as jest.Mock).mockClear();

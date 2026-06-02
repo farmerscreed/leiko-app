@@ -22,16 +22,14 @@ import {
   type SingleStringCascadeResult,
 } from './fallThrough';
 import type { TrendsData, TrendsRange } from '../../utils/trends-aggregate';
-import type { CorrelationRow, AccountType } from '../../types/database';
+import type { CorrelationRow } from '../../types/database';
+import {
+  buildTrendsLetter,
+  type BuildTrendsLetterInput,
+  type TrendsLetter,
+} from './trendsTierC';
 
-export interface BuildTrendsNarrativeInput {
-  data: TrendsData | undefined;
-  correlations: CorrelationRow[];
-  range: TrendsRange;
-  accountType: AccountType;
-  /** "Mum" / "Dad" / user's chosen label. */
-  parentLabel?: string;
-}
+export type BuildTrendsNarrativeInput = BuildTrendsLetterInput;
 
 const RANGE_LABEL: Record<TrendsRange, string> = {
   '7d': 'week',
@@ -150,24 +148,84 @@ function capitalize(s: string): string {
 // ── Cascade integration ──────────────────────────────────────────────
 
 /**
+ * Sprint 16.5g — extended cascade result that also carries the
+ * structured fields the renderer uses (focal vital, cited day, sign-
+ * off). When the cascade falls through to deterministic copy these
+ * fields are best-effort defaults.
+ */
+export interface TrendsNarrativeResult {
+  body: string;
+  focalVital: TrendsLetter['focalVital'];
+  citedDayIdx: number | null;
+  signOff: string;
+  /** Tier the renderer should attribute the narrative to. */
+  tier: 'C' | 'A' | 'deterministic';
+}
+
+/**
  * Generate the trends narrative through the Sprint 16 fall-through
- * cascade. Tier-B is not yet wired for this surface; the cascade
- * skips straight to Tier-A. When Tier-B lands later, swap the first
- * argument for an Edge Function call.
+ * cascade. Tier-C is the rich deterministic engine (Sprint 16.5g);
+ * Tier-A is the legacy 2-sentence template kept as a backup; Tier-B
+ * LLM is not yet wired for the narrative surface (needs an Edge
+ * Function path that bypasses the Ask Leiko hash-locked prompt).
+ *
+ * The result type also carries structured fields for the renderer.
  */
 export async function generateTrendsNarrative(
   input: BuildTrendsNarrativeInput,
-): Promise<SingleStringCascadeResult> {
-  return runSingleStringCascade({
+): Promise<TrendsNarrativeResult> {
+  // Tier-C: rich deterministic engine. Tries first.
+  const letter = buildTrendsLetter(input);
+  if (letter) {
+    return {
+      body: letter.body,
+      focalVital: letter.focalVital,
+      citedDayIdx: letter.citedDayIdx,
+      signOff: letter.signOff,
+      tier: 'C',
+    };
+  }
+
+  // Tier-A fallback: legacy short template.
+  const tierA = buildTierATrendsNarrative(input);
+  if (tierA) {
+    return {
+      body: tierA,
+      // Best-effort focal pick when Tier-A is the lead.
+      focalVital: input.data && input.data.summary.bp.count >= 3 ? 'bp' : 'bp',
+      citedDayIdx: null,
+      signOff: '— Leiko',
+      tier: 'A',
+    };
+  }
+
+  // Deterministic — preserve cascade visibility for analytics.
+  const cascade = await runSingleStringCascade({
     surface: 'trends_narrative',
-    // Tier-B not wired yet for Trends — omit the tierB callback so the
-    // cascade skips straight to Tier-A without logging a fake
-    // degradation event. When the Edge Function path lands, pass the
-    // async call here.
-    tierA: () => buildTierATrendsNarrative(input),
-    // Deterministic default lives in fallThrough.DETERMINISTIC_COPY
-    // under `trends_narrative`. The cascade resolves it.
+    tierA: () => null,
   });
+  return {
+    body: cascade.body,
+    focalVital: 'bp',
+    citedDayIdx: null,
+    signOff: '— Leiko',
+    tier: 'deterministic',
+  };
+}
+
+/** Compatibility alias for callers that only need the string body
+ *  (e.g. analytics, tests). Returns the same fall-through chain. */
+export async function generateTrendsNarrativeBody(
+  input: BuildTrendsNarrativeInput,
+): Promise<SingleStringCascadeResult> {
+  const r = await generateTrendsNarrative(input);
+  // Map Tier-C → 'tier_a' source so the existing analytics surface
+  // (which only knows tier_b / tier_a / deterministic) still reads
+  // sensibly. Tier-C is functionally an enriched Tier-A.
+  return {
+    body: r.body,
+    source: r.tier === 'deterministic' ? 'deterministic' : 'tier_a',
+  };
 }
 
 // ── Span renderer helpers ────────────────────────────────────────────

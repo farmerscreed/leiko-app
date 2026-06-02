@@ -135,7 +135,7 @@ describe('<InlineExplainer /> — BP context', () => {
     );
     expect(
       screen.getByText(
-        /This is general information, not medical advice\. Talk to your doctor about what is right for you\./,
+        /General information to help you understand the numbers\. Talk to your doctor about what is right for you\./,
       ),
     ).toBeTruthy();
   });

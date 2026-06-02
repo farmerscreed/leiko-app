@@ -51,6 +51,10 @@ import { useSeededLearnCard } from '../../hooks/useSeededLearnCard';
 import { useEnsureSelfBuyerFamily } from '../../hooks/useEnsureSelfBuyerFamily';
 import { useDailyNarration } from '../../hooks/useDailyNarration';
 import { useHydrateReadingsFromServer } from '../../hooks/useHydrateReadingsFromServer';
+import { useHydrateSleepFromServer } from '../../hooks/useHydrateSleepFromServer';
+import { useHydrateActivityFromServer } from '../../hooks/useHydrateActivityFromServer';
+import { useHydrateHRFromServer } from '../../hooks/useHydrateHRFromServer';
+import { useHydrateSpO2FromServer } from '../../hooks/useHydrateSpO2FromServer';
 import { VitalTile } from '../../components/VitalTile';
 import {
   CorrelationStrip,
@@ -59,8 +63,11 @@ import {
 import { DaySpine } from '../../components/DaySpine';
 import { useDailyPulseData } from '../../state/dailyPulse';
 import { useFamilyReadings } from '../../hooks/useFamilyReadings';
+import { FamilyRemovalBanner } from '../../components/FamilyRemovalBanner';
+import { useFamilyRemovalBanner } from '../../hooks/useFamilyRemovalBanner';
 import { useAuth } from '../../state/auth';
 import { useHR } from '../../state/hr';
+import { usePairing } from '../../state/pairing';
 import { useSleep } from '../../state/sleep';
 import { useTheme, type Theme } from '../../theme';
 import {
@@ -76,10 +83,22 @@ export function SelfBuyerHome() {
   const theme = useTheme();
   const navigation = useNavigation<Nav>();
   const profile = useAuth((s) => s.profile);
-  const { parents, isRefreshing, refresh } = useFamilyReadings();
+  const { parents, isLoading: familyLoading, isRefreshing, refresh } =
+    useFamilyReadings();
+  // Sprint 17b — backstop banner if this user (who could be a hybrid
+  // mode caregiver of another family) was removed from a circle.
+  // Self-buyers can't be removed from their own family (the Edge
+  // Function refuses owner-removal); only their secondary
+  // memberships are at risk.
+  const removalBanner = useFamilyRemovalBanner(parents, familyLoading);
   const data = useDailyPulseData();
   // Sprint 10a — drives the 6th-reading auto-paywall mount below.
   const familyId = parents[0]?.familyId ?? null;
+  // Sprint 18 bench bug — self-buyer post-onboarding has no inline
+  // pairing affordance; if pairedDevice is null we render a calm
+  // "let's pair your watch" prompt under the hero so first-run users
+  // don't have to dig into Settings to find pairing.
+  const pairedDevice = usePairing((s) => s.pairedDevice);
 
   // ----- Adaptive central value (D13 §7.2) ---------------------------
   const central = useMemo(() => pickCentralValue(data), [data]);
@@ -107,6 +126,21 @@ export function SelfBuyerHome() {
   // pulling the family's last 30 server-side readings. No-ops when
   // local already has data. See useHydrateReadingsFromServer.
   useHydrateReadingsFromServer();
+  // Sprint 16.5c — same pattern for sleep. The watch's day-info
+  // storage rolls over after a few days, so a re-sync only re-pulls
+  // last night even when the server has 30+ historical sessions.
+  // This hook tops up the sleep slice from the server when local has
+  // < FETCH_LIMIT rows.
+  useHydrateSleepFromServer();
+  // Sprint 16.5e — same pattern for steps + calories. Same watch
+  // rollover; without this the ActivityDetail screen + the activity
+  // tile show only today's row after a few days of normal use.
+  useHydrateActivityFromServer();
+  // Sprint 16.5e — HR + SpO2 round out the multi-day hydration set.
+  // HR's recent cap is ~16h dense, but the SpO2 hourly cadence + the
+  // sleep × resting-HR correlation strip both need server-side history.
+  useHydrateHRFromServer();
+  useHydrateSpO2FromServer();
 
   // ----- Sprint 12 follow-up: Ask Leiko bottom sheet ----------------
   const [askLeikoVisible, setAskLeikoVisible] = useState(false);
@@ -184,6 +218,17 @@ export function SelfBuyerHome() {
           onAvatarPress={() => navigation.navigate('Settings')}
         />
 
+        {/* Sprint 17b — surfaces when this user was removed from a
+            family circle they were a member of (hybrid mode only;
+            self-buyers can't be removed from their own family). */}
+        {removalBanner.removed ? (
+          <FamilyRemovalBanner
+            label={removalBanner.removed.label}
+            onDismiss={removalBanner.dismiss}
+            testID="self-buyer-home-removal-banner"
+          />
+        ) : null}
+
         {/* Sprint 16 — calm reassurance banner after 24h of failed
             /sync. Renders only when the failure-tracker reports a
             streak past the threshold; otherwise null. */}
@@ -249,6 +294,25 @@ export function SelfBuyerHome() {
             testID="self-buyer-home-hero"
           />
         </Pressable>
+
+        {/* Sprint 18 bench bug — first-run self-buyer with no watch
+            paired had no inline pairing CTA on Home and had to dig into
+            Settings. This calm prompt slots between the hero and the
+            narration so the next action is obvious. Disappears the
+            moment usePairing has a pairedDevice. */}
+        {!pairedDevice ? (
+          <View
+            style={{
+              paddingHorizontal: theme.spacing.l,
+              marginTop: theme.spacing.xxl,
+            }}
+          >
+            <PairWatchPrompt
+              theme={theme}
+              onPair={() => navigation.navigate('Pairing')}
+            />
+          </View>
+        ) : null}
 
         {/* AI narration card — placeholder string until Sprint 12.5. */}
         <View
@@ -455,7 +519,6 @@ interface PulseHeaderProps {
 function PulseHeader({ theme, eyebrow, greeting, name, onAvatarPress }: PulseHeaderProps) {
   const eyebrowStyle = theme.type('labelUppercase');
   const greetingStyle = theme.type('displayM');
-  const initial = name.trim().charAt(0).toUpperCase() || 'A';
   return (
     <View
       accessibilityRole="header"
@@ -514,17 +577,24 @@ function PulseHeader({ theme, eyebrow, greeting, name, onAvatarPress }: PulseHea
           justifyContent: 'center',
           opacity: pressed ? 0.65 : 1,
         })}
-        testID="self-buyer-home-avatar"
+        testID="self-buyer-home-settings"
       >
+        {/* Sprint 17b polish — the affordance is "open settings", so
+            show a settings glyph (matches CaregiverHome's pattern at
+            screens/Home/CaregiverHome.tsx). Previously displayed the
+            user's first initial, which was visually identical to a
+            generic avatar bubble and read as "B" instead of
+            "Settings". Phosphor GearSix lands when the icon library
+            sweep ships. */}
         <Text
           allowFontScaling={false}
           style={{
-            fontFamily: theme.fontFamilies.editorial,
-            fontSize: 17,
+            fontSize: 18,
             color: theme.colors.text.secondary,
+            lineHeight: 18,
           }}
         >
-          {initial}
+          {'⚙'}
         </Text>
       </Pressable>
     </View>
@@ -534,6 +604,96 @@ function PulseHeader({ theme, eyebrow, greeting, name, onAvatarPress }: PulseHea
 interface NarrationCardProps {
   theme: Theme;
   text: string;
+}
+
+// Sprint 18 bench bug — calm pairing prompt rendered on self-buyer Home
+// when no watch is paired. Matches NarrationCard's visual weight so it
+// sits naturally below the hero. Tapping anywhere on the card routes to
+// the Pairing screen; an explicit "Pair watch" pressable carries the
+// label for screen readers + accessibility.
+interface PairWatchPromptProps {
+  theme: Theme;
+  onPair: () => void;
+}
+
+function PairWatchPrompt({ theme, onPair }: PairWatchPromptProps) {
+  const labelStyle = theme.type('labelUppercase');
+  const titleStyle = theme.type('title');
+  const bodyStyle = theme.type('bodyM');
+  return (
+    <Pressable
+      onPress={onPair}
+      accessibilityRole="button"
+      accessibilityLabel="Pair your watch"
+      accessibilityHint="Opens the pairing flow"
+      testID="self-buyer-home-pair-watch-prompt"
+      style={({ pressed }) => ({
+        padding: theme.spacing.l,
+        borderRadius: theme.radii.l,
+        backgroundColor: theme.colors.surface.warmElevated,
+        borderWidth: 0.5,
+        borderColor: theme.colors.border.rim,
+        opacity: pressed ? 0.85 : 1,
+      })}
+    >
+      <Text
+        allowFontScaling={false}
+        style={{
+          fontFamily: labelStyle.family,
+          fontSize: labelStyle.size,
+          lineHeight: labelStyle.lineHeight,
+          letterSpacing: labelStyle.letterSpacing,
+          color: theme.colors.brand.coral,
+          textTransform: 'uppercase',
+          marginBottom: theme.spacing.s,
+        }}
+      >
+        Your watch
+      </Text>
+      <Text
+        style={{
+          fontFamily: titleStyle.family,
+          fontSize: titleStyle.size,
+          lineHeight: titleStyle.lineHeight,
+          fontWeight: titleStyle.weight as '600',
+          color: theme.colors.text.primary,
+          marginBottom: theme.spacing.xs,
+        }}
+      >
+        Pair your watch to start.
+      </Text>
+      <Text
+        style={{
+          fontFamily: bodyStyle.family,
+          fontSize: bodyStyle.size,
+          lineHeight: bodyStyle.lineHeight,
+          color: theme.colors.text.secondary,
+          marginBottom: theme.spacing.m,
+        }}
+      >
+        Once connected, your readings start syncing on their own.
+      </Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: bodyStyle.family,
+            fontSize: bodyStyle.size,
+            lineHeight: bodyStyle.lineHeight,
+            fontWeight: '600',
+            color: theme.colors.brand.coral,
+          }}
+        >
+          Pair watch  ›
+        </Text>
+      </View>
+    </Pressable>
+  );
 }
 
 function NarrationCard({ theme, text }: NarrationCardProps) {

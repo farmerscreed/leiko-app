@@ -11,7 +11,7 @@ exports[`CorrelationStrip — colorMode snapshot matrix renders range=7d colorMo
           "marginBottom": 4,
         },
         {
-          "color": "#ECE9E2",
+          "color": "#B8B2AA",
           "fontFamily": "Inter_400Regular",
           "fontSize": 12,
           "fontWeight": "400",

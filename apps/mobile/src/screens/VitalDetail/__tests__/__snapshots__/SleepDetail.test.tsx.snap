@@ -187,7 +187,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                   }
                   stroke={
                     {
-                      "payload": 4294308330,
+                      "payload": 4294967295,
                       "type": 0,
                     }
                   }
@@ -306,7 +306,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -322,7 +322,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -338,7 +338,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -361,7 +361,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
           }
         >
           <View
-            accessibilityLabel="Last sync Thu. 7:42hrs. Roughly in line with your usual"
+            accessibilityLabel="Last sync Thu. 7:42hrs. Roughly in the middle by the numbers"
             accessibilityRole="text"
             style={
               [
@@ -663,7 +663,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "Inter_500Medium",
                       "fontSize": 11,
                       "letterSpacing": 0.55,
@@ -689,7 +689,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#F5F1EA",
+                        "color": "#FFFFFF",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 56,
                         "letterSpacing": -0.5,
@@ -704,7 +704,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 22,
                         "lineHeight": 28,
@@ -720,7 +720,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 12,
                       "letterSpacing": 0.5,
@@ -730,7 +730,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                   }
                   testID="sleep-detail-hero-range"
                 >
-                  Roughly in line with your usual
+                  Roughly in the middle by the numbers
                 </Text>
               </View>
             </View>
@@ -816,7 +816,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -880,7 +880,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -944,7 +944,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -970,1012 +970,539 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
             style={
               [
                 {
-                  "flexDirection": "row",
-                  "paddingHorizontal": 20,
-                },
-                {
+                  "backgroundColor": "#120C07",
+                  "borderColor": "rgba(255,255,255,0.06)",
+                  "borderRadius": 22,
+                  "borderWidth": 0.5,
                   "gap": 12,
+                  "marginHorizontal": 20,
+                  "padding": 16,
                 },
                 undefined,
               ]
             }
-            testID="sleep-detail-stats"
+            testID="sleep-detail-stages"
           >
             <View
-              accessibilityLabel="Deep: 1:38 hrs · 21%"
-              accessibilityRole="text"
               style={
-                [
-                  {
-                    "borderWidth": 0.5,
-                    "flex": 1,
-                  },
-                  {
-                    "backgroundColor": "#120C07",
-                    "borderColor": "rgba(255,255,255,0.06)",
-                    "borderRadius": 14,
-                    "padding": 12,
-                  },
-                ]
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
+                }
               }
-              testID="sleep-detail-stats-0"
             >
               <Text
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "Inter_500Medium",
                     "fontSize": 11,
                     "letterSpacing": 0.55,
                     "lineHeight": 14,
-                    "marginBottom": 4,
                     "textTransform": "uppercase",
                   }
                 }
               >
-                Deep
+                Sleep composition
               </Text>
               <Text
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
-                    "fontFamily": "InstrumentSerif_400Regular",
-                    "fontSize": 22,
-                    "lineHeight": 28,
-                  }
-                }
-              >
-                1:38
-              </Text>
-              <Text
-                allowFontScaling={false}
-                style={
-                  {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
-                    "letterSpacing": 0.4,
+                    "letterSpacing": 0.3,
                     "lineHeight": 16,
-                    "marginTop": 4,
                   }
                 }
               >
-                hrs · 21%
+                7h 42m
+                 total
               </Text>
             </View>
             <View
-              accessibilityLabel="REM: 1:54 hrs · 25%"
-              accessibilityRole="text"
               style={
-                [
-                  {
-                    "borderWidth": 0.5,
-                    "flex": 1,
-                  },
-                  {
-                    "backgroundColor": "#120C07",
-                    "borderColor": "rgba(255,255,255,0.06)",
-                    "borderRadius": 14,
-                    "padding": 12,
-                  },
-                ]
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "gap": 8,
+                  "justifyContent": "space-between",
+                }
               }
-              testID="sleep-detail-stats-1"
             >
+              <View
+                style={
+                  {
+                    "gap": 2,
+                  }
+                }
+              >
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "Inter_500Medium",
+                      "fontSize": 11,
+                      "letterSpacing": 0.55,
+                      "lineHeight": 14,
+                      "textTransform": "uppercase",
+                    }
+                  }
+                >
+                  In bed
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#7C7AAB",
+                      "fontFamily": "InstrumentSerif_400Regular",
+                      "fontSize": 18,
+                      "fontWeight": "600",
+                      "lineHeight": 24,
+                    }
+                  }
+                >
+                  4:18 PM
+                </Text>
+              </View>
               <Text
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
-                    "fontFamily": "Inter_500Medium",
-                    "fontSize": 11,
-                    "letterSpacing": 0.55,
-                    "lineHeight": 14,
-                    "marginBottom": 4,
-                    "textTransform": "uppercase",
+                    "alignSelf": "flex-end",
+                    "color": "#857F7A",
+                    "fontFamily": "Inter_600SemiBold",
+                    "fontSize": 18,
+                    "lineHeight": 24,
+                    "paddingBottom": 2,
                   }
                 }
               >
-                REM
+                →
               </Text>
-              <Text
-                allowFontScaling={false}
+              <View
                 style={
-                  {
-                    "color": "#F5F1EA",
-                    "fontFamily": "InstrumentSerif_400Regular",
-                    "fontSize": 22,
-                    "lineHeight": 28,
-                  }
+                  [
+                    {
+                      "gap": 2,
+                    },
+                    {
+                      "alignItems": "flex-end",
+                    },
+                  ]
                 }
               >
-                1:54
-              </Text>
-              <Text
-                allowFontScaling={false}
-                style={
-                  {
-                    "color": "#9C9890",
-                    "fontFamily": "JetBrainsMono_500Medium",
-                    "fontSize": 12,
-                    "letterSpacing": 0.4,
-                    "lineHeight": 16,
-                    "marginTop": 4,
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "Inter_500Medium",
+                      "fontSize": 11,
+                      "letterSpacing": 0.55,
+                      "lineHeight": 14,
+                      "textTransform": "uppercase",
+                    }
                   }
-                }
-              >
-                hrs · 25%
-              </Text>
+                >
+                  Woke
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#7C7AAB",
+                      "fontFamily": "InstrumentSerif_400Regular",
+                      "fontSize": 18,
+                      "fontWeight": "600",
+                      "lineHeight": 24,
+                    }
+                  }
+                >
+                  12:00 AM
+                </Text>
+              </View>
             </View>
             <View
-              accessibilityLabel="Light: 3:52 hrs · 50%"
-              accessibilityRole="text"
+              accessibilityLabel="Deep 21%, Light 50%, Other 29%"
+              accessibilityRole="image"
               style={
-                [
-                  {
-                    "borderWidth": 0.5,
-                    "flex": 1,
-                  },
-                  {
-                    "backgroundColor": "#120C07",
-                    "borderColor": "rgba(255,255,255,0.06)",
-                    "borderRadius": 14,
-                    "padding": 12,
-                  },
-                ]
+                {
+                  "borderRadius": 6,
+                  "flexDirection": "row",
+                  "height": 12,
+                  "overflow": "hidden",
+                }
               }
-              testID="sleep-detail-stats-2"
             >
-              <Text
-                allowFontScaling={false}
+              <View
                 style={
                   {
-                    "color": "#9C9890",
-                    "fontFamily": "Inter_500Medium",
-                    "fontSize": 11,
-                    "letterSpacing": 0.55,
-                    "lineHeight": 14,
-                    "marginBottom": 4,
-                    "textTransform": "uppercase",
+                    "backgroundColor": "#7C7AAB",
+                    "flex": 21,
+                    "marginLeft": 0,
+                    "opacity": 1,
                   }
                 }
-              >
-                Light
-              </Text>
-              <Text
-                allowFontScaling={false}
+                testID="sleep-detail-stages-segment-deep"
+              />
+              <View
                 style={
                   {
-                    "color": "#F5F1EA",
-                    "fontFamily": "InstrumentSerif_400Regular",
-                    "fontSize": 22,
-                    "lineHeight": 28,
+                    "backgroundColor": "#7C7AAB",
+                    "flex": 50,
+                    "marginLeft": 1,
+                    "opacity": 0.7,
                   }
                 }
-              >
-                3:52
-              </Text>
-              <Text
-                allowFontScaling={false}
+                testID="sleep-detail-stages-segment-light"
+              />
+              <View
                 style={
                   {
-                    "color": "#9C9890",
-                    "fontFamily": "JetBrainsMono_500Medium",
-                    "fontSize": 12,
-                    "letterSpacing": 0.4,
-                    "lineHeight": 16,
-                    "marginTop": 4,
+                    "backgroundColor": "#7C7AAB",
+                    "flex": 29,
+                    "marginLeft": 1,
+                    "opacity": 0.4,
                   }
                 }
-              >
-                hrs · 50%
-              </Text>
+                testID="sleep-detail-stages-segment-other"
+              />
             </View>
+            <View
+              style={
+                {
+                  "flexDirection": "row",
+                  "gap": 12,
+                }
+              }
+            >
+              <View
+                style={
+                  {
+                    "flex": 1,
+                    "gap": 4,
+                  }
+                }
+              >
+                <View
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                      "gap": 6,
+                    }
+                  }
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "borderRadius": 4,
+                          "height": 8,
+                          "width": 8,
+                        },
+                        {
+                          "backgroundColor": "#7C7AAB",
+                          "opacity": 1,
+                        },
+                      ]
+                    }
+                  />
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Deep
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#FFFFFF",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 15,
+                      "fontWeight": "600",
+                      "lineHeight": 20,
+                    }
+                  }
+                >
+                  1h 38m
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "lineHeight": 16,
+                    }
+                  }
+                >
+                  21
+                  %
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                    "gap": 4,
+                  }
+                }
+              >
+                <View
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                      "gap": 6,
+                    }
+                  }
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "borderRadius": 4,
+                          "height": 8,
+                          "width": 8,
+                        },
+                        {
+                          "backgroundColor": "#7C7AAB",
+                          "opacity": 0.7,
+                        },
+                      ]
+                    }
+                  />
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Light
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#FFFFFF",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 15,
+                      "fontWeight": "600",
+                      "lineHeight": 20,
+                    }
+                  }
+                >
+                  3h 52m
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "lineHeight": 16,
+                    }
+                  }
+                >
+                  50
+                  %
+                </Text>
+              </View>
+              <View
+                style={
+                  {
+                    "flex": 1,
+                    "gap": 4,
+                  }
+                }
+              >
+                <View
+                  style={
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                      "gap": 6,
+                    }
+                  }
+                >
+                  <View
+                    style={
+                      [
+                        {
+                          "borderRadius": 4,
+                          "height": 8,
+                          "width": 8,
+                        },
+                        {
+                          "backgroundColor": "#7C7AAB",
+                          "opacity": 0.4,
+                        },
+                      ]
+                    }
+                  />
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Other
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#FFFFFF",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 15,
+                      "fontWeight": "600",
+                      "lineHeight": 20,
+                    }
+                  }
+                >
+                  2h 12m
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "lineHeight": 16,
+                    }
+                  }
+                >
+                  29
+                  %
+                </Text>
+              </View>
+            </View>
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#857F7A",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 12,
+                  "lineHeight": 16,
+                }
+              }
+            >
+              Your watch reports total, deep, and light durations per night. Minute-by-minute REM and awake timing aren't available on this model — "Other" covers REM cycles and brief wakings combined.
+            </Text>
           </View>
           <View
             style={
               [
-                {},
+                {
+                  "backgroundColor": "#120C07",
+                  "borderColor": "rgba(255,255,255,0.06)",
+                  "borderRadius": 22,
+                  "borderWidth": 0.5,
+                  "gap": 8,
+                  "marginHorizontal": 20,
+                  "padding": 16,
+                },
                 undefined,
               ]
             }
-            testID="sleep-detail-hypnogram"
+            testID="sleep-detail-nightly"
           >
-            <Text
-              accessibilityRole="header"
-              allowFontScaling={false}
+            <View
               style={
                 {
-                  "color": "#9C9890",
-                  "fontFamily": "Inter_500Medium",
-                  "fontSize": 11,
-                  "letterSpacing": 0.55,
-                  "lineHeight": 14,
-                  "marginBottom": 10,
-                  "marginHorizontal": 24,
-                  "textTransform": "uppercase",
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "justifyContent": "space-between",
                 }
               }
-              testID="sleep-detail-hypnogram-eyebrow"
             >
-              Stages · 4:18 PM – 12:00 AM
-            </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#857F7A",
+                    "fontFamily": "Inter_500Medium",
+                    "fontSize": 11,
+                    "letterSpacing": 0.55,
+                    "lineHeight": 14,
+                    "textTransform": "uppercase",
+                  }
+                }
+              >
+                Nightly sleep · 7d
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#857F7A",
+                    "fontFamily": "JetBrainsMono_500Medium",
+                    "fontSize": 12,
+                    "letterSpacing": 0.3,
+                    "lineHeight": 16,
+                  }
+                }
+              >
+                0 of 7 tracked
+              </Text>
+            </View>
             <View
-              accessibilityLabel="Sleep stages from 4:18 PM to 12:00 AM."
-              accessibilityRole="image"
               style={
                 [
                   {
-                    "borderWidth": 0.5,
-                    "marginHorizontal": 20,
-                    "position": "relative",
+                    "flexDirection": "row",
+                    "gap": 6,
                   },
                   {
-                    "backgroundColor": "#120C07",
-                    "borderColor": "rgba(255,255,255,0.06)",
-                    "borderRadius": 22,
-                    "padding": 16,
+                    "height": 132,
                   },
                 ]
               }
-              testID="sleep-detail-hypnogram-card"
             >
-              <RNSVGSvgView
-                align="xMidYMid"
-                bbHeight={130}
-                bbWidth="100%"
-                focusable={false}
-                height={130}
-                meetOrSlice={0}
-                minX={0}
-                minY={0}
-                style={
-                  [
-                    {
-                      "backgroundColor": "transparent",
-                      "borderWidth": 0,
-                    },
-                    {
-                      "flex": 0,
-                      "height": 130,
-                      "width": "100%",
-                    },
-                  ]
-                }
-                testID="sleep-detail-hypnogram-svg"
-                vbHeight={130}
-                vbWidth={320}
-                width="100%"
-              >
-                <RNSVGGroup
-                  fill={
-                    {
-                      "payload": 4278190080,
-                      "type": 0,
-                    }
-                  }
-                >
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-0"
-                    width={9.633333333333333}
-                    x={8}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-1"
-                    width={9.633333333333333}
-                    x={18.133333333333333}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-2"
-                    width={9.633333333333333}
-                    x={28.266666666666666}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-3"
-                    width={9.633333333333333}
-                    x={38.4}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-4"
-                    width={9.633333333333333}
-                    x={48.53333333333333}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-5"
-                    width={9.633333333333333}
-                    x={58.666666666666664}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-6"
-                    width={9.633333333333333}
-                    x={68.8}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-7"
-                    width={9.633333333333333}
-                    x={78.93333333333334}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-8"
-                    width={9.633333333333333}
-                    x={89.06666666666666}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-9"
-                    width={9.633333333333333}
-                    x={99.19999999999999}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-10"
-                    width={9.633333333333333}
-                    x={109.33333333333333}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-11"
-                    width={9.633333333333333}
-                    x={119.46666666666667}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-12"
-                    width={9.633333333333333}
-                    x={129.6}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-13"
-                    width={9.633333333333333}
-                    x={139.73333333333332}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-14"
-                    width={9.633333333333333}
-                    x={149.86666666666667}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-15"
-                    width={9.633333333333333}
-                    x={160}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-16"
-                    width={9.633333333333333}
-                    x={170.13333333333333}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-17"
-                    width={9.633333333333333}
-                    x={180.26666666666665}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-18"
-                    width={9.633333333333333}
-                    x={190.39999999999998}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-19"
-                    width={9.633333333333333}
-                    x={200.53333333333333}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-20"
-                    width={9.633333333333333}
-                    x={210.66666666666666}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-21"
-                    width={9.633333333333333}
-                    x={220.79999999999998}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-22"
-                    width={9.633333333333333}
-                    x={230.93333333333334}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-23"
-                    width={9.633333333333333}
-                    x={241.06666666666666}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-24"
-                    width={9.633333333333333}
-                    x={251.2}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-25"
-                    width={9.633333333333333}
-                    x={261.3333333333333}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-26"
-                    width={9.633333333333333}
-                    x={271.46666666666664}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-27"
-                    width={9.633333333333333}
-                    x={281.59999999999997}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-28"
-                    width={9.633333333333333}
-                    x={291.73333333333335}
-                    y={66.1}
-                  />
-                  <RNSVGRect
-                    fill={
-                      {
-                        "payload": 4286347947,
-                        "type": 0,
-                      }
-                    }
-                    fillOpacity={0.85}
-                    height={8}
-                    propList={
-                      [
-                        "fill",
-                        "fillOpacity",
-                      ]
-                    }
-                    rx={2}
-                    testID="sleep-detail-hypnogram-bin-29"
-                    width={9.633333333333333}
-                    x={301.8666666666667}
-                    y={66.1}
-                  />
-                </RNSVGGroup>
-              </RNSVGSvgView>
-              <View
-                pointerEvents="none"
-                style={
-                  {
-                    "bottom": 0,
-                    "left": 0,
-                    "position": "absolute",
-                    "right": 0,
-                    "top": 0,
-                  }
-                }
-              >
-                <Text
-                  allowFontScaling={false}
-                  style={
-                    {
-                      "color": "#9C9890",
-                      "fontFamily": "JetBrainsMono_500Medium",
-                      "fontSize": 8,
-                      "left": 24,
-                      "letterSpacing": 0.8,
-                      "position": "absolute",
-                      "top": 25,
-                    }
-                  }
-                  testID="sleep-detail-hypnogram-label-awake"
-                >
-                  AWAKE
-                </Text>
-                <Text
-                  allowFontScaling={false}
-                  style={
-                    {
-                      "color": "#9C9890",
-                      "fontFamily": "JetBrainsMono_500Medium",
-                      "fontSize": 8,
-                      "left": 24,
-                      "letterSpacing": 0.8,
-                      "position": "absolute",
-                      "top": 50.5,
-                    }
-                  }
-                  testID="sleep-detail-hypnogram-label-rem"
-                >
-                  REM
-                </Text>
-                <Text
-                  allowFontScaling={false}
-                  style={
-                    {
-                      "color": "#9C9890",
-                      "fontFamily": "JetBrainsMono_500Medium",
-                      "fontSize": 8,
-                      "left": 24,
-                      "letterSpacing": 0.8,
-                      "position": "absolute",
-                      "top": 81.1,
-                    }
-                  }
-                  testID="sleep-detail-hypnogram-label-light"
-                >
-                  LIGHT
-                </Text>
-                <Text
-                  allowFontScaling={false}
-                  style={
-                    {
-                      "color": "#9C9890",
-                      "fontFamily": "JetBrainsMono_500Medium",
-                      "fontSize": 8,
-                      "left": 24,
-                      "letterSpacing": 0.8,
-                      "position": "absolute",
-                      "top": 111.7,
-                    }
-                  }
-                  testID="sleep-detail-hypnogram-label-deep"
-                >
-                  DEEP
-                </Text>
-              </View>
               <View
                 style={
                   {
-                    "flexDirection": "row",
                     "justifyContent": "space-between",
-                    "marginTop": 6,
+                    "paddingBottom": 0,
+                    "paddingTop": 0,
                   }
                 }
               >
@@ -1983,63 +1510,256 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
-                      "fontFamily": "JetBrainsMono_500Medium",
-                      "fontSize": 12,
-                      "letterSpacing": 0.6,
+                      "color": "#857F7A",
+                      "fontFamily": "Inter_400Regular",
+                      "fontSize": 10,
+                      "lineHeight": 12,
+                      "textAlign": "right",
+                      "width": 22,
                     }
                   }
                 >
-                  4p
+                  9h
                 </Text>
                 <Text
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
-                      "fontFamily": "JetBrainsMono_500Medium",
-                      "fontSize": 12,
-                      "letterSpacing": 0.6,
+                      "color": "#857F7A",
+                      "fontFamily": "Inter_400Regular",
+                      "fontSize": 10,
+                      "lineHeight": 12,
+                      "textAlign": "right",
+                      "width": 22,
                     }
                   }
                 >
-                  8p
+                  6h
                 </Text>
                 <Text
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
-                      "fontFamily": "JetBrainsMono_500Medium",
-                      "fontSize": 12,
-                      "letterSpacing": 0.6,
+                      "color": "#857F7A",
+                      "fontFamily": "Inter_400Regular",
+                      "fontSize": 10,
+                      "lineHeight": 12,
+                      "textAlign": "right",
+                      "width": 22,
                     }
                   }
                 >
-                  12a
+                  3h
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "Inter_400Regular",
+                      "fontSize": 10,
+                      "lineHeight": 12,
+                      "textAlign": "right",
+                      "width": 22,
+                    }
+                  }
+                >
+                  0h
                 </Text>
               </View>
               <View
-                pointerEvents="none"
                 style={
-                  [
+                  {
+                    "flex": 1,
+                  }
+                }
+              >
+                <View
+                  style={
                     {
-                      "bottom": 0,
+                      "backgroundColor": "#857F7A",
+                      "height": 0.5,
                       "left": 0,
+                      "opacity": 0.15,
                       "position": "absolute",
                       "right": 0,
                       "top": 0,
-                    },
+                    }
+                  }
+                />
+                <View
+                  style={
                     {
-                      "opacity": 0,
-                    },
-                  ]
+                      "backgroundColor": "#857F7A",
+                      "height": 0.5,
+                      "left": 0,
+                      "opacity": 0.15,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 44,
+                    }
+                  }
+                />
+                <View
+                  style={
+                    {
+                      "backgroundColor": "#857F7A",
+                      "height": 0.5,
+                      "left": 0,
+                      "opacity": 0.15,
+                      "position": "absolute",
+                      "right": 0,
+                      "top": 88,
+                    }
+                  }
+                />
+                <View
+                  accessibilityRole="image"
+                  style={
+                    [
+                      {
+                        "alignItems": "flex-end",
+                        "flexDirection": "row",
+                        "paddingBottom": 4,
+                        "paddingTop": 4,
+                      },
+                      {
+                        "gap": 6,
+                        "height": 132,
+                      },
+                    ]
+                  }
+                >
+                  <View
+                    style={
+                      {
+                        "alignSelf": "flex-end",
+                        "backgroundColor": "#857F7A",
+                        "borderRadius": 1.5,
+                        "height": 3,
+                        "opacity": 0.2,
+                        "width": 28,
+                      }
+                    }
+                  />
+                  <View
+                    style={
+                      {
+                        "alignSelf": "flex-end",
+                        "backgroundColor": "#857F7A",
+                        "borderRadius": 1.5,
+                        "height": 3,
+                        "opacity": 0.2,
+                        "width": 28,
+                      }
+                    }
+                  />
+                  <View
+                    style={
+                      {
+                        "alignSelf": "flex-end",
+                        "backgroundColor": "#857F7A",
+                        "borderRadius": 1.5,
+                        "height": 3,
+                        "opacity": 0.2,
+                        "width": 28,
+                      }
+                    }
+                  />
+                  <View
+                    style={
+                      {
+                        "alignSelf": "flex-end",
+                        "backgroundColor": "#857F7A",
+                        "borderRadius": 1.5,
+                        "height": 3,
+                        "opacity": 0.2,
+                        "width": 28,
+                      }
+                    }
+                  />
+                  <View
+                    style={
+                      {
+                        "alignSelf": "flex-end",
+                        "backgroundColor": "#857F7A",
+                        "borderRadius": 1.5,
+                        "height": 3,
+                        "opacity": 0.2,
+                        "width": 28,
+                      }
+                    }
+                  />
+                  <View
+                    style={
+                      {
+                        "alignSelf": "flex-end",
+                        "backgroundColor": "#857F7A",
+                        "borderRadius": 1.5,
+                        "height": 3,
+                        "opacity": 0.2,
+                        "width": 28,
+                      }
+                    }
+                  />
+                  <View
+                    style={
+                      {
+                        "alignSelf": "flex-end",
+                        "backgroundColor": "#857F7A",
+                        "borderRadius": 1.5,
+                        "height": 3,
+                        "opacity": 0.2,
+                        "width": 28,
+                      }
+                    }
+                  />
+                </View>
+              </View>
+            </View>
+            <View
+              style={
+                [
+                  {
+                    "flexDirection": "row",
+                    "justifyContent": "space-between",
+                  },
+                  {
+                    "paddingLeft": 28,
+                  },
+                ]
+              }
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#857F7A",
+                    "fontFamily": "Inter_400Regular",
+                    "fontSize": 12,
+                    "lineHeight": 16,
+                  }
                 }
-              />
+              >
+                May 2
+              </Text>
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#857F7A",
+                    "fontFamily": "Inter_400Regular",
+                    "fontSize": 12,
+                    "lineHeight": 16,
+                  }
+                }
+              >
+                today
+              </Text>
             </View>
           </View>
           <View
-            accessibilityLabel="Leiko about your sleep: Deep sleep made up about 21% of the night — roughly your usual. We'll keep watching how this connects to your morning readings."
+            accessibilityLabel="Leiko about your sleep: Deep sleep made up about 21% of the night — within the range we typically see. Wear the watch a few more nights and we'll start showing how this connects to your morning readings."
             accessibilityRole="text"
             style={
               [
@@ -2176,14 +1896,14 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
             <Text
               style={
                 {
-                  "color": "#F5F1EA",
+                  "color": "#FFFFFF",
                   "fontFamily": "Inter_400Regular",
                   "fontSize": 15,
                   "lineHeight": 22,
                 }
               }
             >
-              Deep sleep made up about 21% of the night — roughly your usual. We'll keep watching how this connects to your morning readings.
+              Deep sleep made up about 21% of the night — within the range we typically see. Wear the watch a few more nights and we'll start showing how this connects to your morning readings.
             </Text>
           </View>
           <View
@@ -2240,162 +1960,6 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
             >
               What does this mean?
             </Text>
-          </View>
-          <View
-            testID="sleep-detail-recent"
-          >
-            <Text
-              allowFontScaling={false}
-              style={
-                {
-                  "color": "#9C9890",
-                  "fontFamily": "Inter_500Medium",
-                  "fontSize": 11,
-                  "letterSpacing": 0.55,
-                  "lineHeight": 14,
-                  "marginBottom": 8,
-                  "paddingHorizontal": 20,
-                  "textTransform": "uppercase",
-                }
-              }
-              testID="sleep-detail-recent-eyebrow"
-            >
-              Recent nights
-            </Text>
-            <View
-              style={
-                [
-                  {
-                    "borderWidth": 0.5,
-                  },
-                  {
-                    "backgroundColor": "#120C07",
-                    "borderColor": "rgba(255,255,255,0.06)",
-                    "borderRadius": 22,
-                    "marginHorizontal": 20,
-                    "paddingHorizontal": 16,
-                  },
-                  undefined,
-                ]
-              }
-              testID="sleep-detail-recent-list"
-            >
-              <View
-                accessibilityLabel="7:42, Last night · 21% deep, now"
-                accessibilityRole="text"
-                accessibilityState={
-                  {
-                    "busy": undefined,
-                    "checked": undefined,
-                    "disabled": undefined,
-                    "expanded": undefined,
-                    "selected": undefined,
-                  }
-                }
-                accessibilityValue={
-                  {
-                    "max": undefined,
-                    "min": undefined,
-                    "now": undefined,
-                    "text": undefined,
-                  }
-                }
-                accessible={true}
-                collapsable={false}
-                focusable={true}
-                onBlur={[Function]}
-                onClick={[Function]}
-                onFocus={[Function]}
-                onResponderGrant={[Function]}
-                onResponderMove={[Function]}
-                onResponderRelease={[Function]}
-                onResponderTerminate={[Function]}
-                onResponderTerminationRequest={[Function]}
-                onStartShouldSetResponder={[Function]}
-                style={
-                  [
-                    {
-                      "alignItems": "center",
-                      "flexDirection": "row",
-                    },
-                    {
-                      "borderBottomColor": "rgba(255,255,255,0.08)",
-                      "borderBottomWidth": 0,
-                      "opacity": 1,
-                      "paddingVertical": 12,
-                    },
-                  ]
-                }
-                testID="sleep-detail-recent-list-row-sleep-1715185080"
-              >
-                <View
-                  style={
-                    [
-                      {
-                        "borderRadius": 3,
-                        "height": 32,
-                        "width": 6,
-                      },
-                      {
-                        "backgroundColor": "#7C7AAB",
-                      },
-                    ]
-                  }
-                />
-                <View
-                  style={
-                    {
-                      "flex": 1,
-                      "marginLeft": 12,
-                    }
-                  }
-                >
-                  <Text
-                    allowFontScaling={false}
-                    style={
-                      {
-                        "color": "#F5F1EA",
-                        "fontFamily": "InstrumentSerif_400Regular",
-                        "fontSize": 22,
-                        "lineHeight": 28,
-                      }
-                    }
-                  >
-                    7:42
-                  </Text>
-                  <Text
-                    allowFontScaling={false}
-                    style={
-                      {
-                        "color": "#9C9890",
-                        "fontFamily": "Inter_500Medium",
-                        "fontSize": 11,
-                        "letterSpacing": 0.55,
-                        "lineHeight": 14,
-                        "marginTop": 3,
-                        "textTransform": "uppercase",
-                      }
-                    }
-                  >
-                    Last night · 21% deep
-                  </Text>
-                </View>
-                <Text
-                  allowFontScaling={false}
-                  style={
-                    {
-                      "color": "#9C9890",
-                      "fontFamily": "JetBrainsMono_500Medium",
-                      "fontSize": 12,
-                      "letterSpacing": 0.4,
-                      "lineHeight": 16,
-                    }
-                  }
-                >
-                  now
-                </Text>
-              </View>
-            </View>
           </View>
         </View>
       </View>

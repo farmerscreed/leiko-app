@@ -38,7 +38,10 @@ describe('DoctorCoverPreview', () => {
         />,
       ),
     );
-    expect(screen.getByTestId('cover-title-line-1').props.children.join('')).toContain('For her');
+    // Caregiver mode no longer hardcodes "her". With no parentLabel
+    // prop, the possessive is the gender-neutral "their" ("For their
+    // doctor"); when a parentLabel is supplied it becomes "<Name>'s".
+    expect(screen.getByTestId('cover-title-line-1').props.children.join('')).toContain('For their');
   });
 
   it('renders all 7 PDF sections', () => {

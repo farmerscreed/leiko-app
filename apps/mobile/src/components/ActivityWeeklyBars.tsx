@@ -52,12 +52,17 @@ const ENTRY_STAGGER_MS = 70;
 const ENTRY_EASING = Easing.bezier(0.22, 1, 0.36, 1);
 
 export interface ActivityWeeklyBarsProps {
-  /** 7 daily step counts, oldest first. Today is index 6. */
+  /** Daily step counts, oldest first. Today is the last index. 7 bars
+   *  for the 7d range; weekly aggregates for 30d / 90d. */
   days: number[];
-  /** 7 single-character day labels matching `days`. */
+  /** Labels matching `days` — single-character initials for 7d, short
+   *  month-day strings ("May 7") for weekly aggregates. */
   dayLabels: string[];
-  /** Daily step goal — used for the dashed line + above/below tinting. */
+  /** Step goal — daily for 7d, weekly total for the aggregated ranges.
+   *  Used for the dashed line + above/below tinting. */
   goal: number;
+  /** Section eyebrow above the card. Defaults to "This week vs goal". */
+  title?: string;
   testID?: string;
   style?: StyleProp<ViewStyle>;
 }
@@ -91,6 +96,7 @@ export function ActivityWeeklyBars({
   days,
   dayLabels,
   goal,
+  title = 'This week vs goal',
   testID,
   style,
 }: ActivityWeeklyBarsProps) {
@@ -117,7 +123,7 @@ export function ActivityWeeklyBars({
         }}
         testID={testID ? `${testID}-section-label` : undefined}
       >
-        This week vs goal
+        {title}
       </Text>
       <View
         style={[

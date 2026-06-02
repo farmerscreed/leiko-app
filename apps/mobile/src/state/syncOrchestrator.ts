@@ -250,8 +250,10 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
       // Steps 5–8 of D13 §3.3 — multi-vitals reads + batch /sync.
       // Failures are isolated inside syncMultiVitals (per-vital
       // Promise.allSettled); the BP path's success doesn't depend on
-      // these. Skipped silently when no paired-device meta or when the
-      // multi-vitals path itself errors — the next reconnect retries.
+      // these. Sprint 16.5b — return value is now CHECKED so /sync
+      // upload failures (which cause pending arrays to accumulate) are
+      // visible in analytics. Pre-16.5b the return was ignored and the
+      // failures were silent for 8+ days at a time.
       try {
         const meta = {
           bleId: paired.bleId,
@@ -259,11 +261,19 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
           name: paired.name,
           model: inferModel(paired.name),
         };
-        await syncMultiVitals(device, paired.bleId, meta);
+        const mvResult = await syncMultiVitals(device, paired.bleId, meta);
+        if (!mvResult.ok) {
+          // syncMultiVitals already emitted multi_vitals_sync_failed
+          // with details; this is a top-level rollup so trigger-level
+          // analytics see the failure too.
+          logger.track('sync_failed', {
+            trigger,
+            reason: `multi_vitals:${Object.keys(mvResult.errors).join(',')}`,
+          });
+        }
       } catch (e) {
-        // Defensive — syncMultiVitals already swallows step-level
-        // errors and returns a result; only an unexpected throw lands
-        // here. Don't fail the whole sync run on this.
+        // Defensive — syncMultiVitals is supposed to never throw, but
+        // if an unexpected error escapes, log it here and continue.
         logger.track('sync_failed', {
           trigger,
           reason: e instanceof Error ? `multi_vitals:${e.message}` : 'multi_vitals:unknown',

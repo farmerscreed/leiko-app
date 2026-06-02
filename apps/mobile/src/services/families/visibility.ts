@@ -62,9 +62,16 @@ export async function listCaregivers(
   familyId: string,
   client: SupabaseClient<Database> = defaultSupabase,
 ): Promise<CaregiverWithVisibility[]> {
+  // Same PGRST201 disambiguation as listMembers.ts (Sprint 17a fix):
+  // family_members has two FKs to users (`user_id` + `invited_by`),
+  // so the bare `users(...)` embed throws and the screen stays stuck
+  // on "Loading…". Pin the relationship explicitly to the
+  // membership-holder.
   const { data, error } = await client
     .from('family_members')
-    .select('user_id, joined_at, vital_visibility, users(display_name)')
+    .select(
+      'user_id, joined_at, vital_visibility, users!family_members_user_id_fkey(display_name)',
+    )
     .eq('family_id', familyId)
     .eq('role', 'caregiver')
     .is('removed_at', null)

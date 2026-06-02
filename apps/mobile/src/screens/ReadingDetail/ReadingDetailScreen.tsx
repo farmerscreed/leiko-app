@@ -110,15 +110,20 @@ export function ReadingDetailScreen({ navigation }: Props) {
       edges={['top', 'bottom']}
       testID="reading-detail-screen"
     >
-      <ScrollView
-        contentContainerStyle={[
-          styles.scroll,
-          {
-            paddingHorizontal: theme.spacing.xxl,
-            paddingTop: theme.spacing.xxl,
-            paddingBottom: theme.spacing.xxxl,
-          },
-        ]}
+      {/* Sprint 18 bench bug — sticky top bar with a visually obvious
+          Back affordance. The old text-only "Back" link sat INSIDE the
+          ScrollView so it scrolled away when the user scrolled down to
+          read Pulse / actions, leaving them with no apparent exit.
+          Chevron + bold + amber colour + outside the scroll container
+          fixes all three. */}
+      <View
+        style={{
+          paddingHorizontal: theme.spacing.xxl,
+          paddingTop: theme.spacing.m,
+          paddingBottom: theme.spacing.s,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
       >
         <Pressable
           onPress={() => navigation.goBack()}
@@ -126,19 +131,54 @@ export function ReadingDetailScreen({ navigation }: Props) {
           accessibilityLabel="Back"
           hitSlop={theme.spacing.m}
           testID="reading-detail-back"
-          style={{ alignSelf: 'flex-start', marginBottom: theme.spacing.l }}
+          style={({ pressed }) => ({
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: theme.spacing.m,
+            paddingVertical: theme.spacing.s,
+            borderRadius: theme.radii.m,
+            backgroundColor: theme.colors.surface.warmSubtle,
+            borderWidth: 0.5,
+            borderColor: theme.colors.border.rim,
+            opacity: pressed ? 0.7 : 1,
+          })}
         >
+          <Text
+            allowFontScaling={false}
+            style={{
+              color: theme.colors.brand.primary,
+              fontSize: bodyM.size + 4,
+              lineHeight: bodyM.lineHeight,
+              fontFamily: bodyM.family,
+              fontWeight: '600',
+              marginRight: theme.spacing.xs,
+            }}
+          >
+            {'‹'}
+          </Text>
           <Text
             style={{
               color: theme.colors.brand.primary,
               fontSize: bodyM.size,
               fontFamily: bodyM.family,
+              fontWeight: '600',
             }}
           >
             Back
           </Text>
         </Pressable>
+      </View>
 
+      <ScrollView
+        contentContainerStyle={[
+          styles.scroll,
+          {
+            paddingHorizontal: theme.spacing.xxl,
+            paddingTop: theme.spacing.l,
+            paddingBottom: theme.spacing.xxxl,
+          },
+        ]}
+      >
         <Text
           accessibilityRole="header"
           style={{
@@ -270,34 +310,31 @@ export function ReadingDetailScreen({ navigation }: Props) {
           />
         </View>
 
-        {isSelf ? (
-          <Button
-            variant="ghost"
-            onPress={() => undefined}
-            accessibilityLabel="Why this reading? Opens explanation sheet."
-            testID="reading-detail-why-this"
-            style={{ marginBottom: theme.spacing.s }}
-          >
-            Why this reading?
-          </Button>
-        ) : (
-          <Button
-            variant="ghost"
-            onPress={() => undefined}
-            accessibilityLabel="Mark as not me. Hides this reading from the family."
-            testID="reading-detail-not-me"
-            style={{ marginBottom: theme.spacing.s }}
-          >
-            Mark as not me
-          </Button>
-        )}
+        {/* Sprint 18 — removed three ghost buttons that shipped to
+            users with onPress={() => undefined} ("Why this reading?",
+            "Mark as not me", "Add a note" / "Note for my doctor").
+            Tapping them did literally nothing — confusing UX. The
+            working "What does this mean?" pressable above already
+            opens the InlineExplainer; the other three were Sprint
+            7/13 placeholders that never got wired. Bring them back
+            when their real handlers land (notes UI; soft-hide for
+            "not me"; richer explainer for "why"). */}
+
+        {/* Sprint 18 bench bug — an explicit Done CTA at the bottom of
+            the scroll content. Calls goBack so it works in both nav
+            contexts: post-take-reading (where TakeReading replaced
+            itself, so Back → Home) AND from-a-list (where Back returns
+            to the list). The top Back chip is the same target; this is
+            here for the user who scrolled all the way down and wants
+            one obvious "I'm done" tap. */}
         <Button
-          variant="ghost"
-          onPress={() => undefined}
-          accessibilityLabel={isSelf ? 'Note for my doctor' : 'Add a note'}
-          testID="reading-detail-add-note"
+          variant="primary"
+          onPress={() => navigation.goBack()}
+          accessibilityLabel="Done"
+          testID="reading-detail-done"
+          style={{ marginTop: theme.spacing.xxl }}
         >
-          {isSelf ? 'Note for my doctor' : 'Add a note'}
+          Done
         </Button>
       </ScrollView>
 

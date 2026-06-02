@@ -12,7 +12,7 @@
 // Hidden entirely when the list is empty — per the spec, "restraint
 // matters" (D13 §9.1).
 
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import { useTheme } from '../theme';
 import type { CorrelationRow } from '../types/database';
 
@@ -22,6 +22,20 @@ const CORRELATION_HEADLINE: Record<CorrelationRow['correlation_type'], string> =
   sleep_x_morning_bp: 'Sleep × morning BP',
   activity_x_resting_hr: 'Activity × resting HR',
   spo2_dip_x_sleep_score: 'SpO2 × sleep score',
+};
+
+// Sprint 16.5g — deterministic body fallback per correlation type.
+// Pre-fix, when both `narrative_long` and `narrative_short` were null
+// (which the Sprint 9 backend doesn't always populate), the card
+// rendered just the headline + strength label with no explanation.
+// Now every card has at least one sentence of context.
+const CORRELATION_BODY_FALLBACK: Record<CorrelationRow['correlation_type'], string> = {
+  sleep_x_morning_bp:
+    'After shorter nights, morning blood pressure has run a little higher.',
+  activity_x_resting_hr:
+    'On the days with more walking, resting heart rate has settled lower.',
+  spo2_dip_x_sleep_score:
+    'On the nights oxygen dipped, sleep tended to be lighter.',
 };
 
 function strengthLabel(r: number | null): 'Strong' | 'Moderate' | 'Gentle' {
@@ -37,6 +51,10 @@ export interface TrendsCitedSectionProps {
    *  narrative_long lives in correlations.narrative_long; the screen
    *  passes it through). */
   bodyFor?: (row: CorrelationRow) => string;
+  /** Sprint 16.5g — tap handler. The screen navigates to the relevant
+   *  detail screen ("Sleep × morning BP" → BPDetail). When omitted, the
+   *  cards render as static. */
+  onSelectRow?: (row: CorrelationRow) => void;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
@@ -44,6 +62,7 @@ export interface TrendsCitedSectionProps {
 export function TrendsCitedSection({
   rows,
   bodyFor,
+  onSelectRow,
   style,
   testID,
 }: TrendsCitedSectionProps) {
@@ -102,25 +121,18 @@ export function TrendsCitedSection({
             bodyFor?.(row) ??
             row.narrative_long ??
             row.narrative_short ??
+            CORRELATION_BODY_FALLBACK[row.correlation_type] ??
             '';
-          return (
-            <View
-              key={row.id}
-              style={[
-                styles.card,
-                {
-                  marginHorizontal: theme.spacing.l,
-                  marginTop: theme.spacing.s,
-                  paddingVertical: theme.spacing.m,
-                  paddingHorizontal: theme.spacing.m,
-                  borderRadius: theme.radii.m,
-                  borderLeftWidth: 2,
-                  borderLeftColor: accent,
-                  backgroundColor: theme.colors.surface.warmSubtle,
-                },
-              ]}
-              testID={testID ? `${testID}-${i + 1}` : undefined}
-            >
+          // Sprint 16.5g — show the actual r value alongside the
+          // strength label so users (or curious doctors) can see
+          // the underlying number. Strong/Moderate/Gentle is the
+          // headline; the value is the receipt.
+          const rDisplay =
+            row.pearson_r !== null
+              ? `${row.pearson_r >= 0 ? '+' : ''}${row.pearson_r.toFixed(2)}`
+              : null;
+          const CardContent = (
+            <>
               <Text
                 allowFontScaling={false}
                 style={{
@@ -136,20 +148,36 @@ export function TrendsCitedSection({
                 {i + 1}
               </Text>
               <View style={{ flex: 1 }}>
-                <Text
-                  allowFontScaling={false}
-                  style={{
-                    fontFamily: theme.fontFamilies.numeric,
-                    fontSize: 9,
-                    letterSpacing: 1.4,
-                    textTransform: 'uppercase',
-                    color: accent,
-                    marginBottom: 4,
-                  }}
-                  testID={testID ? `${testID}-${i + 1}-strength` : undefined}
-                >
-                  {strengthLabel(row.pearson_r)}
-                </Text>
+                <View style={styles.strengthRow}>
+                  <Text
+                    allowFontScaling={false}
+                    style={{
+                      fontFamily: theme.fontFamilies.numeric,
+                      fontSize: 9,
+                      letterSpacing: 1.4,
+                      textTransform: 'uppercase',
+                      color: accent,
+                    }}
+                    testID={testID ? `${testID}-${i + 1}-strength` : undefined}
+                  >
+                    {strengthLabel(row.pearson_r)}
+                  </Text>
+                  {rDisplay ? (
+                    <Text
+                      allowFontScaling={false}
+                      style={{
+                        fontFamily: theme.fontFamilies.numeric,
+                        fontSize: 9,
+                        letterSpacing: 0.6,
+                        color: theme.colors.text.tertiary,
+                        marginLeft: 6,
+                      }}
+                      testID={testID ? `${testID}-${i + 1}-r` : undefined}
+                    >
+                      {`r = ${rDisplay}`}
+                    </Text>
+                  ) : null}
+                </View>
                 <Text
                   allowFontScaling={false}
                   style={{
@@ -157,6 +185,7 @@ export function TrendsCitedSection({
                     fontSize: 15,
                     lineHeight: 20,
                     color: theme.colors.text.primary,
+                    marginTop: 4,
                     marginBottom: 4,
                   }}
                   testID={testID ? `${testID}-${i + 1}-headline` : undefined}
@@ -175,6 +204,45 @@ export function TrendsCitedSection({
                   </Text>
                 ) : null}
               </View>
+            </>
+          );
+          const cardStyle = [
+            styles.card,
+            {
+              marginHorizontal: theme.spacing.l,
+              marginTop: theme.spacing.s,
+              paddingVertical: theme.spacing.m,
+              paddingHorizontal: theme.spacing.m,
+              borderRadius: theme.radii.m,
+              borderLeftWidth: 2,
+              borderLeftColor: accent,
+              backgroundColor: theme.colors.surface.warmSubtle,
+            },
+          ];
+          if (onSelectRow) {
+            return (
+              <Pressable
+                key={row.id}
+                onPress={() => onSelectRow(row)}
+                accessibilityRole="button"
+                accessibilityHint="Opens the relevant detail screen"
+                style={({ pressed }) => [
+                  ...cardStyle,
+                  { opacity: pressed ? 0.85 : 1 },
+                ]}
+                testID={testID ? `${testID}-${i + 1}` : undefined}
+              >
+                {CardContent}
+              </Pressable>
+            );
+          }
+          return (
+            <View
+              key={row.id}
+              style={cardStyle}
+              testID={testID ? `${testID}-${i + 1}` : undefined}
+            >
+              {CardContent}
             </View>
           );
         })}
@@ -187,4 +255,5 @@ const styles = StyleSheet.create({
   root: {},
   eyebrowRow: { flexDirection: 'row', alignItems: 'center' },
   card: { flexDirection: 'row', alignItems: 'flex-start' },
+  strengthRow: { flexDirection: 'row', alignItems: 'baseline' },
 });

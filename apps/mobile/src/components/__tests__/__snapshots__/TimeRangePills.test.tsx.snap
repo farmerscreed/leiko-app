@@ -73,7 +73,7 @@ exports[`TimeRangePills matches snapshot 1`] = `
       allowFontScaling={false}
       style={
         {
-          "color": "#F5F1EA",
+          "color": "#FFFFFF",
           "fontFamily": "JetBrainsMono_500Medium",
           "fontSize": 13,
           "letterSpacing": 0.4,
@@ -137,7 +137,7 @@ exports[`TimeRangePills matches snapshot 1`] = `
       allowFontScaling={false}
       style={
         {
-          "color": "#9C9890",
+          "color": "#857F7A",
           "fontFamily": "JetBrainsMono_500Medium",
           "fontSize": 13,
           "letterSpacing": 0.4,
@@ -201,7 +201,7 @@ exports[`TimeRangePills matches snapshot 1`] = `
       allowFontScaling={false}
       style={
         {
-          "color": "#9C9890",
+          "color": "#857F7A",
           "fontFamily": "JetBrainsMono_500Medium",
           "fontSize": 13,
           "letterSpacing": 0.4,

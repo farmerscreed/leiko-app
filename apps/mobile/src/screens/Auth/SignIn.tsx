@@ -23,6 +23,33 @@ import type { AuthScreenProps } from '../../navigation/types';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** Sprint 19 Block 9 — friendly error mapping.
+ *
+ *  Supabase returns "Signups not allowed for otp" verbatim when
+ *  `shouldCreateUser: false` and the email isn't registered. Showing
+ *  the raw string is confusing — the user assumes their account is
+ *  broken. Map it to a friendly hint + flag so the screen offers a
+ *  "Sign up instead" route. Returns `{ message, suggestSignUp }`. */
+export function mapSignInError(e: unknown): { message: string; suggestSignUp: boolean } {
+  const raw = e instanceof Error ? e.message : '';
+  if (/signups not allowed|user not found|invalid login credentials/i.test(raw)) {
+    return {
+      message: "We don't see an account for that email. Sign up to create one.",
+      suggestSignUp: true,
+    };
+  }
+  if (/rate.?limit|too many/i.test(raw)) {
+    return {
+      message: 'Too many attempts. Wait a moment and try again.',
+      suggestSignUp: false,
+    };
+  }
+  return {
+    message: raw || "We couldn't send your code. Try again.",
+    suggestSignUp: false,
+  };
+}
+
 export function SignInScreen({ navigation }: AuthScreenProps<'SignIn'>) {
   const theme = useTheme();
   const signInWithOtp = useAuth((s) => s.signInWithOtp);
@@ -30,6 +57,7 @@ export function SignInScreen({ navigation }: AuthScreenProps<'SignIn'>) {
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [suggestSignUp, setSuggestSignUp] = useState(false);
 
   const trimmed = email.trim();
   const valid = EMAIL_RE.test(trimmed);
@@ -42,11 +70,14 @@ export function SignInScreen({ navigation }: AuthScreenProps<'SignIn'>) {
     if (!valid || submitting) return;
     setSubmitting(true);
     setError(null);
+    setSuggestSignUp(false);
     try {
       await signInWithOtp(trimmed);
       navigation.navigate('OTPVerify', { email: trimmed, mode: 'signin' });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "We couldn't send your code. Try again.");
+      const mapped = mapSignInError(e);
+      setError(mapped.message);
+      setSuggestSignUp(mapped.suggestSignUp);
     } finally {
       setSubmitting(false);
     }
@@ -159,6 +190,7 @@ export function SignInScreen({ navigation }: AuthScreenProps<'SignIn'>) {
           {error ? (
             <Text
               accessibilityLiveRegion="polite"
+              testID="signin-error"
               style={{
                 color: theme.colors.state.urgent,
                 fontSize: label.size,
@@ -182,6 +214,30 @@ export function SignInScreen({ navigation }: AuthScreenProps<'SignIn'>) {
           >
             Send code
           </Button>
+
+          {suggestSignUp ? (
+            <View style={{ marginTop: theme.spacing.l }}>
+              <Pressable
+                onPress={() => navigation.navigate('AccountTypeFork')}
+                accessibilityRole="button"
+                accessibilityLabel="Sign up instead"
+                hitSlop={theme.spacing.s}
+                testID="signin-suggest-signup"
+              >
+                <Text
+                  style={{
+                    color: theme.colors.brand.primary,
+                    fontSize: body.size,
+                    fontFamily: body.family,
+                    textAlign: 'center',
+                    fontWeight: '600',
+                  }}
+                >
+                  Sign up instead
+                </Text>
+              </Pressable>
+            </View>
+          ) : null}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

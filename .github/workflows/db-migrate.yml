@@ -1,0 +1,66 @@
+name: DB migrate (Supabase)
+
+# Sprint 16.6 QUA-4. Applies new migrations to the production
+# Supabase project on every push to main that touches
+# supabase/migrations/. Manual dispatch is also supported so the
+# founder can re-run after a secret rotation.
+#
+# Secrets required (configure once in GitHub repo settings):
+#   SUPABASE_ACCESS_TOKEN — `supabase login` token, account-wide
+#   SUPABASE_DB_PASSWORD  — the prod project's database password
+# Variables:
+#   SUPABASE_PROJECT_REF  — e.g. "abcdefghijklmnopqrst"
+#
+# Why no manual approval gate: migrations are designed to be
+# additive + idempotent (see existing migrations + the Supabase
+# advisor checks in CI). If a migration needs human review, gate
+# the underlying PR rather than this workflow.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+  workflow_dispatch:
+
+concurrency:
+  group: db-migrate-prod
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: supabase db push
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link project
+        run: |
+          supabase link --project-ref "${{ vars.SUPABASE_PROJECT_REF }}" \
+            --password "${{ secrets.SUPABASE_DB_PASSWORD }}"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Apply migrations
+        run: |
+          supabase db push --include-all
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      # Post-deploy advisor: warn (not fail) on any new RLS / security
+      # issues introduced by the migration. The founder still gets the
+      # signal in the Actions log; a follow-up commit can pin advisor
+      # outcomes if they want this to break the build later.
+      - name: Lint security advisors
+        continue-on-error: true
+        run: supabase advisors security --project-ref "${{ vars.SUPABASE_PROJECT_REF }}"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}

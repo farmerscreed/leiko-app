@@ -8,7 +8,7 @@ exports[`ActivityWeeklyBars — render matches snapshot in dark mode 1`] = `
     allowFontScaling={false}
     style={
       {
-        "color": "#9C9890",
+        "color": "#857F7A",
         "fontFamily": "Inter_500Medium",
         "fontSize": 11,
         "letterSpacing": 0.55,
@@ -78,7 +78,7 @@ exports[`ActivityWeeklyBars — render matches snapshot in dark mode 1`] = `
           allowFontScaling={false}
           style={
             {
-              "color": "#9C9890",
+              "color": "#857F7A",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 8.5,
               "letterSpacing": 0.55,
@@ -145,7 +145,7 @@ exports[`ActivityWeeklyBars — render matches snapshot in dark mode 1`] = `
           allowFontScaling={false}
           style={
             {
-              "color": "#9C9890",
+              "color": "#857F7A",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 8.5,
               "letterSpacing": 0.55,
@@ -210,7 +210,7 @@ exports[`ActivityWeeklyBars — render matches snapshot in dark mode 1`] = `
           allowFontScaling={false}
           style={
             {
-              "color": "#9C9890",
+              "color": "#857F7A",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 8.5,
               "letterSpacing": 0.55,
@@ -275,7 +275,7 @@ exports[`ActivityWeeklyBars — render matches snapshot in dark mode 1`] = `
           allowFontScaling={false}
           style={
             {
-              "color": "#9C9890",
+              "color": "#857F7A",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 8.5,
               "letterSpacing": 0.55,
@@ -340,7 +340,7 @@ exports[`ActivityWeeklyBars — render matches snapshot in dark mode 1`] = `
           allowFontScaling={false}
           style={
             {
-              "color": "#9C9890",
+              "color": "#857F7A",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 8.5,
               "letterSpacing": 0.55,
@@ -405,7 +405,7 @@ exports[`ActivityWeeklyBars — render matches snapshot in dark mode 1`] = `
           allowFontScaling={false}
           style={
             {
-              "color": "#9C9890",
+              "color": "#857F7A",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 8.5,
               "letterSpacing": 0.55,
@@ -470,7 +470,7 @@ exports[`ActivityWeeklyBars — render matches snapshot in dark mode 1`] = `
           allowFontScaling={false}
           style={
             {
-              "color": "#9C9890",
+              "color": "#857F7A",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 8.5,
               "letterSpacing": 0.55,
@@ -535,7 +535,7 @@ exports[`ActivityWeeklyBars — render matches snapshot in dark mode 1`] = `
           allowFontScaling={false}
           style={
             {
-              "color": "#F5F1EA",
+              "color": "#FFFFFF",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 8.5,
               "letterSpacing": 0.55,

@@ -94,7 +94,7 @@ exports[`VitalTrendChart — render renders with no caption (chart only) 1`] = `
         }
         stroke={
           {
-            "payload": 4294308330,
+            "payload": 4294967295,
             "type": 0,
           }
         }
@@ -126,7 +126,7 @@ exports[`VitalTrendChart — render renders with no caption (chart only) 1`] = `
         }
         stroke={
           {
-            "payload": 4294308330,
+            "payload": 4294967295,
             "type": 0,
           }
         }
@@ -158,7 +158,7 @@ exports[`VitalTrendChart — render renders with no caption (chart only) 1`] = `
         }
         stroke={
           {
-            "payload": 4294308330,
+            "payload": 4294967295,
             "type": 0,
           }
         }

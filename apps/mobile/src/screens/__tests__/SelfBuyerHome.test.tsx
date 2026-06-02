@@ -119,6 +119,22 @@ jest.mock('../../state/sleep', () => ({
     return selector ? selector(state) : state;
   },
 }));
+
+// Sprint 18 bench bug — PairWatchPrompt reads usePairing to gate
+// whether it renders. Stub a paired-device by default so the existing
+// pre-Sprint-18 assertions (which assume the prompt is not present)
+// stay green; tests that exercise the prompt path opt in via
+// setPaired(false).
+let mockPaired: { macSuffix: string } | null = { macSuffix: 'AB12' };
+const setPaired = (p: { macSuffix: string } | null) => {
+  mockPaired = p;
+};
+jest.mock('../../state/pairing', () => ({
+  usePairing: (selector?: (s: unknown) => unknown) => {
+    const state = { pairedDevice: mockPaired };
+    return selector ? selector(state) : state;
+  },
+}));
 (jest.requireMock('../../state/sleep') as { useSleep: { getState: () => unknown } }).useSleep.getState = () => ({
   recent: [],
   pending: [],
@@ -179,6 +195,31 @@ function makeSleep(endSec: number, totalMinutes = 7 * 60 + 24): SleepSession {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // Default to paired-device for every existing assertion. The
+  // pairing-prompt describe block below opts in to the unpaired path.
+  setPaired({ macSuffix: 'AB12' });
+});
+
+describe('SelfBuyerHome — pairing prompt (Sprint 18 bench bug)', () => {
+  it('renders nothing when a watch is already paired', () => {
+    setPaired({ macSuffix: 'AB12' });
+    render(withProviders(<SelfBuyerHome />));
+    expect(screen.queryByTestId('self-buyer-home-pair-watch-prompt')).toBeNull();
+  });
+
+  it('renders the calm pair-watch prompt when no watch is paired', () => {
+    setPaired(null);
+    render(withProviders(<SelfBuyerHome />));
+    expect(screen.getByTestId('self-buyer-home-pair-watch-prompt')).toBeTruthy();
+    expect(screen.getByText('Pair your watch to start.')).toBeTruthy();
+  });
+
+  it('tapping the prompt routes to the Pairing screen', () => {
+    setPaired(null);
+    render(withProviders(<SelfBuyerHome />));
+    fireEvent.press(screen.getByTestId('self-buyer-home-pair-watch-prompt'));
+    expect(mockNavigate).toHaveBeenCalledWith('Pairing');
+  });
 });
 
 describe('SelfBuyerHome — adaptive central value (D13 §7.2)', () => {
@@ -361,9 +402,12 @@ describe('SelfBuyerHome — navigation wiring', () => {
     expect(mockNavigate).toHaveBeenCalledWith('Settings');
   });
 
-  it('Avatar tap → navigates to Settings', () => {
+  it('Settings affordance tap → navigates to Settings', () => {
+    // Sprint 17b redesign: the header's initial-bubble avatar became a
+    // gear "settings" affordance; testID self-buyer-home-avatar →
+    // self-buyer-home-settings.
     render(withProviders(<SelfBuyerHome />));
-    fireEvent.press(screen.getByTestId('self-buyer-home-avatar'));
+    fireEvent.press(screen.getByTestId('self-buyer-home-settings'));
     expect(mockNavigate).toHaveBeenCalledWith('Settings');
   });
 });

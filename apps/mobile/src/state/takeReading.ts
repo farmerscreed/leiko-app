@@ -69,6 +69,17 @@ const FRIENDLY: Record<TakeReadingError['code'], string> = {
 const WATCH_TIMEOUT_MS = 90_000;
 const FETCH_TIMEOUT_MS = 10_000;
 
+// Sprint 16.6 QUA-1 — BP value mismatch mitigation.
+// The watch's BP-history register can return a stale / partial row
+// for a few hundred ms after `0x73 0x02` fires (a known firmware
+// race observed in scenario-11 of the 2026-05-13 trace bench). The
+// 200ms settling delay before we query lets the firmware finish
+// committing the new row. Cheap on the user side (the success
+// modal already takes longer to animate in) and a clean fix
+// compared to vote-on-retry, which doubled the BLE chatter on
+// every reading.
+const BP_SETTLING_DELAY_MS = 200;
+
 // Mid-measurement reconnect window. The Urion BP cycle (inflate →
 // measure → deflate → store) runs ~30–45s end-to-end. BLE drops at
 // peak inflate (~5–15s into the cycle), so a naive 5s reconnect lands
@@ -269,6 +280,8 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
     set({ phase: 'fetching', _watchTimer: null });
     try {
       const before = useReadings.getState().latest();
+      // QUA-1 settling delay — see BP_SETTLING_DELAY_MS docstring above.
+      await new Promise((resolve) => setTimeout(resolve, BP_SETTLING_DELAY_MS));
       const result = await syncBacklog(_device, paired.bleId, {
         timeoutMs: FETCH_TIMEOUT_MS,
       });
@@ -441,11 +454,14 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
           return;
         }
         // No reading yet. Wait, then re-poll. If a live notify fired
-        // while we were here, skip the wait and poll again immediately.
+        // while we were here, skip the 8s wait and poll again — but
+        // still pause BP_SETTLING_DELAY_MS for the same firmware-race
+        // reason as the notify-driven path (QUA-1).
         if (!liveNotifyHit) {
           await new Promise((r) => setTimeout(r, RECONNECT_POLL_INTERVAL_MS));
         } else {
           liveNotifyHit = false;
+          await new Promise((r) => setTimeout(r, BP_SETTLING_DELAY_MS));
         }
       } catch (e) {
         // syncBacklog throwing usually means the connection just died

@@ -16,13 +16,20 @@ function withTheme(
   );
 }
 
-describe('ViewToggle — labels', () => {
-  it('renders both segment labels', () => {
+describe('ViewToggle — accessibility labels', () => {
+  it('exposes both view names as accessibilityLabels (icon-only design)', () => {
+    // Sprint 16.6 redesign — ViewToggle is now icon-only (no visible
+    // text labels). The view names live solely as accessibilityLabels
+    // on each Pressable so screen-reader users get the same affordance.
     render(
       withTheme(<ViewToggle value="birds" onChange={() => undefined} />),
     );
-    expect(screen.getByText("Bird's-eye")).toBeTruthy();
-    expect(screen.getByText('Detailed')).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: "Bird's-eye view" }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'Detailed view' }),
+    ).toBeTruthy();
   });
 });
 

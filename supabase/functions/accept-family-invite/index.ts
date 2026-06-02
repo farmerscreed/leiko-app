@@ -23,6 +23,10 @@ import { corsHeaders } from '../_shared/cors.ts';
 interface RequestBody {
   code: string;
   email: string;
+  /** Sprint 19 — optional per-caregiver label for the wearer. When
+   *  set, stored on family_members.caregiver_relationship_label and
+   *  preferred over families.parent_relationship for display. */
+  caregiverRelationshipLabel?: string;
 }
 
 interface ResponseShape {
@@ -67,6 +71,7 @@ Deno.serve(async (req: Request) => {
   }
   const code = (body?.code ?? '').trim();
   const email = (body?.email ?? '').trim();
+  const caregiverLabel = (body?.caregiverRelationshipLabel ?? '').trim();
   if (!/^\d{6}$/.test(code)) {
     return json({ error: 'invalid_code' }, 400);
   }
@@ -120,20 +125,21 @@ Deno.serve(async (req: Request) => {
   }
 
   // Insert / re-insert family_members row.
+  const upsertRow: Record<string, unknown> = {
+    family_id: familyId,
+    user_id: userId,
+    role: 'caregiver',
+    invited_by: invitation.id ? userId : null, // best-effort — the inviter id lives on invitations
+    joined_at: new Date().toISOString(),
+    removed_at: null,
+    removed_reason: null,
+  };
+  if (caregiverLabel.length > 0) {
+    upsertRow.caregiver_relationship_label = caregiverLabel;
+  }
   const upsertResult = await serviceClient
     .from('family_members')
-    .upsert(
-      {
-        family_id: familyId,
-        user_id: userId,
-        role: 'caregiver',
-        invited_by: invitation.id ? userId : null, // best-effort — the inviter id lives on invitations
-        joined_at: new Date().toISOString(),
-        removed_at: null,
-        removed_reason: null,
-      },
-      { onConflict: 'family_id,user_id' },
-    );
+    .upsert(upsertRow, { onConflict: 'family_id,user_id' });
   if (upsertResult.error) {
     return json(
       { error: 'membership_insert_failed', detail: upsertResult.error.message },

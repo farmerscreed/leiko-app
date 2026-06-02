@@ -18,6 +18,17 @@ import {
   parsePacket,
 } from './io';
 
+// BLE_TRACE — Sprint 16.5a Phase A forensic-capture instrumentation.
+// Gated behind __DEV__ so dev sideloads + Metro builds emit traces but
+// any TestFlight / Play Internal / production build skips the logs
+// entirely (cheap boolean short-circuit at every call site). Strip both
+// flag and call sites per the sprint's Step 4 before any release.
+const BLE_TRACE = typeof __DEV__ !== 'undefined' && __DEV__;
+
+function hex2(n: number): string {
+  return (n & 0xff).toString(16).padStart(2, '0');
+}
+
 export type NotifyHandler = (packet: ParsedPacket) => void;
 
 export class CommandTimeoutError extends Error {
@@ -57,9 +68,19 @@ export class UrionDevice {
         if (!value) return;
         try {
           const packet = parsePacket(base64ToBytes(value));
+          if (BLE_TRACE) {
+            const p = packet.payload;
+            console.log(
+              `[ble-trace] notify cmd=0x${hex2(packet.command)} ` +
+                `payload[0..3]=${hex2(p[0] ?? 0)} ${hex2(p[1] ?? 0)} ` +
+                `${hex2(p[2] ?? 0)} ${hex2(p[3] ?? 0)} ` +
+                `listeners=${this.listeners.size}`,
+            );
+          }
           for (const l of this.listeners) l(packet);
         } catch (e) {
           if (e instanceof CrcError) {
+            if (BLE_TRACE) console.log(`[ble-trace] CRC fail deviceId=${this.id}`);
             logger.track('ble_crc_fail', { deviceId: this.id });
             return;
           }

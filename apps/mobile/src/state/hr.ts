@@ -43,6 +43,8 @@ interface HRState {
   hydrate: () => void;
   /** Synchronous MMKV write. Returns the row. */
   addPending: (sample: HRSample) => HRSample;
+  /** Batch insert (backfill) — one MMKV write + one set() for N samples. */
+  addPendingBatch: (samples: HRSample[]) => void;
   /** Move acknowledged rows from pending → recent (cap respected). */
   acceptSyncResult: (acceptedKeys: string[]) => void;
   /** Latest sample regardless of pending/recent. */
@@ -59,6 +61,28 @@ interface HRState {
    *  Empty entries are skipped (not zero-filled) so classifyHR sees
    *  baseline length = days-with-data. */
   restingBpmRecent: (nowSec?: number, timeZone?: string | null) => number[];
+  /** Sprint 18 — same data as restingBpmRecent but each entry carries
+   *  the nightKey (YYYY-MM-DD of the night the sleep window
+   *  belongs to) so consumers can date-align with other vitals'
+   *  per-night data instead of positional pairing. Oldest first.
+   *  Empty nights are skipped (not zero-filled). */
+  restingBpmRecentByNight: (
+    nowSec?: number,
+    timeZone?: string | null,
+  ) => Array<{ nightKey: string; restingBpm: number }>;
+  /**
+   * Sprint 16.5e — seed historical samples from the server. The U16PRO
+   * watch's day-info storage rolls over after a few days; without a
+   * server top-up the HR detail screen loses everything older than the
+   * watch's retention window. Mirrors `useSleep.seedFromServer` /
+   * `useActivity.seedStepsFromServer` — accepts the authoritative list,
+   * dedups against `pending` + `recent` by `measuredAtSec`, merges, sorts
+   * desc, caps at `RECENT_SAMPLES_CAP`. Returns the number of NEW rows.
+   */
+  seedFromServer: (samples: HRSample[]) => number;
+  /** Sprint 17b — visibility purge. Clears `recent` only; `pending`
+   *  is preserved (user's own offline writes). */
+  clearRecent: () => void;
   reset: () => void;
 }
 
@@ -160,6 +184,22 @@ export const useHR = create<HRState>((set, get) => ({
     return sample;
   },
 
+  // Batch insert for backfill. The per-sample addPending does a full MMKV
+  // read+filter+write AND a Zustand set() AND a log PER SAMPLE — O(n^2)
+  // plus a render storm when a cold start replays ~1,800 samples
+  // (cursor.hr=0 after an install/MMKV wipe). addPendingBatch dedups by
+  // measuredAtSec and writes the whole set ONCE with a single set()/log.
+  addPendingBatch: (samples) => {
+    if (samples.length === 0) return;
+    const byKey = new Map<string, HRSample>();
+    for (const s of buffer.readAll()) byKey.set(String(s.measuredAtSec), s);
+    for (const s of samples) byKey.set(String(s.measuredAtSec), s);
+    const merged = Array.from(byKey.values());
+    buffer.replace(merged);
+    set({ pending: merged });
+    logger.track('vital_persisted', { vital_type: 'hr', count: samples.length });
+  },
+
   acceptSyncResult: (acceptedKeys) => {
     if (acceptedKeys.length === 0) return;
     const keySet = new Set(acceptedKeys);
@@ -209,6 +249,12 @@ export const useHR = create<HRState>((set, get) => ({
   },
 
   restingBpmRecent: (nowSec, timeZone) => {
+    return get()
+      .restingBpmRecentByNight(nowSec, timeZone)
+      .map((e) => e.restingBpm);
+  },
+
+  restingBpmRecentByNight: (nowSec, timeZone) => {
     const now = nowSec ?? Math.floor(Date.now() / 1000);
     const all = [...get().pending, ...get().recent];
     if (all.length === 0) return [];
@@ -225,7 +271,7 @@ export const useHR = create<HRState>((set, get) => ({
     // before today's nightKey) so today's restingBpm is NOT included
     // — classifyHR consumes today separately.
     const todayKey = nightDateKey(now, timeZone);
-    const out: number[] = [];
+    const out: Array<{ nightKey: string; restingBpm: number }> = [];
     for (let d = RESTING_RECENT_DAYS; d >= 1; d--) {
       const nightKey = nightDateKey(now - d * SECONDS_PER_DAY, timeZone);
       if (nightKey === todayKey) continue;
@@ -233,9 +279,36 @@ export const useHR = create<HRState>((set, get) => ({
       if (!samples || samples.length < 2) continue;
       const avg = rollingMinAverage(samples);
       if (avg === null) continue;
-      out.push(avg);
+      out.push({ nightKey, restingBpm: avg });
     }
     return out;
+  },
+
+  seedFromServer: (samples) => {
+    if (samples.length === 0) return 0;
+    const existing = get().recent;
+    const existingKeys = new Set(existing.map((s) => String(s.measuredAtSec)));
+    const pendingKeys = new Set(
+      get().pending.map((s) => String(s.measuredAtSec)),
+    );
+    const newRows = samples.filter((s) => {
+      const key = String(s.measuredAtSec);
+      return !existingKeys.has(key) && !pendingKeys.has(key);
+    });
+    if (newRows.length === 0) return 0;
+    const merged = dedupRecent(
+      [...newRows, ...existing].sort(
+        (a, b) => b.measuredAtSec - a.measuredAtSec,
+      ),
+    ).slice(0, RECENT_SAMPLES_CAP);
+    set({ recent: merged });
+    persistRecent(merged);
+    return newRows.length;
+  },
+
+  clearRecent: () => {
+    set({ recent: [] });
+    mmkv.remove(STORAGE_KEYS.recentHR);
   },
 
   reset: () => {

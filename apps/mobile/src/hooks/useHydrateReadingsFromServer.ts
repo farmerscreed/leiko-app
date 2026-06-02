@@ -68,11 +68,23 @@ export function useHydrateReadingsFromServer(): void {
   useEffect(() => {
     if (!userId) return;
 
-    // Only fire when local is empty — pending rows count too (a user
-    // with pending offline-writes shouldn't have those overwritten).
+    // Sprint 16.5c — top-up semantics.
+    //
+    // Pre-fix: gate fired only when local was COMPLETELY empty. Any
+    // single row in `recent` or `pending` meant the hook skipped. This
+    // worked for the original use case (post-uninstall recovery) but
+    // failed when local was partial — e.g. after the BP syncPending
+    // cap-cutoff bug silently dropped the 2 newest BP rows, leaving
+    // local at 28 instead of 30 and the missing 2 unrecoverable.
+    //
+    // New gate: skip only when local already has the full FETCH_LIMIT
+    // worth of rows. Otherwise fetch and let `seedRecentFromServer`'s
+    // dedup (by serverId) decide what to actually add. This costs at
+    // most one Supabase query per Home mount on accounts with < 30
+    // readings — a fair price for the self-heal property.
     const localCount = useReadings.getState().recent.length +
       useReadings.getState().pending.length;
-    if (localCount > 0) return;
+    if (localCount >= FETCH_LIMIT) return;
 
     let cancelled = false;
     void (async () => {

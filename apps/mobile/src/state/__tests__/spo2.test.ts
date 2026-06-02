@@ -112,4 +112,52 @@ describe('useSpO2 slice', () => {
     expect(mmkv.contains(STORAGE_KEYS.pendingSpO2)).toBe(false);
     expect(mmkv.contains(STORAGE_KEYS.recentSpO2)).toBe(false);
   });
+
+  // ---- Sprint 16.5e — server hydration ---------------------------------
+
+  test('seedFromServer adds new samples + dedups by measuredAtSec', () => {
+    useSpO2.setState({ recent: [makeSample(1_700_000_000, 97)] });
+    const serverRows = [
+      makeSample(1_700_000_000, 50), // duplicate; existing wins
+      makeSample(1_699_900_000, 95),
+      makeSample(1_699_800_000, 96),
+    ];
+    const added = useSpO2.getState().seedFromServer(serverRows);
+    expect(added).toBe(2);
+    const recent = useSpO2.getState().recent;
+    expect(recent).toHaveLength(3);
+    const dup = recent.find((s) => s.measuredAtSec === 1_700_000_000);
+    expect(dup?.percent).toBe(97);
+  });
+
+  test('seedFromServer ignores rows already in pending', () => {
+    useSpO2.getState().addPending(makeSample(1_700_000_000, 97));
+    const added = useSpO2
+      .getState()
+      .seedFromServer([makeSample(1_700_000_000, 50)]);
+    expect(added).toBe(0);
+    expect(useSpO2.getState().recent).toEqual([]);
+  });
+
+  test('seedFromServer sorts merged result newest-first + persists', () => {
+    const rows = [
+      makeSample(1_699_800_000, 94),
+      makeSample(1_700_000_000, 97),
+      makeSample(1_699_900_000, 95),
+    ];
+    useSpO2.getState().seedFromServer(rows);
+    const recent = useSpO2.getState().recent;
+    expect(recent.map((s) => s.measuredAtSec)).toEqual([
+      1_700_000_000,
+      1_699_900_000,
+      1_699_800_000,
+    ]);
+    expect(mmkv.getString(STORAGE_KEYS.recentSpO2)).toBeDefined();
+  });
+
+  test('seedFromServer returns 0 on empty input', () => {
+    useSpO2.setState({ recent: [makeSample(1_700_000_000, 97)] });
+    expect(useSpO2.getState().seedFromServer([])).toBe(0);
+    expect(useSpO2.getState().recent).toHaveLength(1);
+  });
 });

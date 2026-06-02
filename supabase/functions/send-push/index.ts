@@ -32,6 +32,7 @@ import {
   renderWeeklySummary,
   renderWatchLowBattery,
   renderFamilyInviteAccepted,
+  renderFamilyMemberRemoved,
   renderSubscriptionRenewing,
   type AccountType,
   type RenderedNotification,
@@ -53,6 +54,7 @@ type PushCategory =
   | 'weekly'
   | 'device'
   | 'family'
+  | 'family_removed'
   | 'subscription'
   | 'marketing';
 
@@ -96,6 +98,21 @@ interface FamilyPayload extends BasePayload {
   caregiverName: string;
 }
 
+// Sprint 17b — sent to a caregiver who has just been removed from a
+// family circle. Carries the actor + circle labels so the body reads
+// naturally for the recipient. Gated by the same `family_activity`
+// opt-out as the existing 'family' category; the in-app banner
+// (client-side MMKV diff) is the safety net for users who have it
+// disabled.
+interface FamilyRemovedPayload extends BasePayload {
+  category: 'family_removed';
+  /** family_owner's display_name. */
+  removerName: string;
+  /** Human-readable circle label (typically the parent's display name
+   *  in caregiver-mode, or the self-buyer's name). */
+  circleLabel: string;
+}
+
 interface SubscriptionPayload extends BasePayload {
   category: 'subscription';
   priceUsd: string;
@@ -114,6 +131,7 @@ type SendPushRequest =
   | WeeklyPayload
   | DevicePayload
   | FamilyPayload
+  | FamilyRemovedPayload
   | SubscriptionPayload
   | MarketingPayload;
 
@@ -282,6 +300,7 @@ function checkOptOut(payload: SendPushRequest, prefs: typeof DEFAULT_PREFS): str
     case 'device':
       return prefs.watch_status ? null : 'device_off';
     case 'family':
+    case 'family_removed':
       return prefs.family_activity ? null : 'family_off';
     case 'subscription':
       return prefs.subscription_account ? null : 'subscription_off';
@@ -307,6 +326,8 @@ function renderPayload(payload: SendPushRequest, recipient: AccountType): Render
       return renderWatchLowBattery(recipient, payload);
     case 'family':
       return renderFamilyInviteAccepted(recipient, payload);
+    case 'family_removed':
+      return renderFamilyMemberRemoved(recipient, payload);
     case 'subscription':
       return renderSubscriptionRenewing(recipient, payload);
     case 'marketing':
@@ -391,6 +412,12 @@ function computeDeepLink(payload: SendPushRequest): string {
       return 'leiko://settings/devices';
     case 'family':
       return 'leiko://family';
+    case 'family_removed':
+      // The removed user no longer has access to anything in that
+      // family. Home is the most useful landing place — the empty
+      // state + the "I have an invite code" CTA cover the re-join
+      // case if they think the removal was a mistake.
+      return 'leiko://home';
     case 'subscription':
       return 'leiko://settings/subscription';
     case 'marketing':

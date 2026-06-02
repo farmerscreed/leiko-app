@@ -24,8 +24,23 @@ export const paletteDark = {
     850: '#120C07', // subtle
     800: '#1D140D', // elevated
   },
-  bone: { 50: '#F5F1EA', 100: '#ECE9E2' },
-  stone: { 300: '#9C9890', 500: '#6B6862' },
+  // Sprint 16.6 — three-tone text gradation tuned per founder's
+  // on-device pick: the "No recent reading" StatusPill (offline tone
+  // #857F7A) carries the warm-grey character the founder loves for
+  // off-white text. Secondary + tertiary are now in that same hue
+  // family rather than the cream direction:
+  //   bone[50]   #FFFFFF  primary    — focal: orb / person names,
+  //                                    headlines, vital values.
+  //   bone[100]  #B8B2AA  secondary  — body sentences, italic accents,
+  //                                    legend headlines. Warm grey
+  //                                    at ~72% luminance — lifted
+  //                                    offline tone for paragraph use.
+  bone: { 50: '#FFFFFF', 100: '#B8B2AA' },
+  //   stone[300] #857F7A tertiary  — recessive labels: relation tags,
+  //                                    eyebrows, dates, footers, vital
+  //                                    labels. Exact match to the
+  //                                    offline status tone.
+  stone: { 300: '#857F7A', 500: '#6B6862' },
   amber: { 400: '#F5B47A', 500: '#E8A063', 600: '#C5824A' },
   // Coral — caregiver-mode brand accent (Sprint 7.7). Distinct from the
   // existing `coral.500 #D6745A` used for HR vital chromatic; this is
@@ -56,7 +71,12 @@ export const paletteDark = {
     clear: '#61B565', // green
     watch: '#F2A618', // amber (same as person.2)
     attention: '#FF7350', // coral (same as person.1 / brand caregiver)
-    urgent: '#EE343B', // bright red — distinct from `crimson.700` for higher salience
+    // Sprint 16.6 — was #EE343B (bright red). The caregiver-unified
+    // design source uses oklch(62% 0.22 25) for the urgent dot — a
+    // softer red-orange that reads as "needs attention now" without
+    // siren-grade alarm. Aligns with the broader Leiko voice rule
+    // that red is reserved for confirmed-urgent, calibrated tone.
+    urgent: '#DC5631',
     offline: '#857F7A', // grey
     sleeping: '#7B67CC', // periwinkle (same as person.3)
   },

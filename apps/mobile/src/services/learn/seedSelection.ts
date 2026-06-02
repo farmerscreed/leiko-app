@@ -154,6 +154,9 @@ export function selectSeededCard(
   const ranked = [...input.articles]
     .filter(a => !input.isHidden(a.frontmatter.id))
     .filter(a => !everRead(a.frontmatter.id))
+    // Region routing — v1.0 ships as a no-op. Every article is allowed
+    // for every region. Re-introduce a predicate here when CULTURAL
+    // articles land for Nigerian readers.
     .sort((a, b) => {
       const ap = a.frontmatter.inline_explainer_priority;
       const bp = b.frontmatter.inline_explainer_priority;
@@ -194,6 +197,3 @@ function dayIndexTarget(dayIndex: number): string | null {
   return null;
 }
 
-// Region routing landed as a v1.0 no-op and has been removed until
-// CULTURAL articles for Nigerian readers actually need it; the
-// `region` input field is retained as the forward hook.

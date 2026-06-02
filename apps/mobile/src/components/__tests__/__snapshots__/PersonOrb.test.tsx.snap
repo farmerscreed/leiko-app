@@ -72,8 +72,6 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=attention m
         style={
           [
             {
-              "backgroundColor": "#FF735059",
-              "borderRadius": 9999,
               "bottom": -16,
               "left": -16,
               "position": "absolute",
@@ -90,7 +88,75 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=attention m
             },
           ]
         }
-      />
+      >
+        <RNSVGSvgView
+          bbHeight="100%"
+          bbWidth="100%"
+          focusable={false}
+          height="100%"
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          width="100%"
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGRadialGradient
+                cx="50%"
+                cy="50%"
+                fx="50%"
+                fy="50%"
+                gradient={
+                  [
+                    0,
+                    1509913424,
+                    1,
+                    16741200,
+                  ]
+                }
+                gradientTransform={null}
+                gradientUnits={0}
+                name="cg-orb-halo"
+                rx="50%"
+                ry="50%"
+              />
+            </RNSVGDefs>
+            <RNSVGCircle
+              cx="50%"
+              cy="50%"
+              fill={
+                {
+                  "brushRef": "cg-orb-halo",
+                  "type": 1,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+              r="50%"
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
       <View
         style={
           [
@@ -178,10 +244,11 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=attention m
         allowFontScaling={false}
         style={
           {
-            "color": "#F5F1EA",
+            "color": "#FFFFFF",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
-            "lineHeight": 16,
+            "letterSpacing": -0.07,
+            "lineHeight": 18,
           }
         }
       >
@@ -194,6 +261,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=attention m
             "color": "#FF7350",
             "fontFamily": "JetBrainsMono_500Medium",
             "fontSize": 10,
+            "fontWeight": "500",
             "letterSpacing": 0.4,
             "lineHeight": 12,
             "marginTop": 1,
@@ -279,8 +347,6 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=attention m
         style={
           [
             {
-              "backgroundColor": "#FF735059",
-              "borderRadius": 9999,
               "bottom": -16,
               "left": -16,
               "position": "absolute",
@@ -297,7 +363,75 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=attention m
             },
           ]
         }
-      />
+      >
+        <RNSVGSvgView
+          bbHeight="100%"
+          bbWidth="100%"
+          focusable={false}
+          height="100%"
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          width="100%"
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGRadialGradient
+                cx="50%"
+                cy="50%"
+                fx="50%"
+                fy="50%"
+                gradient={
+                  [
+                    0,
+                    1509913424,
+                    1,
+                    16741200,
+                  ]
+                }
+                gradientTransform={null}
+                gradientUnits={0}
+                name="cg-orb-halo"
+                rx="50%"
+                ry="50%"
+              />
+            </RNSVGDefs>
+            <RNSVGCircle
+              cx="50%"
+              cy="50%"
+              fill={
+                {
+                  "brushRef": "cg-orb-halo",
+                  "type": 1,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+              r="50%"
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
       <View
         style={
           [
@@ -388,7 +522,8 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=attention m
             "color": "#0F121C",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
-            "lineHeight": 16,
+            "letterSpacing": -0.07,
+            "lineHeight": 18,
           }
         }
       >
@@ -401,6 +536,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=attention m
             "color": "#FF7350",
             "fontFamily": "JetBrainsMono_500Medium",
             "fontSize": 10,
+            "fontWeight": "500",
             "letterSpacing": 0.4,
             "lineHeight": 12,
             "marginTop": 1,
@@ -486,8 +622,6 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=clear mode=
         style={
           [
             {
-              "backgroundColor": "#FF735059",
-              "borderRadius": 9999,
               "bottom": -16,
               "left": -16,
               "position": "absolute",
@@ -504,7 +638,75 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=clear mode=
             },
           ]
         }
-      />
+      >
+        <RNSVGSvgView
+          bbHeight="100%"
+          bbWidth="100%"
+          focusable={false}
+          height="100%"
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          width="100%"
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGRadialGradient
+                cx="50%"
+                cy="50%"
+                fx="50%"
+                fy="50%"
+                gradient={
+                  [
+                    0,
+                    1509913424,
+                    1,
+                    16741200,
+                  ]
+                }
+                gradientTransform={null}
+                gradientUnits={0}
+                name="cg-orb-halo"
+                rx="50%"
+                ry="50%"
+              />
+            </RNSVGDefs>
+            <RNSVGCircle
+              cx="50%"
+              cy="50%"
+              fill={
+                {
+                  "brushRef": "cg-orb-halo",
+                  "type": 1,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+              r="50%"
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
       <View
         style={
           [
@@ -576,10 +778,11 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=clear mode=
         allowFontScaling={false}
         style={
           {
-            "color": "#F5F1EA",
+            "color": "#FFFFFF",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
-            "lineHeight": 16,
+            "letterSpacing": -0.07,
+            "lineHeight": 18,
           }
         }
       >
@@ -592,6 +795,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=clear mode=
             "color": "#FF7350",
             "fontFamily": "JetBrainsMono_500Medium",
             "fontSize": 10,
+            "fontWeight": "500",
             "letterSpacing": 0.4,
             "lineHeight": 12,
             "marginTop": 1,
@@ -677,8 +881,6 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=clear mode=
         style={
           [
             {
-              "backgroundColor": "#FF735059",
-              "borderRadius": 9999,
               "bottom": -16,
               "left": -16,
               "position": "absolute",
@@ -695,7 +897,75 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=clear mode=
             },
           ]
         }
-      />
+      >
+        <RNSVGSvgView
+          bbHeight="100%"
+          bbWidth="100%"
+          focusable={false}
+          height="100%"
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          width="100%"
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGRadialGradient
+                cx="50%"
+                cy="50%"
+                fx="50%"
+                fy="50%"
+                gradient={
+                  [
+                    0,
+                    1509913424,
+                    1,
+                    16741200,
+                  ]
+                }
+                gradientTransform={null}
+                gradientUnits={0}
+                name="cg-orb-halo"
+                rx="50%"
+                ry="50%"
+              />
+            </RNSVGDefs>
+            <RNSVGCircle
+              cx="50%"
+              cy="50%"
+              fill={
+                {
+                  "brushRef": "cg-orb-halo",
+                  "type": 1,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+              r="50%"
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
       <View
         style={
           [
@@ -770,7 +1040,8 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=clear mode=
             "color": "#0F121C",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
-            "lineHeight": 16,
+            "letterSpacing": -0.07,
+            "lineHeight": 18,
           }
         }
       >
@@ -783,6 +1054,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=clear mode=
             "color": "#FF7350",
             "fontFamily": "JetBrainsMono_500Medium",
             "fontSize": 10,
+            "fontWeight": "500",
             "letterSpacing": 0.4,
             "lineHeight": 12,
             "marginTop": 1,
@@ -868,8 +1140,6 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=offline mod
         style={
           [
             {
-              "backgroundColor": "#FF735059",
-              "borderRadius": 9999,
               "bottom": -16,
               "left": -16,
               "position": "absolute",
@@ -886,7 +1156,75 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=offline mod
             },
           ]
         }
-      />
+      >
+        <RNSVGSvgView
+          bbHeight="100%"
+          bbWidth="100%"
+          focusable={false}
+          height="100%"
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          width="100%"
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGRadialGradient
+                cx="50%"
+                cy="50%"
+                fx="50%"
+                fy="50%"
+                gradient={
+                  [
+                    0,
+                    1509913424,
+                    1,
+                    16741200,
+                  ]
+                }
+                gradientTransform={null}
+                gradientUnits={0}
+                name="cg-orb-halo"
+                rx="50%"
+                ry="50%"
+              />
+            </RNSVGDefs>
+            <RNSVGCircle
+              cx="50%"
+              cy="50%"
+              fill={
+                {
+                  "brushRef": "cg-orb-halo",
+                  "type": 1,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+              r="50%"
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
       <View
         style={
           [
@@ -958,10 +1296,11 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=offline mod
         allowFontScaling={false}
         style={
           {
-            "color": "#F5F1EA",
+            "color": "#FFFFFF",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
-            "lineHeight": 16,
+            "letterSpacing": -0.07,
+            "lineHeight": 18,
           }
         }
       >
@@ -974,6 +1313,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=offline mod
             "color": "#FF7350",
             "fontFamily": "JetBrainsMono_500Medium",
             "fontSize": 10,
+            "fontWeight": "500",
             "letterSpacing": 0.4,
             "lineHeight": 12,
             "marginTop": 1,
@@ -1059,8 +1399,6 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=offline mod
         style={
           [
             {
-              "backgroundColor": "#FF735059",
-              "borderRadius": 9999,
               "bottom": -16,
               "left": -16,
               "position": "absolute",
@@ -1077,7 +1415,75 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=offline mod
             },
           ]
         }
-      />
+      >
+        <RNSVGSvgView
+          bbHeight="100%"
+          bbWidth="100%"
+          focusable={false}
+          height="100%"
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          width="100%"
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGRadialGradient
+                cx="50%"
+                cy="50%"
+                fx="50%"
+                fy="50%"
+                gradient={
+                  [
+                    0,
+                    1509913424,
+                    1,
+                    16741200,
+                  ]
+                }
+                gradientTransform={null}
+                gradientUnits={0}
+                name="cg-orb-halo"
+                rx="50%"
+                ry="50%"
+              />
+            </RNSVGDefs>
+            <RNSVGCircle
+              cx="50%"
+              cy="50%"
+              fill={
+                {
+                  "brushRef": "cg-orb-halo",
+                  "type": 1,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+              r="50%"
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
       <View
         style={
           [
@@ -1152,7 +1558,8 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=offline mod
             "color": "#0F121C",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
-            "lineHeight": 16,
+            "letterSpacing": -0.07,
+            "lineHeight": 18,
           }
         }
       >
@@ -1165,6 +1572,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=offline mod
             "color": "#FF7350",
             "fontFamily": "JetBrainsMono_500Medium",
             "fontSize": 10,
+            "fontWeight": "500",
             "letterSpacing": 0.4,
             "lineHeight": 12,
             "marginTop": 1,
@@ -1250,8 +1658,6 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=sleeping mo
         style={
           [
             {
-              "backgroundColor": "#FF735059",
-              "borderRadius": 9999,
               "bottom": -16,
               "left": -16,
               "position": "absolute",
@@ -1268,7 +1674,75 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=sleeping mo
             },
           ]
         }
-      />
+      >
+        <RNSVGSvgView
+          bbHeight="100%"
+          bbWidth="100%"
+          focusable={false}
+          height="100%"
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          width="100%"
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGRadialGradient
+                cx="50%"
+                cy="50%"
+                fx="50%"
+                fy="50%"
+                gradient={
+                  [
+                    0,
+                    1509913424,
+                    1,
+                    16741200,
+                  ]
+                }
+                gradientTransform={null}
+                gradientUnits={0}
+                name="cg-orb-halo"
+                rx="50%"
+                ry="50%"
+              />
+            </RNSVGDefs>
+            <RNSVGCircle
+              cx="50%"
+              cy="50%"
+              fill={
+                {
+                  "brushRef": "cg-orb-halo",
+                  "type": 1,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+              r="50%"
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
       <View
         style={
           [
@@ -1371,10 +1845,11 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=sleeping mo
         allowFontScaling={false}
         style={
           {
-            "color": "#F5F1EA",
+            "color": "#FFFFFF",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
-            "lineHeight": 16,
+            "letterSpacing": -0.07,
+            "lineHeight": 18,
           }
         }
       >
@@ -1387,6 +1862,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=sleeping mo
             "color": "#FF7350",
             "fontFamily": "JetBrainsMono_500Medium",
             "fontSize": 10,
+            "fontWeight": "500",
             "letterSpacing": 0.4,
             "lineHeight": 12,
             "marginTop": 1,
@@ -1472,8 +1948,6 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=sleeping mo
         style={
           [
             {
-              "backgroundColor": "#FF735059",
-              "borderRadius": 9999,
               "bottom": -16,
               "left": -16,
               "position": "absolute",
@@ -1490,7 +1964,75 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=sleeping mo
             },
           ]
         }
-      />
+      >
+        <RNSVGSvgView
+          bbHeight="100%"
+          bbWidth="100%"
+          focusable={false}
+          height="100%"
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          width="100%"
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGRadialGradient
+                cx="50%"
+                cy="50%"
+                fx="50%"
+                fy="50%"
+                gradient={
+                  [
+                    0,
+                    1509913424,
+                    1,
+                    16741200,
+                  ]
+                }
+                gradientTransform={null}
+                gradientUnits={0}
+                name="cg-orb-halo"
+                rx="50%"
+                ry="50%"
+              />
+            </RNSVGDefs>
+            <RNSVGCircle
+              cx="50%"
+              cy="50%"
+              fill={
+                {
+                  "brushRef": "cg-orb-halo",
+                  "type": 1,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+              r="50%"
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
       <View
         style={
           [
@@ -1596,7 +2138,8 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=sleeping mo
             "color": "#0F121C",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
-            "lineHeight": 16,
+            "letterSpacing": -0.07,
+            "lineHeight": 18,
           }
         }
       >
@@ -1609,6 +2152,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=sleeping mo
             "color": "#FF7350",
             "fontFamily": "JetBrainsMono_500Medium",
             "fontSize": 10,
+            "fontWeight": "500",
             "letterSpacing": 0.4,
             "lineHeight": 12,
             "marginTop": 1,
@@ -1694,8 +2238,6 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=urgent mode
         style={
           [
             {
-              "backgroundColor": "#FF735059",
-              "borderRadius": 9999,
               "bottom": -16,
               "left": -16,
               "position": "absolute",
@@ -1712,7 +2254,75 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=urgent mode
             },
           ]
         }
-      />
+      >
+        <RNSVGSvgView
+          bbHeight="100%"
+          bbWidth="100%"
+          focusable={false}
+          height="100%"
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          width="100%"
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGRadialGradient
+                cx="50%"
+                cy="50%"
+                fx="50%"
+                fy="50%"
+                gradient={
+                  [
+                    0,
+                    1509913424,
+                    1,
+                    16741200,
+                  ]
+                }
+                gradientTransform={null}
+                gradientUnits={0}
+                name="cg-orb-halo"
+                rx="50%"
+                ry="50%"
+              />
+            </RNSVGDefs>
+            <RNSVGCircle
+              cx="50%"
+              cy="50%"
+              fill={
+                {
+                  "brushRef": "cg-orb-halo",
+                  "type": 1,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+              r="50%"
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
       <View
         style={
           [
@@ -1771,7 +2381,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=urgent mode
         pointerEvents="none"
         style={
           {
-            "backgroundColor": "#EE343B",
+            "backgroundColor": "#DC5631",
             "borderColor": "#0A0908",
             "borderRadius": 99,
             "borderWidth": 1.5,
@@ -1800,10 +2410,11 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=urgent mode
         allowFontScaling={false}
         style={
           {
-            "color": "#F5F1EA",
+            "color": "#FFFFFF",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
-            "lineHeight": 16,
+            "letterSpacing": -0.07,
+            "lineHeight": 18,
           }
         }
       >
@@ -1816,6 +2427,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=urgent mode
             "color": "#FF7350",
             "fontFamily": "JetBrainsMono_500Medium",
             "fontSize": 10,
+            "fontWeight": "500",
             "letterSpacing": 0.4,
             "lineHeight": 12,
             "marginTop": 1,
@@ -1901,8 +2513,6 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=urgent mode
         style={
           [
             {
-              "backgroundColor": "#FF735059",
-              "borderRadius": 9999,
               "bottom": -16,
               "left": -16,
               "position": "absolute",
@@ -1919,7 +2529,75 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=urgent mode
             },
           ]
         }
-      />
+      >
+        <RNSVGSvgView
+          bbHeight="100%"
+          bbWidth="100%"
+          focusable={false}
+          height="100%"
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          width="100%"
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGRadialGradient
+                cx="50%"
+                cy="50%"
+                fx="50%"
+                fy="50%"
+                gradient={
+                  [
+                    0,
+                    1509913424,
+                    1,
+                    16741200,
+                  ]
+                }
+                gradientTransform={null}
+                gradientUnits={0}
+                name="cg-orb-halo"
+                rx="50%"
+                ry="50%"
+              />
+            </RNSVGDefs>
+            <RNSVGCircle
+              cx="50%"
+              cy="50%"
+              fill={
+                {
+                  "brushRef": "cg-orb-halo",
+                  "type": 1,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+              r="50%"
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
       <View
         style={
           [
@@ -1978,7 +2656,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=urgent mode
         pointerEvents="none"
         style={
           {
-            "backgroundColor": "#EE343B",
+            "backgroundColor": "#DC5631",
             "borderColor": "#0A0908",
             "borderRadius": 99,
             "borderWidth": 1.5,
@@ -2010,7 +2688,8 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=urgent mode
             "color": "#0F121C",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
-            "lineHeight": 16,
+            "letterSpacing": -0.07,
+            "lineHeight": 18,
           }
         }
       >
@@ -2023,6 +2702,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=urgent mode
             "color": "#FF7350",
             "fontFamily": "JetBrainsMono_500Medium",
             "fontSize": 10,
+            "fontWeight": "500",
             "letterSpacing": 0.4,
             "lineHeight": 12,
             "marginTop": 1,
@@ -2108,8 +2788,6 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=watch mode=
         style={
           [
             {
-              "backgroundColor": "#FF735059",
-              "borderRadius": 9999,
               "bottom": -16,
               "left": -16,
               "position": "absolute",
@@ -2126,7 +2804,75 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=watch mode=
             },
           ]
         }
-      />
+      >
+        <RNSVGSvgView
+          bbHeight="100%"
+          bbWidth="100%"
+          focusable={false}
+          height="100%"
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          width="100%"
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGRadialGradient
+                cx="50%"
+                cy="50%"
+                fx="50%"
+                fy="50%"
+                gradient={
+                  [
+                    0,
+                    1509913424,
+                    1,
+                    16741200,
+                  ]
+                }
+                gradientTransform={null}
+                gradientUnits={0}
+                name="cg-orb-halo"
+                rx="50%"
+                ry="50%"
+              />
+            </RNSVGDefs>
+            <RNSVGCircle
+              cx="50%"
+              cy="50%"
+              fill={
+                {
+                  "brushRef": "cg-orb-halo",
+                  "type": 1,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+              r="50%"
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
       <View
         style={
           [
@@ -2214,10 +2960,11 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=watch mode=
         allowFontScaling={false}
         style={
           {
-            "color": "#F5F1EA",
+            "color": "#FFFFFF",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
-            "lineHeight": 16,
+            "letterSpacing": -0.07,
+            "lineHeight": 18,
           }
         }
       >
@@ -2230,6 +2977,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=watch mode=
             "color": "#FF7350",
             "fontFamily": "JetBrainsMono_500Medium",
             "fontSize": 10,
+            "fontWeight": "500",
             "letterSpacing": 0.4,
             "lineHeight": 12,
             "marginTop": 1,
@@ -2315,8 +3063,6 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=watch mode=
         style={
           [
             {
-              "backgroundColor": "#FF735059",
-              "borderRadius": 9999,
               "bottom": -16,
               "left": -16,
               "position": "absolute",
@@ -2333,7 +3079,75 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=watch mode=
             },
           ]
         }
-      />
+      >
+        <RNSVGSvgView
+          bbHeight="100%"
+          bbWidth="100%"
+          focusable={false}
+          height="100%"
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          width="100%"
+        >
+          <RNSVGGroup
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+          >
+            <RNSVGDefs>
+              <RNSVGRadialGradient
+                cx="50%"
+                cy="50%"
+                fx="50%"
+                fy="50%"
+                gradient={
+                  [
+                    0,
+                    1509913424,
+                    1,
+                    16741200,
+                  ]
+                }
+                gradientTransform={null}
+                gradientUnits={0}
+                name="cg-orb-halo"
+                rx="50%"
+                ry="50%"
+              />
+            </RNSVGDefs>
+            <RNSVGCircle
+              cx="50%"
+              cy="50%"
+              fill={
+                {
+                  "brushRef": "cg-orb-halo",
+                  "type": 1,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+              r="50%"
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
       <View
         style={
           [
@@ -2424,7 +3238,8 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=watch mode=
             "color": "#0F121C",
             "fontFamily": "InstrumentSerif_400Regular",
             "fontSize": 14,
-            "lineHeight": 16,
+            "letterSpacing": -0.07,
+            "lineHeight": 18,
           }
         }
       >
@@ -2437,6 +3252,7 @@ exports[`PersonOrb — status × mode snapshot matrix renders status=watch mode=
             "color": "#FF7350",
             "fontFamily": "JetBrainsMono_500Medium",
             "fontSize": 10,
+            "fontWeight": "500",
             "letterSpacing": 0.4,
             "lineHeight": 12,
             "marginTop": 1,

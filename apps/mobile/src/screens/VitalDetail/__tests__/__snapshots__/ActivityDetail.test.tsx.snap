@@ -187,7 +187,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   }
                   stroke={
                     {
-                      "payload": 4294308330,
+                      "payload": 4294967295,
                       "type": 0,
                     }
                   }
@@ -306,7 +306,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -322,7 +322,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -338,7 +338,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   cy={3}
                   fill={
                     {
-                      "payload": 4288452752,
+                      "payload": 4286939002,
                       "type": 0,
                     }
                   }
@@ -721,149 +721,6 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     </RNSVGSvgView>
                   </View>
                 </View>
-                <View
-                  style={
-                    [
-                      {
-                        "alignItems": "center",
-                        "justifyContent": "center",
-                        "position": "absolute",
-                      },
-                      {
-                        "height": 72,
-                        "left": 24,
-                        "top": 24,
-                        "width": 72,
-                      },
-                    ]
-                  }
-                >
-                  <View
-                    accessibilityRole="progressbar"
-                    accessibilityValue={
-                      {
-                        "max": 1,
-                        "min": 0,
-                        "now": 0,
-                      }
-                    }
-                    style={
-                      [
-                        {
-                          "height": 72,
-                          "opacity": 1,
-                          "width": 72,
-                        },
-                        {
-                          "opacity": 1,
-                          "transform": [
-                            {
-                              "scale": 1,
-                            },
-                          ],
-                        },
-                        {
-                          "opacity": 0.7,
-                        },
-                      ]
-                    }
-                    testID="activity-detail-hero-ring-move"
-                  >
-                    <RNSVGSvgView
-                      bbHeight={72}
-                      bbWidth={72}
-                      focusable={false}
-                      height={72}
-                      style={
-                        [
-                          {
-                            "backgroundColor": "transparent",
-                            "borderWidth": 0,
-                          },
-                          {
-                            "flex": 0,
-                            "height": 72,
-                            "width": 72,
-                          },
-                        ]
-                      }
-                      width={72}
-                    >
-                      <RNSVGGroup
-                        fill={
-                          {
-                            "payload": 4278190080,
-                            "type": 0,
-                          }
-                        }
-                      >
-                        <RNSVGCircle
-                          cx={36}
-                          cy={36}
-                          fill={null}
-                          propList={
-                            [
-                              "fill",
-                              "stroke",
-                              "strokeWidth",
-                              "strokeOpacity",
-                            ]
-                          }
-                          r={34}
-                          stroke={
-                            {
-                              "payload": 4286358895,
-                              "type": 0,
-                            }
-                          }
-                          strokeOpacity={0.12}
-                          strokeWidth={4}
-                        />
-                        <RNSVGCircle
-                          cx={36}
-                          cy={36}
-                          fill={null}
-                          matrix={
-                            [
-                              6.123233995736766e-17,
-                              -1,
-                              1,
-                              6.123233995736766e-17,
-                              0,
-                              72,
-                            ]
-                          }
-                          propList={
-                            [
-                              "fill",
-                              "stroke",
-                              "strokeWidth",
-                              "strokeDasharray",
-                              "strokeDashoffset",
-                              "strokeLinecap",
-                            ]
-                          }
-                          r={34}
-                          stroke={
-                            {
-                              "payload": 4286358895,
-                              "type": 0,
-                            }
-                          }
-                          strokeDasharray={
-                            [
-                              213.62830044410595,
-                              213.62830044410595,
-                            ]
-                          }
-                          strokeDashoffset={213.62830044410595}
-                          strokeLinecap={1}
-                          strokeWidth={4}
-                        />
-                      </RNSVGGroup>
-                    </RNSVGSvgView>
-                  </View>
-                </View>
               </View>
               <View
                 style={
@@ -878,7 +735,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "Inter_500Medium",
                       "fontSize": 11,
                       "letterSpacing": 0.55,
@@ -895,7 +752,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#F5F1EA",
+                      "color": "#FFFFFF",
                       "fontFamily": "InstrumentSerif_400Regular",
                       "fontSize": 56,
                       "letterSpacing": -0.5,
@@ -963,7 +820,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "Inter_500Medium",
                       "fontSize": 9,
                       "letterSpacing": 0.55,
@@ -978,7 +835,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#F5F1EA",
+                      "color": "#FFFFFF",
                       "fontFamily": "InstrumentSerif_400Regular",
                       "fontSize": 14,
                       "marginLeft": 6,
@@ -1016,7 +873,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "Inter_500Medium",
                       "fontSize": 9,
                       "letterSpacing": 0.55,
@@ -1031,66 +888,13 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#F5F1EA",
+                      "color": "#FFFFFF",
                       "fontFamily": "InstrumentSerif_400Regular",
                       "fontSize": 14,
                       "marginLeft": 6,
                     }
                   }
                   testID="activity-detail-hero-legend-calories-value"
-                >
-                  —
-                </Text>
-              </View>
-              <View
-                style={
-                  {
-                    "alignItems": "center",
-                    "flexDirection": "row",
-                  }
-                }
-                testID="activity-detail-hero-legend-move"
-              >
-                <View
-                  style={
-                    [
-                      {
-                        "borderRadius": 99,
-                        "height": 8,
-                        "width": 8,
-                      },
-                      {
-                        "backgroundColor": "#E89063",
-                      },
-                    ]
-                  }
-                />
-                <Text
-                  allowFontScaling={false}
-                  style={
-                    {
-                      "color": "#9C9890",
-                      "fontFamily": "Inter_500Medium",
-                      "fontSize": 9,
-                      "letterSpacing": 0.55,
-                      "marginLeft": 6,
-                      "textTransform": "uppercase",
-                    }
-                  }
-                >
-                  Move
-                </Text>
-                <Text
-                  allowFontScaling={false}
-                  style={
-                    {
-                      "color": "#F5F1EA",
-                      "fontFamily": "InstrumentSerif_400Regular",
-                      "fontSize": 14,
-                      "marginLeft": 6,
-                    }
-                  }
-                  testID="activity-detail-hero-legend-move-value"
                 >
                   —
                 </Text>
@@ -1178,7 +982,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -1242,7 +1046,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -1306,7 +1110,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 13,
                     "letterSpacing": 0.4,
@@ -1328,6 +1132,66 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
             }
           }
         >
+          <View
+            accessibilityLabel="Your typical day: ~7,100 steps, based on 6 days of activity"
+            accessibilityRole="text"
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "marginTop": 4,
+                  "paddingHorizontal": 20,
+                },
+                undefined,
+              ]
+            }
+            testID="activity-detail-baseline"
+          >
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#857F7A",
+                  "fontFamily": "Inter_500Medium",
+                  "fontSize": 11,
+                  "letterSpacing": 0.55,
+                  "lineHeight": 14,
+                  "marginBottom": 2,
+                  "textTransform": "uppercase",
+                }
+              }
+            >
+              Your typical day
+            </Text>
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#B8B2AA",
+                  "fontFamily": "JetBrainsMono_500Medium",
+                  "fontSize": 14,
+                  "letterSpacing": 0.2,
+                }
+              }
+              testID="activity-detail-baseline-body"
+            >
+              ~7,100 steps
+            </Text>
+            <Text
+              allowFontScaling={false}
+              style={
+                {
+                  "color": "#857F7A",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 12,
+                  "lineHeight": 16,
+                  "marginTop": 2,
+                }
+              }
+            >
+              based on 6 days of activity
+            </Text>
+          </View>
           <View
             style={
               [
@@ -1366,7 +1230,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "Inter_500Medium",
                     "fontSize": 11,
                     "letterSpacing": 0.55,
@@ -1382,7 +1246,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "InstrumentSerif_400Regular",
                     "fontSize": 22,
                     "lineHeight": 28,
@@ -1395,7 +1259,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "letterSpacing": 0.4,
@@ -1430,7 +1294,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "Inter_500Medium",
                     "fontSize": 11,
                     "letterSpacing": 0.55,
@@ -1446,7 +1310,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "InstrumentSerif_400Regular",
                     "fontSize": 22,
                     "lineHeight": 28,
@@ -1459,7 +1323,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "letterSpacing": 0.4,
@@ -1494,7 +1358,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "Inter_500Medium",
                     "fontSize": 11,
                     "letterSpacing": 0.55,
@@ -1510,7 +1374,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#F5F1EA",
+                    "color": "#FFFFFF",
                     "fontFamily": "InstrumentSerif_400Regular",
                     "fontSize": 22,
                     "lineHeight": 28,
@@ -1523,7 +1387,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 12,
                     "letterSpacing": 0.4,
@@ -1543,7 +1407,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
               allowFontScaling={false}
               style={
                 {
-                  "color": "#9C9890",
+                  "color": "#857F7A",
                   "fontFamily": "Inter_500Medium",
                   "fontSize": 11,
                   "letterSpacing": 0.55,
@@ -1613,7 +1477,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "JetBrainsMono_500Medium",
                         "fontSize": 8.5,
                         "letterSpacing": 0.55,
@@ -1680,7 +1544,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "JetBrainsMono_500Medium",
                         "fontSize": 8.5,
                         "letterSpacing": 0.55,
@@ -1689,7 +1553,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                       }
                     }
                   >
-                    M
+                    S
                   </Text>
                 </View>
                 <View
@@ -1745,7 +1609,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "JetBrainsMono_500Medium",
                         "fontSize": 8.5,
                         "letterSpacing": 0.55,
@@ -1754,7 +1618,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                       }
                     }
                   >
-                    T
+                    S
                   </Text>
                 </View>
                 <View
@@ -1810,7 +1674,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "JetBrainsMono_500Medium",
                         "fontSize": 8.5,
                         "letterSpacing": 0.55,
@@ -1819,7 +1683,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                       }
                     }
                   >
-                    W
+                    M
                   </Text>
                 </View>
                 <View
@@ -1875,7 +1739,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "JetBrainsMono_500Medium",
                         "fontSize": 8.5,
                         "letterSpacing": 0.55,
@@ -1940,7 +1804,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "JetBrainsMono_500Medium",
                         "fontSize": 8.5,
                         "letterSpacing": 0.55,
@@ -1949,7 +1813,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                       }
                     }
                   >
-                    F
+                    W
                   </Text>
                 </View>
                 <View
@@ -2005,7 +1869,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "JetBrainsMono_500Medium",
                         "fontSize": 8.5,
                         "letterSpacing": 0.55,
@@ -2014,7 +1878,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                       }
                     }
                   >
-                    S
+                    T
                   </Text>
                 </View>
                 <View
@@ -2070,7 +1934,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#F5F1EA",
+                        "color": "#FFFFFF",
                         "fontFamily": "JetBrainsMono_500Medium",
                         "fontSize": 8.5,
                         "letterSpacing": 0.55,
@@ -2079,14 +1943,14 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                       }
                     }
                   >
-                    S
+                    F
                   </Text>
                 </View>
               </View>
             </View>
           </View>
           <View
-            accessibilityLabel="Leiko about your activity: You hit your step goal four times this week — a quiet improvement. Today's still early; an evening walk would close the ring. Step count tends to track gently with calmer evening blood pressure."
+            accessibilityLabel="Leiko about your activity: You met your goal 2 times this week. Your daily average (6,636) is right at your usual."
             accessibilityRole="text"
             style={
               [
@@ -2223,14 +2087,14 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
             <Text
               style={
                 {
-                  "color": "#F5F1EA",
+                  "color": "#FFFFFF",
                   "fontFamily": "Inter_400Regular",
                   "fontSize": 15,
                   "lineHeight": 22,
                 }
               }
             >
-              You hit your step goal four times this week — a quiet improvement. Today's still early; an evening walk would close the ring. Step count tends to track gently with calmer evening blood pressure.
+              You met your goal 2 times this week. Your daily average (6,636) is right at your usual.
             </Text>
           </View>
           <View
@@ -2295,7 +2159,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
               allowFontScaling={false}
               style={
                 {
-                  "color": "#9C9890",
+                  "color": "#857F7A",
                   "fontFamily": "Inter_500Medium",
                   "fontSize": 11,
                   "letterSpacing": 0.55,
@@ -2328,7 +2192,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
               testID="activity-detail-recent-list"
             >
               <View
-                accessibilityLabel="6,250, Today · in progress, now"
+                accessibilityLabel="6,250, Today · so far, now"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2401,7 +2265,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#F5F1EA",
+                        "color": "#FFFFFF",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 22,
                         "lineHeight": 28,
@@ -2414,7 +2278,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "Inter_500Medium",
                         "fontSize": 11,
                         "letterSpacing": 0.55,
@@ -2424,14 +2288,14 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                       }
                     }
                   >
-                    Today · in progress
+                    Today · so far
                   </Text>
                 </View>
                 <Text
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 12,
                       "letterSpacing": 0.4,
@@ -2443,7 +2307,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 </Text>
               </View>
               <View
-                accessibilityLabel="8,000, Yesterday · met goal, Yes"
+                accessibilityLabel="8,000, Thursday · met goal, May 7"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2488,7 +2352,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     },
                   ]
                 }
-                testID="activity-detail-recent-list-row-day-5"
+                testID="activity-detail-recent-list-row-day-2026-05-07"
               >
                 <View
                   style={
@@ -2516,7 +2380,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#F5F1EA",
+                        "color": "#FFFFFF",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 22,
                         "lineHeight": 28,
@@ -2529,7 +2393,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "Inter_500Medium",
                         "fontSize": 11,
                         "letterSpacing": 0.55,
@@ -2539,14 +2403,14 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                       }
                     }
                   >
-                    Yesterday · met goal
+                    Thursday · met goal
                   </Text>
                 </View>
                 <Text
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 12,
                       "letterSpacing": 0.4,
@@ -2554,11 +2418,11 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     }
                   }
                 >
-                  Yes
+                  May 7
                 </Text>
               </View>
               <View
-                accessibilityLabel="7,100, Wednesday · light day, Wed"
+                accessibilityLabel="7,100, Wednesday · light day, May 6"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2603,7 +2467,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     },
                   ]
                 }
-                testID="activity-detail-recent-list-row-day-4"
+                testID="activity-detail-recent-list-row-day-2026-05-06"
               >
                 <View
                   style={
@@ -2631,7 +2495,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#F5F1EA",
+                        "color": "#FFFFFF",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 22,
                         "lineHeight": 28,
@@ -2644,7 +2508,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "Inter_500Medium",
                         "fontSize": 11,
                         "letterSpacing": 0.55,
@@ -2661,7 +2525,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 12,
                       "letterSpacing": 0.4,
@@ -2669,11 +2533,126 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     }
                   }
                 >
-                  Wed
+                  May 6
                 </Text>
               </View>
               <View
-                accessibilityLabel="5,400, Tuesday · light day, Tue"
+                accessibilityLabel="5,400, Tuesday · light day, May 5"
+                accessibilityRole="text"
+                accessibilityState={
+                  {
+                    "busy": undefined,
+                    "checked": undefined,
+                    "disabled": undefined,
+                    "expanded": undefined,
+                    "selected": undefined,
+                  }
+                }
+                accessibilityValue={
+                  {
+                    "max": undefined,
+                    "min": undefined,
+                    "now": undefined,
+                    "text": undefined,
+                  }
+                }
+                accessible={true}
+                collapsable={false}
+                focusable={true}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onResponderGrant={[Function]}
+                onResponderMove={[Function]}
+                onResponderRelease={[Function]}
+                onResponderTerminate={[Function]}
+                onResponderTerminationRequest={[Function]}
+                onStartShouldSetResponder={[Function]}
+                style={
+                  [
+                    {
+                      "alignItems": "center",
+                      "flexDirection": "row",
+                    },
+                    {
+                      "borderBottomColor": "rgba(255,255,255,0.08)",
+                      "borderBottomWidth": 0.5,
+                      "opacity": 1,
+                      "paddingVertical": 12,
+                    },
+                  ]
+                }
+                testID="activity-detail-recent-list-row-day-2026-05-05"
+              >
+                <View
+                  style={
+                    [
+                      {
+                        "borderRadius": 3,
+                        "height": 32,
+                        "width": 6,
+                      },
+                      {
+                        "backgroundColor": "#7CA56F",
+                      },
+                    ]
+                  }
+                />
+                <View
+                  style={
+                    {
+                      "flex": 1,
+                      "marginLeft": 12,
+                    }
+                  }
+                >
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#FFFFFF",
+                        "fontFamily": "InstrumentSerif_400Regular",
+                        "fontSize": 22,
+                        "lineHeight": 28,
+                      }
+                    }
+                  >
+                    5,400
+                  </Text>
+                  <Text
+                    allowFontScaling={false}
+                    style={
+                      {
+                        "color": "#857F7A",
+                        "fontFamily": "Inter_500Medium",
+                        "fontSize": 11,
+                        "letterSpacing": 0.55,
+                        "lineHeight": 14,
+                        "marginTop": 3,
+                        "textTransform": "uppercase",
+                      }
+                    }
+                  >
+                    Tuesday · light day
+                  </Text>
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  style={
+                    {
+                      "color": "#857F7A",
+                      "fontFamily": "JetBrainsMono_500Medium",
+                      "fontSize": 12,
+                      "letterSpacing": 0.4,
+                      "lineHeight": 16,
+                    }
+                  }
+                >
+                  May 5
+                </Text>
+              </View>
+              <View
+                accessibilityLabel="9,000, Monday · met goal, May 4"
                 accessibilityRole="text"
                 accessibilityState={
                   {
@@ -2718,7 +2697,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     },
                   ]
                 }
-                testID="activity-detail-recent-list-row-day-3"
+                testID="activity-detail-recent-list-row-day-2026-05-04"
               >
                 <View
                   style={
@@ -2746,20 +2725,20 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#F5F1EA",
+                        "color": "#FFFFFF",
                         "fontFamily": "InstrumentSerif_400Regular",
                         "fontSize": 22,
                         "lineHeight": 28,
                       }
                     }
                   >
-                    5,400
+                    9,000
                   </Text>
                   <Text
                     allowFontScaling={false}
                     style={
                       {
-                        "color": "#9C9890",
+                        "color": "#857F7A",
                         "fontFamily": "Inter_500Medium",
                         "fontSize": 11,
                         "letterSpacing": 0.55,
@@ -2769,14 +2748,14 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                       }
                     }
                   >
-                    Tuesday · light day
+                    Monday · met goal
                   </Text>
                 </View>
                 <Text
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 12,
                       "letterSpacing": 0.4,
@@ -2784,9 +2763,73 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                     }
                   }
                 >
-                  Tue
+                  May 4
                 </Text>
               </View>
+            </View>
+            <View
+              accessibilityLabel="Showing 5 of 7 readings · tap to show more"
+              accessibilityRole="button"
+              accessibilityState={
+                {
+                  "busy": undefined,
+                  "checked": undefined,
+                  "disabled": undefined,
+                  "expanded": undefined,
+                  "selected": undefined,
+                }
+              }
+              accessibilityValue={
+                {
+                  "max": undefined,
+                  "min": undefined,
+                  "now": undefined,
+                  "text": undefined,
+                }
+              }
+              accessible={true}
+              collapsable={false}
+              focusable={true}
+              hitSlop={6}
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+              onResponderGrant={[Function]}
+              onResponderMove={[Function]}
+              onResponderRelease={[Function]}
+              onResponderTerminate={[Function]}
+              onResponderTerminationRequest={[Function]}
+              onStartShouldSetResponder={[Function]}
+              style={
+                {
+                  "alignItems": "center",
+                  "backgroundColor": "#120C07",
+                  "borderColor": "rgba(255,255,255,0.06)",
+                  "borderRadius": 14,
+                  "borderWidth": 0.5,
+                  "marginHorizontal": 20,
+                  "marginTop": 12,
+                  "opacity": 1,
+                  "paddingHorizontal": 16,
+                  "paddingVertical": 12,
+                }
+              }
+              testID="activity-detail-recent-footer"
+            >
+              <Text
+                allowFontScaling={false}
+                style={
+                  {
+                    "color": "#FFFFFF",
+                    "fontFamily": "Inter_400Regular",
+                    "fontSize": 12,
+                    "fontWeight": "500",
+                    "lineHeight": 16,
+                  }
+                }
+              >
+                Show more · 5 of 7
+              </Text>
             </View>
           </View>
           <View>
@@ -2794,7 +2837,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
               allowFontScaling={false}
               style={
                 {
-                  "color": "#9C9890",
+                  "color": "#857F7A",
                   "fontFamily": "Inter_500Medium",
                   "fontSize": 11,
                   "letterSpacing": 0.55,
@@ -2871,7 +2914,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#F5F1EA",
+                      "color": "#FFFFFF",
                       "fontFamily": "InstrumentSerif_400Regular",
                       "fontSize": 22,
                       "lineHeight": 28,
@@ -2884,7 +2927,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                   allowFontScaling={false}
                   style={
                     {
-                      "color": "#9C9890",
+                      "color": "#857F7A",
                       "fontFamily": "JetBrainsMono_500Medium",
                       "fontSize": 11,
                       "letterSpacing": 0.4,
@@ -2900,7 +2943,7 @@ exports[`ActivityDetail — snapshot matches snapshot in dark mode (populated) 1
                 allowFontScaling={false}
                 style={
                   {
-                    "color": "#9C9890",
+                    "color": "#857F7A",
                     "fontFamily": "JetBrainsMono_500Medium",
                     "fontSize": 22,
                   }

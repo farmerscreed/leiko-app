@@ -41,14 +41,30 @@ export interface VitalSetup {
   /** True iff at least one setting has changed since the last
    *  successful watch flush. */
   dirty: boolean;
+  /** Sprint 16.5b — wall-clock ms of the last successful applyDeviceConfig
+   *  flush. Used by applyDeviceConfig's debounce so background syncs
+   *  push config periodically (refreshing demographics, auto-HR/SpO2,
+   *  goals on the watch) instead of being silently dirty-gated. 0 = never
+   *  flushed, treated as "stale → flush on next sync." */
+  lastFlushedAtMs: number;
 }
 
 const DEFAULTS: VitalSetup = {
   autoHrEnabled: true,
-  autoSpo2Enabled: false,
+  // Sprint 16.5b — flipped from false to true. Pre-16.5b most users never
+  // saw SpO2 data because the watch wasn't sampling unless they explicitly
+  // toggled this in Settings → Vital Streams. Battery cost is small (~1
+  // sample per hour); the data gap is large (no overnight SpO2 lows for
+  // anomaly engine, no SpO2 trend for AI). Phase A scenario 1 confirmed
+  // 11 SpO2 samples per hour when on. Voice-claim review note: enabling
+  // by default means we tell users "we measure your blood oxygen" — keep
+  // that copy aligned with docs/05-voice-and-claims.md when the Settings
+  // surface is rebuilt in Phase 16.5c.
+  autoSpo2Enabled: true,
   stepsTarget: 6000,
   sleepTargetMin: 480,
   dirty: false,
+  lastFlushedAtMs: 0,
 };
 
 export const STEPS_TARGET_MIN = 2000;
@@ -81,6 +97,10 @@ function readPersisted(): VitalSetup {
           ? clampSleep(parsed.sleepTargetMin)
           : DEFAULTS.sleepTargetMin,
       dirty: typeof parsed.dirty === 'boolean' ? parsed.dirty : DEFAULTS.dirty,
+      lastFlushedAtMs:
+        typeof parsed.lastFlushedAtMs === 'number' && Number.isFinite(parsed.lastFlushedAtMs)
+          ? parsed.lastFlushedAtMs
+          : DEFAULTS.lastFlushedAtMs,
     };
   } catch {
     return { ...DEFAULTS };
@@ -110,7 +130,9 @@ interface VitalSetupStore extends VitalSetup {
   setStepsTarget: (value: number) => void;
   setSleepTargetMin: (value: number) => void;
   /** Mark settings as flushed to the watch — called by
-   *  applyDeviceConfig after a successful BLE round-trip. */
+   *  applyDeviceConfig after a successful BLE round-trip.
+   *  Sprint 16.5b: also stamps `lastFlushedAtMs` so the next sync's
+   *  applyDeviceConfig can debounce repeat flushes. */
   clearDirty: () => void;
   /** Test-only reset. */
   __resetForTest: () => void;
@@ -128,6 +150,7 @@ export const useVitalSetup = create<VitalSetupStore>((set, get) => {
         stepsTarget: get().stepsTarget,
         sleepTargetMin: get().sleepTargetMin,
         dirty: true,
+        lastFlushedAtMs: get().lastFlushedAtMs,
       };
       set(next);
       persist(next);
@@ -140,6 +163,7 @@ export const useVitalSetup = create<VitalSetupStore>((set, get) => {
         stepsTarget: get().stepsTarget,
         sleepTargetMin: get().sleepTargetMin,
         dirty: true,
+        lastFlushedAtMs: get().lastFlushedAtMs,
       };
       set(next);
       persist(next);
@@ -152,6 +176,7 @@ export const useVitalSetup = create<VitalSetupStore>((set, get) => {
         stepsTarget: clampSteps(value),
         sleepTargetMin: get().sleepTargetMin,
         dirty: true,
+        lastFlushedAtMs: get().lastFlushedAtMs,
       };
       set(next);
       persist(next);
@@ -164,6 +189,7 @@ export const useVitalSetup = create<VitalSetupStore>((set, get) => {
         stepsTarget: get().stepsTarget,
         sleepTargetMin: clampSleep(value),
         dirty: true,
+        lastFlushedAtMs: get().lastFlushedAtMs,
       };
       set(next);
       persist(next);
@@ -176,8 +202,9 @@ export const useVitalSetup = create<VitalSetupStore>((set, get) => {
         stepsTarget: get().stepsTarget,
         sleepTargetMin: get().sleepTargetMin,
         dirty: false,
+        lastFlushedAtMs: Date.now(),
       };
-      set({ dirty: false });
+      set({ dirty: false, lastFlushedAtMs: current.lastFlushedAtMs });
       persist(current);
     },
 
@@ -197,5 +224,6 @@ export function getVitalSetup(): VitalSetup {
     stepsTarget: s.stepsTarget,
     sleepTargetMin: s.sleepTargetMin,
     dirty: s.dirty,
+    lastFlushedAtMs: s.lastFlushedAtMs,
   };
 }

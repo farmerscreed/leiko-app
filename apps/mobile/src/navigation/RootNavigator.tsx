@@ -33,7 +33,7 @@ import { SelfBuyerIntro3Screen } from '../screens/Onboarding/SelfBuyer/Intro3';
 import { SelfBuyerYouScreen } from '../screens/Onboarding/SelfBuyer/You';
 import { SelfBuyerWatchScreen } from '../screens/Onboarding/SelfBuyer/Watch';
 import { CaregiverHome } from '../screens/Home/CaregiverHome';
-import { ParentReadingsList } from '../screens/Home/ParentReadingsList';
+import { ParentDashboard } from '../screens/Home/ParentDashboard';
 import { SelfBuyerHome } from '../screens/Home/SelfBuyerHome';
 import { SelfBuyerHomePlaceholder } from '../screens/Placeholders/SelfBuyerHomePlaceholder';
 import { VitalDetailRouter } from '../screens/VitalDetail/VitalDetailRouter';
@@ -46,12 +46,15 @@ import { ForYourDoctorScreen } from '../screens/ForYourDoctor/ForYourDoctorScree
 import { AuditLogScreen } from '../screens/AuditLog/AuditLogScreen';
 import { CaregiverVisibilityScreen } from '../screens/CaregiverVisibility/CaregiverVisibilityScreen';
 import { FamilyMembersScreen } from '../screens/FamilyMembers/FamilyMembersScreen';
+import { AddPersonScreen } from '../screens/Family/AddPersonScreen';
+import { AccountSwitchScreen } from '../screens/AccountSwitch/AccountSwitchScreen';
 import { LearnScreen } from '../screens/Learn/LearnScreen';
 import { LearnClusterScreen } from '../screens/Learn/LearnClusterScreen';
 import { ArticleScreen } from '../screens/Learn/ArticleScreen';
 import { AskLeikoScreen } from '../screens/AskLeiko/AskLeikoScreen';
 import { DebugLauncher } from '../dev/DebugLauncher';
 import { OfflineBanner } from '../components/OfflineBanner';
+import { useEnforceVisibility } from '../hooks/useEnforceVisibility';
 import { useTheme } from '../theme';
 import { useAuth } from '../state/auth';
 import { useOnboarding } from '../state/onboarding';
@@ -68,7 +71,10 @@ import {
   startBackgroundSync,
   stopBackgroundSync,
 } from '../services/sync/backgroundSync';
+import { getOrCreateClientDeviceId, mmkv, STORAGE_KEYS } from '../services/storage';
 import { inferModel, setDeviceMetaProvider } from '../services/sync/postReading';
+import { startBleForegroundService } from '../services/ble/foregroundService';
+import { scheduleNextLearnedTimeReminder } from '../services/reminders/dispatcher';
 import {
   configureNotificationHandler,
   registerForPushNotifications,
@@ -104,6 +110,7 @@ setDeviceMetaProvider(() => {
     macSuffix: paired.macSuffix,
     name: paired.name,
     model: inferModel(paired.name),
+    clientDeviceId: getOrCreateClientDeviceId(),
   };
 });
 import type {
@@ -162,7 +169,8 @@ function CaregiverHomeNavigator() {
   return (
     <CaregiverStack.Navigator screenOptions={{ headerShown: false }}>
       <CaregiverStack.Screen name="CaregiverHome" component={CaregiverHome} />
-      <CaregiverStack.Screen name="ParentReadings" component={ParentReadingsList} />
+      <CaregiverStack.Screen name="ParentDashboard" component={ParentDashboard} />
+      <CaregiverStack.Screen name="VitalDetail" component={VitalDetailRouter} />
       <CaregiverStack.Screen name="Pairing" component={PairingScreen} />
       <CaregiverStack.Screen name="Settings" component={SettingsScreen} />
       <CaregiverStack.Screen name="TakeReading" component={TakeReadingScreen} />
@@ -181,6 +189,8 @@ function CaregiverHomeNavigator() {
         name="FamilyMembers"
         component={FamilyMembersScreen}
       />
+      <CaregiverStack.Screen name="AddPerson" component={AddPersonScreen} />
+      <CaregiverStack.Screen name="AccountSwitch" component={AccountSwitchScreen} />
       <CaregiverStack.Screen name="Learn" component={LearnScreen} />
       <CaregiverStack.Screen name="LearnCluster" component={LearnClusterScreen} />
       <CaregiverStack.Screen name="Article" component={ArticleScreen} />
@@ -214,11 +224,33 @@ function SelfBuyerHomeNavigator() {
   // initial route. The placeholder route is kept registered so any in-flight
   // dev tooling that deep-links to it still resolves; it is no longer
   // surfaced to the user.
+  //
+  // ADR-0006 — consume the one-shot pairOnLaunch flag. Onboarding's "I have
+  // the watch" sets it; Pairing lives on THIS (home) stack, so we open it
+  // right after the onboarding gate flips and this navigator mounts.
+  useEffect(() => {
+    if (!mmkv.getBoolean(STORAGE_KEYS.pairOnLaunch)) return;
+    mmkv.remove(STORAGE_KEYS.pairOnLaunch);
+    // Defer until the navigator is ready, then push Pairing over the home.
+    const t = setTimeout(() => {
+      if (navigationRef.isReady()) {
+        navigationRef.navigate('Pairing' as never);
+      }
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
   return (
     <SelfBuyerStack.Navigator
-      initialRouteName="SelfBuyerHome"
+      initialRouteName="CaregiverHome"
       screenOptions={{ headerShown: false }}
     >
+      {/* ADR-0006 Phase 2/3 — unified constellation home is the landing
+          screen for every persona. The self-buyer's own self-circle shows
+          as the "You" node; tapping it opens the immersive personal view
+          (ParentDashboard). The legacy SelfBuyerHome stays registered as
+          that detail target and for deep-links. */}
+      <SelfBuyerStack.Screen name="CaregiverHome" component={CaregiverHome} />
+      <SelfBuyerStack.Screen name="ParentDashboard" component={ParentDashboard} />
       <SelfBuyerStack.Screen name="SelfBuyerHome" component={SelfBuyerHome} />
       <SelfBuyerStack.Screen
         name="SelfBuyerHomePlaceholder"
@@ -243,6 +275,8 @@ function SelfBuyerHomeNavigator() {
         name="FamilyMembers"
         component={FamilyMembersScreen}
       />
+      <SelfBuyerStack.Screen name="AddPerson" component={AddPersonScreen} />
+      <SelfBuyerStack.Screen name="AccountSwitch" component={AccountSwitchScreen} />
       <SelfBuyerStack.Screen name="Learn" component={LearnScreen} />
       <SelfBuyerStack.Screen name="LearnCluster" component={LearnClusterScreen} />
       <SelfBuyerStack.Screen name="Article" component={ArticleScreen} />
@@ -263,6 +297,23 @@ function HydratingFallback() {
       <ActivityIndicator color={theme.colors.brand.primary} />
     </View>
   );
+}
+
+/**
+ * Sprint 16.6 FUN-4 — wire the learned-time reminder dispatcher to
+ * current app state. Pure-ish: reads the store snapshots directly so
+ * it does not depend on React rendering. Self-buyer fires "you"
+ * copy; caregiver fires a neutral "your loved one" until per-parent
+ * resolution is wired through useCaregiverFamily (TODO follow-up).
+ * The "parent" persona route is read-only by spec, so we skip it.
+ */
+function scheduleLearnedTimeFromCurrentState(): Promise<unknown> | void {
+  const accountType = useAuth.getState().profile?.account_type;
+  if (!accountType || accountType === 'parent') return;
+  const isSelf = accountType === 'self_buyer';
+  const readings = useReadings.getState().recent ?? [];
+  const parentLabel = isSelf ? '' : 'your loved one';
+  return scheduleNextLearnedTimeReminder({ readings, parentLabel, isSelf });
 }
 
 export function RootNavigator() {
@@ -296,6 +347,13 @@ export function RootNavigator() {
   useEffect(() => {
     void hydrate();
     hydratePairing();
+    // If a watch was already paired in a prior session, re-arm the
+    // Android foreground service on cold start so background BLE sync
+    // survives Doze. hydratePairing() above populates pairedDevice
+    // synchronously from MMKV. No-op on iOS / when no watch is paired.
+    if (usePairing.getState().pairedDevice) {
+      void startBleForegroundService();
+    }
     hydrateReadings();
     // Best-effort: try to sync any pending readings on app cold start
     // (offline captures from a previous session).
@@ -322,6 +380,12 @@ export function RootNavigator() {
     // tap → deep-link routing.
     void configureNotificationHandler();
     void registerForPushNotifications();
+    // Sprint 16.6 FUN-4 — learned-time reminder dispatcher. Reads
+    // current readings + persona from the stores and schedules the
+    // next one-shot reminder. The dispatcher cancel-and-reschedules,
+    // so re-running on foreground (when the orchestrator does its
+    // own re-fire) keeps the schedule fresh as readings come in.
+    void scheduleLearnedTimeFromCurrentState();
     const notifListeners = startNotificationListeners();
     return () => {
       stopOrchestrator();
@@ -353,6 +417,12 @@ export function RootNavigator() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      {/* Sprint 17b — visibility enforcement. Subscribes to UPDATEs
+          on the signed-in user's family_members row and purges
+          singleton-slice `recent` + TanStack caches when a vital
+          flips visible → hidden. Must be inside QueryClientProvider
+          because it uses useQueryClient. */}
+      <VisibilityEnforcer />
       {/* navigationRef is typed loosely so jest-expo's mock can stand
           in for it in tests. Cast here so NavigationContainer's
           stricter ref shape accepts it. */}
@@ -368,6 +438,14 @@ export function RootNavigator() {
       <DebugLauncher />
     </QueryClientProvider>
   );
+}
+
+// Sprint 17b — single-purpose wrapper so the hook is called inside
+// the QueryClientProvider tree (useQueryClient requires it). Returns
+// null; pure side-effect.
+function VisibilityEnforcer(): null {
+  useEnforceVisibility();
+  return null;
 }
 
 const styles = StyleSheet.create({

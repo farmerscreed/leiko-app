@@ -8,9 +8,17 @@ export function useReducedMotion(): boolean {
 
   useEffect(() => {
     let mounted = true;
-    AccessibilityInfo.isReduceMotionEnabled().then((value) => {
-      if (mounted) setReduce(value);
-    });
+    // Sprint 16.5i — guard with catch. Some Android devices reject this
+    // call (unhandled rejection would otherwise crash on cold start at
+    // theme init time).
+    AccessibilityInfo.isReduceMotionEnabled()
+      .then((value) => {
+        if (mounted) setReduce(value);
+      })
+      .catch(() => {
+        // Default to "motion enabled" on read failure — safer than
+        // accidentally locking everyone into reduce-motion.
+      });
     const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduce);
     return () => {
       mounted = false;

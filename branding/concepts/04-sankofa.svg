@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Direction 4 — Sankofa heart -->
+  <!-- A heart whose right lobe opens into a graceful spiral curl —
+       evoking the Adinkra Sankofa bird "looking back". The spiral has
+       to read as intentional grace, not a bite or a defect. Drawn as a
+       continuous outline filled inside, with the curl built from
+       smooth Bézier control points. -->
+
+  <defs>
+    <radialGradient id="canopy4" cx="50%" cy="55%" r="65%">
+      <stop offset="0%" stop-color="#2A231C"/>
+      <stop offset="100%" stop-color="#1F1A14"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#canopy4)"/>
+
+  <!-- Heart silhouette (left side + bottom) — standard heart curve until
+       the right lobe, where the path peels off into a spiral. -->
+  <path d="
+    M 512 800
+    C 372 670, 220 570, 220 432
+    C 220 340, 290 268, 384 268
+    C 446 268, 488 300, 512 350
+    L 512 800
+    Z
+  " fill="#E8A063"/>
+
+  <!-- Right lobe + spiral curl — drawn as a single sweeping form. The
+       lobe rises like a normal heart, then curls inward and around,
+       finishing in a tight inner terminal. -->
+  <path d="
+    M 512 350
+    C 536 300, 578 268, 640 268
+    C 734 268, 804 340, 804 432
+    C 804 500, 760 552, 700 568
+    C 642 584, 588 552, 580 496
+    C 572 444, 612 408, 656 412
+    C 692 416, 712 444, 704 472
+    C 698 494, 678 502, 666 488
+    C 658 480, 660 470, 668 466
+    L 512 800
+    Z
+  " fill="#E8A063"/>
+</svg>

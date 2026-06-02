@@ -41,6 +41,25 @@ interface SpO2State {
     nights?: number,
     timeZone?: string | null,
   ) => number[];
+  /** Sprint 18 — same data as overnightLowsRecent but each entry
+   *  carries the nightKey (the "owning morning" date the sample
+   *  is anchored to) so consumers can date-align with other vitals'
+   *  per-night data instead of positional pairing. Oldest first.
+   *  Empty nights are skipped (not zero-filled). */
+  overnightLowsRecentByNight: (
+    nowSec?: number,
+    nights?: number,
+    timeZone?: string | null,
+  ) => Array<{ nightKey: string; low: number }>;
+  /**
+   * Sprint 16.5e — seed historical samples from the server. Same
+   * pattern as `useHR.seedFromServer`. The U16PRO watch's day-info
+   * storage rolls over after a few days; this top-up keeps the SpO2
+   * detail screen + the overnight chart populated.
+   */
+  seedFromServer: (samples: SpO2Sample[]) => number;
+  /** Sprint 17b — visibility purge. Clears `recent` only. */
+  clearRecent: () => void;
   reset: () => void;
 }
 
@@ -144,6 +163,12 @@ export const useSpO2 = create<SpO2State>((set, get) => ({
   },
 
   overnightLowsRecent: (nowSec, nights, timeZone) => {
+    return get()
+      .overnightLowsRecentByNight(nowSec, nights, timeZone)
+      .map((e) => e.low);
+  },
+
+  overnightLowsRecentByNight: (nowSec, nights, timeZone) => {
     const now = nowSec ?? Math.floor(Date.now() / 1000);
     const N = nights ?? OVERNIGHT_DEFAULT_NIGHTS;
     const all = [...get().pending, ...get().recent];
@@ -156,7 +181,7 @@ export const useSpO2 = create<SpO2State>((set, get) => ({
       if (arr) arr.push(s);
       else byNight.set(key, [s]);
     }
-    const out: number[] = [];
+    const out: Array<{ nightKey: string; low: number }> = [];
     // Walk from oldest (now - N days) to newest (now), so result is
     // oldest-first as the brief specifies.
     for (let d = N; d >= 0; d--) {
@@ -164,9 +189,36 @@ export const useSpO2 = create<SpO2State>((set, get) => ({
       const samples = byNight.get(key);
       if (!samples || samples.length === 0) continue;
       const low = Math.min(...samples.map((s) => s.percent));
-      out.push(low);
+      out.push({ nightKey: key, low });
     }
     return out;
+  },
+
+  seedFromServer: (samples) => {
+    if (samples.length === 0) return 0;
+    const existing = get().recent;
+    const existingKeys = new Set(existing.map((s) => String(s.measuredAtSec)));
+    const pendingKeys = new Set(
+      get().pending.map((s) => String(s.measuredAtSec)),
+    );
+    const newRows = samples.filter((s) => {
+      const key = String(s.measuredAtSec);
+      return !existingKeys.has(key) && !pendingKeys.has(key);
+    });
+    if (newRows.length === 0) return 0;
+    const merged = dedupRecent(
+      [...newRows, ...existing].sort(
+        (a, b) => b.measuredAtSec - a.measuredAtSec,
+      ),
+    ).slice(0, RECENT_SAMPLES_CAP);
+    set({ recent: merged });
+    persistRecent(merged);
+    return newRows.length;
+  },
+
+  clearRecent: () => {
+    set({ recent: [] });
+    mmkv.remove(STORAGE_KEYS.recentSpO2);
   },
 
   reset: () => {

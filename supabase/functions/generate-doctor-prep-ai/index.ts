@@ -160,8 +160,17 @@ async function callAnthropic(opts: {
   } catch (err) {
     return { error: 'anthropic_fetch_failed: ' + (err as Error).message };
   }
-  if (!res.ok) return { error: `anthropic_http_${res.status}` };
-  const out = (await res.json()) as any;
+  if (!res.ok) {
+    let snippet = '';
+    try { snippet = (await res.text()).slice(0, 160); } catch { /* ignore */ }
+    return { error: `anthropic_http_${res.status}${snippet ? `: ${snippet}` : ''}` };
+  }
+  let out: any;
+  try {
+    out = await res.json();
+  } catch (err) {
+    return { error: 'anthropic_parse_failed: ' + (err as Error).message };
+  }
   return {
     body: ((out.content?.[0]?.text as string | undefined) ?? '').trim(),
     promptTokens: out.usage?.input_tokens ?? 0,
@@ -233,27 +242,40 @@ async function generateWithGuard(opts: {
   }
 
   const flagged = !layer1.passes || layer2Cosine >= LAYER2_THRESHOLD;
-  await opts.serviceClient.from('ai_narration_cache').upsert({
-    user_id: opts.userId, family_id: opts.familyId,
-    surface: opts.surface, scope_key: opts.scopeKey,
-    body: candidate, tier: opts.model === SONNET_MODEL ? 'C' : 'B',
-    model: opts.model,
-    prompt_tokens: promptTokens, completion_tokens: completionTokens,
-    flagged, generated_at: new Date().toISOString(),
-  }, { onConflict: 'user_id,surface,scope_key' });
-
-  await opts.serviceClient.from('audit_log').insert({
-    actor_user_id: opts.userId, family_id: opts.familyId,
-    action: 'ai.doctor_prep',
-    metadata: {
-      tier: opts.model === SONNET_MODEL ? 'C' : 'B',
-      model: opts.model, surface: opts.surface,
+  // Cache write + audit log are best-effort. A transient Postgres error
+  // here must NOT crash the request — the AI body is already generated
+  // and the caller has paid the latency cost. Log and continue.
+  try {
+    const cacheRes = await opts.serviceClient.from('ai_narration_cache').upsert({
+      user_id: opts.userId, family_id: opts.familyId,
+      surface: opts.surface, scope_key: opts.scopeKey,
+      body: candidate, tier: opts.model === SONNET_MODEL ? 'C' : 'B',
+      model: opts.model,
       prompt_tokens: promptTokens, completion_tokens: completionTokens,
-      layer2_max_cosine: layer2Cosine,
-      prompt_version: SYSTEM_PROMPT_VERSION,
-      scope_key: opts.scopeKey,
-    },
-  });
+      flagged, generated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id,surface,scope_key' });
+    if (cacheRes.error) console.warn('prep-ai cache upsert error', cacheRes.error);
+  } catch (err) {
+    console.warn('prep-ai cache upsert threw', err);
+  }
+
+  try {
+    const auditRes = await opts.serviceClient.from('audit_log').insert({
+      actor_user_id: opts.userId, family_id: opts.familyId,
+      action: 'ai.doctor_prep',
+      metadata: {
+        tier: opts.model === SONNET_MODEL ? 'C' : 'B',
+        model: opts.model, surface: opts.surface,
+        prompt_tokens: promptTokens, completion_tokens: completionTokens,
+        layer2_max_cosine: layer2Cosine,
+        prompt_version: SYSTEM_PROMPT_VERSION,
+        scope_key: opts.scopeKey,
+      },
+    });
+    if (auditRes.error) console.warn('prep-ai audit_log insert error', auditRes.error);
+  } catch (err) {
+    console.warn('prep-ai audit_log insert threw', err);
+  }
 
   return { body: candidate };
 }
@@ -266,7 +288,12 @@ interface RequestBody {
   endDate: string;
 }
 
-Deno.serve(async (req: Request): Promise<Response> => {
+// Top-level wrapper: any uncaught throw inside the handler becomes a
+// Supabase EDGE_FUNCTION_ERROR 502 with an unhelpful 75-byte body and
+// no log surface from the caller side. Catch + return structured 500
+// instead — the actual stack still lands in function logs via the
+// console.error below.
+async function handle(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json({ status: 'error', error: 'method_not_allowed' }, 405);
 
@@ -341,6 +368,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
   });
   if ('error' in cover) {
     clearTimeout(timeout);
+    console.warn('prep-ai cover failed', cover.error);
     return json({ status: 'error', error: cover.error, stage: 'cover' }, 502);
   }
 
@@ -371,6 +399,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     });
     if ('error' in obs) {
       clearTimeout(timeout);
+      console.warn('prep-ai observations failed', obs.error);
       return json({ status: 'error', error: obs.error, stage: 'observations' }, 502);
     }
     observationsBody = obs.body;
@@ -384,4 +413,18 @@ Deno.serve(async (req: Request): Promise<Response> => {
     observations: observationsBody,
     exportId: body.exportId,
   }, 200);
+}
+
+Deno.serve(async (req: Request): Promise<Response> => {
+  try {
+    return await handle(req);
+  } catch (err) {
+    const e = err as Error;
+    console.error('generate-doctor-prep-ai uncaught', e?.stack || e?.message || e);
+    return json({
+      status: 'error',
+      error: 'internal_error',
+      detail: e?.message ?? String(e),
+    }, 500);
+  }
 });

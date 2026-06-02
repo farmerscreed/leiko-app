@@ -193,6 +193,12 @@ export type FamilyMemberRow = {
   removed_at: string | null;
   removed_reason: string | null;
   vital_visibility: VitalVisibility | null;
+  /** Sprint 19 Block 5 — per-caregiver label for the wearer.
+   *  Optional; when null the display layer falls back to
+   *  families.parent_relationship via formatRelation. Same encoding
+   *  convention as parent_relationship ('mother' | 'son' |
+   *  'other:<label>' | …). */
+  caregiver_relationship_label: string | null;
 };
 
 export type QualityScore = 'good' | 'fair' | 'suspect';

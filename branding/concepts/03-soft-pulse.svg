@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Direction 3 — Soft pulse heart -->
+  <!-- The most literal direction, executed with restraint. A rounded heart;
+       through it passes a single calm breath of a pulse — wide, gentle,
+       slow. Not the spike of a monitor. The rhythm of a person at rest. -->
+
+  <defs>
+    <radialGradient id="canopy3" cx="50%" cy="55%" r="65%">
+      <stop offset="0%" stop-color="#2A231C"/>
+      <stop offset="100%" stop-color="#1F1A14"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#canopy3)"/>
+
+  <!-- Heart — solid, full, generous. -->
+  <path d="
+    M 512 760
+    C 372 632, 220 540, 220 410
+    C 220 320, 290 250, 380 250
+    C 444 250, 488 282, 512 332
+    C 536 282, 580 250, 644 250
+    C 734 250, 804 320, 804 410
+    C 804 540, 652 632, 512 760
+    Z
+  " fill="#E8A063"/>
+
+  <!-- The pulse — a single calm wave across the centre. White-on-amber
+       creates the cleanest legibility while keeping the matte warmth. -->
+  <path d="
+    M 240 480
+    L 360 480
+    Q 400 480, 420 442
+    Q 440 404, 472 478
+    Q 504 552, 540 480
+    Q 576 408, 608 480
+    L 784 480
+  " fill="none" stroke="#1F1A14" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

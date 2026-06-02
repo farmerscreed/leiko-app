@@ -76,6 +76,10 @@ export interface CaregiverPerson {
   relation: string;
   /** Pre-formatted four-vital labels for the editorial card row. */
   vitalStrip: VitalStripLabels;
+  /** Parent age in years derived from parentYearOfBirth. `undefined`
+   *  when the family record has no DOB on file — PersonCard then
+   *  renders the eyebrow as just "MOM" without " · N". */
+  age?: number;
 }
 
 export function caregiverPersonFromParent(
@@ -128,6 +132,14 @@ export function caregiverPersonFromParent(
     }
   }
 
+  const currentYear = new Date(nowMs).getFullYear();
+  const age =
+    typeof parent.parentYearOfBirth === 'number' &&
+    parent.parentYearOfBirth > 0 &&
+    parent.parentYearOfBirth <= currentYear
+      ? currentYear - parent.parentYearOfBirth
+      : undefined;
+
   return {
     id: parent.familyId,
     fullName: trimmedName.length > 0 ? trimmedName : 'Family member',
@@ -137,9 +149,52 @@ export function caregiverPersonFromParent(
     bpLabel,
     headline,
     sentence,
-    relation: parent.parentRelationship || 'Family',
+    // Sprint 19 Block 5 — prefer the per-caregiver label when the
+    // viewer has set one; otherwise fall back to the family-default
+    // (which itself falls back to "Wearer" when stored as 'self' via
+    // Block 1's formatRelation).
+    relation: resolveRelation(parent.caregiverRelationshipLabel, parent.parentRelationship),
     vitalStrip: formatVitalStrip(bpLabel, parent.latestHr, parent.latestSpo2, parent.latestSleep),
+    age,
   };
+}
+
+/** Sprint 19 Block 5 — resolution order for the eyebrow relationship:
+ *    1. per-caregiver label (family_members.caregiver_relationship_label)
+ *    2. family default (families.parent_relationship via formatRelation)
+ *  Returns the formatted display string. */
+export function resolveRelation(
+  caregiverLabel: string | null | undefined,
+  familyDefault: string | null | undefined,
+): string {
+  const label = (caregiverLabel ?? '').trim();
+  if (label.length > 0) return formatRelation(label);
+  return formatRelation(familyDefault);
+}
+
+/** Sprint 19 — caregiver-side relationship label.
+ *
+ *  `families.parent_relationship === 'self'` is a self-buyer onboarding
+ *  signal — "the wearer is themselves." From a caregiver's perspective
+ *  (a co-caregiver invited into a self-buyer's family), seeing "Self"
+ *  in the eyebrow makes no sense — the wearer is THEIR loved one, not
+ *  themselves. We render "Wearer" as a neutral fallback. Sprint 19
+ *  Block 5 adds a per-caregiver label that takes precedence over this
+ *  fallback when the caregiver sets one.
+ *
+ *  Also unwraps the 'other:<label>' encoding — the prefix is a storage
+ *  convention, not a display string. */
+export function formatRelation(parentRelationship: string | null | undefined): string {
+  const raw = (parentRelationship ?? '').trim();
+  const lower = raw.toLowerCase();
+  if (!raw) return 'Family';
+  if (lower === 'self') return 'Wearer';
+  if (lower === 'other') return 'Family';
+  if (lower.startsWith('other:')) {
+    const label = raw.slice('other:'.length).trim();
+    return label.length > 0 ? label : 'Family';
+  }
+  return raw;
 }
 
 function formatVitalStrip(

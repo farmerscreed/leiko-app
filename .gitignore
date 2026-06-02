@@ -60,6 +60,8 @@ logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+# Sprint 16.5a Phase A bench captures — versioned for replay in 16.5b.
+!tools/ble-mock/captured-traces/**/*.log
 
 # Env
 .env
@@ -100,3 +102,13 @@ _specs/
 # Misc
 *.tgz
 .eslintcache
+
+# Bench / on-device screenshots — captured during sprints, not source
+screenshots-onboarding/
+screenshots/
+
+# Branding scratch — keep PHILOSOPHY.md, SVGs, render.mjs, generated PNGs
+# but never commit the npm install used to run resvg.
+branding/node_modules/
+branding/package.json
+branding/package-lock.json

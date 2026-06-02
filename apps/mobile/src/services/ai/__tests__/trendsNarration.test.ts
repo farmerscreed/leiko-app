@@ -166,7 +166,10 @@ describe('generateTrendsNarrative', () => {
       range: '30d',
       accountType: 'self_buyer',
     });
-    expect(result.source).toBe('tier_a');
+    // Sprint 16.5g — Tier-C is the new lead engine; Tier-A reads as
+    // a backup. The body still contains the "in pattern" emphasis
+    // span either way.
+    expect(['C', 'A']).toContain(result.tier);
     expect(result.body).toContain('in pattern');
   });
 
@@ -177,7 +180,7 @@ describe('generateTrendsNarrative', () => {
       range: '7d',
       accountType: 'self_buyer',
     });
-    expect(result.source).toBe('deterministic');
+    expect(result.tier).toBe('deterministic');
     expect(result.body).toBe(DETERMINISTIC_COPY.trends_narrative);
   });
 
