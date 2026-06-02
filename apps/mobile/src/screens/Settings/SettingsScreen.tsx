@@ -45,6 +45,7 @@ import { AcceptInviteSheet } from '../../components/AcceptInviteSheet';
 import { EditFamilyDetailsSheet } from '../../components/EditFamilyDetailsSheet';
 import { listCaregivers } from '../../services/families/visibility';
 import { useFamilyReadings } from '../../hooks/useFamilyReadings';
+import { isSelfCircle } from '../../utils/constellationNodes';
 import { useAuth } from '../../state/auth';
 import { useNotifications } from '../../state/notifications';
 import { usePairing } from '../../state/pairing';
@@ -322,6 +323,12 @@ export function SettingsScreen({ navigation }: Props) {
   // per-family edit affordances on individual orbs land in a future
   // sprint when the per-orb context menu does.
   const ownedFamily = parents.find((p) => p.viewerRole === 'family_owner') ?? null;
+  // ADR-0006 Phase 4 — split circles by the single question that drives
+  // the whole unified model: am I the WEARER of this circle, or a
+  // FOLLOWER of it? A circle I wear is my own self-circle (relationship
+  // 'self', and I family_own it); everything else I'm following.
+  const wornCircle = parents.find((p) => isSelfCircle(p)) ?? null;
+  const followedCircles = parents.filter((p) => !isSelfCircle(p));
   const [editFamilyOpen, setEditFamilyOpen] = useState(false);
   const [caregiverCount, setCaregiverCount] = useState<number | null>(null);
   useEffect(() => {
@@ -760,91 +767,92 @@ export function SettingsScreen({ navigation }: Props) {
         </SettingsSection>
 
         {/* Family ------------------------------------------------------ */}
-        <SettingsSection title="Family" testID="settings-section-family">
-          <ListRow
-            variant="navigation"
-            title="Family members"
-            subtitle={
-              caregiverCount === null
-                ? 'Loading…'
-                : caregiverCount === 0
-                  ? 'Just you for now.'
-                  : caregiverCount === 1
-                    ? '1 caregiver in your circle.'
-                    : `${caregiverCount} caregivers in your circle.`
-            }
-            onPress={() => stackNavigation.navigate('FamilyMembers')}
-            testID="settings-family-members"
-          />
-          {/* Sprint 19 Block 3 — owner-only edit affordance. Lets
-              someone who typed the wrong name during onboarding fix
-              it without re-signing-up (account_type is immutable). */}
-          {ownedFamily ? (
+        {/* ADR-0006 Phase 4 — the family surface collapses from ~6
+            persona-gated rows into TWO role-aware sections, driven by the
+            single question "am I the wearer of this circle, or a follower?"
+
+            1. "Following your readings" — shown when you WEAR a watch
+               (you own a self-circle): invite someone to follow + manage
+               what each follower sees + edit your own details.
+            2. "People you follow" — a row per circle you follow, opening
+               its members/leave surface.
+
+            Plus a single "Join with a code" action for accepting an
+            invite to follow someone else. */}
+        {wornCircle ? (
+          <SettingsSection
+            title="Following your readings"
+            testID="settings-section-following-you"
+          >
             <ListRow
               variant="action"
-              title="Edit family details"
-              subtitle={`Update ${ownedFamily.parentDisplayName || 'their'} name or relationship.`}
+              title="Invite someone to follow"
+              subtitle="They’ll see your readings. You choose what they can see."
+              onPress={() => {
+                setInviteEmail('');
+                setInviteLabel('');
+                setInvitePermission('readings');
+                setInviteError(null);
+                setInviteCode(null);
+                setInviteSheetOpen(true);
+              }}
+              testID="settings-family-invite"
+            />
+            {(caregiverCount ?? 0) > 0 ? (
+              <ListRow
+                variant="navigation"
+                title="Who sees my readings"
+                subtitle={
+                  caregiverCount === 1
+                    ? '1 person follows your readings.'
+                    : `${caregiverCount ?? 0} people follow your readings.`
+                }
+                onPress={() => stackNavigation.navigate('CaregiverVisibility')}
+                testID="settings-family-visibility"
+              />
+            ) : null}
+            <ListRow
+              variant="action"
+              title="Edit my details"
+              subtitle="Update your name or year of birth."
               onPress={() => setEditFamilyOpen(true)}
+              showDivider={false}
               testID="settings-family-edit-details"
             />
-          ) : null}
-          {/* Sprint 19 Block 2 — caregivers can set up additional
-              family circles to care for more than one person. Hidden
-              for self-buyers, who only ever have their own family. */}
-          {!isSelfBuyer ? (
-            <ListRow
-              variant="action"
-              title="Care for another person"
-              subtitle="Set up a new circle for someone else you look after."
-              onPress={() => stackNavigation.navigate('AddPerson')}
-              testID="settings-family-add-person"
-            />
-          ) : null}
+          </SettingsSection>
+        ) : null}
+
+        {followedCircles.length > 0 ? (
+          <SettingsSection
+            title="People you care for"
+            testID="settings-section-following"
+          >
+            {followedCircles.map((c, i) => (
+              <ListRow
+                key={c.familyId}
+                variant="navigation"
+                title={c.parentDisplayName || 'Someone you care for'}
+                subtitle="You’re following their readings."
+                onPress={() => stackNavigation.navigate('FamilyMembers')}
+                showDivider={i < followedCircles.length - 1}
+                testID={`settings-followed-${c.familyId}`}
+              />
+            ))}
+          </SettingsSection>
+        ) : null}
+
+        <SettingsSection title="Add someone" testID="settings-section-add">
           <ListRow
             variant="action"
-            title={isSelfBuyer ? 'Invite a family member' : 'Invite a caregiver'}
-            subtitle={
-              isSelfBuyer
-                ? 'They can see your readings.'
-                : 'They can see your parent’s readings.'
-            }
+            title="Care for another person"
+            subtitle="Enter the code they shared to follow their readings."
             onPress={() => {
-              setInviteEmail('');
-              setInviteLabel('');
-              setInvitePermission('readings');
-              setInviteError(null);
-              setInviteCode(null);
-              setInviteSheetOpen(true);
-            }}
-            testID="settings-family-invite"
-          />
-          <ListRow
-            variant="action"
-            title="I have an invite code"
-            subtitle="Join a family circle someone invited you to."
-            onPress={() => {
-              // AcceptInviteSheet resets its own form on every open; we
-              // just toggle visibility + reset the post-success flag.
               setAcceptSuccess(false);
               setAcceptSheetOpen(true);
             }}
-            showDivider={isSelfBuyer && (caregiverCount ?? 0) > 0}
+            showDivider={false}
             testID="settings-family-accept"
           />
-          {isSelfBuyer && (caregiverCount ?? 0) > 0 ? (
-            <ListRow
-              variant="navigation"
-              title="Manage who sees my readings"
-              subtitle={
-                caregiverCount === 1
-                  ? '1 caregiver in your circle.'
-                  : `${caregiverCount ?? 0} caregivers in your circle.`
-              }
-              onPress={() => stackNavigation.navigate('CaregiverVisibility')}
-              showDivider={false}
-              testID="settings-family-visibility"
-            />
-          ) : null}
         </SettingsSection>
 
         {/* Share ------------------------------------------------------ */}

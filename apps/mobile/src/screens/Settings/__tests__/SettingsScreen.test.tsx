@@ -73,12 +73,19 @@ jest.mock('../../../services/families/manageInvites', () => ({
   acceptFamilyInvite: (...args: unknown[]) => mockAcceptInvite(...args),
 }));
 
-// Sprint 10c.2 — Settings now uses useFamilyReadings to drive the
-// hybrid-mode visibility row gate. Stub it to a single-family fixture
-// so the QueryClientProvider isn't required.
+// Sprint 10c.2 / ADR-0006 Phase 4 — Settings uses useFamilyReadings to
+// split the family surface into wearer vs follower sections. Mutable
+// fixture so tests can simulate "I wear a circle" vs "I follow circles".
+// Default: a single self-circle (the viewer is a wearer).
+let mockParents: Array<{
+  familyId: string;
+  parentDisplayName?: string;
+  parentRelationship?: string;
+  viewerRole?: string;
+}> = [{ familyId: 'fam-1', parentRelationship: 'self' }];
 jest.mock('../../../hooks/useFamilyReadings', () => ({
   useFamilyReadings: () => ({
-    parents: [{ familyId: 'fam-1' }],
+    parents: mockParents,
     isLoading: false,
     isRefreshing: false,
     error: null,
@@ -166,6 +173,11 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockProfile = makeProfile();
   mockPairedDevice = null;
+  // Default: the viewer wears a self-circle (so the "Following your
+  // readings" section with invite/visibility renders). viewerRole is left
+  // off so `ownedFamily` stays null and the QueryClient-using
+  // EditFamilyDetailsSheet doesn't mount in the lightweight test env.
+  mockParents = [{ familyId: 'fam-1', parentRelationship: 'self' }];
 });
 
 describe('<SettingsScreen /> — Profile', () => {
@@ -552,10 +564,45 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
     expect(screen.getByTestId('settings-family-accept')).toBeTruthy();
   });
 
-  it('shows the self-buyer subtitle on the invite row when account_type=self_buyer', () => {
-    mockProfile = makeProfile({ account_type: 'self_buyer' });
+  describe('role-aware family sections (ADR-0006 Phase 4)', () => {
+    it('shows "Following your readings" with invite when the viewer wears a circle', () => {
+      mockParents = [{ familyId: 'fam-1', parentRelationship: 'self' }];
+      renderScreen();
+      expect(screen.getByTestId('settings-section-following-you')).toBeTruthy();
+      expect(screen.getByTestId('settings-family-invite')).toBeTruthy();
+    });
+
+    it('hides "Following your readings" when the viewer wears no circle', () => {
+      mockParents = [{ familyId: 'mum', parentRelationship: 'Mom' }];
+      renderScreen();
+      expect(screen.queryByTestId('settings-section-following-you')).toBeNull();
+      expect(screen.queryByTestId('settings-family-invite')).toBeNull();
+    });
+
+    it('lists circles the viewer follows under "People you care for"', () => {
+      mockParents = [
+        { familyId: 'me', parentRelationship: 'self' },
+        { familyId: 'mum', parentRelationship: 'Mom', parentDisplayName: 'Marian' },
+      ];
+      renderScreen();
+      expect(screen.getByTestId('settings-section-following')).toBeTruthy();
+      expect(screen.getByTestId('settings-followed-mum')).toBeTruthy();
+      expect(screen.getByText('Marian')).toBeTruthy();
+    });
+
+    it('always offers "Care for another person" (join with a code)', () => {
+      mockParents = [{ familyId: 'me', parentRelationship: 'self' }];
+      renderScreen();
+      expect(screen.getByTestId('settings-section-add')).toBeTruthy();
+      expect(screen.getByTestId('settings-family-accept')).toBeTruthy();
+    });
+  });
+
+  it('shows the unified invite subtitle (wearer controls visibility)', () => {
     renderScreen();
-    expect(screen.getByText('They can see your readings.')).toBeTruthy();
+    expect(
+      screen.getByText('They’ll see your readings. You choose what they can see.'),
+    ).toBeTruthy();
   });
 
   it('opens the invite sheet, sends the invite, and surfaces the code', async () => {
