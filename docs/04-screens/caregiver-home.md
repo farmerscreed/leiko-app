@@ -1,4 +1,19 @@
-# Screen — Caregiver Home
+# Screen — Caregiver Home (the unified constellation home)
+
+> **RECONCILED 2026-06-02 — this is now the home for *every* persona.
+> Per [ADR-0006](../_adr/0006-unified-caregiver-self-buyer-model.md).** The
+> self-buyer home and the caregiver home converged into one constellation
+> route (`src/screens/Home/`, registered as `CaregiverHome` and used as the
+> initial route by both the caregiver and self-buyer navigators). **The
+> viewer is a node in their own constellation, marked "You"** and anchored at
+> centre; people they care for orbit it. A user with no one added sees their
+> personal view; adding the first person is a calm auto-reveal into the
+> constellation. Tapping your own "You" orb opens the rich personal view
+> (`ParentDashboard` — see `parent-dashboard.md`). Urgency reorders the view
+> (amber for `elevated`; the reserved treatment + top-pin for
+> `confirmed-urgent` only). Where the text below says "caregiver", read "the
+> viewer". `self-buyer-home.md` is now a subordinate detail view, not a
+> separate landing screen.
 
 Sourced from D11 (brand repositioning) + D13 §7.4 (Family Circle) + the
 Sprint 7.7 design `leiko-caregiver-unified.html`.

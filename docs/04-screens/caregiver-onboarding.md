@@ -1,5 +1,15 @@
 # Screen — Caregiver Onboarding
 
+> **RECONCILED 2026-06-02 — legacy path only. Superseded by
+> [ADR-0006](../_adr/0006-unified-caregiver-self-buyer-model.md).** New users
+> no longer reach this flow: the onboarding fork was removed and everyone now
+> onboards through the unified `self-buyer-onboarding.md` path. This
+> caregiver-specific onboarding still exists in code for **existing accounts
+> created with `account_type = 'caregiver'`** but is not part of the current
+> new-user journey. "Caring for someone" is now an action available from the
+> constellation home / Settings via the Connect invite (ADR-0007), not a
+> persona chosen at onboarding. Retained below for history.
+
 Sourced from D8 §4.2 (3 onboarding intro screens) + D8 §4.4 (Family Setup, 3 sub-screens). Routed from `account_type = 'caregiver'` on the fork screen.
 
 ---

@@ -52,12 +52,23 @@ create index users_email_idx  on public.users (lower(email)) where deleted_at is
 create index users_active_idx on public.users (id) where deleted_at is null;
 ```
 
-**`account_type` is IMMUTABLE after onboarding** (D8a §1.3 + §14.1). There is no migration path between `caregiver` / `parent` / `self_buyer`. If a user wants to switch, they start a new account (support intervention required to delete the old one). The fork screen (Sprint 2) is the single moment this gets set.
+**`account_type` is `NOT NULL` and immutable, but as of [ADR-0006](_adr/0006-unified-caregiver-self-buyer-model.md) it is INERT** — retained for existing-row compatibility and analytics history, but it **no longer selects the navigation tree or home screen**. Every new user is onboarded as `self_buyer`. The column is kept, not dropped; the intent is "inert," not "deleted." (The pre-ADR-0006 immutability semantics — "switch = new account, support intervention" — are obsolete: a self-buyer who later cares for someone simply adds them via the Connect invite, with no `account_type` change.)
 
-### Hybrid mode (D8a §1.3)
+### Hybrid mode (D8a §1.3) — superseded by ADR-0006
+> **RECONCILED 2026-06-02.** The "two parallel root stacks selected by
+> `account_type`" design below is **no longer how the app works.** Per
+> ADR-0006, the self-buyer and caregiver homes converged into **one
+> unified constellation route** where the viewer is a "You" node; the
+> runtime does **not** branch the screen tree on `account_type`. The
+> data-level mechanics in this section remain accurate (a user who is
+> followed gains `family_members` rows with `role = 'caregiver'` on their
+> circle; one wearer per circle is a hard invariant). What's obsolete is
+> only the *navigation-branching* claim. The original text is kept below
+> for history.
+
 A self-buyer who later invites family caregivers does **NOT** become `account_type = 'caregiver'`. They remain `account_type = 'self_buyer'`. The change is at the family level: the family record gains additional `family_members` rows with `role = 'caregiver'`. The self-buyer's own UI continues to show "Your readings"; the invited caregivers see a Family Circle with one member (the self-buyer-now-watched). Each user sees the metaphor that fits their role.
 
-Engineering implication: **the runtime selects the screen tree by the viewer's `account_type`**, not by family composition. Two parallel React Navigation root stacks — caregiver per D8, self-buyer per D8a — selected by the logged-in user's `account_type`.
+Engineering implication (pre-ADR-0006, obsolete): the runtime selected the screen tree by the viewer's `account_type`, not by family composition — two parallel React Navigation root stacks (caregiver per D8, self-buyer per D8a). **This branching was removed by ADR-0006; both personas now render the one constellation home.**
 
 ### families
 A family circle — one wearer (`parent_owner`) and 0..N caregivers. The `created_by` user becomes the `family_owner`.
