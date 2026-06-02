@@ -71,7 +71,7 @@ import {
   startBackgroundSync,
   stopBackgroundSync,
 } from '../services/sync/backgroundSync';
-import { getOrCreateClientDeviceId } from '../services/storage';
+import { getOrCreateClientDeviceId, mmkv, STORAGE_KEYS } from '../services/storage';
 import { inferModel, setDeviceMetaProvider } from '../services/sync/postReading';
 import { startBleForegroundService } from '../services/ble/foregroundService';
 import { scheduleNextLearnedTimeReminder } from '../services/reminders/dispatcher';
@@ -224,6 +224,21 @@ function SelfBuyerHomeNavigator() {
   // initial route. The placeholder route is kept registered so any in-flight
   // dev tooling that deep-links to it still resolves; it is no longer
   // surfaced to the user.
+  //
+  // ADR-0006 — consume the one-shot pairOnLaunch flag. Onboarding's "I have
+  // the watch" sets it; Pairing lives on THIS (home) stack, so we open it
+  // right after the onboarding gate flips and this navigator mounts.
+  useEffect(() => {
+    if (!mmkv.getBoolean(STORAGE_KEYS.pairOnLaunch)) return;
+    mmkv.remove(STORAGE_KEYS.pairOnLaunch);
+    // Defer until the navigator is ready, then push Pairing over the home.
+    const t = setTimeout(() => {
+      if (navigationRef.isReady()) {
+        navigationRef.navigate('Pairing' as never);
+      }
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
   return (
     <SelfBuyerStack.Navigator
       initialRouteName="CaregiverHome"

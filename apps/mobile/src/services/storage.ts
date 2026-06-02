@@ -67,6 +67,11 @@ export const STORAGE_KEYS = {
   // circle exists), resolveCareInvite is called with this code to attach
   // the inviter as a follower, then the key is cleared.
   pendingCareInviteCode: 'leiko.invite.pendingCareCode',
+  // ADR-0006 — one-shot flag set by onboarding "I have the watch" so the
+  // home navigator opens the Pairing screen immediately after the
+  // onboarding gate flips (Pairing lives on the home stack, not the
+  // onboarding stack). Cleared by the navigator once consumed.
+  pairOnLaunch: 'leiko.onboarding.pairOnLaunch',
   // Readings buffer — Sprint 6. Two arrays of LocalReading rows:
   //   pending: not yet successfully POSTed to /sync
   //   recent:  synced + persisted, capped at RECENT_READINGS_CAP for UI

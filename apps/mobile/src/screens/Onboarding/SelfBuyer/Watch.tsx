@@ -13,6 +13,7 @@ import { OnboardingEyebrow } from '../../../components/OnboardingEyebrow';
 import { Pill } from '../../../components/Pill';
 import { useTheme } from '../../../theme';
 import { useOnboarding } from '../../../state/onboarding';
+import { mmkv, STORAGE_KEYS } from '../../../services/storage';
 import type { SelfBuyerOnboardingScreenProps } from '../../../navigation/types';
 
 export function SelfBuyerWatchScreen({
@@ -34,8 +35,14 @@ export function SelfBuyerWatchScreen({
     if (finalizing) return;
     setPressed('have');
     try {
+      // ADR-0006 — "I have it" now actually leads to pairing. Pairing
+      // lives on the home stack (not onboarding); completeSelfBuyer flips
+      // the gate that swaps onboarding -> home. Set a one-shot flag so the
+      // home navigator opens Pairing immediately on arrival.
+      mmkv.set(STORAGE_KEYS.pairOnLaunch, true);
       await completeSelfBuyer();
     } catch {
+      mmkv.remove(STORAGE_KEYS.pairOnLaunch);
       setPressed(null);
     }
   };
