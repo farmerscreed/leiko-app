@@ -44,8 +44,20 @@ let mockViewMode: 'birds' | 'cards' = 'birds';
 const setMockViewMode = (m: 'birds' | 'cards') => {
   mockViewMode = m;
 };
+// hasExplicitPreference defaults to true so tests that set mockViewMode
+// get exactly that mode (the count-based default only applies when the
+// user hasn't toggled). The default-by-count behaviour is covered by its
+// own describe block below, which flips this to false.
+let mockHasExplicitPreference = true;
+const setMockHasExplicitPreference = (v: boolean) => {
+  mockHasExplicitPreference = v;
+};
 jest.mock('../../hooks/useCaregiverViewMode', () => ({
-  useCaregiverViewMode: () => ({ viewMode: mockViewMode, setViewMode: jest.fn() }),
+  useCaregiverViewMode: () => ({
+    viewMode: mockViewMode,
+    setViewMode: jest.fn(),
+    hasExplicitPreference: mockHasExplicitPreference,
+  }),
 }));
 
 jest.mock('../../state/pairing', () => ({
@@ -158,6 +170,7 @@ beforeEach(() => {
   mockHookResult.isRefreshing = false;
   mockHookResult.error = null;
   setMockViewMode('birds');
+  setMockHasExplicitPreference(true);
 });
 
 describe('<CaregiverHome /> — empty state', () => {
@@ -537,5 +550,44 @@ describe('<CaregiverHome /> — Take a reading (wearer-only, ADR-0006 Phase 3)',
     ];
     render(withProviders(<CaregiverHome />));
     expect(screen.queryByTestId('caregiver-home-tab-bar')).toBeNull();
+  });
+});
+
+describe('<CaregiverHome /> — default view by count (ADR-0006 Phase 3)', () => {
+  // When the user has NOT explicitly toggled, the default view depends on
+  // how many nodes are in the circle: cards for <=2, birds-eye for 3+.
+  beforeEach(() => {
+    setMockHasExplicitPreference(false);
+  });
+
+  function people(n: number) {
+    return Array.from({ length: n }, (_, i) =>
+      parent({
+        familyId: `fam-${i}`,
+        parentDisplayName: `Person ${i}`,
+        parentRelationship: i === 0 ? 'self' : 'Mom',
+        latestReading: reading({ id: `r-${i}`, systolic: 120, diastolic: 78 }),
+      }),
+    );
+  }
+
+  it('defaults to cards (detailed) for a solo wearer (1 node)', () => {
+    mockHookResult.parents = people(1);
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-detailed')).toBeTruthy();
+    expect(screen.queryByTestId('caregiver-home-birds-layer')).toBeNull();
+  });
+
+  it('defaults to cards for 2 nodes (you + 1 person)', () => {
+    mockHookResult.parents = people(2);
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-detailed')).toBeTruthy();
+  });
+
+  it('defaults to birds-eye for 3+ nodes', () => {
+    mockHookResult.parents = people(3);
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-birds-layer')).toBeTruthy();
+    expect(screen.queryByTestId('caregiver-home-detailed')).toBeNull();
   });
 });

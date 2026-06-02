@@ -72,7 +72,6 @@ import { PersonCard } from '../../components/PersonCard';
 import { ViewToggle } from '../../components/ViewToggle';
 import { useCaregiverFamily } from '../../hooks/useCaregiverFamily';
 import { AcceptInviteSheet } from '../../components/AcceptInviteSheet';
-import { AddSomeoneChooserSheet } from '../../components/AddSomeoneChooserSheet';
 import { FamilyRemovalBanner } from '../../components/FamilyRemovalBanner';
 import { useFamilyRemovalBanner } from '../../hooks/useFamilyRemovalBanner';
 import { useAuth } from '../../state/auth';
@@ -151,7 +150,11 @@ export function CaregiverHome() {
   const removalBanner = useFamilyRemovalBanner(parents, isLoading);
   const pairedDevice = usePairing((s) => s.pairedDevice);
   const localLatest = useReadings((s) => s.latest());
-  const { viewMode, setViewMode } = useCaregiverViewMode();
+  const {
+    viewMode: viewModePref,
+    setViewMode,
+    hasExplicitPreference,
+  } = useCaregiverViewMode();
   const reduceMotion = useReducedMotion();
 
   // Sprint 16.5i — caregiver-side server hydration. Pre-fix all 5
@@ -187,6 +190,17 @@ export function CaregiverHome() {
   // takes readings — the parent does, on the watch; D8a Q-D8a-4).
   const viewerIsWearer = useMemo(() => hasSelfNode(mergedPeople), [mergedPeople]);
 
+  // ADR-0006 Phase 3 — default view by how many people are in the circle.
+  // Detailed (cards) reads better for 1–2 people (a sparse 2-orb sky looks
+  // thin); bird's-eye earns its keep at 3+. Once the user explicitly
+  // toggles, their choice wins. mergedPeople includes the self node, so a
+  // solo wearer (count 1) and "you + 1 person" (count 2) both default to
+  // cards; "you + 2 people" (count 3) flips to birds.
+  const viewMode = useMemo<CaregiverViewMode>(() => {
+    if (hasExplicitPreference) return viewModePref;
+    return mergedPeople.length <= 2 ? 'cards' : 'birds';
+  }, [hasExplicitPreference, viewModePref, mergedPeople.length]);
+
   const anomaly = useMemo(() => pickAnomalyForBanner(mergedPeople), [mergedPeople]);
 
   // Sprint 12 follow-up — Ask Leiko bottom sheet visibility.
@@ -197,10 +211,11 @@ export function CaregiverHome() {
   // on success we refresh the family list so the constellation
   // populates without a manual reload.
   const [acceptInviteVisible, setAcceptInviteVisible] = useState(false);
-  // Sprint 19 Block 2 — chooser sheet for the action-bar "+" CTA.
-  // Lets the caregiver pick between "Care for another person" (new
-  // family) and "Invite a caregiver" (co-caregiver to existing family).
-  const [addSomeoneVisible, setAddSomeoneVisible] = useState(false);
+  // ADR-0006 Phase 3 — "+ Add someone" now goes straight to the AddPerson
+  // flow (set up a circle for someone you care for). The old two-option
+  // chooser (which routed "Invite a caregiver" into Settings) was
+  // confusing in the unified model; inviting a caregiver to follow YOU is
+  // a wearer-settings concern, not part of "add someone I care for".
   const profileEmail = useAuth((s) => s.profile?.email ?? '');
 
   // Sprint 14.5 task 3 — home-seeded "Worth a read" Learn card. Same
@@ -551,7 +566,7 @@ export function CaregiverHome() {
           <CaregiverActionBar
             count={merged.length}
             canInvite={viewerCanInvite(merged)}
-            onInvitePress={() => setAddSomeoneVisible(true)}
+            onInvitePress={() => navigation.navigate('AddPerson')}
             testID="caregiver-home-action-bar"
           />
         </View>
@@ -629,19 +644,6 @@ export function CaregiverHome() {
       {/* Sprint 19 Block 2 — action-bar chooser. Picks between
           "Care for another person" (new family) and "Invite a
           caregiver" (existing flow). */}
-      <AddSomeoneChooserSheet
-        visible={addSomeoneVisible}
-        onDismiss={() => setAddSomeoneVisible(false)}
-        onAddPerson={() => {
-          setAddSomeoneVisible(false);
-          navigation.navigate('AddPerson');
-        }}
-        onInviteCaregiver={() => {
-          setAddSomeoneVisible(false);
-          navigation.navigate('Settings');
-        }}
-        testID="caregiver-home-add-someone"
-      />
       <QuietHoursAffirmSlot />
     </SafeAreaView>
   );
