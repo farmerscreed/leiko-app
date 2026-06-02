@@ -72,6 +72,10 @@ export const STORAGE_KEYS = {
   // onboarding gate flips (Pairing lives on the home stack, not the
   // onboarding stack). Cleared by the navigator once consumed.
   pairOnLaunch: 'leiko.onboarding.pairOnLaunch',
+  // ADR-0006 follow-up — set true when the wearer dismisses the
+  // "add your details for accurate steps/calories" home nudge, so it
+  // doesn't nag. The nudge also hides automatically once the fields fill.
+  profileNudgeDismissed: 'leiko.profile.nudgeDismissed',
   // Readings buffer — Sprint 6. Two arrays of LocalReading rows:
   //   pending: not yet successfully POSTed to /sync
   //   recent:  synced + persisted, capped at RECENT_READINGS_CAP for UI

@@ -75,6 +75,8 @@ import { AcceptInviteSheet } from '../../components/AcceptInviteSheet';
 import { CareInviteSheet } from '../../components/CareInviteSheet';
 import { tryResolvePendingCareInvite } from '../../services/families/pendingCareInvite';
 import { FamilyRemovalBanner } from '../../components/FamilyRemovalBanner';
+import { ProfileDetailsNudge } from '../../components/ProfileDetailsNudge';
+import { useProfileDetailsNudge } from '../../hooks/useProfileDetailsNudge';
 import { useFamilyRemovalBanner } from '../../hooks/useFamilyRemovalBanner';
 import { useAuth } from '../../state/auth';
 import {
@@ -207,6 +209,7 @@ export function CaregiverHome() {
   // Only wearers get the Take-a-reading affordance (a pure caregiver never
   // takes readings — the parent does, on the watch; D8a Q-D8a-4).
   const viewerIsWearer = useMemo(() => hasSelfNode(mergedPeople), [mergedPeople]);
+  const profileNudge = useProfileDetailsNudge(viewerIsWearer);
 
   // ADR-0006 Phase 3 — default view by how many people are in the circle.
   // Detailed (cards) reads better for 1–2 people (a sparse 2-orb sky looks
@@ -461,6 +464,17 @@ export function CaregiverHome() {
             onDismiss={removalBanner.dismiss}
             onEnterInvite={() => setAcceptInviteVisible(true)}
             testID="caregiver-home-removal-banner"
+          />
+        ) : null}
+
+        {/* ADR-0006 — wearer-only nudge to fill the demographics the watch
+            needs for accurate step/calorie counts. Self-resolves once the
+            fields are set. */}
+        {profileNudge.show ? (
+          <ProfileDetailsNudge
+            onAddDetails={() => navigation.navigate('Settings')}
+            onDismiss={profileNudge.dismiss}
+            testID="caregiver-home-profile-nudge"
           />
         ) : null}
 
