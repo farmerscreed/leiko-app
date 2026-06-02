@@ -566,7 +566,7 @@ export function CaregiverHome() {
           <CaregiverActionBar
             count={merged.length}
             canInvite={viewerCanInvite(merged)}
-            onInvitePress={() => navigation.navigate('AddPerson')}
+            onInvitePress={() => setAcceptInviteVisible(true)}
             testID="caregiver-home-action-bar"
           />
         </View>
