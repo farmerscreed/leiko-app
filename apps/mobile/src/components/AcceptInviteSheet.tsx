@@ -66,6 +66,9 @@ export interface AcceptInviteSheetProps {
   /** Pre-fills the email field. The signed-in user's email is the
    *  natural default for every consumer. */
   initialEmail?: string;
+  /** ADR-0006 — pre-fills the 6-digit code field. Used when the sheet is
+   *  opened from a tapped invite link that carried the code. */
+  initialCode?: string;
   /** Called after a successful invite acceptance with the resolved
    *  familyId. The consumer decides what happens next (close the
    *  sheet, navigate, finalize onboarding, etc.). */
@@ -85,6 +88,7 @@ export function AcceptInviteSheet({
   visible,
   onDismiss,
   initialEmail = '',
+  initialCode = '',
   onSuccess,
   showSuccessState = true,
   testID = 'accept-invite-sheet',
@@ -92,7 +96,7 @@ export function AcceptInviteSheet({
   const theme = useTheme();
   const bodyStyle = theme.type('bodyM');
 
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(initialCode);
   const [email, setEmail] = useState(initialEmail);
   const [relChip, setRelChip] = useState<RelationshipChip | null>(null);
   const [relCustom, setRelCustom] = useState('');
@@ -103,7 +107,7 @@ export function AcceptInviteSheet({
   // Reset on open so a dismissed previous attempt doesn't leak.
   useEffect(() => {
     if (visible) {
-      setCode('');
+      setCode(initialCode);
       setEmail(initialEmail);
       setRelChip(null);
       setRelCustom('');
@@ -111,7 +115,7 @@ export function AcceptInviteSheet({
       setError(null);
       setSuccess(false);
     }
-  }, [visible, initialEmail]);
+  }, [visible, initialEmail, initialCode]);
 
   const handleSubmit = async () => {
     setError(null);

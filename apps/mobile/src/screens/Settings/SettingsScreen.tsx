@@ -28,7 +28,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { BottomSheet } from '../../components/BottomSheet';
 import { Button } from '../../components/Button';
@@ -259,6 +259,22 @@ export function SettingsScreen({ navigation }: Props) {
   // post-accept family-list refresh effect at line 317.
   const [acceptSheetOpen, setAcceptSheetOpen] = useState(false);
   const [acceptSuccess, setAcceptSuccess] = useState(false);
+  // ADR-0006 — a tapped invite link deep-links to Settings with the code
+  // prefilled; this seeds the accept sheet.
+  const [acceptPrefillCode, setAcceptPrefillCode] = useState('');
+  const [acceptPrefillEmail, setAcceptPrefillEmail] = useState('');
+  const route = useRoute();
+  useEffect(() => {
+    const params = route.params as
+      | { inviteCode?: string; inviteEmail?: string }
+      | undefined;
+    if (params?.inviteCode || params?.inviteEmail) {
+      setAcceptPrefillCode(params.inviteCode ?? '');
+      setAcceptPrefillEmail(params.inviteEmail ?? '');
+      setAcceptSuccess(false);
+      setAcceptSheetOpen(true);
+    }
+  }, [route.params]);
 
   // Vital setup (auto-HR / auto-SpO2 / goals).
   const autoHrEnabled = useVitalSetup((s) => s.autoHrEnabled);
@@ -1567,7 +1583,8 @@ export function SettingsScreen({ navigation }: Props) {
       <AcceptInviteSheet
         visible={acceptSheetOpen}
         onDismiss={() => setAcceptSheetOpen(false)}
-        initialEmail={profile?.email ?? ''}
+        initialEmail={acceptPrefillEmail || profile?.email || ''}
+        initialCode={acceptPrefillCode}
         onSuccess={() => setAcceptSuccess(true)}
         testID="settings-accept"
       />

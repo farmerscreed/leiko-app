@@ -59,6 +59,8 @@ jest.mock('../../../services/users/updateProfile', () => ({
 // for the AuditLog nav. Stub it.
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),
+  // ADR-0006 — Settings reads route.params for deep-linked invite codes.
+  useRoute: () => ({ params: undefined }),
 }));
 
 jest.mock('../../../services/users/accountActions', () => ({

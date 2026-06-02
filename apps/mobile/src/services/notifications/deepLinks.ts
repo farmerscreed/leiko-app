@@ -79,6 +79,18 @@ export function dispatchDeepLink(parsed: ParsedDeepLink): void {
     case 'family':
       navigationRef.navigate('FamilyMembers' as never);
       return;
+    case 'join':
+      // ADR-0006 — a tapped invite link routes to Settings with the
+      // code/email prefilled; Settings auto-opens the accept-invite sheet.
+      (navigationRef as unknown as { navigate: (n: string, p: unknown) => void }).navigate(
+        'Settings',
+        {
+          inviteCode: parsed.inviteCode,
+          inviteEmail: parsed.inviteEmail,
+          inviteToken: parsed.inviteToken,
+        },
+      );
+      return;
     case 'unknown':
       return;
   }

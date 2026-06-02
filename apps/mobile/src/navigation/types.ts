@@ -49,7 +49,11 @@ export type CaregiverStackParamList = {
     familyId: string;
   };
   Pairing: undefined;
-  Settings: undefined;
+  // ADR-0006 — optional invite params so a tapped join-link can deep-link
+  // into Settings and auto-open the accept-invite sheet, prefilled.
+  Settings:
+    | { inviteCode?: string; inviteEmail?: string; inviteToken?: string }
+    | undefined;
   // Sprint 6 — Take Reading + Reading Detail. ReadingDetail receives
   // the local id of the reading to display (UUIDv4 minted client-side
   // by the readings store; serverId is filled in once /sync acks).
@@ -129,7 +133,11 @@ export type SelfBuyerStackParamList = {
   SelfBuyerHome: undefined;
   SelfBuyerHomePlaceholder: undefined;
   Pairing: undefined;
-  Settings: undefined;
+  // ADR-0006 — optional invite params so a tapped join-link can deep-link
+  // into Settings and auto-open the accept-invite sheet, prefilled.
+  Settings:
+    | { inviteCode?: string; inviteEmail?: string; inviteToken?: string }
+    | undefined;
   TakeReading: undefined;
   ReadingDetail: { readingLocalId: string };
   // Sprint 17a — optional `familyId` for caregiver entry. When set, the
