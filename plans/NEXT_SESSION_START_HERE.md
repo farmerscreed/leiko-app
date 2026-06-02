@@ -1,164 +1,113 @@
-# Start here — Sprint 19 close-out + next session (2026-05-24)
+# Start here — ADR-0006/0007 unified model + Connect invites (2026-06-02)
 
-Last touched: 2026-05-24 evening. Branch `claude/competent-goldberg-737194`,
-tip `5f6d8e3`. Pushed to origin. Supersedes the 2026-05-22 handoff.
+Last touched: 2026-06-02. Branch `claude/consolidated-build`, tip `88a8b8d`
+(pushed to origin). Supersedes the 2026-05-24 Sprint-19 handoff.
 
 ## 60-second context
 
-Sprint 19 shipped **Blocks 1-10** (multi-account + caregiver model + auth
-hardening + doctor PDF polish + PDFShift adapter fix) across 13 commits
-on top of v5. v6 APK is on Phone 1 already; **v7 has NOT been built** —
-needs to be kicked next session.
+This session reshaped the **whole family/home/invite model** and fixed a
+chain of data bugs, across ~45 commits on `claude/consolidated-build`.
+Two ADRs were written, approved, and **fully built + device-verified**:
 
-## What's working RIGHT NOW (no further action)
+- **ADR-0006** (`docs/_adr/0006-…`): unified caregiver/self-buyer model —
+  one "circles" concept, `account_type` made inert, one constellation
+  home where the viewer is a node, Settings collapsed to 2 role-aware
+  sections. **Status: Accepted.**
+- **ADR-0007** (`docs/_adr/0007-…`): unified "Connect" invite — one code,
+  backend infers who-follows-whom from who wears a watch. Replaced the
+  confusing 3-button / 4-edge-function system. **Status: Accepted.**
 
-- ✅ All Sprint 19 source on origin at `5f6d8e3`
-- ✅ Migration `0024_caregiver_relationship_label.sql` applied to prod
-- ✅ `generate-doctor-pdf` Edge Function deployed (with PDFShift Basic-auth fix)
-- ✅ `accept-family-invite` Edge Function deployed (with relationship-label column)
-- ✅ Lawrence's family (`21b057bb-…`) set to `subscription_status = 'plus'` in prod
-- ✅ Doctor PDF can now generate on v6 — visuals from Block 10 land via the
-  deployed Edge Function (mobile didn't need a rebuild for the template work)
-- ✅ Sprint 19 sprint card lives at `plans/sprint-19-multi-account-caregiver-model.md`
+Everything below the "deploy" section has been confirmed working on real
+devices (3 phones, 2 watches) by the founder.
 
-## What blocks v7 ship
+## ⚠️ The one big loose end
 
-1. **Build v7 APK.** Branch tip `5f6d8e3`. EAS will auto-bump to versionCode 10
-   or higher. Command from `apps/mobile/`:
+**Nothing is merged to `main`.** All ~45 commits live only on
+`claude/consolidated-build` (237 ahead of `main`). A PR to land this is
+the top priority — see "Next steps".
 
-   ```
-   $env:NODE_OPTIONS = '--dns-result-order=ipv4first'  # avoids the v6-cycle GraphQL flakes
-   npx --yes eas-cli@latest build --platform android --profile production-apk --non-interactive --no-wait
-   ```
+## What's working RIGHT NOW (built, tested, mostly device-verified)
 
-   v7 carries:
-   - **Block 1** SELF-label hidden + invite owner-gate (cosmetic v6 → v7 parity)
-   - **Block 2** Care-for-another-person + chooser sheet
-   - **Block 3** Edit-family-details sheet
-   - **Block 4** Account switcher + delete-account confirm
-   - **Block 5** Per-caregiver relationship label (chip on AcceptInviteSheet)
-   - **Block 7** APP_VERSION reads from app.json; leiko.health URLs
-   - **Block 8** ⭐ Fresh-install onboarding-redirect fix
-     (returning users on a clean device skip onboarding)
-   - **Block 9** Account-switch routes to OTPVerify; friendly SignIn errors;
-     self-buyer "Add a watch later" card; OTP welcome + digit count +
-     use-a-different-email link; persona breadcrumb on form screens
-   - **Block 10** (template lives in source but server already deployed) —
-     SVG charts + Halo Ember letterhead + colour-coded sections
+Phases (ADR-0006):
+- ✅ **Phase 1 — Stabilise:** device-authoritative deterministic sync
+  routing (`sync/index.ts` resolveFamilyAndDevice); `create_family`
+  self-circle idempotency guard (migration 0028); one-time prod data
+  cleanup done.
+- ✅ **Phase 2 — Unified home:** one constellation; viewer is a node;
+  urgency ordering (`constellationOrder`/`constellationNodes`).
+- ✅ **Phase 3 — self-as-centre (beating orb), bottom tab bar, Ask-Leiko
+  in header, unified onboarding (no fork; everyone self_buyer),
+  "I have the watch" → opens pairing, default view by circle size.**
+- ✅ **Phase 4 — Settings → 2 role-aware sections** (Following your
+  readings / People you care for) + per-vital visibility preserved.
 
-2. **`generate-doctor-prep-ai` is returning 502.** Edge Function CRASHES at boot
-   or in handler (the request log shows `EDGE_FUNCTION_ERROR` with content-length
-   75). Next session: pull the function's own error event from
-   `https://supabase.com/dashboard/project/kqnzxjrpnjnczhgdwdqg/functions/generate-doctor-prep-ai/logs`
-   and paste the FULL `event_message` (not just the request status). Likely
-   suspects:
-   - Anthropic key format issue (`ANTHROPIC_API_KEY` is set per secrets list,
-     but the value may be wrong shape — should start with `sk-ant-`)
-   - Tier-C cascade path crashing because `AI_TIER_C_PROD_DATA_ENABLED` is set
-     but a dependency isn't (embedding cache / token counter / etc.)
-   - Output-guard Layer 2 cosine check failing on cold start
-   
-   **Non-blocking for PDF generation** — `generate-doctor-pdf` gracefully
-   degrades when prep-ai 502s (just renders data-only sections, no AI cover or
-   cross-vital observations paragraph). Phone 1 should be getting a working
-   PDF right now.
+Invites (ADR-0007):
+- ✅ **`connect-create` + `connect-accept`** edge functions. Direction
+  resolved from watch ownership: one wearer → other follows; both wear →
+  accepter follows + `canFollowBack` (ASK, not auto-mutual); neither →
+  pending. Email-match guard kept.
+- ✅ Client `createConnect` / `acceptConnect`; UI = one Connect sheet +
+  one Enter-a-code sheet. Home "+ Add someone" and Settings both use them.
+- ✅ Dual delivery (link + 6-digit code); deep-link `join` route.
 
-## What's still pending after v7
+Fixes this session:
+- ✅ HR backfill render-storm (cold-start froze the home) → batched insert.
+- ✅ Android keyboard covering invite email field → behavior="height".
+- ✅ Caregiver only saw ONE wearer → `isSelfCircle` now requires
+  family_owner (every wearer's circle is 'self'); all wearers orbit.
+- ✅ Empty "You" node for watchless caregivers → hidden until real data.
+- ✅ Tab bar pushed Settings off-screen → tightened spacing.
+- ✅ Demographics nudge (height/weight drive watch step/calorie accuracy).
+- ✅ Orb heartbeat (lub-dub) halo pulse.
+- ✅ Real server error surfaced from functions.invoke (was generic).
 
-| Item | Owner | Notes |
-|---|---|---|
-| `RESEND_FROM_EMAIL` Supabase secret | Founder | Once leiko.health DNS verifies at Resend, set to `noreply@leiko.health`. Until then, family invites generate codes but skip the email send. |
-| `REVENUECAT_WEBHOOK_SECRET` + RC dashboard setup | Founder | Block 6.x launch readiness. Required before real Plus purchases work. |
-| Apple/Play IAP products (`com.leiko.app.plus.monthly` + `.annual`) | Founder | App Store Connect + Play Console, 24-72h approval |
-| iOS prebuild + APNs/FCM (needs Mac) | Founder | Block 6.1 |
-| Website `leiko.health/{terms,privacy,support}` | Website agent | Block 6.4. Prompt given founder 2026-05-23. |
-| Prep-ai 502 diagnosis | Next session | Pull error event + patch. |
-| Sprint 18 sleep wake-time on-device verification | Founder | Carried from Sprint 18; never ran the test plan on Phone 1 with real watch overnight. |
-| 28 stale snapshot tests (Sprint 16.6 palette drift) | Cleanup sprint | Pre-existing; not blocking CI per se but noisy. |
+## Migrations + edge functions deployed to prod this session
 
-## Bench state (carried forward)
+- Migrations: **0027** (devices.client_device_id), **0028**
+  (create_family self idempotent), **0029** (invitations.family_id
+  nullable for pending/connect).
+- Edge functions deployed: **sync** (re-stamp + routing), **send-family-
+  invite** (url_token), **send-care-invite**, **resolve-care-invite**,
+  **connect-create**, **connect-accept**.
 
-- **Phone 1** (Pixel 8, `43230DLJH001YY`) — APK v6 installed; signed in as
-  `lawonecloud@gmail.com` (account_type `self_buyer`, Plus tier). Lawrence's
-  family has 51 BP readings. PDFShift quota check pending.
-- **Phone 2** (OnePlus Nord N30, `8fae80bc`) — not touched recently.
-- **Test accounts**:
-  - `lawonecloud@gmail.com` — self_buyer, family_owner of Lawrence (`21b057bb-…`)
-  - `lawonelimited@gmail.com` — self_buyer, family_owner of TheOne (`b14f53e6-…`) — stale test data
-  - `btamunokiri@hotmail.com` — caregiver, member of TheOne (`b14f53e6-…`)
-- **Lawrence family is Plus**; the other two are Free.
+## DB state (prod, after this session's cleanup)
 
-## Sprint 19 commits (this session, oldest → newest)
+Only **`lawonecloud@gmail.com`** (Lawrence) + test signups remain. All old
+test accounts hard-deleted; orphan circles soft-removed. Lawrence's circle
+`21b057bb-…`, ~87 BP, one active U19M device `5a2a24f5`.
 
-```
-2fdd6ed  fix(caregiver): hide SELF relationship leakage + gate invite on owner role  (Block 1)
-23572c2  feat(caregiver): add 'Care for another person' flow + action-bar chooser    (Block 2)
-38907ea  feat(family): owner edit-family-details from Settings → Family              (Block 3)
-d3becf7  feat(auth): account switcher — remember signed-in emails on this device      (Block 4)
-0105560  feat(family): per-caregiver relationship label (Sprint 19 Block 5)          (Block 5)
-0cf5c12  docs(launch): record v6 APK build queued                                    (Block 6)
-8467df3  docs(launch): record v6 APK URL                                             (Block 6)
-9cfa14f  fix(auth): derive onboarding-complete from server, not per-device MMKV      (Block 8)
-3427df6  fix(auth+onboarding): account-switch routing + 6 other hardening items      (Block 9)
-957c986  feat(doctor-pdf): inline SVG charts + branded letterhead + colour sections  (Block 10)
-5f6d8e3  fix(doctor-pdf): adapt rasterizer auth + body shape per vendor (PDFShift)   (Block 10 follow-up)
-ed0179f  fix(settings): real app version + leiko.health URLs                         (Block 7)
-b8efa12  docs(launch): record v6 APK URL stub
-d05639a  docs(launch): record v6 APK build queued
-```
+## Known deferrals (documented, NOT bugs)
 
-## Resend domain setup (founder TODO)
+1. **Old 4 invite edge functions** (send-family-invite, accept-family-
+   invite, send-care-invite, resolve-care-invite) are now dormant —
+   nothing calls them. Retire after a back-compat window for any
+   already-issued codes.
+2. **No app-store listing / `leiko.app/join` page** — invite LINKS only
+   work for someone who already has the app. Test invites via the 6-digit
+   CODE. Store listing + join landing page are launch tasks.
+3. **Demographics in onboarding** — currently a post-onboarding nudge
+   (founder chose this over an onboarding step). Revisit if signup data
+   completeness matters.
+4. **`tryResolvePendingCareInvite`** is now a no-op (connect-accept needs
+   the accepter's email; a stashed deep-link code doesn't carry it). The
+   person completes via the Enter-a-code sheet.
+5. **Full `account_type` column/nav removal** — ADR-0006 made it inert at
+   the render layer; the column + nav branch still exist (deliberately).
 
-Verified leiko.health DNS records at Resend:
-- `MX send → feedback-smtp.us-east-1.amazonses.com priority 10`
-- `TXT send → v=spf1 include:amazonses.com ~all`
-- `TXT resend._domainkey → (DKIM key from dashboard)`
-- `TXT _dmarc → v=DMARC1; p=none;` (optional, recommended)
+## Next steps (priority order)
 
-Once verified in Resend dashboard → set `RESEND_FROM_EMAIL=noreply@leiko.health`
-in Supabase secrets → redeploy `send-family-invite`.
+1. **Open a PR `claude/consolidated-build` → `main` and merge.** This is
+   the critical loose end. (A draft PR #8 may exist; it predates ~40
+   commits — refresh its description or open fresh.)
+2. **Finish the production test** (`plans/comprehensive-test.md`): the
+   full 3-phone connect matrix, visibility toggles, the both-wear
+   "follow back" path.
+3. **Retire the old 4 invite edge functions** once the back-compat
+   window closes.
+4. Build/flash a fresh APK from `main` after merge.
 
-## Hard rules carried forward
+## Test plan
 
-1. **`expo prebuild` stomps three Android customizations** — see
-   `memory/expo_prebuild_android_drift.md`. Never run prebuild during
-   manual icon / asset baking.
-2. **`account_type` is immutable**. Account switcher does NOT change
-   account_type — it signs out + signs in a different user.
-3. **`accept-family-invite` writes the per-caregiver label** to
-   `family_members.caregiver_relationship_label` (migration 0024).
-   Display layer prefers per-caregiver label over family default;
-   formatRelation('self') → 'Wearer' as the safety-net fallback.
-4. **Doctor PDF AI prep is best-effort** — `generate-doctor-pdf`
-   degrades to data-only when prep-ai 502s. Don't bake AI as a hard
-   dependency.
-5. **PDFShift uses HTTP Basic auth** (API key as username, empty
-   password), NOT Bearer. `rasterizer.ts` adapter handles this; do
-   not regress the Browserless code path.
-
-## Memory close-out from this session
-
-Worth adding once memory tool is back online:
-
-- Sprint 19 close-out across Blocks 1-10
-- PDFShift vendor adapter pattern (Basic auth + `source` field, not Bearer + `html`)
-- Block 8 onboarding-derive-from-server pattern (`checkOnboardingState` query)
-
-## Open prompt for the next session
-
-> Sprint 19 ready to ship as v7. Branch tip `5f6d8e3`. Read CLAUDE.md +
-> `plans/NEXT_SESSION_START_HERE.md` + the Sprint 19 sprint card.
->
-> Two work items in order:
-> 1. **Kick v7 APK build** via `npx eas-cli@latest build --platform android
->    --profile production-apk --non-interactive --no-wait` from
->    `apps/mobile/`. If GraphQL flakes (intermittent api.expo.dev issue
->    seen 2026-05-22/23), set `NODE_OPTIONS=--dns-result-order=ipv4first`
->    and retry. Update `plans/LAUNCH_ARTIFACTS.md` with the URL.
-> 2. **Diagnose prep-ai 502.** Open
->    `https://supabase.com/dashboard/project/kqnzxjrpnjnczhgdwdqg/functions/generate-doctor-prep-ai/logs`
->    and pull the actual `event_message` for the most recent crash. Patch
->    the cause. Re-test by tapping Generate PDF on Phone 1 → confirm AI
->    cover + observations paragraphs land on the rendered PDF.
->
-> After both: hand off to founder for Phone 1 install + retest.
+`plans/comprehensive-test.md` — stage-by-stage, with SQL checkpoints +
+device/account map. Connect flow now: anyone shares a code, the other
+enters it, backend wires direction. No direction-picking.

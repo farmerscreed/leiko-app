@@ -1,6 +1,6 @@
 # ADR-0006: Unify the caregiver / self-buyer model — `account_type` becomes inert
 
-- **Status**: Proposed (awaiting founder sign-off)
+- **Status**: Accepted (founder sign-off 2026-06-02; Phases 1–4 built + device-verified)
 - **Date**: 2026-06-01
 - **Sprint**: TBD (supersedes the "onboarding redesign" non-goal of `plans/sprint-19-multi-account-caregiver-model.md`)
 - **Amends**: `docs/_reference/D8a-self-buyer-mode.md` §1.2, §1.3, §14.1; `docs/01-data-model.md` (users.account_type semantics)

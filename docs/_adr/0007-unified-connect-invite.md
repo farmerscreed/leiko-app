@@ -1,6 +1,6 @@
 # ADR-0007: Unified "Connect" invite — one code, backend infers direction
 
-- **Status**: Proposed (awaiting founder sign-off)
+- **Status**: Accepted (founder sign-off 2026-06-02; built + device-verified)
 - **Date**: 2026-06-02
 - **Amends / supersedes**: ADR-0006 §3 (the two-direction invite design)
 - **Touches**: invite edge functions, `invitations` table semantics,
