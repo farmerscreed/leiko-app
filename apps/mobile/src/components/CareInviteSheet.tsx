@@ -123,6 +123,9 @@ export function CareInviteSheet({ visible, onDismiss, testID = 'care-invite-shee
           </>
         ) : (
           <>
+            <Text style={{ color: theme.colors.text.primary, fontSize: body.size, lineHeight: body.lineHeight, fontFamily: body.family, fontStyle: 'italic' }}>
+              “Let me keep an eye on Mum.”
+            </Text>
             <Text style={{ color: theme.colors.text.secondary, fontSize: body.size, lineHeight: body.lineHeight, fontFamily: body.family }}>
               Invite someone whose readings you’d like to follow. We’ll send a
               link and a code; they set up their own watch and approve.

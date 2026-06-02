@@ -1397,6 +1397,18 @@ export function SettingsScreen({ navigation }: Props) {
             <>
               <Text
                 style={{
+                  color: theme.colors.text.primary,
+                  fontSize: bodyStyle.size,
+                  lineHeight: bodyStyle.lineHeight,
+                  fontFamily: bodyStyle.family,
+                  fontStyle: 'italic',
+                  marginBottom: theme.spacing.s,
+                }}
+              >
+                &ldquo;Let my daughter keep an eye on me.&rdquo;
+              </Text>
+              <Text
+                style={{
                   color: theme.colors.text.secondary,
                   fontSize: bodyStyle.size,
                   lineHeight: bodyStyle.lineHeight,
@@ -1404,8 +1416,8 @@ export function SettingsScreen({ navigation }: Props) {
                   marginBottom: theme.spacing.m,
                 }}
               >
-                We&apos;ll create a 6-digit code you can share with them. They enter
-                it in their own Leiko app to join the circle.
+                We&apos;ll create a 6-digit code you can share. They enter it in
+                their own Leiko app to follow your readings.
               </Text>
               <TextInput
                 value={inviteLabel}
