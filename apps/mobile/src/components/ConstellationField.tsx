@@ -38,7 +38,6 @@
 
 import { useEffect } from 'react';
 import {
-  Pressable,
   StyleSheet,
   Text,
   View,
@@ -107,6 +106,9 @@ const ORB_SLOTS = [
 const CENTER_DOT_RADIUS = 3;
 const CENTER_PULSE_DURATION_MS = 3000;
 const CENTER_PULSE_PEAK_OPACITY = 0.3;
+// ADR follow-up — the centre "You" orb (wearer's own node). Slightly
+// larger than the biggest orbit slot (64) so it reads as the anchor.
+const SELF_ORB_DIAMETER = 72;
 
 const RING_OUTER_R = 130;
 const RING_INNER_R = 80;
@@ -255,20 +257,24 @@ export function ConstellationField({
           );
         })}
 
-        {/* Centre dot — solid white "You" mark */}
-        <Circle cx={CX} cy={CY} r={CENTER_DOT_RADIUS} fill={centerDotColor} />
-
-        {/* Pulsing ring around the centre dot — opacity is animated */}
-        <AnimatedCircle
-          cx={CX}
-          cy={CY}
-          r={CENTER_DOT_RADIUS}
-          fill="none"
-          stroke={centerDotColor}
-          strokeWidth={0.5}
-          animatedProps={pulseAnimatedProps}
-          testID={testID ? `${testID}-pulse` : undefined}
-        />
+        {/* Centre dot + pulsing ring — only for the pure-caregiver case
+            (no selfNode). When the viewer wears a watch, a full beating
+            PersonOrb is rendered at centre instead (below the SVG). */}
+        {selfNode ? null : (
+          <>
+            <Circle cx={CX} cy={CY} r={CENTER_DOT_RADIUS} fill={centerDotColor} />
+            <AnimatedCircle
+              cx={CX}
+              cy={CY}
+              r={CENTER_DOT_RADIUS}
+              fill="none"
+              stroke={centerDotColor}
+              strokeWidth={0.5}
+              animatedProps={pulseAnimatedProps}
+              testID={testID ? `${testID}-pulse` : undefined}
+            />
+          </>
+        )}
       </Svg>
 
       {/* Centre "You" anchor. ADR-0006 Phase 3: when the viewer is a
@@ -277,24 +283,36 @@ export function ConstellationField({
           constellation, not a redundant orbiting node. Caregivers (no
           selfNode) keep the quiet bare "You" label. */}
       {selfNode ? (
-        <Pressable
-          onPress={
-            onSelectPerson ? () => onSelectPerson(selfNode.id) : undefined
-          }
-          accessibilityRole="button"
-          accessibilityLabel={`You — ${selfNode.fullName}, ${selfNode.bpLabel}`}
-          testID={testID ? `${testID}-self` : undefined}
+        // Wearer's own constellation: a full beating PersonOrb at centre
+        // (same heartbeat halo as the orbiting people), with the "You"
+        // label + reading beneath. The bare centre dot/ring is suppressed
+        // above so this is the single centre element.
+        <View
           style={{
             position: 'absolute',
             left: CX,
-            top: CY + 10,
-            transform: [{ translateX: -52 }],
-            width: 104,
+            top: CY - SELF_ORB_DIAMETER / 2,
+            transform: [{ translateX: -SELF_ORB_DIAMETER / 2 }],
+            width: SELF_ORB_DIAMETER,
             alignItems: 'center',
           }}
+          testID={testID ? `${testID}-self` : undefined}
         >
+          <PersonOrb
+            initial={selfNode.initial}
+            accent={selfNode.accent}
+            status={selfNode.status}
+            fullName={selfNode.fullName}
+            bpLabel={selfNode.bpLabel}
+            diameter={SELF_ORB_DIAMETER}
+            onPress={
+              onSelectPerson ? () => onSelectPerson(selfNode.id) : undefined
+            }
+            accessibilityLabel={`You — ${selfNode.fullName}, ${selfNode.bpLabel}`}
+          />
           <Text
             allowFontScaling={false}
+            pointerEvents="none"
             style={{
               fontFamily: theme.fontFamilies.numeric,
               fontSize: 8.5,
@@ -303,37 +321,12 @@ export function ConstellationField({
               fontWeight: '500',
               color: youLabelColor,
               textTransform: 'uppercase',
+              marginTop: 4,
             }}
           >
             You
           </Text>
-          <Text
-            allowFontScaling={false}
-            numberOfLines={1}
-            style={{
-              fontFamily: theme.fontFamilies.editorial,
-              fontSize: 15,
-              lineHeight: 20,
-              color: theme.colors.text.primary,
-              marginTop: 2,
-            }}
-          >
-            {selfNode.fullName}
-          </Text>
-          {selfNode.bpLabel !== '—' ? (
-            <Text
-              allowFontScaling={false}
-              style={{
-                fontFamily: theme.fontFamilies.numeric,
-                fontSize: 13,
-                lineHeight: 17,
-                color: theme.colors.brand.coral,
-              }}
-            >
-              {selfNode.bpLabel}
-            </Text>
-          ) : null}
-        </Pressable>
+        </View>
       ) : (
         <View
           pointerEvents="none"

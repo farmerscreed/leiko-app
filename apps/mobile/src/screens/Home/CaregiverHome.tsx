@@ -307,12 +307,20 @@ export function CaregiverHome() {
     status: p.status,
     bpLabel: p.bpLabel,
   });
-  const selfConstellationNode: ConstellationPerson | undefined = mergedPeople.find(
-    (p) => p.isSelf,
-  )
-    ? toConstellationPerson(mergedPeople.find((p) => p.isSelf)!)
-    : undefined;
+  // The viewer's self node only earns the centre "You" anchor when it has
+  // REAL data (a reading → bpLabel !== '—'). Everyone signs up with a
+  // self-circle, so a caregiver who never paired a watch also has an
+  // isSelf node — but showing an empty "You · no readings" at the top of
+  // the screen is confusing (founder feedback). When the self node has no
+  // reading we DROP it entirely: no centre anchor, and it does not orbit.
+  // The centre "You" returns automatically once they pair / take a reading.
+  const selfNodeData = mergedPeople.find((p) => p.isSelf);
+  const selfHasReading = selfNodeData ? selfNodeData.bpLabel !== '—' : false;
+  const selfConstellationNode: ConstellationPerson | undefined =
+    selfNodeData && selfHasReading ? toConstellationPerson(selfNodeData) : undefined;
   const constellationPeople: ConstellationPerson[] = mergedPeople
+    // Orbit everyone who isn't the self node. The empty self node (no
+    // reading) is excluded here too — it neither centres nor orbits.
     .filter((p) => !p.isSelf)
     .map(toConstellationPerson);
 
