@@ -72,6 +72,7 @@ import { PersonCard } from '../../components/PersonCard';
 import { ViewToggle } from '../../components/ViewToggle';
 import { useCaregiverFamily } from '../../hooks/useCaregiverFamily';
 import { AcceptInviteSheet } from '../../components/AcceptInviteSheet';
+import { CareInviteSheet } from '../../components/CareInviteSheet';
 import { FamilyRemovalBanner } from '../../components/FamilyRemovalBanner';
 import { useFamilyRemovalBanner } from '../../hooks/useFamilyRemovalBanner';
 import { useAuth } from '../../state/auth';
@@ -211,6 +212,11 @@ export function CaregiverHome() {
   // on success we refresh the family list so the constellation
   // populates without a manual reload.
   const [acceptInviteVisible, setAcceptInviteVisible] = useState(false);
+  // ADR-0006 — "+ Add someone I care for" opens the caregiver-initiated
+  // pending-invite sheet (invite someone not yet on Leiko). The empty-
+  // state "enter a code" paths use AcceptInviteSheet (joining an existing
+  // circle) — a distinct action.
+  const [careInviteVisible, setCareInviteVisible] = useState(false);
   // ADR-0006 Phase 3 — "+ Add someone" now goes straight to the AddPerson
   // flow (set up a circle for someone you care for). The old two-option
   // chooser (which routed "Invite a caregiver" into Settings) was
@@ -566,7 +572,7 @@ export function CaregiverHome() {
           <CaregiverActionBar
             count={merged.length}
             canInvite={viewerCanInvite(merged)}
-            onInvitePress={() => setAcceptInviteVisible(true)}
+            onInvitePress={() => setCareInviteVisible(true)}
             testID="caregiver-home-action-bar"
           />
         </View>
@@ -641,9 +647,14 @@ export function CaregiverHome() {
         }}
         testID="caregiver-home-accept"
       />
-      {/* Sprint 19 Block 2 — action-bar chooser. Picks between
-          "Care for another person" (new family) and "Invite a
-          caregiver" (existing flow). */}
+      {/* ADR-0006 — caregiver-initiated pending invite. "+ Add someone I
+          care for" opens this; it creates a pending invite + share link
+          for someone not yet on Leiko. */}
+      <CareInviteSheet
+        visible={careInviteVisible}
+        onDismiss={() => setCareInviteVisible(false)}
+        testID="caregiver-home-care-invite"
+      />
       <QuietHoursAffirmSlot />
     </SafeAreaView>
   );
