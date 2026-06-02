@@ -18,7 +18,7 @@ Canonical version pins and service locks. Sourced from D7 §2 (final lock) and D
 | State (client) | Zustand | 4.x |
 | Server-state cache | TanStack Query (React Query) | v5 |
 | Navigation | React Navigation (native stack + bottom tabs) | v7 |
-| Local relational DB | WatermelonDB ⚠️ **not yet installed** — see note | 0.27+ (locked, unbuilt) |
+| On-device persistence | MMKV (encrypted KV) + Zustand (client state); no separate relational DB | — (see ADR-0008) |
 | Encrypted KV | react-native-mmkv (with platform Keychain/Keystore) | 4.x (bumped from 2.x in Sprint 2 — Nitro Modules require 4.x for Expo SDK 54 + React 19 + New Architecture; same governance route as ADR-0004 for reanimated/gesture-handler. The 2.x lineage stopped at 2.12.2 in early 2024 and does not support the New Architecture cleanly.) |
 | Charts | Victory Native XL | latest stable |
 | i18n | i18next + react-i18next | latest stable |
@@ -34,14 +34,13 @@ Canonical version pins and service locks. Sourced from D7 §2 (final lock) and D
 | Android Health Connect | `react-native-health-connect` | 3.5.0 (added Sprint 9.5 — D13 §12. Ships an Expo config plugin; covers all six HC record types D13 §12.4 names — see ADR-0005.) |
 | Nitro Modules runtime | `react-native-nitro-modules` | 0.35.6 (promoted Sprint 9.5 from transitive (via MMKV 4.x) to direct dep, satisfying `@kingstinct/react-native-healthkit`'s peer dep — see ADR-0005.) |
 
-> ⚠️ **WatermelonDB status (flagged 2026-06-02).** This lock predates the
-> shipped app, which **does not include WatermelonDB** — on-device data is
-> persisted via **MMKV + Zustand (client state) + Supabase (server source of
-> truth)**. Whether WatermelonDB is still planned for a later version or
-> abandoned in favour of MMKV-only is an **open founder decision** (tracked
-> in `plans/NEXT_SESSION_START_HERE.md`); resolving it is an ADR. The
-> SQLCipher row in the encryption inventory below is part of this same
-> not-yet-built design. The lock is left in place pending that call.
+> **WatermelonDB removed (ADR-0008, 2026-06-02).** WatermelonDB was locked
+> but never installed; the founder confirmed the app uses Supabase, so it is
+> **dropped**. There is **no separate on-device relational DB** — on-device
+> persistence is **MMKV (encrypted KV) + Zustand (client state)**, with
+> **Supabase (Postgres)** as the queryable source of truth read through
+> **TanStack Query**. Offline-first is preserved by the MMKV pending buffer.
+> See `docs/_adr/0008-drop-watermelondb.md`.
 
 **Rejected (do not propose without ADR)**: Native Swift+Kotlin, Flutter, Expo Go, Realm, AsyncStorage as primary, Redux Toolkit, Apollo, Material/Chakra/NativeBase UI libs, @gorhom/bottom-sheet (heavy abstraction — we use the primitives directly), `@react-native-community/blur` (replaced by expo-blur in Sprint 1.5; remains in some D12 references pre-amendment), paid display typefaces — Recoleta / Söhne / Reckless Neue (deferred to v1.1 per D12 §3.1 founder decision), `react-native-health` (rejected in Sprint 9.5 — stale + no New Architecture support; see ADR-0005).
 
@@ -156,7 +155,7 @@ Leiko is **direct-to-consumer**; we are NOT a Business Associate to a Covered En
 | Postgres at rest | TDE (LUKS volume) | LUKS key in Hetzner KMS |
 | Storage at rest | AES-256 (Supabase Storage) | Per-bucket key |
 | Mobile keychain | iOS Keychain / Android Keystore (hardware-backed where available) | OS-managed |
-| Local relational DB | SQLCipher AES-256 (WatermelonDB) | Key derived from Keychain entry; rotates on re-install |
+| Local KV at rest (MMKV) | AES-256 (MMKV encryption) | Key in iOS Keychain / Android Keystore |
 
 ### PHI handling rules (HARD)
 1. **Never** log reading values (sys/dia/pulse) outside the database.

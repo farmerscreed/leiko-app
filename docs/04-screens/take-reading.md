@@ -20,7 +20,7 @@ Triggered when the caregiver or self-buyer wants to capture a fresh BP reading v
 2. Watch inflates cuff (~45s), reads sys/dia/pulse, pushes via `0x73` notify packet.
 3. App receives reading via the BLE notify subscription (`docs/06-ble-protocol.md` §3 cmd `0x73`).
 4. Reading is saved to MMKV pending buffer **before** any UI confirmation (`docs/01-data-model.md` §"Local storage on device").
-5. POST to `/sync` Edge Function. On success: insert into WatermelonDB, drop from MMKV pending buffer, write to `public.readings`.
+5. POST to `/sync` Edge Function. On success: the reading lands in `public.readings` and is dropped from the MMKV pending buffer (no on-device relational DB — see ADR-0008).
 6. Anomaly engine classifies on ingest (`docs/10-anomaly-logic.md`).
 7. Push to all caregivers in the family per `docs/11-push-notifications.md` daily-summary or anomaly category.
 

@@ -236,7 +236,7 @@ Notes on the graph:
 | ⏳ Pending | Founder ops blitz (OPS-1..12 — keystores, certs, APNs/FCM, RevenueCat, domain hosting, prod env) | `PRODUCTION_READINESS.md` |
 | ⏳ Pending | Fresh APK from `main` after the ADR-0006/0007 merge | `NEXT_SESSION_START_HERE.md` |
 | ⏳ Pending | Store submission (TestFlight, Play Internal, screenshots, store metadata, beta testers) | `PRODUCTION_READINESS.md` "Week 3" + "Week 4" |
-| ❓ Founder | WatermelonDB + AI Tier-A (Llama/Ollama): locked in `00-tech-stack.md` but unbuilt — confirm planned vs. abandoned | `NEXT_SESSION_START_HERE.md` |
+| ✅ Resolved | WatermelonDB dropped (ADR-0008); AI Tier-A (Llama/Ollama) still planned for v1.x — both reflected in `00-tech-stack.md` | `NEXT_SESSION_START_HERE.md` |
 | 📦 v1.1 | GAP-1..15 (Sleep REM, hourly activity, sports records, deep BP backfill, embeddings build, full Learn corpus, photos, theme toggle, parent persona, jailbreak CI, Maestro E2E, Trends harmonisation, single-string cascade, clinical-review queue) | `PRODUCTION_READINESS.md` § P2 |
 | 📦 v1.1 | POL-1..7 (watch timeout, domain URL config, dep pinning, gitignore, SQL lint CI, type casts, IANA timezone) | `PRODUCTION_READINESS.md` § P2 polish |
 

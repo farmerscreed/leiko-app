@@ -522,7 +522,13 @@ create policy "service inserts audit"    on public.audit_log
 
 ## Local storage on device
 
-Two local layers, mirroring the rules in CLAUDE.md ("offline-first: every reading is saved to MMKV before any sync attempt").
+> **Updated by [ADR-0008](_adr/0008-drop-watermelondb.md) (2026-06-02).**
+> WatermelonDB was dropped — there is **no on-device relational DB**.
+> On-device persistence is **MMKV (encrypted KV) + Zustand (client state)**;
+> **Supabase (Postgres)** is the queryable source of truth, read through
+> **TanStack Query**. The offline-first guarantee in CLAUDE.md ("every
+> reading is saved to MMKV before any sync attempt") is unchanged — the
+> pending buffer is MMKV.
 
 ### MMKV (encrypted KV)
 Used for:
@@ -530,24 +536,23 @@ Used for:
 - User preferences (theme override, large-text mode, locale, quiet-hours config)
 - Pending readings buffer (raw BLE payloads not yet synced — flushed on connection regain)
 - Feature flags / rollout state
-- **Never**: full reading history (use WatermelonDB for queryable data)
+- **Never**: full reading history (that lives in Supabase, fetched + cached via TanStack Query)
 
 Per CLAUDE.md: **no `localStorage` or `sessionStorage`** — MMKV only.
 
-### WatermelonDB (encrypted relational)
-Used for:
-- Last 30 days of readings (queryable for trends, anomaly look-back)
-- Family circle membership snapshot
-- Latest device pairing state
-- Sync conflict markers
-
-Schema mirrors a subset of the Supabase tables. Sync is best-effort, conflict resolution is documented in D7 §9.3 (server wins for reading values; client wins for local-only fields like UI state).
+### Queryable history (Supabase, not a local relational DB)
+Reading history, the other vitals, family/circle membership, and device
+pairing state are queried from **Supabase** and cached client-side by
+**TanStack Query**. Trends, anomaly look-back, and the dashboards read from
+that cache. Conflict resolution stays server-authoritative for reading
+values (D7 §9.3 background: server wins for values; client wins for
+local-only UI state).
 
 ### Sync strategy
 1. Reading captured on device → write to MMKV pending buffer **synchronously** before any UI confirmation.
-2. Best-effort POST to `/sync` Edge Function. On success: insert into WatermelonDB, drop from MMKV pending buffer.
+2. Best-effort POST to `/sync` Edge Function. On success: the reading lands in `public.readings`; drop it from the MMKV pending buffer.
 3. On failure: keep in MMKV pending buffer; retry on next connectivity event (background fetch, app foreground, BLE reconnect).
-4. Reads come from WatermelonDB first, then optionally refresh from `/sync` GET in the background (TanStack Query).
+4. Reads come from the TanStack Query cache over Supabase; a background refresh reconciles when connectivity returns.
 
 The app must function with no network. If `/sync` has been failing for >24h, show a calm reassurance banner ("Your readings are saved. They'll sync when you're back online.") — never a fear-language alert.
 

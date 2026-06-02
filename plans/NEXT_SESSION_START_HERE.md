@@ -41,18 +41,18 @@ squash-merged after CI passed. Sprints are complete through **Sprint 20**
   app after the ADR-0006/0007 pivot. See the drift inventory captured in
   this session.
 
-## Open ADR-level questions (founder's call — do not guess)
+## Stack decisions (resolved)
 
-1. **WatermelonDB** is locked in `docs/00-tech-stack.md` (line 21) as the
-   "local relational DB" but is **not installed**; the app persists via
-   MMKV + Zustand + Supabase. Is WatermelonDB still planned for a later
-   version, or abandoned in favour of MMKV-only? If abandoned, that's an
-   ADR + a stack-doc edit.
-2. **AI Tier A (Llama 3.1/3.2 on Ollama)** is locked in
-   `docs/00-tech-stack.md` (line 62) but is **not built**; the live "Tier A"
-   is a client-side deterministic intent-router + templates (no local LLM).
-   Tier B (Haiku) and Tier C (Sonnet) are real. Is the Ollama tier planned
-   or abandoned? Same ADR/stack-doc implication.
+1. **WatermelonDB — DROPPED** ([ADR-0008](../docs/_adr/0008-drop-watermelondb.md),
+   founder decision 2026-06-02). It was locked but never installed; the app
+   uses Supabase. There is no on-device relational DB — persistence is MMKV +
+   Zustand, with Supabase as the queryable source of truth via TanStack Query.
+   Stack docs updated.
+2. **AI Tier A (Llama 3.1/3.2 on Ollama) — STILL PLANNED (v1.x).** Locked in
+   `docs/00-tech-stack.md` but not yet built; the live "Tier A" is a
+   client-side deterministic intent-router + templates (no local LLM). Tier B
+   (Haiku) and Tier C (Sonnet) are real. Docs mark the Ollama tier "planned,
+   not yet built."
 
 ## Next steps (priority order)
 
