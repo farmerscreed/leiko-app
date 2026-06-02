@@ -62,6 +62,63 @@ describe('composeDailyPulseData', () => {
     expect(data.hr.staleness).toBe('fresh');
   });
 
+  describe('HR display fallback (resting → recent → latest)', () => {
+    it('uses today resting HR as displayBpm when present', () => {
+      const data = composeDailyPulseData(
+        {
+          ...EMPTY_SNAPSHOT,
+          hrRestingToday: 66,
+          hrRestingRecent: [62, 63],
+          hrLatestSampleAt: NOW_SEC - 3600,
+          hrLatestBpm: 88,
+        },
+        NOW_SEC,
+      );
+      expect(data.hr.displayBpm).toBe(66);
+      expect(data.hr.displaySource).toBe('resting-today');
+    });
+
+    it('falls back to the most recent resting HR when today is absent', () => {
+      const data = composeDailyPulseData(
+        {
+          ...EMPTY_SNAPSHOT,
+          hrRestingToday: null,
+          // oldest-first; the last entry (63) is the most recent night.
+          hrRestingRecent: [61, 62, 63],
+          hrLatestSampleAt: NOW_SEC - 3600,
+          hrLatestBpm: 88,
+        },
+        NOW_SEC,
+      );
+      expect(data.hr.displayBpm).toBe(63);
+      expect(data.hr.displaySource).toBe('resting-recent');
+      // Classification must NOT fire on a fallback value.
+      expect(data.hr.classification).toBeNull();
+    });
+
+    it('falls back to the latest sample when no resting HR exists', () => {
+      const data = composeDailyPulseData(
+        {
+          ...EMPTY_SNAPSHOT,
+          hrRestingToday: null,
+          hrRestingRecent: [],
+          hrLatestSampleAt: NOW_SEC - 3600,
+          hrLatestBpm: 84,
+        },
+        NOW_SEC,
+      );
+      expect(data.hr.displayBpm).toBe(84);
+      expect(data.hr.displaySource).toBe('latest');
+      expect(data.hr.classification).toBeNull();
+    });
+
+    it('is null only when there is no HR data at all', () => {
+      const data = composeDailyPulseData(EMPTY_SNAPSHOT, NOW_SEC);
+      expect(data.hr.displayBpm).toBeNull();
+      expect(data.hr.displaySource).toBeNull();
+    });
+  });
+
   it('classifies HR confirmed_urgent on extreme value', () => {
     const data = composeDailyPulseData(
       {

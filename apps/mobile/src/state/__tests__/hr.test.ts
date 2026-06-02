@@ -92,6 +92,23 @@ describe('useHR slice', () => {
     expect(resting).toBe(58);
   });
 
+  test('restingBpmToday — sleep window honours the user timezone', () => {
+    // Two samples at 21:10 and 21:20 UTC on 2026-05-06. In UTC these
+    // are BEFORE the 22:00 window → excluded. In Lagos (UTC+1) they are
+    // 22:10 and 22:20 local → INSIDE the window for the 2026-05-07
+    // morning. nowSec is 2026-05-07 12:00 UTC (13:00 Lagos).
+    const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
+    const s1 = Date.UTC(2026, 4, 6, 21, 10, 0) / 1000;
+    const s2 = Date.UTC(2026, 4, 6, 21, 20, 0) / 1000;
+    useHR.getState().addPending(makeSample(s1, 62));
+    useHR.getState().addPending(makeSample(s2, 60));
+
+    // UTC interpretation: outside the window → null.
+    expect(useHR.getState().restingBpmToday(nowSec)).toBeNull();
+    // Lagos interpretation: inside the window → rolling-min average.
+    expect(useHR.getState().restingBpmToday(nowSec, 'Africa/Lagos')).toBe(61);
+  });
+
   test('restingBpmToday returns null with <2 samples in window', () => {
     const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
     // One sample at 23:00 UTC the night before.

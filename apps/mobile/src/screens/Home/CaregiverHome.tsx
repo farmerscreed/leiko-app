@@ -186,7 +186,6 @@ export function CaregiverHome() {
       cancelled = true;
     };
     // Run once on mount; refresh identity is stable from the query hook.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Owning-phone first-paint merge: if local latest is newer than the

@@ -9,6 +9,10 @@
 
 /* global jest, process */
 
+// Note: the test timezone is pinned to UTC in jest.config.js (parent
+// process, before workers fork) — V8 binds Date's zone at process init,
+// so pinning it here would be too late.
+
 void globalThis.__ExpoImportMetaRegistry;
 void globalThis.URLSearchParams;
 void globalThis.structuredClone;
