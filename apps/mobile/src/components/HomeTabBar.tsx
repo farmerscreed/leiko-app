@@ -46,14 +46,19 @@ export function HomeTabBar({ onSelect, active = 'home', testID }: HomeTabBarProp
         hitSlop={8}
         testID={`${rootTestID}-tab-${t.id}`}
         style={({ pressed }) => ({
-          paddingHorizontal: theme.spacing.l,
+          // Tight horizontal padding so all 4 labels + the centre button
+          // fit on narrow screens (Settings was pushed off the right edge
+          // at spacing.l). hitSlop keeps the tap target comfortable.
+          paddingHorizontal: theme.spacing.xs,
           paddingVertical: theme.spacing.s,
           borderRadius: 16,
           opacity: pressed ? 0.7 : 1,
+          flexShrink: 1,
         })}
       >
         <Text
           allowFontScaling={false}
+          numberOfLines={1}
           style={{
             fontFamily: labelStyle.family,
             fontSize: labelStyle.size,
@@ -84,8 +89,8 @@ export function HomeTabBar({ onSelect, active = 'home', testID }: HomeTabBarProp
         borderColor: theme.colors.border.rim,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: theme.spacing.s,
+        justifyContent: 'space-around',
+        paddingHorizontal: theme.spacing.xs,
         ...theme.elevation.high.ios,
         ...theme.elevation.high.android,
       }}

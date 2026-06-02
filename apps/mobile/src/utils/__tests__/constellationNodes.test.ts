@@ -47,10 +47,20 @@ const freshReading = reading({
 });
 
 describe('isSelfCircle', () => {
-  it('detects the self-circle by parent_relationship', () => {
-    expect(isSelfCircle(summary({ parentRelationship: 'self' }))).toBe(true);
-    expect(isSelfCircle(summary({ parentRelationship: 'Self' }))).toBe(true);
-    expect(isSelfCircle(summary({ parentRelationship: '  self ' }))).toBe(true);
+  it('detects MY self-circle: relationship self AND viewer is family_owner', () => {
+    const self = { parentRelationship: 'self', viewerRole: 'family_owner' as const };
+    expect(isSelfCircle(summary(self))).toBe(true);
+    expect(isSelfCircle(summary({ ...self, parentRelationship: 'Self' }))).toBe(true);
+    expect(isSelfCircle(summary({ ...self, parentRelationship: '  self ' }))).toBe(true);
+  });
+
+  it('a self-relationship circle I only FOLLOW is NOT my self-node', () => {
+    // The regression: every wearer's circle has relationship 'self'. A
+    // caregiver following several wearers must NOT see them all as "self"
+    // (they'd collapse into the centre You node and vanish from the orbit).
+    expect(
+      isSelfCircle(summary({ parentRelationship: 'self', viewerRole: 'caregiver' })),
+    ).toBe(false);
   });
 
   it('treats relatives as non-self', () => {
@@ -64,7 +74,7 @@ describe('buildConstellationNodes', () => {
     const nodes = buildConstellationNodes(
       [
         summary({ familyId: 'mum', parentRelationship: 'Mom', latestReading: freshReading }),
-        summary({ familyId: 'me', parentRelationship: 'self', latestReading: freshReading }),
+        summary({ familyId: 'me', parentRelationship: 'self', viewerRole: 'family_owner', latestReading: freshReading }),
       ],
       NOW,
     );
@@ -81,7 +91,7 @@ describe('buildConstellationNodes', () => {
     });
     const nodes = buildConstellationNodes(
       [
-        summary({ familyId: 'me', parentRelationship: 'self', latestReading: freshReading }),
+        summary({ familyId: 'me', parentRelationship: 'self', viewerRole: 'family_owner', latestReading: freshReading }),
         summary({ familyId: 'dad', parentRelationship: 'father', latestReading: highReading }),
       ],
       NOW,
@@ -91,7 +101,7 @@ describe('buildConstellationNodes', () => {
 
   it('handles a pure self constellation', () => {
     const nodes = buildConstellationNodes(
-      [summary({ familyId: 'me', parentRelationship: 'self', latestReading: freshReading })],
+      [summary({ familyId: 'me', parentRelationship: 'self', viewerRole: 'family_owner', latestReading: freshReading })],
       NOW,
     );
     expect(nodes).toHaveLength(1);
@@ -108,6 +118,23 @@ describe('buildConstellationNodes', () => {
     );
     expect(hasSelfNode(nodes)).toBe(false);
     expect(nodes).toHaveLength(2);
+  });
+
+  it('a caregiver following multiple wearers sees them ALL (none collapse to self)', () => {
+    // Regression: every wearer's circle has relationship 'self'. A
+    // watchless caregiver following three wearers must see three NON-self
+    // nodes (all orbit), not have two vanish into the centre.
+    const nodes = buildConstellationNodes(
+      [
+        summary({ familyId: 'a', parentRelationship: 'self', viewerRole: 'caregiver', latestReading: freshReading }),
+        summary({ familyId: 'b', parentRelationship: 'self', viewerRole: 'caregiver', latestReading: freshReading }),
+        summary({ familyId: 'c', parentRelationship: 'self', viewerRole: 'caregiver', latestReading: freshReading }),
+      ],
+      NOW,
+    );
+    expect(hasSelfNode(nodes)).toBe(false);
+    expect(nodes).toHaveLength(3);
+    expect(nodes.every((n) => !n.isSelf)).toBe(true);
   });
 
   it('returns an empty array for no circles', () => {

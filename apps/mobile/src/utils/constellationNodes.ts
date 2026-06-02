@@ -16,11 +16,22 @@ import {
   type ConstellationNode,
 } from './constellationOrder';
 
-// A family is the viewer's OWN self-circle when its parent_relationship is
-// 'self' (the self_buyer create_family path sets exactly this). Trimmed +
-// case-insensitive for safety against stored variants.
+// A circle is the VIEWER'S OWN self-circle only when BOTH hold:
+//   • its parent_relationship is 'self' (create_family's self_buyer stamp), AND
+//   • the viewer is the family_owner of it (their own circle, not one they
+//     merely follow).
+//
+// The relationship alone is NOT enough: EVERY self-buyer's circle has
+// relationship 'self', so a caregiver following several wearers would see
+// all of them as "self" and they'd collapse into the centre "You" node
+// (observed: a caregiver phone showed only one wearer, the rest vanished
+// from the orbit). viewerRole disambiguates — in circles you follow your
+// role is 'caregiver', not 'family_owner'.
 export function isSelfCircle(parent: ParentSummary): boolean {
-  return parent.parentRelationship.trim().toLowerCase() === 'self';
+  return (
+    parent.parentRelationship.trim().toLowerCase() === 'self' &&
+    parent.viewerRole === 'family_owner'
+  );
 }
 
 /**

@@ -16,6 +16,7 @@ import { type ReactNode } from 'react';
 import { Linking } from 'react-native';
 import { fireEvent, render, screen, waitFor, act } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '../../../theme';
 import { SettingsScreen } from '../SettingsScreen';
 import type { UserRow } from '../../../types/database';
@@ -85,7 +86,7 @@ let mockParents: Array<{
   parentDisplayName?: string;
   parentRelationship?: string;
   viewerRole?: string;
-}> = [{ familyId: 'fam-1', parentRelationship: 'self' }];
+}> = [{ familyId: 'fam-1', parentDisplayName: 'Lawrence', parentRelationship: 'self', viewerRole: 'family_owner' }];
 jest.mock('../../../hooks/useFamilyReadings', () => ({
   useFamilyReadings: () => ({
     parents: mockParents,
@@ -157,11 +158,16 @@ function renderScreen(): ReturnType<typeof render> {
     goBack: () => void;
     navigate: (route: string) => void;
   };
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
   const wrap = (node: ReactNode) =>
     (
-      <SafeAreaProvider initialMetrics={{ frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 47, bottom: 34, left: 0, right: 0 } }}>
-        <ThemeProvider mode="caregiver">{node}</ThemeProvider>
-      </SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <SafeAreaProvider initialMetrics={{ frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 47, bottom: 34, left: 0, right: 0 } }}>
+          <ThemeProvider mode="caregiver">{node}</ThemeProvider>
+        </SafeAreaProvider>
+      </QueryClientProvider>
     );
   return render(
     wrap(
@@ -176,11 +182,10 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockProfile = makeProfile();
   mockPairedDevice = null;
-  // Default: the viewer wears a self-circle (so the "Following your
-  // readings" section with invite/visibility renders). viewerRole is left
-  // off so `ownedFamily` stays null and the QueryClient-using
-  // EditFamilyDetailsSheet doesn't mount in the lightweight test env.
-  mockParents = [{ familyId: 'fam-1', parentRelationship: 'self' }];
+  // Default: the viewer wears a self-circle they own (family_owner) so the
+  // "Following your readings" section + EditFamilyDetails mount. The render
+  // wrapper supplies a QueryClientProvider for the latter.
+  mockParents = [{ familyId: 'fam-1', parentDisplayName: 'Lawrence', parentRelationship: 'self', viewerRole: 'family_owner' }];
 });
 
 describe('<SettingsScreen /> — Profile', () => {
@@ -569,7 +574,7 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
 
   describe('role-aware family sections (ADR-0006 Phase 4)', () => {
     it('shows "Following your readings" with invite when the viewer wears a circle', () => {
-      mockParents = [{ familyId: 'fam-1', parentRelationship: 'self' }];
+      mockParents = [{ familyId: 'fam-1', parentDisplayName: 'Lawrence', parentRelationship: 'self', viewerRole: 'family_owner' }];
       renderScreen();
       expect(screen.getByTestId('settings-section-following-you')).toBeTruthy();
       expect(screen.getByTestId('settings-family-invite')).toBeTruthy();
@@ -584,7 +589,7 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
 
     it('lists circles the viewer follows under "People you care for"', () => {
       mockParents = [
-        { familyId: 'me', parentRelationship: 'self' },
+        { familyId: 'me', parentDisplayName: 'Lawrence', parentRelationship: 'self', viewerRole: 'family_owner' },
         { familyId: 'mum', parentRelationship: 'Mom', parentDisplayName: 'Marian' },
       ];
       renderScreen();
@@ -594,7 +599,7 @@ describe('<SettingsScreen /> — Family invite (Sprint 10c.1)', () => {
     });
 
     it('always offers "Care for another person" (join with a code)', () => {
-      mockParents = [{ familyId: 'me', parentRelationship: 'self' }];
+      mockParents = [{ familyId: 'me', parentDisplayName: 'Lawrence', parentRelationship: 'self', viewerRole: 'family_owner' }];
       renderScreen();
       expect(screen.getByTestId('settings-section-add')).toBeTruthy();
       expect(screen.getByTestId('settings-family-accept')).toBeTruthy();
