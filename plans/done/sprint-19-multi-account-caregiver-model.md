@@ -1,3 +1,13 @@
+> **SUPERSEDED 2026-06-02 by ADR-0006 + ADR-0007** (merged to `main` as
+> PR #8, `3c1dba7`). The model questions this card raised — the "SELF"
+> relationship-label leak, no path to add a second parent, no account
+> switcher, per-caregiver relationship labels — were resolved wholesale by
+> the unified caregiver/self-buyer model (ADR-0006) and the unified
+> "Connect" invite (ADR-0007), rather than as the incremental fixes scoped
+> here. See `docs/_adr/0006-unified-caregiver-self-buyer-model.md` and
+> `docs/_adr/0007-unified-connect-invite.md`. Filed under `done/` as the
+> historical record of the problems that motivated the ADRs.
+
 # Sprint 19 — Multi-account + caregiver-model fixes
 
 **Opened:** 2026-05-22 PM Lagos · supersedes Sprint 18 mid-session pause.

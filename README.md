@@ -58,7 +58,7 @@ leiko-app/
 │   ├── 11-push-notifications.md
 │   ├── 12-localisation.md
 │   ├── 13-testing-standard.md
-│   └── _reference/        # Full D1–D10 spec dumps. Don't load by default.
+│   └── _reference/        # Full D1–D15 spec dumps. Don't load by default.
 ├── plans/                 # Sprint cards. Active card is your job.
 ├── apps/
 │   └── mobile/            # React Native + Expo bare
@@ -77,7 +77,7 @@ leiko-app/
 - **Payments**: RevenueCat
 - **Push**: Expo Notifications
 - **Analytics**: PostHog self-hosted · **Errors**: Sentry SaaS
-- **Test**: Jest + React Native Testing Library · Detox in Sprint 17 only
+- **Test**: Jest + React Native Testing Library · Maestro for E2E (deferred to v1.1)
 - **CI**: GitHub Actions · **Builds**: EAS Build
 
 Versions are pinned exactly in `apps/mobile/package.json`. If a version doesn't match, that's a bug.

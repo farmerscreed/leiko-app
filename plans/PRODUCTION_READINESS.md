@@ -1,8 +1,20 @@
 # Leiko Production Readiness Checklist
 
 **Generated:** 2026-05-14 Lagos · Sprint 16.5i audit
-**Branch:** `claude/vigilant-almeida-0bbc5e`
+**Last verified:** 2026-06-02 — after the ADR-0006/0007 unified-model pivot
+merged to `main` as PR #8 (`3c1dba7`).
 **Status legend:** 🔴 P0 blocker · 🟡 P1 risk · 🟢 P2 polish · ✅ done
+
+> **2026-06-02 status note.** Since this audit was generated, Sprint 18
+> engineering (incl. SEC-1 MMKV encryption-at-rest) closed and the
+> ADR-0006/0007 unified caregiver/self-buyer model + Connect invites
+> shipped to `main`. The **code-side** blockers below are resolved; the
+> remaining P0s are the external **founder-ops** items (OPS-1..12) — they
+> require Apple/Google/RevenueCat dashboards and prod infra the engineer
+> can't reach. This document stays the source of truth for "what ships at
+> v1.0." Two locked-but-unbuilt stack items (WatermelonDB, AI Tier-A on
+> Ollama) await a founder planned-vs-abandoned call — see
+> `NEXT_SESSION_START_HERE.md`.
 
 This document is the launch-gating checklist. Every item is sized and
 labelled so the founder can decide what ships and what waits. The
