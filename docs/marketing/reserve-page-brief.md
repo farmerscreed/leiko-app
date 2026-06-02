@@ -1,5 +1,7 @@
 # Brief — leiko.health/reserve page (v2 with tiered pricing)
 
+> **📎 Historical reference (stamped 2026-06-02).** This is a dated strategy/spec snapshot, kept for context — **not** living spec. For the app's current behaviour see the docs in `docs/00–15`, `docs/04-screens/`, and the decisions in `docs/_adr/`. Where this document and the shipped app disagree, the app + ADRs win.
+
 **For the agent maintaining leiko.health. Self-contained — everything you need to execute is below.**
 
 ---

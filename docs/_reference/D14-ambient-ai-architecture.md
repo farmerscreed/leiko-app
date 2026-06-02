@@ -1,5 +1,7 @@
 # D14 — Ambient AI Architecture
 
+> **📎 Historical reference (stamped 2026-06-02).** This is a dated strategy/spec snapshot, kept for context — **not** living spec. For the app's current behaviour see the docs in `docs/00–15`, `docs/04-screens/`, and the decisions in `docs/_adr/`. Where this document and the shipped app disagree, the app + ADRs win.
+
 **Three-Tier Routing · Six AI Surfaces · System Prompt · Output Guard · Quotas**
 *Prepared: 2026-05-07 · Status: Draft for founder sign-off*
 

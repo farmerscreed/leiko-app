@@ -1,5 +1,7 @@
 # D15 — Affiliate & Editorial Commerce Strategy
 
+> **📎 Historical reference (stamped 2026-06-02).** This is a dated strategy/spec snapshot, kept for context — **not** living spec. For the app's current behaviour see the docs in `docs/00–15`, `docs/04-screens/`, and the decisions in `docs/_adr/`. Where this document and the shipped app disagree, the app + ADRs win.
+
 **Premium Editorial Commerce · Picks · Telemedicine · Pharmacy · Insurance**
 *Prepared: 2026-05-09 · Status: Draft for founder sign-off · v0.1*
 
