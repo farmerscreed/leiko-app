@@ -23,7 +23,12 @@ describe('color — raw palette dark (D12 §2.2)', () => {
     expect(paletteDark.midnight[850]).toBe('#11171F');
     expect(paletteDark.midnight[800]).toBe('#1A2030');
     expect(paletteDark.midnight[750]).toBe('#222937');
-    expect(paletteDark.bone[50]).toBe('#F5F1EA');
+    // Sprint 16.6 — pure #FFFFFF across all dark-mode text tokens
+    // after multiple on-device iterations: warm-cream candidates
+    // (#FBF8F4, #F9F6EE, #F5EFE2) all read as dim/off-white on the
+    // bench Android device. Pure white removes the perception
+    // ambiguity at the cost of editorial warmth.
+    expect(paletteDark.bone[50]).toBe('#FFFFFF');
     expect(paletteDark.amber[500]).toBe('#E8A063');
     expect(paletteDark.coral[500]).toBe('#D6745A');
     expect(paletteDark.teal[500]).toBe('#5FA8A8');

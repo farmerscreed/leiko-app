@@ -81,6 +81,12 @@ interface OnboardingState {
   resetDraft: () => void;
   hydrate: () => void;
   completeWithWatchInHand: () => Promise<void>;
+  /** Sprint 16.6 Issue #1 — invited-caregiver onboarding finalization.
+   *  Same shape as completeWithWatchInHand but does NOT call the
+   *  create_family RPC (no new family record); the familyId comes
+   *  from the accept-family-invite Edge Function result. The
+   *  caregiver joins the existing family they were invited to. */
+  completeViaInvite: (familyId: string) => Promise<void>;
   completeSelfBuyer: () => Promise<void>;
 }
 
@@ -233,6 +239,79 @@ export const useOnboarding = create<OnboardingState>((set, get) => ({
       mmkv.set(STORAGE_KEYS.currentFamilyId, familyId);
       mmkv.set(STORAGE_KEYS.caregiverOnboardingComplete, true);
 
+      // Sprint 18 bench bug — the .update() above wrote display_name +
+      // timezone to public.users but useAuth.profile is still the stale
+      // placeholder hydrated at signup. Refresh BEFORE flipping the
+      // navigator gate so the first render of post-onboarding Home (and
+      // any Settings → Profile peek) sees the values the user just
+      // entered.
+      try {
+        await useAuth.getState().refreshProfile();
+      } catch {
+        // Profile refresh failure is non-fatal — DB has the truth; the
+        // next app open / refreshProfile call will catch up.
+      }
+
+      set({
+        familyId,
+        caregiverOnboardingComplete: true,
+        caregiver: emptyCaregiver(),
+        parent: emptyParent(),
+        finalizing: false,
+      });
+    } catch (e) {
+      set({ finalizing: false, finalizeError: messageFromError(e) });
+      throw e;
+    }
+  },
+
+  async completeViaInvite(familyId: string) {
+    const { caregiver } = get();
+    const profile = useAuth.getState().profile;
+
+    if (!profile) {
+      throw new Error('Not signed in. Sign in and try again.');
+    }
+    if (!familyId) {
+      throw new Error('Missing familyId from invite acceptance.');
+    }
+
+    set({ finalizing: true, finalizeError: null });
+
+    try {
+      // If the caregiver got as far as filling out their display name
+      // (FamilyYou) before taking the invite path, replace the
+      // placeholder display_name + timezone stamped by
+      // handle_new_user. If they jumped straight to the invite without
+      // touching FamilyYou, leave the placeholder alone — the user
+      // can edit their profile from Settings later.
+      if (caregiver.displayName.trim()) {
+        const { error: updateError } = await supabase
+          .from('users')
+          .update({
+            display_name: caregiver.displayName.trim(),
+            timezone: defaultTimezone(),
+          })
+          .eq('id', profile.id);
+        if (updateError) throw updateError;
+      }
+
+      // Persist + flip the navigator gate. The accept-family-invite
+      // Edge Function has already created the family_members row for
+      // this user, so no additional RPC is needed here.
+      mmkv.set(STORAGE_KEYS.currentFamilyId, familyId);
+      mmkv.set(STORAGE_KEYS.caregiverOnboardingComplete, true);
+
+      // Sprint 18 bench bug — refresh useAuth.profile so Settings →
+      // Profile reflects the freshly-written display_name + timezone
+      // (or, on the skip-FamilyYou path, the handle_new_user
+      // placeholder) instead of whatever was hydrated at signup.
+      try {
+        await useAuth.getState().refreshProfile();
+      } catch {
+        // Non-fatal; next refresh will catch up.
+      }
+
       set({
         familyId,
         caregiverOnboardingComplete: true,
@@ -299,6 +378,16 @@ export const useOnboarding = create<OnboardingState>((set, get) => ({
       // 3. Persist + flip the navigator gate.
       mmkv.set(STORAGE_KEYS.currentFamilyId, familyId);
       mmkv.set(STORAGE_KEYS.selfBuyerOnboardingComplete, true);
+
+      // Sprint 18 bench bug — refresh useAuth.profile so Settings →
+      // Profile reflects the display_name + timezone + year_of_birth
+      // the user just entered in onboarding instead of the
+      // handle_new_user placeholder hydrated at signup.
+      try {
+        await useAuth.getState().refreshProfile();
+      } catch {
+        // Non-fatal; next refresh will catch up.
+      }
 
       set({
         familyId,

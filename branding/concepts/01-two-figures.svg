@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Direction 1 — Two figures forming a heart -->
+  <!-- The heart is the silhouette of two people leaning into each other.
+       Left half and right half are mirrored figures; the gap down the
+       centre is the seam where they meet. The small inset circles near
+       the top suggest heads without making the form childish. -->
+
+  <defs>
+    <radialGradient id="canopy1" cx="50%" cy="55%" r="65%">
+      <stop offset="0%" stop-color="#2A231C"/>
+      <stop offset="100%" stop-color="#1F1A14"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#canopy1)"/>
+
+  <!-- Left half of the heart — a single integrated figure-shape. The lobe
+       at top serves as the head; the long sweep down meets the bottom
+       point. -->
+  <path d="
+    M 512 322
+    C 488 256, 432 220, 372 220
+    C 282 220, 220 290, 220 380
+    C 220 528, 372 632, 504 760
+    L 504 322
+    Z
+  " fill="#E8A063"/>
+
+  <!-- Right half — mirrored. -->
+  <path d="
+    M 512 322
+    C 536 256, 592 220, 652 220
+    C 742 220, 804 290, 804 380
+    C 804 528, 652 632, 520 760
+    L 520 322
+    Z
+  " fill="#E8A063"/>
+
+  <!-- The seam — a thin sliver of canopy down the middle (between the two
+       inner edges of the figures, x=504 to x=520). It's the line where
+       they meet. Implied, not drawn — by leaving a 16px gap in the two
+       paths above. -->
+
+  <!-- The heart point — a single shared anchor at the bottom that fuses
+       the two figures into one form. -->
+  <path d="
+    M 504 720
+    C 504 760, 512 800, 512 800
+    C 512 800, 520 760, 520 720
+    Z
+  " fill="#E8A063"/>
+
+  <!-- The heads — small darker circles inset into the top of each lobe.
+       Subtle. Doesn't shout "person"; just reads at a glance. -->
+  <circle cx="372" cy="318" r="36" fill="#1F1A14" opacity="0.85"/>
+  <circle cx="652" cy="318" r="36" fill="#1F1A14" opacity="0.85"/>
+</svg>

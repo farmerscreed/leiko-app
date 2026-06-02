@@ -84,7 +84,13 @@ export interface PersonCardProps {
 
 // Alpha suffixes for hex+alpha colour composition. Matches the design's
 // `accent.replace(')', ' / .NN)')` patterns in oklch.
-const CORNER_GLOW_ALPHA = '2E'; // ≈18%
+// Sprint 16.6 — corner glow trimmed from 2E (≈18%) to 17 (≈9%). At 18%
+// the warm-charcoal corner blob was washing out everything behind it
+// (status pill, right edges of headline, vital row), making the card
+// FEEL dim even though all foreground colours are at AAA contrast on
+// the card surface. Halving the alpha keeps the decorative warmth but
+// stops it from competing with the type.
+const CORNER_GLOW_ALPHA = '17'; // ≈9%
 const BORDER_ALPHA = '2E'; // ≈18%
 const TOP_EDGE_ALPHA = '4D'; // ≈30%
 const HAIRLINE_ALPHA = '1A'; // ~10% — vital-row dividers (text.tertiary tinted)
@@ -201,9 +207,11 @@ export function PersonCard({
               allowFontScaling={false}
               style={{
                 fontFamily: theme.fontFamilies.numeric,
-                fontSize: 9,
-                lineHeight: 11,
-                letterSpacing: 1.4, // ~0.16em at 9pt
+                // tertiary resolves to warm bright grey-cream — sits
+                // visually below the serif full name without going dim.
+                fontSize: 10,
+                lineHeight: 13,
+                letterSpacing: 1.4,
                 textTransform: 'uppercase',
                 color: theme.colors.text.tertiary,
                 marginBottom: 2,
@@ -244,13 +252,15 @@ export function PersonCard({
           {`“${headline}”`}
         </Text>
 
-        {/* Sentence paragraph */}
+        {/* Body sentence — secondary (warm cream #F5EFE2) keeps the
+            paragraph visibly under the italic headline while staying
+            unambiguously bright. */}
         <Text
           allowFontScaling={false}
           style={{
             fontFamily: theme.fontFamilies.body,
             fontSize: 13.5,
-            lineHeight: 20, // ≈1.5
+            lineHeight: 20,
             color: theme.colors.text.secondary,
             marginBottom: theme.spacing.l,
           }}
@@ -321,9 +331,11 @@ export function PersonCard({
             allowFontScaling={false}
             style={{
               fontFamily: theme.fontFamilies.numeric,
+              // tertiary resolves to warm bright grey-cream — footer
+              // sits below the body without falling dim.
               fontSize: 9.5,
-              lineHeight: 12,
-              letterSpacing: 0.95, // ~0.10em at 9.5pt
+              lineHeight: 13,
+              letterSpacing: 1.33,
               textTransform: 'uppercase',
               color: theme.colors.text.tertiary,
             }}
@@ -396,9 +408,9 @@ function VitalCol({
         allowFontScaling={false}
         style={{
           fontFamily: valueFamily,
-          fontSize: 16,
-          lineHeight: 18,
-          letterSpacing: -0.16,
+          fontSize: 18,
+          lineHeight: 22,
+          letterSpacing: -0.18,
           color: valueColor,
         }}
       >
@@ -408,12 +420,16 @@ function VitalCol({
         allowFontScaling={false}
         style={{
           fontFamily: labelFamily,
-          fontSize: 8,
-          lineHeight: 10,
-          letterSpacing: 0.64, // ~0.08em at 8pt
+          // Back to design's 9pt mono uppercase letter-spacing 0.10em
+          // for BP / HR / SPO2 / SLEEP. The earlier 10pt secondary
+          // patch was compensating for legibility issues that the
+          // warm-near-white text + warm canopy now resolve.
+          fontSize: 9,
+          lineHeight: 12,
+          letterSpacing: 0.9,
           textTransform: 'uppercase',
           color: labelColor,
-          marginTop: 3,
+          marginTop: 4,
         }}
       >
         {label}

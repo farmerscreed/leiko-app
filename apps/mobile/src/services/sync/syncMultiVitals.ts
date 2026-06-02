@@ -65,7 +65,7 @@ import { readDayInfo } from '../ble/commands/readDayInfo';
 import {
   getVitalCursor,
   setVitalCursor,
-  watchTimestampToUtcSec,
+  watchVitalTimestampToUtcSec,
 } from './syncBacklog';
 import { postMultiVitals, isPayloadEmpty } from './postMultiVitals';
 import { applyDeviceConfig } from './applyDeviceConfig';
@@ -80,6 +80,8 @@ import { useSpO2 } from '../../state/spo2';
 import { useSleep } from '../../state/sleep';
 import { useActivity } from '../../state/activity';
 import { logger } from '../analytics/logger';
+import { userTz } from '../../utils/userTz';
+import { inferWakeFromHR } from '../sleep/inferWakeFromHR';
 import type {
   HRSample,
   SpO2Sample,
@@ -91,8 +93,15 @@ import type {
   SleepStage,
 } from '../../types/vitals';
 
+// BLE_TRACE — Sprint 16.5a Phase A forensic-capture instrumentation.
+// See apps/mobile/src/services/ble/UrionDevice.ts for the convention.
+const BLE_TRACE = typeof __DEV__ !== 'undefined' && __DEV__;
+
 const APP_VERSION = '0.0.1'; // bumped via package.json on release
-const HR_DEFAULT_WINDOW_SEC = 30 * 60;
+// Sprint 18 / QUA-2 — removed HR_FALLBACK_WINDOW_SEC (was 30 * 60).
+// readHRHistory now always returns intervalSec (5 min on U19M_013C,
+// confirmed by Sprint 16.5b traces). On the no-data branch both
+// intervalSec and samples are 0 together, so no fallback is reachable.
 const SPO2_DEFAULT_WINDOW_SEC = 60 * 60;
 const SECONDS_PER_DAY = 24 * 60 * 60;
 
@@ -247,10 +256,16 @@ async function syncHRStep(
   const todayLocal = dayLocalFromNow(nowSec);
   const cursor = getVitalCursor(deviceBleId);
 
-  const cursorDayLocal =
-    cursor.hr > 0
-      ? dayLocalFromNow(watchTimestampToUtcSec(cursor.hr))
-      : '';
+  // Sprint 16.5c — `cursor.hr` holds the watch's raw timestamp for the
+  // newest HR sample we've ingested. HR/SpO2 use a DIFFERENT firmware
+  // encoding than BP: the day-anchor is echoed back and per-sample
+  // timestamps are `dayStart + i × intervalSec` where `dayStart` is
+  // interpreted as `wall-clock-display-as-UTC`. To get TRUE UTC we
+  // subtract the user's local offset — encapsulated in
+  // `watchVitalTimestampToUtcSec`. (The BP +8h "Beijing wall clock"
+  // shift `watchTimestampToUtcSec` is wrong here — that one is for the
+  // 0x14 packet's TS field only.)
+  const cursorDayLocal = cursor.hr > 0 ? dayLocalFromNow(watchVitalTimestampToUtcSec(cursor.hr)) : '';
 
   const days = computeBackfillDayList(cursorDayLocal, todayLocal, {
     firstSyncDays,
@@ -259,38 +274,84 @@ async function syncHRStep(
     alwaysIncludeToday: true,
   });
 
-  const addPending = useHR.getState().addPending;
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncMultiVitals.hr enter cursor.hr=${cursor.hr} days=[${days.join(',')}]`,
+    );
+  }
+
+  const addPendingBatch = useHR.getState().addPendingBatch;
   let newestRaw = cursor.hr;
   let totalPulled = 0;
 
   for (const day of days) {
-    const samples = await readHRHistory(device, {
+    const result = await readHRHistory(device, {
       dayTimestampSec: unixSecFromDayLocal(day),
     });
+    const { samples, intervalSec: rawIntervalSec } = result;
+    // Sprint 18 / QUA-2 — the watch's index packet always reports
+    // intervalSec when samples are present (5 min on U19M_013C). No
+    // fallback needed; when intervalSec is 0 the watch also returns
+    // an empty samples array, so the loop below is a no-op.
+    const sampleWindowSec = rawIntervalSec;
+    if (BLE_TRACE) {
+      console.log(
+        `[ble-trace] syncMultiVitals.hr day=${day} readHRHistory returned ${samples.length} samples ` +
+          `(intervalSec=${rawIntervalSec})`,
+      );
+    }
+    // Invariant guard: if the watch ever returns samples WITHOUT an
+    // interval, the per-sample window is undefined. Skip the day to
+    // avoid persisting samples with sampleWindowSec=0 (which would
+    // wedge the classifier). Should be unreachable per readHRHistory.
+    if (samples.length > 0 && rawIntervalSec <= 0) {
+      if (BLE_TRACE) {
+        console.warn(
+          `[ble-trace] syncMultiVitals.hr day=${day} skipped — samples without intervalSec`,
+        );
+      }
+      continue;
+    }
     // Sample-level dedup: keep only samples newer than cursor.hr.
     const fresh =
       cursor.hr > 0
         ? samples.filter((s) => s.timestampSec > cursor.hr)
         : samples;
+    // Build the day's samples in memory, then persist in ONE batch.
+    // Per-sample addPending caused an O(n^2) MMKV + render storm on
+    // cold-start backfill (~1,800 samples) that froze the home.
+    const batch: HRSample[] = [];
     for (const s of fresh) {
       const sample: HRSample = {
-        measuredAtSec: watchTimestampToUtcSec(s.timestampSec),
+        // Sprint 16.5c: HR raw timestamps from the watch encode
+        // `wall_clock_display_as_UTC`. For TRUE UTC we subtract the
+        // user's local-offset (`watchVitalTimestampToUtcSec`). The BP
+        // +7h Beijing shift `watchTimestampToUtcSec` was wrong here
+        // (pushed samples 7 h into the future on Lagos clients) and
+        // applying NO shift was also wrong (left them 1 h ahead).
+        measuredAtSec: watchVitalTimestampToUtcSec(s.timestampSec),
         bpm: s.bpm,
-        sampleWindowSec: HR_DEFAULT_WINDOW_SEC,
+        sampleWindowSec,
         // The 0x15 history packet does not expose motion-state per sample.
         // Classifier's sensor-error fallback ignores motion='unknown' for
         // baseline computation but still classifies extreme values.
         motionState: 'unknown',
         isSpotCheck: false,
       };
-      addPending(sample);
+      batch.push(sample);
       if (s.timestampSec > newestRaw) newestRaw = s.timestampSec;
     }
+    addPendingBatch(batch);
     totalPulled += fresh.length;
   }
 
   if (newestRaw > cursor.hr) {
     setVitalCursor(deviceBleId, 'hr', newestRaw);
+  }
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncMultiVitals.hr exit totalPulled=${totalPulled} newestRaw=${newestRaw}`,
+    );
   }
   return totalPulled;
 }
@@ -312,6 +373,12 @@ async function syncSpO2Step(
     alwaysIncludeToday: true,
   });
 
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncMultiVitals.spo2 enter cursor.spo2=${cursor.spo2 || '(empty)'} days=[${days.join(',')}]`,
+    );
+  }
+
   const addPending = useSpO2.getState().addPending;
   let totalPulled = 0;
 
@@ -319,9 +386,27 @@ async function syncSpO2Step(
     const samples = await readSpO2History(device, {
       dayTimestampSec: unixSecFromDayLocal(day),
     });
+    if (BLE_TRACE) {
+      console.log(
+        `[ble-trace] syncMultiVitals.spo2 day=${day} readSpO2History returned ${samples.length} samples`,
+      );
+    }
     for (const s of samples) {
+      const measuredAtSec = watchVitalTimestampToUtcSec(s.timestampSec);
+      if (BLE_TRACE) {
+        const isoLocal = new Date(measuredAtSec * 1000).toISOString();
+        const hourLocal = new Date(measuredAtSec * 1000).getHours();
+        console.log(
+          `[ble-trace] spo2 store raw=${s.timestampSec} ` +
+            `measuredAtSec=${measuredAtSec} percent=${s.percent} ` +
+            `isoUTC=${isoLocal} getHours=${hourLocal}`,
+        );
+      }
       const sample: SpO2Sample = {
-        measuredAtSec: watchTimestampToUtcSec(s.timestampSec),
+        // Sprint 16.5c: SpO2 encoding mirrors HR —
+        // `wall_clock_display_as_UTC` raw timestamps that need the
+        // user's local-offset subtracted to reach TRUE UTC.
+        measuredAtSec,
         percent: s.percent,
         maxInWindow: s.maxInWindow,
         minInWindow: s.minInWindow,
@@ -335,6 +420,9 @@ async function syncSpO2Step(
     totalPulled += samples.length;
     // Advance per-day so a mid-loop failure leaves a resumable cursor.
     setVitalCursor(deviceBleId, 'spo2', day);
+  }
+  if (BLE_TRACE) {
+    console.log(`[ble-trace] syncMultiVitals.spo2 exit totalPulled=${totalPulled}`);
   }
   return totalPulled;
 }
@@ -352,11 +440,28 @@ async function syncDayInfoStep(
   const todayLocal = dayLocalFromNow(nowSec);
   const cursor = getVitalCursor(deviceBleId);
 
+  // Sprint 16.5c — `alwaysIncludeToday: true` for sleep.
+  //
+  // Pre-fix: sleep used `alwaysIncludeToday: false` with the rationale
+  // "last-night totals don't change once captured." But the cursor
+  // advanced inside the loop unconditionally — even on syncs that ran
+  // before the user had actually slept (e.g., a morning sync immediately
+  // after wake, before the watch's overnight session was persisted).
+  // The cursor would jump to today, no sleep session was ever ingested,
+  // and subsequent syncs computed an empty sleepDays list and skipped
+  // today's `readDayInfo` sleep result entirely (the result kept coming
+  // back from the watch but `sleepDaySet.has(day)` was false, so the
+  // ingest branch was bypassed).
+  //
+  // Fix: always include today in sleepDays. The dayInfo branch's
+  // `addPending(session)` dedupes by `sessionStartSec`, so re-pulling
+  // today's sleep on every sync is idempotent. The cursor advances only
+  // when there's a real session — see the `info.sleep` check below.
   const sleepDays = computeBackfillDayList(cursor.sleep, todayLocal, {
     firstSyncDays,
     maxBackfillDays,
     inclusiveCursorDay: false,
-    alwaysIncludeToday: false,
+    alwaysIncludeToday: true,
   });
   const activityDays = computeBackfillDayList(cursor.activity, todayLocal, {
     firstSyncDays,
@@ -371,12 +476,27 @@ async function syncDayInfoStep(
     new Set<string>([...sleepDays, ...activityDays]),
   ).sort();
 
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncMultiVitals.dayInfo enter ` +
+        `cursor.sleep=${cursor.sleep || '(empty)'} cursor.activity=${cursor.activity || '(empty)'} ` +
+        `allDays=[${allDays.join(',')}]`,
+    );
+  }
+
   let sleepCount = 0;
   let activityCount = 0;
 
   for (const day of allDays) {
     const daysAgo = countDaysBetween(day, todayLocal);
     const info = await readDayInfo(device, { daysAgo });
+    if (BLE_TRACE) {
+      console.log(
+        `[ble-trace] syncMultiVitals.dayInfo day=${day} daysAgo=${daysAgo} ` +
+          `activity=${info.activity ? `steps=${info.activity.totalSteps}` : 'null'} ` +
+          `sleep=${info.sleep ? `min=${info.sleep.totalMinutes}` : 'null'}`,
+      );
+    }
 
     if (sleepDaySet.has(day)) {
       if (info.sleep && info.sleep.totalMinutes > 0) {
@@ -386,12 +506,28 @@ async function syncDayInfoStep(
           info.sleep.day,
         );
         const dayStart = unixSecFromDayLocal(dayLocal);
-        // Synthesize session boundaries — the 0x07 reply doesn't expose
-        // start/end. sessionEnd = day 08:00 UTC (proxy for "this morning's
-        // wake"); sessionStart = sessionEnd - totalMinutes. Tracked in D13
-        // §15.4 Q-D13-3.
+        // Legacy synthesized boundaries — kept as the canonical
+        // sessionStartSec/sessionEndSec for server identity + client
+        // dedup. Display layers prefer the `inferred*Sec` values below
+        // (Sprint 18 / SLEEP_TIMEZONE_FIX_BRIEF).
         const sessionEndSec = dayStart + 8 * 3600;
         const sessionStartSec = sessionEndSec - info.sleep.totalMinutes * 60;
+        // Sprint 18 — derive the display-time wake from HR samples
+        // already in the slice (this ingest path runs in parallel with
+        // syncHRStep, so HR for tonight may or may not be present yet;
+        // when not, we fall back to a tz-aware 07:00-local synthesis
+        // and the reconcile hook upgrades the session once HR catches
+        // up). The legacy `sessionStartSec`/`sessionEndSec` are
+        // untouched to preserve dedup identity.
+        const tz = userTz();
+        const hrState = useHR.getState();
+        const hrSamples = [...hrState.pending, ...hrState.recent];
+        const inferred = inferWakeFromHR(
+          hrSamples,
+          dayLocal,
+          info.sleep.totalMinutes,
+          tz,
+        );
         const session: SleepSession = {
           sessionStartSec,
           sessionEndSec,
@@ -405,11 +541,24 @@ async function syncDayInfoStep(
           awakeCount: 0,
           transitions: [] as { atSec: number; stage: SleepStage }[],
           sleepScore: 0, // computed by classifier downstream
+          inferredSessionStartSec: inferred.sessionStartSec,
+          inferredSessionEndSec: inferred.sessionEndSec,
+          wakeSource: inferred.source,
         };
         useSleep.getState().addPending(session);
         sleepCount += 1;
+        // Sprint 16.5c — only advance the cursor when we actually
+        // ingested a session. The pre-fix code advanced unconditionally,
+        // so a sync that ran before the user had slept (or before the
+        // watch had persisted the overnight session) burned today's
+        // chance and locked out the eventual real session.
+        setVitalCursor(deviceBleId, 'sleep', day);
+      } else if (BLE_TRACE) {
+        console.log(
+          `[ble-trace] syncMultiVitals.dayInfo day=${day} sleep skipped ` +
+            `(info.sleep=${info.sleep ? `min=${info.sleep.totalMinutes}` : 'null'}); cursor NOT advanced`,
+        );
       }
-      setVitalCursor(deviceBleId, 'sleep', day);
     }
 
     if (activityDaySet.has(day)) {
@@ -448,7 +597,162 @@ async function syncDayInfoStep(
     }
   }
 
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncMultiVitals.dayInfo exit sleepCount=${sleepCount} activityCount=${activityCount}`,
+    );
+  }
   return { sleep: sleepCount, activity: activityCount };
+}
+
+/** Sprint 16.5b — Edge Function CPU-soft-limit-safe HR chunk size.
+ *  Empirically (2026-05-13 scenario 07 + 08 traces): the Supabase Deno
+ *  isolate's CPU soft limit (~200ms) kills POSTs of ~300+ samples even
+ *  when the rest of the payload is small. 100 HR samples/chunk → ~30
+ *  POSTs for a worst-case 3000-sample backfill. The other vital arrays
+ *  (SpO2 ~120/day, Sleep 7-10/week, Activity ~10/day) go in a SEPARATE
+ *  first POST with NO HR samples — keeps the small-vitals POST bounded
+ *  and decouples it from the HR backfill loop. */
+const MULTIVITALS_HR_CHUNK_SIZE = 100;
+
+function chunkArray<T>(arr: T[] | undefined, size: number): T[][] {
+  if (!arr || arr.length === 0) return [];
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
+}
+
+function emptyCounts(): MultiVitalsCounts {
+  return { bp: 0, hr: 0, spo2: 0, sleep: 0, steps: 0, calories: 0 };
+}
+
+function addCounts(a: MultiVitalsCounts, b: MultiVitalsCounts): MultiVitalsCounts {
+  return {
+    bp: a.bp + b.bp,
+    hr: a.hr + b.hr,
+    spo2: a.spo2 + b.spo2,
+    sleep: a.sleep + b.sleep,
+    steps: a.steps + b.steps,
+    calories: a.calories + b.calories,
+  };
+}
+
+/** Type alias so the local helpers above can reference the shape without
+ *  pulling postMultiVitals's import (which is already imported below). */
+type MultiVitalsCounts = {
+  bp: number;
+  hr: number;
+  spo2: number;
+  sleep: number;
+  steps: number;
+  calories: number;
+};
+
+/**
+ * Sprint 16.5b — chunked POST that respects the Supabase Edge Function's
+ * CPU soft limit. The HR array (which can hold thousands of samples after
+ * a long offline period or a fresh-install backfill) is split into
+ * MULTIVITALS_CHUNK_SIZE-sized batches; SpO2 / sleep / activity / calories
+ * ride in the FIRST chunk only.
+ *
+ * Each chunk acceptSyncResult's its own slice ONLY after the chunk's
+ * POST succeeds. A mid-stream failure aborts the loop and re-throws —
+ * the unsent slices stay in pending for the next sync.
+ *
+ * Returns aggregate `MultiVitalsResponse` shape so the caller's
+ * `inserted` count reflects all chunks combined.
+ */
+async function postMultiVitalsChunked(
+  basePayload: MultiVitalsPayload,
+  hrPending: HRSample[],
+  spo2Pending: SpO2Sample[],
+  sleepPending: SleepSession[],
+  stepsPending: ActivityDay[],
+  caloriesPending: CaloriesDay[],
+): Promise<{ deviceId: string; inserted: MultiVitalsCounts; rejected: MultiVitalsCounts; duplicates: MultiVitalsCounts }> {
+  let deviceId = '';
+  let totalInserted: MultiVitalsCounts = emptyCounts();
+  let totalRejected: MultiVitalsCounts = emptyCounts();
+  let totalDuplicates: MultiVitalsCounts = emptyCounts();
+
+  // Phase 1 — the "small vitals" POST. SpO2 (~120/day) + Sleep (~7-10
+  // entries) + Activity (~10 days) + Calories (~10 days). NO HR samples.
+  // Bounded enough to fit comfortably under the Edge Function CPU budget.
+  if (
+    spo2Pending.length > 0 ||
+    sleepPending.length > 0 ||
+    stepsPending.length > 0 ||
+    caloriesPending.length > 0
+  ) {
+    const smallVitalsPayload: MultiVitalsPayload = {
+      ...basePayload,
+      hrSamples: undefined,
+      spo2Samples: spo2Pending.length ? spo2Pending : undefined,
+      sleepSessions: sleepPending.length ? sleepPending : undefined,
+      activityDays: stepsPending.length ? stepsPending : undefined,
+      caloriesDays: caloriesPending.length ? caloriesPending : undefined,
+    };
+    const response = await postMultiVitals(smallVitalsPayload);
+    deviceId = response.deviceId;
+    totalInserted = addCounts(totalInserted, response.inserted);
+    totalRejected = addCounts(totalRejected, response.rejected);
+    totalDuplicates = addCounts(totalDuplicates, response.duplicates);
+    // Drain the slices we just sent.
+    if (spo2Pending.length) {
+      useSpO2.getState().acceptSyncResult(
+        spo2Pending.map((s) => String(s.measuredAtSec)),
+      );
+    }
+    if (sleepPending.length) {
+      useSleep.getState().acceptSyncResult(
+        sleepPending.map((s) => String(s.sessionStartSec)),
+      );
+    }
+    if (stepsPending.length) {
+      useActivity.getState().acceptStepsSyncResult(
+        stepsPending.map((d) => d.dayLocal),
+      );
+    }
+    if (caloriesPending.length) {
+      useActivity.getState().acceptCaloriesSyncResult(
+        caloriesPending.map((d) => d.dayLocal),
+      );
+    }
+  }
+
+  // Phase 2 — HR-only chunks. Each chunk has MULTIVITALS_HR_CHUNK_SIZE
+  // samples (100). For a worst-case 3000-sample HR backfill: 30 POSTs.
+  // Per-chunk validation + insert + audit-log is bounded so the CPU
+  // soft limit isn't tripped.
+  const hrChunks = chunkArray(hrPending, MULTIVITALS_HR_CHUNK_SIZE);
+  for (const hrSlice of hrChunks) {
+    if (hrSlice.length === 0) continue;
+    const hrChunkPayload: MultiVitalsPayload = {
+      ...basePayload,
+      hrSamples: hrSlice,
+      spo2Samples: undefined,
+      sleepSessions: undefined,
+      activityDays: undefined,
+      caloriesDays: undefined,
+    };
+    const response = await postMultiVitals(hrChunkPayload);
+    deviceId = deviceId || response.deviceId;
+    totalInserted = addCounts(totalInserted, response.inserted);
+    totalRejected = addCounts(totalRejected, response.rejected);
+    totalDuplicates = addCounts(totalDuplicates, response.duplicates);
+    useHR.getState().acceptSyncResult(
+      hrSlice.map((s) => String(s.measuredAtSec)),
+    );
+  }
+
+  return {
+    deviceId,
+    inserted: totalInserted,
+    rejected: totalRejected,
+    duplicates: totalDuplicates,
+  };
 }
 
 // ────────────────────────────────────────────────────────────────────
@@ -588,38 +892,29 @@ export async function syncMultiVitals(
     };
   }
 
+  // Sprint 16.5b — chunk the multi-vitals POST when the payload is
+  // large. The Supabase Edge Function's CPU soft limit (~200ms) kills
+  // the isolate when validation + insert + audit-log for ~3000 HR
+  // samples runs in a single request. Symptom: every multi-vitals POST
+  // returns "non-2xx status code" after `CPU time soft limit reached`
+  // in the function log; pending arrays grow indefinitely.
+  //
+  // Chunking strategy: HR is the high-volume vital (5-min cadence →
+  // ~250-300/day per user). Send HR in batches of MULTIVITALS_CHUNK_SIZE.
+  // SpO2 / Sleep / Activity / Calories ride along in the FIRST chunk
+  // only (they're small enough not to stress the function alone).
+  // After each successful chunk, that slice of HR moves pending → recent.
+  // Subsequent chunks run only if the previous one succeeded; first
+  // failure aborts the rest (preserves pending for retry next sync).
   try {
-    const response = await postMultiVitals(payload);
-    // Move pending → recent on each slice using the keys we pushed.
-    // The /sync response gives us insert/duplicate counts; treat any
-    // sample we sent as accepted (the server has it; cursor already
-    // advanced; whether THIS request inserted vs found-as-duplicate
-    // is irrelevant for client-side state).
-    if (hrPending.length) {
-      useHR.getState().acceptSyncResult(
-        hrPending.map((s) => String(s.measuredAtSec)),
-      );
-    }
-    if (spo2Pending.length) {
-      useSpO2.getState().acceptSyncResult(
-        spo2Pending.map((s) => String(s.measuredAtSec)),
-      );
-    }
-    if (sleepPending.length) {
-      useSleep.getState().acceptSyncResult(
-        sleepPending.map((s) => String(s.sessionStartSec)),
-      );
-    }
-    if (stepsPending.length) {
-      useActivity.getState().acceptStepsSyncResult(
-        stepsPending.map((d) => d.dayLocal),
-      );
-    }
-    if (caloriesPending.length) {
-      useActivity.getState().acceptCaloriesSyncResult(
-        caloriesPending.map((d) => d.dayLocal),
-      );
-    }
+    const response = await postMultiVitalsChunked(
+      payload,
+      hrPending,
+      spo2Pending,
+      sleepPending,
+      stepsPending,
+      caloriesPending,
+    );
     logger.track('vital_sync_accepted', {
       vital_type: 'hr',
       count: response.inserted.hr,
@@ -637,6 +932,20 @@ export async function syncMultiVitals(
     };
   } catch (e) {
     errors.sync = e instanceof Error ? e.message : 'sync failed';
+    // Sprint 16.5b — make the upload failure VISIBLE. The orchestrator
+    // historically ignored syncMultiVitals's return value, so this
+    // analytics event is the only signal future bench traces have for
+    // diagnosing why HR/SpO2/Sleep/Activity pending arrays accumulate.
+    // Per CLAUDE.md voice + data rules: includes counts + error code,
+    // never sample values.
+    logger.track('multi_vitals_sync_failed', {
+      reason: errors.sync,
+      hr_pending: hrPending.length,
+      spo2_pending: spo2Pending.length,
+      sleep_pending: sleepPending.length,
+      steps_pending: stepsPending.length,
+      calories_pending: caloriesPending.length,
+    });
     return { ok: false, errors, pulled, inserted: null };
   }
 }

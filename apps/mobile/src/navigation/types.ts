@@ -34,11 +34,26 @@ export type CaregiverStackParamList = {
   // Sprint 7 — replaces the Sprint 2 placeholder. Family Circle list
   // of parents per docs/04-screens/caregiver-home.md.
   CaregiverHome: undefined;
-  // Sprint 7 — tap-on-card target. Placeholder for now; full reading
-  // list view ships in Sprint 9.
-  ParentReadings: { familyId: string };
+  // Sprint 17a — per-person immersive dashboard. Replaces the Sprint 7
+  // `ParentReadings` placeholder as the canonical tap-on-parent
+  // target. Mirrors SelfBuyerHome but family-scoped to the tapped
+  // parent's `familyId`.
+  ParentDashboard: { familyId: string };
+  // Sprint 17a — caregiver entry to the parameterized VitalDetail
+  // screens. The `familyId` is always set on this stack (the caregiver
+  // is viewing a parent's data, not their own); the self-buyer stack
+  // omits it. Reached only from ParentDashboard for now (sprint card
+  // §4 — no other natural entry point in this stack).
+  VitalDetail: {
+    vital: 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity';
+    familyId: string;
+  };
   Pairing: undefined;
-  Settings: undefined;
+  // ADR-0006 — optional invite params so a tapped join-link can deep-link
+  // into Settings and auto-open the accept-invite sheet, prefilled.
+  Settings:
+    | { inviteCode?: string; inviteEmail?: string; inviteToken?: string }
+    | undefined;
   // Sprint 6 — Take Reading + Reading Detail. ReadingDetail receives
   // the local id of the reading to display (UUIDv4 minted client-side
   // by the readings store; serverId is filled in once /sync acks).
@@ -76,6 +91,18 @@ export type CaregiverStackParamList = {
   // Sprint 11 — minimal "Ask Leiko" surface for the local intent
   // router. Sprint 12 layers Tier-B over the Tier-B placeholder.
   AskLeiko: undefined;
+  // Sprint 19 — add-another-parent flow. Reuses the FamilyParent input
+  // shape (name + relationship + timezone) but as a stand-alone screen
+  // outside the onboarding stack. Calls the `create_family` RPC to
+  // provision a second (or third…) family for the caregiver. Reached
+  // from the CaregiverHome action-bar chooser sheet + Settings →
+  // Family.
+  AddPerson: undefined;
+  // Sprint 19 — account switcher. Lists every email that has signed
+  // in on this device; tap to sign out + OTP-in another. Reached
+  // from Settings → Profile → "Switch account" and from the
+  // "Signed in as X" chip at the top of Settings.
+  AccountSwitch: undefined;
 };
 
 // Sprint 4 — self-buyer onboarding stack. Five screens per
@@ -95,13 +122,32 @@ export type SelfBuyerOnboardingStackParamList = {
 // now). The placeholder route name is kept available so existing tests + dev
 // flows don't break — it is no longer the initial route.
 export type SelfBuyerStackParamList = {
+  // ADR-0006 Phase 2/3 — the unified constellation home. Every user
+  // (self-buyer included) now lands here; their own self-circle renders
+  // as the "You" node. Reuses the caregiver CaregiverHome component +
+  // ParentDashboard immersive detail, so both are registered on this
+  // stack too. The legacy SelfBuyerHome stays registered as the "You"
+  // node's personal detail target.
+  CaregiverHome: undefined;
+  ParentDashboard: { familyId: string };
   SelfBuyerHome: undefined;
   SelfBuyerHomePlaceholder: undefined;
   Pairing: undefined;
-  Settings: undefined;
+  // ADR-0006 — optional invite params so a tapped join-link can deep-link
+  // into Settings and auto-open the accept-invite sheet, prefilled.
+  Settings:
+    | { inviteCode?: string; inviteEmail?: string; inviteToken?: string }
+    | undefined;
   TakeReading: undefined;
   ReadingDetail: { readingLocalId: string };
-  VitalDetail: { vital: 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity' };
+  // Sprint 17a — optional `familyId` for caregiver entry. When set, the
+  // detail screen sources its data from the parent-scoped query layer
+  // (`useParentDailyPulseData` + `useParentVitalsRecent`) instead of the
+  // singleton slices. Unset → unchanged self-buyer behavior.
+  VitalDetail: {
+    vital: 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity';
+    familyId?: string;
+  };
   // Sprint 9 — multi-vital trends + correlation cards + doctor PDF
   // export. The Self-Buyer Home tab bar's "Trends" entry routes here
   // (was a placeholder in Sprint 8).
@@ -127,6 +173,14 @@ export type SelfBuyerStackParamList = {
   // Sprint 11 — minimal "Ask Leiko" surface for the local intent
   // router. Sprint 12 layers Tier-B over the Tier-B placeholder.
   AskLeiko: undefined;
+  // Sprint 19 — add-another-parent flow, mirrored from the caregiver
+  // stack so a hybrid-mode self-buyer with caregiving aspirations can
+  // also create a second family. Self-buyers won't typically reach
+  // this without the chooser sheet, but registering it keeps the
+  // navigator type unions symmetric.
+  AddPerson: undefined;
+  // Sprint 19 — account switcher, mirrored from the caregiver stack.
+  AccountSwitch: undefined;
 };
 
 export type AuthScreenProps<R extends keyof AuthStackParamList> = NativeStackScreenProps<

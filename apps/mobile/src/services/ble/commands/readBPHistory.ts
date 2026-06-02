@@ -26,6 +26,10 @@
 import { ParsedPacket, buildPacket, expectByte0 } from '../io';
 import { CommandTimeoutError, type UrionDevice } from '../UrionDevice';
 
+// BLE_TRACE — Sprint 16.5a Phase A forensic-capture instrumentation.
+// See apps/mobile/src/services/ble/UrionDevice.ts for the convention.
+const BLE_TRACE = typeof __DEV__ !== 'undefined' && __DEV__;
+
 export interface BPReading {
   /** Watch-local-time seconds since epoch. See file header for the caveat. */
   timestampSec: number;
@@ -72,6 +76,21 @@ export function parseBPReading(packet: ParsedPacket): BPReading | null {
   const diastolic = packet.payload[4];
   const systolic = packet.payload[5];
   const pulse = packet.payload[6];
+  // Sprint 16.5b — diagnostic trace for the value-mismatch investigation.
+  // Watch face showed 133/80, app stored 160/93 p88 on 2026-05-13 cycle.
+  // Log the FULL relevant payload bytes (timestamp 0..3, dia 4, sys 5,
+  // pulse 6, plus the next few bytes in case the protocol's byte order
+  // differs from D7 §4.5's documented shape on this firmware version).
+  if (BLE_TRACE) {
+    const p = packet.payload;
+    const hex = (n: number) => (n & 0xff).toString(16).padStart(2, '0');
+    console.log(
+      `[ble-trace] parseBPReading ts=${ts} ` +
+        `bytes[0..7]=${hex(p[0] ?? 0)} ${hex(p[1] ?? 0)} ${hex(p[2] ?? 0)} ${hex(p[3] ?? 0)} ` +
+        `${hex(p[4] ?? 0)} ${hex(p[5] ?? 0)} ${hex(p[6] ?? 0)} ${hex(p[7] ?? 0)} ` +
+        `decoded: dia=${diastolic} sys=${systolic} pulse=${pulse}`,
+    );
+  }
   // Defensive: the firmware can emit zero rows during a buffer flush.
   // Treat anything below the protocol's plausible BP floor as junk.
   if (systolic < 30 || diastolic < 20) return null;

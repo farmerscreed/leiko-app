@@ -10,7 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '../../../theme';
 import { Trends } from '../Trends';
 import { TRENDS_ASK_LABEL } from '../../../components/TrendsAskAffordance';
-import { TRENDS_WEEKLY_BODY } from '../../../components/TrendsWeeklySummaryCard';
+import { TRENDS_WEEKLY_BODY_FALLBACK as TRENDS_WEEKLY_BODY } from '../../../components/TrendsWeeklySummaryCard';
 import type { TrendsData } from '../../../utils/trends-aggregate';
 import type {
   CorrelationRow,
@@ -95,6 +95,8 @@ jest.mock('../../../hooks/useTrendsData', () => ({
     isLoading: false,
     error: null,
   }),
+  // Prefetch hook is a fire-and-forget void; no-op in tests.
+  usePrefetchTrendsRange: () => undefined,
 }));
 
 jest.mock('../../../hooks/usePlusEntitlement', () => ({
@@ -223,14 +225,20 @@ describe('Trends v2 — header + range chips', () => {
   it('renders all 4 range chips for caregiver mode', async () => {
     mockAccountType = 'caregiver';
     await renderAndAwaitNarrative();
-    for (const r of ['7d', '30d', '90d', '1y'] as const) {
-      expect(screen.getByTestId(`trends-range:${r}`)).toBeTruthy();
+    // Free user (default mock): 7d is unlocked; 30d/90d/1y render as
+    // Plus-locked chips (testID trends-range:<label>-locked, label
+    // lowercased — "30D" → "30d-locked"). Sprint 16.5g redesign.
+    expect(screen.getByTestId('trends-range:7d')).toBeTruthy();
+    for (const label of ['30d', '90d', '1y'] as const) {
+      expect(screen.getByTestId(`trends-range:${label}-locked`)).toBeTruthy();
     }
   });
 
   it('renders the all-time chip for self-buyer mode', async () => {
     await renderAndAwaitNarrative();
-    expect(screen.getByTestId('trends-range:all_time')).toBeTruthy();
+    // Free self-buyer: the all-time chip is Plus-locked. Its label is
+    // "All" → testID trends-range:all-locked.
+    expect(screen.getByTestId('trends-range:all-locked')).toBeTruthy();
   });
 });
 
@@ -246,8 +254,10 @@ describe('Trends v2 — the letter narrative', () => {
     await renderAndAwaitNarrative();
     expect(screen.getByTestId('trends-evidence')).toBeTruthy();
     expect(screen.getByTestId('trends-evidence-title')).toBeTruthy();
+    // Focal evidence shows the LATEST BP point (last series day:
+    // sys 122+2, dia 80+2 = 124/82), not the week average (123/81).
     expect(screen.getByTestId('trends-evidence-value').props.children).toBe(
-      '123/81',
+      '124/82',
     );
   });
 
@@ -263,13 +273,15 @@ describe('Trends v2 — the letter narrative', () => {
 describe('Trends v2 — paywall', () => {
   it('opens the paywall sheet when a free user taps a >7d range chip', async () => {
     await renderAndAwaitNarrative();
-    fireEvent.press(screen.getByTestId('trends-range:30d'));
+    // Free user: the 30d chip is a locked chip (testID …-locked).
+    fireEvent.press(screen.getByTestId('trends-range:30d-locked'));
     expect(screen.getByText('Understand your numbers')).toBeTruthy();
   });
 
   it('does NOT open the paywall when a Plus user taps a >7d range chip', async () => {
     mockIsPlus = true;
     await renderAndAwaitNarrative();
+    // Plus user: the chip is unlocked (testID trends-range:30d).
     fireEvent.press(screen.getByTestId('trends-range:30d'));
     expect(screen.queryByText('Understand your numbers')).toBeNull();
   });
@@ -277,13 +289,14 @@ describe('Trends v2 — paywall', () => {
   it('uses caregiver paywall copy when account_type is caregiver', async () => {
     mockAccountType = 'caregiver';
     await renderAndAwaitNarrative();
-    fireEvent.press(screen.getByTestId('trends-range:30d'));
+    fireEvent.press(screen.getByTestId('trends-range:30d-locked'));
     expect(screen.getByText('Stay close, every day')).toBeTruthy();
   });
 
   it('uses the all-time trigger for the all_time chip', async () => {
     await renderAndAwaitNarrative();
-    fireEvent.press(screen.getByTestId('trends-range:all_time'));
+    // Free self-buyer: all-time chip is locked (label "All").
+    fireEvent.press(screen.getByTestId('trends-range:all-locked'));
     // PaywallSheet surfaces the same self-buyer headline for either trigger.
     expect(screen.getByText('Understand your numbers')).toBeTruthy();
   });
@@ -383,11 +396,17 @@ describe('Trends v2 — cited footnote rail', () => {
 });
 
 describe('Trends v2 — weekly summary placeholder + doctor inline link', () => {
-  it('renders the weekly summary placeholder body copy', async () => {
+  it('renders the generated weekly summary body when data is present', async () => {
+    // The placeholder (TRENDS_WEEKLY_BODY_FALLBACK) only renders when
+    // there's no generated summary. With trends data present, the card
+    // shows the real narrative body, so assert it's a non-empty string
+    // distinct from the fallback rather than equal to the placeholder.
     await renderAndAwaitNarrative();
-    expect(
-      screen.getByTestId('trends-weekly-summary-body').props.children,
-    ).toBe(TRENDS_WEEKLY_BODY);
+    const body = screen.getByTestId('trends-weekly-summary-body').props
+      .children as string;
+    expect(typeof body).toBe('string');
+    expect(body.length).toBeGreaterThan(0);
+    expect(body).not.toBe(TRENDS_WEEKLY_BODY);
   });
 
   it('reads "for your doctor" in self-buyer mode', async () => {

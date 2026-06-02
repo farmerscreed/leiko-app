@@ -1,15 +1,19 @@
-// Analytics logger shim — Sprint 5.
+// Analytics logger shim — Sprint 5; PostHog wired post-audit.
 //
-// PostHog wiring lands in Sprint 11/12. Until then, every track() call
-// goes to console (dev) and a small MMKV ring buffer (so we can flush
-// the queue once PostHog initialises). Call sites stay; the impl swap
-// is one file.
+// Behaviour:
+//   • Every track() call still logs to console in __DEV__.
+//   • If PostHog is configured (EXPO_PUBLIC_POSTHOG_API_KEY set) the
+//     event goes straight to PostHog AND the pre-init MMKV ring
+//     buffer is drained the first time we successfully send.
+//   • If PostHog is NOT configured, events queue in MMKV exactly as
+//     they used to — peekRecent / drainQueue / queueLength still work.
 //
 // Per CLAUDE.md data rule: reading values (BP, HR, SpO2) NEVER appear
 // in analytics events. Pass deviceId / family_id / counts / categories
-// only.
+// only. The AnalyticsEvent union below enforces this at compile time.
 
 import { mmkv } from '../storage';
+import { capturePosthog, getPosthog, initPosthog } from './posthog';
 
 const RING_BUFFER_KEY = 'leiko.analytics.queue';
 const RING_BUFFER_LIMIT = 200;
@@ -29,6 +33,15 @@ export type AnalyticsEvent =
   | { name: 'ble_permission_denied'; props?: { permission: string } }
   | { name: 'ble_bluetooth_off' }
   | { name: 'ble_forget_device'; props?: { deviceId?: string } }
+  // BLE foreground service lifecycle (Android only). Keeps the OS
+  // process + connection alive while backgrounded; the persistent
+  // notification is required by Play Console for
+  // FOREGROUND_SERVICE_CONNECTED_DEVICE. No reading values ever appear.
+  | { name: 'ble_fg_started' }
+  | { name: 'ble_fg_stopped' }
+  | { name: 'ble_fg_unavailable'; props?: { reason: string } }
+  | { name: 'ble_fg_start_failed'; props?: { reason: string } }
+  | { name: 'ble_fg_stop_failed'; props?: { reason: string } }
   // Sprint 6 — reading capture lifecycle. Per CLAUDE.md data rule,
   // event payloads NEVER include sys/dia/pulse values, only counts +
   // categories.
@@ -61,6 +74,12 @@ export type AnalyticsEvent =
   // appear in analytics. Per CLAUDE.md data rule + D13 §5.1.
   | { name: 'vital_persisted'; props?: { vital_type: 'hr' | 'spo2' | 'sleep' | 'activity' | 'calories'; count?: number } }
   | { name: 'vital_sync_accepted'; props?: { vital_type: 'hr' | 'spo2' | 'sleep' | 'activity' | 'calories'; count: number } }
+  // Sprint 16.5b — multi-vitals upload failure. Pre-16.5b syncMultiVitals's
+  // return value was ignored by the orchestrator, so /sync upload errors
+  // were silent — pending arrays grew for 8+ days at a time without any
+  // analytics signal. This event makes the failure visible. Per CLAUDE.md
+  // data rule: counts of pending rows + error code only, NEVER values.
+  | { name: 'multi_vitals_sync_failed'; props?: { reason: string; hr_pending: number; spo2_pending: number; sleep_pending: number; steps_pending: number; calories_pending: number } }
   // Sprint 9.5 — Apple Health / Health Connect bridge. Counts only,
   // never values. Per D13 §13.4 + CLAUDE.md analytics rule.
   | { name: 'health_platform_write'; props?: { vital_type: 'bp' | 'hr' | 'spo2' | 'sleep' | 'steps' | 'calories'; written: number; rejected: number } }
@@ -89,6 +108,36 @@ export type AnalyticsEvent =
   | { name: 'family_invite_accept_started' }
   | { name: 'family_invite_accept_completed'; props?: { familyId: string } }
   | { name: 'family_invite_accept_failed'; props?: { reason: string } }
+  // ADR-0006 — caregiver-initiated pending invite (send + wearer-resolve).
+  | { name: 'care_invite_send_started' }
+  | { name: 'care_invite_send_completed' }
+  | { name: 'care_invite_send_failed'; props?: { reason: string } }
+  | { name: 'care_invite_resolve_started' }
+  | { name: 'care_invite_resolve_completed'; props?: { familyId: string } }
+  | { name: 'care_invite_resolve_failed'; props?: { reason: string } }
+  // ADR-0007 — unified Connect (one code, backend infers direction).
+  | { name: 'connect_create_started' }
+  | { name: 'connect_create_completed' }
+  | { name: 'connect_create_failed'; props?: { reason: string } }
+  | { name: 'connect_accept_started' }
+  | { name: 'connect_accept_completed'; props?: { outcome: string } }
+  | { name: 'connect_accept_failed'; props?: { reason: string } }
+  // Sprint 19 — Care for another person (caregiver-side create_family).
+  | { name: 'family_add_another_started' }
+  | { name: 'family_add_another_completed' }
+  | { name: 'family_add_another_failed'; props?: { reason: string } }
+  // Sprint 19 — Edit family details (owner-only).
+  | { name: 'family_details_update_started' }
+  | { name: 'family_details_update_completed' }
+  | { name: 'family_details_update_failed'; props?: { reason: string } }
+  // Sprint 17b — Family member management (owner remove + self leave).
+  | { name: 'family_member_removed' }
+  | { name: 'family_member_remove_failed'; props?: { reason: string } }
+  | { name: 'family_self_left' }
+  | { name: 'family_self_leave_failed'; props?: { reason: string } }
+  | { name: 'family_removal_push_failed'; props?: { reason: string } }
+  | { name: 'family_removal_banner_shown'; props?: { familyId: string } }
+  | { name: 'visibility_slice_purged'; props?: { vital: string } }
   // Sprint 10c.2 polish — OS-scheduled background sync lifecycle.
   | { name: 'background_sync_registered'; props?: { intervalMin: number } }
   | { name: 'background_sync_unregistered' }
@@ -163,7 +212,26 @@ export type AnalyticsEvent =
   // "For your doctor" PDF prep flow — Trends v2 follow-up.
   | { name: 'doctor_pdf_requested'; props?: { range: '7d' | '30d' | '90d' | '1y' } }
   | { name: 'doctor_pdf_generated'; props?: { bytes: number } }
-  | { name: 'doctor_pdf_failed'; props?: { reason: string } };
+  | { name: 'doctor_pdf_failed'; props?: { reason: string } }
+  // Sprint 18 / SEC-1 — MMKV encryption-at-rest boot telemetry. `encrypted`
+  // is the load-bearing metric: if it stays below 100% in prod we need
+  // to investigate which devices are failing the keychain step. Never
+  // includes the key or any stored value.
+  | {
+      name: 'sec1_boot_completed';
+      props?: {
+        encrypted: boolean;
+        status: 'completed' | 'pending' | 'failed';
+        attempts: number;
+        migrationDurationMs: number;
+        keysCopied: number;
+      };
+    }
+  | {
+      name: 'sec1_migration_failed';
+      props?: { mode: 'keychain' | 'copy' | 'limit_reached'; attempt: number; reason: string };
+    }
+  | { name: 'sec1_legacy_deleted' };
 
 type EventName = AnalyticsEvent['name'];
 
@@ -191,11 +259,58 @@ type EventProps<N extends EventName> = Extract<AnalyticsEvent, { name: N }> exte
   ? P
   : never;
 
+let drainedBuffer = false;
+
+function drainBufferToPosthog(): void {
+  if (drainedBuffer) return;
+  const ph = getPosthog();
+  if (!ph) return;
+  const queue = readQueue();
+  if (queue.length === 0) {
+    drainedBuffer = true;
+    return;
+  }
+  for (const entry of queue) {
+    try {
+      ph.capture(entry.name, {
+        ...(entry.props && typeof entry.props === 'object' ? entry.props : {}),
+        // Stamp the original capture time so a delayed flush doesn't
+        // back-date events to "now" in PostHog's UI.
+        $timestamp: new Date(entry.ts).toISOString(),
+        $is_buffered: true,
+      });
+    } catch {
+      // PostHog SDK swallows transport errors internally; this catch
+      // is purely defensive against a malformed entry.
+    }
+  }
+  // Wipe the local buffer on a best-effort basis. If PostHog later
+  // turns out to have rejected an event, we lose that one — acceptable
+  // given the alternative is the buffer growing unbounded across
+  // re-foregrounds.
+  mmkv.set(RING_BUFFER_KEY, '[]');
+  drainedBuffer = true;
+}
+
 export function track<N extends EventName>(name: N, props?: EventProps<N>): void {
   const entry = { name, props: props ?? null, ts: Date.now() };
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
     console.log('[analytics]', name, props ?? '');
   }
+  // Kick off init on first track call. Idempotent — only the first
+  // caller actually configures the client; everyone else awaits the
+  // same promise. We don't await here so analytics call sites stay
+  // synchronous.
+  void initPosthog().then(drainBufferToPosthog);
+
+  const ph = getPosthog();
+  if (ph) {
+    drainBufferToPosthog();
+    capturePosthog(name, (props ?? {}) as Record<string, unknown>);
+    return;
+  }
+  // Pre-PostHog (or never-PostHog) path: buffer to MMKV. Same shape
+  // the dev DebugLauncher already reads via peekRecent / queueLength.
   const queue = readQueue();
   queue.push(entry);
   writeQueue(queue);

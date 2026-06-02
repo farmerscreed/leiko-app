@@ -38,6 +38,10 @@ import { getVitalSetup, useVitalSetup } from '../../state/vitalSetup';
 import { useAuth } from '../../state/auth';
 import type { UserRow } from '../../types/database';
 
+// BLE_TRACE — Sprint 16.5a Phase A forensic-capture instrumentation.
+// See apps/mobile/src/services/ble/UrionDevice.ts for the convention.
+const BLE_TRACE = typeof __DEV__ !== 'undefined' && __DEV__;
+
 export interface DeviceConfigResult {
   ran: boolean;
   /** Names of steps that succeeded — useful for partial-failure logs. */
@@ -64,6 +68,27 @@ const DEFAULT_SETTERS = { setAutoHR, setAutoSpO2, setUserParams, setGoals };
 
 const CURRENT_YEAR = new Date().getFullYear();
 
+// Sprint 16.5b — flush debounce. Pre-16.5b applyDeviceConfig was strictly
+// dirty-flag-gated: orchestrator-triggered syncs (cold_start, foreground,
+// bt_ready, manual_force, background, live_notify) ALL skipped the flush
+// when vitalSetup.dirty=false, which is the steady-state. The result was
+// that demographics, auto-HR/SpO2, and goals never reached the watch on
+// background or routine syncs — only on take-reading (which uses
+// force:true) or after the user touched Settings (which flips dirty).
+//
+// New semantics: still skip when dirty=false AND last successful flush
+// was within FLUSH_DEBOUNCE_MS. Otherwise (dirty OR debounce expired OR
+// never flushed OR force=true), run. This refreshes the watch's config
+// at most once per debounce window across all sync triggers.
+//
+// 1 hour balances:
+//   • cost: 4 BLE writes (~400ms) per debounce window
+//   • benefit: watch-side config (especially demographics) stays fresh
+//     even if user never touches Settings; profile changes via Settings
+//     → Profile flow (which doesn't flip vitalSetup.dirty) reach the
+//     watch within an hour of any sync trigger
+const FLUSH_DEBOUNCE_MS = 60 * 60 * 1000;
+
 export async function applyDeviceConfig(
   device: UrionDevice,
   opts: ApplyDeviceConfigOptions = {},
@@ -72,8 +97,31 @@ export async function applyDeviceConfig(
   const profile = opts.profileSnapshot ?? useAuth.getState().profile;
   const setters = opts.setters ?? DEFAULT_SETTERS;
 
-  if (!opts.force && !setup.dirty) {
+  // Sprint 16.5b — debounce-or-dirty gate. Always run on force=true or
+  // dirty=true. Otherwise, run only if last successful flush was longer
+  // than FLUSH_DEBOUNCE_MS ago (or never). See module header for
+  // rationale.
+  const sinceFlushMs = setup.lastFlushedAtMs > 0
+    ? Date.now() - setup.lastFlushedAtMs
+    : Number.POSITIVE_INFINITY;
+  if (!opts.force && !setup.dirty && sinceFlushMs < FLUSH_DEBOUNCE_MS) {
+    if (BLE_TRACE) {
+      console.log(
+        `[ble-trace] applyDeviceConfig skipped — dirty=false force=false ` +
+          `sinceFlushMs=${sinceFlushMs} (debounce ${FLUSH_DEBOUNCE_MS}ms)`,
+      );
+    }
     return { ran: false, steps: [] };
+  }
+
+  if (BLE_TRACE) {
+    const reason = opts.force ? 'force' : setup.dirty ? 'dirty' : 'debounce-expired';
+    console.log(
+      `[ble-trace] applyDeviceConfig start — reason=${reason} force=${opts.force ?? false} dirty=${setup.dirty} ` +
+        `sinceFlushMs=${sinceFlushMs} autoHR=${setup.autoHrEnabled} ` +
+        `autoSpO2=${setup.autoSpo2Enabled} ` +
+        `hasDemographics=${profile ? hasDemographics(profile) : false}`,
+    );
   }
 
   const steps: string[] = [];
@@ -82,6 +130,7 @@ export async function applyDeviceConfig(
   try {
     await setters.setAutoHR(device, setup.autoHrEnabled);
     steps.push('autoHr');
+    if (BLE_TRACE) console.log('[ble-trace] applyDeviceConfig step=autoHr ok');
   } catch (e) {
     return failPartial(steps, 'autoHr', e);
   }
@@ -90,6 +139,7 @@ export async function applyDeviceConfig(
   try {
     await setters.setAutoSpO2(device, setup.autoSpo2Enabled);
     steps.push('autoSpo2');
+    if (BLE_TRACE) console.log('[ble-trace] applyDeviceConfig step=autoSpo2 ok');
   } catch (e) {
     return failPartial(steps, 'autoSpo2', e);
   }
@@ -114,9 +164,16 @@ export async function applyDeviceConfig(
         hrAlarmBpm: 0,
       });
       steps.push('userParams');
+      if (BLE_TRACE) console.log('[ble-trace] applyDeviceConfig step=userParams ok');
     } catch (e) {
       return failPartial(steps, 'userParams', e);
     }
+  } else if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] applyDeviceConfig step=userParams SKIPPED ` +
+        `(profile=${profile ? 'present' : 'null'}, hasDemographics=false). ` +
+        'Watch will not receive demographics this cycle.',
+    );
   }
 
   // 4. setGoals ---------------------------------------------------------------
@@ -132,6 +189,7 @@ export async function applyDeviceConfig(
       exerciseTargetMinutes: 30,
     });
     steps.push('goals');
+    if (BLE_TRACE) console.log('[ble-trace] applyDeviceConfig step=goals ok');
   } catch (e) {
     return failPartial(steps, 'goals', e);
   }
@@ -139,6 +197,11 @@ export async function applyDeviceConfig(
   // All four packets succeeded — clear dirty so the next no-config sync
   // skips this step entirely.
   useVitalSetup.getState().clearDirty();
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] applyDeviceConfig done — steps=${steps.length} [${steps.join(',')}]`,
+    );
+  }
   logger.track('device_config_flushed', { steps: steps.length });
   return { ran: true, steps };
 }

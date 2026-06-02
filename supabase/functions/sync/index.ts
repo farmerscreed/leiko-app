@@ -102,17 +102,6 @@ Deno.serve(async (req: Request) => {
 
   const serviceClient = createClient(supabaseUrl, serviceKey);
 
-  const { data: membership, error: memberErr } = await serviceClient
-    .from('family_members')
-    .select('family_id')
-    .eq('user_id', userId)
-    .is('removed_at', null)
-    .limit(1)
-    .maybeSingle();
-  if (memberErr) return json({ error: 'member_lookup_failed', detail: memberErr.message }, 500);
-  if (!membership) return json({ error: 'no_family' }, 403);
-  const familyId = membership.family_id as string;
-
   let body: unknown;
   try {
     body = await req.json();
@@ -128,13 +117,15 @@ Deno.serve(async (req: Request) => {
     return json({ error: 'missing_fields' }, 400);
   }
 
-  // Device upsert is the same across both paths — do it once before
-  // dispatching. Sprint-6 logic preserved exactly.
-  const deviceIdResult = await ensureDeviceRow(serviceClient, familyId, userId, device);
-  if ('error' in deviceIdResult) {
-    return json({ error: deviceIdResult.error, detail: deviceIdResult.detail }, 500);
+  // Family routing is DEVICE-AUTHORITATIVE (ADR-0006 Phase 1). The watch's
+  // data goes to the circle its (stable) device is bound to — resolved
+  // from the device, not from a non-deterministic membership pick. Family
+  // + device are resolved together because family now derives from device.
+  const resolved = await resolveFamilyAndDevice(serviceClient, userId, device);
+  if ('error' in resolved) {
+    return json({ error: resolved.error, detail: resolved.detail }, resolved.status ?? 500);
   }
-  const deviceId = deviceIdResult.deviceId;
+  const { familyId, deviceId } = resolved;
 
   if (isLegacyPayload(body)) {
     return handleLegacy(serviceClient, familyId, deviceId, body as LegacyReadingPayload);
@@ -149,38 +140,188 @@ Deno.serve(async (req: Request) => {
 });
 
 // ────────────────────────────────────────────────────────────────────
-// Device upsert — shared by both paths.
+// Device-authoritative family + device resolution — shared by both paths.
+
+type ResolveResult =
+  | { familyId: string; deviceId: string }
+  | { error: string; detail: string; status?: number };
+
+// Is `userId` an active (non-removed) member of `familyId`?
+async function isActiveMember(
+  serviceClient: SupabaseClient,
+  userId: string,
+  familyId: string,
+): Promise<boolean> {
+  const { data } = await serviceClient
+    .from('family_members')
+    .select('user_id')
+    .eq('user_id', userId)
+    .eq('family_id', familyId)
+    .is('removed_at', null)
+    .limit(1)
+    .maybeSingle();
+  return Boolean(data);
+}
+
+// Deterministic membership fallback for a GENUINELY NEW device (no stable-id
+// match). The syncing party is the wearer (a watch only syncs from the
+// wearer's own phone), so we bind to the user's OWN self-circle: the oldest
+// circle they `family_owner`. role=family_owner ensures a follower membership
+// can never capture a wearer's new watch; order(joined_at) makes the choice
+// deterministic across calls (vs the previous limit(1)-with-no-order lottery
+// that scattered data between circles).
+async function resolveOwnCircle(
+  serviceClient: SupabaseClient,
+  userId: string,
+): Promise<string | null> {
+  const { data } = await serviceClient
+    .from('family_members')
+    .select('family_id')
+    .eq('user_id', userId)
+    .eq('role', 'family_owner')
+    .is('removed_at', null)
+    .order('joined_at', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  return data ? (data.family_id as string) : null;
+}
+
+export async function resolveFamilyAndDevice(
+  serviceClient: SupabaseClient,
+  userId: string,
+  device: DeviceMeta,
+): Promise<ResolveResult> {
+  const clientDeviceId = device.clientDeviceId ?? null;
+
+  // STEP 1 — Device-authoritative. A stable clientDeviceId that already maps
+  // to an active device row IS the route: use that device's family. Looked
+  // up globally (not within a family) so a multi-circle user's watch lands
+  // in the circle it was bound to, never a sibling circle. The Urion MAC
+  // rotates, so we refresh the stored MAC but never key on it here.
+  if (clientDeviceId) {
+    const { data: byClient } = await serviceClient
+      .from('devices')
+      .select('id, family_id')
+      .eq('client_device_id', clientDeviceId)
+      .is('unpaired_at', null)
+      .order('paired_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (byClient) {
+      const famId = byClient.family_id as string;
+      // Defence: the caller must belong to the device's family.
+      if (!(await isActiveMember(serviceClient, userId, famId))) {
+        return { error: 'not_family_member', detail: 'caller not in device family', status: 403 };
+      }
+      await serviceClient
+        .from('devices')
+        .update({ mac_address: device.bleId })
+        .eq('id', byClient.id as string);
+      return { familyId: famId, deviceId: byClient.id as string };
+    }
+  }
+
+  // STEP 2 — No stable-id match. Resolve the wearer's own circle, then bind
+  // the device within it (adopt an existing MAC-keyed row, or insert).
+  const familyId = await resolveOwnCircle(serviceClient, userId);
+  if (!familyId) return { error: 'no_family', detail: 'no owned circle', status: 403 };
+
+  const deviceResult = await bindDeviceInFamily(serviceClient, familyId, userId, device);
+  if ('error' in deviceResult) {
+    return { error: deviceResult.error, detail: deviceResult.detail, status: 500 };
+  }
+  return { familyId, deviceId: deviceResult.deviceId };
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Device binding within an already-resolved family — adopt or insert.
 
 type DeviceUpsertResult = { deviceId: string } | { error: string; detail: string };
 
-async function ensureDeviceRow(
+async function bindDeviceInFamily(
   serviceClient: SupabaseClient,
   familyId: string,
   userId: string,
   device: DeviceMeta,
 ): Promise<DeviceUpsertResult> {
-  // Upsert device by mac_address. The active-mac index is partial on
-  // unpaired_at IS NULL, so a forgotten-then-re-paired device may have
-  // multiple rows — pick the most recent active one.
-  const { data: existingDevice } = await serviceClient
+  const clientDeviceId = device.clientDeviceId ?? null;
+  const serial = device.bleId.replace(/[^0-9a-f]/gi, '');
+
+  if (clientDeviceId) {
+    // One watch per circle. If the circle already has a single active
+    // device, it IS this watch — adopt it and (re)stamp the current stable
+    // id + MAC onto it. We deliberately do NOT require client_device_id to
+    // be null: a reinstall mints a NEW clientDeviceId (MMKV was wiped), so
+    // the existing active device may already carry an OLD stable id. Still
+    // the same physical watch — re-stamp rather than insert a duplicate.
+    const { data: activeDevices } = await serviceClient
+      .from('devices')
+      .select('id')
+      .eq('family_id', familyId)
+      .is('unpaired_at', null)
+      .order('paired_at', { ascending: false })
+      .limit(2);
+    if (activeDevices && activeDevices.length === 1) {
+      const adoptId = activeDevices[0].id as string;
+      const adopt = await serviceClient
+        .from('devices')
+        .update({ client_device_id: clientDeviceId, mac_address: device.bleId })
+        .eq('id', adoptId)
+        .select('id')
+        .single();
+      if (!adopt.error) return { deviceId: adopt.data.id as string };
+      // Fall through to insert if the adopt update raced/failed.
+    }
+  } else {
+    // Legacy clients (no stable id): match by active MAC within the family.
+    const { data: byMac } = await serviceClient
+      .from('devices')
+      .select('id')
+      .eq('family_id', familyId)
+      .eq('mac_address', device.bleId)
+      .is('unpaired_at', null)
+      .order('paired_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (byMac) return { deviceId: byMac.id as string };
+  }
+
+  // Before inserting, reactivate a soft-retired device that already holds
+  // this serial. serial_number is GLOBALLY unique (not partial on
+  // unpaired_at), so a fresh insert with a previously-seen serial — e.g.
+  // the rotated MAC of a device retired during cleanup — would 23505. The
+  // rotating Urion MAC means serial isn't a reliable identity, but reusing
+  // the existing row avoids the unique violation and keeps history intact.
+  const { data: bySerial } = await serviceClient
     .from('devices')
     .select('id')
-    .eq('family_id', familyId)
-    .eq('mac_address', device.bleId)
-    .is('unpaired_at', null)
-    .order('paired_at', { ascending: false })
+    .eq('serial_number', serial)
     .limit(1)
     .maybeSingle();
-
-  if (existingDevice) {
-    return { deviceId: existingDevice.id as string };
+  if (bySerial) {
+    const reactivate = await serviceClient
+      .from('devices')
+      .update({
+        family_id: familyId,
+        mac_address: device.bleId,
+        client_device_id: clientDeviceId,
+        unpaired_at: null,
+        paired_by_user_id: userId,
+      })
+      .eq('id', bySerial.id as string)
+      .select('id')
+      .single();
+    if (!reactivate.error) return { deviceId: reactivate.data.id as string };
+    return { error: 'device_insert_failed', detail: reactivate.error.message };
   }
+
   const insertDevice = await serviceClient
     .from('devices')
     .insert({
       family_id: familyId,
-      serial_number: device.bleId.replace(/[^0-9a-f]/gi, ''),
+      serial_number: serial,
       mac_address: device.bleId,
+      client_device_id: clientDeviceId,
       model: device.model,
       paired_by_user_id: userId,
     })
@@ -337,7 +478,8 @@ async function handleMultiVitals(
     await logRejected(serviceClient, familyId, userId, 'sleep_session', rejected);
     if (accepted.length > 0) {
       const rows = mapSleepSessions(accepted, familyId, deviceId);
-      const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows);
+      // Mutable: re-synced sessions reconcile totals + inferred wake.
+      const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows, { mutable: true });
       if (errored) return json({ error: 'sleep_insert_failed', detail: errored }, 500);
       counts.inserted.sleep = inserted;
       counts.duplicates.sleep = duplicates;
@@ -349,8 +491,11 @@ async function handleMultiVitals(
     counts.rejected.steps = rejected.length;
     await logRejected(serviceClient, familyId, userId, 'steps_day', rejected);
     if (accepted.length > 0) {
-      const rows = mapActivityDays(accepted, familyId, deviceId);
-      const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows);
+      const mapped = mapActivityDays(accepted, familyId, deviceId);
+      // Only update when the count increases — never let a purged-day
+      // backfill 0 overwrite a real total.
+      const rows = await dropNonIncreasingDailyRows(serviceClient, mapped);
+      const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows, { mutable: true });
       if (errored) return json({ error: 'activity_insert_failed', detail: errored }, 500);
       counts.inserted.steps = inserted;
       counts.duplicates.steps = duplicates;
@@ -362,8 +507,10 @@ async function handleMultiVitals(
     counts.rejected.calories = rejected.length;
     await logRejected(serviceClient, familyId, userId, 'calories_day', rejected);
     if (accepted.length > 0) {
-      const rows = mapCaloriesDays(accepted, familyId, deviceId);
-      const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows);
+      const mapped = mapCaloriesDays(accepted, familyId, deviceId);
+      // Only update when kcal increases — same purged-day-0 guard as steps.
+      const rows = await dropNonIncreasingDailyRows(serviceClient, mapped);
+      const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows, { mutable: true });
       if (errored) return json({ error: 'calories_insert_failed', detail: errored }, 500);
       counts.inserted.calories = inserted;
       counts.duplicates.calories = duplicates;
@@ -452,15 +599,66 @@ async function insertReadings(
   };
 }
 
+// Monotonic-daily guard for steps_day / calories_day. These accumulate
+// through the day, so a later sync legitimately UPDATES the row (0 -> 38).
+// But a backfill of a day the watch has purged reports 0, and an
+// unconditional update would let that 0 clobber a real count (e.g. a real
+// 1529 from when the day was live). Drop incoming rows that do not
+// strictly exceed what's already stored; the survivors then update on
+// conflict. Homogeneous batch (one device_id + vital_type) per call.
+async function dropNonIncreasingDailyRows(
+  serviceClient: SupabaseClient,
+  rows: VitalsOtherRow[],
+): Promise<VitalsOtherRow[]> {
+  if (rows.length === 0) return rows;
+  const deviceId = rows[0].device_id;
+  const vitalType = rows[0].vital_type;
+  const { data: existing } = await serviceClient
+    .from('vitals_other')
+    .select('measured_at, value_int')
+    .eq('device_id', deviceId)
+    .eq('vital_type', vitalType)
+    .in('measured_at', rows.map((r) => r.measured_at));
+  const storedByAt = new Map<string, number>(
+    (existing ?? []).map((e) => [
+      new Date(e.measured_at as string).toISOString(),
+      (e.value_int as number | null) ?? 0,
+    ]),
+  );
+  return rows.filter((r) => {
+    const stored = storedByAt.get(new Date(r.measured_at).toISOString());
+    return stored === undefined || (r.value_int ?? 0) > stored;
+  });
+}
+
 async function insertVitalRows(
   serviceClient: SupabaseClient,
   rows: VitalsOtherRow[],
+  // `mutable` distinguishes the two upsert semantics on the shared
+  // (device_id, vital_type, measured_at) dedupe key:
+  //
+  //   false (default) — immutable POINT samples (hr / spo2). Each has a
+  //     unique timestamp, so a conflict is a genuine re-sync duplicate:
+  //     ignore it (idempotent).
+  //
+  //   true — mutable DAILY aggregates (steps_day, calories_day) and
+  //     reconciled sleep_session. Their measured_at is the day's
+  //     midnight (steps/calories) or the synthesized session start
+  //     (sleep) — CONSTANT across the day/night — while the value keeps
+  //     changing: steps accumulate, sleep totals + inferred wake get
+  //     reconciled. ignoreDuplicates here froze the row at the first
+  //     sync of the day (e.g. 0 steps before the user walked), so the
+  //     caregiver view — which reads the server — never saw the updated
+  //     count even though the device's local store had it. Update on
+  //     conflict so the latest read wins.
+  options: { mutable?: boolean } = {},
 ): Promise<InsertSummary> {
+  const ignoreDuplicates = !options.mutable;
   const { error, count } = await serviceClient
     .from('vitals_other')
     .upsert(rows, {
       onConflict: 'device_id,vital_type,measured_at',
-      ignoreDuplicates: true,
+      ignoreDuplicates,
       count: 'exact',
     });
   if (error) return { inserted: 0, duplicates: 0, errored: error.message };

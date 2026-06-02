@@ -19,31 +19,44 @@ export type CaregiverViewMode = 'birds' | 'cards';
 
 const DEFAULT_VIEW_MODE: CaregiverViewMode = 'birds';
 
-function readPersisted(): CaregiverViewMode {
+function readRaw(): CaregiverViewMode | null {
   const raw = mmkv.getString(STORAGE_KEYS.caregiverViewMode);
-  return raw === 'birds' || raw === 'cards' ? raw : DEFAULT_VIEW_MODE;
+  return raw === 'birds' || raw === 'cards' ? raw : null;
+}
+
+function readPersisted(): CaregiverViewMode {
+  return readRaw() ?? DEFAULT_VIEW_MODE;
 }
 
 export interface UseCaregiverViewModeResult {
   viewMode: CaregiverViewMode;
   setViewMode: (next: CaregiverViewMode) => void;
+  /** ADR-0006 Phase 3 — true once the user has explicitly toggled the
+   *  view. When false, the screen picks a count-based default (cards for
+   *  ≤2 people, birds-eye for >2) instead of the static DEFAULT_VIEW_MODE. */
+  hasExplicitPreference: boolean;
 }
 
 export function useCaregiverViewMode(): UseCaregiverViewModeResult {
   const [viewMode, setViewModeState] = useState<CaregiverViewMode>(() =>
     readPersisted(),
   );
+  const [hasExplicitPreference, setHasExplicitPreference] = useState<boolean>(
+    () => readRaw() !== null,
+  );
 
   // Hydrate on mount in case MMKV was written while the hook wasn't
   // mounted (other tabs, dev hot-reload). Cheap; reads a single key.
   useEffect(() => {
     setViewModeState(readPersisted());
+    setHasExplicitPreference(readRaw() !== null);
   }, []);
 
   const setViewMode = useCallback((next: CaregiverViewMode) => {
     mmkv.set(STORAGE_KEYS.caregiverViewMode, next);
     setViewModeState(next);
+    setHasExplicitPreference(true);
   }, []);
 
-  return { viewMode, setViewMode };
+  return { viewMode, setViewMode, hasExplicitPreference };
 }

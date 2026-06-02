@@ -27,8 +27,8 @@
 // pending-row merge — the aggregator is already pure, so wiring is
 // straightforward.
 
-import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase as defaultSupabase } from '../services/supabase';
 import {
@@ -170,6 +170,54 @@ export function useTrendsCorrelations(
     isLoading: query.isLoading,
     error: (query.error as Error | null) ?? null,
   };
+}
+
+/**
+ * Sprint 16.5g — prefetch an adjacent range so the user's first tap on
+ * 30D / 90D doesn't trigger a cold spinner. Called from the Trends
+ * screen on mount with the next-larger range. No-ops when the range is
+ * already cached / inflight.
+ */
+export function usePrefetchTrendsRange(
+  familyId: string | null,
+  range: TrendsRange,
+  options: UseTrendsDataOptions = {},
+): void {
+  const client = options.supabase ?? defaultSupabase;
+  const nowMs = options.nowMs ?? Date.now();
+  const qc = useQueryClient();
+  useEffect(() => {
+    if (!familyId) return;
+    const key = [...TRENDS_QUERY_KEY, familyId, range] as const;
+    if (qc.getQueryData(key) !== undefined) return;
+    void qc.prefetchQuery({
+      queryKey: key,
+      staleTime: TRENDS_DATA_STALE_MS,
+      queryFn: async () => {
+        const startIso = rangeStartIso(range, nowMs);
+        const [readingsRes, vitalsRes] = await Promise.all([
+          client
+            .from('readings')
+            .select('*')
+            .eq('family_id', familyId)
+            .gte('measured_at', startIso)
+            .order('measured_at', { ascending: true }),
+          client
+            .from('vitals_other')
+            .select('*')
+            .eq('family_id', familyId)
+            .gte('measured_at', startIso)
+            .order('measured_at', { ascending: true }),
+        ]);
+        if (readingsRes.error) throw readingsRes.error;
+        if (vitalsRes.error) throw vitalsRes.error;
+        return aggregateTrends({
+          readings: (readingsRes.data ?? []) as ReadingRow[],
+          vitalsOther: (vitalsRes.data ?? []) as VitalsOtherRow[],
+        });
+      },
+    });
+  }, [familyId, range, qc, client, nowMs]);
 }
 
 /** Pure helper, exported for tests. Picks the most recent row per

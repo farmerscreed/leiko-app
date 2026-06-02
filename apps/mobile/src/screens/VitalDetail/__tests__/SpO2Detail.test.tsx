@@ -60,9 +60,87 @@ jest.mock('../../../state/dailyPulse', () => {
   };
 });
 
+// Sprint 18 SP2 — slice exposes overnightLowsRecentByNight()
+// (called via getState() by SpO2Detail's correlation memo). Default
+// returns empty; correlation tests opt-in by flipping this.
+let mockLowsByNight: Array<{ nightKey: string; low: number }> = [];
 jest.mock('../../../state/spo2', () => ({
-  useSpO2: (selector?: (s: unknown) => unknown) => {
-    const state = { pending: [], recent: mockSpO2Samples };
+  useSpO2: Object.assign(
+    (selector?: (s: unknown) => unknown) => {
+      const state = { pending: [], recent: mockSpO2Samples };
+      return selector ? selector(state) : state;
+    },
+    {
+      getState: () => ({
+        pending: [],
+        recent: mockSpO2Samples,
+        overnightLowsRecentByNight: () => mockLowsByNight,
+      }),
+    },
+  ),
+}));
+
+// Sprint 17a parent-scoped hooks land in SpO2Detail. Same pre-existing
+// missing-mocks bug as Sleep/HR/BP. Stub to "self-buyer path" defaults;
+// audit tests opt in to loading/error by flipping these.
+let mockParentPulse: {
+  data: unknown;
+  isLoading: boolean;
+  isRefreshing: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+} = {
+  data: null,
+  isLoading: false,
+  isRefreshing: false,
+  error: null,
+  refresh: async () => undefined,
+};
+let mockParentRecent: {
+  data: { sleep: unknown[]; readings: unknown[]; hr: unknown[]; spo2: unknown[]; activity: unknown[] };
+  isLoading: boolean;
+  isRefreshing: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+} = {
+  data: { sleep: [], readings: [], hr: [], spo2: [], activity: [] },
+  isLoading: false,
+  isRefreshing: false,
+  error: null,
+  refresh: async () => undefined,
+};
+const setMockParentPulse = (next: Partial<typeof mockParentPulse>) => {
+  mockParentPulse = { ...mockParentPulse, ...next };
+};
+const resetParentMocks = () => {
+  mockParentPulse = {
+    data: null,
+    isLoading: false,
+    isRefreshing: false,
+    error: null,
+    refresh: async () => undefined,
+  };
+  mockParentRecent = {
+    data: { sleep: [], readings: [], hr: [], spo2: [], activity: [] },
+    isLoading: false,
+    isRefreshing: false,
+    error: null,
+    refresh: async () => undefined,
+  };
+};
+jest.mock('../../../hooks/useParentDailyPulseData', () => ({
+  useParentDailyPulseData: () => mockParentPulse,
+}));
+jest.mock('../../../hooks/useParentVitalsRecent', () => ({
+  useParentVitalsRecent: () => mockParentRecent,
+}));
+
+// SpO2Detail also reads useSleep for the correlation; stub empty by
+// default so existing assertions don't see a correlation strip they
+// didn't ask for.
+jest.mock('../../../state/sleep', () => ({
+  useSleep: (selector?: (s: unknown) => unknown) => {
+    const state = { recent: [], pending: [] };
     return selector ? selector(state) : state;
   },
 }));
@@ -94,9 +172,23 @@ function makeSample(measuredAtSec: number, percent: number): SpO2Sample {
   };
 }
 
+// Sprint 18 SP3 — helper to build a sample whose UTC hour is reliably
+// in the overnight window (22–06 UTC), independent of test-machine
+// timezone. Avoids the prior "chart visibility depends on wall clock"
+// flake. Uses today-at-04:00-UTC minus an hour offset so timestamps
+// are recent (won't trip the staleness gate) but in the overnight
+// band.
+function overnightSampleSec(offsetHours: number): number {
+  const d = new Date();
+  d.setUTCHours(4, 0, 0, 0); // anchor to 04:00 UTC today
+  return Math.floor(d.getTime() / 1000) - offsetHours * 3600;
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockSpO2Samples = [];
+  mockLowsByNight = [];
+  resetParentMocks();
 });
 
 describe('SpO2Detail — hero + tier copy', () => {
@@ -211,14 +303,18 @@ describe('SpO2Detail — empty state', () => {
 
 describe('SpO2Detail — populated surface', () => {
   beforeEach(() => {
-    const baseSec = NOW_SEC() - 4 * 3600;
+    // Sprint 18 — anchor samples to 04:00 UTC ± a few hours so they
+    // reliably fall inside the buildOvernightSeries window
+    // (getUTCHours() >= 22 || < 6). The previous setup used
+    // NOW_SEC()-based offsets which were flaky in CI depending on
+    // wall-clock time-of-day.
     mockSpO2Samples = [
-      makeSample(baseSec - 6 * 3600, 96),
-      makeSample(baseSec - 5 * 3600, 95),
-      makeSample(baseSec - 4 * 3600, 94),
-      makeSample(baseSec - 3 * 3600, 96),
-      makeSample(baseSec - 2 * 3600, 97),
-      makeSample(baseSec - 1 * 3600, 98),
+      makeSample(overnightSampleSec(5), 96),
+      makeSample(overnightSampleSec(4), 95),
+      makeSample(overnightSampleSec(3), 94),
+      makeSample(overnightSampleSec(2), 96),
+      makeSample(overnightSampleSec(1), 97),
+      makeSample(overnightSampleSec(0), 98),
     ];
     setMockData({
       bpLatest: null,
@@ -240,8 +336,12 @@ describe('SpO2Detail — populated surface', () => {
     expect(screen.getByTestId('spo2-detail-insight')).toBeTruthy();
     expect(screen.getByTestId('spo2-detail-readings')).toBeTruthy();
     expect(screen.getByText('Recent readings')).toBeTruthy();
-    expect(screen.getByText('Overnight · oxygen')).toBeTruthy();
-    expect(screen.getByText('95–100 band')).toBeTruthy();
+    // Caption includes the range suffix; assert substring match.
+    expect(screen.getByText(/^Overnight · oxygen · last /)).toBeTruthy();
+    // Sub-caption is the dynamic chart Y-axis band — depends on
+    // the data's minimum (Sprint 16.5f made this adaptive). Just
+    // assert the format here, not the specific numbers.
+    expect(screen.getByText(/^\d+–\d+ band$/)).toBeTruthy();
   });
 
   it('matches the dark-mode snapshot for an in_pattern surface', () => {
@@ -252,14 +352,15 @@ describe('SpO2Detail — populated surface', () => {
     jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
     jest.setSystemTime(new Date('2026-05-08T16:30:00Z').getTime());
     try {
-      const baseSec = NOW_SEC() - 4 * 3600;
+      // Sprint 18 — anchor to overnight UTC window so the chart
+      // renders deterministically.
       mockSpO2Samples = [
-        makeSample(baseSec - 6 * 3600, 96),
-        makeSample(baseSec - 5 * 3600, 95),
-        makeSample(baseSec - 4 * 3600, 94),
-        makeSample(baseSec - 3 * 3600, 96),
-        makeSample(baseSec - 2 * 3600, 97),
-        makeSample(baseSec - 1 * 3600, 98),
+        makeSample(overnightSampleSec(5), 96),
+        makeSample(overnightSampleSec(4), 95),
+        makeSample(overnightSampleSec(3), 94),
+        makeSample(overnightSampleSec(2), 96),
+        makeSample(overnightSampleSec(1), 97),
+        makeSample(overnightSampleSec(0), 98),
       ];
       setMockData({
         bpLatest: null,
@@ -378,5 +479,138 @@ describe('SpO2Detail — voice gate', () => {
     for (const word of FORBIDDEN) {
       expect(text.toLowerCase()).not.toContain(word.toLowerCase());
     }
+  });
+});
+
+// ─── Sprint 18 audit fixes ──────────────────────────────────────────────
+
+describe('SpO2Detail — caregiver-scoped loading + error (Sprint 18 SP1)', () => {
+  it('shows a loading spinner — not the empty-state UI — when the parent fetch is in flight', () => {
+    setMockParentPulse({ isLoading: true, data: null });
+    render(
+      withProviders(
+        <SpO2Detail onBack={mockOnBack} familyId="fam-88" />,
+      ),
+    );
+    expect(screen.getByTestId('spo2-detail-loading')).toBeTruthy();
+    expect(screen.queryByTestId('spo2-detail-insight')).toBeNull();
+  });
+
+  it('shows an ErrorState — not the empty-state UI — when the parent fetch errored', () => {
+    setMockParentPulse({ error: new Error('network down'), data: null });
+    render(
+      withProviders(
+        <SpO2Detail onBack={mockOnBack} familyId="fam-88" />,
+      ),
+    );
+    expect(screen.getByTestId('spo2-detail-error')).toBeTruthy();
+    expect(screen.queryByTestId('spo2-detail-insight')).toBeNull();
+  });
+});
+
+describe("SpO2Detail — 'Lowest' single-source-of-truth (Sprint 18 SP3)", () => {
+  it("value and unit describe the SAME sample (the lowest overnight reading in range)", () => {
+    // Seed a known lowest-sample at 03:00 UTC at 88%; other samples
+    // are all higher. The StatTrio's "Lowest" should be 88 with a
+    // time tied to that exact sample.
+    const lowSec = overnightSampleSec(2); // some overnight time
+    mockSpO2Samples = [
+      makeSample(overnightSampleSec(5), 96),
+      makeSample(overnightSampleSec(4), 95),
+      makeSample(overnightSampleSec(3), 94),
+      makeSample(lowSec, 88), // the lowest
+      makeSample(overnightSampleSec(1), 97),
+      makeSample(overnightSampleSec(0), 98),
+    ];
+    setMockData({
+      bpLatest: null,
+      hrRestingToday: null,
+      hrRestingRecent: [],
+      hrLatestSampleAt: null,
+      spo2LatestPercent: 98,
+      // overnightLowsRecent here intentionally says 95 (per-night
+      // minimum that doesn't match the in-range sample minimum) to
+      // prove that the StatTrio uses the SAMPLE-level minimum
+      // (88), not the per-night roll-up.
+      spo2OvernightLowsRecent: [95],
+      spo2LatestSampleAt: NOW_SEC() - 60 * 60,
+      sleepSession: null,
+      activityToday: null,
+    });
+    render(withProviders(<SpO2Detail onBack={mockOnBack} />));
+    // Value: 88. Unit: starts with "briefly · " followed by a time.
+    expect(screen.getByText('88')).toBeTruthy();
+    expect(screen.getByText(/^briefly · /)).toBeTruthy();
+  });
+});
+
+describe('SpO2Detail — correlation pair-by-date (Sprint 18 SP2)', () => {
+  it('skips a sleep night that has no matching overnight-low entry (no positional misalignment)', () => {
+    // Sleep on Mon/Tue/Wed; overnight lows only on Mon/Wed (Tue
+    // gap). Pre-Sprint-18 the function would have paired Tue-sleep
+    // with Wed-low positionally. Post-fix the intersection is
+    // {Mon, Wed} and Tue-sleep is dropped.
+    const now = NOW_SEC();
+    const mkSleep = (endSec: number, score = 78) => ({
+      sessionStartSec: endSec - 7 * 3600,
+      sessionEndSec: endSec,
+      sessionStartLocal: new Date((endSec - 7 * 3600) * 1000).toISOString(),
+      sessionEndLocal: new Date(endSec * 1000).toISOString(),
+      totalMinutes: 7 * 60,
+      deepMinutes: 100,
+      remMinutes: 80,
+      lightMinutes: 240,
+      awakeMinutes: 0,
+      awakeCount: 0,
+      transitions: [],
+      sleepScore: score,
+    });
+    // Anchor sleep sessions to the same nightKey-anchored dates the
+    // SpO2 slice uses (UTC-based).
+    const mon = now - 3 * 24 * 3600;
+    const wed = now - 1 * 24 * 3600;
+    const dayKeyFor = (sec: number) => {
+      const d = new Date(sec * 1000);
+      const hr = d.getUTCHours();
+      const anchored =
+        hr >= 22 ? new Date(d.getTime() + 86400 * 1000) : d;
+      return anchored.toISOString().slice(0, 10);
+    };
+    // Mock useSleep to return Mon, Tue, Wed.
+    const sleepMock = jest.requireMock('../../../state/sleep') as {
+      useSleep: (selector?: (s: unknown) => unknown) => unknown;
+    };
+    const allSleep = [mkSleep(mon), mkSleep(mon + 86400), mkSleep(wed)];
+    sleepMock.useSleep = (selector?: (s: unknown) => unknown) => {
+      const state = { recent: allSleep, pending: [] };
+      return selector ? selector(state) : state;
+    };
+    // SpO2 lows only on Mon + Wed (no Tuesday entry).
+    mockLowsByNight = [
+      { nightKey: dayKeyFor(mon), low: 92 },
+      { nightKey: dayKeyFor(wed), low: 90 },
+    ];
+    setMockData({
+      bpLatest: null,
+      hrRestingToday: null,
+      hrRestingRecent: [],
+      hrLatestSampleAt: null,
+      spo2LatestPercent: 97,
+      spo2OvernightLowsRecent: [92, 90],
+      spo2LatestSampleAt: NOW_SEC() - 60 * 60,
+      sleepSession: null,
+      activityToday: null,
+    });
+    // Seed at least 3 overnight samples so the chart renders the
+    // surface around the correlation strip (the strip itself needs
+    // at least 2 matched nights, which Mon+Wed satisfies).
+    mockSpO2Samples = [
+      makeSample(overnightSampleSec(5), 96),
+      makeSample(overnightSampleSec(4), 95),
+      makeSample(overnightSampleSec(3), 94),
+    ];
+    render(withProviders(<SpO2Detail onBack={mockOnBack} />));
+    // Correlation strip still renders (Mon + Wed both matched).
+    expect(screen.getByTestId('spo2-detail-correlation')).toBeTruthy();
   });
 });

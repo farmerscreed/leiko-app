@@ -28,8 +28,21 @@
 // Stack pin (docs/00-tech-stack.md): RN 0.81.5, react-native-svg 15.x,
 // react-native-reanimated v3, phosphor-react-native v3. No new deps.
 
-import { useMemo } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { DetailShell } from '../../components/DetailShell';
+import { BaselineReference } from '../../components/BaselineReference';
+import { StalenessHintRow } from '../../components/StalenessHintRow';
+import { LoadingState } from '../../components/LoadingState';
+import { ErrorState } from '../../components/ErrorState';
+import type { TrendRange } from '../../components/TimeRangePills';
+import { hrBaseline, formatHRBaseline, type HRBaseline } from '../../utils/vitalBaselines';
+
+const RANGE_TO_DAYS: Record<TrendRange, number> = {
+  '7d': 7,
+  '30d': 30,
+  '90d': 90,
+};
+
 import { VitalHero } from '../../components/VitalHero';
 import { StatTrio } from '../../components/StatTrio';
 import { VitalTrendChart } from '../../components/VitalTrendChart';
@@ -40,17 +53,22 @@ import {
   type VitalSeries,
 } from '../../components/CorrelationStrip';
 import { HRZonesCard, type HRZone } from '../../components/HRZonesCard';
-import { useDailyPulseData } from '../../state/dailyPulse';
+import {
+  RecentReadingsSection,
+} from '../../components/RecentReadingsSection';
+import type { RecentReading } from '../../components/RecentReadingsList';
+import { useDailyPulseData, emptyDailyPulse } from '../../state/dailyPulse';
 import { useHR } from '../../state/hr';
 import { useSleep } from '../../state/sleep';
 import { useAuth } from '../../state/auth';
+import { useParentDailyPulseData } from '../../hooks/useParentDailyPulseData';
+import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { hrFill } from '../../utils/vitalThemes';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import type { HRSample, SleepSession } from '../../types/vitals';
 
 const SECONDS_PER_DAY = 24 * 60 * 60;
-const TREND_RANGE_BPM: [number, number] = [60, 95];
 
 /**
  * Build the trend-chart series for "today". Bins all available HR samples
@@ -125,10 +143,14 @@ export function buildZones(samples: ReadonlyArray<HRSample>): [HRZone, HRZone, H
 
 /**
  * Compute the headline "stats trio" inputs from the live HR data.
- * - Resting: 7-day average of `restingBpmRecent` (rounded; null if empty)
+ * Sprint 16.5f — Variability slot was a permanent "—" placeholder
+ * (HRV needs RR intervals, not 5-min averages). Replaced with
+ * "Range today" — max − min of today's samples. Real, useful,
+ * computable from current data.
+ *
+ * - Resting: range-average of `restingBpmRecent` (rounded; null if empty)
  * - Peak: max bpm in the last 24h (null if no samples)
- * - Variability: not yet derived from the watch firmware — placeholder
- *   "—" until Sprint 15 (HR streaming).
+ * - Range today: today's max − min spread in bpm (null if < 2 samples)
  */
 export function buildStats(
   samples: ReadonlyArray<HRSample>,
@@ -137,6 +159,7 @@ export function buildStats(
 ): {
   restingAvg: number | null;
   peakToday: number | null;
+  rangeToday: number | null;
 } {
   const restingAvg =
     restingBpmRecent.length === 0
@@ -152,126 +175,343 @@ export function buildStats(
     todays.length === 0
       ? null
       : todays.reduce((a, b) => (b.bpm > a.bpm ? b : a)).bpm;
-  return { restingAvg, peakToday };
+  let rangeToday: number | null = null;
+  if (todays.length >= 2) {
+    const minBpm = todays.reduce((a, b) => (b.bpm < a.bpm ? b : a)).bpm;
+    const maxBpm = todays.reduce((a, b) => (b.bpm > a.bpm ? b : a)).bpm;
+    rangeToday = Math.round(maxBpm - minBpm);
+  }
+  return { restingAvg, peakToday, rangeToday };
+}
+
+/** Dynamic Y-axis range for the today trend chart. Pre-16.5f was
+ *  hardcoded [60, 95], which clipped activity peaks (110+) out of
+ *  view. Returns a band rounded to the nearest 10 with a floor of 40
+ *  and a ceiling of max(95, dataMax + 10). */
+export function dynamicHRChartRange(data: ReadonlyArray<number>): [number, number] {
+  if (data.length === 0) return [60, 95];
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const lo = Math.max(40, Math.floor((min - 5) / 10) * 10);
+  const hi = Math.max(95, Math.ceil((max + 5) / 10) * 10);
+  return [lo, hi];
 }
 
 /**
- * Build the seven-day sleep-x-restingHR correlation series. Each day's
- * resting HR is paired with the same day's sleep-session totalMinutes —
- * we anchor on session end-of-day so a 23:00–06:00 session bucketed as
- * "the morning of the 7th" lines up with the resting HR computed from
- * that same window. Returns null when either side has < 2 days of data.
+ * Sprint 18 H3 — Build the sleep × resting-HR correlation series for
+ * the chosen range, paired by DATE (nightKey) rather than positional
+ * array index. The earlier version did `recentSleep.slice(-n)` and
+ * `recentHR.slice(-n)` then matched i-th with i-th — but the two
+ * arrays could have different lengths AND different night coverage,
+ * so a sparse tracker (gap nights) would see Monday-HR mis-paired
+ * with Wednesday-sleep, etc.
+ *
+ * The function now takes the date-keyed HR shape from
+ * `useHR.restingBpmRecentByNight()`, keys both inputs by their night
+ * (YYYY-MM-DD of the night the sleep window belongs to), and emits
+ * one point per night that has BOTH datasets. Each point's `t` uses
+ * the sleep session's end time so CorrelationStrip's tBounds frame
+ * the window correctly.
  */
 export function buildSleepHRCorrelation(
-  hrRecent: ReadonlyArray<number>,
+  hrByNight: ReadonlyArray<{ nightKey: string; restingBpm: number }>,
   sleepSessions: ReadonlyArray<SleepSession>,
+  days: number = 7,
+  nowSec: number = Math.floor(Date.now() / 1000),
 ): { hr: VitalSeries; sleep: VitalSeries } | null {
-  if (hrRecent.length < 2 || sleepSessions.length < 2) return null;
-  // The HR slice produces `restingBpmRecent` ordered oldest → newest. For
-  // sleep, we anchor by sessionEndSec and take the most recent 7 ordered
-  // oldest → newest. We then truncate both to the same length so the t
-  // axis lines up index-by-index.
-  const sleepOrdered = [...sleepSessions].sort(
-    (a, b) => a.sessionEndSec - b.sessionEndSec,
-  );
-  const recentSleep = sleepOrdered.slice(-7);
-  const recentHR = hrRecent.slice(-7);
-  const n = Math.min(recentSleep.length, recentHR.length);
-  if (n < 2) return null;
-  const sleepWindow = recentSleep.slice(-n);
-  const hrWindow = recentHR.slice(-n);
+  if (hrByNight.length < 2 || sleepSessions.length < 2) return null;
+  const cutoffSec = nowSec - days * SECONDS_PER_DAY;
+  const dayKeyFor = (sessionEndSec: number): string => {
+    const d = new Date(sessionEndSec * 1000);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${dd}`;
+  };
+  // Key the sleep sessions by night (using sessionEndSec's local
+  // date — same convention `nightDateKey` uses upstream in the HR
+  // slice's restingBpmRecentByNight).
+  const sleepByNight = new Map<string, SleepSession>();
+  for (const s of sleepSessions) {
+    if (s.sessionEndSec < cutoffSec) continue;
+    const key = dayKeyFor(s.sessionEndSec);
+    const existing = sleepByNight.get(key);
+    // If two sessions land on the same night (rare; re-sync dupes), prefer the most recent.
+    if (!existing || s.sessionEndSec > existing.sessionEndSec) {
+      sleepByNight.set(key, s);
+    }
+  }
+  const hrByNightMap = new Map<string, number>();
+  for (const e of hrByNight) {
+    hrByNightMap.set(e.nightKey, e.restingBpm);
+  }
+  // Intersect: only nights that have BOTH sleep + HR. Sorted by date.
+  const matchedKeys = Array.from(sleepByNight.keys())
+    .filter((k) => hrByNightMap.has(k))
+    .sort();
+  if (matchedKeys.length < 2) return null;
   const hr: VitalSeries = {
     type: 'hr',
-    points: hrWindow.map((v, i) => ({ t: i, value: v })),
+    points: matchedKeys.map((k) => {
+      const session = sleepByNight.get(k);
+      return {
+        t: (session?.sessionEndSec ?? 0) * 1000,
+        value: hrByNightMap.get(k) as number,
+      };
+    }),
   };
   const sleep: VitalSeries = {
     type: 'sleep',
-    points: sleepWindow.map((s, i) => ({ t: i, value: s.totalMinutes })),
+    points: matchedKeys.map((k) => {
+      const session = sleepByNight.get(k);
+      return {
+        t: (session?.sessionEndSec ?? 0) * 1000,
+        value: session?.totalMinutes ?? 0,
+      };
+    }),
   };
   return { hr, sleep };
 }
 
-const INSIGHT_BODY_HAS_DATA =
-  "Your resting heart rate has settled three points lower than last month. That tracks with the better sleep we've seen — they tend to move together. A calm wake again this morning.";
+// Sprint 16.5c — recent-readings row helpers.
+//
+// HR has the highest sample density of any vital (5-min auto cadence →
+// ~200 samples in the slice's recent cap). The user asked for the same
+// "Recent readings + Show more picker" affordance the other vitals have
+// so they can audit when each sample was captured. We pass the full
+// sorted list to RecentReadingsSection; its picker handles paging.
+
+function hrRowContext(bpm: number, ageHours: number, isFirst: boolean): string {
+  // The 0x15 history packet doesn't carry per-sample motion state, so
+  // we lean on the BPM zones for readable copy. Matches the HRZones
+  // bands (Resting / Steady / Elevated / Active) without re-inventing
+  // colour semantics.
+  const zone =
+    bpm < 65
+      ? 'Resting'
+      : bpm < 95
+        ? 'Steady'
+        : bpm < 125
+          ? 'Elevated'
+          : 'Active';
+  if (isFirst && ageHours < 1.5) return `Latest · ${zone.toLowerCase()}`;
+  if (ageHours < 24) return zone;
+  if (ageHours < 48) return `${zone} · yesterday`;
+  return zone;
+}
+
+function hrRowTime(measuredAtSec: number, nowMs: number): string {
+  const d = new Date(measuredAtSec * 1000);
+  const ageHours = (nowMs - measuredAtSec * 1000) / 3_600_000;
+  if (ageHours < 24) {
+    return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+  if (ageHours < 48) return 'Yesterday';
+  return d.toLocaleDateString([], { weekday: 'short' });
+}
+
+function buildHRRecentRows(samples: ReadonlyArray<HRSample>): RecentReading[] {
+  if (samples.length === 0) return [];
+  const sorted = samples.slice().sort((a, b) => b.measuredAtSec - a.measuredAtSec);
+  const nowMs = Date.now();
+  return sorted.map((s, idx) => {
+    const ageHours = (nowMs - s.measuredAtSec * 1000) / 3_600_000;
+    return {
+      id: `hr-${s.measuredAtSec}`,
+      value: `${Math.round(s.bpm)}`,
+      context: hrRowContext(s.bpm, ageHours, idx === 0),
+      time: hrRowTime(s.measuredAtSec, nowMs),
+    };
+  });
+}
 
 const INSIGHT_BODY_EMPTY =
   "Wear the watch to start tracking your heart rate. After a few nights of sleep, you'll see how it moves with your rest.";
+
+const INSIGHT_BODY_PRE_BASELINE =
+  "After a few nights of sleep, this card will compare your resting heart rate to your usual band and call out anything worth noting.";
+
+/** Sprint 18 H6 — comparative phrasing ("than your usual" / "than
+ *  last week") needs more than a couple of nights of data to be
+ *  honest. Matches the threshold used by SleepDetail. */
+export const HR_HISTORY_REFERENCE_NIGHTS = 7;
+
+/** Deterministic HR insight body — describes the real numbers against
+ *  the baseline. No fabricated month-over-month claims. */
+function hrInsightBody(
+  restingToday: number | null,
+  baseline: HRBaseline | null,
+  recentNightsCount: number = HR_HISTORY_REFERENCE_NIGHTS,
+): string {
+  if (restingToday === null || baseline === null) {
+    return INSIGHT_BODY_PRE_BASELINE;
+  }
+  const baselineMid = Math.round((baseline.bpmLow + baseline.bpmHigh) / 2);
+  const diff = Math.round(restingToday) - baselineMid;
+  const absDiff = Math.abs(diff);
+  const hasHistory = recentNightsCount >= HR_HISTORY_REFERENCE_NIGHTS;
+  if (absDiff <= 2) {
+    return hasHistory
+      ? `Your resting heart rate this morning (${Math.round(restingToday)} bpm) is right at your usual. Calm wake.`
+      : `Your resting heart rate this morning is ${Math.round(restingToday)} bpm — close to the middle of what we've seen so far. Calm wake.`;
+  }
+  if (diff < 0) {
+    return hasHistory
+      ? `Your resting heart rate this morning (${Math.round(restingToday)} bpm) is about ${absDiff} below your usual — a quieter night than last week.`
+      : `Your resting heart rate this morning is ${Math.round(restingToday)} bpm — about ${absDiff} below the middle of what we've seen so far. A few more nights of tracking will give us a stable usual to compare against.`;
+  }
+  return hasHistory
+    ? `Your resting heart rate this morning (${Math.round(restingToday)} bpm) is about ${absDiff} above your usual. Worth watching this week.`
+    : `Your resting heart rate this morning is ${Math.round(restingToday)} bpm — about ${absDiff} above the middle of what we've seen so far. A few more nights of tracking will tell us if this is a one-off.`;
+}
 
 export interface HRDetailProps {
   onBack: () => void;
   onArticleOpen?: (articleId: string) => void;
   onLearnOpen?: () => void;
+  /** Sprint 17a — caregiver entry. When set, HR + sleep data sources
+   *  swap to the parent-scoped query layer. Unset → unchanged
+   *  self-buyer behavior. */
+  familyId?: string;
 }
 
-export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) {
-  const data = useDailyPulseData();
+export function HRDetail({
+  onBack,
+  onArticleOpen,
+  onLearnOpen,
+  familyId,
+}: HRDetailProps) {
+  // Sprint 17a — both data sources called unconditionally (rules of
+  // hooks). Value-level pick below.
+  const ownPulse = useDailyPulseData();
+  const ownHRPending = useHR((s) => s.pending);
+  const ownHRRecent = useHR((s) => s.recent);
+  const ownSleepPending = useSleep((s) => s.pending);
+  const ownSleepRecent = useSleep((s) => s.recent);
+  const scopedFamilyId = familyId ?? null;
+  const parentPulse = useParentDailyPulseData(scopedFamilyId);
+  const parentRecent = useParentVitalsRecent(scopedFamilyId);
+  const emptyFallback = useMemo(() => emptyDailyPulse(), []);
+
+  // Sprint 18 H1 — distinguish loading + error from "truly empty" for
+  // the caregiver-scoped path. Same pattern SleepDetail uses.
+  const isCaregiverScoped = scopedFamilyId !== null;
+  const isInitialParentLoad =
+    isCaregiverScoped &&
+    (parentPulse.isLoading || parentRecent.isLoading) &&
+    parentPulse.data === null;
+  const parentLoadError = isCaregiverScoped
+    ? (parentPulse.error ?? parentRecent.error ?? null)
+    : null;
+
+  const data = scopedFamilyId
+    ? parentPulse.data ?? emptyFallback
+    : ownPulse;
   const restingToday = data.hr.restingToday;
   // Display value for the hero — resting today → recent resting → latest
   // sample. Falls back so the hero stops blanking when only a daytime
-  // reading exists, while resting-specific copy below stays on
-  // `restingToday` so we never narrate a daytime value as "resting".
+  // reading exists, while resting-specific copy below (insight, baseline,
+  // "resting this morning" prose) stays on `restingToday` so we never
+  // narrate a daytime value as "resting".
   const displayBpm = data.hr.displayBpm;
   const isLatestFallback = data.hr.displaySource === 'latest';
 
-  // Pull the live HR samples + the recent restingBpm series + last sleep
-  // sessions. These selectors return the underlying arrays; for the
-  // composed inputs (stats, zones, trend) we re-derive on every render —
-  // these are O(samples) over short windows and the screen renders
-  // infrequently. Sprint 9 introduces memoised selector hooks if needed.
-  const hrPending = useHR((s) => s.pending);
-  const hrRecent = useHR((s) => s.recent);
-  const sleepPending = useSleep((s) => s.pending);
-  const sleepRecent = useSleep((s) => s.recent);
+  // Sprint 16.5e — mirror DetailShell's range so the recent-readings
+  // list, the sleep × resting-HR correlation, and the zone-card
+  // distribution react to 7d / 30d / 90d. The today trend chart stays
+  // 24h-bound (it's literally "today").
+  const [range, setRange] = useState<TrendRange>('7d');
+
+  const hrPending = scopedFamilyId ? [] : ownHRPending;
+  const hrRecent = scopedFamilyId ? parentRecent.data.hr : ownHRRecent;
+  const sleepPending = scopedFamilyId ? [] : ownSleepPending;
+  const sleepRecent = scopedFamilyId
+    ? parentRecent.data.sleep
+    : ownSleepRecent;
 
   const allSamples = useMemo(
     () => [...hrPending, ...hrRecent],
     [hrPending, hrRecent],
   );
+
+  // Sprint 18 P-H3 — capture nowSec ONCE per mount so the useMemos
+  // below actually memoize. Previously this was re-derived on every
+  // render and listed as a dep, defeating each useMemo. The
+  // tradeoff: if the screen sits open across the 24h boundary the
+  // chart's "today" anchor doesn't drift — acceptable, and the user
+  // can pull-to-refresh or re-enter the screen to re-anchor.
+  const nowSec = useMemo(() => Math.floor(Date.now() / 1000), []);
+
+  // Same user timezone the hero uses (via dailyPulse) so the recent
+  // resting series here is bucketed consistently. Null → UTC.
+  const timeZone = useAuth((s) => s.profile?.timezone ?? null);
+
+  const rangedSamples = useMemo(() => {
+    const cutoff = nowSec - RANGE_TO_DAYS[range] * SECONDS_PER_DAY;
+    return allSamples.filter((s) => s.measuredAtSec >= cutoff);
+  }, [allSamples, range, nowSec]);
   const allSleepSessions = useMemo(
     () => [...sleepPending, ...sleepRecent],
     [sleepPending, sleepRecent],
   );
 
-  const nowSec = Math.floor(Date.now() / 1000);
-  // Same user timezone the hero uses (via dailyPulse), so the recent
-  // resting series here is bucketed consistently. Null → UTC.
-  const timeZone = useAuth((s) => s.profile?.timezone ?? null);
-
   const trendData = useMemo(
     () => buildTodayTrendData(allSamples, nowSec),
     [allSamples, nowSec],
   );
-  const zones = useMemo(() => buildZones(allSamples), [allSamples]);
-  const { restingAvg, peakToday } = useMemo(
+  const trendChartRange = useMemo(
+    () => dynamicHRChartRange(trendData),
+    [trendData],
+  );
+  const zones = useMemo(() => buildZones(rangedSamples), [rangedSamples]);
+
+  // Sprint 18 H3 — switch to the date-keyed accessor so the
+  // correlation downstream can pair by night.
+  const restingByNight = useMemo(
+    () => useHR.getState().restingBpmRecentByNight(nowSec, timeZone),
+    [nowSec, hrRecent, hrPending, timeZone],
+  );
+
+  const { restingAvg, peakToday, rangeToday } = useMemo(
     () =>
       buildStats(
         allSamples,
-        // restingBpmRecent is computed on the slice; we ask for it
-        // explicitly via getState() since it's a derived selector.
-        useHR.getState().restingBpmRecent(nowSec, timeZone),
+        restingByNight.map((e) => e.restingBpm),
         nowSec,
       ),
-    [allSamples, nowSec, timeZone],
+    [allSamples, nowSec, restingByNight],
   );
+
+  // ----- Baseline reference (16.5f) -----------------------------------
+  const baseline: HRBaseline | null = useMemo(
+    () => hrBaseline(restingByNight.map((e) => e.restingBpm)),
+    [restingByNight],
+  );
+  const baselineBody = baseline ? formatHRBaseline(baseline) : '';
 
   const correlation = useMemo(
     () =>
       buildSleepHRCorrelation(
-        useHR.getState().restingBpmRecent(nowSec, timeZone),
+        restingByNight,
         allSleepSessions,
+        RANGE_TO_DAYS[range],
+        nowSec,
       ),
-    [allSleepSessions, nowSec, timeZone],
+    [restingByNight, allSleepSessions, range, nowSec],
   );
 
-  // Resting-specific copy (insight card, "within your range") stays
-  // gated on a true resting value; the hero number uses the display
-  // fallback so it shows a daytime reading rather than blanking.
-  const hasResting = restingToday !== null;
+  const recentRows = useMemo(() => buildHRRecentRows(rangedSamples), [rangedSamples]);
+
+  // Resting-specific copy (insight card, baseline) stays gated on a
+  // true resting value; the hero number uses the display fallback so it
+  // shows a daytime reading rather than blanking.
+  const hasData = restingToday !== null;
   const hasDisplay = displayBpm !== null;
   const hasZoneData = zones.some((z) => z.pct > 0);
 
   // Sprint 16 — per D13 §6.6, surface a stale caption when the latest
-  // HR sample is older than 6h.
+  // HR sample is older than 6h. Gate on the displayed value so a
+  // daytime-only reading still gets a staleness check.
   const staleness = hasDisplay
     ? checkStaleness('hr', data.hr.latestSampleSec, nowSec)
     : 'no_data';
@@ -280,11 +520,11 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
       ? formatStalenessCaption(data.hr.latestSampleSec, nowSec)
       : null;
 
-  // Hero copy — voice-rule clean. "Within your range" lifts from the
-  // design source and assumes a resting value; the latest-fallback path
-  // uses neutral wording so we never imply a daytime reading is resting.
-  // Empty-state copy is plain language with no fear framing per
-  // docs/05-voice-and-claims.md.
+  // Sprint 18 P-H1 — "within your range" framing assumes a known range
+  // and shouldn't fire before the user has any baseline. Once the
+  // baseline computes, "within your range" makes sense; before that,
+  // a neutral "bpm" reads honestly. The latest-fallback path uses
+  // neutral wording so we never imply a daytime reading is resting.
   const heroPrimary = hasDisplay ? String(Math.round(displayBpm!)) : '—';
   const heroSub =
     staleCaption ??
@@ -296,13 +536,16 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
   const heroRange = hasDisplay
     ? isLatestFallback
       ? 'bpm · latest reading'
-      : 'bpm · within your range'
+      : baseline !== null
+        ? 'bpm · within your range'
+        : 'bpm · resting'
     : 'Wear the watch to start tracking your heart rate.';
 
   return (
     <DetailShell
       vital="hr"
       onBack={onBack}
+      onRangeChange={setRange}
       hero={
         <VitalHero
           vital="hr"
@@ -316,71 +559,143 @@ export function HRDetail({ onBack, onArticleOpen, onLearnOpen }: HRDetailProps) 
       }
       testID="hr-detail"
     >
-      <StatTrio
-        items={[
-          {
-            label: 'Resting',
-            value: restingAvg !== null ? String(restingAvg) : '—',
-            unit: restingAvg !== null ? 'bpm avg' : 'bpm',
-          },
-          {
-            label: 'Peak',
-            value: peakToday !== null ? String(peakToday) : '—',
-            unit: peakToday !== null ? 'today' : 'bpm',
-          },
-          {
-            label: 'Variability',
-            value: '—',
-            unit: 'ms',
-          },
-        ]}
-        testID="hr-detail-stats"
-      />
-
-      {trendData.length > 0 ? (
-        <VitalTrendChart
-          vital="hr"
-          data={trendData}
-          range={TREND_RANGE_BPM}
-          caption="Today · resting HR"
-          subCaption="60–95 band"
-          peak
-          trough
-          testID="hr-detail-trend"
-          style={{ marginHorizontal: 20 }}
+      {/* Sprint 18 H1 — caregiver-scoped loading + error swap-in.
+          During the initial parent fetch we render a calm spinner
+          instead of telling the caregiver their parent has no HR
+          data; on fetch errors we surface a recoverable banner
+          instead of silently falling through to the empty-state UI. */}
+      {isInitialParentLoad ? (
+        <LoadingState testID="hr-detail-loading" />
+      ) : parentLoadError ? (
+        <ErrorState
+          onRetry={() => {
+            void parentPulse.refresh();
+            void parentRecent.refresh();
+          }}
+          testID="hr-detail-error"
         />
-      ) : null}
+      ) : (
+        <Fragment>
+          {baselineBody ? (
+            <BaselineReference
+              body={baselineBody}
+              eyebrow="Your usual resting"
+              caption={`over the last ${baseline?.sampleCount ?? 14} nights`}
+              testID="hr-detail-baseline"
+            />
+          ) : null}
+          <StalenessHintRow stale={staleness === 'stale'} testID="hr-detail-staleness-hint" />
+          {/* Sprint 18 H2 — first slot label is "Resting avg" to
+              disambiguate from the hero's "Now · resting" (the live
+              value), and unit drops the redundant "avg" qualifier.
+              Sprint 18 H5 — third slot drops the redundant "spread"
+              qualifier; "Range today 30 bpm" reads cleanly. */}
+          <StatTrio
+            items={[
+              {
+                label: 'Resting avg',
+                value: restingAvg !== null ? String(restingAvg) : '—',
+                unit: 'bpm',
+              },
+              {
+                label: 'Peak',
+                value: peakToday !== null ? String(peakToday) : '—',
+                unit: peakToday !== null ? 'today' : 'bpm',
+              },
+              {
+                label: 'Range today',
+                value: rangeToday !== null ? String(rangeToday) : '—',
+                unit: 'bpm',
+              },
+            ]}
+            testID="hr-detail-stats"
+          />
 
-      {hasZoneData ? (
-        <HRZonesCard
-          zones={zones}
-          testID="hr-detail-zones"
-        />
-      ) : null}
+          {trendData.length > 0 ? (
+            <VitalTrendChart
+              vital="hr"
+              data={trendData}
+              range={trendChartRange}
+              // Sprint 18 H4 — caption is more honest. The trend
+              // window is the last 24 hours, not strictly "today";
+              // "Last 24h" reads truthfully when the user looks at
+              // it at 2am and the chart still shows last evening.
+              caption="Last 24h · heart rate"
+              subCaption={`${trendChartRange[0]}–${trendChartRange[1]} band`}
+              peak
+              trough
+              testID="hr-detail-trend"
+              style={{ marginHorizontal: 20 }}
+            />
+          ) : null}
 
-      {correlation ? (
-        <CorrelationStrip
-          vitalA={correlation.sleep}
-          vitalB={correlation.hr}
-          range="7d"
-          caption="Sleep × resting HR — last 7 days"
-          testID="hr-detail-correlation"
-          style={{ marginHorizontal: 20 }}
-        />
-      ) : null}
+          {hasZoneData ? (
+            <HRZonesCard
+              zones={zones}
+              label={`Time in zones · last ${RANGE_TO_DAYS[range]} days`}
+              testID="hr-detail-zones"
+            />
+          ) : null}
 
-      <VitalInsightCard
-        vital="hr"
-        body={hasResting ? INSIGHT_BODY_HAS_DATA : INSIGHT_BODY_EMPTY}
-        testID="hr-detail-insight"
-      />
+          {correlation ? (
+            <CorrelationStrip
+              vitalA={correlation.sleep}
+              vitalB={correlation.hr}
+              range={range}
+              caption={`Sleep × resting HR — last ${RANGE_TO_DAYS[range]} days`}
+              tBounds={(() => {
+                const nowMs = nowSec * 1000;
+                const days = RANGE_TO_DAYS[range];
+                return { tMin: nowMs - days * 24 * 60 * 60 * 1000, tMax: nowMs };
+              })()}
+              axisLabels={(() => {
+                const nowMs = nowSec * 1000;
+                const days = RANGE_TO_DAYS[range];
+                const startMs = nowMs - days * 24 * 60 * 60 * 1000;
+                const left = new Date(startMs).toLocaleDateString([], {
+                  month: 'short',
+                  day: 'numeric',
+                });
+                return { left, right: 'today' };
+              })()}
+              testID="hr-detail-correlation"
+              style={{ marginHorizontal: 20 }}
+            />
+          ) : null}
 
-      <VitalExplainerAnchor
-        context={{ type: 'hr', restingHr: restingToday ?? null }}
-        onArticleOpen={onArticleOpen}
-        onLearnOpen={onLearnOpen}
-        testID="hr-detail-explainer-anchor"
-      />
+          {recentRows.length > 0 ? (
+            <RecentReadingsSection
+              vital="hr"
+              eyebrow="Recent readings"
+              readings={recentRows}
+              testID="hr-detail-recent"
+            />
+          ) : null}
+
+          {/* Sprint 18 H6 — insight body knows how many resting-night
+              entries the user has, and gates the "than your usual" /
+              "than last week" copy on HR_HISTORY_REFERENCE_NIGHTS (7).
+              Below that, switches to non-comparative phrasing so the
+              first-week user isn't told they're "above their usual"
+              when they have no usual yet. */}
+          <VitalInsightCard
+            vital="hr"
+            body={
+              hasData
+                ? hrInsightBody(restingToday, baseline, restingByNight.length)
+                : INSIGHT_BODY_EMPTY
+            }
+            testID="hr-detail-insight"
+          />
+
+          <VitalExplainerAnchor
+            context={{ type: 'hr', restingHr: restingToday ?? null }}
+            onArticleOpen={onArticleOpen}
+            onLearnOpen={onLearnOpen}
+            testID="hr-detail-explainer-anchor"
+          />
+        </Fragment>
+      )}
     </DetailShell>
   );
 }

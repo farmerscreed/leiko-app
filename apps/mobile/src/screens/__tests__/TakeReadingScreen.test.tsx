@@ -75,7 +75,16 @@ function withProviders(ui: ReactNode) {
 
 const goBack = jest.fn();
 const navigate = jest.fn();
-const nav = { goBack, navigate } as unknown as Parameters<typeof TakeReadingScreen>[0]['navigation'];
+// Sprint 18 — added `replace` to support the new onContinueToDetail
+// path that replaces TakeReading with ReadingDetail on the stack
+// instead of pushing (so Back from ReadingDetail goes to Home, not
+// back into the just-finished TakeReading success view).
+const replace = jest.fn();
+// The component's Props is a union; using `any` here bypasses a
+// TS variance quirk in JSX prop resolution. Tests only exercise
+// runtime behaviour, not the type signature.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const nav: any = { goBack, navigate, replace };
 
 beforeEach(() => {
   mockConnectToUrion.mockReset();
@@ -174,13 +183,21 @@ describe('TakeReadingScreen — happy path (watch flow)', () => {
       source: 'watch',
     });
 
-    // Done routes to Reading Detail with the localId.
+    // Sprint 18 bench bug — Done routes to Reading Detail with the
+    // localId, and uses `replace` so the stack ends up as Home →
+    // ReadingDetail (no orphaned TakeReading frame between them).
+    // Falls back to `navigate` only if the navigator doesn't expose
+    // `replace`.
     fireEvent.press(screen.getByTestId('take-reading-done'));
     await waitFor(() => {
-      expect(navigate).toHaveBeenCalledWith('ReadingDetail', {
+      expect(replace).toHaveBeenCalledWith('ReadingDetail', {
         readingLocalId: stored.localId,
       });
     });
+    expect(navigate).not.toHaveBeenCalledWith(
+      'ReadingDetail',
+      expect.anything(),
+    );
   });
 });
 

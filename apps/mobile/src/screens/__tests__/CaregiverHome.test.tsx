@@ -33,7 +33,6 @@ const mockHookResult = {
   refresh: mockRefresh,
 };
 
-const EMPTY_VITAL_STRIP = { bp: '—', hr: '—', spo2: '—', sleep: '—' };
 
 jest.mock('../../hooks/useCaregiverFamily', () => ({
   useCaregiverFamily: () => mockHookResult,
@@ -45,8 +44,20 @@ let mockViewMode: 'birds' | 'cards' = 'birds';
 const setMockViewMode = (m: 'birds' | 'cards') => {
   mockViewMode = m;
 };
+// hasExplicitPreference defaults to true so tests that set mockViewMode
+// get exactly that mode (the count-based default only applies when the
+// user hasn't toggled). The default-by-count behaviour is covered by its
+// own describe block below, which flips this to false.
+let mockHasExplicitPreference = true;
+const setMockHasExplicitPreference = (v: boolean) => {
+  mockHasExplicitPreference = v;
+};
 jest.mock('../../hooks/useCaregiverViewMode', () => ({
-  useCaregiverViewMode: () => ({ viewMode: mockViewMode, setViewMode: jest.fn() }),
+  useCaregiverViewMode: () => ({
+    viewMode: mockViewMode,
+    setViewMode: jest.fn(),
+    hasExplicitPreference: mockHasExplicitPreference,
+  }),
 }));
 
 jest.mock('../../state/pairing', () => ({
@@ -69,7 +80,18 @@ jest.mock('../../hooks/useSeededLearnCard', () => ({
 }));
 
 jest.mock('../../state/readings', () => {
-  const state = { latest: () => null, pending: [], recent: [] };
+  // Sprint 16.6 — `byLocalId` was added to useReadings in the cross-phone
+  // tap-routing fix (commit 221f19c) so CaregiverHome can distinguish a
+  // local reading (route to ReadingDetail) from a server-only one
+  // (sprint 17a routes those to ParentDashboard). The test's existing
+  // assertion expects ReadingDetail navigation, so the mock returns a
+  // stub for any id.
+  const state = {
+    latest: () => null,
+    pending: [],
+    recent: [],
+    byLocalId: (id: string) => ({ localId: id } as unknown),
+  };
   const useReadings = (selector?: (s: unknown) => unknown) =>
     selector ? selector(state) : state;
   // Sprint 14.5 task 3 — useSeededLearnCard reads useReadings.getState()
@@ -130,6 +152,8 @@ function parent(overrides: Partial<ParentSummary> & { familyId: string; parentDi
     parentDisplayName: overrides.parentDisplayName,
     parentRelationship: overrides.parentRelationship ?? 'Mom',
     parentYearOfBirth: overrides.parentYearOfBirth ?? 1955,
+    viewerRole: overrides.viewerRole ?? 'family_owner',
+    caregiverRelationshipLabel: overrides.caregiverRelationshipLabel ?? null,
     latestReading: overrides.latestReading ?? null,
     recentReadings: overrides.recentReadings ?? [],
     latestHr: overrides.latestHr ?? null,
@@ -146,17 +170,25 @@ beforeEach(() => {
   mockHookResult.isRefreshing = false;
   mockHookResult.error = null;
   setMockViewMode('birds');
+  setMockHasExplicitPreference(true);
 });
 
 describe('<CaregiverHome /> — empty state', () => {
-  it('renders the verified empty-state copy when the user has no families', () => {
+  // Sprint 16.6 Issue #1 — empty state inverted to lead with the
+  // invite-code path (the more common journey for non-technical
+  // caregivers being invited by an existing user) and a secondary
+  // link drops to Settings → Family for outgoing invites.
+  it('renders the empty-state heading + body + both CTAs', () => {
     render(withProviders(<CaregiverHome />));
     expect(screen.getByText('Your family circle is quiet for now')).toBeTruthy();
     expect(
-      screen.getByText('Add a family member to start sharing care.'),
+      screen.getByText(/Has someone shared an invite code with you/),
     ).toBeTruthy();
     expect(
-      screen.getByRole('button', { name: 'Add a family member' }),
+      screen.getByRole('button', { name: 'I have an invite code' }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'Or invite someone yourself' }),
     ).toBeTruthy();
   });
 
@@ -268,27 +300,23 @@ describe('<CaregiverHome /> — populated state', () => {
 
 describe('<CaregiverHome /> — anomaly banner', () => {
   function setupOnePerson(status: 'clear' | 'attention' | 'urgent') {
+    // ADR-0006 Phase 2 — status is DERIVED from the reading by
+    // buildConstellationNodes now (not injected via `people`). Use BP
+    // that classifies to the intended tier (classification.ts:
+    // >=180/120 urgent; >160/100 attention; else clear/in_pattern).
+    const bp =
+      status === 'urgent'
+        ? { systolic: 188, diastolic: 122 }
+        : status === 'attention'
+          ? { systolic: 168, diastolic: 104 }
+          : { systolic: 122, diastolic: 78 };
     mockHookResult.parents = [
       parent({
         familyId: 'fam-1',
         parentDisplayName: 'Marian Okeke',
         parentRelationship: 'Mom',
-        latestReading: reading({ id: 'r1', systolic: 122, diastolic: 78 }),
+        latestReading: reading({ id: 'r1', ...bp }),
       }),
-    ];
-    mockHookResult.people = [
-      {
-        id: 'fam-1',
-        fullName: 'Marian Okeke',
-        initial: 'M',
-        accentIndex: 1,
-        status,
-        bpLabel: '122/78',
-        headline: 'headline',
-        sentence: 'sentence',
-        relation: 'Mom',
-        vitalStrip: EMPTY_VITAL_STRIP,
-      },
     ];
   }
 
@@ -312,76 +340,52 @@ describe('<CaregiverHome /> — anomaly banner', () => {
   });
 
   it('confirmed-urgent wins over calm-concerned (most-severe-wins)', () => {
+    // Status derived from readings: Marian attention (168/104), Emeka
+    // urgent (188/122). Most-severe-wins → Emeka's banner.
     mockHookResult.parents = [
       parent({
         familyId: 'fam-1',
         parentDisplayName: 'Marian Okeke',
         parentRelationship: 'Mom',
-        latestReading: reading({ id: 'r1' }),
+        latestReading: reading({ id: 'r1', systolic: 168, diastolic: 104 }),
       }),
       parent({
         familyId: 'fam-2',
         parentDisplayName: 'Emeka Okeke',
         parentRelationship: 'Dad',
-        latestReading: reading({ id: 'r2' }),
+        latestReading: reading({ id: 'r2', systolic: 188, diastolic: 122 }),
       }),
     ];
-    mockHookResult.people = [
-      {
-        id: 'fam-1',
-        fullName: 'Marian Okeke',
-        initial: 'M',
-        accentIndex: 1,
-        status: 'attention',
-        bpLabel: '122/78',
-        headline: 'h',
-        sentence: 's',
-        relation: 'Mom',
-        vitalStrip: EMPTY_VITAL_STRIP,
-      },
-      {
-        id: 'fam-2',
-        fullName: 'Emeka Okeke',
-        initial: 'E',
-        accentIndex: 2,
-        status: 'urgent',
-        bpLabel: '188/120',
-        headline: 'h',
-        sentence: 's',
-        relation: 'Dad',
-        vitalStrip: EMPTY_VITAL_STRIP,
-      },
-    ];
     render(withProviders(<CaregiverHome />));
-    // Confirmed-urgent (Dad) wins; calm-concerned (Marian) is suppressed.
+    // Confirmed-urgent (Dad) wins; calm-concerned (Marian) is suppressed
+    // in the BANNER. (Marian's attention headline "Worth a chat …" still
+    // renders in her legend row — that's per-person copy, not the banner,
+    // so we assert on the banner's specific title, not a loose substring.)
     expect(screen.getByText('Talk to Emeka now')).toBeTruthy();
-    expect(screen.queryByText(/Worth a chat/)).toBeNull();
+    expect(screen.queryByText('Worth a chat with Marian')).toBeNull();
   });
 });
 
 describe('<CaregiverHome /> — view toggle (Sprint 7.7b)', () => {
   function setupThree() {
+    // ADR-0006 Phase 2 — the vital strip is now DERIVED from the parent's
+    // latestHr/latestSpo2/latestSleep (not injected via `people`). Populate
+    // them so the derived strip renders 64 / 98% / 7:42 (462 min).
     mockHookResult.parents = [
       parent({
         familyId: 'fam-1',
         parentDisplayName: 'Marian Okeke',
         parentRelationship: 'Mom',
-        latestReading: reading({ id: 'r-mom' }),
+        latestReading: reading({ id: 'r-mom', systolic: 122, diastolic: 78 }),
+        latestHr: { measuredAt: new Date().toISOString(), bpm: 64 },
+        latestSpo2: { measuredAt: new Date().toISOString(), percent: 98 },
+        latestSleep: {
+          measuredAt: new Date().toISOString(),
+          totalMinutes: 462,
+          deepMinutes: null,
+          lightMinutes: null,
+        },
       }),
-    ];
-    mockHookResult.people = [
-      {
-        id: 'fam-1',
-        fullName: 'Marian Okeke',
-        initial: 'M',
-        accentIndex: 1,
-        status: 'clear',
-        bpLabel: '122/78',
-        headline: 'h',
-        sentence: 'BP 122/78 a moment ago. Inside the usual band.',
-        relation: 'Mom',
-        vitalStrip: { bp: '122/78', hr: '64', spo2: '98%', sleep: '7:42' },
-      },
     ];
   }
 
@@ -429,10 +433,10 @@ describe('<CaregiverHome /> — view toggle (Sprint 7.7b)', () => {
   });
 });
 
-describe('<CaregiverHome /> — Ask Leiko (Sprint 12 follow-up)', () => {
-  it('renders the floating Ask Leiko button', () => {
+describe('<CaregiverHome /> — Ask Leiko', () => {
+  it('renders the Ask Leiko affordance in the header (moved off the bottom FAB)', () => {
     render(withProviders(<CaregiverHome />));
-    expect(screen.getByTestId('caregiver-home-ask-leiko-fab')).toBeTruthy();
+    expect(screen.getByTestId('caregiver-home-ask-leiko')).toBeTruthy();
   });
 });
 
@@ -502,11 +506,88 @@ describe('<CaregiverHome /> — seeded Learn card (Sprint 14.5 task 3)', () => {
 describe('<CaregiverHome /> — voice rules', () => {
   it.each([
     'Your family circle is quiet for now',
-    'Add a family member to start sharing care.',
+    // Sprint 16.6 Issue #1 — empty-state copy refreshed for the
+    // invite-code-first CTA. Body explains the incoming-caregiver
+    // path; primary CTA opens the AcceptInviteSheet; secondary text
+    // link drops to Settings → Family for outgoing invites.
+    /Has someone shared an invite code with you/,
+    'I have an invite code',
+    /Or invite someone yourself/,
     'Good morning',
     'Leiko · Family',
   ])('voice-rule clean string present: %s', (text) => {
     render(withProviders(<CaregiverHome />));
     expect(screen.getByText(text)).toBeTruthy();
+  });
+});
+
+describe('<CaregiverHome /> — Take a reading (wearer-only, ADR-0006 Phase 3)', () => {
+  it('shows the bottom tab bar (with Take a reading) when the viewer is a wearer', () => {
+    mockHookResult.parents = [
+      parent({
+        familyId: 'me',
+        parentDisplayName: 'Lawrence',
+        parentRelationship: 'self',
+        latestReading: reading({ id: 'r-self', systolic: 118, diastolic: 78 }),
+      }),
+    ];
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-tab-bar')).toBeTruthy();
+    // The centre "+" Take-a-reading lives inside the tab bar.
+    expect(
+      screen.getByTestId('caregiver-home-tab-bar-tab-take_reading'),
+    ).toBeTruthy();
+  });
+
+  it('hides the tab bar for a pure caregiver (no self-circle)', () => {
+    mockHookResult.parents = [
+      parent({
+        familyId: 'mum',
+        parentDisplayName: 'Marian',
+        parentRelationship: 'Mom',
+        latestReading: reading({ id: 'r-mum', systolic: 122, diastolic: 78 }),
+      }),
+    ];
+    render(withProviders(<CaregiverHome />));
+    expect(screen.queryByTestId('caregiver-home-tab-bar')).toBeNull();
+  });
+});
+
+describe('<CaregiverHome /> — default view by count (ADR-0006 Phase 3)', () => {
+  // When the user has NOT explicitly toggled, the default view depends on
+  // how many nodes are in the circle: cards for <=2, birds-eye for 3+.
+  beforeEach(() => {
+    setMockHasExplicitPreference(false);
+  });
+
+  function people(n: number) {
+    return Array.from({ length: n }, (_, i) =>
+      parent({
+        familyId: `fam-${i}`,
+        parentDisplayName: `Person ${i}`,
+        parentRelationship: i === 0 ? 'self' : 'Mom',
+        latestReading: reading({ id: `r-${i}`, systolic: 120, diastolic: 78 }),
+      }),
+    );
+  }
+
+  it('defaults to cards (detailed) for a solo wearer (1 node)', () => {
+    mockHookResult.parents = people(1);
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-detailed')).toBeTruthy();
+    expect(screen.queryByTestId('caregiver-home-birds-layer')).toBeNull();
+  });
+
+  it('defaults to cards for 2 nodes (you + 1 person)', () => {
+    mockHookResult.parents = people(2);
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-detailed')).toBeTruthy();
+  });
+
+  it('defaults to birds-eye for 3+ nodes', () => {
+    mockHookResult.parents = people(3);
+    render(withProviders(<CaregiverHome />));
+    expect(screen.getByTestId('caregiver-home-birds-layer')).toBeTruthy();
+    expect(screen.queryByTestId('caregiver-home-detailed')).toBeNull();
   });
 });

@@ -1,4 +1,4 @@
-// syncBacklog — Sprint 6 cursor-aware fetch.
+// syncBacklog — Sprint 6 building block; cursor semantics rewired in Sprint 16.5a.
 //
 // On any successful BLE connect we run an incremental backlog pull:
 // the watch buffers measurements while the app is closed (typical
@@ -6,21 +6,39 @@
 // in the room), and we should surface every reading that's accumulated
 // since the last successful sync.
 //
-// Sprint 6 ships the building block; Sprint 7's caregiver-home will
-// own the orchestrator (when to run this — cold start, foreground,
-// BT_READY transition, etc.).
+// Sprint 6 ships the building block; Sprint 7's caregiver-home owns
+// the orchestrator (cold start, foreground, BT_READY, etc.).
 //
-// Cursor model — per docs/_reference/U16PRO_protocol_en.pdf §4.5:
-//   - lastSync = 0  → first sync; pull "latest 50" with TS=0, DIR=0/1
-//   - lastSync > 0  → incremental; pull readings newer than lastSync
-//                     with TS=lastSync, DIR=1 (backtrack from latest
-//                     stopping at TS, return up to 50 newer ones)
+// QUERY MODEL — empirically verified 2026-05-12 (Sprint 16.5a Phase A):
+//   The Sprint 6 cursor model used `readBPHistory(TS=lastSync, DIR=1)`
+//   for incremental sync, assuming DIR=1 means "walk from latest
+//   stopping at TS, returning newer-than-TS records." That's WRONG.
+//   The empirical behaviour of DIR=1 is: return records strictly OLDER
+//   than TS. Cursor-anchored queries therefore can NEVER return records
+//   ≥ cursor — every BP cycle taken since the previous sync was
+//   permanently invisible until a cursor reset.
+//
+//   Five captured traces 2026-05-12 (plans/captures/2026-05-12-capture-notes.md)
+//   prove this end-to-end: with cursor=1778598235, the watch returned
+//   first.ts=1778597282 (953s OLDER than cursor) even when fresh BP
+//   cycles had landed in the watch's transferable register.
+//
+//   The fix: always query TS=0 (per protocol §4.5: "TS=0 returns
+//   latest COUNT records, DIR ignored"). The in-memory `lastSync`
+//   stays as a filter-only marker — it keeps the addPending writes
+//   to records newer than the previous high-watermark. addPendingReading's
+//   identity-dedupe (source, deviceBleId, measuredAtSec) handles the
+//   already-ingested records that come back in every batch.
+//
+//   Cost: 50 × 16-byte packets per sync ≈ 800 bytes BLE traffic. The
+//   filter saves the dedupe-overhead for the in-memory case.
 //
 // Single-batch syncBacklog stays the building block (used by the
 // take-reading-sheet flow). Sprint 7 adds syncBacklogToCompletion
-// below, which loops the cursor until the watch returns an empty
-// page — needed when the watch has been buffering for >50 readings
-// (parent's phone offline for a week scenario, intent memo §6.2).
+// below; with TS=0 the loop self-terminates after one iteration
+// (no new records on the second pass; filter rejects everything;
+// pulled=0; loop exits). Deep historical backfill (records older
+// than the latest 50) is a separate concern handled in Phase 16.5c.
 
 import { mmkv, STORAGE_KEYS } from '../storage';
 import { readBPHistory } from '../ble/commands/readBPHistory';
@@ -29,6 +47,10 @@ import type { UrionDevice } from '../ble/UrionDevice';
 import { useReadings } from '../../state/readings';
 import { logger } from '../analytics/logger';
 import type { VitalSyncCursor } from '../../types/vitals';
+
+// BLE_TRACE — Sprint 16.5a Phase A forensic-capture instrumentation.
+// See apps/mobile/src/services/ble/UrionDevice.ts for the convention.
+const BLE_TRACE = typeof __DEV__ !== 'undefined' && __DEV__;
 
 const BATCH_SIZE = 50;
 
@@ -67,6 +89,29 @@ export function watchTimestampToUtcSec(rawWatchSec: number): number {
   const phoneOffsetSec =
     -new Date(rawWatchSec * 1000).getTimezoneOffset() * 60;
   return rawWatchSec + WATCH_FIRMWARE_OFFSET_SEC - phoneOffsetSec;
+}
+
+// Sprint 16.5c — HR + SpO2 path uses a DIFFERENT firmware encoding than
+// BP. The 0x14 (BP) packet carries `wall_clock_display_as_Beijing` —
+// hence the +8h firmware offset above. The 0x15 (HR) day-anchor and the
+// 0x2D (SpO2) day-anchor are echoed back as `wall_clock_display_as_UTC`
+// — the watch interprets the unix sec we send (e.g. for `<day>T00:00:00Z`)
+// as a literal wall-clock anchor and records subsequent samples at slot
+// indexes derived from its own wall-clock progression. Verified on
+// U19M_013C / Pixel 8 in Lagos 2026-05-13 (scenario-13 trace):
+//   • sample 0 of "2026-05-13" had ts = 1778630400 = 2026-05-13T00:00 UTC
+//     and bpm = 79 (sleeping HR at real-Lagos 00:00, watch wall clock
+//     displayed 00:00 — interpreted-as-UTC matches the watch face value)
+//   • sample 194 had ts = 1778688600 (= 16:10 UTC) and was the freshest
+//     sample at real-Lagos 16:10 — i.e. the watch's wall-clock 16:10
+//     mapped to slot index 194 (= 16:10 / 5min from midnight).
+// So for HR/SpO2 the correct correction to TRUE UTC subtracts the
+// user's local-offset (Lagos +1 → subtract 3600 s). Equivalent to the
+// general formula with WATCH_FIRMWARE_OFFSET_SEC=0.
+export function watchVitalTimestampToUtcSec(rawWatchSec: number): number {
+  const phoneOffsetSec =
+    -new Date(rawWatchSec * 1000).getTimezoneOffset() * 60;
+  return rawWatchSec - phoneOffsetSec;
 }
 
 // Per-device, per-vital sync cursor — Sprint 7.5 / D13 §3.4.
@@ -194,6 +239,74 @@ export function resetVitalCursors(deviceBleId: string): void {
 export interface BacklogResult {
   pulled: number;
   latestTimestampSec: number | null;
+  /** Sprint 16.5b — oldest raw timestamp seen in THIS batch's
+   *  readBPHistory response (regardless of whether it passed the cursor
+   *  filter). Used by `syncBacklogToCompletion` to anchor the next
+   *  backfill iteration walking backward via DIR=1. Null when the
+   *  watch returned no records. */
+  oldestTimestampSecInBatch: number | null;
+}
+
+/** Sprint 16.5b — pull a batch of BP records STRICTLY OLDER than
+ *  `anchorTs` (the documented use for DIR=1). Used by
+ *  `syncBacklogToCompletion` to walk backward through the watch's
+ *  stored history beyond the latest 50 that the forward `syncBacklog`
+ *  captures via TS=0. Does NOT touch the in-memory lastSync cursor —
+ *  cursor is a forward-watermark only. Records are deduped at ingest
+ *  by addPendingReading's `(source, deviceBleId, measuredAtSec)` key,
+ *  so re-fetched records are safe. */
+export interface BacklogBackwardResult {
+  /** Raw count of records returned by readBPHistory (pre-dedupe). */
+  pulled: number;
+  /** Oldest raw timestamp in this batch. Caller anchors the next
+   *  iteration at this value. Null when the watch returned nothing. */
+  oldestTimestampSec: number | null;
+}
+
+export async function backfillBPHistoryOlderThan(
+  device: UrionDevice,
+  deviceBleId: string,
+  anchorTs: number,
+  options: { timeoutMs?: number } = {},
+): Promise<BacklogBackwardResult> {
+  if (anchorTs <= 0) {
+    return { pulled: 0, oldestTimestampSec: null };
+  }
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] backfillBPHistoryOlderThan enter anchorTs=${anchorTs} (DIR=1 walk-backward)`,
+    );
+  }
+  const readings = await readBPHistory(device, {
+    sinceTimestampSec: anchorTs,
+    direction: 'oldest_first', // DIR=1 — records strictly < anchorTs
+    count: BATCH_SIZE,
+    timeoutMs: options.timeoutMs ?? 10_000,
+  });
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] backfillBPHistoryOlderThan returned ${readings.length} packet(s); ` +
+        `first.ts=${readings[0]?.timestampSec ?? 'n/a'} ` +
+        `last.ts=${readings[readings.length - 1]?.timestampSec ?? 'n/a'}`,
+    );
+  }
+  if (readings.length === 0) {
+    return { pulled: 0, oldestTimestampSec: null };
+  }
+  const addPending = useReadings.getState().addPendingReading;
+  let oldest = readings[0].timestampSec;
+  for (const r of readings) {
+    addPending({
+      measuredAtSec: watchTimestampToUtcSec(r.timestampSec),
+      systolic: r.systolic,
+      diastolic: r.diastolic,
+      pulse: r.pulse,
+      source: 'watch',
+      deviceBleId,
+    });
+    if (r.timestampSec < oldest) oldest = r.timestampSec;
+  }
+  return { pulled: readings.length, oldestTimestampSec: oldest };
 }
 
 export async function syncBacklog(
@@ -215,12 +328,28 @@ export async function syncBacklog(
     }
   }
   let lastSync = getLastSyncSec(deviceBleId);
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncBacklog enter deviceBleId=${deviceBleId} lastSync=${lastSync} (filter-only; query is TS=0)`,
+    );
+  }
+  // Always query TS=0 — see file header for the rationale. The watch
+  // returns its latest COUNT records (DIR is ignored when TS=0); the
+  // in-memory `lastSync` filter below keeps just the ones we haven't
+  // seen yet.
   let readings = await readBPHistory(device, {
-    sinceTimestampSec: lastSync,
+    sinceTimestampSec: 0,
     direction: 'oldest_first',
     count: BATCH_SIZE,
     timeoutMs: options.timeoutMs ?? 10_000,
   });
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncBacklog readBPHistory returned ${readings.length} packet(s); ` +
+        `first.ts=${readings[0]?.timestampSec ?? 'n/a'} ` +
+        `last.ts=${readings[readings.length - 1]?.timestampSec ?? 'n/a'}`,
+    );
+  }
   // Sprint 12.5.1 Option C — auto-recover from a long-stale cursor
   // when the watch also returns nothing. Per U16PRO §4.5, the watch
   // returns the 0xFFFFFFFF terminator when DIR=1's TS anchor cannot
@@ -254,7 +383,13 @@ export async function syncBacklog(
     }
   }
   if (readings.length === 0) {
-    return { pulled: 0, latestTimestampSec: null };
+    return { pulled: 0, latestTimestampSec: null, oldestTimestampSecInBatch: null };
+  }
+  // Track oldest in this batch (pre-cursor-filter) so the loop in
+  // syncBacklogToCompletion can anchor backward-walk iterations.
+  let oldestInBatch = readings[0].timestampSec;
+  for (const r of readings) {
+    if (r.timestampSec < oldestInBatch) oldestInBatch = r.timestampSec;
   }
   // De-dupe by cursor: when lastSync > 0, DIR=1 returns records OLDER
   // than the cursor (verified empirically + per U16PRO §4.5). We only
@@ -280,12 +415,19 @@ export async function syncBacklog(
     if (r.timestampSec > newest) newest = r.timestampSec;
   }
   if (newest > lastSync) setLastSyncSec(deviceBleId, newest);
+  if (BLE_TRACE) {
+    console.log(
+      `[ble-trace] syncBacklog exit pulled=${fresh.length} ` +
+        `(filtered from ${readings.length}); cursor ${lastSync} → ${newest}`,
+    );
+  }
   // Per-row addPendingReading already emits reading_persisted with
   // the correct tier; no batch-summary event needed (the count is
   // derivable from the row events).
   return {
     pulled: fresh.length,
     latestTimestampSec: newest > 0 ? newest : null,
+    oldestTimestampSecInBatch: oldestInBatch,
   };
 }
 

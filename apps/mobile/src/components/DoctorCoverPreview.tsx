@@ -25,8 +25,16 @@ export interface DoctorCoverPreviewProps {
   rangeLabel: string;
   /** Inclusive date range, e.g. "Apr 12 – May 12, 2026". */
   datesLabel: string;
-  /** Caregiver mode flips "your" → "her/his/their" in the cover line. */
+  /** Caregiver mode flips "your" → the parent's actual name in the
+   *  cover line. */
   accountType: AccountType;
+  /**
+   * Sprint 16.5h — actual parent's name in caregiver mode (e.g.
+   * "Patricia"). Used by the cover-letter body so it reads
+   * "Patricia's mornings averaged 124/80" rather than "her mornings".
+   * Self-buyer mode passes "you" / the user's name.
+   */
+  parentLabel?: string;
   /** Sparkline samples (BP systolic). Falls back to a flat line. */
   sparkline?: number[];
   /** True when the user can't yet generate — overlays the Plus pill. */
@@ -60,6 +68,7 @@ export function DoctorCoverPreview({
   rangeLabel,
   datesLabel,
   accountType,
+  parentLabel,
   sparkline,
   freeUser = false,
   style,
@@ -67,7 +76,13 @@ export function DoctorCoverPreview({
 }: DoctorCoverPreviewProps) {
   const theme = useTheme();
   const isCaregiver = accountType === 'caregiver';
-  const possessive = isCaregiver ? 'her' : 'your';
+  // Sprint 16.5h — use the real parent's name when provided. Was
+  // hardcoded "her" regardless of which parent (Dad / Mum / partner).
+  const possessive = isCaregiver
+    ? parentLabel?.trim()
+      ? `${parentLabel.trim()}'s`
+      : 'their'
+    : 'your';
 
   const sparkPath = useMemo(
     () => buildSparklinePath(sparkline ?? [120, 122, 119, 124, 121, 126, 122, 120]),

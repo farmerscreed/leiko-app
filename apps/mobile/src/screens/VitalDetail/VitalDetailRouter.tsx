@@ -42,6 +42,20 @@ export function VitalDetailRouter() {
     navigation.navigate('Learn');
   }, [navigation]);
 
+  // Sprint 17a — optional caregiver entry. When present, every detail
+  // screen sources its data from the parent-scoped query layer; the
+  // router just forwards the route param.
+  const familyId = route.params.familyId;
+
+  // Sprint 18 B3 — Sprint 16.5f shipped the "Share with your doctor"
+  // row on BPDetail but the router forgot to pass `onSharePress`, so
+  // the affordance never reached users. Route the tap to the
+  // dedicated `ForYourDoctor` screen where the doctor-prep PDF
+  // generator already lives.
+  const onSharePress = useCallback(() => {
+    navigation.navigate('ForYourDoctor');
+  }, [navigation]);
+
   switch (route.params.vital) {
     case 'bp':
       return (
@@ -50,6 +64,8 @@ export function VitalDetailRouter() {
           onSelectReading={onSelectReading}
           onArticleOpen={onArticleOpen}
           onLearnOpen={onLearnOpen}
+          onSharePress={onSharePress}
+          familyId={familyId}
         />
       );
     case 'hr':
@@ -58,6 +74,7 @@ export function VitalDetailRouter() {
           onBack={onBack}
           onArticleOpen={onArticleOpen}
           onLearnOpen={onLearnOpen}
+          familyId={familyId}
         />
       );
     case 'spo2':
@@ -66,6 +83,7 @@ export function VitalDetailRouter() {
           onBack={onBack}
           onArticleOpen={onArticleOpen}
           onLearnOpen={onLearnOpen}
+          familyId={familyId}
         />
       );
     case 'sleep':
@@ -74,6 +92,7 @@ export function VitalDetailRouter() {
           onBack={onBack}
           onArticleOpen={onArticleOpen}
           onLearnOpen={onLearnOpen}
+          familyId={familyId}
         />
       );
     case 'activity':
@@ -82,6 +101,7 @@ export function VitalDetailRouter() {
           onBack={onBack}
           onArticleOpen={onArticleOpen}
           onLearnOpen={onLearnOpen}
+          familyId={familyId}
         />
       );
   }

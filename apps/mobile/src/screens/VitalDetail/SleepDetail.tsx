@@ -1,30 +1,36 @@
-// SleepDetail — Sprint 8.5 (D13 §8.5).
+// SleepDetail — Sprint 8.5, fully reworked in Sprint 16.5c.
 //
 // Per-vital detail screen for sleep. Composes the Sprint 8.5 foundation
 // primitives (DetailShell, VitalHero, StatTrio, VitalInsightCard,
-// CorrelationStrip, RecentReadingsList) with the bespoke SleepHypnogram
-// chart for last-night's stage timeline.
+// CorrelationStrip, RecentReadingsSection) with the bespoke
+// SleepStagesBar (last-night composition) + SleepNightlyBars (range
+// chart). The earlier SleepHypnogram was removed: it expected a
+// transitions[] array, but the U16PRO_protocol_en.pdf §4.3 sleep
+// packet has no field for transitions — total / deep / light minutes
+// only — so the hypnogram was rendering as a single flat "light"
+// band and gave the impression no stage data existed.
 //
-// Risk note (sprint card, D13 §8.5): "Sleep stage data accuracy from the
-// watch is decent but not clinical. Don't surface stage data with false
-// precision — broad bands only." Stage minutes are rounded to whole
-// minutes (no millisecond precision), the hypnogram is pre-binned to 30
-// broad bands, and copy uses "about" / "roughly" / "tends to" framing
-// rather than diagnostic claims.
+// 7d / 30d / 90d range:
+//   The DetailShell-owned TimeRangePills are now wired through to
+//   `setRange` here. Switching range filters:
+//     - the nightly bar chart (window length)
+//     - the "Recent nights" list (only sessions within the window)
+//     - the morning-BP × sleep-score correlation (matching range)
+//   The hero is unaffected — it always shows last night.
+//
+// Risk note (sprint card, D13 §8.5): "Sleep stage data accuracy from
+// the watch is decent but not clinical. Don't surface stage data with
+// false precision — broad bands only." We now show three broad bands
+// (Deep / Light / Other) by duration; no per-minute precision.
 //
 // Voice rules: every user-visible string in this file passes
 // docs/05-voice-and-claims.md — descriptive, calm, no "patient",
-// "diagnose", "predict", "dangerous", "critical", "silent killer", "you
-// may have", "we detected", "loved one", "smartwatch".
-//
-// Stack: RN 0.81.5, react-native-svg, react-native-reanimated v3,
-// phosphor-react-native v3 (per docs/00-tech-stack.md).
+// "diagnose", "predict", "dangerous", "critical", "silent killer".
 
-import { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { DetailShell } from '../../components/DetailShell';
 import { VitalHero } from '../../components/VitalHero';
-import { StatTrio, type StatTrioItem } from '../../components/StatTrio';
 import { type RecentReading } from '../../components/RecentReadingsList';
 import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { VitalInsightCard } from '../../components/VitalInsightCard';
@@ -33,14 +39,37 @@ import {
   CorrelationStrip,
   type VitalSeries,
 } from '../../components/CorrelationStrip';
-import { SleepHypnogram } from '../../components/SleepHypnogram';
-import { useDailyPulseData } from '../../state/dailyPulse';
+import { SleepStagesBar } from '../../components/SleepStagesBar';
+import { SleepNightlyBars } from '../../components/SleepNightlyBars';
+import { LoadingState } from '../../components/LoadingState';
+import { ErrorState } from '../../components/ErrorState';
+import type { TrendRange } from '../../components/TimeRangePills';
+import { useDailyPulseData, emptyDailyPulse } from '../../state/dailyPulse';
 import { useSleep } from '../../state/sleep';
 import { useReadings } from '../../state/readings';
+import { useParentDailyPulseData } from '../../hooks/useParentDailyPulseData';
+import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { sleepFill } from '../../utils/vitalThemes';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
+import { formatClockInTz, useUserTz } from '../../utils/userTz';
+import { useReconcileSleepFromHR } from '../../hooks/useReconcileSleepFromHR';
+import { useTheme } from '../../theme';
 import type { SleepSession } from '../../types/vitals';
+
+/** Sprint 18 — pick the HR-inferred wake/bed times when present, else
+ *  fall back to the legacy synthesized boundaries. Exported for tests. */
+export function displayWindow(session: SleepSession): {
+  startSec: number;
+  endSec: number;
+  wakeSource: 'hr_inferred' | 'fallback' | undefined;
+} {
+  return {
+    startSec: session.inferredSessionStartSec ?? session.sessionStartSec,
+    endSec: session.inferredSessionEndSec ?? session.sessionEndSec,
+    wakeSource: session.wakeSource,
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Pure helpers (exported for tests via the screen module)
@@ -60,59 +89,94 @@ function pctOfTotal(part: number, total: number): number {
   return Math.max(0, Math.min(100, Math.round((part / total) * 100)));
 }
 
-/**
- * Voice-rule-clean range copy mapped from sleep score (0..100). We deliberately
- * stay descriptive — no "good", "bad", "dangerous". The bands lean on
- * "tends to" / "looks like" framing.
- */
-export function rangeCopyForSleepScore(score: number | null | undefined): string {
+/** Sprint 18 — P1 fix. Below `HISTORY_REFERENCE_NIGHTS` recorded
+ *  nights, the "your usual / than last week" phrasing is misleading
+ *  because the user has no baseline. Below the threshold we use
+ *  non-comparative copy. Above it the earlier comparative copy
+ *  returns. */
+export const HISTORY_REFERENCE_NIGHTS = 7;
+
+export function rangeCopyForSleepScore(
+  score: number | null | undefined,
+  recentNightsCount: number = HISTORY_REFERENCE_NIGHTS,
+): string {
   if (score === null || score === undefined) return '';
-  if (score >= 80) return 'A quieter night than last week';
-  if (score >= 65) return 'Roughly in line with your usual';
-  if (score >= 50) return 'A lighter night than your usual';
-  return 'A more restless night than your usual';
+  const hasHistory = recentNightsCount >= HISTORY_REFERENCE_NIGHTS;
+  if (score >= 80) {
+    return hasHistory ? 'A quieter night than last week' : 'A quieter night by the numbers';
+  }
+  if (score >= 65) {
+    return hasHistory ? 'Roughly in line with your usual' : 'Roughly in the middle by the numbers';
+  }
+  if (score >= 50) {
+    return hasHistory ? 'A lighter night than your usual' : 'A lighter night by the numbers';
+  }
+  return hasHistory
+    ? 'A more restless night than your usual'
+    : 'A more restless night by the numbers';
 }
 
-/**
- * Voice-rule-clean insight body. Reads as a single calm paragraph; uses
- * "about", "tends to", and "your usual" — no medical claims, no precision
- * the watch can't deliver.
- */
-function insightBody(session: SleepSession | null): string {
+function insightBody(
+  session: SleepSession | null,
+  recentNightsCount: number = HISTORY_REFERENCE_NIGHTS,
+): string {
   if (session === null) {
-    return 'Wear the watch to bed and your sleep shape will land here in the morning. We highlight the night\'s stages and how they tend to line up with your morning readings.';
+    return 'Wear the watch to bed and your sleep shape will land here in the morning. We highlight the night\'s composition and how it tends to line up with your morning readings.';
   }
   const deep = session.deepMinutes;
   const total = session.totalMinutes;
   const deepPct = pctOfTotal(deep, total);
-  // Generic, descriptive copy — no diagnostic, no "predict".
+  const hasHistory = recentNightsCount >= HISTORY_REFERENCE_NIGHTS;
   if (deepPct >= 22) {
-    return `Deep sleep landed around ${deepPct}% of the night, a touch above your usual. Heart rate tends to settle earlier on nights like this, which often shows up as a calmer morning reading.`;
+    return hasHistory
+      ? `Deep sleep landed around ${deepPct}% of the night, a touch above your usual. Heart rate tends to settle earlier on nights like this, which often shows up as a calmer morning reading.`
+      : `Deep sleep landed around ${deepPct}% of the night — toward the higher end of what we typically see. Heart rate tends to settle earlier on nights like this, which often shows up as a calmer morning reading.`;
   }
   if (deepPct >= 14) {
-    return `Deep sleep made up about ${deepPct}% of the night — roughly your usual. We'll keep watching how this connects to your morning readings.`;
+    return hasHistory
+      ? `Deep sleep made up about ${deepPct}% of the night — roughly your usual. We'll keep watching how this connects to your morning readings.`
+      : `Deep sleep made up about ${deepPct}% of the night — within the range we typically see. Wear the watch a few more nights and we'll start showing how this connects to your morning readings.`;
   }
-  return `Deep sleep was about ${deepPct}% of the night, a little under your usual. A lighter night often pairs with a slightly higher morning reading; we'll keep an eye on how this week shapes up.`;
+  return hasHistory
+    ? `Deep sleep was about ${deepPct}% of the night, a little under your usual. A lighter night often pairs with a slightly higher morning reading; we'll keep an eye on how this week shapes up.`
+    : `Deep sleep was about ${deepPct}% of the night — on the lighter side of what we typically see. A lighter night often pairs with a slightly higher morning reading; a few more nights of tracking will give us context.`;
 }
 
-/**
- * "Last night" sub-line: "Last night · in bed 11:14 pm".
- */
-export function bedTimeSub(sessionStartSec: number): string {
-  const time = new Date(sessionStartSec * 1000).toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-  return `Last night · in bed ${time}`;
+/** "Last night · 11:14 pm → 8:00 am" — bedtime AND wake-time in one
+ *  line. Pre-16.5c only the bedtime appeared. Sprint 18: now formats
+ *  in the user's IANA timezone instead of the device-OS default. */
+export function bedTimeSub(
+  sessionStartSec: number,
+  sessionEndSec: number,
+  tz: string,
+): string {
+  const bed = formatClockInTz(sessionStartSec, tz);
+  const wake = formatClockInTz(sessionEndSec, tz);
+  return `Last night · ${bed} → ${wake}`;
 }
 
-/**
- * Day-of-week or "last night" context label for the recent-nights list.
- * Most recent (idx 0) reads "Last night"; everything else reads as the
- * weekday of the session start.
- */
-function nightLabel(idx: number, sessionEndSec: number): string {
-  if (idx === 0) return 'Last night';
+// Sprint 18 — S2 fix. The recent-nights list used to label the newest
+// row as "Last night" / "now" regardless of when that session was
+// recorded. For sparse trackers (5 days off, then 1 night) the newest
+// row could be 5 days old and still be called "Last night". Gate the
+// fresh labels on a 36-hour window — the same window
+// `useSleep.lastNightSession` uses to decide whether a session counts
+// as "last night" anywhere else in the app.
+const LAST_NIGHT_WINDOW_SEC = 36 * 60 * 60;
+
+export function isWithinLastNightWindow(
+  sessionEndSec: number,
+  nowSec: number = Math.floor(Date.now() / 1000),
+): boolean {
+  return nowSec - sessionEndSec <= LAST_NIGHT_WINDOW_SEC && sessionEndSec <= nowSec;
+}
+
+function nightLabel(
+  idx: number,
+  sessionEndSec: number,
+  nowSec: number = Math.floor(Date.now() / 1000),
+): string {
+  if (idx === 0 && isWithinLastNightWindow(sessionEndSec, nowSec)) return 'Last night';
   return new Date(sessionEndSec * 1000).toLocaleDateString([], {
     weekday: 'long',
   });
@@ -124,13 +188,30 @@ function nightTime(sessionEndSec: number): string {
   });
 }
 
-// Build a "morning BP" series — average systolic per day from BP readings
-// captured before noon, last 7 days. Pure; takes already-filtered rows.
+const RANGE_TO_DAYS: Record<TrendRange, number> = {
+  '7d': 7,
+  '30d': 30,
+  '90d': 90,
+};
+
+/** Filter sessions to those ending within the last N days for the given
+ *  range. Exported for tests. */
+export function filterSessionsToRange(
+  sessions: ReadonlyArray<SleepSession>,
+  range: TrendRange,
+  nowMs: number = Date.now(),
+): SleepSession[] {
+  const days = RANGE_TO_DAYS[range];
+  const cutoffSec = Math.floor(nowMs / 1000) - days * 24 * 60 * 60;
+  return sessions.filter((s) => s.sessionEndSec >= cutoffSec);
+}
+
 function buildMorningBPSeries(
   readings: { measuredAtSec: number; systolic: number }[],
   nowSec: number,
+  days: number,
 ): { t: number; value: number }[] {
-  const cutoffSec = nowSec - 7 * 24 * 60 * 60;
+  const cutoffSec = nowSec - days * 24 * 60 * 60;
   const byDay = new Map<string, { sumSys: number; count: number; tMs: number }>();
   for (const r of readings) {
     if (r.measuredAtSec < cutoffSec) continue;
@@ -151,7 +232,7 @@ function buildMorningBPSeries(
 }
 
 function buildSleepScoreSeries(
-  sessions: SleepSession[],
+  sessions: ReadonlyArray<SleepSession>,
 ): { t: number; value: number }[] {
   return sessions
     .map((s) => ({ t: s.sessionEndSec * 1000, value: s.sleepScore }))
@@ -166,161 +247,304 @@ export interface SleepDetailProps {
   onBack: () => void;
   onArticleOpen?: (articleId: string) => void;
   onLearnOpen?: () => void;
+  /** Sprint 17a — caregiver entry. When set, sleep + readings data
+   *  sources swap to the parent-scoped query layer. */
+  familyId?: string;
 }
 
-export function SleepDetail({ onBack, onArticleOpen, onLearnOpen }: SleepDetailProps) {
-  const data = useDailyPulseData();
+export function SleepDetail({
+  onBack,
+  onArticleOpen,
+  onLearnOpen,
+  familyId,
+}: SleepDetailProps) {
+  const theme = useTheme();
+  const { width: screenWidth } = useWindowDimensions();
+  const tz = useUserTz();
+  // Sprint 18 — re-derive HR-inferred wake times across stored
+  // sessions whose `wakeSource` is missing or 'fallback'. Mounts here
+  // (and on each Home variant) so we re-run whenever the screen
+  // appears with fresh HR data.
+  useReconcileSleepFromHR();
+  // Sprint 17a — both data sources called unconditionally.
+  const ownPulse = useDailyPulseData();
+  const ownSleepRecent = useSleep((s) => s.recent);
+  const ownSleepPending = useSleep((s) => s.pending);
+  const ownAllReadings = useReadings((s) => [...s.pending, ...s.recent]);
+  const scopedFamilyId = familyId ?? null;
+  const parentPulse = useParentDailyPulseData(scopedFamilyId);
+  const parentRecent = useParentVitalsRecent(scopedFamilyId);
+  const emptyFallback = useMemo(() => emptyDailyPulse(), []);
+
+  // Sprint 18 — S1/S3 fix. Distinguish "loading on first mount" and
+  // "errored" from "truly empty" when we're in the caregiver-scoped
+  // path. Without this, both states fall through to the empty-state
+  // UI and the user is told their parent has no sleep data when
+  // actually we just haven't finished fetching, or fetching failed.
+  const isCaregiverScoped = scopedFamilyId !== null;
+  const isInitialParentLoad =
+    isCaregiverScoped &&
+    (parentPulse.isLoading || parentRecent.isLoading) &&
+    parentPulse.data === null;
+  const parentLoadError = isCaregiverScoped
+    ? (parentPulse.error ?? parentRecent.error ?? null)
+    : null;
+
+  const data = scopedFamilyId
+    ? parentPulse.data ?? emptyFallback
+    : ownPulse;
   const session = data.sleep.session;
 
-  // Recent nights (last 4) — newest first for the list, the hypnogram
-  // reads from `data.sleep.session` directly.
-  const sleepRecent = useSleep((s) => s.recent);
-  const sleepPending = useSleep((s) => s.pending);
-  const recentNights = useMemo(() => {
+  // Sprint 16.5c — DetailShell's TimeRangePills are now wired here.
+  // The DetailShell still owns the internal state for the pills'
+  // appearance; we mirror it into local state so the screen's data
+  // selectors react to the choice.
+  const [range, setRange] = useState<TrendRange>('7d');
+
+  // All recorded sessions, newest-first.
+  const sleepRecent = scopedFamilyId
+    ? parentRecent.data.sleep
+    : ownSleepRecent;
+  const sleepPending = scopedFamilyId ? [] : ownSleepPending;
+  const allNights = useMemo(() => {
     const all = [...sleepPending, ...sleepRecent];
     return all
       .slice()
-      .sort((a, b) => b.sessionStartSec - a.sessionStartSec)
-      .slice(0, 4);
+      .sort((a, b) => b.sessionStartSec - a.sessionStartSec);
   }, [sleepRecent, sleepPending]);
 
-  // Morning BP × sleep score correlation, 7 days.
-  const allReadings = useReadings((s) => [...s.pending, ...s.recent]);
+  // Range-filtered slice for the chart, correlation, and list.
+  const rangedNights = useMemo(
+    () => filterSessionsToRange(allNights, range),
+    [allNights, range],
+  );
+
+  // Morning BP × sleep score correlation, matching the selected range.
+  const allReadings = scopedFamilyId
+    ? parentRecent.data.readings
+    : ownAllReadings;
   const correlationSeries = useMemo<{ a: VitalSeries; b: VitalSeries } | null>(() => {
-    if (recentNights.length < 2 || allReadings.length < 2) return null;
+    if (rangedNights.length < 2 || allReadings.length < 2) return null;
     const nowSec = Math.floor(Date.now() / 1000);
-    const bpSeries = buildMorningBPSeries(allReadings, nowSec);
-    const sleepSeries = buildSleepScoreSeries(recentNights);
+    const days = RANGE_TO_DAYS[range];
+    const bpSeries = buildMorningBPSeries(allReadings, nowSec, days);
+    const sleepSeries = buildSleepScoreSeries(rangedNights);
     if (bpSeries.length < 2 || sleepSeries.length < 2) return null;
     return {
       a: { type: 'sleep', points: sleepSeries },
       b: { type: 'bp', points: bpSeries },
     };
-  }, [allReadings, recentNights]);
+  }, [allReadings, rangedNights, range]);
 
-  // ---- Empty state: no session at all -----------------------------------
-  if (session === null) {
-    return (
-      <DetailShell
-        vital="sleep"
-        onBack={onBack}
-        testID="sleep-detail"
-        hero={
-          <VitalHero
-            vital="sleep"
-            primary="—"
-            sub="No sleep recorded last night"
-            range="Wear the watch overnight to track your sleep."
-            ringFill={0}
-            testID="sleep-detail-hero"
-          />
-        }
-      >
-        <VitalInsightCard
-          vital="sleep"
-          body={insightBody(null)}
-          testID="sleep-detail-insight"
-        />
-      </DetailShell>
-    );
-  }
+  // ---- Empty state: no last-night session AT ALL ------------------------
+  // If older nights exist we still render history below; only the
+  // hero + stages-bar + "this morning's" insight need the empty path.
+  const hasLastNight = session !== null;
 
   // ---- Hero ------------------------------------------------------------
-  const totalMinutes = session.totalMinutes;
-  const heroPrimary = formatHm(totalMinutes);
-  // Sprint 16 — per D13 §6.6, stale when no sleep session in last 24h.
-  // The wake-up reference is sessionEndSec — that's the freshness signal.
-  const sleepStaleness = checkStaleness('sleep', session.sessionEndSec);
+  const heroPrimary = hasLastNight ? formatHm(session.totalMinutes) : '—';
+  // Sprint 18 — prefer HR-inferred wake/bed when present.
+  const heroDisplay = hasLastNight ? displayWindow(session) : null;
+  const sleepStaleness = hasLastNight
+    ? checkStaleness('sleep', heroDisplay!.endSec)
+    : 'no_data';
   const sleepStaleCaption =
-    sleepStaleness === 'stale'
-      ? formatStalenessCaption(session.sessionEndSec)
+    sleepStaleness === 'stale' && hasLastNight
+      ? formatStalenessCaption(heroDisplay!.endSec)
       : null;
-  const heroSub = sleepStaleCaption ?? bedTimeSub(session.sessionStartSec);
-  const heroRange = rangeCopyForSleepScore(session.sleepScore);
+  const heroSub = hasLastNight
+    ? (sleepStaleCaption ?? bedTimeSub(heroDisplay!.startSec, heroDisplay!.endSec, tz))
+    : 'No sleep recorded last night';
+  // Sprint 18 — P1 fix. Pass the count of recorded nights so the
+  // "than your usual" / "than last week" phrasing only fires once the
+  // user actually has a baseline (HISTORY_REFERENCE_NIGHTS = 7).
+  const heroRange = hasLastNight
+    ? rangeCopyForSleepScore(session.sleepScore, allNights.length)
+    : 'Wear the watch overnight to track your sleep.';
 
-  // ---- Stat trio: deep / rem / light, formatted "h:mm" + percent --------
-  const deepPct = pctOfTotal(session.deepMinutes, totalMinutes);
-  const remPct = pctOfTotal(session.remMinutes, totalMinutes);
-  const lightPct = pctOfTotal(session.lightMinutes, totalMinutes);
+  // Sleep composition values for SleepStagesBar (replaces the
+  // duplicated StatTrio above the bar — both showed the same numbers).
+  const totalMinutes = hasLastNight ? session.totalMinutes : 0;
+  const deepMinutes = hasLastNight ? session.deepMinutes : 0;
+  const lightMinutes = hasLastNight ? session.lightMinutes : 0;
+  const otherMinutes = Math.max(0, totalMinutes - deepMinutes - lightMinutes);
 
-  const statItems: [StatTrioItem, StatTrioItem, StatTrioItem] = [
-    {
-      label: 'Deep',
-      value: formatHm(session.deepMinutes),
-      unit: `hrs · ${deepPct}%`,
-    },
-    {
-      label: 'REM',
-      value: formatHm(session.remMinutes),
-      unit: `hrs · ${remPct}%`,
-    },
-    {
-      label: 'Light',
-      value: formatHm(session.lightMinutes),
-      unit: `hrs · ${lightPct}%`,
-    },
-  ];
-
-  // ---- Recent nights list ----------------------------------------------
-  const recentRows: RecentReading[] = recentNights.map((s, idx) => {
+  // ---- Recent nights list (within the selected range) ------------------
+  // Sprint 18 — S2 fix. The list used to label the first row "Last
+  // night" / "now" unconditionally. For sparse trackers that's wrong:
+  // the newest row could be 5 days old. Use a 36-hour window so the
+  // fresh labels only fire when the newest session truly was last
+  // night.
+  const nowSecForLabels = Math.floor(Date.now() / 1000);
+  const recentRows: RecentReading[] = rangedNights.map((s, idx) => {
     const deepP = pctOfTotal(s.deepMinutes, s.totalMinutes);
+    const freshLabel =
+      idx === 0 && isWithinLastNightWindow(s.sessionEndSec, nowSecForLabels);
     return {
       id: `sleep-${s.sessionStartSec}`,
       value: formatHm(s.totalMinutes),
-      context: `${nightLabel(idx, s.sessionEndSec)} · ${deepP}% deep`,
-      time: idx === 0 ? 'now' : nightTime(s.sessionEndSec),
+      context: `${nightLabel(idx, s.sessionEndSec, nowSecForLabels)} · ${deepP}% deep`,
+      time: freshLabel ? 'now' : nightTime(s.sessionEndSec),
     };
   });
+
+  // Sprint 18 — P5 fix. When the correlation chart can't render (need
+  // ≥2 nights AND ≥2 BP mornings), show a calm placeholder instead of
+  // silently nothing so the user understands the strip will land once
+  // they have enough data. Only show the placeholder if there's any
+  // sleep history at all — otherwise the hero already explains the
+  // empty state.
+  const showCorrelationPlaceholder =
+    correlationSeries === null && allNights.length >= 1 && rangedNights.length >= 1;
 
   return (
     <DetailShell
       vital="sleep"
       onBack={onBack}
+      onRangeChange={setRange}
       testID="sleep-detail"
       hero={
         <VitalHero
           vital="sleep"
           primary={heroPrimary}
-          secondary="hrs"
+          secondary={hasLastNight ? 'hrs' : undefined}
           sub={heroSub}
           range={heroRange}
-          ringFill={sleepFill(session.sleepScore)}
+          ringFill={hasLastNight ? sleepFill(session.sleepScore) : 0}
           testID="sleep-detail-hero"
         />
       }
     >
-      <StatTrio items={statItems} testID="sleep-detail-stats" />
-      <SleepHypnogram session={session} testID="sleep-detail-hypnogram" />
-      {correlationSeries ? (
-        <View style={styles.correlationWrap}>
-          <CorrelationStrip
-            vitalA={correlationSeries.a}
-            vitalB={correlationSeries.b}
-            range="7d"
-            caption="Sleep × morning BP — last 7 days"
-            testID="sleep-detail-correlation"
-          />
-        </View>
-      ) : null}
-      <VitalInsightCard
-        vital="sleep"
-        body={insightBody(session)}
-        testID="sleep-detail-insight"
-      />
-      <VitalExplainerAnchor
-        context={{ type: 'sleep' }}
-        onArticleOpen={onArticleOpen}
-        onLearnOpen={onLearnOpen}
-        testID="sleep-detail-explainer-anchor"
-      />
-      {recentRows.length > 0 ? (
-        <RecentReadingsSection
-          vital="sleep"
-          eyebrow="Recent nights"
-          readings={recentRows}
-          testID="sleep-detail-recent"
+      {/* Sprint 18 — S1 + S3 fix. Caregiver-scoped first load shows a
+          calm spinner instead of falsely claiming "No sleep recorded
+          last night"; caregiver-scoped error surfaces a recoverable
+          banner. Both branches REPLACE the body content; the hero
+          above still renders so the persona header stays consistent. */}
+      {isInitialParentLoad ? (
+        <LoadingState testID="sleep-detail-loading" />
+      ) : parentLoadError ? (
+        <ErrorState
+          onRetry={() => {
+            void parentPulse.refresh();
+            void parentRecent.refresh();
+          }}
+          testID="sleep-detail-error"
         />
-      ) : null}
+      ) : (
+        <>
+          {hasLastNight ? (
+            <SleepStagesBar
+              totalMinutes={totalMinutes}
+              deepMinutes={deepMinutes}
+              lightMinutes={lightMinutes}
+              otherMinutes={otherMinutes}
+              sessionStartSec={heroDisplay!.startSec}
+              sessionEndSec={heroDisplay!.endSec}
+              wakeSource={heroDisplay!.wakeSource}
+              tz={tz}
+              testID="sleep-detail-stages"
+            />
+          ) : null}
+
+          {/* Nightly chart for the selected range — shows historical
+              context even when last night was missing. Sprint 18 S4:
+              pass screen width so bars fill the card on any phone
+              size instead of clustering left on wider devices. */}
+          {allNights.length > 0 ? (
+            <SleepNightlyBars
+              sessions={allNights}
+              range={range}
+              width={screenWidth}
+              testID="sleep-detail-nightly"
+            />
+          ) : null}
+
+          {correlationSeries ? (
+            <View style={styles.correlationWrap}>
+              <CorrelationStrip
+                vitalA={correlationSeries.a}
+                vitalB={correlationSeries.b}
+                range={range}
+                caption={`Sleep × morning BP — last ${RANGE_TO_DAYS[range]} days`}
+                tBounds={(() => {
+                  const nowMs = Date.now();
+                  const days = RANGE_TO_DAYS[range];
+                  return { tMin: nowMs - days * 24 * 60 * 60 * 1000, tMax: nowMs };
+                })()}
+                axisLabels={(() => {
+                  const nowMs = Date.now();
+                  const days = RANGE_TO_DAYS[range];
+                  const startMs = nowMs - days * 24 * 60 * 60 * 1000;
+                  const left = new Date(startMs).toLocaleDateString([], {
+                    month: 'short',
+                    day: 'numeric',
+                  });
+                  return { left, right: 'today' };
+                })()}
+                testID="sleep-detail-correlation"
+              />
+            </View>
+          ) : showCorrelationPlaceholder ? (
+            // Sprint 18 — P5 placeholder. Calm, explanatory; vital-tinted
+            // border to match the other cards on the screen.
+            <View
+              style={[
+                styles.correlationWrap,
+                {
+                  padding: theme.spacing.l,
+                  borderRadius: theme.radii.l,
+                  backgroundColor: theme.colors.surface.warmSubtle,
+                  borderWidth: 0.5,
+                  borderColor: theme.colors.border.rim,
+                },
+              ]}
+              testID="sleep-detail-correlation-placeholder"
+            >
+              <Text
+                allowFontScaling={false}
+                style={[
+                  theme.type('labelUppercase'),
+                  {
+                    color: theme.colors.text.tertiary,
+                    textTransform: 'uppercase',
+                    marginBottom: theme.spacing.s,
+                  },
+                ]}
+              >
+                Sleep × morning BP
+              </Text>
+              <Text
+                style={[
+                  theme.type('bodyM'),
+                  { color: theme.colors.text.secondary },
+                ]}
+              >
+                A few more mornings of readings will let us chart how your sleep lines up with your morning BP.
+              </Text>
+            </View>
+          ) : null}
+
+          <VitalInsightCard
+            vital="sleep"
+            body={insightBody(hasLastNight ? session : null, allNights.length)}
+            testID="sleep-detail-insight"
+          />
+          <VitalExplainerAnchor
+            context={{ type: 'sleep' }}
+            onArticleOpen={onArticleOpen}
+            onLearnOpen={onLearnOpen}
+            testID="sleep-detail-explainer-anchor"
+          />
+          {recentRows.length > 0 ? (
+            <RecentReadingsSection
+              vital="sleep"
+              eyebrow="Recent nights"
+              readings={recentRows}
+              testID="sleep-detail-recent"
+            />
+          ) : null}
+        </>
+      )}
     </DetailShell>
   );
 }

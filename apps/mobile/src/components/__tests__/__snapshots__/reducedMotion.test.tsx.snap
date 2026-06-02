@@ -47,7 +47,7 @@ exports[`Reduced motion — end-state snapshots AnomalyBanner confirmed-urgent r
       bbHeight={24}
       bbWidth={24}
       className="warning-circle-regular__svg-icon-phosphor"
-      color="#F5F1EA"
+      color="#FFFFFF"
       fill="currentColor"
       focusable={false}
       height={24}
@@ -92,7 +92,7 @@ exports[`Reduced motion — end-state snapshots AnomalyBanner confirmed-urgent r
         <RNSVGGroup
           fill={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -131,7 +131,7 @@ exports[`Reduced motion — end-state snapshots AnomalyBanner confirmed-urgent r
       <Text
         style={
           {
-            "color": "#F5F1EA",
+            "color": "#FFFFFF",
             "fontFamily": "Inter_600SemiBold",
             "fontSize": 18,
             "fontWeight": "600",
@@ -145,7 +145,7 @@ exports[`Reduced motion — end-state snapshots AnomalyBanner confirmed-urgent r
       <Text
         style={
           {
-            "color": "#F5F1EA",
+            "color": "#FFFFFF",
             "fontFamily": "Inter_400Regular",
             "fontSize": 15,
             "lineHeight": 22,
@@ -254,7 +254,7 @@ exports[`Reduced motion — end-state snapshots DailyPulseHero constellation ren
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -288,7 +288,7 @@ exports[`Reduced motion — end-state snapshots DailyPulseHero constellation ren
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -322,7 +322,7 @@ exports[`Reduced motion — end-state snapshots DailyPulseHero constellation ren
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -356,7 +356,7 @@ exports[`Reduced motion — end-state snapshots DailyPulseHero constellation ren
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -611,7 +611,7 @@ exports[`Reduced motion — end-state snapshots DailyPulseHero constellation ren
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 56,
                 "letterSpacing": -0.5,
@@ -628,7 +628,7 @@ exports[`Reduced motion — end-state snapshots DailyPulseHero constellation ren
             allowFontScaling={false}
             style={
               {
-                "color": "#9C9890",
+                "color": "#857F7A",
                 "fontFamily": "JetBrainsMono_500Medium",
                 "fontSize": 12,
                 "letterSpacing": 0.4,
@@ -862,7 +862,7 @@ exports[`Reduced motion — end-state snapshots DailyPulseHero constellation ren
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 22,
                 "letterSpacing": -0.3,
@@ -1109,7 +1109,7 @@ exports[`Reduced motion — end-state snapshots DailyPulseHero constellation ren
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 18,
                 "letterSpacing": -0.3,
@@ -1356,7 +1356,7 @@ exports[`Reduced motion — end-state snapshots DailyPulseHero constellation ren
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 18,
                 "letterSpacing": -0.3,
@@ -1603,7 +1603,7 @@ exports[`Reduced motion — end-state snapshots DailyPulseHero constellation ren
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 22,
                 "letterSpacing": -0.3,

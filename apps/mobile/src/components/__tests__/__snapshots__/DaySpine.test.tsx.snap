@@ -36,7 +36,7 @@ exports[`DaySpine — empty state matches snapshot in the empty state 1`] = `
       allowFontScaling={false}
       style={
         {
-          "color": "#9C9890",
+          "color": "#857F7A",
           "fontFamily": "Inter_500Medium",
           "fontSize": 11,
           "letterSpacing": 0.55,
@@ -61,7 +61,7 @@ exports[`DaySpine — empty state matches snapshot in the empty state 1`] = `
     accessibilityLiveRegion="polite"
     style={
       {
-        "color": "#9C9890",
+        "color": "#857F7A",
         "fontFamily": "Inter_400Regular",
         "fontSize": 12,
         "lineHeight": 16,
@@ -113,7 +113,7 @@ exports[`DaySpine — populated matches snapshot in dark mode 1`] = `
       allowFontScaling={false}
       style={
         {
-          "color": "#9C9890",
+          "color": "#857F7A",
           "fontFamily": "Inter_500Medium",
           "fontSize": 11,
           "letterSpacing": 0.55,
@@ -204,7 +204,7 @@ exports[`DaySpine — populated matches snapshot in dark mode 1`] = `
         allowFontScaling={false}
         style={
           {
-            "color": "#9C9890",
+            "color": "#857F7A",
             "fontFamily": "JetBrainsMono_500Medium",
             "fontSize": 12,
             "letterSpacing": 0.4,
@@ -251,7 +251,7 @@ exports[`DaySpine — populated matches snapshot in dark mode 1`] = `
           allowFontScaling={false}
           style={
             {
-              "color": "#F5F1EA",
+              "color": "#FFFFFF",
               "fontFamily": "InstrumentSerif_400Regular",
               "fontSize": 22,
               "lineHeight": 28,
@@ -263,7 +263,7 @@ exports[`DaySpine — populated matches snapshot in dark mode 1`] = `
         <Text
           style={
             {
-              "color": "#9C9890",
+              "color": "#857F7A",
               "fontFamily": "Inter_400Regular",
               "fontSize": 12,
               "lineHeight": 16,
@@ -321,7 +321,7 @@ exports[`DaySpine — populated matches snapshot in dark mode 1`] = `
         allowFontScaling={false}
         style={
           {
-            "color": "#9C9890",
+            "color": "#857F7A",
             "fontFamily": "JetBrainsMono_500Medium",
             "fontSize": 12,
             "letterSpacing": 0.4,
@@ -368,7 +368,7 @@ exports[`DaySpine — populated matches snapshot in dark mode 1`] = `
           allowFontScaling={false}
           style={
             {
-              "color": "#F5F1EA",
+              "color": "#FFFFFF",
               "fontFamily": "InstrumentSerif_400Regular",
               "fontSize": 22,
               "lineHeight": 28,
@@ -380,7 +380,7 @@ exports[`DaySpine — populated matches snapshot in dark mode 1`] = `
         <Text
           style={
             {
-              "color": "#9C9890",
+              "color": "#857F7A",
               "fontFamily": "Inter_400Regular",
               "fontSize": 12,
               "lineHeight": 16,

@@ -15,9 +15,28 @@ export interface ParsedDeepLink {
     | 'settings_devices'
     | 'settings_subscription'
     | 'family'
+    | 'join'
     | 'unknown';
   readingId?: string;
   vital?: 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity';
+  /** ADR-0006 — invite acceptance via a shared link.
+   *  https://leiko.app/join?token=...&code=...&email=... */
+  inviteToken?: string;
+  inviteCode?: string;
+  inviteEmail?: string;
+}
+
+// Minimal query-string parser (URLSearchParams isn't reliably available
+// across all RN/Hermes targets). Returns a flat map of decoded params.
+function parseQuery(url: string): Record<string, string> {
+  const q = url.split('?')[1];
+  if (!q) return {};
+  const out: Record<string, string> = {};
+  for (const pair of q.split('&')) {
+    const [k, v] = pair.split('=');
+    if (k) out[decodeURIComponent(k)] = v ? decodeURIComponent(v) : '';
+  }
+  return out;
 }
 
 export function parseDeepLink(url: string): ParsedDeepLink {
@@ -28,6 +47,17 @@ export function parseDeepLink(url: string): ParsedDeepLink {
   const segments = pathRaw.split('/').filter(Boolean);
   const [first, second] = segments;
   switch (first) {
+    case 'join': {
+      // Invite link. Carries at least a token (or a code); email optional.
+      const params = parseQuery(url);
+      if (!params.token && !params.code) return { category: 'unknown' };
+      return {
+        category: 'join',
+        inviteToken: params.token || undefined,
+        inviteCode: params.code || undefined,
+        inviteEmail: params.email || undefined,
+      };
+    }
     case 'home':
     case undefined:
       return { category: 'home' };

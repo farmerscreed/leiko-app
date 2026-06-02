@@ -23,6 +23,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../../components/Button';
+import { OnboardingEyebrow } from '../../../components/OnboardingEyebrow';
 import { Pill } from '../../../components/Pill';
 import { TimezonePicker } from '../../../components/TimezonePicker';
 import { useTheme } from '../../../theme';
@@ -113,6 +114,8 @@ export function CaregiverFamilyParentScreen({
               Back
             </Text>
           </Pressable>
+
+          <OnboardingEyebrow persona="Caregiver" step={2} total={3} />
 
           <Text
             accessibilityRole="header"

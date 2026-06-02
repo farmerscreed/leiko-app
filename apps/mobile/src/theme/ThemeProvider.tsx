@@ -48,7 +48,16 @@ interface ThemeProviderProps {
 function readPersistedOverride(): ColorModeOverride {
   const raw = mmkv.getString(STORAGE_KEYS.themeColorMode);
   if (raw === 'dark' || raw === 'light' || raw === 'system') return raw;
-  return 'system';
+  // Sprint 16.6 — default to 'dark' on first launch. The Leiko design
+  // language is dark-canonical for v1.0 (warm-charcoal canopy across
+  // caregiver Home + every screen that consumes warmBase surfaces).
+  // With the previous 'system' default, devices in OS light mode
+  // resolved to semanticColorsLight whose text.primary is #0F121C
+  // (near-black) and rendered nearly-black text on hardcoded warm-dark
+  // surfaces — unreadable. Users can still opt into 'light' or
+  // 'system' via Settings; the MMKV write from that flow takes
+  // precedence over this default on subsequent launches.
+  return 'dark';
 }
 
 export function ThemeProvider({

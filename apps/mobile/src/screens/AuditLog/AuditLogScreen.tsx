@@ -47,12 +47,15 @@ function actionToLabel(action: string): string {
 }
 
 function formatTime(iso: string): string {
+  // Sprint 16.5i — use device locale (was hardcoded 'en-US'). Per
+  // CLAUDE.md the app ships in Nigeria + US; en-NG users got
+  // MM/DD formatting that doesn't match their conventions.
   const d = new Date(iso);
-  const day = d.toLocaleDateString('en-US', {
+  const day = d.toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
   });
-  const time = d.toLocaleTimeString('en-US', {
+  const time = d.toLocaleTimeString(undefined, {
     hour: 'numeric',
     minute: '2-digit',
   });

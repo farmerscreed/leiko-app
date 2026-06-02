@@ -4,15 +4,40 @@
 // MMKV instance (for the Zustand auth store's pendingAccountType cache)
 // and the Supabase-shaped adapter.
 //
+// Sprint 18 / SEC-1 — module-load behaviour now depends on secureBoot
+// having resolved first. If secureBoot.getCachedKey() returns a key
+// AND migration is complete, this module opens the ENCRYPTED instance
+// at id 'leiko-enc'. Otherwise it falls through to the legacy plain
+// instance at id 'leiko'. App.tsx enforces the ordering by dynamic-
+// importing the navigator (which transitively imports this module)
+// only AFTER acquireMmkvKey() + the migration (if needed) resolve.
+//
 // Test surface: mocked at __mocks__/react-native-mmkv.js so jest projects
 // (pure + rn) can import this module without the native module loading.
-// Tokens live here in dev only — the production build will gate access
-// through the platform Keychain/Keystore (per docs/00-tech-stack.md
-// §Encryption inventory). Keychain integration is a follow-up task.
+// In test contexts secureBoot is not initialised, so this module opens
+// the legacy plain instance — same behaviour the test suite expects.
 
+import { randomUUID } from 'expo-crypto';
 import { createMMKV, type MMKV } from 'react-native-mmkv';
+import { getCachedKey, getCachedStatus } from './secureBoot';
 
-export const mmkv: MMKV = createMMKV({ id: 'leiko' });
+function openMmkv(): MMKV {
+  const key = getCachedKey();
+  const status = getCachedStatus();
+  if (key && status === 'completed') {
+    return createMMKV({ id: 'leiko-enc', encryptionKey: key });
+  }
+  return createMMKV({ id: 'leiko' });
+}
+
+export const mmkv: MMKV = openMmkv();
+
+/** True iff the live mmkv instance is the encrypted one. Telemetry
+ *  surface — analytics may sample this on session start so we can
+ *  measure the encryption-at-rest coverage in prod. */
+export function isMmkvEncrypted(): boolean {
+  return getCachedKey() !== null && getCachedStatus() === 'completed';
+}
 
 export const STORAGE_KEYS = {
   pendingAccountType: 'leiko.onboarding.pendingAccountType',
@@ -30,6 +55,27 @@ export const STORAGE_KEYS = {
   // Paired Urion device for the current user/family. Sprint 5.
   // Stored as JSON: { id, mac, model, deviceId (Supabase row id), pairedAt }.
   pairedDevice: 'leiko.ble.pairedDevice',
+  // Stable per-install identity for THIS user's watch. The Urion firmware
+  // advertises a rotating BLE MAC, so the connection id (pairedDevice.bleId)
+  // changes across reconnects/re-pairs — which made the server mint a new
+  // device row each time and split vitals across duplicate identities.
+  // This UUID is generated once (getOrCreateClientDeviceId) and reused for
+  // every sync so the server can key device identity on something stable.
+  clientDeviceId: 'leiko.ble.clientDeviceId',
+  // ADR-0006 — a 6-digit care-invite code captured from a tapped join
+  // link before the wearer has onboarded/paired. After they pair (their
+  // circle exists), resolveCareInvite is called with this code to attach
+  // the inviter as a follower, then the key is cleared.
+  pendingCareInviteCode: 'leiko.invite.pendingCareCode',
+  // ADR-0006 — one-shot flag set by onboarding "I have the watch" so the
+  // home navigator opens the Pairing screen immediately after the
+  // onboarding gate flips (Pairing lives on the home stack, not the
+  // onboarding stack). Cleared by the navigator once consumed.
+  pairOnLaunch: 'leiko.onboarding.pairOnLaunch',
+  // ADR-0006 follow-up — set true when the wearer dismisses the
+  // "add your details for accurate steps/calories" home nudge, so it
+  // doesn't nag. The nudge also hides automatically once the fields fill.
+  profileNudgeDismissed: 'leiko.profile.nudgeDismissed',
   // Readings buffer — Sprint 6. Two arrays of LocalReading rows:
   //   pending: not yet successfully POSTed to /sync
   //   recent:  synced + persisted, capped at RECENT_READINGS_CAP for UI
@@ -151,7 +197,43 @@ export const STORAGE_KEYS = {
   //     spo2: { ... }, sleep: { ... }, activity: { ... } }
   // Cleared per-vital on success.
   vitalFailureCounters: 'leiko.sync.vitalFailureCounters',
+  // Sprint 17b — JSON map { familyId: parentDisplayName } of every
+  // family the user is currently a known member of. On every
+  // useFamilyReadings refetch the removal-detection banner diffs the
+  // live `parents` array against this map. If a familyId disappears
+  // from the live array, the banner surfaces "You're no longer in
+  // {label}'s circle." until dismissed. Persistence allows the banner
+  // to survive app backgrounding — important because a removed user
+  // might miss the push notification (permissions, quiet hours).
+  lastKnownFamilyIds: 'leiko.family.lastKnownIds',
+  // Sprint 17b — last seen `vital_visibility` JSON for the signed-in
+  // user, across all families they're a member of. The visibility-
+  // enforcement hook diffs incoming Realtime updates against this
+  // snapshot; when a vital flips visible → hidden, the matching
+  // singleton slice's `recent` is purged and TanStack Query caches
+  // are invalidated. Cleared on sign-out.
+  lastKnownVisibility: 'leiko.family.lastKnownVisibility',
+  // Sprint 19 Block 4 — account switcher. JSON array of
+  // `{ email, lastSignedInAtMs }` for every account that has
+  // successfully signed in on this device. Used by
+  // AccountSwitchScreen to render the picker without requiring a
+  // server roundtrip. Survives sign-out — the list IS the point of
+  // the switcher.
+  knownAccounts: 'leiko.auth.knownAccounts',
 } as const;
+
+// Returns this install's stable watch identity, generating + persisting
+// it on first call. Used as the device key the server dedupes on, so a
+// rotating BLE MAC can no longer spawn duplicate device rows. Survives
+// reconnects and re-pairs (it is NOT tied to pairedDevice, which is
+// rewritten on every pair); resets only on reinstall/storage clear.
+export function getOrCreateClientDeviceId(): string {
+  const existing = mmkv.getString(STORAGE_KEYS.clientDeviceId);
+  if (existing) return existing;
+  const id = randomUUID();
+  mmkv.set(STORAGE_KEYS.clientDeviceId, id);
+  return id;
+}
 
 export const supabaseStorage = {
   getItem: (key: string): string | null => mmkv.getString(key) ?? null,

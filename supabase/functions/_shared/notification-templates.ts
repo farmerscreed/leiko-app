@@ -266,6 +266,36 @@ export function renderFamilyInviteAccepted(
   };
 }
 
+// Sprint 17b — sent to a caregiver who has just been removed from a
+// family circle by the family_owner. Calm informational tone — the
+// founder explicitly flagged that silent revocation reads as a bug,
+// so the user must know this was a deliberate action.
+//
+// removerName: the family_owner's display_name (the actor who removed
+//   them). Falls back to a calm neutral when display_name isn't
+//   available.
+// circleLabel: the human-readable circle label, typically the parent's
+//   display name (e.g. "Mum") for caregiver-mode families, or the
+//   self-buyer's name for hybrid setups.
+export interface FamilyRemovedPayload {
+  removerName: string;
+  circleLabel: string;
+}
+
+export function renderFamilyMemberRemoved(
+  _recipient: AccountType,
+  p: FamilyRemovedPayload,
+): RenderedNotification {
+  // The recipient is always the removed user. account_type doesn't
+  // change the framing — being removed from a circle is the same
+  // semantic regardless of whether you're a self-buyer who joined as
+  // a caregiver elsewhere or a caregiver-only account.
+  return {
+    title: `You're no longer in ${p.circleLabel}'s circle`,
+    body: `${p.removerName} removed you. They can invite you back any time.`,
+  };
+}
+
 export interface SubscriptionPayload {
   priceUsd: string;
 }

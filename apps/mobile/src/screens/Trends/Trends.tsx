@@ -29,7 +29,6 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -51,18 +50,25 @@ import { TrendsCitedSection } from '../../components/TrendsCitedSection';
 import { TrendsSeeEverythingToggle } from '../../components/TrendsSeeEverythingToggle';
 import { TrendsWeeklySummaryCard } from '../../components/TrendsWeeklySummaryCard';
 import { TrendsDoctorInlineLink } from '../../components/TrendsDoctorInlineLink';
+import { AskLeikoSheet } from '../../components/AskLeikoSheet';
+import { BaselineReference } from '../../components/BaselineReference';
+import { Header } from './TrendsHeader';
+import { TrendsRangeChipsRow } from './TrendsRangeChipsRow';
 import {
   useTrendsCorrelations,
   useTrendsData,
+  usePrefetchTrendsRange,
 } from '../../hooks/useTrendsData';
 import { usePlusEntitlement } from '../../hooks/usePlusEntitlement';
 import { useFamilyReadings } from '../../hooks/useFamilyReadings';
 import { useAuth } from '../../state/auth';
+import { useReadings } from '../../state/readings';
 import { useTheme, type Theme } from '../../theme';
 import { generateTrendsNarrative } from '../../services/ai/trendsNarration';
-import type { TrendsRange } from '../../utils/trends-aggregate';
+import type { TrendsRange, TrendsData } from '../../utils/trends-aggregate';
 import type { VitalType } from '../../components/VitalRing';
 import type { AccountType } from '../../types/database';
+import { bpBaseline, formatBPBaseline } from '../../utils/vitalBaselines';
 import type {
   CaregiverStackParamList,
   SelfBuyerStackParamList,
@@ -72,8 +78,6 @@ type AnyNav = NativeStackNavigationProp<
   CaregiverStackParamList | SelfBuyerStackParamList
 >;
 
-const CAREGIVER_RANGES: TrendsRange[] = ['7d', '30d', '90d', '1y'];
-const SELF_BUYER_RANGES: TrendsRange[] = ['7d', '30d', '90d', '1y', 'all_time'];
 const FREE_RANGE: TrendsRange = '7d';
 const RANGE_LABELS: Record<TrendsRange, string> = {
   '7d': '7D',
@@ -91,12 +95,15 @@ const RANGE_WORD: Record<TrendsRange, string> = {
 };
 
 const ALL_VITALS: VitalType[] = ['bp', 'hr', 'spo2', 'sleep', 'activity'];
+// Sprint 16.5g — all 5 vitals visible by default in the expansion now
+// that hydration is wired end-to-end. Pre-fix, spo2 + activity were
+// hidden by default, forcing the user to toggle them on every time.
 const DEFAULT_VISIBLE: Record<VitalType, boolean> = {
   bp: true,
   hr: true,
-  spo2: false,
+  spo2: true,
   sleep: true,
-  activity: false,
+  activity: true,
 };
 const VITAL_CHIP_LABEL: Record<VitalType, string> = {
   bp: 'BP',
@@ -104,6 +111,14 @@ const VITAL_CHIP_LABEL: Record<VitalType, string> = {
   spo2: 'SpO2',
   sleep: 'Sleep',
   activity: 'Activity',
+};
+
+const FOCAL_VITAL_TITLE: Record<VitalType, string> = {
+  bp: 'Blood pressure · morning',
+  hr: 'Heart rate · resting',
+  spo2: 'Oxygen · overnight',
+  sleep: 'Sleep · last 7 nights',
+  activity: 'Steps · this range',
 };
 
 interface PaywallState {
@@ -125,6 +140,107 @@ function formatFreshness(computedAtMs: number, nowMs: number): string {
   return 'last week';
 }
 
+/** Pull the latest value + range bounds for the focal vital so the
+ *  evidence card adapts dynamically (was hardcoded BP-only). Returns
+ *  the data the card needs in one go. */
+function evidenceFor(
+  vital: VitalType,
+  data: TrendsData | undefined,
+): {
+  latestValue: string;
+  series: number[];
+  yRange: [number, number];
+  axisStart: string;
+  axisEnd: string;
+} {
+  const fallback = {
+    latestValue: '—',
+    series: [] as number[],
+    yRange: [0, 1] as [number, number],
+    axisStart: '',
+    axisEnd: '',
+  };
+  if (!data) return fallback;
+  switch (vital) {
+    case 'bp': {
+      const series = data.series.bp;
+      if (series.length === 0) return fallback;
+      const sys = series.map((p) => p.sys);
+      const dia = series.map((p) => p.dia);
+      const last = series[series.length - 1];
+      const yMin = Math.max(60, Math.floor((Math.min(...sys, ...dia) - 5) / 5) * 5);
+      const yMax = Math.min(220, Math.ceil((Math.max(...sys) + 5) / 5) * 5);
+      return {
+        latestValue: `${Math.round(last.sys)}/${Math.round(last.dia)}`,
+        series: sys,
+        yRange: [yMin, yMax],
+        axisStart: series[0].day,
+        axisEnd: last.day,
+      };
+    }
+    case 'hr': {
+      const series = data.series.hr.filter((p) => p.restingBpm !== null);
+      if (series.length === 0) return fallback;
+      const vals = series.map((p) => p.restingBpm as number);
+      const last = series[series.length - 1];
+      const yMin = Math.max(40, Math.floor((Math.min(...vals) - 5) / 5) * 5);
+      const yMax = Math.min(180, Math.ceil((Math.max(...vals) + 5) / 5) * 5);
+      return {
+        latestValue: `${Math.round(last.restingBpm as number)}`,
+        series: vals,
+        yRange: [yMin, yMax],
+        axisStart: series[0].day,
+        axisEnd: last.day,
+      };
+    }
+    case 'spo2': {
+      const series = data.series.spo2.filter((p) => p.avgPercent !== null);
+      if (series.length === 0) return fallback;
+      const vals = series.map((p) => p.avgPercent as number);
+      const last = series[series.length - 1];
+      const yMin = Math.max(80, Math.floor(Math.min(...vals) - 3));
+      return {
+        latestValue: `${Math.round(last.avgPercent as number)}%`,
+        series: vals,
+        yRange: [yMin, 100],
+        axisStart: series[0].day,
+        axisEnd: last.day,
+      };
+    }
+    case 'sleep': {
+      const series = data.series.sleep;
+      if (series.length === 0) return fallback;
+      const vals = series.map((p) => p.totalMinutes);
+      const last = series[series.length - 1];
+      const h = Math.floor(last.totalMinutes / 60);
+      const m = last.totalMinutes % 60;
+      return {
+        latestValue: `${h}h ${m}m`,
+        series: vals,
+        yRange: [
+          Math.max(0, Math.floor((Math.min(...vals) - 30) / 30) * 30),
+          Math.ceil((Math.max(...vals) + 30) / 30) * 30,
+        ],
+        axisStart: series[0].day,
+        axisEnd: last.day,
+      };
+    }
+    case 'activity': {
+      const series = data.series.activity;
+      if (series.length === 0) return fallback;
+      const vals = series.map((p) => p.totalSteps);
+      const last = series[series.length - 1];
+      return {
+        latestValue: `${Math.round(last.totalSteps).toLocaleString()}`,
+        series: vals,
+        yRange: [0, Math.ceil((Math.max(...vals) + 1000) / 1000) * 1000],
+        axisStart: series[0].day,
+        axisEnd: last.day,
+      };
+    }
+  }
+}
+
 // ─── Screen ───────────────────────────────────────────────────────────
 
 export function Trends() {
@@ -132,11 +248,23 @@ export function Trends() {
   const navigation = useNavigation<AnyNav>();
   const profile = useAuth((s) => s.profile);
   const accountType: AccountType = profile?.account_type ?? 'caregiver';
-  const parentLabel = profile?.display_name ?? 'Mum';
 
   const { parents, isRefreshing, refresh } = useFamilyReadings();
   const familyId = parents[0]?.familyId ?? null;
   const userId = useAuth((s) => s.session?.user.id ?? null);
+
+  // Sprint 16.5g — caregiver-mode parent label comes from the family
+  // membership (the actual parent's display name), NOT the caregiver's
+  // profile. Pre-fix `profile?.display_name ?? 'Mum'` was always the
+  // caregiver's name, so narratives like "John's mornings averaged 145"
+  // referred to the caregiver, not the parent being cared for.
+  const parentLabel = useMemo(() => {
+    if (accountType !== 'caregiver') {
+      return profile?.display_name?.trim() || 'You';
+    }
+    const parentName = parents[0]?.parentDisplayName?.trim();
+    return parentName || 'Mum';
+  }, [accountType, profile?.display_name, parents]);
 
   const [range, setRange] = useState<TrendsRange>(FREE_RANGE);
   const [expanded, setExpanded] = useState(false);
@@ -147,15 +275,40 @@ export function Trends() {
     visible: false,
     trigger: 'range_extension',
   });
+  const [askVisible, setAskVisible] = useState(false);
 
   const { isPlus } = usePlusEntitlement();
   const trends = useTrendsData(familyId, range);
   const correlations = useTrendsCorrelations(familyId, userId);
 
-  // Narrative — Sprint 16 cascade. Refetches when range / data /
-  // correlations change. The cascade guarantees a non-null body.
+  // Sprint 16.5g — prefetch 30D for Plus users so first tap is instant.
+  // No-op for free users (would just trigger the paywall anyway).
+  usePrefetchTrendsRange(isPlus && range === '7d' ? familyId : null, '30d');
+
+  // Sprint 16.5g — baseline computed from the readings slice (the
+  // 30-day p10–p90 band). Surfaced under the focal chart so "within
+  // your range" finally has a visible range.
+  const recentReadings = useReadings((s) => s.recent);
+  const pendingReadings = useReadings((s) => s.pending);
+  const baselineBP = useMemo(
+    () => bpBaseline([...pendingReadings, ...recentReadings]),
+    [pendingReadings, recentReadings],
+  );
+
+  // Narrative — Tier-C engine (rich deterministic) via the cascade.
+  // Refetches when range / data / correlations change. The cascade
+  // guarantees a non-null body.
+  //
+  // Sprint 16.5g — freshness caption used to lie by setting
+  // `computedAtMs: Date.now()` on every effect. Now we track the
+  // tuple of inputs and only update the timestamp when the
+  // narrative content actually changes.
   const [narrative, setNarrative] = useState<{
     body: string;
+    focalVital: VitalType;
+    citedDayIdx: number | null;
+    signOff: string;
+    tier: 'C' | 'A' | 'deterministic';
     computedAtMs: number;
   } | null>(null);
   useEffect(() => {
@@ -166,14 +319,35 @@ export function Trends() {
       range,
       accountType,
       parentLabel,
+      baselines: { bp: baselineBP ?? null },
     }).then((r) => {
       if (cancelled) return;
-      setNarrative({ body: r.body, computedAtMs: Date.now() });
+      setNarrative((prev) => {
+        // Preserve the computed timestamp when the body hasn't
+        // actually changed (re-renders shouldn't make "just now"
+        // appear forever).
+        if (prev && prev.body === r.body) return prev;
+        return {
+          body: r.body,
+          focalVital: r.focalVital,
+          citedDayIdx: r.citedDayIdx,
+          signOff: r.signOff,
+          tier: r.tier,
+          computedAtMs: Date.now(),
+        };
+      });
     });
     return () => {
       cancelled = true;
     };
-  }, [trends.data, correlations.correlations, range, accountType, parentLabel]);
+  }, [
+    trends.data,
+    correlations.correlations,
+    range,
+    accountType,
+    parentLabel,
+    baselineBP,
+  ]);
 
   const onRangeTap = useCallback(
     (next: TrendsRange) => {
@@ -197,13 +371,11 @@ export function Trends() {
     [],
   );
 
+  // Sprint 16.5g — opens AskLeikoSheet with the current range +
+  // focal vital pre-loaded as context. Pre-fix this was a no-op
+  // (visible CTA, no effect). The sheet does the Tier-B call.
   const onAskTrend = useCallback(() => {
-    // Sprint 16 cascade-protected: AskLeiko is the existing
-    // conversational surface. Deep-linked navigation is wired by the
-    // navigator. For v1.0 this fires a no-op when the navigator
-    // didn't pass an onAsk handler — the affordance still tests as
-    // present without forcing screen tests to mock navigation.
-    // (Hook into screen-level navigation in a follow-up patch.)
+    setAskVisible(true);
   }, []);
 
   const onOpenDoctorScreen = useCallback(() => {
@@ -221,17 +393,36 @@ export function Trends() {
     [trends.data, visible],
   );
 
-  const bpSummary = trends.data?.summary.bp;
-  const hasBpData = (bpSummary?.count ?? 0) >= 3;
+  // Sprint 16.5g — multi-vital empty gate. Pre-fix this was BP-only,
+  // so a user with full HR/SpO2/sleep/activity history but < 3 BP
+  // readings saw "Trends will appear here next week" forever.
+  const summary = trends.data?.summary;
+  const hasAnyVitalData = !!summary && (
+    summary.bp.count >= 3 ||
+    summary.hr.count >= 3 ||
+    summary.spo2.count >= 3 ||
+    summary.sleep.count >= 3 ||
+    summary.activity.count >= 3
+  );
 
   const headerTitle = accountType === 'self_buyer' ? 'Your trends' : 'Trends';
   const eyebrow = `A letter from Leiko · ${RANGE_WORD[range]}`;
   const freshnessCaption = narrative
-    ? `Based on your last ${RANGE_WORD[range]} · last computed ${formatFreshness(
-        narrative.computedAtMs,
-        Date.now(),
-      )}`
+    ? `Last computed ${formatFreshness(narrative.computedAtMs, Date.now())}`
     : undefined;
+
+  // Focal vital + evidence card data (16.5g — was hardcoded BP).
+  const focalVital: VitalType = narrative?.focalVital ?? 'bp';
+  const evidence = useMemo(
+    () => evidenceFor(focalVital, trends.data),
+    [focalVital, trends.data],
+  );
+  const focalBPBand = focalVital === 'bp' && baselineBP
+    ? ([baselineBP.sysLow, baselineBP.sysHigh] as [number, number])
+    : focalVital === 'bp'
+      ? ([110, 130] as [number, number])
+      : undefined;
+  const baselineBody = baselineBP ? formatBPBaseline(baselineBP) : '';
 
   return (
     <SafeAreaView
@@ -255,10 +446,9 @@ export function Trends() {
         }
         testID="trends-scroll"
       >
-        <Header theme={theme} title={headerTitle} />
+        <Header title={headerTitle} />
 
-        <RangeChipsRow
-          theme={theme}
+        <TrendsRangeChipsRow
           accountType={accountType}
           active={range}
           isPlus={isPlus}
@@ -280,7 +470,7 @@ export function Trends() {
               body="Pull to refresh, or try again in a moment."
             />
           </View>
-        ) : !hasBpData ? (
+        ) : !hasAnyVitalData ? (
           <View style={{ marginTop: theme.spacing.xl }}>
             <EmptyState
               title="Trends will appear here next week"
@@ -294,30 +484,38 @@ export function Trends() {
               body={narrative?.body ?? ''}
               eyebrow={eyebrow}
               freshnessCaption={freshnessCaption}
+              signOff={narrative?.signOff}
               testID="trends-letter"
             />
 
             <View style={{ marginTop: theme.spacing.l }}>
               <TrendsEvidenceCard
-                vital="bp"
-                title="Blood pressure · morning"
-                latestValue={
-                  bpSummary?.avgSys && bpSummary?.avgDia
-                    ? `${Math.round(bpSummary.avgSys)}/${Math.round(bpSummary.avgDia)}`
-                    : '—'
+                vital={focalVital}
+                title={FOCAL_VITAL_TITLE[focalVital]}
+                latestValue={evidence.latestValue}
+                series={evidence.series}
+                yRange={evidence.yRange}
+                healthyBand={focalBPBand}
+                annotation={
+                  narrative?.citedDayIdx !== null &&
+                  narrative?.citedDayIdx !== undefined
+                    ? { index: narrative.citedDayIdx, label: 'Cited' }
+                    : undefined
                 }
-                series={(trends.data?.series.bp ?? []).map((p) => p.sys)}
-                yRange={[90, 150]}
-                healthyBand={[110, 130]}
-                axisStart={trends.data?.series.bp[0]?.day ?? ''}
-                axisEnd={
-                  trends.data?.series.bp[
-                    trends.data.series.bp.length - 1
-                  ]?.day ?? ''
-                }
+                axisStart={evidence.axisStart}
+                axisEnd={evidence.axisEnd}
                 testID="trends-evidence"
               />
             </View>
+
+            {focalVital === 'bp' && baselineBody ? (
+              <BaselineReference
+                body={baselineBody}
+                caption={`over the last ${baselineBP?.sampleCount ?? 30} readings`}
+                style={{ marginTop: theme.spacing.s }}
+                testID="trends-baseline"
+              />
+            ) : null}
 
             <View style={{ marginTop: theme.spacing.m }}>
               <TrendsAskAffordance
@@ -329,6 +527,18 @@ export function Trends() {
             <TrendsCitedSection
               rows={correlations.correlations}
               testID="trends-cited"
+              onSelectRow={(corrRow) => {
+                // Sprint 16.5g — tapping a correlation card deep-links
+                // to the relevant detail screen.
+                const target = corrRow.correlation_type === 'sleep_x_morning_bp'
+                  ? 'bp'
+                  : corrRow.correlation_type === 'activity_x_resting_hr'
+                    ? 'hr'
+                    : 'spo2';
+                (navigation as unknown as {
+                  navigate: (screen: 'VitalDetail', params: { vital: VitalType }) => void;
+                }).navigate('VitalDetail', { vital: target });
+              }}
             />
 
             <TrendsSeeEverythingToggle
@@ -346,7 +556,14 @@ export function Trends() {
               />
             ) : null}
 
-            <TrendsWeeklySummaryCard testID="trends-weekly-summary" />
+            <TrendsWeeklySummaryCard
+              data={trends.data}
+              correlations={correlations.correlations}
+              accountType={accountType}
+              parentLabel={parentLabel}
+              baselineBP={baselineBP}
+              testID="trends-weekly-summary"
+            />
           </>
         )}
 
@@ -363,84 +580,22 @@ export function Trends() {
         accountType={accountType}
         trigger={paywall.trigger}
       />
+
+      <AskLeikoSheet
+        visible={askVisible}
+        onDismiss={() => setAskVisible(false)}
+        onArticleOpen={(id) =>
+          (navigation as unknown as {
+            navigate: (s: 'Article', p: { articleId: string }) => void;
+          }).navigate('Article', { articleId: id })
+        }
+      />
     </SafeAreaView>
   );
 }
 
 // ────────────────────────────────────────────────────────────────────
-// Sub-components.
-
-function Header({ theme, title }: { theme: Theme; title: string }) {
-  return (
-    <View
-      style={{
-        paddingHorizontal: theme.spacing.l,
-        paddingTop: theme.spacing.l,
-      }}
-    >
-      <Text
-        accessibilityRole="header"
-        style={[
-          {
-            fontFamily: theme.fontFamilies.editorial,
-            fontSize: 30,
-            lineHeight: 34,
-            color: theme.colors.text.primary,
-            letterSpacing: -0.4,
-          },
-        ]}
-        testID="trends-header-title"
-      >
-        {title}
-      </Text>
-    </View>
-  );
-}
-
-function RangeChipsRow({
-  theme,
-  accountType,
-  active,
-  isPlus,
-  onRangeTap,
-}: {
-  theme: Theme;
-  accountType: AccountType;
-  active: TrendsRange;
-  isPlus: boolean;
-  onRangeTap: (r: TrendsRange) => void;
-}) {
-  const ranges =
-    accountType === 'self_buyer' ? SELF_BUYER_RANGES : CAREGIVER_RANGES;
-  return (
-    <View
-      style={{
-        paddingTop: theme.spacing.m,
-        paddingHorizontal: theme.spacing.l,
-        flexDirection: 'row',
-        gap: theme.spacing.xs,
-      }}
-      testID="trends-range-row"
-    >
-      {ranges.map((r) => {
-        const isActive = active === r;
-        const locked = r !== FREE_RANGE && !isPlus;
-        return (
-          <Pill
-            key={r}
-            variant={isActive ? 'accent' : 'outline'}
-            selected={isActive}
-            onPress={() => onRangeTap(r)}
-            testID={`trends-range:${r}`}
-            accessibilityLabel={locked ? `${RANGE_LABELS[r]} (Plus only)` : RANGE_LABELS[r]}
-          >
-            {locked ? `${RANGE_LABELS[r]} ·` : RANGE_LABELS[r]}
-          </Pill>
-        );
-      })}
-    </View>
-  );
-}
+// Sub-components (16.5g — Header + RangeChipsRow extracted to siblings).
 
 function ExpansionPanel({
   theme,

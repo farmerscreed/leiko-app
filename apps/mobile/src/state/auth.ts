@@ -25,6 +25,12 @@ import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../services/supabase';
 import { mmkv, STORAGE_KEYS } from '../services/storage';
 import { identifyPurchaser, logoutPurchaser } from '../services/purchases';
+import { checkOnboardingState } from '../services/users/checkOnboardingState';
+import { useKnownAccounts } from './knownAccounts';
+import { useOnboarding } from './onboarding';
+import { linkSentryToUser } from '../services/sentry';
+import { linkPosthogToUser } from '../services/analytics/posthog';
+import { stopBleForegroundService } from '../services/ble/foregroundService';
 import type { AccountType, UserRow } from '../types/database';
 
 type Status = 'loading' | 'unauthenticated' | 'authenticated';
@@ -42,7 +48,15 @@ interface AuthState {
 
   signUpWithOtp: (email: string) => Promise<void>;
   signInWithOtp: (email: string) => Promise<void>;
-  verifyOtp: (email: string, token: string) => Promise<void>;
+  /** Sprint 19 Block 9 — optional `delayMs` defers the session flip
+   *  (and the resulting navigator transition) by N ms so the OTP
+   *  screen can render a brief "Welcome back" success state. Default
+   *  0 preserves existing behaviour for tests + non-UI callers. */
+  verifyOtp: (
+    email: string,
+    token: string,
+    options?: { delayMs?: number },
+  ) => Promise<void>;
   signOut: () => Promise<void>;
 
   /** Refresh the profile from Supabase. Settings → Profile edits call
@@ -129,13 +143,19 @@ export const useAuth = create<AuthState>((set, get) => ({
     set({ lastOtpEmail: email });
   },
 
-  async verifyOtp(email, token) {
+  async verifyOtp(email, token, options) {
     const { data, error } = await supabase.auth.verifyOtp({
       email,
       token,
       type: 'email',
     });
     if (error) throw error;
+    // Sprint 19 Block 9 — optional delay before the session flip so
+    // OTPVerify can render a brief "Welcome back" success view.
+    const delayMs = options?.delayMs ?? 0;
+    if (delayMs > 0) {
+      await new Promise<void>((resolve) => setTimeout(resolve, delayMs));
+    }
     // Successful verification triggers handle_new_user (first-time)
     // and onAuthStateChange. Set state directly here too so the
     // calling screen sees the change synchronously without waiting
@@ -144,6 +164,8 @@ export const useAuth = create<AuthState>((set, get) => ({
     // The fork choice has now been committed to the database — drop
     // it from MMKV so a future signed-out state doesn't replay it.
     if (data.session) get().clearPendingAccountType();
+    // Sprint 19 Block 4 — remember this account for the switcher.
+    if (data.session) useKnownAccounts.getState().add(email);
   },
 
   async refreshProfile() {
@@ -154,6 +176,10 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   async signOut() {
+    // Stop the BLE foreground service before tearing down the session —
+    // a signed-out app has no business holding the watch link or the
+    // persistent notification open. No-op on iOS / when not running.
+    void stopBleForegroundService();
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     // Best-effort: clear the RevenueCat subscriber so a different user
@@ -164,19 +190,65 @@ export const useAuth = create<AuthState>((set, get) => ({
 
   async _setSession(session) {
     if (!session) {
+      linkSentryToUser(null);
+      linkPosthogToUser(null);
       set({ session: null, profile: null, status: 'unauthenticated' });
       return;
     }
     const profile = await fetchProfile(session.user.id);
+    // Sprint 19 Block 8 — derive onboarding-complete from server
+    // state. Without this, a returning user on a fresh install (or
+    // post-MMKV-wipe) signs in cleanly but the navigator sends them
+    // back through onboarding because the per-device MMKV flag is
+    // false. The fix queries `family_members` for any active row and
+    // back-fills the appropriate MMKV flag, then hydrates the
+    // useOnboarding store so the navigator re-evaluates.
+    //
+    // Quietly best-effort: a network failure here leaves the existing
+    // MMKV state alone (next session retries).
+    if (profile) {
+      try {
+        const { hasOnboarded, primaryFamilyId } = await checkOnboardingState(profile.id);
+        if (hasOnboarded) {
+          if (profile.account_type === 'caregiver') {
+            mmkv.set(STORAGE_KEYS.caregiverOnboardingComplete, true);
+          } else if (profile.account_type === 'self_buyer') {
+            mmkv.set(STORAGE_KEYS.selfBuyerOnboardingComplete, true);
+          }
+          // v7 hotfix — also seed currentFamilyId from the server when
+          // the user has any active family. Pre-fix the onboarding flag
+          // was set but currentFamilyId stayed null on a fresh install,
+          // which routed the user out of onboarding but into an empty
+          // home view that couldn't query any family data. Only write
+          // when MMKV is empty so the chooser-driven currentFamilyId
+          // (Sprint 19 Block 2) isn't clobbered for caregivers with
+          // multiple families.
+          if (primaryFamilyId && !mmkv.getString(STORAGE_KEYS.currentFamilyId)) {
+            mmkv.set(STORAGE_KEYS.currentFamilyId, primaryFamilyId);
+          }
+          useOnboarding.getState().hydrate();
+        }
+      } catch {
+        // Best-effort — leave MMKV alone on failure.
+      }
+    }
     set({ session, profile, status: 'authenticated' });
+    // Stitch future crashes to this user. Only the row id leaves the
+    // device — sendDefaultPii is off so no email / IP is attached.
+    linkSentryToUser(session.user.id);
     // Identify with RevenueCat once we have the profile. The webhook is
     // the source of truth for entitlement; this call only ties future
     // purchase events to the right Supabase user.
     if (profile) {
+      const familyId = mmkv.getString(STORAGE_KEYS.currentFamilyId) ?? null;
       void identifyPurchaser(profile.id, {
         accountType: profile.account_type,
-        familyId: mmkv.getString(STORAGE_KEYS.currentFamilyId) ?? null,
+        familyId,
       });
+      // Stitch future PostHog events to this user. Identity travels
+      // as row-id + account_type + family_id only; email and raw
+      // metadata never leave the device.
+      linkPosthogToUser(profile.id, { accountType: profile.account_type, familyId });
     }
   },
 }));

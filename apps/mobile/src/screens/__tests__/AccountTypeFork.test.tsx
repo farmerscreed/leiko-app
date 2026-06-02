@@ -1,12 +1,14 @@
-// AccountTypeFork — Sprint 2 acceptance tests.
+// AccountTypeFork — ADR-0006 Phase 3 (unified model) acceptance tests.
 //
-// Bar (per docs/04-screens/onboarding-fork.md + sprint card):
-//   - Headline + body copy match verbatim
-//   - Both CTAs present, both rendered as button.primary (D8a §3.1.2 —
-//     equal visual weight)
-//   - Each CTA, when tapped, dispatches setPendingAccountType with the
-//     correct value and navigates to SignUp
-//   - The Sprint 2 "Sign in" tertiary link routes to SignIn
+// The screen no longer forks caregiver vs self-buyer. It is a calm
+// welcome with one "Get started" CTA; every new user onboards as
+// 'self_buyer' (the self-owning persona the unified constellation home is
+// built on). Bar:
+//   - Unified welcome headline + body
+//   - Single "Get started" CTA that caches account_type='self_buyer' and
+//     routes to SignUp
+//   - "Sign in" tertiary link routes to SignIn without caching a type
+//   - Voice rules still pass
 //
 // We mock useAuth so we don't pull supabase into the RN test runtime.
 
@@ -54,30 +56,30 @@ beforeEach(() => {
 });
 
 describe('AccountTypeFork — copy', () => {
-  it('renders the headline verbatim per docs/04-screens/onboarding-fork.md', () => {
+  it('renders the unified welcome headline', () => {
     render(
       withProviders(<AccountTypeForkScreen navigation={makeNav()} route={makeRoute()} />),
     );
-    expect(screen.getByText('Who are you setting up for?')).toBeTruthy();
+    expect(screen.getByText('Welcome to Leiko')).toBeTruthy();
   });
 
-  it('renders the body verbatim', () => {
+  it('renders the unified body naming both capabilities', () => {
     render(
       withProviders(<AccountTypeForkScreen navigation={makeNav()} route={makeRoute()} />),
     );
     expect(
-      screen.getByText('Leiko works for both — the path just looks a little different.'),
+      screen.getByText(
+        /Track your own readings and keep an eye on the people you care\s+for/,
+      ),
     ).toBeTruthy();
   });
 
-  it('renders both CTA labels and captions verbatim', () => {
+  it('renders a single Get started CTA', () => {
     render(
       withProviders(<AccountTypeForkScreen navigation={makeNav()} route={makeRoute()} />),
     );
-    expect(screen.getByText('Someone I care for')).toBeTruthy();
-    expect(screen.getByText('A parent, partner, or other family member')).toBeTruthy();
-    expect(screen.getByText('Myself')).toBeTruthy();
-    expect(screen.getByText('I have or want to track my own blood pressure')).toBeTruthy();
+    expect(screen.getByTestId('fork-get-started')).toBeTruthy();
+    expect(screen.getByText('Get started')).toBeTruthy();
   });
 
   it('renders the Sign in tertiary link', () => {
@@ -92,9 +94,6 @@ describe('AccountTypeFork — copy', () => {
     render(
       withProviders(<AccountTypeForkScreen navigation={makeNav()} route={makeRoute()} />),
     );
-    // docs/05-voice-and-claims.md HARD FAIL list — sample the highest-
-    // risk phrases for an onboarding screen. (The CI copy-lint scanner
-    // is the canonical check; this is a screen-level smoke test.)
     const forbidden = [
       'patient',
       'patients',
@@ -115,21 +114,11 @@ describe('AccountTypeFork — copy', () => {
 });
 
 describe('AccountTypeFork — interaction', () => {
-  it("caregiver tap caches account_type='caregiver' and routes to SignUp", () => {
+  it("Get started caches account_type='self_buyer' (unified) and routes to SignUp", () => {
     const nav = makeNav();
     render(withProviders(<AccountTypeForkScreen navigation={nav} route={makeRoute()} />));
 
-    fireEvent.press(screen.getByTestId('fork-caregiver'));
-
-    expect(mockSetPendingAccountType).toHaveBeenCalledWith('caregiver');
-    expect(nav.navigate).toHaveBeenCalledWith('SignUp');
-  });
-
-  it("self-buyer tap caches account_type='self_buyer' and routes to SignUp", () => {
-    const nav = makeNav();
-    render(withProviders(<AccountTypeForkScreen navigation={nav} route={makeRoute()} />));
-
-    fireEvent.press(screen.getByTestId('fork-self-buyer'));
+    fireEvent.press(screen.getByTestId('fork-get-started'));
 
     expect(mockSetPendingAccountType).toHaveBeenCalledWith('self_buyer');
     expect(nav.navigate).toHaveBeenCalledWith('SignUp');
@@ -143,23 +132,5 @@ describe('AccountTypeFork — interaction', () => {
 
     expect(mockSetPendingAccountType).not.toHaveBeenCalled();
     expect(nav.navigate).toHaveBeenCalledWith('SignIn');
-  });
-});
-
-describe('AccountTypeFork — visual weight (D8a §3.1.2)', () => {
-  it('both CTAs render as buttons (equal visual weight per spec)', () => {
-    // Equal visual weight is enforced by the source: the screen passes
-    // variant="primary" to both Buttons. We can't compare resolved
-    // backgroundColors without scraping internal Pressable state — too
-    // brittle. The robust assertion at unit-test scope is that both
-    // CTAs are accessible buttons of the same variant family. Visual
-    // parity itself belongs in Sprint 17 visual-regression coverage.
-    render(
-      withProviders(<AccountTypeForkScreen navigation={makeNav()} route={makeRoute()} />),
-    );
-    const caregiver = screen.getByTestId('fork-caregiver');
-    const selfBuyer = screen.getByTestId('fork-self-buyer');
-    expect(caregiver.props.accessibilityRole).toBe('button');
-    expect(selfBuyer.props.accessibilityRole).toBe('button');
   });
 });

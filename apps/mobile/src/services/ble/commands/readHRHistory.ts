@@ -29,11 +29,28 @@ import { ParsedPacket, buildPacket } from '../io';
 import { CommandTimeoutError, type UrionDevice } from '../UrionDevice';
 import { readUint32LE, writeUint32LE } from './readBPHistory';
 
+// BLE_TRACE — Sprint 16.5a Phase A forensic-capture instrumentation.
+// See apps/mobile/src/services/ble/UrionDevice.ts for the convention.
+const BLE_TRACE = typeof __DEV__ !== 'undefined' && __DEV__;
+
 export interface HRHistorySample {
   /** RAW watch-firmware seconds (pre-firmware-shift). */
   timestampSec: number;
   /** 1..220 valid; 0 placeholders are filtered out before return. */
   bpm: number;
+}
+
+/** Sprint 16.5b — wrapper returns the watch's reported sample cadence
+ *  alongside the samples themselves so consumers can use it for
+ *  sampleWindowSec instead of the hardcoded `30 min` assumption that was
+ *  6x wrong on U19M_013C (actual: 5 min per Phase A trace). */
+export interface HRHistoryResult {
+  samples: HRHistorySample[];
+  /** Seconds between consecutive samples per the watch's index packet.
+   *  0 when the watch returned the no-data marker. Consumers should
+   *  treat 0 as "fall back to default" since the index packet is the
+   *  only source of truth for this. */
+  intervalSec: number;
 }
 
 export interface ReadHRHistoryOptions {
@@ -49,13 +66,13 @@ const HR_NO_DATA_MARKER = 0xff;
 export async function readHRHistory(
   device: UrionDevice,
   options: ReadHRHistoryOptions,
-): Promise<HRHistorySample[]> {
+): Promise<HRHistoryResult> {
   const timeoutMs = options.timeoutMs ?? 10_000;
 
   const payload = new Uint8Array(14);
   writeUint32LE(payload, 0, options.dayTimestampSec);
 
-  return new Promise<HRHistorySample[]>((resolve, reject) => {
+  return new Promise<HRHistoryResult>((resolve, reject) => {
     const samples: HRHistorySample[] = [];
     let dayStartSec: number | null = null;
     let intervalSec = 0;
@@ -80,7 +97,7 @@ export async function readHRHistory(
       const seq = packet.payload[0];
 
       if (seq === HR_NO_DATA_MARKER) {
-        finish(() => resolve([]));
+        finish(() => resolve({ samples: [], intervalSec: 0 }));
         return;
       }
 
@@ -89,9 +106,15 @@ export async function readHRHistory(
         totalPackets = packet.payload[1];
         const intervalMinutes = packet.payload[2];
         intervalSec = intervalMinutes * 60;
+        if (BLE_TRACE) {
+          console.log(
+            `[ble-trace] readHRHistory index totalPackets=${totalPackets} ` +
+              `intervalMinutes=${intervalMinutes} (returned to caller)`,
+          );
+        }
         if (totalPackets <= 1) {
           // Index packet only — no samples to follow.
-          finish(() => resolve([]));
+          finish(() => resolve({ samples: [], intervalSec }));
         }
         return;
       }
@@ -101,6 +124,15 @@ export async function readHRHistory(
       if (seq === 0x01) {
         dayStartSec = readUint32LE(packet.payload, 1);
         offset = 5;
+        if (BLE_TRACE) {
+          const p = packet.payload;
+          const hex = (n: number) => (n & 0xff).toString(16).padStart(2, '0');
+          console.log(
+            `[ble-trace] readHRHistory seq=01 bytes[1..4]=${hex(p[1] ?? 0)} ${hex(p[2] ?? 0)} ${hex(p[3] ?? 0)} ${hex(p[4] ?? 0)} ` +
+              `dayStartSec=${dayStartSec} ` +
+              `(requested dayTimestampSec=${options.dayTimestampSec})`,
+          );
+        }
       } else {
         offset = 1;
       }
@@ -109,6 +141,11 @@ export async function readHRHistory(
       for (let i = offset; i < packet.payload.length; i++) {
         const bpm = packet.payload[i];
         const ts = baseSec + sampleIndex * intervalSec;
+        if (BLE_TRACE && sampleIndex < 3) {
+          console.log(
+            `[ble-trace] readHRHistory sample idx=${sampleIndex} ts=${ts} bpm=${bpm}`,
+          );
+        }
         sampleIndex++;
         if (bpm === 0) continue;
         samples.push({ timestampSec: ts, bpm });
@@ -117,7 +154,7 @@ export async function readHRHistory(
       dataPacketsSeen++;
       // The index packet counts as packet 0; data packets fill 1..total-1.
       if (totalPackets > 0 && dataPacketsSeen >= totalPackets - 1) {
-        finish(() => resolve(samples));
+        finish(() => resolve({ samples, intervalSec }));
       }
     });
 

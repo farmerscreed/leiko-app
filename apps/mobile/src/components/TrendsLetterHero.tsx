@@ -29,6 +29,12 @@ export interface TrendsLetterHeroProps {
    * uppercase. Caller composes from the range + last-computed time.
    */
   freshnessCaption?: string;
+  /**
+   * Sprint 16.5g — optional sign-off line ("— Leiko") rendered in
+   * italic editorial type below the paragraph. Closes the letter
+   * metaphor that the eyebrow opens.
+   */
+  signOff?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
@@ -37,6 +43,7 @@ export function TrendsLetterHero({
   body,
   eyebrow,
   freshnessCaption,
+  signOff,
   style,
   testID,
 }: TrendsLetterHeroProps) {
@@ -91,6 +98,23 @@ export function TrendsLetterHero({
           </Text>
         ))}
       </Text>
+
+      {signOff ? (
+        <Text
+          allowFontScaling={false}
+          style={{
+            fontFamily: theme.fontFamilies.editorialItalic,
+            fontStyle: 'italic',
+            fontSize: 16,
+            lineHeight: 22,
+            color: theme.colors.text.secondary,
+            marginTop: theme.spacing.s,
+          }}
+          testID={testID ? `${testID}-signoff` : undefined}
+        >
+          {signOff}
+        </Text>
+      ) : null}
 
       {freshnessCaption ? (
         <Text

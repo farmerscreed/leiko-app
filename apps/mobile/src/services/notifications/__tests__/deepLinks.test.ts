@@ -63,4 +63,31 @@ describe('parseDeepLink', () => {
       readingId: 'abc',
     });
   });
+
+  it('routes https://leiko.app/join with token + code + email', () => {
+    expect(
+      parseDeepLink(
+        'https://leiko.app/join?token=abc%2F123&code=482910&email=me%40x.com',
+      ),
+    ).toEqual({
+      category: 'join',
+      inviteToken: 'abc/123',
+      inviteCode: '482910',
+      inviteEmail: 'me@x.com',
+    });
+  });
+
+  it('routes leiko://join with just a token', () => {
+    expect(parseDeepLink('leiko://join?token=xyz')).toEqual({
+      category: 'join',
+      inviteToken: 'xyz',
+      inviteCode: undefined,
+      inviteEmail: undefined,
+    });
+  });
+
+  it('returns unknown for a join link with no token or code', () => {
+    expect(parseDeepLink('leiko://join').category).toBe('unknown');
+  });
+
 });

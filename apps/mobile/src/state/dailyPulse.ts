@@ -309,6 +309,34 @@ export function useDailyPulseData(nowSec?: number): DailyPulseData {
   return composeDailyPulseData(snapshot, now);
 }
 
+/**
+ * Sprint 17a — empty fallback for the parameterized VitalDetail screens.
+ * When a caregiver opens a parent's vital detail and the parent-scoped
+ * fetch hasn't resolved yet, the screen needs SOME `DailyPulseData`
+ * shape to read (it's presentational; null-checking every field is
+ * noisy). The empty fallback returns the same shape with all-null
+ * vital slices — the screens' existing `isEmpty` checks then drive
+ * the empty-state branch automatically.
+ */
+export function emptyDailyPulse(nowSec?: number): DailyPulseData {
+  const now = nowSec ?? Math.floor(Date.now() / 1000);
+  return composeDailyPulseData(
+    {
+      bpLatest: null,
+      hrRestingToday: null,
+      hrRestingRecent: [],
+      hrLatestSampleAt: null,
+      hrLatestBpm: null,
+      spo2LatestPercent: null,
+      spo2OvernightLowsRecent: [],
+      spo2LatestSampleAt: null,
+      sleepSession: null,
+      activityToday: null,
+    },
+    now,
+  );
+}
+
 function buildSnapshot(nowSec: number, timeZone?: string | null): DailyPulseSnapshot {
   const tz = timeZone ?? useAuth.getState().profile?.timezone ?? null;
   const hrAll = [

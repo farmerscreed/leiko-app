@@ -1,47 +1,32 @@
-// ViewToggle — Sprint 7.7b (caregiver Family Constellation).
+// ViewToggle — Sprint 16.6 redesign v2 (caregiver Family Constellation).
 //
-// Pill-shaped segmented control that flips the caregiver home between the
-// bird's-eye constellation view and the editorial detailed-card view. The
-// component is pure presentation: it accepts `value` + `onChange` from the
-// consumer (`CaregiverHome`) which owns the persisted state via
-// `useCaregiverViewMode` (MMKV-backed).
+// Pill-shaped segmented control that flips the caregiver home between
+// the bird's-eye constellation view and the editorial detailed-card view.
 //
-// Anatomy (from `leiko-caregiver-unified.html` → ViewToggle):
-//   - Outer pill: borderRadius 999, padding 3pt, glass background. BlurView
-//     intensity 50 + tinted floor of `surface.warmElevated` at ~70% alpha;
-//     hairline border in `border.subtle`.
-//   - Two buttons inside, each with glyph + label (gap 6pt), padding
-//     7pt vertical / 11pt right / 9pt left, borderRadius 999.
-//     - Active:   coral background ~18% alpha, coral border ~35%, coral text.
-//     - Inactive: transparent background, transparent border (same width to
-//                 keep layout stable), text.tertiary text. Glyph follows
-//                 the same colour via `currentColor`-style stroke / fill.
+// v2 brings text labels BACK alongside the icons after on-device feedback
+// that the icon-only version didn't read as a control. Anatomy:
 //
-// Glyphs:
-//   - Bird's-eye: 3 SVG circles at varied positions/sizes (matches design
-//     coordinates exactly: 7,9 r2.5 / 16,6 r1.8 / 14,16 r2.2 with
-//     opacity 0.9 / 0.7 / 0.85).
-//   - Detailed: 3 stacked SVG rectangles (16x4, 16x4, 16x2.5).
+//   · Warm-dark glass pill (#140E0A @ 88%) with hairline warm-near-white
+//     rim + soft drop shadow so it sits forward of the canopy.
+//   · Two segment buttons. Each carries a small icon + a mono-uppercase
+//     label ("BIRD'S-EYE" / "DETAILED"). Unmistakably tappable.
+//   · An animated coral "thumb" sits behind the labels and slides
+//     between positions on selection via Reanimated withSpring (mass 0.8)
+//     so the state change feels physical.
+//   · Active label + icon: pure white at full opacity (sits on top of
+//     the coral thumb). Inactive: white at 50% opacity.
+//   · Per-button press feedback: scale-down to 0.94 with spring-back
+//     on release. Reduced-motion users skip the animation; the thumb
+//     still snaps.
 //
-// Motion:
-//   The cinematic moment in 7.7b is the screen-level zoom between views,
-//   not the toggle itself. Per the brief's recommendation we keep the
-//   toggle's state-flip instant — Pressable's pressed-opacity provides
-//   tap feedback. This trims the file and avoids a Reanimated colour
-//   interpolation that adds nothing the user notices.
+// Geometry: ~168 × 36pt total (84 × 28pt per button). Tap target meets
+// the iOS 44pt guideline including the 4pt hitSlop.
 //
-// Accessibility:
-//   - Outer pill: accessibilityRole="radiogroup" so AT announces single-
-//     selection semantics.
-//   - Each button: accessibilityRole="button" (radio role isn't supported
-//     reliably on RN's accessibility layer; button + selected state is the
-//     idiomatic compromise), accessibilityLabel "Bird's-eye view" /
-//     "Detailed view", accessibilityState { selected }.
-//
-// Voice (docs/05-voice-and-claims.md):
-//   "Bird's-eye" + "Detailed" + accessibilityLabel "Bird's-eye view" /
-//   "Detailed view" — clean. No forbidden vocabulary.
+// Voice (docs/05-voice-and-claims.md): visible labels + accessibility
+// labels both plain-language: "BIRD'S-EYE" / "DETAILED" and
+// "Bird's-eye view" / "Detailed view". No forbidden vocabulary.
 
+import { useEffect } from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -50,9 +35,15 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { BlurView } from 'expo-blur';
 import Svg, { Circle, Rect } from 'react-native-svg';
 import { useTheme } from '../theme';
+import { useReducedMotion } from '../theme/useReducedMotion';
 import type { CaregiverViewMode } from '../hooks/useCaregiverViewMode';
 
 export interface ViewToggleProps {
@@ -73,29 +64,39 @@ interface SegmentDef {
 const SEGMENTS: readonly SegmentDef[] = [
   {
     key: 'birds',
-    label: "Bird's-eye",
+    label: "BIRD'S-EYE",
     a11yLabel: "Bird's-eye view",
     testIDSuffix: 'birds',
   },
   {
     key: 'cards',
-    label: 'Detailed',
+    label: 'DETAILED',
     a11yLabel: 'Detailed view',
     testIDSuffix: 'cards',
   },
 ] as const;
 
-// Hex helpers — RN doesn't accept oklch(), so the design's
-//   oklch(72% 0.18 35 / .18)  → coral + alpha hex
-//   oklch(72% 0.18 35 / .35)  → coral + alpha hex
-// are pre-resolved here against `theme.colors.brand.coral`.
-const ALPHA_ACTIVE_BG = '2E'; // ~18%
-const ALPHA_ACTIVE_BORDER = '59'; // ~35%
-const ALPHA_PILL_FILL = 'B3'; // ~70%
+// Geometry. Each button width is sized to fit the longer label
+// "BIRD'S-EYE" (10 chars + apostrophe + dash) in JetBrainsMono 9.5pt
+// with 0.06em letter-spacing + 14pt icon + 6pt gap + side padding.
+const PILL_HEIGHT = 36;
+const PILL_PADDING = 4;
+const BUTTON_WIDTH = 84;
+const THUMB_HEIGHT = PILL_HEIGHT - PILL_PADDING * 2;
 
-function BirdsGlyph({ color }: { color: string }) {
+const ALPHA_THUMB_BG = '40'; // ~25%
+const ALPHA_THUMB_BORDER = '8C'; // ~55%
+const ALPHA_GLASS_FILL = 'E0'; // ~88% — solid enough to read as a chip
+const ALPHA_RIM = '33'; // ~20% — warm-near-white hairline rim
+const ALPHA_INACTIVE = 0.5;
+
+const THUMB_SPRING = { stiffness: 220, damping: 22, mass: 0.8 } as const;
+const PRESS_SPRING = { stiffness: 400, damping: 22, mass: 0.6 } as const;
+const PRESS_SCALE = 0.94;
+
+function BirdsGlyph({ color, opacity }: { color: string; opacity: number }) {
   return (
-    <Svg width={14} height={14} viewBox="0 0 24 24">
+    <Svg width={14} height={14} viewBox="0 0 24 24" opacity={opacity}>
       <Circle cx={7} cy={9} r={2.5} fill={color} opacity={0.9} />
       <Circle cx={16} cy={6} r={1.8} fill={color} opacity={0.7} />
       <Circle cx={14} cy={16} r={2.2} fill={color} opacity={0.85} />
@@ -103,9 +104,15 @@ function BirdsGlyph({ color }: { color: string }) {
   );
 }
 
-function DetailedGlyph({ color }: { color: string }) {
+function DetailedGlyph({ color, opacity }: { color: string; opacity: number }) {
   return (
-    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+    <Svg
+      width={14}
+      height={14}
+      viewBox="0 0 24 24"
+      fill="none"
+      opacity={opacity}
+    >
       <Rect
         x={4}
         y={5}
@@ -113,7 +120,7 @@ function DetailedGlyph({ color }: { color: string }) {
         height={4}
         rx={1.2}
         stroke={color}
-        strokeWidth={1.6}
+        strokeWidth={1.8}
       />
       <Rect
         x={4}
@@ -122,7 +129,7 @@ function DetailedGlyph({ color }: { color: string }) {
         height={4}
         rx={1.2}
         stroke={color}
-        strokeWidth={1.6}
+        strokeWidth={1.8}
       />
       <Rect
         x={4}
@@ -131,27 +138,75 @@ function DetailedGlyph({ color }: { color: string }) {
         height={2.5}
         rx={1}
         stroke={color}
-        strokeWidth={1.6}
+        strokeWidth={1.8}
       />
     </Svg>
   );
 }
 
-export function ViewToggle({ value, onChange, testID, style }: ViewToggleProps) {
+export function ViewToggle({
+  value,
+  onChange,
+  testID,
+  style,
+}: ViewToggleProps) {
   const theme = useTheme();
+  const reduceMotion = useReducedMotion();
 
-  const blurTint: 'dark' | 'light' = theme.colorMode === 'dark' ? 'dark' : 'light';
+  const blurTint: 'dark' | 'light' =
+    theme.colorMode === 'dark' ? 'dark' : 'light';
+  const activeIndex = value === 'cards' ? 1 : 0;
+
+  // Thumb position. 0 = birds (left), 1 = cards (right). Translated by
+  // BUTTON_WIDTH px when active = cards. Spring physics for a natural
+  // tactile state change.
+  const thumbPosition = useSharedValue(activeIndex);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      thumbPosition.value = activeIndex;
+    } else {
+      thumbPosition.value = withSpring(activeIndex, THUMB_SPRING);
+    }
+  }, [activeIndex, reduceMotion, thumbPosition]);
+
+  const thumbAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: thumbPosition.value * BUTTON_WIDTH }],
+  }));
 
   const pillStyle: ViewStyle = {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 3,
+    width: BUTTON_WIDTH * 2 + PILL_PADDING * 2,
+    height: PILL_HEIGHT,
+    padding: PILL_PADDING,
     borderRadius: 999,
-    backgroundColor: `${theme.colors.surface.warmElevated}${ALPHA_PILL_FILL}`,
+    backgroundColor: `#140E0A${ALPHA_GLASS_FILL}`,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: theme.colors.border.subtle,
+    borderColor: `#FFFFFF${ALPHA_RIM}`,
     overflow: 'hidden',
-    alignSelf: 'flex-start',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.32,
+    shadowRadius: 12,
+    elevation: 8,
+  };
+
+  const thumbStyle: ViewStyle = {
+    position: 'absolute',
+    top: PILL_PADDING,
+    left: PILL_PADDING,
+    width: BUTTON_WIDTH,
+    height: THUMB_HEIGHT,
+    borderRadius: 999,
+    backgroundColor: `${theme.colors.brand.coral}${ALPHA_THUMB_BG}`,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: `${theme.colors.brand.coral}${ALPHA_THUMB_BORDER}`,
+    shadowColor: theme.colors.brand.coral,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.45,
+    shadowRadius: 6,
+    elevation: 2,
   };
 
   return (
@@ -161,77 +216,119 @@ export function ViewToggle({ value, onChange, testID, style }: ViewToggleProps) 
       testID={testID}
     >
       <BlurView
-        intensity={50}
+        intensity={60}
         tint={blurTint}
         style={StyleSheet.absoluteFill}
         pointerEvents="none"
       />
+      <Animated.View
+        pointerEvents="none"
+        style={[thumbStyle, thumbAnimatedStyle]}
+      />
       {SEGMENTS.map((segment) => {
         const active = value === segment.key;
-        const tint = active
-          ? theme.colors.brand.coral
-          : theme.colors.text.tertiary;
-
-        const buttonStyle: ViewStyle = {
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingTop: 7,
-          paddingBottom: 7,
-          paddingLeft: 9,
-          paddingRight: 11,
-          borderRadius: 999,
-          // Border width stays constant in both states so layout doesn't
-          // shift on selection. Inactive is `transparent`.
-          borderWidth: 0.5,
-          borderColor: active
-            ? `${theme.colors.brand.coral}${ALPHA_ACTIVE_BORDER}`
-            : 'transparent',
-          backgroundColor: active
-            ? `${theme.colors.brand.coral}${ALPHA_ACTIVE_BG}`
-            : 'transparent',
-        };
-
         return (
-          <Pressable
+          <SegmentButton
             key={segment.key}
-            accessibilityRole="button"
-            accessibilityLabel={segment.a11yLabel}
-            accessibilityState={{ selected: active }}
+            segment={segment}
+            active={active}
+            reduceMotion={reduceMotion}
+            tint="#FFFFFF"
+            labelFamily={theme.fontFamilies.numeric}
             onPress={() => {
-              // Only fire when the value actually changes — pressing the
-              // already-active segment is a no-op. Keeps consumer state
-              // diff-friendly and avoids needless MMKV writes.
               if (!active) onChange(segment.key);
             }}
-            hitSlop={4}
-            style={({ pressed }) => [
-              buttonStyle,
-              pressed ? { opacity: 0.7 } : null,
-            ]}
             testID={testID ? `${testID}-${segment.testIDSuffix}` : undefined}
-          >
-            {segment.key === 'birds' ? (
-              <BirdsGlyph color={tint} />
-            ) : (
-              <DetailedGlyph color={tint} />
-            )}
-            <Text
-              style={{
-                fontFamily: theme.fontFamilies.numeric,
-                fontSize: 10.5,
-                lineHeight: 14,
-                letterSpacing: 0.6, // ~0.06em at 10.5pt
-                color: tint,
-                textTransform: 'uppercase',
-                marginLeft: 6,
-              }}
-              allowFontScaling={false}
-            >
-              {segment.label}
-            </Text>
-          </Pressable>
+          />
         );
       })}
     </View>
+  );
+}
+
+interface SegmentButtonProps {
+  segment: SegmentDef;
+  active: boolean;
+  reduceMotion: boolean;
+  tint: string;
+  labelFamily: string;
+  onPress: () => void;
+  testID?: string;
+}
+
+function SegmentButton({
+  segment,
+  active,
+  reduceMotion,
+  tint,
+  labelFamily,
+  onPress,
+  testID,
+}: SegmentButtonProps) {
+  const pressScale = useSharedValue(1);
+  const opacity = active ? 1 : ALPHA_INACTIVE;
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pressScale.value }],
+  }));
+
+  const handlePressIn = () => {
+    if (!reduceMotion) {
+      pressScale.value = withSpring(PRESS_SCALE, PRESS_SPRING);
+    }
+  };
+  const handlePressOut = () => {
+    if (!reduceMotion) {
+      pressScale.value = withSpring(1, PRESS_SPRING);
+    }
+  };
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={segment.a11yLabel}
+      accessibilityState={{ selected: active }}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      onPress={onPress}
+      hitSlop={4}
+      testID={testID}
+      style={{
+        width: BUTTON_WIDTH,
+        height: THUMB_HEIGHT,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Animated.View
+        style={[
+          {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+          },
+          animatedStyle,
+        ]}
+      >
+        {segment.key === 'birds' ? (
+          <BirdsGlyph color={tint} opacity={opacity} />
+        ) : (
+          <DetailedGlyph color={tint} opacity={opacity} />
+        )}
+        <Text
+          allowFontScaling={false}
+          style={{
+            fontFamily: labelFamily,
+            fontSize: 9.5,
+            lineHeight: 12,
+            letterSpacing: 0.57, // ~0.06em at 9.5pt
+            color: tint,
+            opacity,
+          }}
+        >
+          {segment.label}
+        </Text>
+      </Animated.View>
+    </Pressable>
   );
 }

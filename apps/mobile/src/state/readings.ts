@@ -72,6 +72,10 @@ interface ReadingsState {
   seedRecentFromServer: (rows: LocalReading[]) => number;
   /** Test/utility: drop all rows (does NOT clear MMKV — use clearAll for that). */
   reset: () => void;
+  /** Sprint 17b — visibility-enforcement purge. Clears `recent` and
+   *  the persisted MMKV blob but PRESERVES `pending` (the user's
+   *  own offline writes must never be wiped by an external toggle). */
+  clearRecent: () => void;
 }
 
 function uuid(): string {
@@ -249,10 +253,29 @@ export const useReadings = create<ReadingsState>((set, get) => ({
       const finalPending = get().pending.filter(
         (r) => !syncedIds.has(r.localId),
       );
-      const finalRecent = [...newRecentRows, ...get().recent].slice(
-        0,
-        RECENT_READINGS_CAP,
-      );
+      // Sprint 16.5c — sort by measuredAtSec DESC before capping.
+      //
+      // Bug fix: pre-16.5c the order was
+      //   `[...newRecentRows, ...get().recent].slice(0, 30)`
+      // which silently dropped the NEWEST readings whenever a single
+      // syncPending batch had > 30 rows. The cause was the iteration
+      // order in the loop above: `pending` is newest-first (addPending
+      // prepends), the `for` consumes it newest-first, and
+      // `newRecentRows.unshift(...)` then inverts that ordering — so
+      // `newRecentRows` ends up oldest-first. Concatenating with the
+      // existing (newest-first) `recent` produced a non-monotonic
+      // array, and `.slice(0, 30)` kept the front (oldest of the
+      // newly-synced batch) and discarded the back (newest of the
+      // batch + oldest of pre-existing recent).
+      //
+      // Symptom: after a "Reset cursors + re-sync" that pulled 50 BP
+      // records, the 2-20 newest BP readings were silently missing
+      // from the detail screen even though they were on the server.
+      //
+      // Mirrors HR's slice which already sorts before capping.
+      const finalRecent = [...newRecentRows, ...get().recent]
+        .sort((a, b) => b.measuredAtSec - a.measuredAtSec)
+        .slice(0, RECENT_READINGS_CAP);
       set({ pending: finalPending, recent: finalRecent, syncError: lastError });
       persist({ pending: finalPending, recent: finalRecent });
     } finally {
@@ -301,6 +324,11 @@ export const useReadings = create<ReadingsState>((set, get) => ({
     set({ recent: merged });
     persist({ pending, recent: merged });
     return newRows.length;
+  },
+
+  clearRecent: () => {
+    set({ recent: [] });
+    mmkv.remove(STORAGE_KEYS.recentReadings);
   },
 
   reset: () => {

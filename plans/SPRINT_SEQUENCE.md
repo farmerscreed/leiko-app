@@ -1,6 +1,6 @@
 # Sprint Sequence — Post-Pivot
 
-**Updated 2026-05-07 for the Apple-of-Healthcare pivot.** The 17-sprint plan is restructured with seven new sprints inserted (1.5, 7.5, 7.6, 7.7, 8.5, 9.5, 12.5). Existing un-done sprint cards (8 → 17) updated in place to consume D11–D14 content. This document is the index — read it to understand sequence + gating; read the individual sprint cards for details.
+**Updated 2026-05-20 — added the 16.5a–i hardening passes, Sprints 16.6 / 17a / 17b / 18, and reorganised Phase 6 to reflect Sprint 18 as the launch-readiness sprint that supersedes the original Sprint 17 card.** Previous update 2026-05-07 inserted Sprints 1.5, 7.5, 7.6, 7.7, 8.5, 9.5, 12.5 for the Apple-of-Healthcare pivot. This document is the index — read it to understand sequence + gating; read the individual sprint cards for details.
 
 ---
 
@@ -32,15 +32,13 @@
 
 ---
 
-## Phase 2 — Foundation rebuild (remaining)
+## Phase 2 — Foundation rebuild
 
 | Order | Sprint | Title | Type | File |
 |---|---|---|---|---|
-| 2 | **7.5** | Multi-vitals ingest plumbing | NEW | `sprint-07-5-multi-vitals-plumbing.md` |
-| 3 | **7.6** | Daily Pulse + Vital Tile component primitives | NEW | `sprint-07-6-daily-pulse-primitives.md` |
-| 4 | **7.7** | Caregiver Home rewrite (Daily Pulse cards) | NEW | `sprint-07-7-caregiver-home-rewrite.md` |
-
-Sprint 1.5 shipped 2026-05-07 (closeout in `plans/done/sprint-01-5-visual-system-v2.md`). Remaining three are the Phase 2 work that gates any new screen sprints.
+| ✅ | **7.5** | Multi-vitals ingest plumbing | NEW | `done/sprint-07-5-multi-vitals-plumbing.md` |
+| ✅ | **7.6** | Daily Pulse + Vital Tile component primitives | NEW | `done/sprint-07-6-daily-pulse-primitives.md` |
+| ✅ | **7.7** | Caregiver Home rewrite (Daily Pulse cards) | NEW | `done/sprint-07-7-caregiver-home-rewrite.md` |
 
 ---
 
@@ -48,11 +46,11 @@ Sprint 1.5 shipped 2026-05-07 (closeout in `plans/done/sprint-01-5-visual-system
 
 | Order | Sprint | Title | Type | File |
 |---|---|---|---|---|
-| 5 | **8** | Self-Buyer Home (Daily Pulse) | REWRITTEN | `sprint-08-self-buyer-home.md` |
-| 6 | **8.5** | Per-vital detail screens (HR · SpO2 · Sleep · Activity) | NEW | `sprint-08-5-vital-detail-screens.md` |
+| ✅ | **8** | Self-Buyer Home (Daily Pulse) | REWRITTEN | `done/sprint-08-self-buyer-home.md` |
+| ✅ | **8.5** | Per-vital detail screens (HR · SpO2 · Sleep · Activity) | NEW | `done/sprint-08-5-vital-detail-screens.md` |
 | ✅ | **9** | Trends + Multi-Vital PDF | REWRITTEN | `done/sprint-09-trends-pdf.md` |
 | ✅ | **9.5** | Apple Health + Health Connect | NEW | `done/sprint-09-5-health-platform-integration.md` |
-| 9 | **10** | Settings + Family + Paywall | EDITED | `sprint-10-settings-family-paywall.md` |
+| ✅ | **10** | Settings + Family + Paywall | EDITED | `done/sprint-10-settings-family-paywall.md` |
 
 ---
 
@@ -60,11 +58,13 @@ Sprint 1.5 shipped 2026-05-07 (closeout in `plans/done/sprint-01-5-visual-system
 
 | Order | Sprint | Title | Type | File |
 |---|---|---|---|---|
-| 10 | **11** | AI Tier-A Multi-Vital Intent Router | REWRITTEN | `sprint-11-ai-tier-a.md` |
-| 11 | **12** | AI Tier-B Multi-Vital (LiteLLM) | REWRITTEN | `sprint-12-ai-tier-b.md` |
-| 12 | **12.5** | Ambient AI Surfaces | NEW | `sprint-12-5-ambient-ai-surfaces.md` |
+| ✅ | **11** | AI Tier-A Multi-Vital Intent Router | REWRITTEN | `done/sprint-11-ai-tier-a.md` |
+| ✅ | **12** | AI Tier-B Multi-Vital (LiteLLM) | REWRITTEN | `done/sprint-12-ai-tier-b.md` |
+| ✅ | **12.5** | Ambient AI Surfaces | NEW | `done/sprint-12-5-ambient-ai-surfaces.md` |
+| ✅ | **12.5.1** | BLE active-sync hotfix | INSERTED | `done/sprint-12-5-1-ble-active-sync.md` |
+| ✅ | **12.5.2** | Watch BP persistence + Settings rebuild | INSERTED | `done/sprint-12-5-2-watch-bp-persistence.md` |
 
-Sprint 12.5 is the sprint that delivers on D11's *ambient pulse intelligence* claim — daily narration, weekly summary, monthly baseline, contextual paragraphs, doctor-prep generator, learned-time reminders.
+Sprint 12.5 delivered D11's *ambient pulse intelligence* claim — daily narration, weekly summary, monthly baseline, contextual paragraphs, doctor-prep generator, learned-time reminders. 12.5.1 + 12.5.2 closed the BLE / watch-config gaps that surfaced from bench work.
 
 ---
 
@@ -72,21 +72,52 @@ Sprint 12.5 is the sprint that delivers on D11's *ambient pulse intelligence* cl
 
 | Order | Sprint | Title | Type | File |
 |---|---|---|---|---|
-| 13 | **13** | Learn Surface A + B (Multi-Vital) | EDITED | `sprint-13-learn-a-b.md` |
-| 14 | **14** | Learn Surface C (Multi-Vital Seeding) | EDITED | `sprint-14-learn-c.md` |
-| 14.5 | **14.5** | Deferred Follow-ups (cleanup pass) | NEW | `sprint-14-5-deferred-followups.md` |
+| ✅ | **13** | Learn Surface A + B (Multi-Vital) | EDITED | `done/sprint-13-learn-a-b.md` |
+| ✅ | **14** | Learn Surface C (Multi-Vital Seeding) | EDITED | `done/sprint-14-learn-c.md` |
+| ✅ | **14.5** | Deferred Follow-ups (cleanup pass) | NEW | `done/sprint-14-5-deferred-followups.md` |
 | ✅ | **15** | Push + Multi-Vital Anomaly Engine | REWRITTEN | `done/sprint-15-push-anomaly.md` |
 | ✅ | **16** | Offline + Error States (Multi-Vital) | EDITED | `done/sprint-16-offline-error-states.md` |
 
-Sprint 14.5 is a deliberate cleanup pass inserted before Sprint 12.5 to close the orphan items that accumulated across sprints 7.5 / 9 / 12 / 14 (BLE writer stubs, pg_cron schedule, caregiver Learn-seed, error-mapping polish, amber token fix). Bundling them keeps the Sprint 12.5 → 17 critical path uncluttered.
+Sprint 14.5 is a deliberate cleanup pass inserted before Sprint 12.5 to close the orphan items that accumulated across sprints 7.5 / 9 / 12 / 14 (BLE writer stubs, pg_cron schedule, caregiver Learn-seed, error-mapping polish, amber token fix).
 
 ---
 
-## Phase 6 — Launch
+## Phase 5.5 — Data-plane hardening (inserted 2026-05-12 → 2026-05-14)
 
-| Order | Sprint | Title | Type | File |
+Single-phone bench work surfaced ~30 BLE / sync / hydration issues across BP + HR + SpO2 + Sleep + Activity. The 16.5a–i sequence closed them, each as a self-contained one-day card. Memory files in `memory/sprint_16_5*_close_out.md` carry the load-bearing findings.
+
+| Order | Sprint | Title | File |
+|---|---|---|---|
+| ✅ | **16.5a** | BP cursor root cause + fix (TS=0 always) | `done/sprint-16-5a-data-plane-capture.md` |
+| ✅ | **16.5b** | (Superseded by 16.5c root-cause finding) | — |
+| ✅ | **16.5c** | Multi-vitals drain ROOT CAUSE (vitals_dedupe partial index) | — |
+| ✅ | **16.5d** | HR/SpO2 wall-clock-as-UTC + SpO2 single-byte parser + Sleep rebuild | — |
+| ✅ | **16.5e** | Multi-vital hydration + 7d/30d/90d wiring | — |
+| ✅ | **16.5f** | Stale-caption explainer + vitalBaselines utility | — |
+| ✅ | **16.5g** | Trends Tier-C narrative engine + focal vital wiring | — |
+| ✅ | **16.5h** | For-your-doctor cover note + dynamic page count + locked-chip | — |
+| ✅ | **16.5i** | Code-side P0s from PRODUCTION_READINESS audit (CODE-1..6) | — |
+
+---
+
+## Phase 6 — Launch (Pre-Submission)
+
+| Order | Sprint | Title | Status | File |
 |---|---|---|---|---|
-| 17 | **17** | Launch | EDITED | `sprint-17-launch.md` |
+| ✅ | **16.6** | Pre-launch validation + P1 hardening + two-phone test rig | Closed 2026-05-19 | `done/sprint-16-6-pre-launch-validation.md` |
+| ✅ | **17a** | Per-person dashboard (caregiver immersive surface) | Closed 2026-05-20 | `done/sprint-17a-per-person-dashboard.md` |
+| ✅ | **17b** | Family member management + visibility enforcement | Closed 2026-05-20 | `done/sprint-17b-family-member-management.md` |
+| ⏳ | **18** | Launch readiness blitz (SEC-1 + ops + PDF wiring + CI) | Active | `sprint-18-launch-readiness.md` |
+
+The original Sprint 17 "Launch" card was superseded — its scope was redistributed across 16.6 / 17a / 17b / 18. The card now sits in `done/` with a SUPERSEDED header explaining the redistribution.
+
+---
+
+## Phase 7 — Store submission (post-Sprint 18)
+
+There is no dedicated sprint card for the final store-submission work. The remaining items are tracked in **`plans/PRODUCTION_READINESS.md`** — the launch-gating checklist — as OPS-1..12 (founder ops blitz, all small), QUA-3/4/6 (Android BLE foreground service, CI workflow, npm vulns), and the explicit v1.1 deferrals (GAP-1..15, POL-1..7). Treat that document as the source of truth for "what ships at v1.0."
+
+The actual submission cycle (TestFlight + Play Internal builds, App Store + Play screenshots, beta tester recruitment, store-review iteration) happens after Sprint 18 closes — it's a workstream against PRODUCTION_READINESS.md, not a new sprint card.
 
 ---
 
@@ -135,32 +166,46 @@ D11 ──► D12 ──► (D13 ∥ D14) ──► docs/ sweep PR
                                                   Sprint 16 (offline polish)
                                                         │
                                                         ▼
-                                                  Sprint 17 (launch)
+                                                  Sprint 16.5a–i (data-plane hardening)
+                                                        │
+                                                        ▼
+                                                  Sprint 16.6 (pre-launch validation)
+                                                        │
+                                                        ▼
+                                                  Sprint 17a (per-person dashboard)
+                                                        │
+                                                        ▼
+                                                  Sprint 17b (family management)
+                                                        │
+                                                        ▼
+                                                  Sprint 18 (launch readiness blitz) ◀ active
+                                                        │
+                                                        ▼
+                                                  PRODUCTION_READINESS.md (store submission)
 ```
 
 Notes on the graph:
-- **Sprint 1.5 is the gate** — no UI sprint can begin until tokens are migrated.
-- **Sprint 7.5 + 7.6 can run in parallel** if you have two engineers — they don't depend on each other (7.5 is backend, 7.6 is frontend primitives consuming mock data).
-- **Sprint 9.5 (Apple Health) and Sprint 10 (Settings + Paywall) are coupled** — Sprint 10 surfaces the Health Platform toggles that Sprint 9.5 wires.
-- **Sprint 12.5 unblocks** the AI narration consumers in Sprints 7.7, 8, 8.5, 9 — until 12.5 ships, those sprints carry placeholder narration strings.
-- **Sprint 13 is a hard gate for Sprint 11** — the Tier-A intent router cites Learn cards by ID, which means the cards must exist.
+- **Sprint 1.5 was the gate** — no UI sprint could begin until tokens were migrated.
+- **Sprint 12.5 unblocks** the AI narration consumers in Sprints 7.7, 8, 8.5, 9.
+- **Sprint 13 was a hard gate for Sprint 11** — the Tier-A intent router cites Learn cards by ID.
+- **Sprint 16.5a–i** ran sequentially against the bench, not in parallel — each card surfaced data that fed the next.
+- **Sprint 17a + 17b** could have run in parallel; they didn't because both depended on the 16.6 caregiver-flow context.
+- **Sprint 18 is the active sprint** as of 2026-05-20.
 
 ---
 
-## Capacity / duration estimate
+## What's left at a glance
 
-Aggregating durations from each card:
-
-| Phase | Sprints | Estimated weeks |
+| Status | Item | Source |
 |---|---|---|
-| Phase 2 — Foundation | 1.5 + 7.5 + 7.6 + 7.7 | ~6 weeks (some parallel possible) |
-| Phase 3 — Screens | 8 + 8.5 + 9 + 9.5 + 10 | ~6 weeks |
-| Phase 4 — AI | 11 + 12 + 12.5 | ~4 weeks |
-| Phase 5 — Education + safety + polish | 13 + 14 + 15 + 16 | ~4 weeks |
-| Phase 6 — Launch | 17 | ~1 week |
-| **Total elapsed** | | **~21 weeks (~5 months)** |
-
-Assumes single full-time engineer + designer engaged through D12 + Phase 2. Two engineers shaves ~3–4 weeks off Phase 2 if 7.5 and 7.6 run in parallel.
+| ⏳ Active | Sprint 18 Day 1 — SEC-1 (MMKV encryption at rest) | `sprint-18-launch-readiness.md` |
+| ⏳ Pending | Sprint 18 Day 2 — Founder ops blitz (OPS-1..12) | `PRODUCTION_READINESS.md` |
+| ⏳ Pending | Sprint 18 Day 3 — Doctor-PDF wiring (FUN-5 / FUN-6) | `sprint-18-launch-readiness.md` |
+| ⏳ Pending | Sprint 18 Day 4 — CI deploy workflows + Help/Support row | `sprint-18-launch-readiness.md` |
+| ⏳ Pending | Sprint 18 Day 5 — Bench verification (FUN-7/8, QUA-1/2/3) | `sprint-18-launch-readiness.md` |
+| ⏳ Post-18 | Store submission (TestFlight, Play Internal, screenshots, store metadata, beta testers) | `PRODUCTION_READINESS.md` "Week 3" + "Week 4" |
+| 📦 v1.1 | GAP-1..15 (Sleep REM, hourly activity, sports records, deep BP backfill, embeddings build, full Learn corpus, photos, theme toggle, parent persona, jailbreak CI, Maestro E2E, Trends harmonisation, single-string cascade, clinical-review queue) | `PRODUCTION_READINESS.md` § P2 |
+| 📦 v1.1 | POL-1..7 (watch timeout, domain URL config, dep pinning, gitignore, SQL lint CI, type casts, IANA timezone) | `PRODUCTION_READINESS.md` § P2 polish |
 
 ---
 

@@ -1,0 +1,110 @@
+name: Release (mobile build + submit)
+
+# Sprint 16.6 QUA-4. Triggered manually OR on a tag push matching
+# `v*.*.*` (semver convention). Two stages: build (always runs on
+# trigger) and submit (gated by GitHub Environment "production"
+# approval — the workflow waits for a reviewer to click Approve).
+#
+# Secrets required (configure once in GitHub repo settings):
+#   EXPO_TOKEN           — `eas whoami --json` token for the build account
+#   EAS_BUILD_PROFILE    — optional; defaults to "production"
+#
+# Plus the production EAS profile in apps/mobile/eas.json must reference
+# Apple + Google credentials via EAS-Cloud's credentials store (configured
+# via `eas credentials` once, not in this workflow).
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'all'
+        type: choice
+        options: ['all', 'ios', 'android']
+      submit:
+        description: 'Submit to store after build?'
+        required: true
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: EAS build
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Setup Expo CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: EAS build
+        working-directory: apps/mobile
+        run: |
+          PROFILE="${{ vars.EAS_BUILD_PROFILE || 'production' }}"
+          PLATFORM="${{ github.event.inputs.platform || 'all' }}"
+          eas build \
+            --platform "$PLATFORM" \
+            --profile "$PROFILE" \
+            --non-interactive \
+            --no-wait
+
+  submit:
+    name: EAS submit (gated)
+    needs: build
+    if: github.event.inputs.submit == 'true' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Manual reviewer approval — configured in GitHub > Settings >
+    # Environments > production > Required reviewers. The workflow
+    # pauses here until a reviewer clicks Approve.
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Setup Expo CLI
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: EAS submit
+        working-directory: apps/mobile
+        run: |
+          PLATFORM="${{ github.event.inputs.platform || 'all' }}"
+          eas submit \
+            --platform "$PLATFORM" \
+            --latest \
+            --non-interactive

@@ -119,35 +119,49 @@ export function AskLeikoBody({ onArticleOpen, testID }: AskLeikoBodyProps) {
 
     if (result.responseMode === 'TIER_B_PLACEHOLDER') {
       setTierBState({ kind: 'loading' });
-      void askTierB({ question: trimmed }).then((r) => {
-        const outcome = mapAskLeikoTierBResult(r);
-        if (outcome.source === 'deterministic') {
-          // Soft Tier-B failure — silent fall-through to deterministic
-          // copy (Sprint 16 acceptance: never show an AI error).
-          setTierBState({ kind: 'ok', body: outcome.body, degraded: true });
-          return;
-        }
-        switch (outcome.status) {
-          case 'ok':
-            setTierBState({ kind: 'ok', body: outcome.body, degraded: false });
-            break;
-          case 'defer':
-            setTierBState({
-              kind: 'defer',
-              trigger: outcome.trigger as TierBDeferTrigger,
-            });
-            break;
-          case 'quota_exceeded':
-            setTierBState({ kind: 'quota_exceeded' });
-            break;
-          case 'structural_error':
-            setTierBState({
-              kind: 'error',
-              reason: mapStructuralError(outcome.reason),
-            });
-            break;
-        }
-      });
+      askTierB({ question: trimmed })
+        .then((r) => {
+          const outcome = mapAskLeikoTierBResult(r);
+          if (outcome.source === 'deterministic') {
+            // Soft Tier-B failure — silent fall-through to deterministic
+            // copy (Sprint 16 acceptance: never show an AI error).
+            setTierBState({ kind: 'ok', body: outcome.body, degraded: true });
+            return;
+          }
+          switch (outcome.status) {
+            case 'ok':
+              setTierBState({ kind: 'ok', body: outcome.body, degraded: false });
+              break;
+            case 'defer':
+              setTierBState({
+                kind: 'defer',
+                trigger: outcome.trigger as TierBDeferTrigger,
+              });
+              break;
+            case 'quota_exceeded':
+              setTierBState({ kind: 'quota_exceeded' });
+              break;
+            case 'structural_error':
+              setTierBState({
+                kind: 'error',
+                reason: mapStructuralError(outcome.reason),
+              });
+              break;
+          }
+        })
+        .catch(() => {
+          // Sprint 16.5i — defence-in-depth. `askTierB` already returns
+          // a discriminated union and never throws by contract, but a
+          // runtime error inside `.then()` body could escape as an
+          // unhandled rejection and freeze the loading state forever.
+          // Treat it as a soft Tier-B failure → silent deterministic
+          // fall-through (Sprint 16 cascade: never show an AI error).
+          setTierBState({
+            kind: 'ok',
+            body: ASK_LEIKO_COPY.errorNoSession,
+            degraded: true,
+          });
+        });
     } else {
       setTierBState({ kind: 'idle' });
     }

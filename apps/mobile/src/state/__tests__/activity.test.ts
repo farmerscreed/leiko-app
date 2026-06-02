@@ -180,4 +180,105 @@ describe('useActivity slice', () => {
     expect(got?.targetSteps).toBe(6000);
     expect(got?.hourly).toHaveLength(24);
   });
+
+  // ---- Sprint 16.5e — server hydration ---------------------------------
+
+  test('seedStepsFromServer adds new rows + dedups by dayLocal', () => {
+    const today = Date.UTC(2026, 4, 7, 0, 0, 0) / 1000;
+    const existing = makeActivityDay(today, 7200);
+    useActivity.setState({ recentSteps: [existing] });
+    const serverRows = [
+      makeActivityDay(today, 9999), // duplicate — should NOT replace
+      makeActivityDay(today - SECONDS_PER_DAY, 5000),
+      makeActivityDay(today - 2 * SECONDS_PER_DAY, 6000),
+    ];
+    const added = useActivity.getState().seedStepsFromServer(serverRows);
+    expect(added).toBe(2);
+    const recent = useActivity.getState().recentSteps;
+    expect(recent).toHaveLength(3);
+    // Local existing row is preserved (server duplicate is ignored).
+    const todayRow = recent.find((d) => d.dayLocal === existing.dayLocal);
+    expect(todayRow?.totalSteps).toBe(7200);
+  });
+
+  test('seedStepsFromServer ignores rows already in pendingSteps', () => {
+    const today = Date.UTC(2026, 4, 7, 0, 0, 0) / 1000;
+    useActivity.getState().addPendingSteps(makeActivityDay(today, 7200));
+    const added = useActivity
+      .getState()
+      .seedStepsFromServer([makeActivityDay(today, 9999)]);
+    expect(added).toBe(0);
+    expect(useActivity.getState().recentSteps).toEqual([]);
+  });
+
+  test('seedStepsFromServer sorts merged result newest-first', () => {
+    const today = Date.UTC(2026, 4, 7, 0, 0, 0) / 1000;
+    const rows = [
+      makeActivityDay(today - 2 * SECONDS_PER_DAY, 5000),
+      makeActivityDay(today, 7200),
+      makeActivityDay(today - SECONDS_PER_DAY, 6000),
+    ];
+    useActivity.getState().seedStepsFromServer(rows);
+    const recent = useActivity.getState().recentSteps;
+    expect(recent.map((d) => d.dayLocal)).toEqual([
+      dayLocalFor(today),
+      dayLocalFor(today - SECONDS_PER_DAY),
+      dayLocalFor(today - 2 * SECONDS_PER_DAY),
+    ]);
+  });
+
+  test('seedStepsFromServer caps at RECENT_DAYS_CAP (90)', () => {
+    const today = Date.UTC(2026, 4, 7, 0, 0, 0) / 1000;
+    const rows: ActivityDay[] = [];
+    for (let i = 0; i < 120; i++) {
+      rows.push(makeActivityDay(today - i * SECONDS_PER_DAY, 1000));
+    }
+    const added = useActivity.getState().seedStepsFromServer(rows);
+    expect(added).toBe(120);
+    expect(useActivity.getState().recentSteps.length).toBeLessThanOrEqual(90);
+  });
+
+  test('seedStepsFromServer persists merged result to MMKV', () => {
+    const today = Date.UTC(2026, 4, 7, 0, 0, 0) / 1000;
+    useActivity
+      .getState()
+      .seedStepsFromServer([makeActivityDay(today, 7200)]);
+    const raw = mmkv.getString(STORAGE_KEYS.recentActivity);
+    expect(raw).toBeDefined();
+    expect(JSON.parse(raw!)).toHaveLength(1);
+  });
+
+  test('seedStepsFromServer returns 0 on empty input without touching state', () => {
+    const today = Date.UTC(2026, 4, 7, 0, 0, 0) / 1000;
+    useActivity.setState({ recentSteps: [makeActivityDay(today, 7200)] });
+    const added = useActivity.getState().seedStepsFromServer([]);
+    expect(added).toBe(0);
+    expect(useActivity.getState().recentSteps).toHaveLength(1);
+  });
+
+  test('seedCaloriesFromServer adds new rows + dedups by dayLocal', () => {
+    const today = Date.UTC(2026, 4, 7, 0, 0, 0) / 1000;
+    const existing = makeCaloriesDay(today, 1800);
+    useActivity.setState({ recentCalories: [existing] });
+    const serverRows = [
+      makeCaloriesDay(today, 9999),
+      makeCaloriesDay(today - SECONDS_PER_DAY, 1700),
+    ];
+    const added = useActivity.getState().seedCaloriesFromServer(serverRows);
+    expect(added).toBe(1);
+    const recent = useActivity.getState().recentCalories;
+    expect(recent).toHaveLength(2);
+    const todayRow = recent.find((d) => d.dayLocal === existing.dayLocal);
+    expect(todayRow?.totalKcal).toBe(1800);
+  });
+
+  test('seedCaloriesFromServer persists merged result to MMKV', () => {
+    const today = Date.UTC(2026, 4, 7, 0, 0, 0) / 1000;
+    useActivity
+      .getState()
+      .seedCaloriesFromServer([makeCaloriesDay(today, 1800)]);
+    const raw = mmkv.getString(STORAGE_KEYS.recentCalories);
+    expect(raw).toBeDefined();
+    expect(JSON.parse(raw!)).toHaveLength(1);
+  });
 });

@@ -27,9 +27,17 @@ export async function listFamilyMembers(
   familyId: string,
   client: SupabaseClient<Database> = defaultSupabase,
 ): Promise<FamilyMember[]> {
+  // PostgREST sees two FKs from family_members → users
+  // (`user_id` and `invited_by`); the bare `users(...)` embed
+  // triggers PGRST201 "ambiguous embedding". Disambiguate via the
+  // explicit FK name so the embed always targets the membership-
+  // holder, not the inviter. Without this the entire SELECT throws
+  // and the Family Members screen falls back to its error state.
   const { data, error } = await client
     .from('family_members')
-    .select('user_id, role, joined_at, users(display_name)')
+    .select(
+      'user_id, role, joined_at, users!family_members_user_id_fkey(display_name)',
+    )
     .eq('family_id', familyId)
     .is('removed_at', null)
     .order('joined_at', { ascending: true });

@@ -53,10 +53,11 @@ const DIA_OPACITY = 0.6;
 export interface BPTwinLineChartProps {
   /** Locked to "bp" — included so the API matches our other chart components. */
   vital: 'bp';
-  /** Hourly systolic samples, oldest → newest. Same length as `dia` + `hourLabels`. */
-  sys: number[];
-  /** Hourly diastolic samples, oldest → newest. Same length as `sys`. */
-  dia: number[];
+  /** Systolic samples per slot, oldest → newest. `null` for slots with
+   *  no reading — those slots render no dot (honest "missing"). */
+  sys: (number | null)[];
+  /** Diastolic samples per slot, oldest → newest. Same shape rules as `sys`. */
+  dia: (number | null)[];
   /** Bottom-axis labels (e.g. "12a", "3a", "6a", ..., "9p"). Same length as `sys`. */
   hourLabels: string[];
   /** Healthy systolic range [low, high] — drawn as a faint vital-color rectangle. */
@@ -68,12 +69,12 @@ export interface BPTwinLineChartProps {
 }
 
 export interface BPTwinChartGeometry {
-  /** Per-point x coordinates. */
+  /** Per-slot x coordinates (one per labelled slot). */
   xs: number[];
-  /** Per-point y coordinates for systolic. */
-  sysY: number[];
-  /** Per-point y coordinates for diastolic. */
-  diaY: number[];
+  /** Per-slot y for systolic. `null` for missing-data slots. */
+  sysY: (number | null)[];
+  /** Per-slot y for diastolic. `null` for missing-data slots. */
+  diaY: (number | null)[];
   /** Range-band rectangle (sys low → high) on the chart. */
   rangeRect: { x: number; y: number; w: number; h: number };
 }
@@ -84,10 +85,14 @@ export interface BPTwinChartGeometry {
  * (60..140 mmHg) that comfortably accommodates the BP space without
  * auto-scaling per-day (which would make month-over-month visual
  * comparison harder).
+ *
+ * Sprint 16.5f — null entries in sys/dia map to null sysY/diaY so the
+ * render layer skips dots for slots with no real reading. Previously
+ * the screen filled empty slots with mock data; now they're honest.
  */
 export function buildBPTwinGeometry(
-  sys: number[],
-  dia: number[],
+  sys: (number | null)[],
+  dia: (number | null)[],
   range: [number, number],
   width: number,
   height: number,
@@ -117,8 +122,12 @@ export function buildBPTwinGeometry(
   const yFor = (v: number) =>
     PADDING_Y + innerH - ((v - Y_MIN) / span) * innerH;
 
-  const sysY = sys.slice(0, points).map(yFor);
-  const diaY = dia.slice(0, points).map(yFor);
+  const sysY: (number | null)[] = sys
+    .slice(0, points)
+    .map((v) => (v === null ? null : yFor(v)));
+  const diaY: (number | null)[] = dia
+    .slice(0, points)
+    .map((v) => (v === null ? null : yFor(v)));
 
   const rangeTopY = yFor(range[1]);
   const rangeBottomY = yFor(range[0]);
@@ -177,46 +186,58 @@ export function BPTwinLineChart({
           />
         ) : null}
 
-        {/* Connector lines between sys + dia at each point */}
-        {geometry.xs.map((x, i) => (
-          <SvgLine
-            key={`c-${i}`}
-            x1={x}
-            x2={x}
-            y1={geometry.sysY[i]}
-            y2={geometry.diaY[i]}
-            stroke={vitalColor}
-            strokeOpacity={CONNECTOR_OPACITY}
-            strokeWidth={CONNECTOR_WIDTH}
-            strokeLinecap="round"
-          />
-        ))}
+        {/* Connector lines between sys + dia — only when BOTH are present. */}
+        {geometry.xs.map((x, i) => {
+          const sy = geometry.sysY[i];
+          const dy = geometry.diaY[i];
+          if (sy === null || dy === null) return null;
+          return (
+            <SvgLine
+              key={`c-${i}`}
+              x1={x}
+              x2={x}
+              y1={sy}
+              y2={dy}
+              stroke={vitalColor}
+              strokeOpacity={CONNECTOR_OPACITY}
+              strokeWidth={CONNECTOR_WIDTH}
+              strokeLinecap="round"
+            />
+          );
+        })}
 
-        {/* Systolic dots (vital color) */}
-        {geometry.xs.map((x, i) => (
-          <Circle
-            key={`s-${i}`}
-            cx={x}
-            cy={geometry.sysY[i]}
-            r={DOT_RADIUS}
-            fill={vitalColor}
-            testID={testID ? `${testID}-sys-dot-${i}` : undefined}
-          />
-        ))}
+        {/* Systolic dots — skipped for slots with no reading. */}
+        {geometry.xs.map((x, i) => {
+          const sy = geometry.sysY[i];
+          if (sy === null) return null;
+          return (
+            <Circle
+              key={`s-${i}`}
+              cx={x}
+              cy={sy}
+              r={DOT_RADIUS}
+              fill={vitalColor}
+              testID={testID ? `${testID}-sys-dot-${i}` : undefined}
+            />
+          );
+        })}
 
-        {/* Diastolic dots (vital color at lower lightness — modeled here
-            as opacity 0.6; see file header note on oklch portability). */}
-        {geometry.xs.map((x, i) => (
-          <Circle
-            key={`d-${i}`}
-            cx={x}
-            cy={geometry.diaY[i]}
-            r={DOT_RADIUS}
-            fill={vitalColor}
-            fillOpacity={DIA_OPACITY}
-            testID={testID ? `${testID}-dia-dot-${i}` : undefined}
-          />
-        ))}
+        {/* Diastolic dots — skipped for slots with no reading. */}
+        {geometry.xs.map((x, i) => {
+          const dy = geometry.diaY[i];
+          if (dy === null) return null;
+          return (
+            <Circle
+              key={`d-${i}`}
+              cx={x}
+              cy={dy}
+              r={DOT_RADIUS}
+              fill={vitalColor}
+              fillOpacity={DIA_OPACITY}
+              testID={testID ? `${testID}-dia-dot-${i}` : undefined}
+            />
+          );
+        })}
 
         {/* Hour labels along the bottom */}
         {hourLabels.map((label, i) => {

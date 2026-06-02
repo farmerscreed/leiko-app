@@ -37,7 +37,13 @@
 // reduced motion the pulse ring renders at its rest opacity (0).
 
 import { useEffect } from 'react';
-import { StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import Animated, {
   Easing,
   useAnimatedProps,
@@ -72,6 +78,12 @@ export interface ConstellationPerson {
 export interface ConstellationFieldProps {
   /** Up to 3 supported in v1 — extras are dropped with a dev warning. */
   people: ConstellationPerson[];
+  /** ADR-0006 Phase 3 — when the viewer is a wearer, their own circle is
+   *  the CENTRE "You" anchor (showing their reading + name), not an
+   *  orbiting node. Pass it here and exclude it from `people`. Caregivers
+   *  (no self circle) leave this undefined → the bare "You" dot renders
+   *  as before. */
+  selfNode?: ConstellationPerson;
   onSelectPerson?: (id: string) => void;
   testID?: string;
   style?: StyleProp<ViewStyle>;
@@ -94,6 +106,9 @@ const ORB_SLOTS = [
 const CENTER_DOT_RADIUS = 3;
 const CENTER_PULSE_DURATION_MS = 3000;
 const CENTER_PULSE_PEAK_OPACITY = 0.3;
+// ADR follow-up — the centre "You" orb (wearer's own node). Slightly
+// larger than the biggest orbit slot (64) so it reads as the anchor.
+const SELF_ORB_DIAMETER = 72;
 
 const RING_OUTER_R = 130;
 const RING_INNER_R = 80;
@@ -121,6 +136,7 @@ function clampPeople(people: ConstellationPerson[]): ConstellationPerson[] {
 
 export function ConstellationField({
   people,
+  selfNode,
   onSelectPerson,
   testID,
   style,
@@ -158,6 +174,10 @@ export function ConstellationField({
     opacity: pulseOpacity.value,
   }));
 
+  // "YOU" uses the tertiary token, which now resolves to a warm bright
+  // grey-cream #D9D2C2 (Sprint 16.6 palette tune). Recessive from the
+  // surrounding primary serifs through tone + scale; never grey-dim
+  // the way the previous tertiary #B8B5AE read on Android.
   const youLabelColor = theme.colors.text.tertiary;
   const centerDotColor = theme.colors.text.primary;
 
@@ -237,46 +257,106 @@ export function ConstellationField({
           );
         })}
 
-        {/* Centre dot — solid white "You" mark */}
-        <Circle cx={CX} cy={CY} r={CENTER_DOT_RADIUS} fill={centerDotColor} />
-
-        {/* Pulsing ring around the centre dot — opacity is animated */}
-        <AnimatedCircle
-          cx={CX}
-          cy={CY}
-          r={CENTER_DOT_RADIUS}
-          fill="none"
-          stroke={centerDotColor}
-          strokeWidth={0.5}
-          animatedProps={pulseAnimatedProps}
-          testID={testID ? `${testID}-pulse` : undefined}
-        />
+        {/* Centre dot + pulsing ring — only for the pure-caregiver case
+            (no selfNode). When the viewer wears a watch, a full beating
+            PersonOrb is rendered at centre instead (below the SVG). */}
+        {selfNode ? null : (
+          <>
+            <Circle cx={CX} cy={CY} r={CENTER_DOT_RADIUS} fill={centerDotColor} />
+            <AnimatedCircle
+              cx={CX}
+              cy={CY}
+              r={CENTER_DOT_RADIUS}
+              fill="none"
+              stroke={centerDotColor}
+              strokeWidth={0.5}
+              animatedProps={pulseAnimatedProps}
+              testID={testID ? `${testID}-pulse` : undefined}
+            />
+          </>
+        )}
       </Svg>
 
-      {/* "You" label — sits just below the centre dot in mono uppercase */}
-      <View
-        pointerEvents="none"
-        style={{
-          position: 'absolute',
-          left: CX,
-          top: CY + 10,
-          transform: [{ translateX: -16 }],
-        }}
-      >
-        <Text
-          allowFontScaling={false}
+      {/* Centre "You" anchor. ADR-0006 Phase 3: when the viewer is a
+          wearer (selfNode present), the centre shows THEIR name + reading
+          and is tappable — they are the protagonist of their own
+          constellation, not a redundant orbiting node. Caregivers (no
+          selfNode) keep the quiet bare "You" label. */}
+      {selfNode ? (
+        // Wearer's own constellation: a full beating PersonOrb at centre
+        // (same heartbeat halo as the orbiting people), with the "You"
+        // label + reading beneath. The bare centre dot/ring is suppressed
+        // above so this is the single centre element.
+        <View
           style={{
-            fontFamily: theme.fontFamilies.numeric,
-            fontSize: 9,
-            lineHeight: 11,
-            letterSpacing: 1.8, // 0.20em at 9pt
-            color: youLabelColor,
-            textTransform: 'uppercase',
+            position: 'absolute',
+            left: CX,
+            top: CY - SELF_ORB_DIAMETER / 2,
+            transform: [{ translateX: -SELF_ORB_DIAMETER / 2 }],
+            width: SELF_ORB_DIAMETER,
+            alignItems: 'center',
+          }}
+          testID={testID ? `${testID}-self` : undefined}
+        >
+          <PersonOrb
+            initial={selfNode.initial}
+            accent={selfNode.accent}
+            status={selfNode.status}
+            fullName={selfNode.fullName}
+            bpLabel={selfNode.bpLabel}
+            diameter={SELF_ORB_DIAMETER}
+            onPress={
+              onSelectPerson ? () => onSelectPerson(selfNode.id) : undefined
+            }
+            accessibilityLabel={`You — ${selfNode.fullName}, ${selfNode.bpLabel}`}
+          />
+          <Text
+            allowFontScaling={false}
+            pointerEvents="none"
+            style={{
+              fontFamily: theme.fontFamilies.numeric,
+              fontSize: 8.5,
+              lineHeight: 11,
+              letterSpacing: 1.7,
+              fontWeight: '500',
+              color: youLabelColor,
+              textTransform: 'uppercase',
+              marginTop: 4,
+            }}
+          >
+            You
+          </Text>
+        </View>
+      ) : (
+        <View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            left: CX,
+            top: CY + 10,
+            transform: [{ translateX: -16 }],
           }}
         >
-          You
-        </Text>
-      </View>
+          <Text
+            allowFontScaling={false}
+            style={{
+              fontFamily: theme.fontFamilies.numeric,
+              // Design: 8.5pt mono uppercase, letter-spacing 0.20em
+              // (~1.7pt at 8.5pt). The earlier 11pt bump made the
+              // label compete with the orb portraits for attention;
+              // small + quiet is the intent.
+              fontSize: 8.5,
+              lineHeight: 11,
+              letterSpacing: 1.7,
+              fontWeight: '500',
+              color: youLabelColor,
+              textTransform: 'uppercase',
+            }}
+          >
+            You
+          </Text>
+        </View>
+      )}
 
       {/* Person orbs — absolutely positioned over the SVG */}
       {visible.map((person, i) => {

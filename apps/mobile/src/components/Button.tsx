@@ -204,8 +204,16 @@ export function Button({
     textAlign: 'center',
   };
 
+  // Consumer's `style` (width: '100%', margins, etc.) goes on the
+  // Animated.View wrapper, NOT the inner Pressable. Putting width on the
+  // Pressable while the Animated.View stays auto-sized causes the
+  // Pressable's `width: '100%'` to resolve against a content-sized
+  // parent and collapse back to text+padding — leaving the button
+  // narrow and the label visually off-center on column layouts. With
+  // the wrapper sized correctly, the Pressable stretches to fill via
+  // its default `alignSelf: 'auto'`.
   return (
-    <Animated.View style={animatedStyle}>
+    <Animated.View style={[animatedStyle, style]}>
       <Pressable
         disabled={interactionDisabled}
         onPress={handlePress}
@@ -223,7 +231,6 @@ export function Button({
             {
               backgroundColor: showPressedLook ? paint.pressedBackground : paint.background,
             },
-            style,
           ];
         }}
       >

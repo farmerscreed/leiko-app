@@ -95,7 +95,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 1
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -129,7 +129,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 1
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -163,7 +163,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 1
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -197,7 +197,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 1
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -452,7 +452,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 1
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 56,
                 "letterSpacing": -0.5,
@@ -469,7 +469,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 1
             allowFontScaling={false}
             style={
               {
-                "color": "#9C9890",
+                "color": "#857F7A",
                 "fontFamily": "JetBrainsMono_500Medium",
                 "fontSize": 12,
                 "letterSpacing": 0.4,
@@ -703,7 +703,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 1
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 22,
                 "letterSpacing": -0.3,
@@ -950,7 +950,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 1
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 18,
                 "letterSpacing": -0.3,
@@ -1197,7 +1197,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 1
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 18,
                 "letterSpacing": -0.3,
@@ -1444,7 +1444,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 1
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 22,
                 "letterSpacing": -0.3,
@@ -1571,7 +1571,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 2
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -1605,7 +1605,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 2
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -1639,7 +1639,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 2
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -1673,7 +1673,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 2
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -1928,7 +1928,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 2
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 80,
                 "letterSpacing": -0.5,
@@ -1945,7 +1945,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 2
             allowFontScaling={false}
             style={
               {
-                "color": "#9C9890",
+                "color": "#857F7A",
                 "fontFamily": "JetBrainsMono_500Medium",
                 "fontSize": 12,
                 "letterSpacing": 0.4,
@@ -2179,7 +2179,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 2
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 22,
                 "letterSpacing": -0.3,
@@ -2426,7 +2426,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 2
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 18,
                 "letterSpacing": -0.3,
@@ -2673,7 +2673,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 2
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 18,
                 "letterSpacing": -0.3,
@@ -2920,7 +2920,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 2
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 22,
                 "letterSpacing": -0.3,
@@ -3047,7 +3047,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 3
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -3081,7 +3081,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 3
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -3115,7 +3115,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 3
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -3149,7 +3149,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 3
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -3404,7 +3404,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 3
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 56,
                 "letterSpacing": -0.5,
@@ -3421,7 +3421,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 3
             allowFontScaling={false}
             style={
               {
-                "color": "#9C9890",
+                "color": "#857F7A",
                 "fontFamily": "JetBrainsMono_500Medium",
                 "fontSize": 12,
                 "letterSpacing": 0.4,
@@ -3655,7 +3655,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 3
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 22,
                 "letterSpacing": -0.3,
@@ -3902,7 +3902,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 3
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 18,
                 "letterSpacing": -0.3,
@@ -4149,7 +4149,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 3
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 18,
                 "letterSpacing": -0.3,
@@ -4396,7 +4396,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 3
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 22,
                 "letterSpacing": -0.3,
@@ -4523,7 +4523,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 4
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -4557,7 +4557,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 4
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -4591,7 +4591,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 4
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -4625,7 +4625,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 4
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -4880,7 +4880,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 4
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 80,
                 "letterSpacing": -0.5,
@@ -5115,7 +5115,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 4
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 22,
                 "letterSpacing": -0.3,
@@ -5362,7 +5362,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 4
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 18,
                 "letterSpacing": -0.3,
@@ -5609,7 +5609,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 4
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 18,
                 "letterSpacing": -0.3,
@@ -5856,7 +5856,7 @@ exports[`DailyPulseHero — adaptive central value branches (D13 §7.2) branch 4
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 22,
                 "letterSpacing": -0.3,
@@ -5983,7 +5983,7 @@ exports[`DailyPulseHero — colorMode snapshot matrix renders colorMode=dark 1`]
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -6017,7 +6017,7 @@ exports[`DailyPulseHero — colorMode snapshot matrix renders colorMode=dark 1`]
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -6051,7 +6051,7 @@ exports[`DailyPulseHero — colorMode snapshot matrix renders colorMode=dark 1`]
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -6085,7 +6085,7 @@ exports[`DailyPulseHero — colorMode snapshot matrix renders colorMode=dark 1`]
           }
           stroke={
             {
-              "payload": 4294308330,
+              "payload": 4294967295,
               "type": 0,
             }
           }
@@ -6340,7 +6340,7 @@ exports[`DailyPulseHero — colorMode snapshot matrix renders colorMode=dark 1`]
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 56,
                 "letterSpacing": -0.5,
@@ -6357,7 +6357,7 @@ exports[`DailyPulseHero — colorMode snapshot matrix renders colorMode=dark 1`]
             allowFontScaling={false}
             style={
               {
-                "color": "#9C9890",
+                "color": "#857F7A",
                 "fontFamily": "JetBrainsMono_500Medium",
                 "fontSize": 12,
                 "letterSpacing": 0.4,
@@ -6591,7 +6591,7 @@ exports[`DailyPulseHero — colorMode snapshot matrix renders colorMode=dark 1`]
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 22,
                 "letterSpacing": -0.3,
@@ -6838,7 +6838,7 @@ exports[`DailyPulseHero — colorMode snapshot matrix renders colorMode=dark 1`]
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 18,
                 "letterSpacing": -0.3,
@@ -7085,7 +7085,7 @@ exports[`DailyPulseHero — colorMode snapshot matrix renders colorMode=dark 1`]
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 18,
                 "letterSpacing": -0.3,
@@ -7332,7 +7332,7 @@ exports[`DailyPulseHero — colorMode snapshot matrix renders colorMode=dark 1`]
             numberOfLines={1}
             style={
               {
-                "color": "#F5F1EA",
+                "color": "#FFFFFF",
                 "fontFamily": "InstrumentSerif_400Regular",
                 "fontSize": 22,
                 "letterSpacing": -0.3,

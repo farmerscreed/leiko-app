@@ -71,6 +71,21 @@ export interface CorrelationStripProps {
   width?: number;
   /** Defaults to 96. */
   height?: number;
+  /**
+   * Sprint 16.5c — optional x-axis override. When omitted the chart
+   * auto-scales to the data's tMin/tMax. When provided, the x-axis
+   * spans `[tMin, tMax]` regardless of the data extent, so a chart for
+   * a 30d range still reads as "30 days wide" even if the data only
+   * covers the last week. Pair with the new `axisLabels` prop to
+   * surface the date window to the user.
+   */
+  tBounds?: { tMin: number; tMax: number };
+  /**
+   * Sprint 16.5c — optional left / right axis labels rendered under
+   * the chart (e.g. "May 6" → "today"). Pure decoration; no effect on
+   * the line geometry.
+   */
+  axisLabels?: { left: string; right: string };
   testID?: string;
   style?: StyleProp<ViewStyle>;
 }
@@ -154,6 +169,8 @@ export function CorrelationStrip({
   caption,
   width = DEFAULT_WIDTH,
   height = DEFAULT_HEIGHT,
+  tBounds,
+  axisLabels,
   testID,
   style,
 }: CorrelationStripProps) {
@@ -161,9 +178,15 @@ export function CorrelationStrip({
   const reduceMotion = useReducedMotion();
   const captionStyle = theme.type('caption');
 
-  // Shared time extent across both series. If both are empty, fall back
-  // to [0, 1] so the math doesn't divide by zero anywhere downstream.
+  // Shared time extent. Pre-16.5c this always auto-scaled to the
+  // data's tMin/tMax — fine when both series spanned the same window,
+  // but misleading when one series (e.g. sleep, 7 nights) is sparse
+  // and the other (BP morning, 90 days) is dense: the dense series
+  // dominates the x-axis and the sparse one bunches at one edge. The
+  // optional `tBounds` prop pins the x-axis to the requested range
+  // window so the chart reads as wide as the user selected.
   const { tMin, tMax } = useMemo(() => {
+    if (tBounds) return { tMin: tBounds.tMin, tMax: tBounds.tMax };
     const all = [...vitalA.points, ...vitalB.points];
     if (all.length === 0) return { tMin: 0, tMax: 1 };
     let min = all[0].t;
@@ -173,7 +196,7 @@ export function CorrelationStrip({
       if (p.t > max) max = p.t;
     }
     return { tMin: min, tMax: max };
-  }, [vitalA.points, vitalB.points]);
+  }, [vitalA.points, vitalB.points, tBounds]);
 
   const bounds = { tMin, tMax, width, height };
 
@@ -318,6 +341,34 @@ export function CorrelationStrip({
           />
         ) : null}
       </Svg>
+      {axisLabels ? (
+        <View style={styles.axisRow}>
+          <Text
+            allowFontScaling={false}
+            style={{
+              fontFamily: captionStyle.family,
+              fontSize: captionStyle.size,
+              lineHeight: captionStyle.lineHeight,
+              color: theme.colors.text.tertiary,
+            }}
+            testID={testID ? `${testID}-axis-left` : undefined}
+          >
+            {axisLabels.left}
+          </Text>
+          <Text
+            allowFontScaling={false}
+            style={{
+              fontFamily: captionStyle.family,
+              fontSize: captionStyle.size,
+              lineHeight: captionStyle.lineHeight,
+              color: theme.colors.text.tertiary,
+            }}
+            testID={testID ? `${testID}-axis-right` : undefined}
+          >
+            {axisLabels.right}
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -325,5 +376,10 @@ export function CorrelationStrip({
 const styles = StyleSheet.create({
   caption: {
     marginBottom: 4,
+  },
+  axisRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 4,
   },
 });

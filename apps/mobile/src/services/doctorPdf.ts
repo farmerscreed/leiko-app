@@ -36,6 +36,22 @@ export interface GenerateDoctorPdfInput {
   range: DoctorPdfRange;
   includeNotes?: boolean;
   includeComments?: boolean;
+  /**
+   * Sprint 16.5h — optional cover-page personal note. The Edge
+   * Function accepts an opaque string; templates that haven't grown
+   * a slot for it yet ignore it. Persisted client-side via MMKV
+   * (see `doctorPdfState.ts`) so the user's draft survives re-mounts.
+   */
+  coverNote?: string;
+  /**
+   * Sprint 19 PDF v2 — optional structured clinical-context fields
+   * rendered as a dedicated block on the PDF cover. Each is
+   * independently optional and capped server-side (300 chars for
+   * medications/symptoms, 60 for target BP).
+   */
+  medications?: string;
+  symptoms?: string;
+  targetBp?: string;
 }
 
 export interface DoctorPdfOk {
@@ -90,6 +106,51 @@ export function pdfRangeFromTrendsRange(
 }
 
 /**
+ * Sprint 16.5h — compute the projected page count of the generated
+ * PDF. Pre-fix the screen showed a literal "8 pages" regardless of
+ * which vital sections would actually print. Now we count the slots
+ * the server template will render based on which vitals have
+ * meaningful data in the window:
+ *   - Cover (always 1)
+ *   - BP section (1 if ≥ 3 readings)
+ *   - HR section (1 if ≥ 3 samples)
+ *   - SpO2 section (1 if ≥ 3 samples)
+ *   - Sleep section (1 if ≥ 3 nights)
+ *   - Activity section (1 if ≥ 3 days)
+ *   - Cross-vital observations (1 if any correlation row exists OR
+ *     ≥ 2 vital sections present)
+ *   - Disclaimer (always 1)
+ *
+ * Returns at least 2 (cover + disclaimer). Used by the mobile
+ * preview tag; the server still owns its own pagination.
+ */
+export interface VitalCounts {
+  bp: number;
+  hr: number;
+  spo2: number;
+  sleep: number;
+  activity: number;
+}
+
+export function projectedPageCount(
+  counts: VitalCounts,
+  hasCorrelations: boolean,
+): number {
+  let pages = 1; // Cover
+  const vitalSections = [
+    counts.bp >= 3 ? 1 : 0,
+    counts.hr >= 3 ? 1 : 0,
+    counts.spo2 >= 3 ? 1 : 0,
+    counts.sleep >= 3 ? 1 : 0,
+    counts.activity >= 3 ? 1 : 0,
+  ].reduce<number>((a, b) => a + b, 0);
+  pages += vitalSections;
+  if (hasCorrelations || vitalSections >= 2) pages += 1; // Cross-vital
+  pages += 1; // Disclaimer
+  return Math.max(2, pages);
+}
+
+/**
  * Fire the generate-doctor-pdf request. Never throws. The
  * discriminated result tells the caller whether to open the share
  * sheet, fall through to an error state, or render the mock HTML
@@ -108,6 +169,25 @@ export async function generateDoctorPdf(
           range: input.range,
           includeNotes: input.includeNotes ?? true,
           includeComments: input.includeComments ?? true,
+          // Sprint 16.5h — note is passed even though older Edge
+          // Function versions ignore unknown fields. Server-side
+          // rendering of the note can land later without a client
+          // change.
+          ...(input.coverNote && input.coverNote.trim().length > 0
+            ? { coverNote: input.coverNote.trim() }
+            : {}),
+          // Sprint 19 PDF v2 — only sent when populated. Server caps
+          // each independently and ignores unknown fields, so older
+          // function versions tolerate these gracefully.
+          ...(input.medications && input.medications.trim().length > 0
+            ? { medications: input.medications.trim() }
+            : {}),
+          ...(input.symptoms && input.symptoms.trim().length > 0
+            ? { symptoms: input.symptoms.trim() }
+            : {}),
+          ...(input.targetBp && input.targetBp.trim().length > 0
+            ? { targetBp: input.targetBp.trim() }
+            : {}),
         },
       }),
       timeoutAfter(HARD_CLIENT_TIMEOUT_MS),

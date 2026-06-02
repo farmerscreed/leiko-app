@@ -108,7 +108,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#F5F1EA",
+              "color": "#FFFFFF",
               "fontFamily": "InstrumentSerif_400Regular",
               "fontSize": 15,
               "letterSpacing": -0.075,
@@ -122,7 +122,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#9C9890",
+              "color": "#857F7A",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -140,10 +140,11 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#ECE9E2",
+            "color": "#B8B2AA",
+            "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
-            "marginTop": 1,
+            "marginTop": 2,
           }
         }
       >
@@ -304,7 +305,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#F5F1EA",
+              "color": "#FFFFFF",
               "fontFamily": "InstrumentSerif_400Regular",
               "fontSize": 15,
               "letterSpacing": -0.075,
@@ -318,7 +319,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#9C9890",
+              "color": "#857F7A",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -336,10 +337,11 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#ECE9E2",
+            "color": "#B8B2AA",
+            "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
-            "marginTop": 1,
+            "marginTop": 2,
           }
         }
       >
@@ -491,7 +493,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#F5F1EA",
+              "color": "#FFFFFF",
               "fontFamily": "InstrumentSerif_400Regular",
               "fontSize": 15,
               "letterSpacing": -0.075,
@@ -505,7 +507,7 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
           allowFontScaling={false}
           style={
             {
-              "color": "#9C9890",
+              "color": "#857F7A",
               "fontFamily": "JetBrainsMono_500Medium",
               "fontSize": 9,
               "letterSpacing": 0.9,
@@ -523,10 +525,11 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         numberOfLines={1}
         style={
           {
-            "color": "#ECE9E2",
+            "color": "#B8B2AA",
+            "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
-            "marginTop": 1,
+            "marginTop": 2,
           }
         }
       >
@@ -729,9 +732,10 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         style={
           {
             "color": "#2A3040",
+            "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
-            "marginTop": 1,
+            "marginTop": 2,
           }
         }
       >
@@ -925,9 +929,10 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         style={
           {
             "color": "#2A3040",
+            "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
-            "marginTop": 1,
+            "marginTop": 2,
           }
         }
       >
@@ -1112,9 +1117,10 @@ exports[`ConstellationLegend — colorMode snapshot matrix renders the 3-person 
         style={
           {
             "color": "#2A3040",
+            "fontFamily": "Inter_400Regular",
             "fontSize": 11.5,
             "lineHeight": 16,
-            "marginTop": 1,
+            "marginTop": 2,
           }
         }
       >

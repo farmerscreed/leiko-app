@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Direction 2 — Heart cradled in cupped hands -->
+  <!-- A clean bowl form for the cradle (no finger detail — finger
+       articulation at this scale fights the form). The heart sits IN the
+       bowl, not above it: the bowl's rim crosses the lower lobes so the
+       heart is genuinely held. -->
+
+  <defs>
+    <radialGradient id="canopy2" cx="50%" cy="55%" r="65%">
+      <stop offset="0%" stop-color="#2A231C"/>
+      <stop offset="100%" stop-color="#1F1A14"/>
+    </radialGradient>
+
+    <!-- Clip path that gives the bowl its open top + rounded interior. -->
+    <clipPath id="bowlClip">
+      <path d="
+        M 180 480
+        L 180 720
+        C 180 800, 240 860, 320 860
+        L 704 860
+        C 784 860, 844 800, 844 720
+        L 844 480
+        Z
+      "/>
+    </clipPath>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#canopy2)"/>
+
+  <!-- The bowl — a single rounded form, not two separate hands. Two
+       hands at small icon size become noise; a bowl reads as "held"
+       immediately. -->
+  <path d="
+    M 180 540
+    C 180 500, 212 472, 252 472
+    L 772 472
+    C 812 472, 844 500, 844 540
+    L 844 720
+    C 844 800, 784 860, 704 860
+    L 320 860
+    C 240 860, 180 800, 180 720
+    Z
+  " fill="#A86436"/>
+
+  <!-- Bowl interior — a soft inner shadow that gives the cradle depth. -->
+  <path d="
+    M 232 540
+    C 232 524, 244 512, 260 512
+    L 764 512
+    C 780 512, 792 524, 792 540
+    L 792 716
+    C 792 768, 750 810, 698 810
+    L 326 810
+    C 274 810, 232 768, 232 716
+    Z
+  " fill="#7A4623"/>
+
+  <!-- The heart — sized + positioned so the lower lobes sit just below
+       the rim. The heart is HELD, not floating above. -->
+  <g clip-path="url(#bowlClip-disabled)">
+    <path d="
+      M 512 740
+      C 416 658, 320 590, 320 488
+      C 320 416, 372 360, 444 360
+      C 484 360, 504 380, 512 412
+      C 520 380, 540 360, 580 360
+      C 652 360, 704 416, 704 488
+      C 704 590, 608 658, 512 740
+      Z
+    " fill="#E8A063"/>
+  </g>
+
+  <!-- Subtle thumb-creases on the bowl rim — two short marks angled inward
+       so the bowl reads as a pair of hands meeting, not a single
+       container. Small enough to whisper, not shout. -->
+  <path d="M 376 472 L 384 460 L 392 460 L 384 472 Z" fill="#7A4623"/>
+  <path d="M 632 472 L 640 460 L 648 460 L 640 472 Z" fill="#7A4623"/>
+</svg>

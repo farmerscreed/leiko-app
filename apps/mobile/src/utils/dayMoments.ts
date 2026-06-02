@@ -225,7 +225,11 @@ export function deriveDayMoments(
       timeSec: measuredAt,
       timeLabel: formatClockTime(measuredAt),
       title: 'Heart resting',
-      sub: `${data.hr.restingToday} bpm`,
+      // rollingMinAverage returns a float; round at the display
+      // boundary so "59.333…bpm" never reaches the user. Mirrors the
+      // hero + tile rounding (state/dailyPulse.ts + SelfBuyerHome
+      // buildHeroVitals).
+      sub: `${Math.round(data.hr.restingToday)} bpm`,
       vital: 'hr',
       past: nowSec - measuredAt > PAST_THRESHOLD_SEC,
     });

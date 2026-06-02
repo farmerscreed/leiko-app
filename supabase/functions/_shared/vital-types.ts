@@ -13,6 +13,11 @@ export interface DeviceMeta {
   macSuffix: string;
   name: string | null;
   model: 'U16H' | 'U19M';
+  // Stable per-install device identity. Optional for backward-compat with
+  // older clients that only send the (rotating) BLE MAC; when present the
+  // server keys device identity on this so a reconnect/re-pair under a new
+  // MAC reuses the same device row instead of minting a duplicate.
+  clientDeviceId?: string;
 }
 
 export interface BPReading {

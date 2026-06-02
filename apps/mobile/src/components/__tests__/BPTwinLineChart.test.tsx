@@ -44,8 +44,26 @@ describe('buildBPTwinGeometry — pure logic', () => {
     // Higher BP value → smaller y (SVG y axis grows downward).
     const g = buildBPTwinGeometry(SYS, DIA, SYS_RANGE, 320, 170);
     g.sysY.forEach((y, i) => {
-      expect(y).toBeLessThan(g.diaY[i]);
+      // Sprint 16.5f — y values are now (number | null); fixture has
+      // no nulls, so cast for the assertion.
+      expect(y).not.toBeNull();
+      const dy = g.diaY[i];
+      expect(dy).not.toBeNull();
+      expect(y as number).toBeLessThan(dy as number);
     });
+  });
+
+  it('returns null y for slots with no reading (16.5f honesty)', () => {
+    const g = buildBPTwinGeometry(
+      [120, null, 122, null],
+      [72, null, 76, null],
+      SYS_RANGE,
+      320,
+      170,
+    );
+    expect(g.sysY[0]).not.toBeNull();
+    expect(g.sysY[1]).toBeNull();
+    expect(g.diaY[3]).toBeNull();
   });
 
   it('range rect height is positive when range[1] > range[0]', () => {
