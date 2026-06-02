@@ -10,7 +10,16 @@ Per `docs/11-push-notifications.md` §3.
 ## Before hosting
 
 - `apple-app-site-association`: replace `TEAMID` with the Apple Developer Team ID for `com.leiko.app`.
-- `assetlinks.json`: replace `REPLACE_WITH_PLAY_APP_SIGNING_SHA256` with the SHA-256 fingerprint Google reports under Play Console → Setup → App integrity → App signing key certificate. If you use the upload keystore for sideloads (dev / internal), add its fingerprint as the second entry.
+- `assetlinks.json`:
+  - ✅ **Upload-key fingerprint is filled in** (`84:13:9B:…:28`, from
+    `keytool -list` on `leiko-release.jks`, 2026-06-02). This covers
+    sideloaded / upload-key-signed installs (internal/dev).
+  - ⬜ **Still required:** replace `REPLACE_WITH_PLAY_APP_SIGNING_SHA256`
+    with the SHA-256 from Play Console → Test and release → Setup →
+    **App signing** → *App signing key certificate*. This is the one that
+    matters for Play-distributed installs, because Play re-signs the app
+    with its own key. You only get it **after the first AAB upload**.
+  - After both are set, host the file (see below) and verify.
 
 ## Verification
 
