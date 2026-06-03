@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 import { Text } from 'react-native';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, screen, fireEvent, act } from '@testing-library/react-native';
 import { BottomSheet } from '../BottomSheet';
 import { ThemeProvider } from '../../theme';
 
@@ -40,6 +40,105 @@ describe('BottomSheet — visibility', () => {
       ),
     );
     expect(screen.getByText('Add a note')).toBeTruthy();
+  });
+});
+
+describe('BottomSheet — cancelled dismissal must still unmount', () => {
+  // Regression: the close path only unmounted when the dismiss animation
+  // reported finished === true. A CANCELLED dismissal (rapid open/close,
+  // competing gesture + backdrop dismiss, re-render restarting the timing)
+  // left the Modal mounted with a 0-opacity backdrop — an invisible
+  // full-screen touch-eater. Symptom: "the back button sometimes doesn't
+  // work" on sheet-heavy screens like Settings.
+  it('unmounts when the close animation is cancelled (finished=false)', () => {
+    const reanimated = jest.requireMock('react-native-reanimated');
+    const original = reanimated.withTiming;
+    // Simulate Reanimated cancelling the dismissal.
+    reanimated.withTiming = (
+      toValue: number,
+      _config: unknown,
+      callback?: (finished: boolean) => void,
+    ) => {
+      if (typeof callback === 'function') callback(false);
+      return toValue;
+    };
+    try {
+      const { rerender } = render(
+        withTheme(
+          <BottomSheet visible onDismiss={() => undefined}>
+            <Text>sheet body</Text>
+          </BottomSheet>,
+        ),
+      );
+      expect(screen.getByText('sheet body')).toBeTruthy();
+      rerender(
+        withTheme(
+          <BottomSheet visible={false} onDismiss={() => undefined}>
+            <Text>sheet body</Text>
+          </BottomSheet>,
+        ),
+      );
+      // Old behaviour: still mounted here (invisible), eating touches.
+      expect(screen.queryByText('sheet body')).toBeNull();
+    } finally {
+      reanimated.withTiming = original;
+    }
+  });
+
+  it('unmounts via the JS timeout fallback when the worklet callback never fires', () => {
+    jest.useFakeTimers();
+    const reanimated = jest.requireMock('react-native-reanimated');
+    const original = reanimated.withTiming;
+    // Worst case: the animation callback is swallowed entirely.
+    reanimated.withTiming = (toValue: number) => toValue;
+    try {
+      const { rerender } = render(
+        withTheme(
+          <BottomSheet visible onDismiss={() => undefined}>
+            <Text>sheet body</Text>
+          </BottomSheet>,
+        ),
+      );
+      rerender(
+        withTheme(
+          <BottomSheet visible={false} onDismiss={() => undefined}>
+            <Text>sheet body</Text>
+          </BottomSheet>,
+        ),
+      );
+      act(() => {
+        jest.advanceTimersByTime(1000); // > dismissDuration + 50
+      });
+      expect(screen.queryByText('sheet body')).toBeNull();
+    } finally {
+      reanimated.withTiming = original;
+      jest.useRealTimers();
+    }
+  });
+
+  it('a re-open during the close animation wins (no spurious unmount)', () => {
+    const { rerender } = render(
+      withTheme(
+        <BottomSheet visible onDismiss={() => undefined}>
+          <Text>sheet body</Text>
+        </BottomSheet>,
+      ),
+    );
+    rerender(
+      withTheme(
+        <BottomSheet visible={false} onDismiss={() => undefined}>
+          <Text>sheet body</Text>
+        </BottomSheet>,
+      ),
+    );
+    rerender(
+      withTheme(
+        <BottomSheet visible onDismiss={() => undefined}>
+          <Text>sheet body</Text>
+        </BottomSheet>,
+      ),
+    );
+    expect(screen.getByText('sheet body')).toBeTruthy();
   });
 });
 
