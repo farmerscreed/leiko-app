@@ -62,12 +62,14 @@ jest.mock('../../../state/readings', () => ({
 // in to the loading + error paths by flipping these.
 let mockParentPulse: {
   data: unknown;
+  wearerTimeZone: string | null;
   isLoading: boolean;
   isRefreshing: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
 } = {
   data: null,
+  wearerTimeZone: null,
   isLoading: false,
   isRefreshing: false,
   error: null,
@@ -92,6 +94,7 @@ const setMockParentPulse = (next: Partial<typeof mockParentPulse>) => {
 const resetParentMocks = () => {
   mockParentPulse = {
     data: null,
+    wearerTimeZone: null,
     isLoading: false,
     isRefreshing: false,
     error: null,
@@ -399,7 +402,7 @@ describe('BPDetail — "no readings today" chart placeholder (Sprint 18 B4)', ()
 describe('BPDetail — hero time formatting (Sprint 18 B5)', () => {
   it('formatHeroTime — under 24h returns "Latest · <time>" only', () => {
     const oneHourAgo = NOW_SEC() - 60 * 60;
-    const out = formatHeroTime(oneHourAgo);
+    const out = formatHeroTime(oneHourAgo, 'UTC');
     expect(out).toMatch(/^Latest · /);
     expect(out).not.toMatch(/Latest · .+ · /); // no second "·"
   });
@@ -408,10 +411,20 @@ describe('BPDetail — hero time formatting (Sprint 18 B5)', () => {
     // 25 hours ago — definitely cross-day, but inside the 36h
     // staleness threshold so we exercise the >24h-but-fresh path.
     const yesterday = NOW_SEC() - 25 * 3600;
-    const out = formatHeroTime(yesterday);
+    const out = formatHeroTime(yesterday, 'UTC');
     // Format: "Latest · <weekday> · <month-day>, <time>".
     // Three " · " (or two: "Latest ·" and "<wd> ·") + a "," before time.
     expect(out).toMatch(/^Latest · .+ · .+, /);
+  });
+
+  it('formatHeroTime — renders in the wearer timezone, not the device (UTC) zone', () => {
+    // Vitals data-completeness fix: a reading at 23:30 UTC reads as
+    // 12:30 AM in Lagos (UTC+1) but 7:30 PM in New York (UTC-4 in June).
+    // The runner is TZ=UTC, so this proves the tz is actually applied.
+    const at2330Utc = Math.floor(Date.UTC(2026, 5, 3, 23, 30, 0) / 1000);
+    const nowMs = Date.UTC(2026, 5, 4, 0, 0, 0); // 30 min later → <24h branch
+    expect(formatHeroTime(at2330Utc, 'Africa/Lagos', nowMs)).toMatch(/12:30/);
+    expect(formatHeroTime(at2330Utc, 'America/New_York', nowMs)).toMatch(/7:30/);
   });
 });
 
