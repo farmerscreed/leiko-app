@@ -231,6 +231,44 @@ export type CreateFamilyArgs = {
   _caregiver_relationship: string;
 };
 
+// Vitals data-completeness fix (migration 0030). Server-side HR aggregates
+// over [_from,_to] in the user's IANA timezone — backs HRDetail's
+// range-driven surfaces so they are not capped by the local 200-sample
+// slice. `_tz` empty/null → UTC. Type alias (not interface) per the
+// postgrest GenericSchema note above so rpc() Returns resolves correctly.
+export type HrRangeSummaryArgs = {
+  _family_id: string;
+  _tz: string;
+  _from: string; // ISO timestamptz
+  _to: string; // ISO timestamptz
+};
+
+export type HrRangeSummary = {
+  totals: {
+    n: number;
+    avg_bpm: number | null;
+    min_bpm: number | null;
+    max_bpm: number | null;
+    first_at: string | null;
+    last_at: string | null;
+  };
+  // Zone counts (bands match HRDetail buildZones): resting <60, calm
+  // 60–80, active 80–110, vigorous 110+. `total` is the windowed sample
+  // count (== totals.n) for percentage math on the client.
+  zones: {
+    resting: number;
+    calm: number;
+    active: number;
+    vigorous: number;
+    total: number;
+  };
+  // Per local-day rollups, ascending by day.
+  per_day: { day: string; avg: number; min: number; max: number; n: number }[];
+  // Per-night resting bpm (10-min rolling-min within 22:00–06:00 local),
+  // ascending by night, keyed to the "owning morning" (YYYY-MM-DD).
+  resting_by_night: { night: string; resting: number }[];
+};
+
 // Multi-vitals (Sprint 7.5) — table is keyed by (family_id, vital_type,
 // measured_at). Sprint 7.7b is the first client-side reader; the writes
 // flow through the /sync Edge Function (services/sync/postMultiVitals.ts).
@@ -404,6 +442,10 @@ export type Database = {
       create_family: {
         Args: CreateFamilyArgs;
         Returns: { family_id: string }[];
+      };
+      hr_range_summary: {
+        Args: HrRangeSummaryArgs;
+        Returns: HrRangeSummary;
       };
     };
   };

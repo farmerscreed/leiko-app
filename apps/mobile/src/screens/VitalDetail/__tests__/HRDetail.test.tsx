@@ -138,6 +138,34 @@ jest.mock('../../../hooks/useParentVitalsRecent', () => ({
   useParentVitalsRecent: () => mockParentRecent,
 }));
 
+// Vitals data-completeness fix: HRDetail now calls useHRRangeSummary
+// (TanStack Query → hr_range_summary RPC) and useOnboarding (own-family
+// resolution). Stub the summary to null so these tests exercise the
+// local-slice fallback path (unchanged behaviour); range-summary wiring
+// is covered by useHRRangeSummary's own unit tests + the live re-verify.
+const mockHRRangeSummary: {
+  data: unknown;
+  isLoading: boolean;
+  isRefreshing: boolean;
+  error: Error | null;
+  refresh: () => Promise<void>;
+} = {
+  data: null,
+  isLoading: false,
+  isRefreshing: false,
+  error: null,
+  refresh: async () => undefined,
+};
+jest.mock('../../../hooks/useHRRangeSummary', () => ({
+  useHRRangeSummary: () => mockHRRangeSummary,
+}));
+jest.mock('../../../state/onboarding', () => ({
+  useOnboarding: (selector?: (s: unknown) => unknown) => {
+    const state = { familyId: 'fam-self' };
+    return selector ? selector(state) : state;
+  },
+}));
+
 function withProviders(ui: ReactNode, colorMode: 'dark' | 'light' = 'dark') {
   return (
     <SafeAreaProvider
@@ -252,9 +280,12 @@ describe('HRDetail — has-data path', () => {
     expect(screen.getByTestId('hr-detail-hero-primary').props.children).toBe('64');
   });
 
-  it('renders the "Now · resting" hero sub-label', () => {
+  it('renders the "Latest reading" hero sub-label when a live sample exists', () => {
+    // Live-first hero: the watch auto-samples HR every 5 min, so the
+    // headline shows the most recent sample. Resting moves to the
+    // "Resting avg" stat below.
     render(withProviders(<HRDetail onBack={() => undefined} />));
-    expect(screen.getByText('Now · resting')).toBeTruthy();
+    expect(screen.getByText('Latest reading')).toBeTruthy();
   });
 
   it('renders the StatTrio with three label/value pairs', () => {
@@ -487,7 +518,7 @@ describe('HRDetail — history-aware insight copy (Sprint 18 H6)', () => {
 });
 
 describe('HRDetail — hero range copy gating (Sprint 18 P-H1)', () => {
-  it('shows "bpm · resting" — not "within your range" — when no baseline is computed yet', () => {
+  it('shows neutral "bpm · latest" — not "within your range" — when no baseline is computed yet', () => {
     const now = NOW_SEC();
     setMockData({
       bpLatest: null,
@@ -507,7 +538,7 @@ describe('HRDetail — hero range copy gating (Sprint 18 P-H1)', () => {
     mockHRRestingRecent = [];
     mockHRRestingByNight = []; // no baseline-eligible nights yet
     render(withProviders(<HRDetail onBack={() => undefined} />));
-    expect(screen.getByText('bpm · resting')).toBeTruthy();
+    expect(screen.getByText('bpm · latest')).toBeTruthy();
     expect(screen.queryByText('bpm · within your range')).toBeNull();
   });
 });
