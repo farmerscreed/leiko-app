@@ -70,7 +70,7 @@ leiko-app/
 
 - **Mobile**: React Native + Expo bare (TypeScript strict)
 - **State**: Zustand 4.x · **Server cache**: TanStack Query v5
-- **On-device**: MMKV (encrypted KV) + Zustand · **Server source of truth**: Supabase (Postgres), cached via TanStack Query · no on-device relational DB (see ADR-0008)
+- **On-device**: MMKV (encrypted KV) + Zustand · **Server source of truth**: Supabase (Postgres), cached via TanStack Query · no on-device relational DB (see ADR-0009)
 - **BLE**: react-native-ble-plx 3.x
 - **Backend**: Supabase self-hosted on Hetzner (Postgres 15, Auth, Storage, Edge Functions)
 - **AI**: LiteLLM gateway · Tier A (local Llama on Ollama) *planned, not yet built* — today's Tier A is a client-side deterministic router · Tier B Haiku 4.5 · Tier C Sonnet 4.6

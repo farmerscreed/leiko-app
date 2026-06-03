@@ -1,4 +1,4 @@
-# ADR-0008: Drop WatermelonDB — MMKV + Supabase is the persistence model
+# ADR-0009: Drop WatermelonDB — MMKV + Supabase is the persistence model
 
 - **Status**: Accepted (founder decision 2026-06-02)
 - **Date**: 2026-06-02

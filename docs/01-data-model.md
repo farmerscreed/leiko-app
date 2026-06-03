@@ -522,7 +522,7 @@ create policy "service inserts audit"    on public.audit_log
 
 ## Local storage on device
 
-> **Updated by [ADR-0008](_adr/0008-drop-watermelondb.md) (2026-06-02).**
+> **Updated by [ADR-0009](_adr/0009-drop-watermelondb.md) (2026-06-02).**
 > WatermelonDB was dropped — there is **no on-device relational DB**.
 > On-device persistence is **MMKV (encrypted KV) + Zustand (client state)**;
 > **Supabase (Postgres)** is the queryable source of truth, read through

@@ -43,7 +43,7 @@ squash-merged after CI passed. Sprints are complete through **Sprint 20**
 
 ## Stack decisions (resolved)
 
-1. **WatermelonDB — DROPPED** ([ADR-0008](../docs/_adr/0008-drop-watermelondb.md),
+1. **WatermelonDB — DROPPED** ([ADR-0009](../docs/_adr/0009-drop-watermelondb.md),
    founder decision 2026-06-02). It was locked but never installed; the app
    uses Supabase. There is no on-device relational DB — persistence is MMKV +
    Zustand, with Supabase as the queryable source of truth via TanStack Query.
