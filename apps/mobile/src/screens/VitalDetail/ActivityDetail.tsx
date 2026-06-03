@@ -67,6 +67,7 @@ import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import { useActivity } from '../../state/activity';
 import { useAuth } from '../../state/auth';
+import { resolveTimeZone, hourInZone, dayKeyInZone } from '../../utils/timeInZone';
 import { useTheme } from '../../theme';
 import type { ActivityDay } from '../../types/vitals';
 import { BaselineReference } from '../../components/BaselineReference';
@@ -170,6 +171,11 @@ export function ActivityDetail({
   const scopedFamilyId = familyId ?? null;
   const parentPulse = useParentDailyPulseData(scopedFamilyId);
   const parentRecent = useParentVitalsRecent(scopedFamilyId);
+  // Day labels / "today" progress render in the wearer's tz on the caregiver
+  // path, else the viewer's own. UTC last.
+  const displayTimeZone = resolveTimeZone(
+    scopedFamilyId ? parentPulse.wearerTimeZone ?? timeZone : timeZone,
+  );
   const emptyFallback = useMemo(() => emptyDailyPulse(), []);
 
   // Sprint 18 A1 — distinguish loading + error from "truly empty" on
@@ -302,8 +308,8 @@ export function ActivityDetail({
 
   // ----- Recent-days list (no hard cap) ------------------------------
   const recentReadings = useMemo<RecentReading[]>(
-    () => buildRecentReadings(stepsToday, rangedDays, targetSteps),
-    [stepsToday, rangedDays, targetSteps],
+    () => buildRecentReadings(stepsToday, rangedDays, targetSteps, displayTimeZone),
+    [stepsToday, rangedDays, targetSteps, displayTimeZone],
   );
 
   // ----- Goal sheet --------------------------------------------------
@@ -752,11 +758,13 @@ export function buildRecentReadings(
   stepsToday: number,
   rangedDays: ActivityDay[],
   goal: number,
+  timeZone: string,
   nowMs: number = Date.now(),
 ): RecentReading[] {
-  const now = new Date(nowMs);
-  const hour = now.getHours();
-  const todayKeyStr = now.toISOString().slice(0, 10);
+  // Time-of-day + "today" key in the wearer's tz (was device getHours / UTC
+  // toISOString, which mislabelled the day's progress near local midnight).
+  const hour = hourInZone(nowMs, timeZone);
+  const todayKeyStr = dayKeyInZone(nowMs, timeZone);
   const rows: RecentReading[] = [];
 
   // Today is always the first row. Sprint 16.5f — context is time-of-day
