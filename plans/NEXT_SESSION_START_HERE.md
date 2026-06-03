@@ -2,7 +2,7 @@
 
 Last touched: 2026-06-03. Branch `fix/vitals-data-completeness`
 (forked from `claude/consolidated-build`; contains all its ~237 commits
-plus this session's 14). Supersedes the 2026-06-02 ADR-0006/0007 handoff.
+plus this session's 16). Supersedes the 2026-06-02 ADR-0006/0007 handoff.
 
 ## 60-second context
 
@@ -60,7 +60,7 @@ card with all verified findings is `plans/vitals-data-completeness.md`.
 
 ## Gates (must stay green)
 
-tsc 0 · jest 204 suites / 2441 tests · eslint 0 errors ·
+tsc 0 · jest 206 suites / 2455 tests · eslint 0 errors ·
 `deno check` clean on changed functions · deno tests 192 pass
 (**known pre-existing failure**: 2 tests in `sync/resolve-routing.test.ts`
 — mock fidelity, present before this session; not a regression).
