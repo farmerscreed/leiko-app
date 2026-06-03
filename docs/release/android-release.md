@@ -97,7 +97,7 @@ $env:LEIKO_RELEASE_STORE_FILE     = 'C:\Users\admin\secrets\leiko-release.jks'
 $env:LEIKO_RELEASE_STORE_PASSWORD = 'your-keystore-password'
 $env:LEIKO_RELEASE_KEY_ALIAS      = 'leiko'
 $env:LEIKO_RELEASE_KEY_PASSWORD   = 'your-key-password'
-$env:LEIKO_VERSION_CODE           = '12'   # must be > your highest previous Play upload
+$env:LEIKO_VERSION_CODE           = '20'   # MUST be > your highest previous Play upload (was 19)
 
 # runtime — copy the exact value from apps/mobile/eas.json (build.production.env)
 $env:EXPO_PUBLIC_SUPABASE_URL      = 'https://kqnzxjrpnjnczhgdwdqg.supabase.co'
