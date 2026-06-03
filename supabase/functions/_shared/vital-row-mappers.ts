@@ -36,7 +36,7 @@ export interface ReadingsRow {
   device_id: string;
   source: 'watch' | 'manual';
   measured_at: string;
-  measured_at_local: string;
+  measured_at_local: string | null;
   systolic: number;
   diastolic: number;
   pulse: number | null;
@@ -181,10 +181,12 @@ export function mapBPReadings(
       device_id: deviceId,
       source: r.source,
       measured_at: iso,
-      // Per Sprint 7 TODO in supabase/functions/sync/index.ts: parent
-      // IANA TZ reconciliation lives server-side in a later sprint;
-      // for now the local mirrors UTC, same as the Sprint-6 path.
-      measured_at_local: iso,
+      // Data-completeness cleanup: measured_at_local used to mirror UTC
+      // with a 'Z' suffix — wrong data under a "local" name. Nothing reads
+      // it; render-side localisation now happens in the app from
+      // measured_at + the wearer's users.timezone. NULL until a properly
+      // tz-wired implementation exists (don't store a wrong value).
+      measured_at_local: null,
       systolic: r.systolic,
       diastolic: r.diastolic,
       pulse: r.pulse,

@@ -127,7 +127,7 @@ Deno.test('mapCaloriesDays carries activity + bmr split', () => {
   assertEquals((rows[0].value_jsonb as { activity_kcal: number }).activity_kcal, 320);
 });
 
-Deno.test('mapBPReadings keeps Sprint-6 shape (sys/dia/pulse + measured_at_local)', () => {
+Deno.test('mapBPReadings keeps Sprint-6 shape; measured_at_local is NULL (no mislabeled UTC)', () => {
   const rows = mapBPReadings(
     [{ measuredAtSec: NOW, systolic: 124, diastolic: 79, pulse: 72, source: 'watch' }],
     FAMILY,
@@ -138,5 +138,7 @@ Deno.test('mapBPReadings keeps Sprint-6 shape (sys/dia/pulse + measured_at_local
   assertEquals(rows[0].pulse, 72);
   assertEquals(rows[0].source, 'watch');
   assertEquals(rows[0].measured_at, NOW_ISO);
-  assertEquals(rows[0].measured_at_local, NOW_ISO);
+  // Cleanup: the column used to mirror UTC under a "local" name — wrong
+  // data. It is NULL until a properly tz-wired implementation exists.
+  assertEquals(rows[0].measured_at_local, null);
 });

@@ -361,7 +361,8 @@ async function handleLegacy(
       device_id: deviceId,
       source: r.source,
       measured_at: measuredAt,
-      measured_at_local: measuredAt, // Sprint 7 wires the parent IANA TZ
+      // NULL, not a UTC value mislabeled "local" — see mapBPReadings.
+      measured_at_local: null,
       systolic: r.systolic,
       diastolic: r.diastolic,
       pulse: r.pulse,

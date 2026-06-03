@@ -271,8 +271,10 @@ signed-in user's `users.timezone`; caregiver path = the family owner's tz).
   mapper (`fetchParentPulseData.mapSleep`) derives end from measured_at,
   start = end − total. Migration `0032` re-stamps existing rows + collapses
   the 5-fragment June-2 night to 84 (16→12). Supersedes D13 §2.4.
-  **PENDING PROD APPLY: migration 0032 + sync redeploy (awaiting explicit go).**
-  Also `session_*_local` are mislabeled UTC (latent).
+  ✅ APPLIED to leiko-prod 2026-06-03: migration 0032 (16→12 rows, all
+  end-keyed, June-2 fragments collapsed to 84) + sync edge function
+  redeployed. Sleep fragmentation is fixed at the source. Latent leftover:
+  `session_*_local` jsonb strings are still mislabeled UTC (unread).
   Original detail: multiple overlapping sessions per night.
   ✅ DONE 2: **no fabricated sleep times.** Founder direction — the app must
   never project a wrong time; rather show nothing. Bed/wake now display
