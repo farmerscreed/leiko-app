@@ -142,17 +142,30 @@ function insightBody(
     : `Deep sleep was about ${deepPct}% of the night — on the lighter side of what we typically see. A lighter night often pairs with a slightly higher morning reading; a few more nights of tracking will give us context.`;
 }
 
-/** "Last night · 11:14 pm → 8:00 am" — bedtime AND wake-time in one
- *  line. Pre-16.5c only the bedtime appeared. Sprint 18: now formats
- *  in the user's IANA timezone instead of the device-OS default. */
+/**
+ * Hero sub-line for the last night.
+ *
+ * Honesty rule (data-completeness fix): the watch does NOT record bed/wake
+ * times — its 0x07 reply carries only total/deep/light minutes. We only
+ * show a clock window when HR (the morning-surge signal) let us infer it
+ * with confidence (`wakeSource === 'hr_inferred'`), and then as an explicit
+ * estimate (`~`). Without that signal we NEVER fabricate a time (the old
+ * code synthesized a fixed 08:00/07:00) — we show the measured duration
+ * only. Rather no time than a wrong one.
+ */
 export function bedTimeSub(
   sessionStartSec: number,
   sessionEndSec: number,
   tz: string,
+  wakeSource: 'hr_inferred' | 'fallback' | undefined,
+  totalMinutes: number,
 ): string {
-  const bed = formatClockInTz(sessionStartSec, tz);
-  const wake = formatClockInTz(sessionEndSec, tz);
-  return `Last night · ${bed} → ${wake}`;
+  if (wakeSource === 'hr_inferred') {
+    const bed = formatClockInTz(sessionStartSec, tz);
+    const wake = formatClockInTz(sessionEndSec, tz);
+    return `Last night · ~${bed} → ~${wake}`;
+  }
+  return `Last night · ${formatHm(totalMinutes)} slept`;
 }
 
 // Sprint 18 — S2 fix. The recent-nights list used to label the newest
@@ -353,7 +366,14 @@ export function SleepDetail({
       ? formatStalenessCaption(heroDisplay!.endSec)
       : null;
   const heroSub = hasLastNight
-    ? (sleepStaleCaption ?? bedTimeSub(heroDisplay!.startSec, heroDisplay!.endSec, tz))
+    ? (sleepStaleCaption ??
+      bedTimeSub(
+        heroDisplay!.startSec,
+        heroDisplay!.endSec,
+        tz,
+        heroDisplay!.wakeSource,
+        session.totalMinutes,
+      ))
     : 'No sleep recorded last night';
   // Sprint 18 — P1 fix. Pass the count of recorded nights so the
   // "than your usual" / "than last week" phrasing only fires once the

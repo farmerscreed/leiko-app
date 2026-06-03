@@ -12,19 +12,31 @@ describe('bedTimeSub', () => {
   const bedSec = Math.floor(new Date('2026-05-21T21:00:00Z').getTime() / 1000);
   const wakeSec = Math.floor(new Date('2026-05-22T05:30:00Z').getTime() / 1000);
 
-  it('formats both times in the user tz', () => {
-    expect(bedTimeSub(bedSec, wakeSec, TZ_LAGOS)).toMatch(/10:00/);
-    expect(bedTimeSub(bedSec, wakeSec, TZ_LAGOS)).toMatch(/6:30/);
+  it('formats both times in the user tz when HR-inferred', () => {
+    expect(bedTimeSub(bedSec, wakeSec, TZ_LAGOS, 'hr_inferred', 450)).toMatch(/10:00/);
+    expect(bedTimeSub(bedSec, wakeSec, TZ_LAGOS, 'hr_inferred', 450)).toMatch(/6:30/);
   });
 
-  it('renders different times in a different tz', () => {
+  it('renders different times in a different tz when HR-inferred', () => {
     // Same epochs in NYC (UTC-4 DST): bed = 17:00, wake = 01:30.
-    expect(bedTimeSub(bedSec, wakeSec, TZ_NYC)).toMatch(/5:00/);
-    expect(bedTimeSub(bedSec, wakeSec, TZ_NYC)).toMatch(/1:30/);
+    expect(bedTimeSub(bedSec, wakeSec, TZ_NYC, 'hr_inferred', 450)).toMatch(/5:00/);
+    expect(bedTimeSub(bedSec, wakeSec, TZ_NYC, 'hr_inferred', 450)).toMatch(/1:30/);
   });
 
-  it('prefixes "Last night"', () => {
-    expect(bedTimeSub(bedSec, wakeSec, TZ_LAGOS)).toMatch(/^Last night/);
+  it('frames HR-inferred times as an estimate (~) and prefixes "Last night"', () => {
+    const out = bedTimeSub(bedSec, wakeSec, TZ_LAGOS, 'hr_inferred', 450);
+    expect(out).toMatch(/^Last night/);
+    expect(out).toMatch(/~/);
+  });
+
+  it('shows duration only — never a fabricated clock — when not HR-inferred', () => {
+    // The watch does not record bed/wake; without a confident HR signal we
+    // must not print any clock time. 450 min = 7:30.
+    const fb = bedTimeSub(bedSec, wakeSec, TZ_LAGOS, 'fallback', 450);
+    expect(fb).toBe('Last night · 7:30 slept');
+    expect(fb).not.toMatch(/→/); // no bed→wake arrow / clock
+    const legacy = bedTimeSub(bedSec, wakeSec, TZ_LAGOS, undefined, 450);
+    expect(legacy).toBe('Last night · 7:30 slept');
   });
 });
 
