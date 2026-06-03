@@ -261,11 +261,18 @@ signed-in user's `users.timezone`; caregiver path = the family owner's tz).
   with a different total mints a NEW row (08:00−84=06:36 … 08:00−46=07:14 —
   the 5 fragments match exactly). DONE: `computeSleepLastNight` now
   consolidates per wake-date and returns the FULLEST session (max minutes),
-  so the most-recent night is no longer understated (+ tests). PENDING
-  founder decision on the ingestion root: either set sleep `measured_at =
-  sessionEnd` (stable per night, collapses re-reads — but deviates from
-  D13 §2.4 "measured_at = start") or add a per-night sleep dedupe/upsert
-  keeping max minutes. Also `session_*_local` are mislabeled UTC.
+  so the most-recent night is no longer understated (+ tests).
+  ✅ INGESTION ROOT DECIDED + BUILT (founder: use sessionEnd as measured_at).
+  Sleep `measured_at` now = the session END (constant ~08:00 night key, never
+  shown — display is HR-inferred only) so re-reads collide & reconcile one
+  row. Within-batch fragments collapse to the fullest
+  (`collapseToMaxByMeasuredAt`) + a no-shrink guard (`dropNonIncreasingDailyRows`
+  now applied to sleep) so a shorter re-read can't understate a night. Read
+  mapper (`fetchParentPulseData.mapSleep`) derives end from measured_at,
+  start = end − total. Migration `0032` re-stamps existing rows + collapses
+  the 5-fragment June-2 night to 84 (16→12). Supersedes D13 §2.4.
+  **PENDING PROD APPLY: migration 0032 + sync redeploy (awaiting explicit go).**
+  Also `session_*_local` are mislabeled UTC (latent).
   Original detail: multiple overlapping sessions per night.
   ✅ DONE 2: **no fabricated sleep times.** Founder direction — the app must
   never project a wrong time; rather show nothing. Bed/wake now display

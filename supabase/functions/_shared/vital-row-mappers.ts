@@ -97,8 +97,19 @@ export function mapSleepSessions(
     family_id: familyId,
     device_id: deviceId,
     vital_type: 'sleep_session',
-    // Per D13 §2.4 — measured_at is the session start.
-    measured_at: toIso(s.sessionStartSec),
+    // measured_at = session END (the synthesized ~08:00 wake), NOT the
+    // start. Data-completeness fix: the watch's 0x07 reply has no real
+    // bed/wake; the client synthesizes end = 08:00 and start = end - total,
+    // so the START drifts whenever `total` changes across re-reads and
+    // produced a NEW row per sync (one night fragmented into many). The END
+    // is constant per night, so it is the stable dedup key — re-reads now
+    // collide and reconcile one row (the fullest, via the no-shrink guard +
+    // mutable upsert in sync/index.ts). Supersedes the old D13 §2.4
+    // "measured_at = start" convention. The actual start/end epochs are
+    // preserved in value_jsonb.session_{start,end}_local. measured_at is a
+    // NIGHT-IDENTITY key, never shown as a real wake time (display is
+    // HR-inferred only).
+    measured_at: toIso(s.sessionEndSec),
     value_int: s.totalMinutes,
     value_int_2: s.deepMinutes,
     value_int_3: s.remMinutes,

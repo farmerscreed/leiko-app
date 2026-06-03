@@ -176,9 +176,6 @@ function mapSleep(row: VitalsOtherRow): SleepSession {
     transitions?: SleepTransition[];
     sleep_score?: number;
   };
-  const sessionStartSec = Math.floor(
-    new Date(row.measured_at).getTime() / 1000,
-  );
   const totalMinutes = row.value_int;
   const deepMinutes = row.value_int_2 ?? 0;
   const remMinutes = row.value_int_3 ?? 0;
@@ -187,9 +184,13 @@ function mapSleep(row: VitalsOtherRow): SleepSession {
   const awakeCount = j.awake_count ?? 0;
   const transitions = j.transitions ?? [];
   const sleepScore = j.sleep_score ?? 0;
-  const sessionEndSec = j.session_end_local
-    ? Math.floor(new Date(j.session_end_local).getTime() / 1000)
-    : sessionStartSec + totalMinutes * 60;
+  // measured_at is the session END (the constant night key — see
+  // mapSleepSessions). Derive the start deterministically as end - total;
+  // the actual start epoch is also carried in session_start_local.
+  const sessionEndSec = Math.floor(new Date(row.measured_at).getTime() / 1000);
+  const sessionStartSec = j.session_start_local
+    ? Math.floor(new Date(j.session_start_local).getTime() / 1000)
+    : sessionEndSec - (totalMinutes ?? 0) * 60;
   const sessionStartLocal =
     j.session_start_local ?? new Date(sessionStartSec * 1000).toISOString();
   const sessionEndLocal =
