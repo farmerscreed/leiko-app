@@ -90,7 +90,13 @@ export function SleepStagesBar({
   const titleStyle = theme.type('title');
   const captionStyle = theme.type('caption');
 
+  // Honesty rule (data-completeness fix): the watch never records bed/wake
+  // times. We only show a clock window when HR (the morning surge) let us
+  // infer it with confidence; for 'fallback' / undefined we show NO times
+  // (the duration total above stands on its own) rather than a fabricated
+  // clock. The window is always framed as an estimate.
   const hasWindow =
+    wakeSource === 'hr_inferred' &&
     typeof sessionStartSec === 'number' &&
     typeof sessionEndSec === 'number' &&
     sessionEndSec > sessionStartSec;
@@ -224,21 +230,21 @@ export function SleepStagesBar({
             >
               {formatClock(sessionEndSec!)}
             </Text>
-            {wakeSource === 'fallback' ? (
-              <Text
-                allowFontScaling={false}
-                testID={testID ? `${testID}-approx` : undefined}
-                style={{
-                  fontFamily: captionStyle.family,
-                  fontSize: captionStyle.size,
-                  lineHeight: captionStyle.lineHeight,
-                  color: theme.colors.text.tertiary,
-                  fontStyle: 'italic',
-                }}
-              >
-                approx.
-              </Text>
-            ) : null}
+            {/* The window only renders for hr_inferred, and an inferred
+                wake is still an estimate — label it honestly. */}
+            <Text
+              allowFontScaling={false}
+              testID={testID ? `${testID}-estimate` : undefined}
+              style={{
+                fontFamily: captionStyle.family,
+                fontSize: captionStyle.size,
+                lineHeight: captionStyle.lineHeight,
+                color: theme.colors.text.tertiary,
+                fontStyle: 'italic',
+              }}
+            >
+              est. from heart rate
+            </Text>
           </View>
         </View>
       ) : null}

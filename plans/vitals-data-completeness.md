@@ -262,7 +262,14 @@ signed-in user's `users.timezone`; caregiver path = the family owner's tz).
   sessionEnd` (stable per night, collapses re-reads — but deviates from
   D13 §2.4 "measured_at = start") or add a per-night sleep dedupe/upsert
   keeping max minutes. Also `session_*_local` are mislabeled UTC.
-  Original detail: multiple overlapping sessions per night. 2026-06-02 has
+  Original detail: multiple overlapping sessions per night.
+  ✅ DONE 2: **no fabricated sleep times.** Founder direction — the app must
+  never project a wrong time; rather show nothing. Bed/wake now display
+  ONLY when `wakeSource === 'hr_inferred'` (the morning-HR-surge signal),
+  framed as an estimate (`~`, "est. from heart rate"); on fallback/undefined
+  the hero shows duration only ("Last night · 7:30 slept") and SleepStagesBar
+  hides the clock entirely. Removed the fabricated 08:00/07:00 display.
+  (`bedTimeSub`, `SleepStagesBar` + tests + snapshot.) 2026-06-02 has
   **5 sessions** (84/72/68/50/46 min) all from the U16H, all ending 08:00
   with marching start times — the watch re-reported one night repeatedly,
   not 5 naps. `computeSleepLastNight` picks by latest `sessionEndSec`
