@@ -80,6 +80,19 @@ describe('useSleep slice', () => {
     expect(useSleep.getState().lastNightSession(nowSec)).toBeNull();
   });
 
+  test('lastNightSession consolidates a fragmented night to the fullest session', () => {
+    // Prod shape: the watch re-reported one night as overlapping fragments,
+    // all ending at the same wake with drifting (later) starts and shrinking
+    // totals. Must return the fullest (84 min), not the shortest (46).
+    const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
+    const wake = nowSec - 6 * SECONDS_PER_HOUR;
+    const frags = [84, 72, 68, 50, 46].map((mins) =>
+      makeSession(wake - mins * 60, wake, { totalMinutes: mins }),
+    );
+    useSleep.setState({ recent: frags });
+    expect(useSleep.getState().lastNightSession(nowSec)?.totalMinutes).toBe(84);
+  });
+
   test('recentSessions returns last N nights, oldest first', () => {
     const nowSec = Date.UTC(2026, 4, 7, 12, 0, 0) / 1000;
     const nights = [1, 3, 5, 30, 60].map((daysAgo) => {

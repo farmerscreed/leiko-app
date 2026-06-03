@@ -285,11 +285,17 @@ signed-in user's `users.timezone`; caregiver path = the family owner's tz).
   `new Date(nowSec*1000).toISOString().slice(0,10)` = **UTC** date, not the
   wearer's tz, so near local midnight it reads the wrong day. The range/
   history aggregation in ActivityDetail still needs a dup-day check.
-- **Broader [important]:** the tz bug is not only in screen formatters — the
-  **aggregators** (`computeActivityToday`, likely `computeSleepLastNight`,
-  `computeHRRestingToday`, etc. in `utils/vitalAggregators.ts`) derive
-  "today"/"night" from UTC, ignoring `profile.timezone`. The timezone fix
-  must reach the aggregators, not just the per-screen formatters.
+- **Broader [important] — AGGREGATOR TZ FIX DONE.** `utils/vitalAggregators.ts`
+  now threads the wearer's `timeZone` through `inHRSleepWindow`,
+  `inSpO2OvernightWindow`, `nightDateKey`, `computeHRRestingToday/Recent`,
+  `computeSpO2OvernightLowsRecent`, `computeSleepLastNight`,
+  `computeActivityToday` — using `hourInZone`/`dayKeyInZone` instead of
+  getUTCHours/toISOString. `fetchParentPulseData` passes the wearer tz. The
+  self-path slices (`state/hr.ts` etc.) were already tz-aware. Also found +
+  fixed the SAME sleep-fragment understatement on the self path
+  (`state/sleep.ts lastNightSession` was pick-latest-end → now fullest per
+  wake-date). Tests added (aggregator tz boundary + slice consolidation).
+  Gates green: tsc 0, jest 204 suites/2437, eslint 0.
 
 ### Audit method (per page — no guesswork)
 
