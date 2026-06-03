@@ -66,7 +66,11 @@ function dayLocal(unixSec) {
 function hrInPatternBaseline(opts = {}) {
   const seed = opts.seed ?? 1;
   const days = opts.days ?? 14;
-  const startSec = opts.startSec ?? Math.floor(Date.now() / 1000) - days * SECONDS_PER_DAY;
+  // Anchor to UTC midnight so each generated day maps to exactly one UTC
+  // calendar-day bucket downstream (classifiers bucket by toISOString day).
+  // Without this, fixture days straddle two UTC days and trend tests flake
+  // around midnight UTC.
+  const startSec = opts.startSec ?? (Math.floor(Date.now() / 1000 / SECONDS_PER_DAY) - days) * SECONDS_PER_DAY;
   const baselineBpm = opts.baselineBpm ?? 70;
   const rng = seededRng(seed);
   const samples = [];
@@ -83,19 +87,27 @@ function hrInPatternBaseline(opts = {}) {
 }
 
 /**
- * 14-day baseline with the last 3 days running > baseline + 15 bpm —
- * triggers the calm_concerned `baseline_3day_trend` rule per D13 §6.2.
+ * 15-day series with the last 3 days running > baseline + 15 bpm. The
+ * classifier needs >= 14 days of *baseline* history (HR_MIN_BASELINE_DAYS),
+ * and the test treats the final bucket as "today" — so we generate 15 clean
+ * UTC-day buckets (12 baseline + 3 elevated). That leaves 14 days in
+ * `restingBpmRecent` (hot path) with the last 3 elevated, triggering the
+ * calm_concerned `baseline_3day_trend` rule per D13 §6.2.
  */
 function hrCalmConcerned3DayTrend(opts = {}) {
   const seed = opts.seed ?? 2;
-  const startSec = opts.startSec ?? Math.floor(Date.now() / 1000) - 14 * SECONDS_PER_DAY;
+  // Anchor to UTC midnight (see note in hrInPatternBaseline) so each day maps
+  // to exactly one UTC-day bucket and the trend is deterministic regardless of
+  // the wall-clock time the test runs.
+  const days = 15;
+  const startSec = opts.startSec ?? (Math.floor(Date.now() / 1000 / SECONDS_PER_DAY) - days) * SECONDS_PER_DAY;
   const baselineBpm = opts.baselineBpm ?? 70;
   const rng = seededRng(seed);
   const samples = [];
-  for (let day = 0; day < 14; day++) {
+  for (let day = 0; day < days; day++) {
     const dayStart = startSec + day * SECONDS_PER_DAY;
-    // First 11 days at baseline, last 3 days at baseline + 18-22 bpm.
-    const center = day >= 11 ? baselineBpm + 20 : baselineBpm;
+    // First 12 days at baseline, last 3 days at baseline + 18-22 bpm.
+    const center = day >= days - 3 ? baselineBpm + 20 : baselineBpm;
     for (let s = 0; s < 48; s++) {
       samples.push({
         measuredAtSec: dayStart + s * 30 * SECONDS_PER_MINUTE,
@@ -139,7 +151,11 @@ function hrConfirmedUrgentExtreme(opts = {}) {
 function spo2InPattern(opts = {}) {
   const seed = opts.seed ?? 11;
   const days = opts.days ?? 14;
-  const startSec = opts.startSec ?? Math.floor(Date.now() / 1000) - days * SECONDS_PER_DAY;
+  // Anchor to UTC midnight so each generated day maps to exactly one UTC
+  // calendar-day bucket downstream (classifiers bucket by toISOString day).
+  // Without this, fixture days straddle two UTC days and trend tests flake
+  // around midnight UTC.
+  const startSec = opts.startSec ?? (Math.floor(Date.now() / 1000 / SECONDS_PER_DAY) - days) * SECONDS_PER_DAY;
   const rng = seededRng(seed);
   const samples = [];
   for (let s = 0; s < days * 48; s++) {
@@ -168,7 +184,11 @@ function spo2InPattern(opts = {}) {
 function spo2OvernightDip(opts = {}) {
   const seed = opts.seed ?? 12;
   const days = opts.days ?? 7;
-  const startSec = opts.startSec ?? Math.floor(Date.now() / 1000) - days * SECONDS_PER_DAY;
+  // Anchor to UTC midnight so each generated day maps to exactly one UTC
+  // calendar-day bucket downstream (classifiers bucket by toISOString day).
+  // Without this, fixture days straddle two UTC days and trend tests flake
+  // around midnight UTC.
+  const startSec = opts.startSec ?? (Math.floor(Date.now() / 1000 / SECONDS_PER_DAY) - days) * SECONDS_PER_DAY;
   const rng = seededRng(seed);
   const samples = [];
   for (let day = 0; day < days; day++) {
