@@ -193,8 +193,11 @@ watch, U16H only came out Jun 2 for testing.
   `anomaly_events`, `ai_narration_cache` are all empty for this family, so
   nothing server-side was computed off the duplicates. The app's baseline /
   trends recompute live from the (now-deduped) readings.
-- Note: migration 0030 (HR RPC) is still NOT applied — only 0031 is. A
-  later `supabase db push` will apply 0030 and skip 0031 (already recorded).
+- FINAL PROD STATE (2026-06-03 end of session): migrations **0029→0033 all
+  applied** (0030 HR RPC, 0031 BP dedupe, 0032 sleep end-key, 0033 null
+  mislabeled measured_at_local — 97→0 wrong values) and the **sync edge
+  function deployed** with all fixes. Working tree clean; physical testing
+  begun on device 43230DLJH001YY (debug build with all client fixes).
 
 **FIX BUILT (files, mirrors what was applied):**
 - `supabase/migrations/0031_readings_device_independent_dedupe.sql`:
