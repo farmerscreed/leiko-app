@@ -6,10 +6,10 @@
 > **Audit COMPLETE, all fixes BUILT + LIVE in prod.** Decision record:
 > `docs/_adr/0008-vitals-data-correctness.md`. Session handoff:
 > `plans/NEXT_SESSION_START_HERE.md`. Prod migrations 0029→0034 applied;
-> `sync` + `generate-doctor-pdf` deployed. Gates: tsc 0 / jest 204
-> suites, 2441 tests / eslint 0 / deno check clean.
-> **Remaining work: the VitalHistory "view all per range" screen
-> (founder-approved, not started) + physical testing in progress.**
+> `sync` + `generate-doctor-pdf` deployed. Gates: tsc 0 / jest 206
+> suites, 2455 tests / eslint 0 / deno check clean.
+> **VitalHistory "view all per range" BUILT for BP/SpO2/Sleep/Activity;
+> remaining: the HR per-day drill-down + physical testing in progress.**
 > The body below is the audit's working log, kept as the verified
 > evidence trail. Markers: **[verified]** = confirmed against code / a
 > passing run / prod SQL; **[open]** = was unconfirmed at the time of
