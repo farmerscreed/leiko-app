@@ -371,11 +371,13 @@ async function handleLegacy(
 
   if (insertReading.error) {
     // 23505 = unique_violation (readings_dedupe). Return existing row.
+    // Migration 0031: the dedup key is (family_id, measured_at), so the
+    // existing-row lookup keys off the family, not the device_id.
     if ((insertReading.error as any).code === '23505') {
       const dup = await serviceClient
         .from('readings')
         .select('id')
-        .eq('device_id', deviceId)
+        .eq('family_id', familyId)
         .eq('measured_at', measuredAt)
         .single();
       if (dup.error) {
@@ -585,7 +587,10 @@ async function insertReadings(
   const { error, data } = await serviceClient
     .from('readings')
     .upsert(rows, {
-      onConflict: 'device_id,measured_at',
+      // Device-independent dedup (migration 0031): a BP reading is
+      // identified by (family_id, measured_at), not the watch that sent it,
+      // so a re-pair can't re-import history under a new device_id.
+      onConflict: 'family_id,measured_at',
       ignoreDuplicates: true,
     })
     .select('id');
