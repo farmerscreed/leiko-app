@@ -61,6 +61,7 @@ import { useDailyPulseData, emptyDailyPulse } from '../../state/dailyPulse';
 import { useHR } from '../../state/hr';
 import { useSleep } from '../../state/sleep';
 import { useAuth } from '../../state/auth';
+import { resolveTimeZone, timeInZone, weekdayInZone } from '../../utils/timeInZone';
 import { useParentDailyPulseData } from '../../hooks/useParentDailyPulseData';
 import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { useOnboarding } from '../../state/onboarding';
@@ -324,17 +325,20 @@ function hrRowContext(bpm: number, ageHours: number, isFirst: boolean): string {
   return zone;
 }
 
-function hrRowTime(measuredAtSec: number, nowMs: number): string {
-  const d = new Date(measuredAtSec * 1000);
-  const ageHours = (nowMs - measuredAtSec * 1000) / 3_600_000;
+function hrRowTime(measuredAtSec: number, timeZone: string, nowMs: number): string {
+  const ms = measuredAtSec * 1000;
+  const ageHours = (nowMs - ms) / 3_600_000;
   if (ageHours < 24) {
-    return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    return timeInZone(ms, timeZone);
   }
   if (ageHours < 48) return 'Yesterday';
-  return d.toLocaleDateString([], { weekday: 'short' });
+  return weekdayInZone(ms, timeZone, 'short');
 }
 
-function buildHRRecentRows(samples: ReadonlyArray<HRSample>): RecentReading[] {
+function buildHRRecentRows(
+  samples: ReadonlyArray<HRSample>,
+  timeZone: string,
+): RecentReading[] {
   if (samples.length === 0) return [];
   const sorted = samples.slice().sort((a, b) => b.measuredAtSec - a.measuredAtSec);
   const nowMs = Date.now();
@@ -344,7 +348,7 @@ function buildHRRecentRows(samples: ReadonlyArray<HRSample>): RecentReading[] {
       id: `hr-${s.measuredAtSec}`,
       value: `${Math.round(s.bpm)}`,
       context: hrRowContext(s.bpm, ageHours, idx === 0),
-      time: hrRowTime(s.measuredAtSec, nowMs),
+      time: hrRowTime(s.measuredAtSec, timeZone, nowMs),
     };
   });
 }
@@ -479,6 +483,11 @@ export function HRDetail({
   // Same user timezone the hero uses (via dailyPulse) so the recent
   // resting series here is bucketed consistently. Null → UTC.
   const timeZone = useAuth((s) => s.profile?.timezone ?? null);
+  // Timezone the row times render in: the wearer's on the caregiver path
+  // (the rows are the wearer's readings), else the viewer's own. UTC last.
+  const displayTimeZone = resolveTimeZone(
+    scopedFamilyId ? parentPulse.wearerTimeZone ?? timeZone : timeZone,
+  );
 
   const rangedSamples = useMemo(() => {
     const cutoff = nowSec - RANGE_TO_DAYS[range] * SECONDS_PER_DAY;
@@ -575,7 +584,10 @@ export function HRDetail({
   // correlation) are now server-windowed above; paging the raw HR list
   // server-side is a deliberate follow-up (a list of thousands of 5-min
   // samples needs its own pagination design, not a bigger fetch).
-  const recentRows = useMemo(() => buildHRRecentRows(rangedSamples), [rangedSamples]);
+  const recentRows = useMemo(
+    () => buildHRRecentRows(rangedSamples, displayTimeZone),
+    [rangedSamples, displayTimeZone],
+  );
 
   // Hero value — live-first (founder direction): the watch auto-samples
   // HR every 5 min, so the headline shows the most recent sample (the
