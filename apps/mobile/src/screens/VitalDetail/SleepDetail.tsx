@@ -53,6 +53,8 @@ import { sleepFill } from '../../utils/vitalThemes';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import { formatClockInTz, useUserTz } from '../../utils/userTz';
+import { useOnboarding } from '../../state/onboarding';
+import { ViewAllHistoryLink } from '../../components/ViewAllHistoryLink';
 import {
   resolveTimeZone,
   weekdayInZone,
@@ -269,6 +271,13 @@ export interface SleepDetailProps {
   onLearnOpen?: () => void;
   /** Sprint 17a — caregiver entry. When set, sleep + readings data
    *  sources swap to the parent-scoped query layer. */
+  /** ADR-0008 follow-up — opens the full-window VitalHistory browse for
+   *  the selected range. Router curries the vital kind. */
+  onViewAllHistory?: (
+    range: TrendRange,
+    familyId: string,
+    timeZone: string,
+  ) => void;
   familyId?: string;
 }
 
@@ -276,6 +285,7 @@ export function SleepDetail({
   onBack,
   onArticleOpen,
   onLearnOpen,
+  onViewAllHistory,
   familyId,
 }: SleepDetailProps) {
   const theme = useTheme();
@@ -301,6 +311,9 @@ export function SleepDetail({
   const tz = resolveTimeZone(
     scopedFamilyId ? parentPulse.wearerTimeZone ?? ownTz : ownTz,
   );
+  // Family the full-window history is scoped to (ADR-0008 follow-up).
+  const ownFamilyId = useOnboarding((s) => s.familyId);
+  const historyFamilyId = scopedFamilyId ?? ownFamilyId;
 
   // Sprint 18 — S1/S3 fix. Distinguish "loading on first mount" and
   // "errored" from "truly empty" when we're in the caregiver-scoped
@@ -571,6 +584,17 @@ export function SleepDetail({
               eyebrow="Recent nights"
               readings={recentRows}
               testID="sleep-detail-recent"
+            />
+          ) : null}
+          {onViewAllHistory && historyFamilyId ? (
+            <ViewAllHistoryLink
+              kind="sleep"
+              familyId={historyFamilyId}
+              range={range}
+              onPress={() =>
+                onViewAllHistory(range, historyFamilyId, tz)
+              }
+              testID="sleep-detail-view-all"
             />
           ) : null}
         </>
