@@ -364,29 +364,32 @@ export async function fetchParentPulseData(
     mapCaloriesDay,
   );
 
-  const snapshot: DailyPulseSnapshot = {
-    bpLatest: readings[0] ?? null,
-    hrRestingToday: computeHRRestingToday(hr, nowSec),
-    hrRestingRecent: computeHRRestingRecent(hr, nowSec),
-    hrLatestSampleAt: computeHRLatestSampleAt(hr),
-    hrLatestBpm: computeHRLatestBpm(hr),
-    spo2LatestPercent: computeSpO2LatestPercent(spo2),
-    spo2OvernightLowsRecent: computeSpO2OvernightLowsRecent(spo2, nowSec),
-    spo2LatestSampleAt: computeSpO2LatestSampleAt(spo2),
-    sleepSession: computeSleepLastNight(sleep, nowSec),
-    activityToday: computeActivityToday(steps, nowSec),
-  };
-
-  const pulse = composeDailyPulseData(snapshot, nowSec);
-
-  // Wearer tz is best-effort: a failed/empty lookup leaves it null and the
-  // caller falls back to the viewer's tz, then UTC. The embedded `users`
-  // join may surface as an object or a single-element array (PostgREST).
+  // Wearer (family owner) tz — drives "today"/"night" boundaries in the
+  // aggregators so the caregiver sees the wearer's local days, not UTC. The
+  // embedded `users` join may surface as an object or single-element array.
   const ownerUsers = (ownerResult.data as { users?: unknown } | null)?.users;
   const ownerObj = Array.isArray(ownerUsers) ? ownerUsers[0] : ownerUsers;
   const wearerTimeZone =
     (ownerObj as { timezone?: string | null } | undefined)?.timezone ?? null;
+  const tz = wearerTimeZone ?? 'UTC';
 
+  const snapshot: DailyPulseSnapshot = {
+    bpLatest: readings[0] ?? null,
+    hrRestingToday: computeHRRestingToday(hr, nowSec, tz),
+    hrRestingRecent: computeHRRestingRecent(hr, nowSec, tz),
+    hrLatestSampleAt: computeHRLatestSampleAt(hr),
+    hrLatestBpm: computeHRLatestBpm(hr),
+    spo2LatestPercent: computeSpO2LatestPercent(spo2),
+    spo2OvernightLowsRecent: computeSpO2OvernightLowsRecent(spo2, nowSec, tz),
+    spo2LatestSampleAt: computeSpO2LatestSampleAt(spo2),
+    sleepSession: computeSleepLastNight(sleep, nowSec, tz),
+    activityToday: computeActivityToday(steps, nowSec, tz),
+  };
+
+  const pulse = composeDailyPulseData(snapshot, nowSec);
+
+  // wearerTimeZone is best-effort: a failed/empty lookup leaves it null and
+  // the screens fall back to the viewer's tz, then UTC.
   return {
     pulse,
     recent: { readings, hr, spo2, sleep, steps, calories },

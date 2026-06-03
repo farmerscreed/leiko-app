@@ -25,6 +25,7 @@ import type {
   SleepSession,
   ActivityDay,
 } from '../types/vitals';
+import { hourInZone, dayKeyInZone } from './timeInZone';
 
 const SECONDS_PER_DAY = 24 * 60 * 60;
 
@@ -49,27 +50,36 @@ const SLEEP_LAST_NIGHT_LOOKBACK_SEC = 36 * 60 * 60;
 
 // ----- Shared helpers --------------------------------------------
 
-function inHRSleepWindow(measuredAtSec: number): boolean {
-  const hr = new Date(measuredAtSec * 1000).getUTCHours();
+// Data-completeness fix: these read the hour-of-day / calendar day in the
+// wearer's `timeZone`, not UTC. Previously getUTCHours()/toISOString() made
+// "today" and the overnight window start at UTC midnight/22:00 — wrong for
+// any non-UTC user (e.g. Lagos UTC+1, New York UTC-4). The self-path slices
+// (state/hr.ts etc.) already take a tz; this brings the caregiver-path
+// aggregators in line. `timeZone` empty/invalid → UTC (resolveTimeZone).
+function inHRSleepWindow(measuredAtSec: number, timeZone: string): boolean {
+  const hr = hourInZone(measuredAtSec * 1000, timeZone);
   return hr >= HR_SLEEP_WINDOW_START_HOUR || hr < HR_SLEEP_WINDOW_END_HOUR;
 }
 
-function inSpO2OvernightWindow(measuredAtSec: number): boolean {
-  const hr = new Date(measuredAtSec * 1000).getUTCHours();
+function inSpO2OvernightWindow(measuredAtSec: number, timeZone: string): boolean {
+  const hr = hourInZone(measuredAtSec * 1000, timeZone);
   return hr >= SPO2_OVERNIGHT_START_HOUR || hr < SPO2_OVERNIGHT_END_HOUR;
 }
 
-/** Sleep / overnight "night identity": evening samples (hr >= window
- *  start) belong to the next UTC date (their "owning morning"); early-
- *  morning samples (hr < window end) stay on the same UTC date.
- *  Matches the convention in `state/hr.ts` + `state/spo2.ts`. */
-function nightDateKey(measuredAtSec: number, windowStartHour: number): string {
-  const d = new Date(measuredAtSec * 1000);
-  const hr = d.getUTCHours();
-  const anchored = hr >= windowStartHour
-    ? new Date(d.getTime() + SECONDS_PER_DAY * 1000)
-    : d;
-  return anchored.toISOString().slice(0, 10);
+/** Sleep / overnight "night identity" in the wearer's `timeZone`: evening
+ *  samples (local hr >= window start) belong to the next local date (their
+ *  "owning morning"); early-morning samples (local hr < window end) stay on
+ *  the same local date. Matches the convention in `state/hr.ts` +
+ *  `state/spo2.ts` (which key off the user tz). */
+function nightDateKey(
+  measuredAtSec: number,
+  windowStartHour: number,
+  timeZone: string,
+): string {
+  const ms = measuredAtSec * 1000;
+  const hr = hourInZone(ms, timeZone);
+  const anchorMs = hr >= windowStartHour ? ms + SECONDS_PER_DAY * 1000 : ms;
+  return dayKeyInZone(anchorMs, timeZone);
 }
 
 /** Lowest 10-min rolling-average HR across a sample list. Mirrors
@@ -102,13 +112,14 @@ function rollingMinAverage(samples: HRSample[]): number | null {
 export function computeHRRestingToday(
   samples: HRSample[],
   nowSec: number,
+  timeZone: string,
 ): number | null {
   if (samples.length < 2) return null;
-  const todayKey = nightDateKey(nowSec, HR_SLEEP_WINDOW_START_HOUR);
+  const todayKey = nightDateKey(nowSec, HR_SLEEP_WINDOW_START_HOUR, timeZone);
   const windowSamples = samples.filter(
     (s) =>
-      inHRSleepWindow(s.measuredAtSec) &&
-      nightDateKey(s.measuredAtSec, HR_SLEEP_WINDOW_START_HOUR) === todayKey,
+      inHRSleepWindow(s.measuredAtSec, timeZone) &&
+      nightDateKey(s.measuredAtSec, HR_SLEEP_WINDOW_START_HOUR, timeZone) === todayKey,
   );
   if (windowSamples.length < 2) return null;
   return rollingMinAverage(windowSamples);
@@ -117,22 +128,24 @@ export function computeHRRestingToday(
 export function computeHRRestingRecent(
   samples: HRSample[],
   nowSec: number,
+  timeZone: string,
 ): number[] {
   if (samples.length === 0) return [];
   const byNight = new Map<string, HRSample[]>();
   for (const s of samples) {
-    if (!inHRSleepWindow(s.measuredAtSec)) continue;
-    const key = nightDateKey(s.measuredAtSec, HR_SLEEP_WINDOW_START_HOUR);
+    if (!inHRSleepWindow(s.measuredAtSec, timeZone)) continue;
+    const key = nightDateKey(s.measuredAtSec, HR_SLEEP_WINDOW_START_HOUR, timeZone);
     const arr = byNight.get(key);
     if (arr) arr.push(s);
     else byNight.set(key, [s]);
   }
-  const todayKey = nightDateKey(nowSec, HR_SLEEP_WINDOW_START_HOUR);
+  const todayKey = nightDateKey(nowSec, HR_SLEEP_WINDOW_START_HOUR, timeZone);
   const out: number[] = [];
   for (let d = HR_RESTING_RECENT_DAYS; d >= 1; d--) {
     const nightKey = nightDateKey(
       nowSec - d * SECONDS_PER_DAY,
       HR_SLEEP_WINDOW_START_HOUR,
+      timeZone,
     );
     if (nightKey === todayKey) continue;
     const ns = byNight.get(nightKey);
@@ -182,13 +195,14 @@ export function computeSpO2LatestSampleAt(
 export function computeSpO2OvernightLowsRecent(
   samples: SpO2Sample[],
   nowSec: number,
+  timeZone: string,
   nights: number = SPO2_DEFAULT_NIGHTS,
 ): number[] {
   if (samples.length === 0) return [];
   const byNight = new Map<string, SpO2Sample[]>();
   for (const s of samples) {
-    if (!inSpO2OvernightWindow(s.measuredAtSec)) continue;
-    const key = nightDateKey(s.measuredAtSec, SPO2_OVERNIGHT_START_HOUR);
+    if (!inSpO2OvernightWindow(s.measuredAtSec, timeZone)) continue;
+    const key = nightDateKey(s.measuredAtSec, SPO2_OVERNIGHT_START_HOUR, timeZone);
     const arr = byNight.get(key);
     if (arr) arr.push(s);
     else byNight.set(key, [s]);
@@ -198,6 +212,7 @@ export function computeSpO2OvernightLowsRecent(
     const key = nightDateKey(
       nowSec - d * SECONDS_PER_DAY,
       SPO2_OVERNIGHT_START_HOUR,
+      timeZone,
     );
     const ns = byNight.get(key);
     if (!ns || ns.length === 0) continue;
@@ -209,6 +224,7 @@ export function computeSpO2OvernightLowsRecent(
 export function computeSleepLastNight(
   sessions: SleepSession[],
   nowSec: number,
+  timeZone: string,
 ): SleepSession | null {
   if (sessions.length === 0) return null;
   const inWindow = sessions.filter(
@@ -230,7 +246,7 @@ export function computeSleepLastNight(
   // date), then within that night return the fullest session by
   // totalMinutes. Mirrors computeActivityToday's max-pick against shadows.
   const wakeDate = (s: SleepSession) =>
-    new Date(s.sessionEndSec * 1000).toISOString().slice(0, 10);
+    dayKeyInZone(s.sessionEndSec * 1000, timeZone);
   const latestNight = inWindow.reduce((a, b) =>
     b.sessionEndSec > a.sessionEndSec ? b : a,
   );
@@ -243,9 +259,13 @@ export function computeSleepLastNight(
 export function computeActivityToday(
   days: ActivityDay[],
   nowSec: number,
+  timeZone: string,
 ): ActivityDay | null {
   if (days.length === 0) return null;
-  const todayLocal = new Date(nowSec * 1000).toISOString().slice(0, 10);
+  // "Today" in the wearer's tz — `d.dayLocal` is already a local YYYY-MM-DD,
+  // so comparing against a UTC-derived date (the old toISOString) mismatched
+  // near local midnight and could blank the day's steps.
+  const todayLocal = dayKeyInZone(nowSec * 1000, timeZone);
   // There can be MORE than one row for today: a rotating BLE MAC mints a
   // second device row (ensureDeviceRow keys on mac_address), so the same
   // calendar day gets duplicate steps_day rows under different
