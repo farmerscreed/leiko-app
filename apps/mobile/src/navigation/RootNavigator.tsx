@@ -37,6 +37,7 @@ import { ParentDashboard } from '../screens/Home/ParentDashboard';
 import { SelfBuyerHome } from '../screens/Home/SelfBuyerHome';
 import { SelfBuyerHomePlaceholder } from '../screens/Placeholders/SelfBuyerHomePlaceholder';
 import { VitalDetailRouter } from '../screens/VitalDetail/VitalDetailRouter';
+import { VitalHistoryScreen } from '../screens/VitalHistory/VitalHistoryScreen';
 import { PairingScreen } from '../screens/Pairing/PairingScreen';
 import { SettingsScreen } from '../screens/Settings/SettingsScreen';
 import { TakeReadingScreen } from '../screens/TakeReading/TakeReadingScreen';
@@ -171,6 +172,7 @@ function CaregiverHomeNavigator() {
       <CaregiverStack.Screen name="CaregiverHome" component={CaregiverHome} />
       <CaregiverStack.Screen name="ParentDashboard" component={ParentDashboard} />
       <CaregiverStack.Screen name="VitalDetail" component={VitalDetailRouter} />
+      <CaregiverStack.Screen name="VitalHistory" component={VitalHistoryScreen} />
       <CaregiverStack.Screen name="Pairing" component={PairingScreen} />
       <CaregiverStack.Screen name="Settings" component={SettingsScreen} />
       <CaregiverStack.Screen name="TakeReading" component={TakeReadingScreen} />
@@ -261,6 +263,7 @@ function SelfBuyerHomeNavigator() {
       <SelfBuyerStack.Screen name="TakeReading" component={TakeReadingScreen} />
       <SelfBuyerStack.Screen name="ReadingDetail" component={ReadingDetailScreen} />
       <SelfBuyerStack.Screen name="VitalDetail" component={VitalDetailRouter} />
+      <SelfBuyerStack.Screen name="VitalHistory" component={VitalHistoryScreen} />
       <SelfBuyerStack.Screen name="Trends" component={Trends} />
       <SelfBuyerStack.Screen
         name="ForYourDoctor"

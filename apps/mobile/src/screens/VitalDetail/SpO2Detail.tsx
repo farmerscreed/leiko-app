@@ -70,6 +70,8 @@ import { useSpO2 } from '../../state/spo2';
 import { useParentDailyPulseData } from '../../hooks/useParentDailyPulseData';
 import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { useAuth } from '../../state/auth';
+import { useOnboarding } from '../../state/onboarding';
+import { ViewAllHistoryLink } from '../../components/ViewAllHistoryLink';
 import {
   resolveTimeZone,
   timeInZone,
@@ -90,6 +92,13 @@ export interface SpO2DetailProps {
   onLearnOpen?: () => void;
   /** Sprint 17a — caregiver entry. When set, SpO2 + sleep data
    *  sources swap to the parent-scoped query layer. */
+  /** ADR-0008 follow-up — opens the full-window VitalHistory browse for
+   *  the selected range. Router curries the vital kind. */
+  onViewAllHistory?: (
+    range: TrendRange,
+    familyId: string,
+    timeZone: string,
+  ) => void;
   familyId?: string;
 }
 
@@ -309,6 +318,7 @@ export function SpO2Detail({
   onBack,
   onArticleOpen,
   onLearnOpen,
+  onViewAllHistory,
   familyId,
 }: SpO2DetailProps) {
   // Sprint 17a — both data sources called unconditionally.
@@ -327,6 +337,9 @@ export function SpO2Detail({
   const displayTimeZone = resolveTimeZone(
     scopedFamilyId ? parentPulse.wearerTimeZone ?? ownTimeZone : ownTimeZone,
   );
+  // Family the full-window history is scoped to (ADR-0008 follow-up).
+  const ownFamilyId = useOnboarding((s) => s.familyId);
+  const historyFamilyId = scopedFamilyId ?? ownFamilyId;
 
   // Sprint 18 SP1 — distinguish loading + error from "truly empty" on
   // the caregiver-scoped path (matches Sleep S1+S3 / HR H1 / BP B1).
@@ -652,6 +665,17 @@ export function SpO2Detail({
             readings={recentRows}
             testID="spo2-detail-readings"
           />
+          {onViewAllHistory && historyFamilyId ? (
+            <ViewAllHistoryLink
+              kind="spo2"
+              familyId={historyFamilyId}
+              range={trendRange}
+              onPress={() =>
+                onViewAllHistory(trendRange, historyFamilyId, displayTimeZone)
+              }
+              testID="spo2-detail-view-all"
+            />
+          ) : null}
         </>
       )}
     </DetailShell>

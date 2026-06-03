@@ -215,9 +215,14 @@ watch, U16H only came out Jun 2 for testing.
   via fetchAll() with deterministic ORDER BY, and day bucketing is
   wearer-tz (`dayOf(iso, tz)`, was UTC slice). Semantics preserved
   (percentile_cont(0.5) == old JS median).
-- **NEXT (approved, not started): VitalHistory screen** — "View all · N"
-  per range on every vital; flat day-grouped list for BP/SpO2/Sleep/
-  Activity, per-day drill-down for HR (hr_range_summary.per_day is live).
+- **VitalHistory screen [BUILT 2026-06-03]** — "View all · N" (true server
+  count via head-count query) under the BP/SpO2/Sleep/Activity recent
+  lists → `screens/VitalHistory/` pages the FULL window: 50/page infinite
+  scroll, exact page-0 count, wearer-tz day sections, loading/error/empty
+  states. `services/vitalHistory.ts` (paged fetch + pure row mappers) +
+  `hooks/useVitalHistory.ts`; registered on both stacks; router curries
+  the vital kind. 17 new tests. REMAINING: HR per-day drill-down
+  (hr_range_summary.per_day → day's samples) — designed, not built.
 
 **FIX BUILT (files, mirrors what was applied):**
 - `supabase/migrations/0031_readings_device_independent_dedupe.sql`:

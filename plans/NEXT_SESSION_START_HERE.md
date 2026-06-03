@@ -67,12 +67,13 @@ tsc 0 · jest 204 suites / 2441 tests · eslint 0 errors ·
 
 ## In flight / next steps (priority order)
 
-1. **VitalHistory screen** (founder-approved, NOT started): every vital's
-   range pill gets "View all · N readings" → a shared screen that pages
-   the full server data for the selected range (BP/SpO2/Sleep/Activity =
-   flat day-grouped list; HR = per-day drill-down using
-   `hr_range_summary.per_day`, already live). Design notes in the
-   2026-06-03 session + `plans/vitals-data-completeness.md`.
+1. **VitalHistory screen — BUILT for BP/SpO2/Sleep/Activity** (commit on
+   branch): "View all · N" (true server count) under each recent list →
+   shared `screens/VitalHistory/` pages the FULL window (50/page infinite
+   scroll, wearer-tz day sections, exact totals; `services/vitalHistory` +
+   `hooks/useVitalHistory`). **Remaining: the HR per-day drill-down**
+   (day list from `hr_range_summary.per_day` → tap a day → that day's
+   samples) — designed, not built. Needs an on-device pass too.
 2. **Physical testing** in progress on device `43230DLJH001YY` (debug
    build via `npx expo run:android`; metro-tethered). Release APK needs
    the founder's `LEIKO_RELEASE_*` keystore env (`npm run

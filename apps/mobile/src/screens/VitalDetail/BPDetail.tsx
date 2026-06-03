@@ -66,6 +66,8 @@ import {
   dayKeyInZone,
 } from '../../utils/timeInZone';
 import { useAuth } from '../../state/auth';
+import { useOnboarding } from '../../state/onboarding';
+import { ViewAllHistoryLink } from '../../components/ViewAllHistoryLink';
 
 const RANGE_TO_DAYS: Record<TrendRange, number> = {
   '7d': 7,
@@ -353,6 +355,13 @@ export interface BPDetailProps {
   /** Sprint 16.5f — tap "Share with your doctor" → navigates to Trends
    *  where the doctor-prep PDF generator lives. Router wires this. */
   onSharePress?: () => void;
+  /** ADR-0008 follow-up — opens the full-window VitalHistory browse for
+   *  the selected range. Router curries the vital kind. */
+  onViewAllHistory?: (
+    range: TrendRange,
+    familyId: string,
+    timeZone: string,
+  ) => void;
   /** Sprint 17a — caregiver entry. When set, the screen sources its
    *  data from `useParentDailyPulseData(familyId)` +
    *  `useParentVitalsRecent(familyId)` instead of the singleton
@@ -366,6 +375,7 @@ export function BPDetail({
   onArticleOpen,
   onLearnOpen,
   onSharePress,
+  onViewAllHistory,
   familyId,
 }: BPDetailProps) {
   const theme = useTheme();
@@ -388,6 +398,10 @@ export function BPDetail({
   // signed-in user. Caregiver path: the family owner's tz from the parent
   // fetch, falling back to the viewer's tz, then UTC (resolveTimeZone).
   const ownTimeZone = useAuth((s) => s.profile?.timezone ?? null);
+  // Family the full-window history is scoped to: the viewed parent on the
+  // caregiver path, else the signed-in user's own family.
+  const ownFamilyId = useOnboarding((s) => s.familyId);
+  const historyFamilyId = scopedFamilyId ?? ownFamilyId;
   const timeZone = resolveTimeZone(
     scopedFamilyId ? parentPulse.wearerTimeZone ?? ownTimeZone : ownTimeZone,
   );
@@ -711,6 +725,17 @@ export function BPDetail({
                 onSelectReading ? (r) => onSelectReading(r.id) : undefined
               }
               testID="bp-detail-readings"
+            />
+          ) : null}
+          {!isEmpty && onViewAllHistory && historyFamilyId ? (
+            <ViewAllHistoryLink
+              kind="bp"
+              familyId={historyFamilyId}
+              range={range}
+              onPress={() =>
+                onViewAllHistory(range, historyFamilyId, timeZone)
+              }
+              testID="bp-detail-view-all"
             />
           ) : null}
           {!isEmpty && onSharePress ? (

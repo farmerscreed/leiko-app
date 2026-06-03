@@ -67,6 +67,8 @@ import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import { useActivity } from '../../state/activity';
 import { useAuth } from '../../state/auth';
+import { useOnboarding } from '../../state/onboarding';
+import { ViewAllHistoryLink } from '../../components/ViewAllHistoryLink';
 import { resolveTimeZone, hourInZone, dayKeyInZone } from '../../utils/timeInZone';
 import { useTheme } from '../../theme';
 import type { ActivityDay } from '../../types/vitals';
@@ -88,6 +90,13 @@ export interface ActivityDetailProps {
   onLearnOpen?: () => void;
   /** Sprint 17a — caregiver entry. When set, activity data sources
    *  swap to the parent-scoped query layer. */
+  /** ADR-0008 follow-up — opens the full-window VitalHistory browse for
+   *  the selected range. Router curries the vital kind. */
+  onViewAllHistory?: (
+    range: TrendRange,
+    familyId: string,
+    timeZone: string,
+  ) => void;
   familyId?: string;
 }
 
@@ -156,6 +165,7 @@ export function ActivityDetail({
   onGoalChange,
   onArticleOpen,
   onLearnOpen,
+  onViewAllHistory,
   familyId,
 }: ActivityDetailProps) {
   // Same user timezone the rest of the app uses for day boundaries so
@@ -176,6 +186,9 @@ export function ActivityDetail({
   const displayTimeZone = resolveTimeZone(
     scopedFamilyId ? parentPulse.wearerTimeZone ?? timeZone : timeZone,
   );
+  // Family the full-window history is scoped to (ADR-0008 follow-up).
+  const ownFamilyId = useOnboarding((s) => s.familyId);
+  const historyFamilyId = scopedFamilyId ?? ownFamilyId;
   const emptyFallback = useMemo(() => emptyDailyPulse(), []);
 
   // Sprint 18 A1 — distinguish loading + error from "truly empty" on
@@ -431,6 +444,17 @@ export function ActivityDetail({
             testID="activity-detail-recent"
           />
         ) : null}
+          {onViewAllHistory && historyFamilyId ? (
+            <ViewAllHistoryLink
+              kind="activity"
+              familyId={historyFamilyId}
+              range={range}
+              onPress={() =>
+                onViewAllHistory(range, historyFamilyId, displayTimeZone)
+              }
+              testID="activity-detail-view-all"
+            />
+          ) : null}
 
         <GoalConfigSection
           currentGoal={targetSteps}
