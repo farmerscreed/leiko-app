@@ -51,7 +51,7 @@ Deno.test('mapSpO2Samples carries min/max into int_2/int_3', () => {
   assertEquals((rows[0].value_jsonb as { perfusion_index: number }).perfusion_index, 0.6);
 });
 
-Deno.test('mapSleepSessions uses sessionStart for measured_at', () => {
+Deno.test('mapSleepSessions uses sessionEnd as measured_at (constant night key)', () => {
   const start = NOW - 8 * 3600;
   const rows = mapSleepSessions(
     [
@@ -74,10 +74,17 @@ Deno.test('mapSleepSessions uses sessionStart for measured_at', () => {
     DEVICE,
   );
   assertEquals(rows[0].vital_type, 'sleep_session');
-  assertEquals(rows[0].measured_at, new Date(start * 1000).toISOString());
+  // Now the session END — re-reads of a night (whose synthesized start
+  // drifts with total) share this constant key and reconcile one row.
+  assertEquals(rows[0].measured_at, NOW_ISO);
   assertEquals(rows[0].value_int, 444);
   assertEquals(rows[0].value_int_2, 100);
   assertEquals(rows[0].value_int_3, 90);
+  // The real start epoch is preserved in the jsonb for the read side.
+  assertEquals(
+    (rows[0].value_jsonb as { session_start_local?: string }).session_start_local,
+    new Date(start * 1000).toISOString(),
+  );
 });
 
 Deno.test('mapActivityDays carries day_local and hourly array', () => {
