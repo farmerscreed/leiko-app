@@ -57,6 +57,15 @@ import {
 } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import { bpBaseline, formatBPBaseline, type BPBaseline } from '../../utils/vitalBaselines';
+import {
+  resolveTimeZone,
+  timeInZone,
+  weekdayInZone,
+  monthDayInZone,
+  hourInZone,
+  dayKeyInZone,
+} from '../../utils/timeInZone';
+import { useAuth } from '../../state/auth';
 
 const RANGE_TO_DAYS: Record<TrendRange, number> = {
   '7d': 7,
@@ -119,28 +128,37 @@ function rangeCopyForTier(tier: ClassificationTier | null | undefined): string {
 // Pure formatting helpers — exported for tests
 // ---------------------------------------------------------------------------
 
-export function formatHeroTime(measuredAtSec: number, nowMs: number = Date.now()): string {
-  const d = new Date(measuredAtSec * 1000);
-  const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-  const ageHours = (nowMs - d.getTime()) / 3_600_000;
+// Vitals data-completeness fix — every time-derived value is read in the
+// wearer's `timeZone` (their Settings IANA tz), not the device's. See
+// utils/timeInZone. Self path: the signed-in user's tz; caregiver path:
+// the family owner's tz (carried on the parent fetch).
+export function formatHeroTime(
+  measuredAtSec: number,
+  timeZone: string,
+  nowMs: number = Date.now(),
+): string {
+  const ms = measuredAtSec * 1000;
+  const time = timeInZone(ms, timeZone);
+  const ageHours = (nowMs - ms) / 3_600_000;
   if (ageHours < 24) {
     return `Latest · ${time}`;
   }
   // Sprint 18 B5 — older than 24h includes the date so "Mon 3:14 PM"
   // isn't ambiguous about which week. Format: "Latest · Mon · May 18,
   // 3:14 PM".
-  const weekday = d.toLocaleDateString(undefined, { weekday: 'short' });
-  const monthDay = d.toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-  });
+  const weekday = weekdayInZone(ms, timeZone, 'short');
+  const monthDay = monthDayInZone(ms, timeZone);
   return `Latest · ${weekday} · ${monthDay}, ${time}`;
 }
 
-export function formatRowTime(measuredAtSec: number, nowMs: number = Date.now()): string {
-  const d = new Date(measuredAtSec * 1000);
-  const ageHours = (nowMs - d.getTime()) / 3_600_000;
-  const time = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+export function formatRowTime(
+  measuredAtSec: number,
+  timeZone: string,
+  nowMs: number = Date.now(),
+): string {
+  const ms = measuredAtSec * 1000;
+  const ageHours = (nowMs - ms) / 3_600_000;
+  const time = timeInZone(ms, timeZone);
   if (ageHours < 24) {
     return time;
   }
@@ -151,33 +169,35 @@ export function formatRowTime(measuredAtSec: number, nowMs: number = Date.now())
   }
   // Older — short weekday + time. Sparse trackers viewing a >48h-old
   // row should at least see when the reading happened, not just "Mon".
-  return `${d.toLocaleDateString(undefined, { weekday: 'short' })} ${time}`;
+  return `${weekdayInZone(ms, timeZone, 'short')} ${time}`;
 }
 
 function rowContext(
   measuredAtSec: number,
   isFirst: boolean,
+  timeZone: string,
   nowMs: number = Date.now(),
 ): string {
-  const d = new Date(measuredAtSec * 1000);
-  const ageHours = (nowMs - d.getTime()) / 3_600_000;
-  const hour = d.getHours();
+  const ms = measuredAtSec * 1000;
+  const ageHours = (nowMs - ms) / 3_600_000;
+  const hour = hourInZone(ms, timeZone);
   const partOfDay =
     hour < 5 ? 'overnight' : hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
   if (isFirst && ageHours < 1) return 'Just now · resting';
   if (ageHours < 24) return `Today ${partOfDay}`;
   if (ageHours < 48) return `Yesterday ${partOfDay}`;
-  return `${d.toLocaleDateString(undefined, { weekday: 'long' })} ${partOfDay}`;
+  return `${weekdayInZone(ms, timeZone, 'long')} ${partOfDay}`;
 }
 
-/** Filters BP readings to those that fell on the local "today" of nowMs. */
+/** Filters BP readings to those that fell on the wearer's local "today". */
 export function readingsForToday(
   readings: LocalReading[],
+  timeZone: string,
   nowMs: number = Date.now(),
 ): LocalReading[] {
-  const today = new Date(nowMs).toDateString();
+  const today = dayKeyInZone(nowMs, timeZone);
   return readings.filter(
-    (r) => new Date(r.measuredAtSec * 1000).toDateString() === today,
+    (r) => dayKeyInZone(r.measuredAtSec * 1000, timeZone) === today,
   );
 }
 
@@ -193,13 +213,14 @@ export function readingsForToday(
  */
 export function bucketReadingsByHour(
   readings: LocalReading[],
+  timeZone: string,
 ): { sys: (number | null)[]; dia: (number | null)[] } {
   // Slot index = floor(hour / 3) — 8 slots covering 0-23h.
   const sysSums = new Array(8).fill(0) as number[];
   const diaSums = new Array(8).fill(0) as number[];
   const counts = new Array(8).fill(0) as number[];
   for (const r of readings) {
-    const hour = new Date(r.measuredAtSec * 1000).getHours();
+    const hour = hourInZone(r.measuredAtSec * 1000, timeZone);
     const slot = Math.min(7, Math.floor(hour / 3));
     sysSums[slot] += r.systolic;
     diaSums[slot] += r.diastolic;
@@ -222,6 +243,7 @@ export function bucketReadingsByHour(
 export function bucketReadingsByDay(
   readings: LocalReading[],
   days: number,
+  timeZone: string,
   nowMs: number = Date.now(),
 ): { sys: (number | null)[]; dia: (number | null)[]; labels: string[] } {
   const sysSums = new Array(days).fill(0) as number[];
@@ -230,13 +252,11 @@ export function bucketReadingsByDay(
   const labels: string[] = [];
   for (let i = 0; i < days; i++) {
     const slotMs = nowMs - (days - 1 - i) * 24 * 3_600_000;
-    const d = new Date(slotMs);
     // Two short label modes: short month-day for 7d (readable), single
-    // char weekday for 30d/90d (avoid label crowding).
+    // char weekday for 30d/90d (avoid label crowding). Weekday read in
+    // the wearer's tz so the axis matches their calendar.
     labels.push(
-      days <= 7
-        ? d.toLocaleDateString(undefined, { weekday: 'short' }).slice(0, 3)
-        : '',
+      days <= 7 ? weekdayInZone(slotMs, timeZone, 'short').slice(0, 3) : '',
     );
   }
   for (const r of readings) {
@@ -263,6 +283,7 @@ export function bucketReadingsByDay(
  *  reacts to the 7d / 30d / 90d range pills. */
 export function computeStats(
   readings: LocalReading[],
+  timeZone: string,
   nowMs: number = Date.now(),
   days: number = 7,
 ): {
@@ -300,8 +321,8 @@ export function computeStats(
   // Sprint 16.5f — show short weekday + month-day so "Thu" isn't
   // ambiguous (this Thursday vs last Thursday). Example: "Thu · May 9".
   const labelFor = (r: LocalReading) => {
-    const d = new Date(r.measuredAtSec * 1000);
-    return `${d.toLocaleDateString(undefined, { weekday: 'short' })} · ${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+    const ms = r.measuredAtSec * 1000;
+    return `${weekdayInZone(ms, timeZone, 'short')} · ${monthDayInZone(ms, timeZone)}`;
   };
   return {
     avgSys,
@@ -361,6 +382,15 @@ export function BPDetail({
   const parentPulse = useParentDailyPulseData(scopedFamilyId);
   const parentRecent = useParentVitalsRecent(scopedFamilyId);
   const emptyFallback = useMemo(() => emptyDailyPulse(), []);
+
+  // Wearer's timezone — all times / day boundaries render in the wearer's
+  // local zone (their Settings value), never the device's. Self path: the
+  // signed-in user. Caregiver path: the family owner's tz from the parent
+  // fetch, falling back to the viewer's tz, then UTC (resolveTimeZone).
+  const ownTimeZone = useAuth((s) => s.profile?.timezone ?? null);
+  const timeZone = resolveTimeZone(
+    scopedFamilyId ? parentPulse.wearerTimeZone ?? ownTimeZone : ownTimeZone,
+  );
 
   // Sprint 18 B1 — distinguish loading + error from "truly empty" for
   // the caregiver-scoped path. Same pattern Sleep/HR audits introduced.
@@ -428,7 +458,7 @@ export function BPDetail({
       sub={
         staleCaption ??
         (data.bp.latestSampleSec !== null
-          ? formatHeroTime(data.bp.latestSampleSec)
+          ? formatHeroTime(data.bp.latestSampleSec, timeZone)
           : 'Latest')
       }
       range={rangeCopyForTier(tier)}
@@ -440,8 +470,8 @@ export function BPDetail({
 
   // ----- Stat trio (over the chosen range) ----------------------------
   const stats = useMemo(
-    () => computeStats(allBPReadings, Date.now(), RANGE_TO_DAYS[range]),
-    [allBPReadings, range],
+    () => computeStats(allBPReadings, timeZone, Date.now(), RANGE_TO_DAYS[range]),
+    [allBPReadings, timeZone, range],
   );
   const statItems: [StatTrioItem, StatTrioItem, StatTrioItem] = [
     {
@@ -476,13 +506,13 @@ export function BPDetail({
   // the chart's window matches the range pill. Empty slots return null
   // → no dots drawn (was: mock fallback data on every empty slot).
   const todayReadings = useMemo(
-    () => readingsForToday(allBPReadings),
-    [allBPReadings],
+    () => readingsForToday(allBPReadings, timeZone),
+    [allBPReadings, timeZone],
   );
   const { sys, dia, hourLabels, chartEyebrow } = useMemo(() => {
     if (range === '7d') {
       // Default: today's 8-slot hourly chart.
-      const { sys: s, dia: d } = bucketReadingsByHour(todayReadings);
+      const { sys: s, dia: d } = bucketReadingsByHour(todayReadings, timeZone);
       return {
         sys: s,
         dia: d,
@@ -495,6 +525,7 @@ export function BPDetail({
     const { sys: s, dia: d, labels } = bucketReadingsByDay(
       allBPReadings,
       days,
+      timeZone,
       Date.now(),
     );
     return {
@@ -503,7 +534,7 @@ export function BPDetail({
       hourLabels: labels,
       chartEyebrow: `Last ${days} days · daily averages`,
     };
-  }, [allBPReadings, todayReadings, range]);
+  }, [allBPReadings, todayReadings, range, timeZone]);
 
   // ----- Baseline reference (16.5f) ------------------------------------
   const baseline = useMemo(() => bpBaseline(allBPReadings), [allBPReadings]);
@@ -527,11 +558,11 @@ export function BPDetail({
         return {
           id: r.localId,
           value: `${r.systolic}/${r.diastolic}`,
-          context: rowContext(r.measuredAtSec, idx === 0, nowMs),
-          time: isFreshFirst ? 'now' : formatRowTime(r.measuredAtSec, nowMs),
+          context: rowContext(r.measuredAtSec, idx === 0, timeZone, nowMs),
+          time: isFreshFirst ? 'now' : formatRowTime(r.measuredAtSec, timeZone, nowMs),
         };
       });
-  }, [rangedReadings]);
+  }, [rangedReadings, timeZone]);
 
   // Sprint 18 B4 — when the 7d chart has zero readings today but the
   // user DOES have older readings, the chart would render with all 8

@@ -29,6 +29,8 @@ export function parentPulseQueryKey(familyId: string | null) {
 export interface UseParentDailyPulseDataResult {
   /** null while loading or when no familyId is supplied. */
   data: DailyPulseData | null;
+  /** Wearer's (family owner's) IANA timezone; null until loaded/unknown. */
+  wearerTimeZone: string | null;
   isLoading: boolean;
   isRefreshing: boolean;
   error: Error | null;
@@ -53,6 +55,7 @@ export function useParentDailyPulseData(
   });
   return {
     data: query.data?.pulse ?? null,
+    wearerTimeZone: query.data?.wearerTimeZone ?? null,
     isLoading: query.isLoading,
     isRefreshing: query.isFetching && !query.isLoading,
     error: (query.error as Error | null) ?? null,

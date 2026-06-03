@@ -73,6 +73,14 @@ export interface ParentPulseFetchResult {
   pulse: DailyPulseData;
   /** Per-vital recent arrays. Used by parameterized VitalDetail screens. */
   recent: ParentVitalsRecent;
+  /**
+   * The wearer's (family owner's) IANA timezone, so the caregiver's
+   * VitalDetail screens render the wearer's readings in the wearer's
+   * local time — not the caregiver's device tz. null when unknown
+   * (caller falls back to the viewer's tz, then UTC). Readable under the
+   * `users` "same-family read profile" RLS policy.
+   */
+  wearerTimeZone: string | null;
 }
 
 // ----- Server row shapes ------------------------------------------
@@ -273,6 +281,7 @@ export async function fetchParentPulseData(
     sleepResult,
     stepsResult,
     caloriesResult,
+    ownerResult,
   ] = await Promise.all([
     client
       .from('readings')
@@ -328,6 +337,15 @@ export async function fetchParentPulseData(
       .eq('vital_type', 'calories_day')
       .order('measured_at', { ascending: false })
       .limit(CALORIES_LIMIT),
+    // Wearer (family owner) timezone — mirrors the listMembers/visibility
+    // FK-join pattern; readable via the `users` same-family RLS policy.
+    client
+      .from('family_members')
+      .select('users!family_members_user_id_fkey(timezone)')
+      .eq('family_id', familyId)
+      .eq('role', 'family_owner')
+      .is('removed_at', null)
+      .maybeSingle(),
   ]);
 
   if (readingsResult.error) throw readingsResult.error;
@@ -361,8 +379,17 @@ export async function fetchParentPulseData(
 
   const pulse = composeDailyPulseData(snapshot, nowSec);
 
+  // Wearer tz is best-effort: a failed/empty lookup leaves it null and the
+  // caller falls back to the viewer's tz, then UTC. The embedded `users`
+  // join may surface as an object or a single-element array (PostgREST).
+  const ownerUsers = (ownerResult.data as { users?: unknown } | null)?.users;
+  const ownerObj = Array.isArray(ownerUsers) ? ownerUsers[0] : ownerUsers;
+  const wearerTimeZone =
+    (ownerObj as { timezone?: string | null } | undefined)?.timezone ?? null;
+
   return {
     pulse,
     recent: { readings, hr, spo2, sleep, steps, calories },
+    wearerTimeZone,
   };
 }
