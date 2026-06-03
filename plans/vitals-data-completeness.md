@@ -235,9 +235,13 @@ signed-in user's `users.timezone`; caregiver path = the family owner's tz).
   `bucketReadingsByDay`, `computeStats`) now take an explicit `timeZone`;
   the component resolves wearer-tz (caregiver) else own-tz (self) else UTC.
   Gates green: tsc 0, jest 204 suites/2433, eslint 0.
-- ⏳ **Remaining screens still on device-tz** (same bug, not yet fixed):
-  `SpO2Detail` (4 call sites), `SleepDetail` (4 — night-boundary sensitive),
-  `HRDetail` (3), `ActivityDetail` (1). Apply the same timeInZone treatment.
+- ✅ **All per-screen formatters tz-corrected:** `HRDetail` (recent-row
+  times), `SpO2Detail` (low-overnight time, recent list, formatTimeShort/
+  DayShort, overnight window, isToday), `SleepDetail` (night labels,
+  sleep×BP morning correlation window+day-key, chart axis), `ActivityDetail`
+  (time-of-day progress + today key). Each resolves wearer-tz on the
+  caregiver path, viewer-own on self, UTC last. Chart-axis weekday/date
+  labels also threaded where in scope.
 - **Committed** 2026-06-03: `d6c615c` (BP dedupe + sync), `9b337d4` (BP tz
   fix), `3c3c28a` (this plan). Sync edge function **deployed to leiko-prod**.
   Prior-session HR work (0030, useHRRangeSummary, HRDetail) remains
