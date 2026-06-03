@@ -1,13 +1,22 @@
 # Vitals Data Completeness & Time Correctness
 
 > Branch: `fix/vitals-data-completeness`. Opened 2026-06-03.
-> Status: **HR arc landed in the working tree (uncommitted), cross-vital
-> audit not started.** This card was reconstructed after a system restart
-> wiped the originating session's conversation — the only surviving trace
-> of the in-flight plan was in code comments. Everything below is marked
-> **[verified]** (confirmed against code / a passing run) or **[open]**
-> (asserted by the founder or implied by comments, NOT yet confirmed
-> against the database or rendered output).
+>
+> ## CURRENT STATUS (end of 2026-06-03 session)
+> **Audit COMPLETE, all fixes BUILT + LIVE in prod.** Decision record:
+> `docs/_adr/0008-vitals-data-correctness.md`. Session handoff:
+> `plans/NEXT_SESSION_START_HERE.md`. Prod migrations 0029→0034 applied;
+> `sync` + `generate-doctor-pdf` deployed. Gates: tsc 0 / jest 204
+> suites, 2441 tests / eslint 0 / deno check clean.
+> **Remaining work: the VitalHistory "view all per range" screen
+> (founder-approved, not started) + physical testing in progress.**
+> The body below is the audit's working log, kept as the verified
+> evidence trail. Markers: **[verified]** = confirmed against code / a
+> passing run / prod SQL; **[open]** = was unconfirmed at the time of
+> writing (all opens were subsequently resolved — see ADR-0008).
+>
+> Originally reconstructed after a system restart wiped the first
+> session's conversation; the only surviving trace was in code comments.
 
 ## The goal (founder, 2026-06-03)
 
@@ -193,11 +202,22 @@ watch, U16H only came out Jun 2 for testing.
   `anomaly_events`, `ai_narration_cache` are all empty for this family, so
   nothing server-side was computed off the duplicates. The app's baseline /
   trends recompute live from the (now-deduped) readings.
-- FINAL PROD STATE (2026-06-03 end of session): migrations **0029→0033 all
+- FINAL PROD STATE (2026-06-03 end of session): migrations **0029→0034 all
   applied** (0030 HR RPC, 0031 BP dedupe, 0032 sleep end-key, 0033 null
-  mislabeled measured_at_local — 97→0 wrong values) and the **sync edge
-  function deployed** with all fixes. Working tree clean; physical testing
-  begun on device 43230DLJH001YY (debug build with all client fixes).
+  mislabeled measured_at_local — 97→0, 0034 doctor-PDF aggregates) and the
+  **sync + generate-doctor-pdf edge functions deployed** with all fixes.
+  Working tree clean; physical testing begun on device 43230DLJH001YY.
+- **DOCTOR PDF [verified, FIXED + LIVE]:** the report's queries had no
+  .limit() → PostgREST silently capped at max_rows=1000, unordered (HR
+  crosses 1000 in ~3.5 days; prod 30d = 5,266 rows, report saw ~1,000).
+  Now: `doctor_report_vitals_summary` RPC (0034) aggregates HR/SpO2 in SQL
+  (validated vs prod: 5,266/5,266 and 470/470), everything else paginates
+  via fetchAll() with deterministic ORDER BY, and day bucketing is
+  wearer-tz (`dayOf(iso, tz)`, was UTC slice). Semantics preserved
+  (percentile_cont(0.5) == old JS median).
+- **NEXT (approved, not started): VitalHistory screen** — "View all · N"
+  per range on every vital; flat day-grouped list for BP/SpO2/Sleep/
+  Activity, per-day drill-down for HR (hr_range_summary.per_day is live).
 
 **FIX BUILT (files, mirrors what was applied):**
 - `supabase/migrations/0031_readings_device_independent_dedupe.sql`:

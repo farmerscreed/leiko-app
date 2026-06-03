@@ -1,76 +1,99 @@
-# Start here — current state (2026-06-02)
+# Start here — vitals data correctness + timezone overhaul (2026-06-03)
 
-This is the living "where are we" pointer. Update it at the end of each
-session. The previous handoff (the ADR-0006/0007 consolidation session) is
-archived at `plans/done/session-2026-06-02-adr0006-0007-handoff.md`.
+Last touched: 2026-06-03. Branch `fix/vitals-data-completeness`
+(forked from `claude/consolidated-build`; contains all its ~237 commits
+plus this session's 14). Supersedes the 2026-06-02 ADR-0006/0007 handoff.
 
 ## 60-second context
 
-Leiko's whole family / home / invite model was reshaped under two ADRs,
-and that work is **now on `main`**:
+This session was a founder-directed **data-correctness audit and fix**
+across every vitals surface, driven by one rule: *a health app must never
+project wrong data — rather show nothing than something wrong.* Every
+finding was verified against leiko-prod SQL before fixing; every fix is
+tested, committed, and **live in prod**. The full decision record is
+**ADR-0008** (`docs/_adr/0008-vitals-data-correctness.md`); the working
+card with all verified findings is `plans/vitals-data-completeness.md`.
 
-- **ADR-0006** — unified caregiver/self-buyer model: one "circles" concept,
-  `account_type` made inert at the render layer, one constellation home
-  where the viewer is a node, Settings collapsed to 2 role-aware sections.
-  **Accepted + shipped.**
-- **ADR-0007** — unified "Connect" invite: one code, backend infers
-  who-follows-whom from who wears a watch. Replaced the old 3-button /
-  4-edge-function invite system. **Accepted + shipped.**
+## What was found and fixed (all live)
 
-Both landed on `main` as **PR #8** (`3c1dba7`, merged 2026-06-02),
-squash-merged after CI passed. Sprints are complete through **Sprint 20**
-(`plans/done/sprint-20-phase1-stabilise-routing.md`).
+1. **BP duplicates** — 51 of 148 rows (~34%) were re-sync duplicates from
+   pairing a second test watch. Root: dedup keyed on the device. Now
+   device-independent `(family_id, measured_at)` (migration 0031 + sync).
+   Prod deduped 148 → 97.
+2. **Timezone** — every screen rendered times in the DEVICE tz and the
+   caregiver aggregators bucketed today/night in UTC. Now everything
+   renders/buckets in the **wearer's** tz (`utils/timeInZone.ts`;
+   caregiver path fetches the owner's tz). Storage was always correct UTC.
+3. **Sleep** — times were fabricated (synthesized 08:00 displayed as a
+   real wake) and nights fragmented into up to 5 rows. Now: bed/wake show
+   ONLY when HR-inferred (est. framing), else duration-only;
+   `measured_at` = session END (constant night key, migration 0032,
+   supersedes D13 §2.4); fullest-session consolidation + no-shrink guard.
+   Prod 16 → 12 sleep rows.
+4. **Doctor PDF silently truncated** — no `.limit()` + PostgREST
+   `max_rows=1000` meant the HR section used ~1000 arbitrary unordered
+   samples (of 5,266 in 30d). Now exact: SQL aggregation RPC
+   (`doctor_report_vitals_summary`, 0034) + `fetchAll()` pagination +
+   wearer-tz day bucketing.
+5. **HR range pills** — all showed the same ~16h (200-sample slice cap).
+   Analytics now server-windowed via `hr_range_summary` RPC (0030);
+   hero is live-first ("Latest reading").
+6. **`measured_at_local`** — UTC mislabeled as local, unread → nulled
+   (0033), sync writes NULL.
+7. **BottomSheet touch-eater** — cancelled dismiss animations left an
+   invisible Modal eating all taps ("back button sometimes doesn't work"
+   on Settings). Fixed + 3 regression tests.
 
-## What's working right now (on `main`)
+## Prod state (leiko-prod `kqnzxjrpnjnczhgdwdqg`)
 
-- Unified constellation home for every persona; viewer is a node, urgency
-  ordering, self-as-centre beating orb, bottom tab bar, Ask-Leiko in header.
-- Unified onboarding (no fork; everyone onboards `self_buyer`); "I have the
-  watch" opens pairing.
-- Settings → 2 role-aware sections + per-vital visibility.
-- Connect invites: `connect-create` / `connect-accept` edge functions;
-  one Connect sheet + one Enter-a-code sheet; dual delivery (link + 6-digit
-  code); deep-link `join` route.
-- Multi-vitals (BP / HR / SpO2 / Sleep / Activity) capture, hydration,
-  trends, per-vital detail screens, doctor PDF, ambient AI surfaces.
+- **Migrations applied: 0029 → 0034** (all recorded in schema_migrations).
+- **Edge functions deployed**: `sync` (device-independent BP dedup, sleep
+  end-key + collapse + no-shrink, measured_at_local NULL),
+  `generate-doctor-pdf` (exact full-window data).
+- Data: readings 97 (92 in the main family), sleep 12 (one row per
+  night), HR 5.3k+, SpO2 470+. No stale derived data (those tables were
+  empty when the dedups ran).
+- Access for sessions: `apps/mobile/.env.local` has the URL + anon key;
+  the Supabase **Management API PAT** reaches this project (curl
+  User-Agent needed; the MCP supabase tools are authed to a DIFFERENT
+  account and can NOT reach leiko-prod).
 
-## In flight
+## Gates (must stay green)
 
-- **Documentation reconciliation** (this workstream, branch
-  `claude/pensive-mayer-IpwNO`): bringing every doc in line with the shipped
-  app after the ADR-0006/0007 pivot. See the drift inventory captured in
-  this session.
+tsc 0 · jest 204 suites / 2441 tests · eslint 0 errors ·
+`deno check` clean on changed functions · deno tests 192 pass
+(**known pre-existing failure**: 2 tests in `sync/resolve-routing.test.ts`
+— mock fidelity, present before this session; not a regression).
 
-## Stack decisions (resolved)
+## In flight / next steps (priority order)
 
-1. **WatermelonDB — DROPPED** ([ADR-0009](../docs/_adr/0009-drop-watermelondb.md),
-   founder decision 2026-06-02). It was locked but never installed; the app
-   uses Supabase. There is no on-device relational DB — persistence is MMKV +
-   Zustand, with Supabase as the queryable source of truth via TanStack Query.
-   Stack docs updated.
-2. **AI Tier A (Llama 3.1/3.2 on Ollama) — STILL PLANNED (v1.x).** Locked in
-   `docs/00-tech-stack.md` but not yet built; the live "Tier A" is a
-   client-side deterministic intent-router + templates (no local LLM). Tier B
-   (Haiku) and Tier C (Sonnet) are real. Docs mark the Ollama tier "planned,
-   not yet built."
+1. **VitalHistory screen** (founder-approved, NOT started): every vital's
+   range pill gets "View all · N readings" → a shared screen that pages
+   the full server data for the selected range (BP/SpO2/Sleep/Activity =
+   flat day-grouped list; HR = per-day drill-down using
+   `hr_range_summary.per_day`, already live). Design notes in the
+   2026-06-03 session + `plans/vitals-data-completeness.md`.
+2. **Physical testing** in progress on device `43230DLJH001YY` (debug
+   build via `npx expo run:android`; metro-tethered). Release APK needs
+   the founder's `LEIKO_RELEASE_*` keystore env (`npm run
+   release:android:apk`). Test checklist: BP list deduped + Lagos-local
+   times; HR pills differ per range; sleep duration-only unless inferred;
+   fresh-reading sync adds exactly 1; caregiver sees wearer-tz times.
+3. **Merge to `main`** remains the long-standing loose end (branch is
+   ~250 commits ahead).
+4. Pre-existing deferrals from the 2026-06-02 handoff still stand (old
+   invite functions dormant; no store listing/join page;
+   `account_type` column inert but present).
 
-## Next steps (priority order)
+## Hard-won operational notes
 
-1. **Founder-ops launch blitz** — the OPS-1..12 external dependencies in
-   `plans/PRODUCTION_READINESS.md` (keystores, certs, APNs/FCM, RevenueCat,
-   domain hosting, prod env vars). These gate store submission and only the
-   founder can do them.
-2. **Finish the production test** (`plans/comprehensive-test.md`): the full
-   3-phone Connect matrix, visibility toggles, the both-wear "follow back"
-   path.
-3. **Retire the old 4 invite edge functions** (send-family-invite,
-   accept-family-invite, send-care-invite, resolve-care-invite) once the
-   back-compat window for already-issued codes closes.
-4. **Build / flash a fresh APK from `main`** after the ops blitz.
-
-## Source-of-truth docs
-
-- `plans/PRODUCTION_READINESS.md` — launch-gating checklist (what ships at v1.0).
-- `plans/SPRINT_SEQUENCE.md` — sprint index + dependency graph.
-- `plans/comprehensive-test.md` — staged device test plan.
-- `docs/_adr/` — the seven accepted ADRs.
+- Prod mutations are applied via the Management API
+  (`/v1/projects/{ref}/database/query`) inside guarded `DO $$` blocks that
+  abort on unexpected row counts, then recorded in
+  `supabase_migrations.schema_migrations` manually.
+- Edge deploys: `SUPABASE_ACCESS_TOKEN=<PAT> npx supabase functions deploy
+  <fn> --project-ref kqnzxjrpnjnczhgdwdqg --use-api` (no Docker needed).
+- Deno is installed locally now (`~/.deno/bin`) — run `deno check` + the
+  function tests before any edge deploy.
+- The founder's standing rule (treat as law): **no guesswork — verify
+  every data claim against the DB/code/tests before acting on it.**
