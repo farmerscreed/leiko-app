@@ -25,6 +25,20 @@ process.env.EXPO_PUBLIC_SUPABASE_URL =
 process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY =
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key';
 
+// supabase-js >= 2.105 eagerly builds a RealtimeClient in createClient(),
+// which calls getWebSocketConstructor() and throws when no global
+// WebSocket exists (node/jsdom have none). Any screen that transitively
+// imports services/supabase then fails to load. We never open a realtime
+// channel in tests, so a never-connecting stub is enough.
+if (typeof globalThis.WebSocket === 'undefined') {
+  globalThis.WebSocket = class {
+    close() {}
+    send() {}
+    addEventListener() {}
+    removeEventListener() {}
+  };
+}
+
 // Reanimated 4 + worklets expect a native module in the bundle that doesn't
 // exist under jest. The shipped `react-native-reanimated/mock` re-imports
 // the real reanimated and fails. Hand-rolled mocks below cover the surface
