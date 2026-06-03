@@ -217,7 +217,27 @@ export function computeSleepLastNight(
       s.sessionEndSec <= nowSec,
   );
   if (inWindow.length === 0) return null;
-  return inWindow.reduce((a, b) => (b.sessionEndSec > a.sessionEndSec ? b : a));
+  // Vitals data-completeness fix: a single night can carry MULTIPLE
+  // overlapping sleep_session rows. The watch re-reports the same night
+  // across syncs with a drifting start time (e.g. 06:36→07:14, all ending
+  // 08:00), and measured_at = session start is the dedup key, so each
+  // variant becomes its own row. They overlap (all share the same wake),
+  // so the longest is the most-complete superset — summing would
+  // double-count, and picking by latest end (the old behaviour) could
+  // surface the SHORTEST fragment and badly understate sleep.
+  //
+  // So: take the most recent night (by the wake morning = sessionEndSec's
+  // date), then within that night return the fullest session by
+  // totalMinutes. Mirrors computeActivityToday's max-pick against shadows.
+  const wakeDate = (s: SleepSession) =>
+    new Date(s.sessionEndSec * 1000).toISOString().slice(0, 10);
+  const latestNight = inWindow.reduce((a, b) =>
+    b.sessionEndSec > a.sessionEndSec ? b : a,
+  );
+  const latestWake = wakeDate(latestNight);
+  return inWindow
+    .filter((s) => wakeDate(s) === latestWake)
+    .reduce((a, b) => (b.totalMinutes > a.totalMinutes ? b : a));
 }
 
 export function computeActivityToday(

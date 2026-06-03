@@ -238,7 +238,51 @@ signed-in user's `users.timezone`; caregiver path = the family owner's tz).
 - ⏳ **Remaining screens still on device-tz** (same bug, not yet fixed):
   `SpO2Detail` (4 call sites), `SleepDetail` (4 — night-boundary sensitive),
   `HRDetail` (3), `ActivityDetail` (1). Apply the same timeInZone treatment.
-- Note: all the above is **uncommitted** working-tree change.
+- **Committed** 2026-06-03: `d6c615c` (BP dedupe + sync), `9b337d4` (BP tz
+  fix), `3c3c28a` (this plan). Sync edge function **deployed to leiko-prod**.
+  Prior-session HR work (0030, useHRRangeSummary, HRDetail) remains
+  uncommitted pending the hero-copy sign-off.
+
+### SpO2 / Sleep / Activity data audit (2026-06-03, verified vs prod)
+
+- **SpO2 [low]:** 473 rows, values 93–99% (sane). 9 same-(family,time)
+  slots, all cross-device; only 3 differ in value → ~6 byte-identical
+  cross-device dupes (the two-watch overlap), negligible. No screen change
+  needed; values render fine.
+- **Sleep [HIGH] — FIX (read-side) DONE; ingestion root needs a decision.**
+  ROOT CAUSE (verified `syncMultiVitals.ts:48-50`): the watch 0x07 reply has
+  no sleep start/end, only `totalMinutes`. The client synthesizes
+  `sessionEnd = 08:00 UTC`, `sessionStart = end − total`. Since sleep
+  `measured_at = sessionStart` is the dedup key, every re-read of a night
+  with a different total mints a NEW row (08:00−84=06:36 … 08:00−46=07:14 —
+  the 5 fragments match exactly). DONE: `computeSleepLastNight` now
+  consolidates per wake-date and returns the FULLEST session (max minutes),
+  so the most-recent night is no longer understated (+ tests). PENDING
+  founder decision on the ingestion root: either set sleep `measured_at =
+  sessionEnd` (stable per night, collapses re-reads — but deviates from
+  D13 §2.4 "measured_at = start") or add a per-night sleep dedupe/upsert
+  keeping max minutes. Also `session_*_local` are mislabeled UTC.
+  Original detail: multiple overlapping sessions per night. 2026-06-02 has
+  **5 sessions** (84/72/68/50/46 min) all from the U16H, all ending 08:00
+  with marching start times — the watch re-reported one night repeatedly,
+  not 5 naps. `computeSleepLastNight` picks by latest `sessionEndSec`
+  (tie → first in array = newest measured_at), so it can surface the
+  **shortest fragment (46 min)** instead of the fullest (84). Understates
+  sleep → wrong doctor's-report / AI input. Also `session_start_local` /
+  `session_end_local` are mislabeled UTC (Z suffix), same bug class as
+  `readings.measured_at_local`. Needs: consolidate same-night sessions
+  (max/merge) + tz-correct night keys.
+- **Activity [medium]:** cross-device duplicate-day rows (e.g. 2026-06-03
+  has both 380 and 0 steps). `computeActivityToday` already picks the MAX
+  per day so the 0-shadow can't win (good) — BUT it computes "today" as
+  `new Date(nowSec*1000).toISOString().slice(0,10)` = **UTC** date, not the
+  wearer's tz, so near local midnight it reads the wrong day. The range/
+  history aggregation in ActivityDetail still needs a dup-day check.
+- **Broader [important]:** the tz bug is not only in screen formatters — the
+  **aggregators** (`computeActivityToday`, likely `computeSleepLastNight`,
+  `computeHRRestingToday`, etc. in `utils/vitalAggregators.ts`) derive
+  "today"/"night" from UTC, ignoring `profile.timezone`. The timezone fix
+  must reach the aggregators, not just the per-screen formatters.
 
 ### Audit method (per page — no guesswork)
 

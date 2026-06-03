@@ -241,6 +241,29 @@ describe('computeSleepLastNight', () => {
     const ancient = sleepSession(ancientEnd - 8 * 60 * 60, ancientEnd, 420);
     expect(computeSleepLastNight([ancient], NOW_SEC)).toBeNull();
   });
+
+  it('consolidates a fragmented night to the fullest session (not the shortest)', () => {
+    // Real prod shape: the watch re-reported one night as 5 overlapping
+    // sessions, all ending at the same wake, with drifting (later) starts
+    // and shrinking durations. The old "latest end" pick surfaced the
+    // shortest (46 min); the fix returns the fullest superset (84 min).
+    const wake = NOW_SEC - 6 * 60 * 60;
+    const frags = [84, 72, 68, 50, 46].map((mins) =>
+      sleepSession(wake - mins * 60, wake, mins),
+    );
+    const result = computeSleepLastNight(frags, NOW_SEC);
+    expect(result?.totalMinutes).toBe(84);
+  });
+
+  it('does not let an earlier night outrank the most recent one', () => {
+    const lastNightEnd = NOW_SEC - 6 * 60 * 60;
+    const lastNight = sleepSession(lastNightEnd - 60 * 60, lastNightEnd, 60); // short but most recent
+    const priorEnd = NOW_SEC - 30 * 60 * 60; // ~prior night, still in 36h window
+    const prior = sleepSession(priorEnd - 8 * 60 * 60, priorEnd, 480); // longer, older
+    const result = computeSleepLastNight([prior, lastNight], NOW_SEC);
+    expect(result?.sessionEndSec).toBe(lastNightEnd);
+    expect(result?.totalMinutes).toBe(60);
+  });
 });
 
 // =============================================================================
