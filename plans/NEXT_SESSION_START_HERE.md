@@ -1,8 +1,11 @@
 # Start here — vitals data correctness + timezone overhaul (2026-06-03)
 
-Last touched: 2026-06-03. Branch `fix/vitals-data-completeness`
-(forked from `claude/consolidated-build`; contains all its ~237 commits
-plus this session's 16). Supersedes the 2026-06-02 ADR-0006/0007 handoff.
+Last touched: 2026-06-04. The vitals data-correctness work (19 commits)
+has been **cherry-picked onto `claude/pensive-mayer-IpwNO`** — the docs-
+reconciliation branch — so docs + vitals land on `main` together via
+**PR #9**. (Original vitals branch: `fix/vitals-data-completeness`, forked
+from `claude/consolidated-build`.) Supersedes the 2026-06-02 ADR-0006/0007
+handoff.
 
 ## 60-second context
 
@@ -13,6 +16,20 @@ finding was verified against leiko-prod SQL before fixing; every fix is
 tested, committed, and **live in prod**. The full decision record is
 **ADR-0008** (`docs/_adr/0008-vitals-data-correctness.md`); the working
 card with all verified findings is `plans/vitals-data-completeness.md`.
+
+## Also bundled in (docs reconciliation)
+
+This branch also carries a full **documentation reconciliation** pass that
+brought every doc in line with the shipped app after the ADR-0006/0007
+pivot, plus two stack-decision records:
+
+- **WatermelonDB — DROPPED** ([ADR-0009](../docs/_adr/0009-drop-watermelondb.md)):
+  it was locked but never installed; persistence is MMKV + Zustand with
+  Supabase as the queryable source of truth via TanStack Query. (Renumbered
+  0008 → 0009 so it would not collide with the vitals ADR-0008.)
+- **AI Tier A (Llama on Ollama) — STILL PLANNED (v1.x):** the live "Tier A"
+  is a client-side deterministic intent-router; Tier B (Haiku) + Tier C
+  (Sonnet) are real. Docs mark the Ollama tier "planned, not yet built."
 
 ## What was found and fixed (all live)
 
@@ -80,8 +97,11 @@ tsc 0 · jest 206 suites / 2455 tests · eslint 0 errors ·
    release:android:apk`). Test checklist: BP list deduped + Lagos-local
    times; HR pills differ per range; sleep duration-only unless inferred;
    fresh-reading sync adds exactly 1; caregiver sees wearer-tz times.
-3. **Merge to `main`** remains the long-standing loose end (branch is
-   ~250 commits ahead).
+3. **Merge to `main`** — IN PROGRESS via this bundle. Rather than replay
+   the ~239 commits already squashed into `main` as PR #8, the 19 new
+   vitals commits were cherry-picked onto the docs branch; the combined
+   work ships through **PR #9** once CI is green and the physical test plan
+   passes. Migrations 0030–0034 are already live in leiko-prod.
 4. Pre-existing deferrals from the 2026-06-02 handoff still stand (old
    invite functions dormant; no store listing/join page;
    `account_type` column inert but present).
