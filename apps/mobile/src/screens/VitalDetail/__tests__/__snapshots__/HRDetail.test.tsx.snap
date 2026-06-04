@@ -369,7 +369,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
           }
         >
           <View
-            accessibilityLabel="Now · resting. 64. bpm · resting"
+            accessibilityLabel="Latest reading. 64. bpm · latest"
             accessibilityRole="text"
             style={
               [
@@ -682,7 +682,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   }
                   testID="hr-detail-hero-sub"
                 >
-                  Now · resting
+                  Latest reading
                 </Text>
                 <View
                   style={
@@ -723,7 +723,7 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                   }
                   testID="hr-detail-hero-range"
                 >
-                  bpm · resting
+                  bpm · latest
                 </Text>
               </View>
             </View>

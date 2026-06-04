@@ -8,6 +8,12 @@ surface, this is the file.
 D14 (`docs/_reference/D14-ambient-ai-architecture.md`) remains the source
 of truth for behaviour. This file documents the wiring.
 
+> ⏳ **Tier A caveat (flagged 2026-06-02).** Any surface routed to "Tier A"
+> below runs on the **client-side deterministic intent-router**, not a local
+> LLM — the Llama-on-Ollama Tier A is planned but not yet built (see
+> `docs/07-ai-assistant.md`). The cloud surfaces (Tier B Haiku / Tier C
+> Sonnet) are live as documented.
+
 ---
 
 ## §1. Surface inventory

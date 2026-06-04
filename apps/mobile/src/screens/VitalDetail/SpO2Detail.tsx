@@ -69,6 +69,16 @@ import { useDailyPulseData, emptyDailyPulse } from '../../state/dailyPulse';
 import { useSpO2 } from '../../state/spo2';
 import { useParentDailyPulseData } from '../../hooks/useParentDailyPulseData';
 import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
+import { useAuth } from '../../state/auth';
+import { useOnboarding } from '../../state/onboarding';
+import { ViewAllHistoryLink } from '../../components/ViewAllHistoryLink';
+import {
+  resolveTimeZone,
+  timeInZone,
+  weekdayInZone,
+  hourInZone,
+  dayKeyInZone,
+} from '../../utils/timeInZone';
 import { spo2Fill } from '../../utils/vitalThemes';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
@@ -82,6 +92,13 @@ export interface SpO2DetailProps {
   onLearnOpen?: () => void;
   /** Sprint 17a — caregiver entry. When set, SpO2 + sleep data
    *  sources swap to the parent-scoped query layer. */
+  /** ADR-0008 follow-up — opens the full-window VitalHistory browse for
+   *  the selected range. Router curries the vital kind. */
+  onViewAllHistory?: (
+    range: TrendRange,
+    familyId: string,
+    timeZone: string,
+  ) => void;
   familyId?: string;
 }
 
@@ -195,22 +212,19 @@ export function computeAwakeAverage(
  *  range minimum. */
 export function findLowestOvernightSample(
   samples: ReadonlyArray<SpO2Sample>,
+  timeZone: string,
 ): { percent: number; time: string } | null {
   const overnight = samples.filter((s) => {
-    const hr = new Date(s.measuredAtSec * 1000).getUTCHours();
+    const hr = hourInZone(s.measuredAtSec * 1000, timeZone);
     return hr >= OVERNIGHT_WINDOW_START_HOUR || hr < OVERNIGHT_WINDOW_END_HOUR;
   });
   if (overnight.length === 0) return null;
   const lowestSample = overnight.reduce((a, b) =>
     b.percent < a.percent ? b : a,
   );
-  const t = new Date(lowestSample.measuredAtSec * 1000);
   return {
     percent: lowestSample.percent,
-    time: `briefly · ${t.toLocaleTimeString(undefined, {
-      hour: 'numeric',
-      minute: '2-digit',
-    })}`,
+    time: `briefly · ${timeInZone(lowestSample.measuredAtSec * 1000, timeZone)}`,
   };
 }
 
@@ -218,8 +232,9 @@ export function findLowestOvernightSample(
  *  SpO2Detail uses `findLowestOvernightSample` for both fields. */
 export function lowestOvernightTime(
   samples: ReadonlyArray<SpO2Sample>,
+  timeZone: string,
 ): string {
-  return findLowestOvernightSample(samples)?.time ?? 'overnight';
+  return findLowestOvernightSample(samples, timeZone)?.time ?? 'overnight';
 }
 
 /** Dynamic Y-axis range. Pre-16.5f was fixed [95, 100] which hid
@@ -242,6 +257,7 @@ export function dynamicSpO2Range(data: ReadonlyArray<number>): [number, number] 
  */
 function buildRecentList(
   pendingAndRecent: readonly SpO2Sample[],
+  timeZone: string,
 ): RecentReading[] {
   if (pendingAndRecent.length === 0) return [];
   const sortedByRecency = pendingAndRecent
@@ -250,13 +266,15 @@ function buildRecentList(
 
   const rows: RecentReading[] = [];
   const nowMs = Date.now();
-  const nowSec = Math.floor(nowMs / 1000);
-  const todayBoundary = nowSec - (nowSec % 86400);
+  // "Today" is the wearer's local calendar day, not UTC midnight (the old
+  // nowSec % 86400 boundary was wrong for any non-UTC tz near midnight).
+  const todayKey = dayKeyInZone(nowMs, timeZone);
 
   sortedByRecency.forEach((s, idx) => {
-    const ageHours = (nowMs - s.measuredAtSec * 1000) / 3_600_000;
+    const ms = s.measuredAtSec * 1000;
+    const ageHours = (nowMs - ms) / 3_600_000;
     const isOvernight = (() => {
-      const hr = new Date(s.measuredAtSec * 1000).getUTCHours();
+      const hr = hourInZone(ms, timeZone);
       return hr >= OVERNIGHT_WINDOW_START_HOUR || hr < OVERNIGHT_WINDOW_END_HOUR;
     })();
     let context: string;
@@ -269,41 +287,38 @@ function buildRecentList(
             ? 'Latest today'
             : ageHours < 48
               ? 'Latest · yesterday'
-              : `Latest · ${formatDayShort(s.measuredAtSec)}`;
+              : `Latest · ${formatDayShort(s.measuredAtSec, timeZone)}`;
     } else {
       context = isOvernight ? 'Overnight reading' : 'Daytime reading';
     }
-    const isToday = s.measuredAtSec >= todayBoundary;
+    const isToday = dayKeyInZone(ms, timeZone) === todayKey;
     rows.push({
       id: `spo2-${s.measuredAtSec}`,
       value: `${s.percent}%`,
       context,
-      time: isToday ? formatTimeShort(s.measuredAtSec) : formatDayShort(s.measuredAtSec),
+      time: isToday
+        ? formatTimeShort(s.measuredAtSec, timeZone)
+        : formatDayShort(s.measuredAtSec, timeZone),
     });
   });
   return rows;
 }
 
-/** "6:42 am" / "10:08 pm" — locale-light, deterministic. */
-function formatTimeShort(sec: number): string {
-  const d = new Date(sec * 1000);
-  let h = d.getHours();
-  const m = d.getMinutes();
-  const ampm = h >= 12 ? 'pm' : 'am';
-  h = h % 12 || 12;
-  return `${h}:${m.toString().padStart(2, '0')} ${ampm}`;
+/** "6:42 am" / "10:08 pm" in the wearer's tz. */
+function formatTimeShort(sec: number, timeZone: string): string {
+  return timeInZone(sec * 1000, timeZone).toLowerCase();
 }
 
-/** "Mon" / "Sun" — short weekday for older samples. */
-function formatDayShort(sec: number): string {
-  const d = new Date(sec * 1000);
-  return d.toLocaleDateString(undefined, { weekday: 'short' });
+/** "Mon" / "Sun" — short weekday for older samples, in the wearer's tz. */
+function formatDayShort(sec: number, timeZone: string): string {
+  return weekdayInZone(sec * 1000, timeZone, 'short');
 }
 
 export function SpO2Detail({
   onBack,
   onArticleOpen,
   onLearnOpen,
+  onViewAllHistory,
   familyId,
 }: SpO2DetailProps) {
   // Sprint 17a — both data sources called unconditionally.
@@ -314,6 +329,17 @@ export function SpO2Detail({
   const parentPulse = useParentDailyPulseData(scopedFamilyId);
   const parentRecent = useParentVitalsRecent(scopedFamilyId);
   const emptyFallback = useMemo(() => emptyDailyPulse(), []);
+
+  // Timezone the sample times / overnight window render in: the wearer's on
+  // the caregiver path (the readings are the wearer's), else the viewer's
+  // own. UTC last.
+  const ownTimeZone = useAuth((s) => s.profile?.timezone ?? null);
+  const displayTimeZone = resolveTimeZone(
+    scopedFamilyId ? parentPulse.wearerTimeZone ?? ownTimeZone : ownTimeZone,
+  );
+  // Family the full-window history is scoped to (ADR-0008 follow-up).
+  const ownFamilyId = useOnboarding((s) => s.familyId);
+  const historyFamilyId = scopedFamilyId ?? ownFamilyId;
 
   // Sprint 18 SP1 — distinguish loading + error from "truly empty" on
   // the caregiver-scoped path (matches Sleep S1+S3 / HR H1 / BP B1).
@@ -396,8 +422,8 @@ export function SpO2Detail({
   // overnightLowsRecent so users with historical nights still see
   // their existing data — keyed to "overnight" instead of a time.
   const lowestSampleInRange = useMemo(
-    () => findLowestOvernightSample(rangedSamples),
-    [rangedSamples],
+    () => findLowestOvernightSample(rangedSamples, displayTimeZone),
+    [rangedSamples, displayTimeZone],
   );
   const overnightLowsRangeMin =
     overnightLows.length > 0 ? Math.min(...overnightLows) : null;
@@ -410,8 +436,8 @@ export function SpO2Detail({
   );
 
   const recentRows = useMemo(
-    () => buildRecentList(rangedSamples),
-    [rangedSamples],
+    () => buildRecentList(rangedSamples, displayTimeZone),
+    [rangedSamples, displayTimeZone],
   );
 
   // ----- Baseline reference (16.5f) ------------------------------------
@@ -639,6 +665,17 @@ export function SpO2Detail({
             readings={recentRows}
             testID="spo2-detail-readings"
           />
+          {onViewAllHistory && historyFamilyId ? (
+            <ViewAllHistoryLink
+              kind="spo2"
+              familyId={historyFamilyId}
+              range={trendRange}
+              onPress={() =>
+                onViewAllHistory(trendRange, historyFamilyId, displayTimeZone)
+              }
+              testID="spo2-detail-view-all"
+            />
+          ) : null}
         </>
       )}
     </DetailShell>

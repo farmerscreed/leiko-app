@@ -1,3 +1,5 @@
+> **📎 Historical reference — PARTIALLY SUPERSEDED (stamped 2026-06-02).** ADR-0006 amends §1.2, §1.3 and §14.1 of this document and ADR-0007 supersedes its invite UX: the self-buyer / caregiver split is unified, `account_type` is inert, and there is no "switch = new account" escape hatch (a self-buyer simply adds someone via the Connect invite). The self-buyer *content* here (voice, paywall framing, hero card) survives as the "you wear a watch" branch of the unified UI. See `docs/_adr/0006-unified-caregiver-self-buyer-model.md` and `docs/_adr/0007-unified-connect-invite.md`. Treat the rest as historical context.
+
 D8a
 Self-Buyer Mode Addendum
 Amendment to D8 — Design System Specification v1.0

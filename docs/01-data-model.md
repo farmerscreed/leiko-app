@@ -52,12 +52,23 @@ create index users_email_idx  on public.users (lower(email)) where deleted_at is
 create index users_active_idx on public.users (id) where deleted_at is null;
 ```
 
-**`account_type` is IMMUTABLE after onboarding** (D8a §1.3 + §14.1). There is no migration path between `caregiver` / `parent` / `self_buyer`. If a user wants to switch, they start a new account (support intervention required to delete the old one). The fork screen (Sprint 2) is the single moment this gets set.
+**`account_type` is `NOT NULL` and immutable, but as of [ADR-0006](_adr/0006-unified-caregiver-self-buyer-model.md) it is INERT** — retained for existing-row compatibility and analytics history, but it **no longer selects the navigation tree or home screen**. Every new user is onboarded as `self_buyer`. The column is kept, not dropped; the intent is "inert," not "deleted." (The pre-ADR-0006 immutability semantics — "switch = new account, support intervention" — are obsolete: a self-buyer who later cares for someone simply adds them via the Connect invite, with no `account_type` change.)
 
-### Hybrid mode (D8a §1.3)
+### Hybrid mode (D8a §1.3) — superseded by ADR-0006
+> **RECONCILED 2026-06-02.** The "two parallel root stacks selected by
+> `account_type`" design below is **no longer how the app works.** Per
+> ADR-0006, the self-buyer and caregiver homes converged into **one
+> unified constellation route** where the viewer is a "You" node; the
+> runtime does **not** branch the screen tree on `account_type`. The
+> data-level mechanics in this section remain accurate (a user who is
+> followed gains `family_members` rows with `role = 'caregiver'` on their
+> circle; one wearer per circle is a hard invariant). What's obsolete is
+> only the *navigation-branching* claim. The original text is kept below
+> for history.
+
 A self-buyer who later invites family caregivers does **NOT** become `account_type = 'caregiver'`. They remain `account_type = 'self_buyer'`. The change is at the family level: the family record gains additional `family_members` rows with `role = 'caregiver'`. The self-buyer's own UI continues to show "Your readings"; the invited caregivers see a Family Circle with one member (the self-buyer-now-watched). Each user sees the metaphor that fits their role.
 
-Engineering implication: **the runtime selects the screen tree by the viewer's `account_type`**, not by family composition. Two parallel React Navigation root stacks — caregiver per D8, self-buyer per D8a — selected by the logged-in user's `account_type`.
+Engineering implication (pre-ADR-0006, obsolete): the runtime selected the screen tree by the viewer's `account_type`, not by family composition — two parallel React Navigation root stacks (caregiver per D8, self-buyer per D8a). **This branching was removed by ADR-0006; both personas now render the one constellation home.**
 
 ### families
 A family circle — one wearer (`parent_owner`) and 0..N caregivers. The `created_by` user becomes the `family_owner`.
@@ -146,8 +157,11 @@ create table public.readings (
   family_id           uuid not null references public.families(id) on delete restrict,
   device_id           uuid references public.devices(id) on delete set null,
   source              public.reading_source not null default 'watch',
-  measured_at         timestamptz not null,           -- parent local time, stored UTC
-  measured_at_local   text,                           -- ISO with offset, for display
+  measured_at         timestamptz not null,           -- the measurement instant, stored UTC
+  measured_at_local   text,                           -- ALWAYS NULL since migration 0033 (ADR-0008):
+                                                      -- it used to mirror UTC under a "local" name
+                                                      -- (wrong data). Localisation happens app-side
+                                                      -- from measured_at + users.timezone.
   systolic            smallint not null check (systolic between 30 and 300),
   diastolic           smallint not null check (diastolic between 20 and 200),
   pulse               smallint check (pulse between 30 and 240),
@@ -161,9 +175,11 @@ create table public.readings (
   created_at          timestamptz not null default now()
 );
 
--- one row per (device, measured_at) pair; defends against BLE retries
-create unique index readings_dedupe on public.readings (device_id, measured_at)
-  where device_id is not null;
+-- DEVICE-INDEPENDENT identity since migration 0031 (ADR-0008): a BP reading
+-- is the measurement — (family_id, measured_at) — not the watch that sent
+-- it. The original (device_id, measured_at) key let a re-paired second
+-- watch re-import the whole history as "new" rows (51 duplicates in prod).
+create unique index readings_dedupe on public.readings (family_id, measured_at);
 create index readings_family_time on public.readings (family_id, measured_at desc);
 create index readings_visible      on public.readings (family_id, measured_at desc) where hidden = false;
 -- baseline-eligibility for the anomaly engine
@@ -212,7 +228,13 @@ create table public.vitals_other (
   family_id     uuid not null references public.families(id) on delete restrict,
   device_id     uuid references public.devices(id),
   vital_type    public.vital_type not null,
-  measured_at   timestamptz not null,
+  measured_at   timestamptz not null,                -- sleep_session: the session END since
+                                                     -- migration 0032 (ADR-0008, supersedes D13
+                                                     -- §2.4 "= start"). The watch reports no real
+                                                     -- bed/wake; end is the synthesized ~08:00
+                                                     -- wake — a CONSTANT per-night identity key,
+                                                     -- never displayed as a real time. Real
+                                                     -- start/end epochs live in value_jsonb.
   value_int     integer,                             -- HR bpm; steps; calories
   value_int_2   integer,                             -- SpO2 max for sample window
   value_int_3   integer,                             -- SpO2 min, sleep deep min, etc.
@@ -511,7 +533,13 @@ create policy "service inserts audit"    on public.audit_log
 
 ## Local storage on device
 
-Two local layers, mirroring the rules in CLAUDE.md ("offline-first: every reading is saved to MMKV before any sync attempt").
+> **Updated by [ADR-0009](_adr/0009-drop-watermelondb.md) (2026-06-02).**
+> WatermelonDB was dropped — there is **no on-device relational DB**.
+> On-device persistence is **MMKV (encrypted KV) + Zustand (client state)**;
+> **Supabase (Postgres)** is the queryable source of truth, read through
+> **TanStack Query**. The offline-first guarantee in CLAUDE.md ("every
+> reading is saved to MMKV before any sync attempt") is unchanged — the
+> pending buffer is MMKV.
 
 ### MMKV (encrypted KV)
 Used for:
@@ -519,24 +547,23 @@ Used for:
 - User preferences (theme override, large-text mode, locale, quiet-hours config)
 - Pending readings buffer (raw BLE payloads not yet synced — flushed on connection regain)
 - Feature flags / rollout state
-- **Never**: full reading history (use WatermelonDB for queryable data)
+- **Never**: full reading history (that lives in Supabase, fetched + cached via TanStack Query)
 
 Per CLAUDE.md: **no `localStorage` or `sessionStorage`** — MMKV only.
 
-### WatermelonDB (encrypted relational)
-Used for:
-- Last 30 days of readings (queryable for trends, anomaly look-back)
-- Family circle membership snapshot
-- Latest device pairing state
-- Sync conflict markers
-
-Schema mirrors a subset of the Supabase tables. Sync is best-effort, conflict resolution is documented in D7 §9.3 (server wins for reading values; client wins for local-only fields like UI state).
+### Queryable history (Supabase, not a local relational DB)
+Reading history, the other vitals, family/circle membership, and device
+pairing state are queried from **Supabase** and cached client-side by
+**TanStack Query**. Trends, anomaly look-back, and the dashboards read from
+that cache. Conflict resolution stays server-authoritative for reading
+values (D7 §9.3 background: server wins for values; client wins for
+local-only UI state).
 
 ### Sync strategy
 1. Reading captured on device → write to MMKV pending buffer **synchronously** before any UI confirmation.
-2. Best-effort POST to `/sync` Edge Function. On success: insert into WatermelonDB, drop from MMKV pending buffer.
+2. Best-effort POST to `/sync` Edge Function. On success: the reading lands in `public.readings`; drop it from the MMKV pending buffer.
 3. On failure: keep in MMKV pending buffer; retry on next connectivity event (background fetch, app foreground, BLE reconnect).
-4. Reads come from WatermelonDB first, then optionally refresh from `/sync` GET in the background (TanStack Query).
+4. Reads come from the TanStack Query cache over Supabase; a background refresh reconciles when connectivity returns.
 
 The app must function with no network. If `/sync` has been failing for >24h, show a calm reassurance banner ("Your readings are saved. They'll sync when you're back online.") — never a fear-language alert.
 

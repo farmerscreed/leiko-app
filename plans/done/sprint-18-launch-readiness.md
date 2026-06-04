@@ -1,3 +1,10 @@
+> **CLOSED 2026-06-02.** The engineering items in this card shipped; the
+> remaining work is the external **founder-ops** blitz (OPS-1..12), which is
+> tracked as the live source of truth in `plans/PRODUCTION_READINESS.md` —
+> not here. Launch work continued past this card into Sprints 19/20 and the
+> ADR-0006/0007 unified-model pivot (merged to `main` as PR #8). Filed under
+> `done/` as the historical record.
+
 # Sprint 18 — Launch Readiness Blitz
 
 ## Goal

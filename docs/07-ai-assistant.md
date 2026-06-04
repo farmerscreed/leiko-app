@@ -2,6 +2,20 @@
 
 CANONICAL for Sprints 11–12. Three-tier routing, system prompt, output guard, citation requirement. Sourced from D6 §5.7 (US-59 to US-66) and D9 §7 (AI fallback / unscoped questions). Versions and gateway from `docs/00-tech-stack.md`.
 
+> ⏳ **Tier A status (flagged 2026-06-02).** The **Tier A local LLM
+> (Llama 3.1/3.2 on Ollama)** described below is **planned for v1.x but not
+> yet built.** In the shipped app, **Tier A is a client-side deterministic
+> intent-router + templates** — no local LLM — implemented in
+> `apps/mobile/src/services/ai/`. It handles intent classification, FAQ
+> routing, and the forbidden-claims pre-screen deterministically. **Tier B
+> (Haiku) and Tier C (Sonnet) are real and live** in the edge functions
+> (`supabase/functions/ai-tier-b`, `ai-daily-narration`,
+> `generate-doctor-prep-ai`, `compute-weekly-summary`,
+> `compute-monthly-baseline`). The Ollama tier remains the intended local
+> layer (founder decision: still planned). Read every "Tier A = Llama"
+> reference below as "the planned local tier"; the current behaviour is the
+> deterministic router.
+
 ---
 
 ## 1. The three tiers

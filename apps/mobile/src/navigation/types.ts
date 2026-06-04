@@ -48,6 +48,15 @@ export type CaregiverStackParamList = {
     vital: 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity';
     familyId: string;
   };
+  // ADR-0008 follow-up — full-window browse for a vital + range ("View
+  // all · N" on the detail screens). familyId + the wearer's timeZone are
+  // resolved by the detail screen and passed through.
+  VitalHistory: {
+    vital: 'bp' | 'spo2' | 'sleep' | 'activity';
+    range: '7d' | '30d' | '90d';
+    familyId: string;
+    timeZone: string;
+  };
   Pairing: undefined;
   // ADR-0006 — optional invite params so a tapped join-link can deep-link
   // into Settings and auto-open the accept-invite sheet, prefilled.
@@ -147,6 +156,15 @@ export type SelfBuyerStackParamList = {
   VitalDetail: {
     vital: 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity';
     familyId?: string;
+  };
+  // ADR-0008 follow-up — full-window browse for a vital + range ("View
+  // all · N" on the detail screens). familyId here is the user's OWN
+  // family, resolved by the detail screen; timeZone is the wearer's.
+  VitalHistory: {
+    vital: 'bp' | 'spo2' | 'sleep' | 'activity';
+    range: '7d' | '30d' | '90d';
+    familyId: string;
+    timeZone: string;
   };
   // Sprint 9 — multi-vital trends + correlation cards + doctor PDF
   // export. The Self-Buyer Home tab bar's "Trends" entry routes here

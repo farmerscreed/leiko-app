@@ -1,5 +1,7 @@
 # D12 — Visual System v2
 
+> **📎 Historical reference (stamped 2026-06-02).** This is a dated strategy/spec snapshot, kept for context — **not** living spec. For the app's current behaviour see the docs in `docs/00–15`, `docs/04-screens/`, and the decisions in `docs/_adr/`. Where this document and the shipped app disagree, the app + ADRs win.
+
 **Apple-of-Healthcare · Design Tokens, Components, Motion Language**
 *Prepared: 2026-05-07 · Status: Draft for founder + designer co-author · Supersedes D8 + `docs/02-design-tokens.md`*
 

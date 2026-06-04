@@ -26,7 +26,7 @@ CANONICAL for v1.1+ work. Sourced from D9 §8 (Localisation pipeline + quality g
 - **i18next + react-i18next** (locked in `docs/00-tech-stack.md`).
 - **ICU MessageFormat** for date, time, number, currency, plurals, gender.
 - All strings externalised in `apps/mobile/src/i18n/{locale}/{namespace}.json`. Hardcoded JSX strings fail the copy-lint string-extraction rule (D6 §6.4 acceptance criterion).
-- Notification templates live in `apps/mobile/src/i18n/notifications/{locale}.ts` (typed function-per-template per `docs/11-push-notifications.md`).
+- Notification templates were specified to live in `apps/mobile/src/i18n/notifications/{locale}.ts` (typed function-per-template per `docs/11-push-notifications.md`). ⚠️ **Drift (flagged 2026-06-02):** as shipped, that directory is an empty placeholder (`.gitkeep` only) and notification copy is currently carried in the standard JSON namespaces, not typed per-locale `.ts` template functions. Either the templates land in `notifications/{locale}.ts` as specified, or this rule is amended to the JSON approach — an open cleanup, not yet resolved.
 - Consent text lives in `apps/mobile/src/i18n/consent/{locale}-v{n}.md` per D7 §7.6.
 
 ### File structure

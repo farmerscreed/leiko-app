@@ -67,6 +67,9 @@ import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import { useActivity } from '../../state/activity';
 import { useAuth } from '../../state/auth';
+import { useOnboarding } from '../../state/onboarding';
+import { ViewAllHistoryLink } from '../../components/ViewAllHistoryLink';
+import { resolveTimeZone, hourInZone, dayKeyInZone } from '../../utils/timeInZone';
 import { useTheme } from '../../theme';
 import type { ActivityDay } from '../../types/vitals';
 import { BaselineReference } from '../../components/BaselineReference';
@@ -87,6 +90,13 @@ export interface ActivityDetailProps {
   onLearnOpen?: () => void;
   /** Sprint 17a — caregiver entry. When set, activity data sources
    *  swap to the parent-scoped query layer. */
+  /** ADR-0008 follow-up — opens the full-window VitalHistory browse for
+   *  the selected range. Router curries the vital kind. */
+  onViewAllHistory?: (
+    range: TrendRange,
+    familyId: string,
+    timeZone: string,
+  ) => void;
   familyId?: string;
 }
 
@@ -155,6 +165,7 @@ export function ActivityDetail({
   onGoalChange,
   onArticleOpen,
   onLearnOpen,
+  onViewAllHistory,
   familyId,
 }: ActivityDetailProps) {
   // Same user timezone the rest of the app uses for day boundaries so
@@ -170,6 +181,14 @@ export function ActivityDetail({
   const scopedFamilyId = familyId ?? null;
   const parentPulse = useParentDailyPulseData(scopedFamilyId);
   const parentRecent = useParentVitalsRecent(scopedFamilyId);
+  // Day labels / "today" progress render in the wearer's tz on the caregiver
+  // path, else the viewer's own. UTC last.
+  const displayTimeZone = resolveTimeZone(
+    scopedFamilyId ? parentPulse.wearerTimeZone ?? timeZone : timeZone,
+  );
+  // Family the full-window history is scoped to (ADR-0008 follow-up).
+  const ownFamilyId = useOnboarding((s) => s.familyId);
+  const historyFamilyId = scopedFamilyId ?? ownFamilyId;
   const emptyFallback = useMemo(() => emptyDailyPulse(), []);
 
   // Sprint 18 A1 — distinguish loading + error from "truly empty" on
@@ -302,8 +321,8 @@ export function ActivityDetail({
 
   // ----- Recent-days list (no hard cap) ------------------------------
   const recentReadings = useMemo<RecentReading[]>(
-    () => buildRecentReadings(stepsToday, rangedDays, targetSteps),
-    [stepsToday, rangedDays, targetSteps],
+    () => buildRecentReadings(stepsToday, rangedDays, targetSteps, displayTimeZone),
+    [stepsToday, rangedDays, targetSteps, displayTimeZone],
   );
 
   // ----- Goal sheet --------------------------------------------------
@@ -425,6 +444,17 @@ export function ActivityDetail({
             testID="activity-detail-recent"
           />
         ) : null}
+          {onViewAllHistory && historyFamilyId ? (
+            <ViewAllHistoryLink
+              kind="activity"
+              familyId={historyFamilyId}
+              range={range}
+              onPress={() =>
+                onViewAllHistory(range, historyFamilyId, displayTimeZone)
+              }
+              testID="activity-detail-view-all"
+            />
+          ) : null}
 
         <GoalConfigSection
           currentGoal={targetSteps}
@@ -752,11 +782,13 @@ export function buildRecentReadings(
   stepsToday: number,
   rangedDays: ActivityDay[],
   goal: number,
+  timeZone: string,
   nowMs: number = Date.now(),
 ): RecentReading[] {
-  const now = new Date(nowMs);
-  const hour = now.getHours();
-  const todayKeyStr = now.toISOString().slice(0, 10);
+  // Time-of-day + "today" key in the wearer's tz (was device getHours / UTC
+  // toISOString, which mislabelled the day's progress near local midnight).
+  const hour = hourInZone(nowMs, timeZone);
+  const todayKeyStr = dayKeyInZone(nowMs, timeZone);
   const rows: RecentReading[] = [];
 
   // Today is always the first row. Sprint 16.5f — context is time-of-day

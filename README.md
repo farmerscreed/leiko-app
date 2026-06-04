@@ -58,7 +58,7 @@ leiko-app/
 │   ├── 11-push-notifications.md
 │   ├── 12-localisation.md
 │   ├── 13-testing-standard.md
-│   └── _reference/        # Full D1–D10 spec dumps. Don't load by default.
+│   └── _reference/        # Full D1–D15 spec dumps. Don't load by default.
 ├── plans/                 # Sprint cards. Active card is your job.
 ├── apps/
 │   └── mobile/            # React Native + Expo bare
@@ -70,14 +70,14 @@ leiko-app/
 
 - **Mobile**: React Native + Expo bare (TypeScript strict)
 - **State**: Zustand 4.x · **Server cache**: TanStack Query v5
-- **Local DB**: WatermelonDB (relational) + MMKV (encrypted KV)
+- **On-device**: MMKV (encrypted KV) + Zustand · **Server source of truth**: Supabase (Postgres), cached via TanStack Query · no on-device relational DB (see ADR-0009)
 - **BLE**: react-native-ble-plx 3.x
 - **Backend**: Supabase self-hosted on Hetzner (Postgres 15, Auth, Storage, Edge Functions)
-- **AI**: LiteLLM gateway · Tier A Llama 3.1 8B on Ollama · Tier B Haiku 4.5 · Tier C Sonnet 4.6
+- **AI**: LiteLLM gateway · Tier A (local Llama on Ollama) *planned, not yet built* — today's Tier A is a client-side deterministic router · Tier B Haiku 4.5 · Tier C Sonnet 4.6
 - **Payments**: RevenueCat
 - **Push**: Expo Notifications
 - **Analytics**: PostHog self-hosted · **Errors**: Sentry SaaS
-- **Test**: Jest + React Native Testing Library · Detox in Sprint 17 only
+- **Test**: Jest + React Native Testing Library · Maestro for E2E (deferred to v1.1)
 - **CI**: GitHub Actions · **Builds**: EAS Build
 
 Versions are pinned exactly in `apps/mobile/package.json`. If a version doesn't match, that's a bug.

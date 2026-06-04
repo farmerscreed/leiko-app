@@ -1,5 +1,18 @@
 # Screen — Onboarding Fork
 
+> **RECONCILED 2026-06-02 — this screen no longer forks. Superseded by
+> [ADR-0006](../_adr/0006-unified-caregiver-self-buyer-model.md).** The
+> persona fork was removed: **every new user now onboards as `self_buyer`**
+> and `account_type` is **inert** at the render layer (it no longer selects
+> a navigation tree or home screen). The code path
+> (`src/screens/Onboarding/AccountTypeFork.tsx`) still renders a calm
+> welcome, but **both CTAs set `account_type = 'self_buyer'`** — the shape of
+> the home emerges from what the user does (pairs a watch? adds people?),
+> not a box chosen once. The "caregiver vs self-buyer track" table below is
+> historical. New onboarding flow lives in `self-buyer-onboarding.md`.
+> `parent` is no longer set by invite acceptance — see ADR-0007 (Connect)
+> and `connect-invite.md`. The original spec is retained below for history.
+
 The single most important screen in the app. Sets `account_type` (immutable per D8a §14.1).
 
 Sourced from D6 US-1, D8a §3 (full ADDS — this is a new screen 4.2.0 inserted before D8 §4.2).

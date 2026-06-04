@@ -53,6 +53,15 @@ import { sleepFill } from '../../utils/vitalThemes';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import { formatClockInTz, useUserTz } from '../../utils/userTz';
+import { useOnboarding } from '../../state/onboarding';
+import { ViewAllHistoryLink } from '../../components/ViewAllHistoryLink';
+import {
+  resolveTimeZone,
+  weekdayInZone,
+  monthDayInZone,
+  hourInZone,
+  dayKeyInZone,
+} from '../../utils/timeInZone';
 import { useReconcileSleepFromHR } from '../../hooks/useReconcileSleepFromHR';
 import { useTheme } from '../../theme';
 import type { SleepSession } from '../../types/vitals';
@@ -142,17 +151,30 @@ function insightBody(
     : `Deep sleep was about ${deepPct}% of the night — on the lighter side of what we typically see. A lighter night often pairs with a slightly higher morning reading; a few more nights of tracking will give us context.`;
 }
 
-/** "Last night · 11:14 pm → 8:00 am" — bedtime AND wake-time in one
- *  line. Pre-16.5c only the bedtime appeared. Sprint 18: now formats
- *  in the user's IANA timezone instead of the device-OS default. */
+/**
+ * Hero sub-line for the last night.
+ *
+ * Honesty rule (data-completeness fix): the watch does NOT record bed/wake
+ * times — its 0x07 reply carries only total/deep/light minutes. We only
+ * show a clock window when HR (the morning-surge signal) let us infer it
+ * with confidence (`wakeSource === 'hr_inferred'`), and then as an explicit
+ * estimate (`~`). Without that signal we NEVER fabricate a time (the old
+ * code synthesized a fixed 08:00/07:00) — we show the measured duration
+ * only. Rather no time than a wrong one.
+ */
 export function bedTimeSub(
   sessionStartSec: number,
   sessionEndSec: number,
   tz: string,
+  wakeSource: 'hr_inferred' | 'fallback' | undefined,
+  totalMinutes: number,
 ): string {
-  const bed = formatClockInTz(sessionStartSec, tz);
-  const wake = formatClockInTz(sessionEndSec, tz);
-  return `Last night · ${bed} → ${wake}`;
+  if (wakeSource === 'hr_inferred') {
+    const bed = formatClockInTz(sessionStartSec, tz);
+    const wake = formatClockInTz(sessionEndSec, tz);
+    return `Last night · ~${bed} → ~${wake}`;
+  }
+  return `Last night · ${formatHm(totalMinutes)} slept`;
 }
 
 // Sprint 18 — S2 fix. The recent-nights list used to label the newest
@@ -174,18 +196,15 @@ export function isWithinLastNightWindow(
 function nightLabel(
   idx: number,
   sessionEndSec: number,
+  timeZone: string,
   nowSec: number = Math.floor(Date.now() / 1000),
 ): string {
   if (idx === 0 && isWithinLastNightWindow(sessionEndSec, nowSec)) return 'Last night';
-  return new Date(sessionEndSec * 1000).toLocaleDateString([], {
-    weekday: 'long',
-  });
+  return weekdayInZone(sessionEndSec * 1000, timeZone, 'long');
 }
 
-function nightTime(sessionEndSec: number): string {
-  return new Date(sessionEndSec * 1000).toLocaleDateString([], {
-    weekday: 'short',
-  });
+function nightTime(sessionEndSec: number, timeZone: string): string {
+  return weekdayInZone(sessionEndSec * 1000, timeZone, 'short');
 }
 
 const RANGE_TO_DAYS: Record<TrendRange, number> = {
@@ -210,14 +229,17 @@ function buildMorningBPSeries(
   readings: { measuredAtSec: number; systolic: number }[],
   nowSec: number,
   days: number,
+  timeZone: string,
 ): { t: number; value: number }[] {
   const cutoffSec = nowSec - days * 24 * 60 * 60;
   const byDay = new Map<string, { sumSys: number; count: number; tMs: number }>();
   for (const r of readings) {
     if (r.measuredAtSec < cutoffSec) continue;
-    const d = new Date(r.measuredAtSec * 1000);
-    if (d.getHours() >= 12) continue;
-    const key = d.toISOString().slice(0, 10);
+    const ms = r.measuredAtSec * 1000;
+    // "Morning" reading + day-key in the wearer's tz (was UTC, which
+    // mis-bucketed the sleep×BP correlation for non-UTC users).
+    if (hourInZone(ms, timeZone) >= 12) continue;
+    const key = dayKeyInZone(ms, timeZone);
     const slot = byDay.get(key) ?? { sumSys: 0, count: 0, tMs: r.measuredAtSec * 1000 };
     slot.sumSys += r.systolic;
     slot.count += 1;
@@ -249,6 +271,13 @@ export interface SleepDetailProps {
   onLearnOpen?: () => void;
   /** Sprint 17a — caregiver entry. When set, sleep + readings data
    *  sources swap to the parent-scoped query layer. */
+  /** ADR-0008 follow-up — opens the full-window VitalHistory browse for
+   *  the selected range. Router curries the vital kind. */
+  onViewAllHistory?: (
+    range: TrendRange,
+    familyId: string,
+    timeZone: string,
+  ) => void;
   familyId?: string;
 }
 
@@ -256,11 +285,12 @@ export function SleepDetail({
   onBack,
   onArticleOpen,
   onLearnOpen,
+  onViewAllHistory,
   familyId,
 }: SleepDetailProps) {
   const theme = useTheme();
   const { width: screenWidth } = useWindowDimensions();
-  const tz = useUserTz();
+  const ownTz = useUserTz();
   // Sprint 18 — re-derive HR-inferred wake times across stored
   // sessions whose `wakeSource` is missing or 'fallback'. Mounts here
   // (and on each Home variant) so we re-run whenever the screen
@@ -275,6 +305,15 @@ export function SleepDetail({
   const parentPulse = useParentDailyPulseData(scopedFamilyId);
   const parentRecent = useParentVitalsRecent(scopedFamilyId);
   const emptyFallback = useMemo(() => emptyDailyPulse(), []);
+
+  // All sleep times / night labels render in the wearer's tz: the family
+  // owner's on the caregiver path, else the viewer's own (useUserTz). UTC last.
+  const tz = resolveTimeZone(
+    scopedFamilyId ? parentPulse.wearerTimeZone ?? ownTz : ownTz,
+  );
+  // Family the full-window history is scoped to (ADR-0008 follow-up).
+  const ownFamilyId = useOnboarding((s) => s.familyId);
+  const historyFamilyId = scopedFamilyId ?? ownFamilyId;
 
   // Sprint 18 — S1/S3 fix. Distinguish "loading on first mount" and
   // "errored" from "truly empty" when we're in the caregiver-scoped
@@ -327,14 +366,14 @@ export function SleepDetail({
     if (rangedNights.length < 2 || allReadings.length < 2) return null;
     const nowSec = Math.floor(Date.now() / 1000);
     const days = RANGE_TO_DAYS[range];
-    const bpSeries = buildMorningBPSeries(allReadings, nowSec, days);
+    const bpSeries = buildMorningBPSeries(allReadings, nowSec, days, tz);
     const sleepSeries = buildSleepScoreSeries(rangedNights);
     if (bpSeries.length < 2 || sleepSeries.length < 2) return null;
     return {
       a: { type: 'sleep', points: sleepSeries },
       b: { type: 'bp', points: bpSeries },
     };
-  }, [allReadings, rangedNights, range]);
+  }, [allReadings, rangedNights, range, tz]);
 
   // ---- Empty state: no last-night session AT ALL ------------------------
   // If older nights exist we still render history below; only the
@@ -353,7 +392,14 @@ export function SleepDetail({
       ? formatStalenessCaption(heroDisplay!.endSec)
       : null;
   const heroSub = hasLastNight
-    ? (sleepStaleCaption ?? bedTimeSub(heroDisplay!.startSec, heroDisplay!.endSec, tz))
+    ? (sleepStaleCaption ??
+      bedTimeSub(
+        heroDisplay!.startSec,
+        heroDisplay!.endSec,
+        tz,
+        heroDisplay!.wakeSource,
+        session.totalMinutes,
+      ))
     : 'No sleep recorded last night';
   // Sprint 18 — P1 fix. Pass the count of recorded nights so the
   // "than your usual" / "than last week" phrasing only fires once the
@@ -383,8 +429,8 @@ export function SleepDetail({
     return {
       id: `sleep-${s.sessionStartSec}`,
       value: formatHm(s.totalMinutes),
-      context: `${nightLabel(idx, s.sessionEndSec, nowSecForLabels)} · ${deepP}% deep`,
-      time: freshLabel ? 'now' : nightTime(s.sessionEndSec),
+      context: `${nightLabel(idx, s.sessionEndSec, tz, nowSecForLabels)} · ${deepP}% deep`,
+      time: freshLabel ? 'now' : nightTime(s.sessionEndSec, tz),
     };
   });
 
@@ -475,10 +521,7 @@ export function SleepDetail({
                   const nowMs = Date.now();
                   const days = RANGE_TO_DAYS[range];
                   const startMs = nowMs - days * 24 * 60 * 60 * 1000;
-                  const left = new Date(startMs).toLocaleDateString([], {
-                    month: 'short',
-                    day: 'numeric',
-                  });
+                  const left = monthDayInZone(startMs, tz);
                   return { left, right: 'today' };
                 })()}
                 testID="sleep-detail-correlation"
@@ -541,6 +584,17 @@ export function SleepDetail({
               eyebrow="Recent nights"
               readings={recentRows}
               testID="sleep-detail-recent"
+            />
+          ) : null}
+          {onViewAllHistory && historyFamilyId ? (
+            <ViewAllHistoryLink
+              kind="sleep"
+              familyId={historyFamilyId}
+              range={range}
+              onPress={() =>
+                onViewAllHistory(range, historyFamilyId, tz)
+              }
+              testID="sleep-detail-view-all"
             />
           ) : null}
         </>

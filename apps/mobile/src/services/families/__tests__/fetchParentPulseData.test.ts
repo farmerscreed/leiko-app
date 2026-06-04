@@ -33,7 +33,12 @@ function makeFakeClient(rowsByKey: Record<string, unknown[]>) {
           return chain;
         }),
         in: jest.fn(() => chain),
+        is: jest.fn(() => chain),
         order: jest.fn(() => chain),
+        // Wearer-tz lookup ends on .maybeSingle() against family_members.
+        maybeSingle: jest.fn(() =>
+          Promise.resolve({ data: rowsByKey['owner']?.[0] ?? null, error: null }),
+        ),
         limit: jest.fn(() => {
           const key =
             table === 'readings'
@@ -72,6 +77,15 @@ describe('fetchParentPulseData', () => {
     expect(result.recent.sleep).toEqual([]);
     expect(result.recent.steps).toEqual([]);
     expect(result.recent.calories).toEqual([]);
+    expect(result.wearerTimeZone).toBeNull();
+  });
+
+  it('surfaces the wearer (family owner) timezone for caregiver-tz rendering', async () => {
+    const client = makeFakeClient({
+      owner: [{ users: { timezone: 'Africa/Lagos' } }],
+    });
+    const result = await fetchParentPulseData(client, TEST_FAMILY_ID, NOW_SEC);
+    expect(result.wearerTimeZone).toBe('Africa/Lagos');
   });
 
   it('maps a server BP row into the composed pulse + recent arrays', async () => {
@@ -146,8 +160,8 @@ describe('fetchParentPulseData', () => {
   it('threads the family_id filter into every query', async () => {
     const client = makeFakeClient({});
     await fetchParentPulseData(client, TEST_FAMILY_ID, NOW_SEC);
-    // 1 readings + 5 vitals_other queries = 6 .from() calls.
-    expect((client.from as jest.Mock).mock.calls.length).toBe(6);
+    // 1 readings + 5 vitals_other + 1 family_members (wearer tz) = 7.
+    expect((client.from as jest.Mock).mock.calls.length).toBe(7);
     expect((client.from as jest.Mock).mock.calls).toEqual([
       ['readings'],
       ['vitals_other'],
@@ -155,6 +169,7 @@ describe('fetchParentPulseData', () => {
       ['vitals_other'],
       ['vitals_other'],
       ['vitals_other'],
+      ['family_members'],
     ]);
   });
 });

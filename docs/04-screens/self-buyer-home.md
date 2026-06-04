@@ -1,5 +1,16 @@
 # Screen — Self-Buyer Home / Daily Pulse
 
+> **RECONCILED 2026-06-02 — no longer the landing screen. Superseded by
+> [ADR-0006](../_adr/0006-unified-caregiver-self-buyer-model.md).** Every
+> persona now lands on the unified constellation home (`caregiver-home.md`),
+> where the viewer is a "You" node. This Daily Pulse layout survives as the
+> **personal detail view** reached by tapping your own "You" orb — it's the
+> "you wear a watch" branch of the unified UI (see `parent-dashboard.md` for
+> the immersive personal hero). It is no longer selected by
+> `account_type = 'self_buyer'`; `account_type` is inert. The Day Spine,
+> hero, and Take-a-Reading affordances described below are accurate for that
+> personal view. Retained below as the spec for the personal surface.
+
 **SUPERSEDES** D8a §6 (the Family Circle reframe → BP-only single-protagonist
 layout) for the constellation pivot. Sourced from D11 (brand repositioning),
 D12 §11.2.3 (DailyPulseHero), D13 §7 (Daily Pulse Hero behaviour), and the

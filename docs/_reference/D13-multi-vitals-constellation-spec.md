@@ -1,5 +1,7 @@
 # D13 — Multi-Vitals Constellation Spec
 
+> **📎 Historical reference (stamped 2026-06-02).** This is a dated strategy/spec snapshot, kept for context — **not** living spec. For the app's current behaviour see the docs in `docs/00–15`, `docs/04-screens/`, and the decisions in `docs/_adr/`. Where this document and the shipped app disagree, the app + ADRs win.
+
 **Five-Vital Data Surface · Daily Pulse · Cross-Vital Correlation**
 *Prepared: 2026-05-07 · Status: Draft for founder sign-off*
 

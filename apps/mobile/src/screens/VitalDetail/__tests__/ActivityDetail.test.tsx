@@ -428,7 +428,7 @@ describe('ActivityDetail helpers — buildRecentReadings (no hard cap)', () => {
     for (let i = 1; i <= 15; i++) {
       days.push(makeAt(nowSec - i * SECONDS_PER_DAY, 5000));
     }
-    const rows = buildRecentReadings(7200, days, 8000);
+    const rows = buildRecentReadings(7200, days, 8000, 'UTC');
     // Today + 15 prior = 16 rows. (vs. pre-fix maximum of 4)
     expect(rows).toHaveLength(16);
     expect(rows[0].id).toBe('today');
@@ -441,7 +441,7 @@ describe('ActivityDetail helpers — buildRecentReadings (no hard cap)', () => {
       makeAt(nowSec - 2 * SECONDS_PER_DAY, 0),
       makeAt(nowSec - 3 * SECONDS_PER_DAY, 6000),
     ];
-    const rows = buildRecentReadings(7200, days, 8000);
+    const rows = buildRecentReadings(7200, days, 8000, 'UTC');
     expect(rows).toHaveLength(3); // today + 2 non-zero days
   });
 });

@@ -61,8 +61,11 @@ import { useDailyPulseData, emptyDailyPulse } from '../../state/dailyPulse';
 import { useHR } from '../../state/hr';
 import { useSleep } from '../../state/sleep';
 import { useAuth } from '../../state/auth';
+import { resolveTimeZone, timeInZone, weekdayInZone } from '../../utils/timeInZone';
 import { useParentDailyPulseData } from '../../hooks/useParentDailyPulseData';
 import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
+import { useOnboarding } from '../../state/onboarding';
+import { useHRRangeSummary } from '../../hooks/useHRRangeSummary';
 import { hrFill } from '../../utils/vitalThemes';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
@@ -138,6 +141,28 @@ export function buildZones(samples: ReadonlyArray<HRSample>): [HRZone, HRZone, H
     { name: 'Calm', range: '60–80', pct: pct(calm) },
     { name: 'Active', range: '80–110', pct: pct(active) },
     { name: 'Vigorous', range: '110+', pct: pct(vigorous) },
+  ];
+}
+
+/**
+ * Convert the server summary's zone counts (migration 0030
+ * hr_range_summary) into the same HRZone[] shape `buildZones` produces,
+ * so HRZonesCard is agnostic to the data source. Bands are identical to
+ * buildZones: resting < 60, calm 60–80, active 80–110, vigorous 110+.
+ */
+export function zonesFromCounts(z: {
+  resting: number;
+  calm: number;
+  active: number;
+  vigorous: number;
+  total: number;
+}): [HRZone, HRZone, HRZone, HRZone] {
+  const pct = (n: number) => (z.total === 0 ? 0 : (n / z.total) * 100);
+  return [
+    { name: 'Resting', range: '< 60', pct: pct(z.resting) },
+    { name: 'Calm', range: '60–80', pct: pct(z.calm) },
+    { name: 'Active', range: '80–110', pct: pct(z.active) },
+    { name: 'Vigorous', range: '110+', pct: pct(z.vigorous) },
   ];
 }
 
@@ -300,17 +325,20 @@ function hrRowContext(bpm: number, ageHours: number, isFirst: boolean): string {
   return zone;
 }
 
-function hrRowTime(measuredAtSec: number, nowMs: number): string {
-  const d = new Date(measuredAtSec * 1000);
-  const ageHours = (nowMs - measuredAtSec * 1000) / 3_600_000;
+function hrRowTime(measuredAtSec: number, timeZone: string, nowMs: number): string {
+  const ms = measuredAtSec * 1000;
+  const ageHours = (nowMs - ms) / 3_600_000;
   if (ageHours < 24) {
-    return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    return timeInZone(ms, timeZone);
   }
   if (ageHours < 48) return 'Yesterday';
-  return d.toLocaleDateString([], { weekday: 'short' });
+  return weekdayInZone(ms, timeZone, 'short');
 }
 
-function buildHRRecentRows(samples: ReadonlyArray<HRSample>): RecentReading[] {
+function buildHRRecentRows(
+  samples: ReadonlyArray<HRSample>,
+  timeZone: string,
+): RecentReading[] {
   if (samples.length === 0) return [];
   const sorted = samples.slice().sort((a, b) => b.measuredAtSec - a.measuredAtSec);
   const nowMs = Date.now();
@@ -320,7 +348,7 @@ function buildHRRecentRows(samples: ReadonlyArray<HRSample>): RecentReading[] {
       id: `hr-${s.measuredAtSec}`,
       value: `${Math.round(s.bpm)}`,
       context: hrRowContext(s.bpm, ageHours, idx === 0),
-      time: hrRowTime(s.measuredAtSec, nowMs),
+      time: hrRowTime(s.measuredAtSec, timeZone, nowMs),
     };
   });
 }
@@ -389,6 +417,10 @@ export function HRDetail({
   const ownSleepPending = useSleep((s) => s.pending);
   const ownSleepRecent = useSleep((s) => s.recent);
   const scopedFamilyId = familyId ?? null;
+  // Family the server summary is scoped to: the tapped parent on the
+  // caregiver path, else the signed-in user's own family (self-buyer).
+  const ownFamilyId = useOnboarding((s) => s.familyId);
+  const summaryFamilyId = scopedFamilyId ?? ownFamilyId;
   const parentPulse = useParentDailyPulseData(scopedFamilyId);
   const parentRecent = useParentVitalsRecent(scopedFamilyId);
   const emptyFallback = useMemo(() => emptyDailyPulse(), []);
@@ -414,13 +446,19 @@ export function HRDetail({
   // "resting this morning" prose) stays on `restingToday` so we never
   // narrate a daytime value as "resting".
   const displayBpm = data.hr.displayBpm;
-  const isLatestFallback = data.hr.displaySource === 'latest';
 
   // Sprint 16.5e — mirror DetailShell's range so the recent-readings
   // list, the sleep × resting-HR correlation, and the zone-card
   // distribution react to 7d / 30d / 90d. The today trend chart stays
   // 24h-bound (it's literally "today").
   const [range, setRange] = useState<TrendRange>('7d');
+
+  // Server-aggregated HR over the selected window (migration 0030 RPC).
+  // Sidesteps the local HR slice's 200-sample (~16h) cap so 7d/30d/90d
+  // render real data. Null while loading / offline / on error → the
+  // local-slice computations below remain the fallback.
+  const rangeSummary = useHRRangeSummary(summaryFamilyId, range);
+  const serverSummary = rangeSummary.data;
 
   const hrPending = scopedFamilyId ? [] : ownHRPending;
   const hrRecent = scopedFamilyId ? parentRecent.data.hr : ownHRRecent;
@@ -445,6 +483,11 @@ export function HRDetail({
   // Same user timezone the hero uses (via dailyPulse) so the recent
   // resting series here is bucketed consistently. Null → UTC.
   const timeZone = useAuth((s) => s.profile?.timezone ?? null);
+  // Timezone the row times render in: the wearer's on the caregiver path
+  // (the rows are the wearer's readings), else the viewer's own. UTC last.
+  const displayTimeZone = resolveTimeZone(
+    scopedFamilyId ? parentPulse.wearerTimeZone ?? timeZone : timeZone,
+  );
 
   const rangedSamples = useMemo(() => {
     const cutoff = nowSec - RANGE_TO_DAYS[range] * SECONDS_PER_DAY;
@@ -455,22 +498,58 @@ export function HRDetail({
     [sleepPending, sleepRecent],
   );
 
-  const trendData = useMemo(
+  // Trend chart data. When the server window is available, plot a
+  // daily-average line over the selected range (per_day from the
+  // hr_range_summary RPC, ascending by day). Otherwise fall back to
+  // today's intraday 24h curve (offline / loading / <2 days of data).
+  const trend24hData = useMemo(
     () => buildTodayTrendData(allSamples, nowSec),
     [allSamples, nowSec],
   );
+  const dailyAvgData = useMemo(
+    () => (serverSummary ? serverSummary.per_day.map((d) => d.avg) : []),
+    [serverSummary],
+  );
+  const isRangeTrend = dailyAvgData.length >= 2;
+  const trendData = isRangeTrend ? dailyAvgData : trend24hData;
+  const trendCaption = isRangeTrend
+    ? `Last ${RANGE_TO_DAYS[range]} days · heart rate`
+    : 'Last 24h · heart rate';
   const trendChartRange = useMemo(
     () => dynamicHRChartRange(trendData),
     [trendData],
   );
-  const zones = useMemo(() => buildZones(rangedSamples), [rangedSamples]);
+  // Zones over the selected window: server counts when available (full
+  // window), else the local-slice computation (today / offline fallback).
+  const zones = useMemo(
+    () =>
+      serverSummary
+        ? zonesFromCounts(serverSummary.zones)
+        : buildZones(rangedSamples),
+    [serverSummary, rangedSamples],
+  );
 
   // Sprint 18 H3 — switch to the date-keyed accessor so the
   // correlation downstream can pair by night.
-  const restingByNight = useMemo(
+  // Per-night resting bpm — feeds the resting-avg stat, the baseline,
+  // and the sleep×HR correlation. Server summary gives the full window
+  // (10-min rolling-min within 22:00–06:00 local, matching the local
+  // computation); the local slice is the today/offline fallback.
+  const restingByNightLocal = useMemo(
     () => useHR.getState().restingBpmRecentByNight(nowSec, timeZone),
     [nowSec, hrRecent, hrPending, timeZone],
   );
+  const restingByNightServer = useMemo(
+    () =>
+      serverSummary
+        ? serverSummary.resting_by_night.map((e) => ({
+            nightKey: e.night,
+            restingBpm: e.resting,
+          }))
+        : null,
+    [serverSummary],
+  );
+  const restingByNight = restingByNightServer ?? restingByNightLocal;
 
   const { restingAvg, peakToday, rangeToday } = useMemo(
     () =>
@@ -500,42 +579,65 @@ export function HRDetail({
     [restingByNight, allSleepSessions, range, nowSec],
   );
 
-  const recentRows = useMemo(() => buildHRRecentRows(rangedSamples), [rangedSamples]);
+  // NOTE: the recent-readings list still reads the local slice (capped at
+  // ~200 / ~16h). The range-driven *analytics* (zones, resting, baseline,
+  // correlation) are now server-windowed above; paging the raw HR list
+  // server-side is a deliberate follow-up (a list of thousands of 5-min
+  // samples needs its own pagination design, not a bigger fetch).
+  const recentRows = useMemo(
+    () => buildHRRecentRows(rangedSamples, displayTimeZone),
+    [rangedSamples, displayTimeZone],
+  );
+
+  // Hero value — live-first (founder direction): the watch auto-samples
+  // HR every 5 min, so the headline shows the most recent sample (the
+  // closest thing to "now") and only falls back to the resting display
+  // value when there's no sample at all. Resting still leads the
+  // insight/baseline prose and the "Resting avg" stat below, so we never
+  // lose the resting view — it just isn't the hero number anymore.
+  const liveSample = useMemo(
+    () =>
+      allSamples.length === 0
+        ? null
+        : allSamples.reduce((a, b) =>
+            b.measuredAtSec > a.measuredAtSec ? b : a,
+          ),
+    [allSamples],
+  );
+  const liveBpm = liveSample?.bpm ?? null;
+  const heroBpm = liveBpm ?? displayBpm;
+  // "Live" framing whenever the hero value is a recent sample rather than a
+  // resting value — either one found in the slice, or dailyPulse's display
+  // falling back to its latest (non-resting) sample. Only when the value is
+  // genuinely resting do we keep the calm resting wording.
+  const isLive = liveBpm !== null || data.hr.displaySource === 'latest';
+  const heroSampleSec = liveSample?.measuredAtSec ?? data.hr.latestSampleSec;
 
   // Resting-specific copy (insight card, baseline) stays gated on a
-  // true resting value; the hero number uses the display fallback so it
-  // shows a daytime reading rather than blanking.
+  // true resting value.
   const hasData = restingToday !== null;
-  const hasDisplay = displayBpm !== null;
+  const hasHero = heroBpm !== null;
   const hasZoneData = zones.some((z) => z.pct > 0);
 
-  // Sprint 16 — per D13 §6.6, surface a stale caption when the latest
-  // HR sample is older than 6h. Gate on the displayed value so a
-  // daytime-only reading still gets a staleness check.
-  const staleness = hasDisplay
-    ? checkStaleness('hr', data.hr.latestSampleSec, nowSec)
+  // Sprint 16 — per D13 §6.6, surface a stale caption when the displayed
+  // HR sample is older than 6h.
+  const staleness = hasHero
+    ? checkStaleness('hr', heroSampleSec, nowSec)
     : 'no_data';
   const staleCaption =
     staleness === 'stale'
-      ? formatStalenessCaption(data.hr.latestSampleSec, nowSec)
+      ? formatStalenessCaption(heroSampleSec, nowSec)
       : null;
 
-  // Sprint 18 P-H1 — "within your range" framing assumes a known range
-  // and shouldn't fire before the user has any baseline. Once the
-  // baseline computes, "within your range" makes sense; before that,
-  // a neutral "bpm" reads honestly. The latest-fallback path uses
-  // neutral wording so we never imply a daytime reading is resting.
-  const heroPrimary = hasDisplay ? String(Math.round(displayBpm!)) : '—';
+  // Live reading leads with neutral "Latest" wording (the sample may be a
+  // few minutes old); the resting fallback keeps the calm resting framing.
+  const heroPrimary = hasHero ? String(Math.round(heroBpm!)) : '—';
   const heroSub =
     staleCaption ??
-    (hasDisplay
-      ? isLatestFallback
-        ? 'Latest reading'
-        : 'Now · resting'
-      : 'Heart rate');
-  const heroRange = hasDisplay
-    ? isLatestFallback
-      ? 'bpm · latest reading'
+    (hasHero ? (isLive ? 'Latest reading' : 'Now · resting') : 'Heart rate');
+  const heroRange = hasHero
+    ? isLive
+      ? 'bpm · latest'
       : baseline !== null
         ? 'bpm · within your range'
         : 'bpm · resting'
@@ -552,7 +654,7 @@ export function HRDetail({
           primary={heroPrimary}
           sub={heroSub}
           range={heroRange}
-          ringFill={hrFill(displayBpm)}
+          ringFill={hrFill(heroBpm)}
           livePulse={false}
           testID="hr-detail-hero"
         />
@@ -585,11 +687,11 @@ export function HRDetail({
             />
           ) : null}
           <StalenessHintRow stale={staleness === 'stale'} testID="hr-detail-staleness-hint" />
-          {/* Sprint 18 H2 — first slot label is "Resting avg" to
-              disambiguate from the hero's "Now · resting" (the live
-              value), and unit drops the redundant "avg" qualifier.
-              Sprint 18 H5 — third slot drops the redundant "spread"
-              qualifier; "Range today 30 bpm" reads cleanly. */}
+          {/* Stat trio is range-consistent with the rest of the screen:
+              when the server window is loaded it shows Resting avg / Peak /
+              Low over the selected 7d/30d/90d (the hero already carries the
+              live "now" value). Offline/loading falls back to the today
+              snapshot (Peak today / Range today) so nothing blanks. */}
           <StatTrio
             items={[
               {
@@ -597,16 +699,34 @@ export function HRDetail({
                 value: restingAvg !== null ? String(restingAvg) : '—',
                 unit: 'bpm',
               },
-              {
-                label: 'Peak',
-                value: peakToday !== null ? String(peakToday) : '—',
-                unit: peakToday !== null ? 'today' : 'bpm',
-              },
-              {
-                label: 'Range today',
-                value: rangeToday !== null ? String(rangeToday) : '—',
-                unit: 'bpm',
-              },
+              serverSummary
+                ? {
+                    label: 'Peak',
+                    value:
+                      serverSummary.totals.max_bpm !== null
+                        ? String(serverSummary.totals.max_bpm)
+                        : '—',
+                    unit: 'bpm',
+                  }
+                : {
+                    label: 'Peak',
+                    value: peakToday !== null ? String(peakToday) : '—',
+                    unit: peakToday !== null ? 'today' : 'bpm',
+                  },
+              serverSummary
+                ? {
+                    label: 'Low',
+                    value:
+                      serverSummary.totals.min_bpm !== null
+                        ? String(serverSummary.totals.min_bpm)
+                        : '—',
+                    unit: 'bpm',
+                  }
+                : {
+                    label: 'Range today',
+                    value: rangeToday !== null ? String(rangeToday) : '—',
+                    unit: 'bpm',
+                  },
             ]}
             testID="hr-detail-stats"
           />
@@ -616,11 +736,11 @@ export function HRDetail({
               vital="hr"
               data={trendData}
               range={trendChartRange}
-              // Sprint 18 H4 — caption is more honest. The trend
-              // window is the last 24 hours, not strictly "today";
-              // "Last 24h" reads truthfully when the user looks at
-              // it at 2am and the chart still shows last evening.
-              caption="Last 24h · heart rate"
+              // Range-driven: a daily-average line over the selected
+              // window when the server summary is available, else
+              // today's intraday 24h curve (offline/loading fallback).
+              // Caption tracks which one is showing.
+              caption={trendCaption}
               subCaption={`${trendChartRange[0]}–${trendChartRange[1]} band`}
               peak
               trough

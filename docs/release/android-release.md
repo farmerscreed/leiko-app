@@ -84,6 +84,44 @@ export SENTRY_PROJECT=leiko-mobile
 
 The file is gitignored by default (under `~/secrets/`). Never commit it.
 
+### Windows / PowerShell
+
+`source` and the `export VAR=…` file above are bash-only. On Windows
+PowerShell, set the vars with `$env:` instead (single-quote the values so
+`$` or special chars in passwords aren't interpreted). Paste this once per
+terminal session, filling in your own keystore path + passwords:
+
+```powershell
+# signing (your values)
+$env:LEIKO_RELEASE_STORE_FILE     = 'C:\Users\admin\secrets\leiko-release.jks'
+$env:LEIKO_RELEASE_STORE_PASSWORD = 'your-keystore-password'
+$env:LEIKO_RELEASE_KEY_ALIAS      = 'leiko'
+$env:LEIKO_RELEASE_KEY_PASSWORD   = 'your-key-password'
+$env:LEIKO_VERSION_CODE           = '20'   # MUST be > your highest previous Play upload (was 19)
+
+# runtime — copy the exact value from apps/mobile/eas.json (build.production.env)
+$env:EXPO_PUBLIC_SUPABASE_URL      = 'https://kqnzxjrpnjnczhgdwdqg.supabase.co'
+$env:EXPO_PUBLIC_SUPABASE_ANON_KEY = '<paste EXPO_PUBLIC_SUPABASE_ANON_KEY from eas.json>'
+
+# optional
+# $env:EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY = 'goog_...'
+```
+
+Then run the build (PowerShell can't do bash's inline `VAR=x cmd` form, so
+set the ACK var on its own line):
+
+```powershell
+npm run release:android:aab          # dry-run: prints the checks + plan, then stops
+$env:LEIKO_RELEASE_ACK = 'yes'
+npm run release:android:aab          # real build
+```
+
+Needs a **JDK 17** + the **Android SDK** on the machine (the same toolchain
+any local Android build uses). If gradle complains about `JAVA_HOME` or the
+SDK, that toolchain isn't installed — the easiest alternative is a cloud
+build: `eas build -p android --profile production` (no local Android
+toolchain needed; point EAS at your existing keystore via `eas credentials`).
+
 ### 3. First release build
 
 ```bash

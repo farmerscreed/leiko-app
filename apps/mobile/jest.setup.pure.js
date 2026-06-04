@@ -13,3 +13,16 @@ process.env.EXPO_PUBLIC_SUPABASE_URL =
   process.env.EXPO_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321';
 process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY =
   process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key';
+
+// supabase-js >= 2.105 eagerly builds a RealtimeClient in createClient(),
+// which throws without a global WebSocket (node has none). The module's
+// load-time guard runs even though the client isn't exercised here, so
+// stub a never-connecting WebSocket. Mirrors jest.setup.rn.js.
+if (typeof globalThis.WebSocket === 'undefined') {
+  globalThis.WebSocket = class {
+    close() {}
+    send() {}
+    addEventListener() {}
+    removeEventListener() {}
+  };
+}

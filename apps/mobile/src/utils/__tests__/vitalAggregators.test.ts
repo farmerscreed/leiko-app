@@ -92,9 +92,9 @@ function activityDay(dayLocal: string, totalSteps: number): ActivityDay {
 
 describe('computeHRRestingToday', () => {
   it('returns null with fewer than 2 samples', () => {
-    expect(computeHRRestingToday([], NOW_SEC)).toBeNull();
+    expect(computeHRRestingToday([], NOW_SEC, 'UTC')).toBeNull();
     const lone = hrSample(NOW_SEC - 10 * 60 * 60, 60);
-    expect(computeHRRestingToday([lone], NOW_SEC)).toBeNull();
+    expect(computeHRRestingToday([lone], NOW_SEC, 'UTC')).toBeNull();
   });
 
   it('returns the lowest 10-min rolling average within the sleep window', () => {
@@ -111,7 +111,7 @@ describe('computeHRRestingToday', () => {
       hrSample(baseSec + 2 * 60, 60),
       hrSample(baseSec + 4 * 60, 62),
     ];
-    const result = computeHRRestingToday(samples, NOW_SEC);
+    const result = computeHRRestingToday(samples, NOW_SEC, 'UTC');
     expect(result).toBe(59);
   });
 
@@ -119,13 +119,13 @@ describe('computeHRRestingToday', () => {
     const noonSec = Math.floor(Date.parse('2026-05-19T13:00:00Z') / 1000);
     const noonSec2 = noonSec + 5 * 60;
     const samples = [hrSample(noonSec, 70), hrSample(noonSec2, 72)];
-    expect(computeHRRestingToday(samples, NOW_SEC)).toBeNull();
+    expect(computeHRRestingToday(samples, NOW_SEC, 'UTC')).toBeNull();
   });
 });
 
 describe('computeHRRestingRecent', () => {
   it('returns empty array on empty input', () => {
-    expect(computeHRRestingRecent([], NOW_SEC)).toEqual([]);
+    expect(computeHRRestingRecent([], NOW_SEC, 'UTC')).toEqual([]);
   });
 
   it('returns one entry per prior night with enough samples', () => {
@@ -143,7 +143,7 @@ describe('computeHRRestingRecent', () => {
       hrSample(oneNightAgo, 64),
       hrSample(oneNightAgo + 2 * 60, 66),
     ];
-    const result = computeHRRestingRecent(samples, NOW_SEC);
+    const result = computeHRRestingRecent(samples, NOW_SEC, 'UTC');
     expect(result.length).toBe(2);
     expect(result[0]).toBe(61); // night 1 (2 days back): (60+62)/2
     expect(result[1]).toBe(65); // night 2 (1 day back): (64+66)/2
@@ -157,7 +157,7 @@ describe('computeHRRestingRecent', () => {
       hrSample(todayWindow, 60),
       hrSample(todayWindow + 2 * 60, 62),
     ];
-    expect(computeHRRestingRecent(samples, NOW_SEC)).toEqual([]);
+    expect(computeHRRestingRecent(samples, NOW_SEC, 'UTC')).toEqual([]);
   });
 });
 
@@ -200,7 +200,7 @@ describe('computeSpO2LatestSampleAt', () => {
 
 describe('computeSpO2OvernightLowsRecent', () => {
   it('returns empty on empty input', () => {
-    expect(computeSpO2OvernightLowsRecent([], NOW_SEC)).toEqual([]);
+    expect(computeSpO2OvernightLowsRecent([], NOW_SEC, 'UTC')).toEqual([]);
   });
 
   it('returns the per-night minimum, oldest first', () => {
@@ -212,7 +212,7 @@ describe('computeSpO2OvernightLowsRecent', () => {
       spo2Sample(nightB, 96),
       spo2Sample(nightB + 30 * 60, 94),
     ];
-    const result = computeSpO2OvernightLowsRecent(samples, NOW_SEC);
+    const result = computeSpO2OvernightLowsRecent(samples, NOW_SEC, 'UTC');
     // Oldest night → newest night. NightA's low is 93; NightB's is 94.
     expect(result).toEqual([93, 94]);
   });
@@ -224,7 +224,7 @@ describe('computeSpO2OvernightLowsRecent', () => {
 
 describe('computeSleepLastNight', () => {
   it('returns null on empty input', () => {
-    expect(computeSleepLastNight([], NOW_SEC)).toBeNull();
+    expect(computeSleepLastNight([], NOW_SEC, 'UTC')).toBeNull();
   });
 
   it('returns the latest session that ended within 36 hours', () => {
@@ -232,14 +232,37 @@ describe('computeSleepLastNight', () => {
     const recent = sleepSession(recentEnd - 8 * 60 * 60, recentEnd, 420);
     const ancientEnd = NOW_SEC - 5 * SECONDS_PER_DAY;
     const ancient = sleepSession(ancientEnd - 8 * 60 * 60, ancientEnd, 360);
-    const result = computeSleepLastNight([ancient, recent], NOW_SEC);
+    const result = computeSleepLastNight([ancient, recent], NOW_SEC, 'UTC');
     expect(result?.sessionEndSec).toBe(recentEnd);
   });
 
   it('returns null when every session is older than 36 hours', () => {
     const ancientEnd = NOW_SEC - 5 * SECONDS_PER_DAY;
     const ancient = sleepSession(ancientEnd - 8 * 60 * 60, ancientEnd, 420);
-    expect(computeSleepLastNight([ancient], NOW_SEC)).toBeNull();
+    expect(computeSleepLastNight([ancient], NOW_SEC, 'UTC')).toBeNull();
+  });
+
+  it('consolidates a fragmented night to the fullest session (not the shortest)', () => {
+    // Real prod shape: the watch re-reported one night as 5 overlapping
+    // sessions, all ending at the same wake, with drifting (later) starts
+    // and shrinking durations. The old "latest end" pick surfaced the
+    // shortest (46 min); the fix returns the fullest superset (84 min).
+    const wake = NOW_SEC - 6 * 60 * 60;
+    const frags = [84, 72, 68, 50, 46].map((mins) =>
+      sleepSession(wake - mins * 60, wake, mins),
+    );
+    const result = computeSleepLastNight(frags, NOW_SEC, 'UTC');
+    expect(result?.totalMinutes).toBe(84);
+  });
+
+  it('does not let an earlier night outrank the most recent one', () => {
+    const lastNightEnd = NOW_SEC - 6 * 60 * 60;
+    const lastNight = sleepSession(lastNightEnd - 60 * 60, lastNightEnd, 60); // short but most recent
+    const priorEnd = NOW_SEC - 30 * 60 * 60; // ~prior night, still in 36h window
+    const prior = sleepSession(priorEnd - 8 * 60 * 60, priorEnd, 480); // longer, older
+    const result = computeSleepLastNight([prior, lastNight], NOW_SEC, 'UTC');
+    expect(result?.sessionEndSec).toBe(lastNightEnd);
+    expect(result?.totalMinutes).toBe(60);
   });
 });
 
@@ -249,14 +272,14 @@ describe('computeSleepLastNight', () => {
 
 describe('computeActivityToday', () => {
   it('returns null on empty input', () => {
-    expect(computeActivityToday([], NOW_SEC)).toBeNull();
+    expect(computeActivityToday([], NOW_SEC, 'UTC')).toBeNull();
   });
 
   it('matches dayLocal to today (UTC) and returns the row', () => {
     const today = '2026-05-19';
     const yesterday = '2026-05-18';
     const days = [activityDay(yesterday, 4500), activityDay(today, 6800)];
-    const result = computeActivityToday(days, NOW_SEC);
+    const result = computeActivityToday(days, NOW_SEC, 'UTC');
     expect(result?.dayLocal).toBe(today);
     expect(result?.totalSteps).toBe(6800);
   });
@@ -264,7 +287,7 @@ describe('computeActivityToday', () => {
   it('returns null when today is not in the list', () => {
     const yesterday = '2026-05-18';
     expect(
-      computeActivityToday([activityDay(yesterday, 4500)], NOW_SEC),
+      computeActivityToday([activityDay(yesterday, 4500)], NOW_SEC, 'UTC'),
     ).toBeNull();
   });
 
@@ -276,7 +299,18 @@ describe('computeActivityToday', () => {
     const today = '2026-05-19';
     const shadow = activityDay(today, 0);
     const real = activityDay(today, 38);
-    expect(computeActivityToday([shadow, real], NOW_SEC)?.totalSteps).toBe(38);
-    expect(computeActivityToday([real, shadow], NOW_SEC)?.totalSteps).toBe(38);
+    expect(computeActivityToday([shadow, real], NOW_SEC, 'UTC')?.totalSteps).toBe(38);
+    expect(computeActivityToday([real, shadow], NOW_SEC, 'UTC')?.totalSteps).toBe(38);
+  });
+
+  it('resolves "today" in the wearer tz, not UTC (boundary near midnight)', () => {
+    // 2026-05-19T23:30:00Z. In UTC the day is the 19th; in Lagos (UTC+1)
+    // it has already rolled to the 20th. The same step rows must resolve to
+    // the correct local "today" per tz — the old toISOString() always used
+    // UTC and would mis-pick near midnight.
+    const nearMidnightUtc = Math.floor(Date.parse('2026-05-19T23:30:00Z') / 1000);
+    const days = [activityDay('2026-05-19', 4000), activityDay('2026-05-20', 9000)];
+    expect(computeActivityToday(days, nearMidnightUtc, 'UTC')?.dayLocal).toBe('2026-05-19');
+    expect(computeActivityToday(days, nearMidnightUtc, 'Africa/Lagos')?.dayLocal).toBe('2026-05-20');
   });
 });

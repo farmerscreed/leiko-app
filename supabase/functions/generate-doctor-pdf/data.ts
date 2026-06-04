@@ -93,7 +93,7 @@ const PULSE_PRESSURE_HIGH = 60;
 const PULSE_PRESSURE_LOW = 30;
 
 // ── SpO2 thresholds ────────────────────────────────────────────────
-const SPO2_DESATURATION_EVENT = 93;
+// (SpO2 desaturation threshold <93 lives in migration 0034's RPC now.)
 
 // ── Activity target ────────────────────────────────────────────────
 const ACTIVITY_DAILY_TARGET = 6_000;
@@ -119,6 +119,73 @@ interface UserRow {
   display_name: string;
   year_of_birth: number | null;
   account_type: AccountType;
+  timezone: string | null;
+}
+
+// Aggregates from the doctor_report_vitals_summary RPC (migration 0034).
+// Dense vitals (hr, spo2) are aggregated in SQL over the FULL window —
+// the raw-row pulls they replace were silently capped by PostgREST's
+// max_rows = 1000 (HR crosses that in ~3.5 days at the 5-min cadence),
+// so every report's HR/SpO2 section was computed from an arbitrary,
+// UNORDERED subset. Day bucketing happens in the wearer's tz.
+interface HrSummary {
+  count: number;
+  min: number | null;
+  max: number | null;
+  per_day: { day: string; median: number; n: number }[];
+}
+
+interface Spo2Summary {
+  count: number;
+  min_observed: number | null;
+  events_below_93: number;
+  per_day: { day: string; avg: number; min: number | null; n: number }[];
+}
+
+interface VitalsSummary {
+  hr: HrSummary;
+  spo2: Spo2Summary;
+}
+
+interface NoteRow {
+  body: string;
+  readings: { measured_at: string };
+}
+
+// One PostgREST page. Matches the project's max_rows so a full page
+// signals "there may be more" and a short page signals "done".
+const FETCH_PAGE_SIZE = 1000;
+
+/**
+ * Drain a range-windowed query to completeness, FETCH_PAGE_SIZE rows at a
+ * time. Every query routed through here MUST have a deterministic ORDER BY
+ * — paging an unordered query can skip/duplicate rows between pages.
+ */
+async function fetchAll<T>(
+  page: (
+    from: number,
+    to: number,
+  ) => PromiseLike<{ data: unknown; error: { message: string } | null }>,
+): Promise<T[]> {
+  const out: T[] = [];
+  for (let from = 0; ; from += FETCH_PAGE_SIZE) {
+    const { data, error } = await page(from, from + FETCH_PAGE_SIZE - 1);
+    if (error) throw error;
+    const rows = (data ?? []) as T[];
+    out.push(...rows);
+    if (rows.length < FETCH_PAGE_SIZE) return out;
+  }
+}
+
+/** Validate an IANA timezone; null/invalid → 'UTC'. */
+function resolveTz(tz: string | null | undefined): string {
+  if (!tz) return 'UTC';
+  try {
+    new Intl.DateTimeFormat('en-CA', { timeZone: tz });
+    return tz;
+  } catch {
+    return 'UTC';
+  }
 }
 
 export async function fetchReportData(
@@ -130,28 +197,52 @@ export async function fetchReportData(
     Date.now() - days * 24 * 60 * 60 * 1000,
   ).toISOString();
 
-  const [userRes, readingsRes, vitalsRes, correlationsRes, notesRes] =
+  // The wearer's tz drives every day boundary in the report, so fetch the
+  // user first (it also feeds the cover identity block).
+  const userRes = await supabase
+    .from('users')
+    .select('display_name, year_of_birth, account_type, timezone')
+    .eq('id', req.userId)
+    .single();
+  if (userRes.error) throw userRes.error;
+  const user = userRes.data as UserRow;
+  const tz = resolveTz(user.timezone);
+
+  const [readings, smallVitals, vitalsSummaryRes, correlationsRes, notesRaw] =
     await Promise.all([
-      supabase
-        .from('users')
-        .select('display_name, year_of_birth, account_type')
-        .eq('id', req.userId)
-        .single(),
-      supabase
-        .from('readings')
-        .select('measured_at, systolic, diastolic, pulse, hidden')
-        .eq('family_id', req.familyId)
-        .eq('hidden', false)
-        .gte('measured_at', startIso)
-        .order('measured_at', { ascending: true }),
-      supabase
-        .from('vitals_other')
-        .select(
-          'measured_at, vital_type, value_int, value_int_2, value_int_3, hidden',
-        )
-        .eq('family_id', req.familyId)
-        .eq('hidden', false)
-        .gte('measured_at', startIso),
+      // BP readings — paginated to completeness (a year of 3/day crosses
+      // PostgREST's silent 1000-row cap).
+      fetchAll<ReadingRow>((from, to) =>
+        supabase
+          .from('readings')
+          .select('measured_at, systolic, diastolic, pulse, hidden')
+          .eq('family_id', req.familyId)
+          .eq('hidden', false)
+          .gte('measured_at', startIso)
+          .order('measured_at', { ascending: true })
+          .range(from, to),
+      ),
+      // Sleep + activity only — at most a few rows per day, but paginated
+      // anyway so a 1y range can never truncate. The dense vitals (hr,
+      // spo2) come from the SQL aggregate below instead of raw rows.
+      fetchAll<VitalsOtherRow>((from, to) =>
+        supabase
+          .from('vitals_other')
+          .select(
+            'measured_at, vital_type, value_int, value_int_2, value_int_3, hidden',
+          )
+          .eq('family_id', req.familyId)
+          .eq('hidden', false)
+          .in('vital_type', ['sleep_session', 'steps_day'])
+          .gte('measured_at', startIso)
+          .order('measured_at', { ascending: true })
+          .range(from, to),
+      ),
+      supabase.rpc('doctor_report_vitals_summary', {
+        _family_id: req.familyId,
+        _tz: tz,
+        _from: startIso,
+      }),
       supabase
         .from('correlations')
         .select(
@@ -164,47 +255,44 @@ export async function fetchReportData(
         .limit(12),
       // Notes are fetched only when the caller opted in.
       req.includeNotes !== false
-        ? supabase
-            .from('reading_notes')
-            .select('body, readings:readings!inner(measured_at)')
-            .eq('family_id', req.familyId)
-            .gte('readings.measured_at', startIso)
-        : Promise.resolve({ data: [], error: null }),
+        ? fetchAll<NoteRow>((from, to) =>
+            supabase
+              .from('reading_notes')
+              .select('id, body, readings:readings!inner(measured_at)')
+              .eq('family_id', req.familyId)
+              .gte('readings.measured_at', startIso)
+              .order('id', { ascending: true })
+              .range(from, to),
+          )
+        : Promise.resolve([] as NoteRow[]),
     ]);
 
-  if (userRes.error) throw userRes.error;
-  if (readingsRes.error) throw readingsRes.error;
-  if (vitalsRes.error) throw vitalsRes.error;
+  if (vitalsSummaryRes.error) throw vitalsSummaryRes.error;
   if (correlationsRes.error) throw correlationsRes.error;
-  if (notesRes.error) throw notesRes.error;
 
-  const user = userRes.data as UserRow;
-  const readings = (readingsRes.data ?? []) as ReadingRow[];
-  const vitals = (vitalsRes.data ?? []) as VitalsOtherRow[];
+  const vitalsSummary = vitalsSummaryRes.data as VitalsSummary;
   const correlations = (correlationsRes.data ?? []) as (CorrelationRow & {
     computed_at: string;
   })[];
-  const notesRaw = (notesRes.data ?? []) as {
-    body: string;
-    readings: { measured_at: string };
-  }[];
 
-  return shape(req, user, readings, vitals, correlations, notesRaw);
+  return shape(req, user, tz, readings, smallVitals, vitalsSummary, correlations, notesRaw);
 }
 
 function shape(
   req: PdfRequest,
   user: UserRow,
+  tz: string,
   readings: ReadingRow[],
   vitals: VitalsOtherRow[],
+  vitalsSummary: VitalsSummary,
   correlations: (CorrelationRow & { computed_at: string })[],
-  notesRaw: { body: string; readings: { measured_at: string } }[],
+  notesRaw: NoteRow[],
 ): ReportData {
-  const bp = shapeBP(readings);
-  const hr = shapeHR(vitals);
-  const spo2 = shapeSpO2(vitals);
-  const sleep = shapeSleep(vitals);
-  const activity = shapeActivity(vitals);
+  const bp = shapeBP(readings, tz);
+  const hr = shapeHR(vitalsSummary.hr);
+  const spo2 = shapeSpO2(vitalsSummary.spo2);
+  const sleep = shapeSleep(vitals, tz);
+  const activity = shapeActivity(vitals, tz);
   // Pick latest meaningful per type, capped at 3.
   const latestPerType = new Map<
     string,
@@ -234,7 +322,7 @@ function shape(
 
   const notes = notesRaw
     .map((n) => ({
-      day: n.readings.measured_at.slice(0, 10),
+      day: dayOf(n.readings.measured_at, tz),
       body: n.body,
     }))
     .sort((a, b) => (a.day < b.day ? 1 : -1));
@@ -270,8 +358,17 @@ function shape(
   };
 }
 
-function dayOf(iso: string): string {
-  return iso.slice(0, 10);
+/** Calendar-day key (YYYY-MM-DD) of `iso` in the wearer's timezone.
+ *  Was `iso.slice(0, 10)` — the UTC day — which mis-bucketed evening
+ *  readings for any non-UTC wearer (e.g. a 23:30 Lagos reading landed on
+ *  the previous "day" in the report). 'en-CA' yields ISO date order. */
+function dayOf(iso: string, tz: string): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: tz,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date(iso));
 }
 
 function mean(values: number[]): number | null {
@@ -316,7 +413,7 @@ function sufficiency(level: 'sufficient' | 'insufficient' | 'none', label: strin
   return { level, label };
 }
 
-function shapeBP(readings: ReadingRow[]): ReportData['bp'] {
+function shapeBP(readings: ReadingRow[], tz: string): ReportData['bp'] {
   if (readings.length === 0) {
     return {
       avgSys: null, avgDia: null, pctInRange: null,
@@ -331,7 +428,7 @@ function shapeBP(readings: ReadingRow[]): ReportData['bp'] {
   }
   const buckets = new Map<string, ReadingRow[]>();
   for (const r of readings) {
-    const day = dayOf(r.measured_at);
+    const day = dayOf(r.measured_at, tz);
     const list = buckets.get(day);
     if (list) list.push(r);
     else buckets.set(day, [r]);
@@ -363,7 +460,7 @@ function shapeBP(readings: ReadingRow[]): ReportData['bp'] {
   };
   const abnormal = readings
     .map((r): AbnormalReading => ({
-      day: dayOf(r.measured_at),
+      day: dayOf(r.measured_at, tz),
       sys: r.systolic,
       dia: r.diastolic,
       pulse: r.pulse,
@@ -420,11 +517,12 @@ function shapeBP(readings: ReadingRow[]): ReportData['bp'] {
   };
 }
 
-function shapeHR(vitals: VitalsOtherRow[]): ReportData['hr'] {
-  const hrSamples = vitals.filter(
-    (v) => v.vital_type === 'hr' && v.value_int !== null,
-  );
-  if (hrSamples.length === 0) {
+// Consumes the SQL aggregate (migration 0034) instead of raw rows: exact
+// over the full window — the old raw-row path was silently capped at 1000
+// arbitrary samples by PostgREST max_rows. Per-day median + counts come
+// from percentile_cont(0.5), which matches the old JS median() exactly.
+function shapeHR(hr: HrSummary): ReportData['hr'] {
+  if (hr.count === 0) {
     return {
       avgResting: null, minObserved: null, maxObserved: null,
       points: [], count: 0,
@@ -432,29 +530,17 @@ function shapeHR(vitals: VitalsOtherRow[]): ReportData['hr'] {
       clinicalContext: { paragraphs: [] },
     };
   }
-  const buckets = new Map<string, number[]>();
-  for (const s of hrSamples) {
-    const day = dayOf(s.measured_at);
-    const list = buckets.get(day);
-    if (list) list.push(s.value_int as number);
-    else buckets.set(day, [s.value_int as number]);
-  }
-  const points = Array.from(buckets.entries())
-    .map(([day, samples]) => ({
-      day,
-      restingBpm: median(samples),
-      count: samples.length,
-    }))
-    .sort((a, b) => a.day.localeCompare(b.day));
+  // per_day arrives day-ascending from the RPC (jsonb_agg ORDER BY day).
+  const points = hr.per_day.map((d) => ({
+    day: d.day,
+    restingBpm: d.median,
+    count: d.n,
+  }));
 
-  const allValues = hrSamples.map((s) => s.value_int as number);
-  const minObserved = allValues.reduce((a, b) => (b < a ? b : a), Infinity);
-  const maxObserved = allValues.reduce((a, b) => (b > a ? b : a), -Infinity);
-
-  const days = buckets.size;
+  const days = points.length;
   const suff: VitalSufficiency = days < DAYS_SUFFICIENT_MIN
     ? sufficiency('insufficient', `${days} of ≥${DAYS_SUFFICIENT_MIN} days needed.`)
-    : sufficiency('sufficient', `${hrSamples.length} samples over ${days} days.`);
+    : sufficiency('sufficient', `${hr.count} samples over ${days} days.`);
 
   const avgResting = mean(
     points.map((p) => p.restingBpm).filter((v): v is number => v !== null),
@@ -462,26 +548,28 @@ function shapeHR(vitals: VitalsOtherRow[]): ReportData['hr'] {
 
   return {
     avgResting,
-    minObserved: Number.isFinite(minObserved) ? minObserved : null,
-    maxObserved: Number.isFinite(maxObserved) ? maxObserved : null,
+    minObserved: hr.min,
+    maxObserved: hr.max,
     points,
-    count: hrSamples.length,
+    count: hr.count,
     sufficiency: suff,
     clinicalContext: buildHrContext({
       avgResting,
-      minObserved: Number.isFinite(minObserved) ? minObserved : null,
-      maxObserved: Number.isFinite(maxObserved) ? maxObserved : null,
-      sampleCount: hrSamples.length,
+      minObserved: hr.min,
+      maxObserved: hr.max,
+      sampleCount: hr.count,
       days,
     }),
   };
 }
 
-function shapeSpO2(vitals: VitalsOtherRow[]): ReportData['spo2'] {
-  const samples = vitals.filter(
-    (v) => v.vital_type === 'spo2' && v.value_int !== null,
-  );
-  if (samples.length === 0) {
+// Consumes the SQL aggregate (migration 0034) — see shapeHR. Semantics
+// preserved exactly: per-day min = min(coalesce(hourly_min, hourly_avg)),
+// min_observed = lowest single observation across both columns,
+// events_below_93 counts both columns (one row can contribute two events,
+// matching the old flatMap). SPO2_DESATURATION_EVENT lives in the SQL now.
+function shapeSpO2(spo2: Spo2Summary): ReportData['spo2'] {
+  if (spo2.count === 0) {
     return {
       avgMinPercent: null, minObserved: null,
       daysBelow90: 0, eventsBelow93: 0,
@@ -490,45 +578,20 @@ function shapeSpO2(vitals: VitalsOtherRow[]): ReportData['spo2'] {
       clinicalContext: { paragraphs: [] },
     };
   }
-  const buckets = new Map<string, VitalsOtherRow[]>();
-  for (const s of samples) {
-    const day = dayOf(s.measured_at);
-    const list = buckets.get(day);
-    if (list) list.push(s);
-    else buckets.set(day, [s]);
-  }
-  const points = Array.from(buckets.entries())
-    .map(([day, daySamples]) => ({
-      day,
-      avgPercent: mean(daySamples.map((s) => s.value_int as number)),
-      minPercent:
-        daySamples
-          .map((s) => s.value_int_3 ?? s.value_int)
-          .filter((v): v is number => v !== null)
-          .reduce((a, b) => Math.min(a, b), Infinity) ?? null,
-      count: daySamples.length,
-    }))
-    .sort((a, b) => a.day.localeCompare(b.day));
-  const cleanPoints = points.map((p) => ({
-    ...p,
-    minPercent: Number.isFinite(p.minPercent) ? p.minPercent : null,
+  const cleanPoints = spo2.per_day.map((d) => ({
+    day: d.day,
+    avgPercent: d.avg,
+    minPercent: d.min,
+    count: d.n,
   }));
   const minValues = cleanPoints
     .map((p) => p.minPercent)
     .filter((v): v is number => v !== null);
 
-  // Single lowest observation across the full range (not the
-  // day-averaged version). Helps spot one-off desaturations.
-  const allObserved = samples
-    .flatMap((s) => [s.value_int_3, s.value_int])
-    .filter((v): v is number => v !== null && Number.isFinite(v));
-  const minObserved = allObserved.length > 0
-    ? allObserved.reduce((a, b) => (b < a ? b : a), Infinity)
-    : null;
+  const minObserved = spo2.min_observed;
+  const eventsBelow93 = spo2.events_below_93;
 
-  const eventsBelow93 = allObserved.filter((v) => v < SPO2_DESATURATION_EVENT).length;
-
-  const days = buckets.size;
+  const days = cleanPoints.length;
   const suff: VitalSufficiency = days < DAYS_SUFFICIENT_MIN
     ? sufficiency('insufficient', `${days} of ≥${DAYS_SUFFICIENT_MIN} days needed.`)
     : sufficiency('sufficient', `${days} days observed.`);
@@ -543,7 +606,7 @@ function shapeSpO2(vitals: VitalsOtherRow[]): ReportData['spo2'] {
     ).length,
     eventsBelow93,
     points: cleanPoints,
-    count: samples.length,
+    count: spo2.count,
     sufficiency: suff,
     clinicalContext: buildSpo2Context({
       avgMinPercent,
@@ -554,7 +617,7 @@ function shapeSpO2(vitals: VitalsOtherRow[]): ReportData['spo2'] {
   };
 }
 
-function shapeSleep(vitals: VitalsOtherRow[]): ReportData['sleep'] {
+function shapeSleep(vitals: VitalsOtherRow[], tz: string): ReportData['sleep'] {
   const samples = vitals.filter(
     (v) => v.vital_type === 'sleep_session' && v.value_int !== null,
   );
@@ -567,7 +630,7 @@ function shapeSleep(vitals: VitalsOtherRow[]): ReportData['sleep'] {
   }
   const buckets = new Map<string, VitalsOtherRow>();
   for (const s of samples) {
-    const day = dayOf(s.measured_at);
+    const day = dayOf(s.measured_at, tz);
     if (!buckets.has(day)) buckets.set(day, s);
   }
   const points = Array.from(buckets.entries())
@@ -598,7 +661,7 @@ function shapeSleep(vitals: VitalsOtherRow[]): ReportData['sleep'] {
   };
 }
 
-function shapeActivity(vitals: VitalsOtherRow[]): ReportData['activity'] {
+function shapeActivity(vitals: VitalsOtherRow[], tz: string): ReportData['activity'] {
   const samples = vitals.filter(
     (v) => v.vital_type === 'steps_day' && v.value_int !== null,
   );
@@ -615,7 +678,7 @@ function shapeActivity(vitals: VitalsOtherRow[]): ReportData['activity'] {
   // we take the MAX, which is the end-of-day total.
   const buckets = new Map<string, VitalsOtherRow>();
   for (const s of samples) {
-    const day = dayOf(s.measured_at);
+    const day = dayOf(s.measured_at, tz);
     const prev = buckets.get(day);
     if (!prev || (s.value_int ?? 0) > (prev.value_int ?? 0)) {
       buckets.set(day, s);
@@ -650,14 +713,6 @@ function shapeActivity(vitals: VitalsOtherRow[]): ReportData['activity'] {
   };
 }
 
-function median(values: number[]): number | null {
-  if (values.length === 0) return null;
-  const sorted = [...values].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0
-    ? (sorted[mid - 1] + sorted[mid]) / 2
-    : sorted[mid];
-}
 
 // ── Clinical context builders ─────────────────────────────────────
 //

@@ -147,9 +147,23 @@ export const useSleep = create<SleepState>((set, get) => ({
       (s) => now - s.sessionEndSec <= LAST_NIGHT_LOOKBACK_SEC && s.sessionEndSec <= now,
     );
     if (inWindow.length === 0) return null;
-    return inWindow.reduce((a, b) =>
+    // Data-completeness fix: one night can carry multiple overlapping
+    // sleep_session rows (the watch re-reports a night with a drifting
+    // synthesized start; measured_at = start is the dedup key, so each
+    // variant is its own row). Picking by latest end could surface the
+    // SHORTEST fragment and understate sleep. Take the most recent night
+    // (wake-morning date), then the fullest session in it — the overlapping
+    // fragments share a wake, so the longest is the superset (summing would
+    // double-count). Mirrors utils/vitalAggregators.computeSleepLastNight.
+    const wakeDate = (s: SleepSession) =>
+      new Date(s.sessionEndSec * 1000).toISOString().slice(0, 10);
+    const latest = inWindow.reduce((a, b) =>
       b.sessionEndSec > a.sessionEndSec ? b : a,
     );
+    const latestWake = wakeDate(latest);
+    return inWindow
+      .filter((s) => wakeDate(s) === latestWake)
+      .reduce((a, b) => (b.totalMinutes > a.totalMinutes ? b : a));
   },
 
   recentSessions: (nowSec, nights) => {

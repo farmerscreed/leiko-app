@@ -73,6 +73,14 @@ export interface ParentPulseFetchResult {
   pulse: DailyPulseData;
   /** Per-vital recent arrays. Used by parameterized VitalDetail screens. */
   recent: ParentVitalsRecent;
+  /**
+   * The wearer's (family owner's) IANA timezone, so the caregiver's
+   * VitalDetail screens render the wearer's readings in the wearer's
+   * local time — not the caregiver's device tz. null when unknown
+   * (caller falls back to the viewer's tz, then UTC). Readable under the
+   * `users` "same-family read profile" RLS policy.
+   */
+  wearerTimeZone: string | null;
 }
 
 // ----- Server row shapes ------------------------------------------
@@ -168,9 +176,6 @@ function mapSleep(row: VitalsOtherRow): SleepSession {
     transitions?: SleepTransition[];
     sleep_score?: number;
   };
-  const sessionStartSec = Math.floor(
-    new Date(row.measured_at).getTime() / 1000,
-  );
   const totalMinutes = row.value_int;
   const deepMinutes = row.value_int_2 ?? 0;
   const remMinutes = row.value_int_3 ?? 0;
@@ -179,9 +184,13 @@ function mapSleep(row: VitalsOtherRow): SleepSession {
   const awakeCount = j.awake_count ?? 0;
   const transitions = j.transitions ?? [];
   const sleepScore = j.sleep_score ?? 0;
-  const sessionEndSec = j.session_end_local
-    ? Math.floor(new Date(j.session_end_local).getTime() / 1000)
-    : sessionStartSec + totalMinutes * 60;
+  // measured_at is the session END (the constant night key — see
+  // mapSleepSessions). Derive the start deterministically as end - total;
+  // the actual start epoch is also carried in session_start_local.
+  const sessionEndSec = Math.floor(new Date(row.measured_at).getTime() / 1000);
+  const sessionStartSec = j.session_start_local
+    ? Math.floor(new Date(j.session_start_local).getTime() / 1000)
+    : sessionEndSec - (totalMinutes ?? 0) * 60;
   const sessionStartLocal =
     j.session_start_local ?? new Date(sessionStartSec * 1000).toISOString();
   const sessionEndLocal =
@@ -273,6 +282,7 @@ export async function fetchParentPulseData(
     sleepResult,
     stepsResult,
     caloriesResult,
+    ownerResult,
   ] = await Promise.all([
     client
       .from('readings')
@@ -328,6 +338,15 @@ export async function fetchParentPulseData(
       .eq('vital_type', 'calories_day')
       .order('measured_at', { ascending: false })
       .limit(CALORIES_LIMIT),
+    // Wearer (family owner) timezone — mirrors the listMembers/visibility
+    // FK-join pattern; readable via the `users` same-family RLS policy.
+    client
+      .from('family_members')
+      .select('users!family_members_user_id_fkey(timezone)')
+      .eq('family_id', familyId)
+      .eq('role', 'family_owner')
+      .is('removed_at', null)
+      .maybeSingle(),
   ]);
 
   if (readingsResult.error) throw readingsResult.error;
@@ -346,23 +365,35 @@ export async function fetchParentPulseData(
     mapCaloriesDay,
   );
 
+  // Wearer (family owner) tz — drives "today"/"night" boundaries in the
+  // aggregators so the caregiver sees the wearer's local days, not UTC. The
+  // embedded `users` join may surface as an object or single-element array.
+  const ownerUsers = (ownerResult.data as { users?: unknown } | null)?.users;
+  const ownerObj = Array.isArray(ownerUsers) ? ownerUsers[0] : ownerUsers;
+  const wearerTimeZone =
+    (ownerObj as { timezone?: string | null } | undefined)?.timezone ?? null;
+  const tz = wearerTimeZone ?? 'UTC';
+
   const snapshot: DailyPulseSnapshot = {
     bpLatest: readings[0] ?? null,
-    hrRestingToday: computeHRRestingToday(hr, nowSec),
-    hrRestingRecent: computeHRRestingRecent(hr, nowSec),
+    hrRestingToday: computeHRRestingToday(hr, nowSec, tz),
+    hrRestingRecent: computeHRRestingRecent(hr, nowSec, tz),
     hrLatestSampleAt: computeHRLatestSampleAt(hr),
     hrLatestBpm: computeHRLatestBpm(hr),
     spo2LatestPercent: computeSpO2LatestPercent(spo2),
-    spo2OvernightLowsRecent: computeSpO2OvernightLowsRecent(spo2, nowSec),
+    spo2OvernightLowsRecent: computeSpO2OvernightLowsRecent(spo2, nowSec, tz),
     spo2LatestSampleAt: computeSpO2LatestSampleAt(spo2),
-    sleepSession: computeSleepLastNight(sleep, nowSec),
-    activityToday: computeActivityToday(steps, nowSec),
+    sleepSession: computeSleepLastNight(sleep, nowSec, tz),
+    activityToday: computeActivityToday(steps, nowSec, tz),
   };
 
   const pulse = composeDailyPulseData(snapshot, nowSec);
 
+  // wearerTimeZone is best-effort: a failed/empty lookup leaves it null and
+  // the screens fall back to the viewer's tz, then UTC.
   return {
     pulse,
     recent: { readings, hr, spo2, sleep, steps, calories },
+    wearerTimeZone,
   };
 }

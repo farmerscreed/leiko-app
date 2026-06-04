@@ -56,6 +56,27 @@ export function VitalDetailRouter() {
     navigation.navigate('ForYourDoctor');
   }, [navigation]);
 
+  // ADR-0008 follow-up — "View all · N" under the recent lists opens the
+  // full-window VitalHistory browse. The detail screen resolves the
+  // family + wearer tz (it already has both); the router owns navigation
+  // and curries the vital kind. HR is excluded (per-day drill-down later).
+  const onViewAllHistory = useCallback(
+    (
+      vital: 'bp' | 'spo2' | 'sleep' | 'activity',
+      range: '7d' | '30d' | '90d',
+      historyFamilyId: string,
+      timeZone: string,
+    ) => {
+      navigation.navigate('VitalHistory', {
+        vital,
+        range,
+        familyId: historyFamilyId,
+        timeZone,
+      });
+    },
+    [navigation],
+  );
+
   switch (route.params.vital) {
     case 'bp':
       return (
@@ -66,6 +87,9 @@ export function VitalDetailRouter() {
           onLearnOpen={onLearnOpen}
           onSharePress={onSharePress}
           familyId={familyId}
+          onViewAllHistory={(range, fid, tz) =>
+            onViewAllHistory('bp', range, fid, tz)
+          }
         />
       );
     case 'hr':
@@ -84,6 +108,9 @@ export function VitalDetailRouter() {
           onArticleOpen={onArticleOpen}
           onLearnOpen={onLearnOpen}
           familyId={familyId}
+          onViewAllHistory={(range, fid, tz) =>
+            onViewAllHistory('spo2', range, fid, tz)
+          }
         />
       );
     case 'sleep':
@@ -93,6 +120,9 @@ export function VitalDetailRouter() {
           onArticleOpen={onArticleOpen}
           onLearnOpen={onLearnOpen}
           familyId={familyId}
+          onViewAllHistory={(range, fid, tz) =>
+            onViewAllHistory('sleep', range, fid, tz)
+          }
         />
       );
     case 'activity':
@@ -102,6 +132,9 @@ export function VitalDetailRouter() {
           onArticleOpen={onArticleOpen}
           onLearnOpen={onLearnOpen}
           familyId={familyId}
+          onViewAllHistory={(range, fid, tz) =>
+            onViewAllHistory('activity', range, fid, tz)
+          }
         />
       );
   }

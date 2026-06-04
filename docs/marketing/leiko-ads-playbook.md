@@ -1,5 +1,7 @@
 # The Leiko Ads Playbook — v2
 
+> **📎 Historical reference (stamped 2026-06-02).** This is a dated strategy/spec snapshot, kept for context — **not** living spec. For the app's current behaviour see the docs in `docs/00–15`, `docs/04-screens/`, and the decisions in `docs/_adr/`. Where this document and the shipped app disagree, the app + ADRs win.
+
 **A hardware-DTC + reservation-funnel field manual for paid acquisition on a lean budget, from Nigeria + diaspora into US mainstream.**
 
 Built for: Leiko (com.leiko.app) | Maker: Lawrence O. (primethebrain@gmail.com)

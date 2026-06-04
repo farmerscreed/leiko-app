@@ -1,6 +1,6 @@
 # Sprint Sequence — Post-Pivot
 
-**Updated 2026-05-20 — added the 16.5a–i hardening passes, Sprints 16.6 / 17a / 17b / 18, and reorganised Phase 6 to reflect Sprint 18 as the launch-readiness sprint that supersedes the original Sprint 17 card.** Previous update 2026-05-07 inserted Sprints 1.5, 7.5, 7.6, 7.7, 8.5, 9.5, 12.5 for the Apple-of-Healthcare pivot. This document is the index — read it to understand sequence + gating; read the individual sprint cards for details.
+**Updated 2026-06-02 — Sprint 18 closed; Sprints 19 and 20 added; Phase 7 added for the ADR-0006/0007 unified-model pivot, which shipped to `main` as PR #8 (`3c1dba7`). Also corrected the D11–D14 paths (they live in `docs/_reference/`, not the retired `WATCH PROJECT/` working folder).** Previous update 2026-05-20 added the 16.5a–i hardening passes, Sprints 16.6 / 17a / 17b / 18, and reorganised Phase 6 to reflect Sprint 18 as the launch-readiness sprint that supersedes the original Sprint 17 card. Update 2026-05-07 inserted Sprints 1.5, 7.5, 7.6, 7.7, 8.5, 9.5, 12.5 for the Apple-of-Healthcare pivot. This document is the index — read it to understand sequence + gating; read the individual sprint cards for details.
 
 ---
 
@@ -8,10 +8,11 @@
 
 | State | Doc | Path |
 |---|---|---|
-| ✅ | D11 — Brand Repositioning | `WATCH PROJECT/D11_Brand_Repositioning.md` |
-| ✅ | D12 — Visual System v2 | `WATCH PROJECT/D12_Visual_System_v2.md` |
-| ✅ | D13 — Multi-Vitals Constellation Spec | `WATCH PROJECT/D13_Multi_Vitals_Constellation_Spec.md` |
-| ✅ | D14 — Ambient AI Architecture | `WATCH PROJECT/D14_Ambient_AI_Architecture.md` |
+| ✅ | D11 — Brand Repositioning | `docs/_reference/D11-brand-repositioning.md` |
+| ✅ | D12 — Visual System v2 | `docs/_reference/D12-visual-system-v2.md` |
+| ✅ | D13 — Multi-Vitals Constellation Spec | `docs/_reference/D13-multi-vitals-constellation-spec.md` |
+| ✅ | D14 — Ambient AI Architecture | `docs/_reference/D14-ambient-ai-architecture.md` |
+| ✅ | D15 — Affiliate & Editorial Commerce Strategy | `docs/_reference/D15-affiliate-strategy.md` |
 | ⏳ | Surgical doc-tree updates (`docs/04-screens/`, `docs/03-components/`, `docs/05-voice-and-claims.md`, `docs/07-ai-assistant.md`, `docs/10-anomaly-logic.md`, `docs/11-push-notifications.md`) | One sweep PR after sign-off |
 
 ---
@@ -107,17 +108,39 @@ Single-phone bench work surfaced ~30 BLE / sync / hydration issues across BP + H
 | ✅ | **16.6** | Pre-launch validation + P1 hardening + two-phone test rig | Closed 2026-05-19 | `done/sprint-16-6-pre-launch-validation.md` |
 | ✅ | **17a** | Per-person dashboard (caregiver immersive surface) | Closed 2026-05-20 | `done/sprint-17a-per-person-dashboard.md` |
 | ✅ | **17b** | Family member management + visibility enforcement | Closed 2026-05-20 | `done/sprint-17b-family-member-management.md` |
-| ⏳ | **18** | Launch readiness blitz (SEC-1 + ops + PDF wiring + CI) | Active | `sprint-18-launch-readiness.md` |
+| ✅ | **18** | Launch readiness blitz (SEC-1 + ops + PDF wiring + CI) | Closed 2026-06-02 (engineering done; founder-ops OPS-1..12 tracked in `PRODUCTION_READINESS.md`) | `done/sprint-18-launch-readiness.md` |
 
 The original Sprint 17 "Launch" card was superseded — its scope was redistributed across 16.6 / 17a / 17b / 18. The card now sits in `done/` with a SUPERSEDED header explaining the redistribution.
 
 ---
 
-## Phase 7 — Store submission (post-Sprint 18)
+## Phase 7 — Unified-model pivot (ADR-0006 / ADR-0007)
+
+Hands-on multi-phone testing after Sprint 18 surfaced that the
+caregiver/self-buyer split and the multi-button invite system were
+confusing in practice. Rather than patch them incrementally (the original
+Sprint 19 scope), the founder and engineer wrote two ADRs that unified the
+model wholesale. This work shipped to `main` as **PR #8** (`3c1dba7`,
+2026-06-02).
+
+| Order | Sprint | Title | Status | File |
+|---|---|---|---|---|
+| ⛔️ | **19** | Multi-account + caregiver-model fixes | SUPERSEDED by ADR-0006/0007 | `done/sprint-19-multi-account-caregiver-model.md` |
+| ✅ | **20** | Phase 1 — stabilise sync routing (device-authoritative) | Closed | `done/sprint-20-phase1-stabilise-routing.md` |
+| ✅ | **ADR-0006** | Unified caregiver/self-buyer model (one constellation home, `account_type` inert, Settings → 2 sections) | Accepted + shipped (PR #8) | `docs/_adr/0006-unified-caregiver-self-buyer-model.md` |
+| ✅ | **ADR-0007** | Unified "Connect" invite (one code; direction inferred from watch ownership) | Accepted + shipped (PR #8) | `docs/_adr/0007-unified-connect-invite.md` |
+
+Sprint 19's incremental fixes were folded into the ADR work — that card is
+in `done/` with a SUPERSEDED header. The session handoff for the pivot is
+archived at `done/session-2026-06-02-adr0006-0007-handoff.md`.
+
+---
+
+## Phase 8 — Store submission (post-pivot)
 
 There is no dedicated sprint card for the final store-submission work. The remaining items are tracked in **`plans/PRODUCTION_READINESS.md`** — the launch-gating checklist — as OPS-1..12 (founder ops blitz, all small), QUA-3/4/6 (Android BLE foreground service, CI workflow, npm vulns), and the explicit v1.1 deferrals (GAP-1..15, POL-1..7). Treat that document as the source of truth for "what ships at v1.0."
 
-The actual submission cycle (TestFlight + Play Internal builds, App Store + Play screenshots, beta tester recruitment, store-review iteration) happens after Sprint 18 closes — it's a workstream against PRODUCTION_READINESS.md, not a new sprint card.
+The actual submission cycle (TestFlight + Play Internal builds, App Store + Play screenshots, beta tester recruitment, store-review iteration) is a workstream against PRODUCTION_READINESS.md, not a new sprint card. As of 2026-06-02 it is gated only on the founder-ops dependencies (OPS-1..12) and a fresh APK built from `main` after the ADR-0006/0007 merge.
 
 ---
 
@@ -178,7 +201,16 @@ D11 ──► D12 ──► (D13 ∥ D14) ──► docs/ sweep PR
                                                   Sprint 17b (family management)
                                                         │
                                                         ▼
-                                                  Sprint 18 (launch readiness blitz) ◀ active
+                                                  Sprint 18 (launch readiness blitz) ✅ closed
+                                                        │
+                                                        ▼
+                                                  Sprint 19 (model fixes) ⛔️ superseded
+                                                        │
+                                                        ▼
+                                                  Sprint 20 (stabilise sync routing) ✅
+                                                        │
+                                                        ▼
+                                                  ADR-0006 / ADR-0007 (unified model) ✅ PR #8
                                                         │
                                                         ▼
                                                   PRODUCTION_READINESS.md (store submission)
@@ -190,7 +222,8 @@ Notes on the graph:
 - **Sprint 13 was a hard gate for Sprint 11** — the Tier-A intent router cites Learn cards by ID.
 - **Sprint 16.5a–i** ran sequentially against the bench, not in parallel — each card surfaced data that fed the next.
 - **Sprint 17a + 17b** could have run in parallel; they didn't because both depended on the 16.6 caregiver-flow context.
-- **Sprint 18 is the active sprint** as of 2026-05-20.
+- **Sprint 18 closed 2026-06-02**; its remaining founder-ops items live in `PRODUCTION_READINESS.md`.
+- **ADR-0006 / ADR-0007** superseded the incremental Sprint 19 fixes and shipped the unified model to `main` as PR #8.
 
 ---
 
@@ -198,12 +231,12 @@ Notes on the graph:
 
 | Status | Item | Source |
 |---|---|---|
-| ⏳ Active | Sprint 18 Day 1 — SEC-1 (MMKV encryption at rest) | `sprint-18-launch-readiness.md` |
-| ⏳ Pending | Sprint 18 Day 2 — Founder ops blitz (OPS-1..12) | `PRODUCTION_READINESS.md` |
-| ⏳ Pending | Sprint 18 Day 3 — Doctor-PDF wiring (FUN-5 / FUN-6) | `sprint-18-launch-readiness.md` |
-| ⏳ Pending | Sprint 18 Day 4 — CI deploy workflows + Help/Support row | `sprint-18-launch-readiness.md` |
-| ⏳ Pending | Sprint 18 Day 5 — Bench verification (FUN-7/8, QUA-1/2/3) | `sprint-18-launch-readiness.md` |
-| ⏳ Post-18 | Store submission (TestFlight, Play Internal, screenshots, store metadata, beta testers) | `PRODUCTION_READINESS.md` "Week 3" + "Week 4" |
+| ✅ Done | ADR-0006/0007 unified model + Connect invites (PR #8) | `done/session-2026-06-02-adr0006-0007-handoff.md` |
+| ✅ Done | Sprint 18 engineering (SEC-1 MMKV encryption, doctor-PDF wiring, CI workflows, Help/Support row, bench verification) | `done/sprint-18-launch-readiness.md` |
+| ⏳ Pending | Founder ops blitz (OPS-1..12 — keystores, certs, APNs/FCM, RevenueCat, domain hosting, prod env) | `PRODUCTION_READINESS.md` |
+| ⏳ Pending | Fresh APK from `main` after the ADR-0006/0007 merge | `NEXT_SESSION_START_HERE.md` |
+| ⏳ Pending | Store submission (TestFlight, Play Internal, screenshots, store metadata, beta testers) | `PRODUCTION_READINESS.md` "Week 3" + "Week 4" |
+| ✅ Resolved | WatermelonDB dropped (ADR-0009); AI Tier-A (Llama/Ollama) still planned for v1.x — both reflected in `00-tech-stack.md` | `NEXT_SESSION_START_HERE.md` |
 | 📦 v1.1 | GAP-1..15 (Sleep REM, hourly activity, sports records, deep BP backfill, embeddings build, full Learn corpus, photos, theme toggle, parent persona, jailbreak CI, Maestro E2E, Trends harmonisation, single-string cascade, clinical-review queue) | `PRODUCTION_READINESS.md` § P2 |
 | 📦 v1.1 | POL-1..7 (watch timeout, domain URL config, dep pinning, gitignore, SQL lint CI, type casts, IANA timezone) | `PRODUCTION_READINESS.md` § P2 polish |
 
@@ -211,7 +244,7 @@ Notes on the graph:
 
 ## What's not on this list
 
-- Strategic docs (D1–D14) — those are in `docs/_reference/` (D1–D10) and `WATCH PROJECT/` (D11–D14)
+- Strategic docs (D1–D15) — all now consolidated in `docs/_reference/` (the old `WATCH PROJECT/` working folder for D11–D14 is retired)
 - Sprint 7-original — superseded by Sprint 7.7 rewrite; the original is in `plans/done/` for historical reference
 - v1.1 features — voice mode AI, dark-mode launch, custom icon set, expanded correlation explorer, Apple Watch / Wear OS companion, additional health platform integrations (Garmin, Fitbit, Oura, Whoop)
 

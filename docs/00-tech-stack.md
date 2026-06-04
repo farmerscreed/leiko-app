@@ -18,7 +18,7 @@ Canonical version pins and service locks. Sourced from D7 §2 (final lock) and D
 | State (client) | Zustand | 4.x |
 | Server-state cache | TanStack Query (React Query) | v5 |
 | Navigation | React Navigation (native stack + bottom tabs) | v7 |
-| Local relational DB | WatermelonDB | 0.27+ |
+| On-device persistence | MMKV (encrypted KV) + Zustand (client state); no separate relational DB | — (see ADR-0009) |
 | Encrypted KV | react-native-mmkv (with platform Keychain/Keystore) | 4.x (bumped from 2.x in Sprint 2 — Nitro Modules require 4.x for Expo SDK 54 + React 19 + New Architecture; same governance route as ADR-0004 for reanimated/gesture-handler. The 2.x lineage stopped at 2.12.2 in early 2024 and does not support the New Architecture cleanly.) |
 | Charts | Victory Native XL | latest stable |
 | i18n | i18next + react-i18next | latest stable |
@@ -33,6 +33,14 @@ Canonical version pins and service locks. Sourced from D7 §2 (final lock) and D
 | Apple HealthKit | `@kingstinct/react-native-healthkit` | 14.0.0 (added Sprint 9.5 — D13 §12. Nitro-native, fits the same Nitro stack MMKV 4.x already runs on. Chosen over the older `react-native-health` because that lib is ~18 months stale with no New Architecture support — see ADR-0005.) |
 | Android Health Connect | `react-native-health-connect` | 3.5.0 (added Sprint 9.5 — D13 §12. Ships an Expo config plugin; covers all six HC record types D13 §12.4 names — see ADR-0005.) |
 | Nitro Modules runtime | `react-native-nitro-modules` | 0.35.6 (promoted Sprint 9.5 from transitive (via MMKV 4.x) to direct dep, satisfying `@kingstinct/react-native-healthkit`'s peer dep — see ADR-0005.) |
+
+> **WatermelonDB removed (ADR-0009, 2026-06-02).** WatermelonDB was locked
+> but never installed; the founder confirmed the app uses Supabase, so it is
+> **dropped**. There is **no separate on-device relational DB** — on-device
+> persistence is **MMKV (encrypted KV) + Zustand (client state)**, with
+> **Supabase (Postgres)** as the queryable source of truth read through
+> **TanStack Query**. Offline-first is preserved by the MMKV pending buffer.
+> See `docs/_adr/0009-drop-watermelondb.md`.
 
 **Rejected (do not propose without ADR)**: Native Swift+Kotlin, Flutter, Expo Go, Realm, AsyncStorage as primary, Redux Toolkit, Apollo, Material/Chakra/NativeBase UI libs, @gorhom/bottom-sheet (heavy abstraction — we use the primitives directly), `@react-native-community/blur` (replaced by expo-blur in Sprint 1.5; remains in some D12 references pre-amendment), paid display typefaces — Recoleta / Söhne / Reckless Neue (deferred to v1.1 per D12 §3.1 founder decision), `react-native-health` (rejected in Sprint 9.5 — stale + no New Architecture support; see ADR-0005).
 
@@ -59,7 +67,7 @@ Three-tier model routing through a single LiteLLM gateway.
 
 | Tier | Model | Hosting | Use case |
 | --- | --- | --- | --- |
-| A (local) | Llama 3.1 8B (default) + Llama 3.2 3B (fast path) | Ollama on Hetzner GPU node | FAQ Q&A, output classifier (forbidden-claims pre-screen), reading-quality scoring |
+| A (local) ⏳ **planned, not yet built** | Llama 3.1 8B (default) + Llama 3.2 3B (fast path) | Ollama on Hetzner GPU node | FAQ Q&A, output classifier (forbidden-claims pre-screen), reading-quality scoring |
 | B (cloud) | Claude Haiku 4.5 (`claude-haiku-4-5-20251001`) | Anthropic API via LiteLLM | Conversational pattern explanation; latency-sensitive caregiver Q&A |
 | C (cloud) | Claude Sonnet 4.6 (`claude-sonnet-4-6`) | Anthropic API via LiteLLM | Weekly summaries, doctor report narrative |
 
@@ -67,7 +75,15 @@ Three-tier model routing through a single LiteLLM gateway.
 
 **BAA gate**: Anthropic BAA must be signed before any reading data is forwarded. Until then, Tier B/C run only against synthetic/scrubbed data in dev.
 
-> CLAUDE.md uses the simplified phrasing "Haiku 4.5 for most queries, Sonnet 4.6 for complex." That's accurate for Tier B/C only — Tier A (Llama on Ollama) handles classification and FAQ. See `docs/07-ai-assistant.md`.
+> CLAUDE.md uses the simplified phrasing "Haiku 4.5 for most queries, Sonnet 4.6 for complex." That's accurate for Tier B/C only.
+>
+> ⏳ **Tier A status (flagged 2026-06-02).** The Llama-on-Ollama local tier is
+> **planned for v1.x but not yet built.** In the shipped app, the live "Tier
+> A" is a **client-side deterministic intent-router + templates** (no local
+> LLM) — see `apps/mobile/src/services/ai/`. Tier B (Haiku) and Tier C
+> (Sonnet) are real, in the edge functions. The Ollama tier remains the
+> intended local layer (founder decision: still planned); until it ships,
+> read "Tier A" as the deterministic router. See `docs/07-ai-assistant.md`.
 
 ---
 
@@ -139,7 +155,7 @@ Leiko is **direct-to-consumer**; we are NOT a Business Associate to a Covered En
 | Postgres at rest | TDE (LUKS volume) | LUKS key in Hetzner KMS |
 | Storage at rest | AES-256 (Supabase Storage) | Per-bucket key |
 | Mobile keychain | iOS Keychain / Android Keystore (hardware-backed where available) | OS-managed |
-| Local relational DB | SQLCipher AES-256 (WatermelonDB) | Key derived from Keychain entry; rotates on re-install |
+| Local KV at rest (MMKV) | AES-256 (MMKV encryption) | Key in iOS Keychain / Android Keystore |
 
 ### PHI handling rules (HARD)
 1. **Never** log reading values (sys/dia/pulse) outside the database.

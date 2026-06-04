@@ -361,7 +361,8 @@ async function handleLegacy(
       device_id: deviceId,
       source: r.source,
       measured_at: measuredAt,
-      measured_at_local: measuredAt, // Sprint 7 wires the parent IANA TZ
+      // NULL, not a UTC value mislabeled "local" — see mapBPReadings.
+      measured_at_local: null,
       systolic: r.systolic,
       diastolic: r.diastolic,
       pulse: r.pulse,
@@ -371,11 +372,13 @@ async function handleLegacy(
 
   if (insertReading.error) {
     // 23505 = unique_violation (readings_dedupe). Return existing row.
+    // Migration 0031: the dedup key is (family_id, measured_at), so the
+    // existing-row lookup keys off the family, not the device_id.
     if ((insertReading.error as any).code === '23505') {
       const dup = await serviceClient
         .from('readings')
         .select('id')
-        .eq('device_id', deviceId)
+        .eq('family_id', familyId)
         .eq('measured_at', measuredAt)
         .single();
       if (dup.error) {
@@ -477,8 +480,16 @@ async function handleMultiVitals(
     counts.rejected.sleep = rejected.length;
     await logRejected(serviceClient, familyId, userId, 'sleep_session', rejected);
     if (accepted.length > 0) {
-      const rows = mapSleepSessions(accepted, familyId, deviceId);
-      // Mutable: re-synced sessions reconcile totals + inferred wake.
+      const mapped = mapSleepSessions(accepted, familyId, deviceId);
+      // measured_at is now the session END (constant per night). A single
+      // sync can carry several rows for the same night (the watch re-reports
+      // a night with a drifting total → drifting synthesized start, all
+      // sharing one end). Collapse those to the fullest, then drop any that
+      // don't exceed the stored total, so a shorter re-read can NEVER shrink
+      // a night. Mirrors the steps/calories monotonic guard; mutable upsert
+      // then reconciles the surviving (fullest) row.
+      const collapsed = collapseToMaxByMeasuredAt(mapped);
+      const rows = await dropNonIncreasingDailyRows(serviceClient, collapsed);
       const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows, { mutable: true });
       if (errored) return json({ error: 'sleep_insert_failed', detail: errored }, 500);
       counts.inserted.sleep = inserted;
@@ -585,7 +596,10 @@ async function insertReadings(
   const { error, data } = await serviceClient
     .from('readings')
     .upsert(rows, {
-      onConflict: 'device_id,measured_at',
+      // Device-independent dedup (migration 0031): a BP reading is
+      // identified by (family_id, measured_at), not the watch that sent it,
+      // so a re-pair can't re-import history under a new device_id.
+      onConflict: 'family_id,measured_at',
       ignoreDuplicates: true,
     })
     .select('id');
@@ -606,6 +620,21 @@ async function insertReadings(
 // 1529 from when the day was live). Drop incoming rows that do not
 // strictly exceed what's already stored; the survivors then update on
 // conflict. Homogeneous batch (one device_id + vital_type) per call.
+// Collapse rows that share a measured_at to the single one with the largest
+// value_int. Used for sleep_session: one sync can carry multiple rows for
+// the same night (now keyed on the constant session-end), and the fullest
+// is the most-complete read. Without this, a bulk upsert of same-key rows
+// would error ("ON CONFLICT cannot affect row a second time").
+function collapseToMaxByMeasuredAt(rows: VitalsOtherRow[]): VitalsOtherRow[] {
+  const best = new Map<string, VitalsOtherRow>();
+  for (const r of rows) {
+    const key = new Date(r.measured_at).toISOString();
+    const cur = best.get(key);
+    if (!cur || (r.value_int ?? 0) > (cur.value_int ?? 0)) best.set(key, r);
+  }
+  return [...best.values()];
+}
+
 async function dropNonIncreasingDailyRows(
   serviceClient: SupabaseClient,
   rows: VitalsOtherRow[],

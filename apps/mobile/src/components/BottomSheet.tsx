@@ -22,7 +22,7 @@
 // react-native-reanimated@4.1.7 (see ADR-0004). The translateY is a shared
 // value driven on the UI thread so drag stays at 60fps.
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Dimensions,
   KeyboardAvoidingView,
@@ -125,23 +125,44 @@ export function BottomSheet({
 
   const dismissDuration = theme.duration('slow');
 
+  // Latest `visible` for the animation-completion callbacks. A dismissal
+  // animation can be CANCELLED (finished === false): rapid open/close, a
+  // competing gesture + backdrop dismiss, a re-render restarting the
+  // timing. The old code only unmounted on finished === true, so a
+  // cancelled dismissal left the (invisible: backdrop at opacity 0, sheet
+  // off-screen) Modal mounted forever — silently eating every touch on
+  // the screen below ("the back button sometimes doesn't work").
+  // settleDismissed unmounts on ANY dismissal outcome unless the sheet
+  // was re-opened mid-animation.
+  const visibleRef = useRef(visible);
+  visibleRef.current = visible;
+  const settleDismissed = useCallback(() => {
+    if (!visibleRef.current) setMounted(false);
+  }, []);
+
   useEffect(() => {
     if (visible) {
       setMounted(true);
       translateY.value = sheetRiseInTranslate(theme.reduceMotion, 0);
       backdropOpacity.value = sheetRiseInBackdropOpacity(theme.reduceMotion, theme.opacity.scrim);
-    } else if (mounted) {
+      return undefined;
+    }
+    if (mounted) {
       backdropOpacity.value = sheetRiseOutBackdropOpacity(theme.reduceMotion);
       translateY.value = withTiming(
         SCREEN_HEIGHT,
         { duration: dismissDuration, easing: EASE_ACCELERATE },
-        (finished) => {
-          if (finished) {
-            runOnJS(setMounted)(false);
-          }
+        () => {
+          // Finished OR cancelled — either way the sheet must not linger.
+          runOnJS(settleDismissed)();
         },
       );
+      // JS-side guarantee: even if the worklet callback never fires
+      // (cancelled animation chains), the invisible Modal must unmount.
+      const fallback = setTimeout(settleDismissed, dismissDuration + 50);
+      return () => clearTimeout(fallback);
     }
+    return undefined;
   }, [
     visible,
     mounted,
@@ -150,6 +171,7 @@ export function BottomSheet({
     backdropOpacity,
     theme.reduceMotion,
     theme.opacity.scrim,
+    settleDismissed,
   ]);
 
   const dismissFromGesture = () => {
@@ -161,6 +183,10 @@ export function BottomSheet({
         if (finished) {
           runOnJS(setMounted)(false);
           runOnJS(onDismiss)();
+        } else {
+          // Cancelled mid-gesture (a parent-driven close took over) —
+          // settleDismissed decides from the latest `visible`.
+          runOnJS(settleDismissed)();
         }
       },
     );
