@@ -37,6 +37,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { useTheme, type Theme } from '../../theme';
+import {
+  downloadDoctorPdf,
+  pdfFileExists,
+} from '../../services/doctorPdfFile';
 import { useAuth } from '../../state/auth';
 import { useFamilyReadings } from '../../hooks/useFamilyReadings';
 import { useTrendsData } from '../../hooks/useTrendsData';
@@ -195,7 +199,10 @@ function dateRangeLabel(range: DoctorPdfRange, nowMs: number = Date.now()): stri
 
 export function ForYourDoctorScreen(props: Nav) {
   const theme = useTheme();
-  const nav = props.navigation as { goBack: () => void };
+  const nav = props.navigation as {
+    goBack: () => void;
+    navigate: (route: string, params?: object) => void;
+  };
   const initialRange = props.route?.params?.range as
     | DoctorPdfRange
     | 'all_time'
@@ -366,12 +373,29 @@ export function ForYourDoctorScreen(props: Nav) {
         generatedAtMs: Date.now(),
         bytes: result.bytes,
       };
-      writeLastGenerated(info);
-      setLastGenerated(info);
-      try {
-        await Share.share(buildSharePayload(result.url, accountType, range, parentLabel));
-      } catch {
-        // OS sheet dismissed — nothing to do.
+      // 2026-06-05 file-share fix: download the PDF and SHOW the document
+      // (PdfPreview, which shares the actual file). The old behaviour
+      // shared the signed URL as text — recipients got a link that
+      // expired after 1 hour instead of the report.
+      const downloaded = await downloadDoctorPdf(result.url, range);
+      if (downloaded.status === 'ok') {
+        const withFile = { ...info, fileUri: downloaded.uri };
+        writeLastGenerated(withFile);
+        setLastGenerated(withFile);
+        nav.navigate('PdfPreview', {
+          fileUri: downloaded.uri,
+          title: `Doctor report · last ${RANGE_WORD[range]}`,
+        });
+      } else {
+        // Download failed (e.g. flaky network right after generating) —
+        // fall back to the legacy URL share rather than dead-ending.
+        writeLastGenerated(info);
+        setLastGenerated(info);
+        try {
+          await Share.share(buildSharePayload(result.url, accountType, range, parentLabel));
+        } catch {
+          // OS sheet dismissed — nothing to do.
+        }
       }
       setPhase('default');
       return;
@@ -409,15 +433,18 @@ export function ForYourDoctorScreen(props: Nav) {
   // generate.
   const onReShare = useCallback(async () => {
     if (!lastGenerated) return;
-    try {
-      await Share.share(
-        buildSharePayload(lastGenerated.url, accountType, lastGenerated.range, parentLabel),
-      );
-    } catch {
-      // OS sheet dismissed — fall back to a fresh generate.
-      void onGenerate();
+    // 2026-06-05 — prefer re-opening the downloaded document. The cache
+    // may have been evicted (and the signed URL expires in 1 hour), so
+    // anything else falls back to a fresh generate.
+    if (lastGenerated.fileUri && pdfFileExists(lastGenerated.fileUri)) {
+      nav.navigate('PdfPreview', {
+        fileUri: lastGenerated.fileUri,
+        title: `Doctor report · last ${RANGE_WORD[lastGenerated.range]}`,
+      });
+      return;
     }
-  }, [accountType, lastGenerated, parentLabel, onGenerate]);
+    void onGenerate();
+  }, [lastGenerated, onGenerate, nav]);
 
   return (
     <SafeAreaView
