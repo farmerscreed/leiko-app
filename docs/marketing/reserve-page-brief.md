@@ -4,6 +4,15 @@
 
 **For the agent maintaining leiko.health. Self-contained — everything you need to execute is below.**
 
+> 🔒 **CONFIDENTIALITY — supplier identity is a trade secret.** Never publish the
+> manufacturer's name, the FDA establishment-registration number, the 510(k) number,
+> any EUDAMED/UDI identifier, or "verifiable links" to the FDA/EUDAMED/ISO public
+> records — **each one resolves to the manufacturer** in a public database. State the
+> regulatory *status* generically ("FDA-listed Class II, cleared via the 510(k)
+> process"; "EU MDR Class IIa"; "ISO 13485 manufacturing"). Substantiation numbers are
+> held privately by the founder and provided off the public record only if an ad
+> platform or regulator asks. Also: "cleared", never "approved" (Class II is cleared).
+
 ---
 
 ## TL;DR
@@ -24,7 +33,7 @@ This is the single most important conversion surface in the entire Leiko go-to-m
 
 ## What Leiko is — for context
 
-A wristwatch with a real inflating blood-pressure cuff (vs the optical "estimate" most smartwatches use). FDA Establishment Registration #3011654863. EU MDR Class IIa. ISO 13485 certified manufacturing.
+A wristwatch with a real inflating blood-pressure cuff (vs the optical "estimate" most smartwatches use). An FDA-listed Class II blood-pressure device, cleared through the FDA 510(k) process. EU MDR Class IIa. ISO 13485 certified manufacturing. *(State these generically — never the underlying numbers or maker; see the confidentiality note above.)*
 
 The watch + a companion app that shows the user how their daily activities (walk, sleep, stress) affect their blood pressure. Pairs with a Family Circle so adult children can watch over elderly parents' readings remotely.
 
@@ -80,10 +89,15 @@ Locks in your spot in the next batch
 
 ### 2. Trust strip (immediately after hero)
 
-Three small badges side by side, with verifiable links:
-- "FDA Establishment Registration #3011654863" → link to FDA database lookup
-- "EU MDR Class IIa" → link to EUDAMED entry (if available; otherwise EU MDR explanation page)
-- "ISO 13485 manufacturing facility" → link to ISO 13485 standard description
+Three small badges side by side — **status claims only, NOT links to public records.**
+Do **not** link to the FDA database lookup, the EUDAMED entry, or an ISO facility page:
+each reveals the manufacturer (a trade secret — see the confidentiality note up top).
+- "FDA-listed Class II device"
+- "EU MDR Class IIa"
+- "ISO 13485 manufacturing"
+
+If a visitor or platform wants proof, route them to a "Verified — details on request"
+note; the founder supplies substantiation privately, off the public page.
 
 Below the badges, one line of body text:
 "Most BP smartwatches are sports trackers in disguise. Leiko is the real thing."
