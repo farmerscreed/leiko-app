@@ -242,3 +242,80 @@ describe('aggregateTrends — empty input', () => {
     });
   });
 });
+
+// ── trendsFromSummary (migration 0035 server aggregates) ─────────────
+
+import { trendsFromSummary } from '../trends-aggregate';
+import type { TrendsServerSummary } from '../../types/database';
+
+function summaryFixture(over: Partial<TrendsServerSummary> = {}): TrendsServerSummary {
+  return {
+    bp: {
+      count: 4,
+      avg_sys: 140,
+      avg_dia: 87,
+      per_day: [
+        { day: '2026-06-04', sys: 120, dia: 78, pulse: 70, n: 2 }, // in band
+        { day: '2026-06-05', sys: 150, dia: 95, pulse: null, n: 2 }, // out
+      ],
+    },
+    hr: {
+      count: 500,
+      per_day: [
+        { day: '2026-06-04', night_median: 58, all_median: 72, n: 280 },
+        { day: '2026-06-05', night_median: null, all_median: 75, n: 220 },
+      ],
+    },
+    spo2: {
+      count: 40,
+      per_day: [{ day: '2026-06-05', avg: 97.5, min: 94, n: 20 }],
+    },
+    sleep: {
+      count: 2,
+      per_night: [
+        { day: '2026-06-04', total: 445, deep: 138 },
+        { day: '2026-06-05', total: 449, deep: 51 },
+      ],
+    },
+    activity: { count: 3, per_day: [{ day: '2026-06-05', steps: 4989 }] },
+    ...over,
+  };
+}
+
+describe('trendsFromSummary', () => {
+  it('maps per-day aggregates onto the TrendsData contract', () => {
+    const out = trendsFromSummary(summaryFixture());
+    expect(out.series.bp).toHaveLength(2);
+    expect(out.series.bp[0]).toEqual({
+      day: '2026-06-04', sys: 120, dia: 78, pulse: 70, count: 2,
+    });
+    expect(out.summary.bp.count).toBe(4);
+    expect(out.summary.bp.avgSys).toBe(140);
+    // One of two day-means inside the band → 0.5.
+    expect(out.summary.bp.pctInRange).toBe(0.5);
+  });
+
+  it('resting proxy: night median, falling back to the all-day median', () => {
+    const out = trendsFromSummary(summaryFixture());
+    expect(out.series.hr[0].restingBpm).toBe(58); // night available
+    expect(out.series.hr[1].restingBpm).toBe(75); // fallback to all-day
+    expect(out.summary.hr.avgResting).toBe((58 + 75) / 2);
+  });
+
+  it('sleep/activity series carry the fullest-per-night / max-per-day values', () => {
+    const out = trendsFromSummary(summaryFixture());
+    expect(out.series.sleep[1]).toEqual({
+      day: '2026-06-05', totalMinutes: 449, deepMinutes: 51,
+    });
+    expect(out.series.activity[0].totalSteps).toBe(4989);
+    expect(out.summary.sleep.avgTotalMinutes).toBe((445 + 449) / 2);
+  });
+
+  it('visibility-gated (empty) sections map to empty series, not crashes', () => {
+    const out = trendsFromSummary(
+      summaryFixture({ hr: { count: 0, per_day: [] } }),
+    );
+    expect(out.series.hr).toEqual([]);
+    expect(out.summary.hr).toEqual({ count: 0, avgResting: null });
+  });
+});
