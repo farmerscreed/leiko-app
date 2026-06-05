@@ -15,7 +15,6 @@
 import { Platform } from 'react-native';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import ReactNativeBlobUtil from 'react-native-blob-util';
 import type { DoctorPdfRange } from './doctorPdf';
 
 /** Cache filename — unique per generation so re-generations never
@@ -78,6 +77,10 @@ export async function savePdfToDownloads(
 ): Promise<SavePdfResult> {
   try {
     if (Platform.OS === 'android') {
+      // Lazy import: blob-util registers a NativeEventEmitter at module
+      // load, which crashes jest suites that merely import this service
+      // and never loads at all on iOS. Only the Android save path pays.
+      const { default: ReactNativeBlobUtil } = await import('react-native-blob-util');
       await ReactNativeBlobUtil.MediaCollection.copyToMediaStore(
         {
           name: filename.replace(/\.pdf$/i, ''),
