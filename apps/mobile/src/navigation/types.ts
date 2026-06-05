@@ -57,6 +57,12 @@ export type CaregiverStackParamList = {
     familyId: string;
     timeZone: string;
   };
+  // 2026-06-05 — in-app preview of the generated doctor PDF; Share hands
+  // the local FILE to the OS sheet (the old link expired in 1 hour).
+  PdfPreview: {
+    fileUri: string;
+    title: string;
+  };
   Pairing: undefined;
   // ADR-0006 — optional invite params so a tapped join-link can deep-link
   // into Settings and auto-open the accept-invite sheet, prefilled.
@@ -165,6 +171,12 @@ export type SelfBuyerStackParamList = {
     range: '7d' | '30d' | '90d';
     familyId: string;
     timeZone: string;
+  };
+  // 2026-06-05 — in-app preview of the generated doctor PDF; Share hands
+  // the local FILE to the OS sheet (the old link expired in 1 hour).
+  PdfPreview: {
+    fileUri: string;
+    title: string;
   };
   // Sprint 9 — multi-vital trends + correlation cards + doctor PDF
   // export. The Self-Buyer Home tab bar's "Trends" entry routes here
