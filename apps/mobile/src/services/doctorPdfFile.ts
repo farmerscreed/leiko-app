@@ -12,8 +12,10 @@
 // Files land in Paths.cache — the OS may evict them; callers fall back
 // to re-download (fresh generation) when the cached file is gone.
 
+import { Platform } from 'react-native';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import ReactNativeBlobUtil from 'react-native-blob-util';
 import type { DoctorPdfRange } from './doctorPdf';
 
 /** Cache filename — unique per generation so re-generations never
@@ -52,6 +54,50 @@ export function pdfFileExists(uri: string): boolean {
     return new File(uri).exists;
   } catch {
     return false;
+  }
+}
+
+export type SavePdfResult =
+  | { status: 'ok' }
+  | { status: 'error'; reason: string };
+
+/**
+ * Save the cached report into the phone's visible storage (founder
+ * direction, 2026-06-05: "the user can also download the report to his
+ * phone, as much as he can share").
+ *
+ * Android: copies into the public **Downloads** collection via the
+ * MediaStore (react-native-blob-util — already in the stack as the PDF
+ * viewer's peer). Scoped-storage compliant; no permission prompt.
+ * iOS: there is no user-visible Downloads folder; the share sheet's
+ * "Save to Files" IS the platform's download — so we open it.
+ */
+export async function savePdfToDownloads(
+  uri: string,
+  filename: string,
+): Promise<SavePdfResult> {
+  try {
+    if (Platform.OS === 'android') {
+      await ReactNativeBlobUtil.MediaCollection.copyToMediaStore(
+        {
+          name: filename.replace(/\.pdf$/i, ''),
+          parentFolder: '',
+          mimeType: 'application/pdf',
+        },
+        'Download',
+        uri.replace(/^file:\/\//, ''),
+      );
+      return { status: 'ok' };
+    }
+    const shared = await sharePdfFile(uri);
+    return shared
+      ? { status: 'ok' }
+      : { status: 'error', reason: 'sharing_unavailable' };
+  } catch (e) {
+    return {
+      status: 'error',
+      reason: e instanceof Error ? e.message : 'save_failed',
+    };
   }
 }
 

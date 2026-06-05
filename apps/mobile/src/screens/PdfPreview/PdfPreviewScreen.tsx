@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Pdf from 'react-native-pdf';
-import { sharePdfFile } from '../../services/doctorPdfFile';
+import { savePdfToDownloads, sharePdfFile } from '../../services/doctorPdfFile';
 import { useTheme } from '../../theme';
 
 export interface PdfPreviewParams {
@@ -29,6 +29,17 @@ export function PdfPreviewScreen({ navigation, route }: Props) {
   const { fileUri, title } = route.params;
   const [pageInfo, setPageInfo] = useState<{ page: number; total: number } | null>(null);
   const [loadError, setLoadError] = useState(false);
+  // Download-to-phone state (founder direction 2026-06-05). 'saving'
+  // debounces double-taps; 'ok'/'error' drive the confirmation caption.
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'ok' | 'error'>('idle');
+
+  const onDownload = async () => {
+    if (saveState === 'saving') return;
+    setSaveState('saving');
+    const filename = fileUri.split('/').pop() ?? 'leiko_report.pdf';
+    const res = await savePdfToDownloads(fileUri, filename);
+    setSaveState(res.status === 'ok' ? 'ok' : 'error');
+  };
 
   const bodyStyle = theme.type('bodyM');
   const captionStyle = theme.type('caption');
@@ -131,6 +142,65 @@ export function PdfPreviewScreen({ navigation, route }: Props) {
           onError={() => setLoadError(true)}
         />
       )}
+
+      {!loadError ? (
+        <View style={{ paddingHorizontal: theme.spacing.xl, paddingTop: theme.spacing.s }}>
+          <Pressable
+            onPress={() => void onDownload()}
+            accessibilityRole="button"
+            accessibilityLabel="Download the report to your phone"
+            disabled={saveState === 'saving'}
+            testID="pdf-preview-download"
+            style={{
+              alignItems: 'center',
+              paddingVertical: theme.spacing.m,
+              borderRadius: theme.radii.m,
+              borderWidth: 1,
+              borderColor: theme.colors.brand.primary,
+              opacity: saveState === 'saving' ? 0.6 : 1,
+            }}
+          >
+            <Text
+              style={{
+                color: theme.colors.brand.primary,
+                fontSize: bodyStyle.size,
+                fontFamily: bodyStyle.family,
+                fontWeight: '500',
+              }}
+            >
+              {saveState === 'saving' ? 'Saving…' : 'Download to phone'}
+            </Text>
+          </Pressable>
+          {saveState === 'ok' ? (
+            <Text
+              style={{
+                textAlign: 'center',
+                paddingTop: theme.spacing.s,
+                color: theme.colors.text.secondary,
+                fontSize: captionStyle.size,
+                fontFamily: captionStyle.family,
+              }}
+              testID="pdf-preview-saved"
+            >
+              Saved to your phone's Downloads folder.
+            </Text>
+          ) : null}
+          {saveState === 'error' ? (
+            <Text
+              style={{
+                textAlign: 'center',
+                paddingTop: theme.spacing.s,
+                color: theme.colors.text.secondary,
+                fontSize: captionStyle.size,
+                fontFamily: captionStyle.family,
+              }}
+              testID="pdf-preview-save-error"
+            >
+              Couldn't save just now — Share works as a backup.
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
 
       {pageInfo && !loadError ? (
         <Text
