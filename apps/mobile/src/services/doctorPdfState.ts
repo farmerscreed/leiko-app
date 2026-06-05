@@ -37,6 +37,10 @@ export interface LastGeneratedInfo {
   generatedAtMs: number;
   /** Bytes of the PDF, when known. */
   bytes: number;
+  /** Local cache URI of the downloaded PDF (2026-06-05 file-share fix).
+   *  The OS may evict cache files — callers must check existence and
+   *  fall back to a fresh generate. Absent on pre-fix records. */
+  fileUri?: string;
 }
 
 export function readCoverNote(): string {

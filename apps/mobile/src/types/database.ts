@@ -269,6 +269,45 @@ export type HrRangeSummary = {
   resting_by_night: { night: string; resting: number }[];
 };
 
+
+// Trends data-completeness fix (migration 0035, ADR-0008 D4). Exact
+// per-day aggregates for all five vitals over [_from, now], day-bucketed
+// in the wearer's tz; per-vital visibility enforced server-side via
+// can_see_vital (restricted vitals come back as empty sections).
+export type TrendsSummaryArgs = {
+  _family_id: string;
+  _tz: string;
+  _from: string; // ISO timestamptz
+};
+
+export type TrendsServerSummary = {
+  bp: {
+    count: number;
+    avg_sys: number | null;
+    avg_dia: number | null;
+    per_day: { day: string; sys: number; dia: number; pulse: number | null; n: number }[];
+  };
+  hr: {
+    count: number;
+    // night_median = 22:00–06:00 local (the resting proxy); the client
+    // falls back to all_median when no overnight samples exist that day.
+    per_day: { day: string; night_median: number | null; all_median: number; n: number }[];
+  };
+  spo2: {
+    count: number;
+    per_day: { day: string; avg: number; min: number | null; n: number }[];
+  };
+  sleep: {
+    count: number;
+    // The FULLEST session per local night (cross-device shadow guard).
+    per_night: { day: string; total: number; deep: number }[];
+  };
+  activity: {
+    count: number;
+    per_day: { day: string; steps: number }[];
+  };
+};
+
 // Multi-vitals (Sprint 7.5) — table is keyed by (family_id, vital_type,
 // measured_at). Sprint 7.7b is the first client-side reader; the writes
 // flow through the /sync Edge Function (services/sync/postMultiVitals.ts).
@@ -446,6 +485,10 @@ export type Database = {
       hr_range_summary: {
         Args: HrRangeSummaryArgs;
         Returns: HrRangeSummary;
+      };
+      trends_summary: {
+        Args: TrendsSummaryArgs;
+        Returns: TrendsServerSummary;
       };
     };
   };

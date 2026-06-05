@@ -11,7 +11,7 @@
 //   5. Ask Leiko affordance       (calm pill, opens AskLeikoSheet)
 //   6. Cited footnote rail        (numbered correlation cards)
 //   7. See everything toggle      (chevron + label + thin rule)
-//      └── Expansion panel        (today's MultiVitalChart + toggles)
+//      └── Expansion panel        (range MultiVitalChart + toggles)
 //   8. Weekly summary placeholder (dashed-border card)
 //   9. Doctor inline link         (centred, soft underline)
 //
@@ -30,6 +30,8 @@ import {
   ScrollView,
   StyleSheet,
   View,
+  Pressable,
+  Text,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -278,12 +280,18 @@ export function Trends() {
   const [askVisible, setAskVisible] = useState(false);
 
   const { isPlus } = usePlusEntitlement();
-  const trends = useTrendsData(familyId, range);
+  // Wearer's tz drives the RPC's day bucketing (ADR-0008 D3). Trends is
+  // always the signed-in user's own circle on this route, so their
+  // profile tz IS the wearer tz.
+  const wearerTz = useAuth((s) => s.profile?.timezone ?? null);
+  const trends = useTrendsData(familyId, range, { timeZone: wearerTz });
   const correlations = useTrendsCorrelations(familyId, userId);
 
   // Sprint 16.5g — prefetch 30D for Plus users so first tap is instant.
   // No-op for free users (would just trigger the paywall anyway).
-  usePrefetchTrendsRange(isPlus && range === '7d' ? familyId : null, '30d');
+  usePrefetchTrendsRange(isPlus && range === '7d' ? familyId : null, '30d', {
+    timeZone: wearerTz,
+  });
 
   // Sprint 16.5g — baseline computed from the readings slice (the
   // 30-day p10–p90 band). Surfaced under the focal chart so "within
@@ -412,7 +420,11 @@ export function Trends() {
     : undefined;
 
   // Focal vital + evidence card data (16.5g — was hardcoded BP).
-  const focalVital: VitalType = narrative?.focalVital ?? 'bp';
+  // Focal-vital switcher (founder-approved package B, 2026-06-05): the
+  // narrative still nominates a focal vital, but the user can override
+  // it to see any vital's range trend in the evidence card.
+  const [focalOverride, setFocalOverride] = useState<VitalType | null>(null);
+  const focalVital: VitalType = focalOverride ?? narrative?.focalVital ?? 'bp';
   const evidence = useMemo(
     () => evidenceFor(focalVital, trends.data),
     [focalVital, trends.data],
@@ -446,7 +458,7 @@ export function Trends() {
         }
         testID="trends-scroll"
       >
-        <Header title={headerTitle} />
+        <Header title={headerTitle} onBack={() => navigation.goBack()} />
 
         <TrendsRangeChipsRow
           accountType={accountType}
@@ -488,7 +500,53 @@ export function Trends() {
               testID="trends-letter"
             />
 
-            <View style={{ marginTop: theme.spacing.l }}>
+            <View
+              style={{
+                marginTop: theme.spacing.l,
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: theme.spacing.s,
+              }}
+              testID="trends-focal-chips"
+            >
+              {ALL_VITALS.map((v) => {
+                const active = v === focalVital;
+                return (
+                  <Pressable
+                    key={v}
+                    onPress={() => setFocalOverride(v)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    accessibilityLabel={`Show ${VITAL_CHIP_LABEL[v]} trend`}
+                    testID={`trends-focal-${v}`}
+                    style={{
+                      paddingHorizontal: theme.spacing.m,
+                      paddingVertical: theme.spacing.xs,
+                      borderRadius: theme.radii.full,
+                      borderWidth: 1,
+                      borderColor: active
+                        ? theme.colors.brand.primary
+                        : theme.colors.border.subtle,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: active
+                          ? theme.colors.brand.primary
+                          : theme.colors.text.secondary,
+                        fontSize: theme.type('caption').size,
+                        fontFamily: theme.type('caption').family,
+                        fontWeight: active ? '600' : '400',
+                      }}
+                    >
+                      {VITAL_CHIP_LABEL[v]}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <View style={{ marginTop: theme.spacing.s }}>
               <TrendsEvidenceCard
                 vital={focalVital}
                 title={FOCAL_VITAL_TITLE[focalVital]}

@@ -261,6 +261,23 @@ describe('Trends v2 — the letter narrative', () => {
     );
   });
 
+  it('header Back is present and tappable (screens must never be one-way)', async () => {
+    await renderAndAwaitNarrative();
+    expect(screen.getByTestId('trends-back')).toBeTruthy();
+    fireEvent.press(screen.getByTestId('trends-back')); // must not throw
+  });
+
+  it('focal chips switch the evidence card to another vital (package B)', async () => {
+    await renderAndAwaitNarrative();
+    expect(screen.getByTestId('trends-focal-chips')).toBeTruthy();
+    fireEvent.press(screen.getByTestId('trends-focal-hr'));
+    // Title flips to the HR framing; the card itself re-renders from
+    // evidenceFor('hr', …) so the value is the latest resting bpm.
+    expect(
+      screen.getByTestId('trends-evidence-title').props.children,
+    ).toBe('Heart rate · resting');
+  });
+
   it('renders the Ask affordance pill', async () => {
     await renderAndAwaitNarrative();
     expect(screen.getByTestId('trends-ask')).toBeTruthy();

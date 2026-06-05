@@ -114,6 +114,37 @@ for a future properly tz-wired implementation.
   dismissals (an invisible mounted Modal was eating all touches —
   "the back button sometimes doesn't work" on Settings).
 
+## Amendment (2026-06-05, physical testing)
+
+**D6 — Scores derive from data, never from placeholders.** Stage-3 device
+testing caught a sixth instance of the same failure class: ingestion
+stamped `sleepScore: 0` ("computed by classifier downstream") but the
+D13 §6.4 classifier was never wired into the pipeline, so the hero copy
+("a more restless night than your usual"), hero ring, the sleep×BP
+correlation series, and both home tiles judged every night from a
+constant zero. Fix (commit 02ec8bb): display consumers recompute via
+`classification.sleepScoreForSession(session)` from the real session
+fields (correct for historical rows too); ingestion now stores the
+computed score. Note: the efficiency + continuity components are constant
+(+30) under the synthesized in-bed window / absent awake data — variance
+comes from measured duration + deep ratio, so cross-night comparisons
+hold. General rule going forward: **a value that drives user-facing
+judgment must be computed from measured data at the point of use, or not
+shown — placeholder fields are not display inputs.**
+
+**2026-06-05 (later):** the Trends screen was found violating D3 + D4 the
+same way the PDF had (raw-row fetch silently capped at max_rows=1000 — the
+combined query let dense HR rows starve sleep/activity out entirely — and
+UTC day bucketing). Fixed by the `trends_summary` RPC (migration 0035) +
+client mapper; the narrative ("The Letter") now derives from exact data.
+A focal-vital switcher also landed so every vital gets a range trend
+(founder-approved A+B+C package).
+
+Physical-testing outcomes for this ADR are recorded in
+`plans/PHYSICAL_TEST_PLAN_2026-06-03.md` (stages 1, 3–7 passed on device,
+2026-06-05). The report-delivery rework found in Stage 6 has its own
+record: **ADR-0009**.
+
 ## Verification
 
 Every claim above was verified against leiko-prod via SQL before and after

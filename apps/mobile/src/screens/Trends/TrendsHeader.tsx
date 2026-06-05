@@ -5,10 +5,18 @@
 // 16.5g added the lock-aware chips, Tier-B Ask handler, and several
 // hooks.
 
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../../theme';
 
-export function Header({ title }: { title: string }) {
+export function Header({
+  title,
+  onBack,
+}: {
+  title: string;
+  /** 2026-06-05 — the screen previously had NO on-screen way back
+   *  (hardware back only); the original design comment promised one. */
+  onBack?: () => void;
+}) {
   const theme = useTheme();
   return (
     <View
@@ -20,6 +28,27 @@ export function Header({ title }: { title: string }) {
         },
       ]}
     >
+      {onBack ? (
+        <Pressable
+          onPress={onBack}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+          hitSlop={theme.spacing.m}
+          testID="trends-back"
+          style={{ alignSelf: 'flex-start', marginBottom: theme.spacing.m }}
+        >
+          <Text
+            style={{
+              color: theme.colors.brand.primary,
+              fontSize: theme.type('bodyM').size,
+              fontFamily: theme.type('bodyM').family,
+              fontWeight: '500',
+            }}
+          >
+            Back
+          </Text>
+        </Pressable>
+      ) : null}
       <Text
         accessibilityRole="header"
         style={{

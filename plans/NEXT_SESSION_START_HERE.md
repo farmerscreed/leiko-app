@@ -1,120 +1,125 @@
-# Start here — vitals data correctness + timezone overhaul (2026-06-03)
+# Start here — vitals correctness + physical testing + report delivery (2026-06-05)
 
-Last touched: 2026-06-04. The vitals data-correctness work (19 commits)
-has been **cherry-picked onto `claude/pensive-mayer-IpwNO`** — the docs-
-reconciliation branch — so docs + vitals land on `main` together via
-**PR #9**. (Original vitals branch: `fix/vitals-data-completeness`, forked
-from `claude/consolidated-build`.) Supersedes the 2026-06-02 ADR-0006/0007
-handoff.
+Last touched: 2026-06-05. Branch `fix/vitals-data-completeness` (pushed,
+tracking origin). Supersedes the 2026-06-03 version of this file.
 
 ## 60-second context
 
-This session was a founder-directed **data-correctness audit and fix**
-across every vitals surface, driven by one rule: *a health app must never
-project wrong data — rather show nothing than something wrong.* Every
-finding was verified against leiko-prod SQL before fixing; every fix is
-tested, committed, and **live in prod**. The full decision record is
-**ADR-0008** (`docs/_adr/0008-vitals-data-correctness.md`); the working
-card with all verified findings is `plans/vitals-data-completeness.md`.
+Two arcs are complete on this branch:
 
-## Also bundled in (docs reconciliation)
+1. **The vitals data-correctness overhaul (2026-06-03)** — full audit +
+   fixes, all LIVE in prod. Decision record: **ADR-0008**
+   (`docs/_adr/0008-vitals-data-correctness.md`). Working evidence:
+   `plans/vitals-data-completeness.md`.
+2. **Physical testing + live fixes (2026-06-05)** — the founder ran
+   `plans/PHYSICAL_TEST_PLAN_2026-06-03.md` on device `43230DLJH001YY`.
+   **Stages 1, 3, 4, 5, 6, 7 PASSED** (results recorded in that file's
+   header). Testing surfaced two real defects, both fixed live, plus a
+   founder-directed feature set — see below. Decision record for the
+   report-delivery work: **ADR-0009**
+   (`docs/_adr/0009-doctor-report-delivery.md`).
 
-This branch also carries a full **documentation reconciliation** pass that
-brought every doc in line with the shipped app after the ADR-0006/0007
-pivot, plus two stack-decision records:
+Standing founder rules (treat as law): **never show fabricated or
+placeholder-derived values — rather show nothing**; **verify every data
+claim against DB/code/tests**; **document everything for the next
+session**.
 
-- **WatermelonDB — DROPPED** ([ADR-0009](../docs/_adr/0009-drop-watermelondb.md)):
-  it was locked but never installed; persistence is MMKV + Zustand with
-  Supabase as the queryable source of truth via TanStack Query. (Renumbered
-  0008 → 0009 so it would not collide with the vitals ADR-0008.)
-- **AI Tier A (Llama on Ollama) — STILL PLANNED (v1.x):** the live "Tier A"
-  is a client-side deterministic intent-router; Tier B (Haiku) + Tier C
-  (Sonnet) are real. Docs mark the Ollama tier "planned, not yet built."
+## What landed 2026-06-05 (all committed + pushed)
 
-## What was found and fixed (all live)
+1. **Sleep score was a constant-0 placeholder** → "a more restless night
+   than your usual" fired for every night. Display now recomputes via
+   `classification.sleepScoreForSession()`; ingest stores the real score
+   (ADR-0008 amendment D6, commit 02ec8bb).
+2. **Doctor report delivery reworked (ADR-0009)**: generation now
+   downloads the PDF and opens the new **PdfPreview** screen
+   (react-native-pdf) — Share hands the actual FILE (old flow shared a
+   text URL that expired in 1 hour), and **"Download to phone"** saves
+   into the public Downloads via the MediaStore. All device-verified
+   (WhatsApp attachment delivered; file present in /sdcard/Download).
+   Commits 1c64550, b55644c, 8fb31f2 (+ docs ee51561).
+3. **Trends rebuilt on exact data (A+B+C package, founder-approved):**
+   the screen had the SAME silent 1000-row truncation as the PDF (worse:
+   one combined query let HR starve sleep/activity out entirely) and UTC
+   day bucketing — the narrative was describing truncated data. Now: the
+   `trends_summary` RPC (0035) returns exact per-day aggregates for all
+   five vitals in the wearer's tz; a **focal-vital chip row** lets the
+   user switch the evidence chart to any vital; the expansion overlay was
+   already range-driven. ADR-0008 amendment notes it.
+4. **Four new stack pins** (founder-approved, in `docs/00-tech-stack.md`):
+   expo-file-system 19.0.x, expo-sharing 14.0.x, react-native-pdf 7.0.x,
+   react-native-blob-util 0.24.x. **Native modules → any build older than
+   2026-06-05 must be rebuilt** (the dev client was; the release APK
+   pipeline will pick them up on next run).
 
-1. **BP duplicates** — 51 of 148 rows (~34%) were re-sync duplicates from
-   pairing a second test watch. Root: dedup keyed on the device. Now
-   device-independent `(family_id, measured_at)` (migration 0031 + sync).
-   Prod deduped 148 → 97.
-2. **Timezone** — every screen rendered times in the DEVICE tz and the
-   caregiver aggregators bucketed today/night in UTC. Now everything
-   renders/buckets in the **wearer's** tz (`utils/timeInZone.ts`;
-   caregiver path fetches the owner's tz). Storage was always correct UTC.
-3. **Sleep** — times were fabricated (synthesized 08:00 displayed as a
-   real wake) and nights fragmented into up to 5 rows. Now: bed/wake show
-   ONLY when HR-inferred (est. framing), else duration-only;
-   `measured_at` = session END (constant night key, migration 0032,
-   supersedes D13 §2.4); fullest-session consolidation + no-shrink guard.
-   Prod 16 → 12 sleep rows.
-4. **Doctor PDF silently truncated** — no `.limit()` + PostgREST
-   `max_rows=1000` meant the HR section used ~1000 arbitrary unordered
-   samples (of 5,266 in 30d). Now exact: SQL aggregation RPC
-   (`doctor_report_vitals_summary`, 0034) + `fetchAll()` pagination +
-   wearer-tz day bucketing.
-5. **HR range pills** — all showed the same ~16h (200-sample slice cap).
-   Analytics now server-windowed via `hr_range_summary` RPC (0030);
-   hero is live-first ("Latest reading").
-6. **`measured_at_local`** — UTC mislabeled as local, unread → nulled
-   (0033), sync writes NULL.
-7. **BottomSheet touch-eater** — cancelled dismiss animations left an
-   invisible Modal eating all taps ("back button sometimes doesn't work"
-   on Settings). Fixed + 3 regression tests.
+## Earlier (2026-06-03) — summary, full detail in ADR-0008
+
+BP dedupe device-independent (51 prod dupes removed) · all rendering +
+day/night bucketing in the **wearer's tz** · sleep night-keyed
+(`measured_at` = session END, supersedes D13 §2.4) with never-fabricated
+display times · doctor-PDF 1000-row silent truncation fixed (SQL
+aggregation RPC 0034 + pagination) · HR range analytics server-windowed
+(RPC 0030) · `measured_at_local` nulled (0033) · BottomSheet
+cancelled-dismiss touch-eater fixed · **VitalHistory** "View all · N"
+screen for BP/SpO2/Sleep/Activity.
 
 ## Prod state (leiko-prod `kqnzxjrpnjnczhgdwdqg`)
 
-- **Migrations applied: 0029 → 0034** (all recorded in schema_migrations).
-- **Edge functions deployed**: `sync` (device-independent BP dedup, sleep
-  end-key + collapse + no-shrink, measured_at_local NULL),
-  `generate-doctor-pdf` (exact full-window data).
-- Data: readings 97 (92 in the main family), sleep 12 (one row per
-  night), HR 5.3k+, SpO2 470+. No stale derived data (those tables were
-  empty when the dedups ran).
-- Access for sessions: `apps/mobile/.env.local` has the URL + anon key;
-  the Supabase **Management API PAT** reaches this project (curl
-  User-Agent needed; the MCP supabase tools are authed to a DIFFERENT
-  account and can NOT reach leiko-prod).
+- Migrations **0029 → 0035** applied (0035 = trends_summary RPC); `sync` + `generate-doctor-pdf`
+  edge functions deployed (all of 2026-06-03; nothing server-side changed
+  on 06-05 — the delivery rework is client-side).
+- Access: `apps/mobile/.env.local` (URL + anon key); Supabase Management
+  API PAT reaches this project (curl User-Agent required; the MCP
+  supabase tools are authed to a DIFFERENT account — they can NOT reach
+  leiko-prod).
 
-## Gates (must stay green)
+## Gates
 
-tsc 0 · jest 206 suites / 2455 tests · eslint 0 errors ·
-`deno check` clean on changed functions · deno tests 192 pass
-(**known pre-existing failure**: 2 tests in `sync/resolve-routing.test.ts`
-— mock fidelity, present before this session; not a regression).
+tsc 0 · jest **208 suites / 2473 tests** · eslint 0 errors · deno check
+clean · deno tests 192 pass (2 pre-existing `resolve-routing` failures —
+mock fidelity, predate everything here).
 
-## In flight / next steps (priority order)
+## Merge status — MERGING to main (founder green-lit)
 
-1. **VitalHistory screen — BUILT for BP/SpO2/Sleep/Activity** (commit on
-   branch): "View all · N" (true server count) under each recent list →
-   shared `screens/VitalHistory/` pages the FULL window (50/page infinite
-   scroll, wearer-tz day sections, exact totals; `services/vitalHistory` +
-   `hooks/useVitalHistory`). **Remaining: the HR per-day drill-down**
-   (day list from `hr_range_summary.per_day` → tap a day → that day's
-   samples) — designed, not built. Needs an on-device pass too.
-2. **Physical testing** in progress on device `43230DLJH001YY` (debug
-   build via `npx expo run:android`; metro-tethered). Release APK needs
-   the founder's `LEIKO_RELEASE_*` keystore env (`npm run
-   release:android:apk`). Test checklist: BP list deduped + Lagos-local
-   times; HR pills differ per range; sleep duration-only unless inferred;
-   fresh-reading sync adds exactly 1; caregiver sees wearer-tz times.
-3. **Merge to `main`** — IN PROGRESS via this bundle. Rather than replay
-   the ~239 commits already squashed into `main` as PR #8, the 19 new
-   vitals commits were cherry-picked onto the docs branch; the combined
-   work ships through **PR #9** once CI is green and the physical test plan
-   passes. Migrations 0030–0034 are already live in leiko-prod.
-4. Pre-existing deferrals from the 2026-06-02 handoff still stand (old
-   invite functions dormant; no store listing/join page;
-   `account_type` column inert but present).
+Founder green-lit the merge. The new commits since the PR-#9 boundary
+(`663ce75`) were **cherry-picked onto current `origin/main`** on branch
+`claude/vitals-followups` — cherry-pick, **not** `git merge` (main is
+squash-merged, so a merge would conflict everywhere). Gates re-run green
+on top of main: **tsc 0 · eslint 0 · jest 208 suites / 2474 tests**.
+Opened as a PR to main.
+
+**Accepted-risk carried into the merge (founder decision):** Stage 2
+(caregiver cross-tz) and the U16H connect regression were **DEFERRED** —
+run them as a follow-up.
+
+**On merge:** pushing main triggers `db-migrate.yml` (`supabase db push`);
+migration **0035** is already applied + recorded in prod
+`schema_migrations` (0029→0035), so `db push` skips it. Confirm after.
+
+## Backlog after the merge
+
+- HR per-day drill-down for VitalHistory (designed: day list from
+  `hr_range_summary.per_day` → tap a day → its samples).
+- Release APK rebuild + untethered test (`npm run release:android:apk`,
+  needs founder's `LEIKO_RELEASE_*` keystore env).
+- iOS verification of the share/download paths once an iOS build exists.
+- Pre-existing deferrals from the 2026-06-02 handoff (dormant old invite
+  functions; store listing/join page; inert `account_type` column).
 
 ## Hard-won operational notes
 
-- Prod mutations are applied via the Management API
-  (`/v1/projects/{ref}/database/query`) inside guarded `DO $$` blocks that
-  abort on unexpected row counts, then recorded in
-  `supabase_migrations.schema_migrations` manually.
-- Edge deploys: `SUPABASE_ACCESS_TOKEN=<PAT> npx supabase functions deploy
-  <fn> --project-ref kqnzxjrpnjnczhgdwdqg --use-api` (no Docker needed).
-- Deno is installed locally now (`~/.deno/bin`) — run `deno check` + the
-  function tests before any edge deploy.
-- The founder's standing rule (treat as law): **no guesswork — verify
-  every data claim against the DB/code/tests before acting on it.**
+- Prod mutations: Management API `database/query` inside guarded
+  `DO $$` blocks (abort on unexpected row counts), then record the
+  version in `supabase_migrations.schema_migrations` manually.
+- Edge deploys: `SUPABASE_ACCESS_TOKEN=<PAT> npx supabase functions
+  deploy <fn> --project-ref kqnzxjrpnjnczhgdwdqg --use-api`.
+- Deno is installed (`~/.deno/bin`) — `deno check` + tests before any
+  edge deploy.
+- **Metro stale-cache trap:** a long-running metro can serve a stale
+  transform cache — a fix "doesn't take effect" on device even after an
+  app restart. Kill metro and restart with `--clear`, then cold-relaunch
+  the app. (Cost us a confusing round during Stage 3.)
+- Driving the device: `adb shell uiautomator dump` + `input tap` works
+  for verification, but a human's three taps beat fifty blind ones —
+  hybrid flow (founder taps, assistant verifies via SQL/logcat/screencap)
+  is the efficient pattern.
+- Git pushes work via `credential.helper store` (configured repo-local).

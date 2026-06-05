@@ -32,17 +32,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { supabase as defaultSupabase } from '../services/supabase';
 import {
-  aggregateTrends,
   rangeStartIso,
+  trendsFromSummary,
   type TrendsData,
   type TrendsRange,
 } from '../utils/trends-aggregate';
-import type {
-  Database,
-  ReadingRow,
-  VitalsOtherRow,
-  CorrelationRow,
-} from '../types/database';
+import type { TrendsServerSummary } from '../types/database';
+import type { Database, CorrelationRow } from '../types/database';
 
 const TRENDS_QUERY_KEY = ['trends-data'] as const;
 const CORRELATIONS_QUERY_KEY = ['trends-correlations'] as const;
@@ -58,6 +54,8 @@ export interface UseTrendsDataOptions {
   supabase?: SupabaseClient<Database>;
   /** Override the wall clock (for fixture-pinned tests). */
   nowMs?: number;
+  /** Wearer's IANA tz — drives the RPC's day bucketing. Null → UTC. */
+  timeZone?: string | null;
 }
 
 export interface UseTrendsDataResult {
@@ -74,9 +72,10 @@ export function useTrendsData(
 ): UseTrendsDataResult {
   const client = options.supabase ?? defaultSupabase;
   const nowMs = options.nowMs ?? Date.now();
+  const timeZone = options.timeZone ?? null;
   const queryKey = useMemo(
-    () => [...TRENDS_QUERY_KEY, familyId, range] as const,
-    [familyId, range],
+    () => [...TRENDS_QUERY_KEY, familyId, range, timeZone] as const,
+    [familyId, range, timeZone],
   );
 
   const query = useQuery({
@@ -85,29 +84,28 @@ export function useTrendsData(
     staleTime: TRENDS_DATA_STALE_MS,
     queryFn: async (): Promise<TrendsData> => {
       if (!familyId) {
-        return aggregateTrends({ readings: [], vitalsOther: [] });
+        // `enabled` gates this; the empty shape keeps the type honest.
+        return trendsFromSummary({
+          bp: { count: 0, avg_sys: null, avg_dia: null, per_day: [] },
+          hr: { count: 0, per_day: [] },
+          spo2: { count: 0, per_day: [] },
+          sleep: { count: 0, per_night: [] },
+          activity: { count: 0, per_day: [] },
+        });
       }
-      const startIso = rangeStartIso(range, nowMs);
-      const [readingsRes, vitalsRes] = await Promise.all([
-        client
-          .from('readings')
-          .select('*')
-          .eq('family_id', familyId)
-          .gte('measured_at', startIso)
-          .order('measured_at', { ascending: true }),
-        client
-          .from('vitals_other')
-          .select('*')
-          .eq('family_id', familyId)
-          .gte('measured_at', startIso)
-          .order('measured_at', { ascending: true }),
-      ]);
-      if (readingsRes.error) throw readingsRes.error;
-      if (vitalsRes.error) throw vitalsRes.error;
-      return aggregateTrends({
-        readings: (readingsRes.data ?? []) as ReadingRow[],
-        vitalsOther: (vitalsRes.data ?? []) as VitalsOtherRow[],
+      // Exact per-day aggregates from the trends_summary RPC (migration
+      // 0035, ADR-0008 D4) — the old raw-row fetch was silently capped
+      // at PostgREST max_rows = 1000 (dense HR rows also starved
+      // sleep/activity out of the combined response), so the charts AND
+      // the narrative described a truncated prefix of the window. The
+      // RPC also buckets days in the wearer's tz (was UTC).
+      const { data, error } = await client.rpc('trends_summary', {
+        _family_id: familyId,
+        _tz: timeZone ?? 'UTC',
+        _from: rangeStartIso(range, nowMs),
       });
+      if (error) throw error;
+      return trendsFromSummary(data as TrendsServerSummary);
     },
   });
 
@@ -185,36 +183,23 @@ export function usePrefetchTrendsRange(
 ): void {
   const client = options.supabase ?? defaultSupabase;
   const nowMs = options.nowMs ?? Date.now();
+  const timeZone = options.timeZone ?? null;
   const qc = useQueryClient();
   useEffect(() => {
     if (!familyId) return;
-    const key = [...TRENDS_QUERY_KEY, familyId, range] as const;
+    const key = [...TRENDS_QUERY_KEY, familyId, range, timeZone] as const;
     if (qc.getQueryData(key) !== undefined) return;
     void qc.prefetchQuery({
       queryKey: key,
       staleTime: TRENDS_DATA_STALE_MS,
       queryFn: async () => {
-        const startIso = rangeStartIso(range, nowMs);
-        const [readingsRes, vitalsRes] = await Promise.all([
-          client
-            .from('readings')
-            .select('*')
-            .eq('family_id', familyId)
-            .gte('measured_at', startIso)
-            .order('measured_at', { ascending: true }),
-          client
-            .from('vitals_other')
-            .select('*')
-            .eq('family_id', familyId)
-            .gte('measured_at', startIso)
-            .order('measured_at', { ascending: true }),
-        ]);
-        if (readingsRes.error) throw readingsRes.error;
-        if (vitalsRes.error) throw vitalsRes.error;
-        return aggregateTrends({
-          readings: (readingsRes.data ?? []) as ReadingRow[],
-          vitalsOther: (vitalsRes.data ?? []) as VitalsOtherRow[],
+        const { data, error } = await client.rpc('trends_summary', {
+          _family_id: familyId,
+          _tz: timeZone ?? 'UTC',
+          _from: rangeStartIso(range, nowMs),
         });
+        if (error) throw error;
+        return trendsFromSummary(data as TrendsServerSummary);
       },
     });
   }, [familyId, range, qc, client, nowMs]);

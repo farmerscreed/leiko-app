@@ -17,6 +17,14 @@
 >
 > Originally reconstructed after a system restart wiped the first
 > session's conversation; the only surviving trace was in code comments.
+>
+> **2026-06-05 addendum:** physical testing PASSED stages 1,3–7 (results in
+> `plans/PHYSICAL_TEST_PLAN_2026-06-03.md`). Two live-found defects fixed:
+> the constant-0 sleep score (ADR-0008 amendment D6) and the expiring
+> link-share of the doctor PDF — replaced by in-app PdfPreview + file
+> share + Download-to-phone (**ADR-0009**, four new stack pins). Remaining
+> before main: stage 2 (caregiver phone), stage 8 sweep, U16H connect;
+> merge via REBASE onto main (PR #8 squash — see handoff).
 
 ## The goal (founder, 2026-06-03)
 
