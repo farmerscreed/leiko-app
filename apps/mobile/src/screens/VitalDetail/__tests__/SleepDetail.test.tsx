@@ -236,8 +236,13 @@ describe('SleepDetail — hero', () => {
     expect(screen.getByText('A quieter night than last week')).toBeTruthy();
   });
 
-  it('renders the "more restless" range copy for low sleep score (with history)', () => {
-    const session = makeSleep({ sleepScore: 40 });
+  it('renders the "more restless" range copy for a genuinely poor night (score derived from data)', () => {
+    // Data-completeness fix (2026-06-05): the stored sleepScore was a
+    // constant-0 ingest placeholder, so display now derives the score
+    // from the REAL session fields (sleepScoreForSession) — the stored
+    // field is ignored. A restless night = short total + no deep
+    // (4h / 0 deep → score ≈ 30 < 50).
+    const session = makeSleep({ sleepScore: 40, totalMinutes: 240, deepMinutes: 0 });
     const history = Array.from({ length: 8 }, (_, i) =>
       makeSleep({ endSec: NOW_SEC() - (i + 1) * 86400, sleepScore: 50 }),
     );

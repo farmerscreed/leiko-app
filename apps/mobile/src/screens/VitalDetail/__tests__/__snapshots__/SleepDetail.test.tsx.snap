@@ -361,7 +361,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
           }
         >
           <View
-            accessibilityLabel="Last sync Thu. 7:42hrs. Roughly in the middle by the numbers"
+            accessibilityLabel="Last sync Thu. 7:42hrs. A quieter night by the numbers"
             accessibilityRole="text"
             style={
               [
@@ -428,7 +428,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                     {
                       "max": 1,
                       "min": 0,
-                      "now": 0.78,
+                      "now": 0.85,
                     }
                   }
                   style={
@@ -538,7 +538,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                             320.4424506661589,
                           ]
                         }
-                        strokeDashoffset={70.49733914655495}
+                        strokeDashoffset={48.066367599923844}
                         strokeLinecap={1}
                         strokeWidth={6}
                       />
@@ -730,7 +730,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                   }
                   testID="sleep-detail-hero-range"
                 >
-                  Roughly in the middle by the numbers
+                  A quieter night by the numbers
                 </Text>
               </View>
             </View>

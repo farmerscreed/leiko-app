@@ -35,6 +35,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { sleepScoreForSession } from '../../utils/classification';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
@@ -966,7 +967,7 @@ export function buildHeroVitals(
     ? clamp01((data.spo2.latestPercent - 85) / 15)
     : 0;
   const sleepFill = data.sleep.session
-    ? clamp01(data.sleep.session.sleepScore / 100)
+    ? clamp01(sleepScoreForSession(data.sleep.session) / 100)
     : 0;
   const activityFill = data.activity.targetSteps > 0
     ? clamp01(data.activity.stepsToday / data.activity.targetSteps)
@@ -1119,7 +1120,7 @@ function buildCorrelation(
   const cutoffSec = Math.floor(Date.now() / 1000) - 7 * 24 * 60 * 60;
   const sleepPoints = sleepRecent
     .filter((s) => s.sessionEndSec >= cutoffSec)
-    .map((s) => ({ t: s.sessionEndSec, value: s.sleepScore }));
+    .map((s) => ({ t: s.sessionEndSec, value: sleepScoreForSession(s) }));
   const hrPoints = hrRecent
     .filter((h) => h.measuredAtSec >= cutoffSec && h.motionState === 'rest')
     .map((h) => ({ t: h.measuredAtSec, value: h.bpm }));

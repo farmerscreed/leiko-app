@@ -78,6 +78,7 @@ import { forwardMultiVitalsToPlatform } from '../health-platform/syncBridge';
 import { useHR } from '../../state/hr';
 import { useSpO2 } from '../../state/spo2';
 import { useSleep } from '../../state/sleep';
+import { computeSleepScore } from '../../utils/classification';
 import { useActivity } from '../../state/activity';
 import { logger } from '../analytics/logger';
 import { userTz } from '../../utils/userTz';
@@ -540,7 +541,15 @@ async function syncDayInfoStep(
           awakeMinutes: 0,
           awakeCount: 0,
           transitions: [] as { atSec: number; stage: SleepStage }[],
-          sleepScore: 0, // computed by classifier downstream
+          // Real score at ingest (was a 0 placeholder that nothing ever
+          // filled — every consumer judged nights from a constant 0).
+          sleepScore: computeSleepScore({
+            totalMinutes: info.sleep.totalMinutes,
+            deepMinutes: info.sleep.deepMinutes,
+            awakeCount: 0,
+            sessionStartSec,
+            sessionEndSec,
+          }),
           inferredSessionStartSec: inferred.sessionStartSec,
           inferredSessionEndSec: inferred.sessionEndSec,
           wakeSource: inferred.source,
