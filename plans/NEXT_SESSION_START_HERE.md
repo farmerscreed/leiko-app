@@ -78,15 +78,16 @@ tsc 0 · jest **208 suites / 2473 tests** · eslint 0 errors · deno check
 clean · deno tests 192 pass (2 pre-existing `resolve-routing` failures —
 mock fidelity, predate everything here).
 
-## Remaining before the main merge (the gate is the test plan's exit criteria)
+## Merge status — HELD by founder instruction (2026-06-05)
 
-1. **Stage 2 — caregiver cross-tz** (needs the second phone, Lima-tz
-   account; wearer's readings must show Lagos times).
-2. **Stage 8 — 2-minute spot sweep** (Trends renders, Learn opens,
-   Connect sheet opens/dismisses).
-3. **U16H connect regression** (deferred from Stage 1): BP count must
-   stay flat when the second watch syncs.
-4. **THE MERGE PATH (important discovery):** PR **#8 already
+**Do NOT merge to main until the founder says so.** All work stays on
+`fix/vitals-data-completeness` (pushed). Physical testing: stages 1, 3–8
+PASSED; **Stage 2 (caregiver cross-tz) and the U16H connect regression
+were DEFERRED by founder decision** (accepted-risk notes in the test
+plan). Run them before/with the eventual merge.
+
+When green-lit:
+1. **THE MERGE PATH (important discovery):** PR **#8 already
    squash-merged** the consolidated-build work to main (2026-06-02), and
    main's content is **byte-identical** to this branch's base commit
    `836fc68` (verified: `git diff origin/main 836fc68` is empty). So do
