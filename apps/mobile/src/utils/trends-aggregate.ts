@@ -17,6 +17,7 @@
 //     dia) per docs/02-design-tokens.md. Other vitals don't have a
 //     "% in range" stat at v1.0.
 
+import type { TrendsServerSummary } from '../types/database';
 import type { ReadingRow, VitalsOtherRow } from '../types/database';
 
 // Sprint 10b.3 — 'all_time' lifts the lower bound entirely. Self-buyer
@@ -355,4 +356,93 @@ export function aggregateTrends(input: AggregateTrendsInput): TrendsData {
 export function rangeStartIso(range: TrendsRange, nowMs: number): string {
   const days = TRENDS_RANGE_DAYS[range];
   return new Date(nowMs - days * 24 * 60 * 60 * 1000).toISOString();
+}
+
+// ── Server-summary mapper (migration 0035, ADR-0008 D4) ─────────────
+//
+// The hook now fetches EXACT per-day aggregates from the trends_summary
+// RPC (day-bucketed in the wearer's tz, per-vital visibility enforced
+// server-side) instead of raw rows that PostgREST silently capped at
+// max_rows = 1000 — at 30d the dense HR rows alone blew the cap and
+// starved sleep/activity out of the combined response entirely, so the
+// charts AND the generated narrative described a truncated prefix of
+// the window. This mapper reshapes the RPC payload into the existing
+// TrendsData contract so the narrative templates and chart components
+// are untouched. `aggregateTrends` below remains only as the raw-row
+// reference implementation for its unit tests.
+
+export function trendsFromSummary(s: TrendsServerSummary): TrendsData {
+  const bpSeries: TrendsBPPoint[] = s.bp.per_day.map((p) => ({
+    day: p.day,
+    sys: p.sys,
+    dia: p.dia,
+    pulse: p.pulse,
+    count: p.n,
+  }));
+  const hrSeries: TrendsHRPoint[] = s.hr.per_day.map((p) => ({
+    day: p.day,
+    // Resting proxy: overnight median, falling back to the all-day
+    // median when no 22:00–06:00 samples exist (mirrors aggregateHR).
+    restingBpm: p.night_median ?? p.all_median,
+    count: p.n,
+  }));
+  const spo2Series: TrendsSpO2Point[] = s.spo2.per_day.map((p) => ({
+    day: p.day,
+    avgPercent: p.avg,
+    minPercent: p.min,
+    count: p.n,
+  }));
+  const sleepSeries: TrendsSleepPoint[] = s.sleep.per_night.map((p) => ({
+    day: p.day,
+    totalMinutes: p.total,
+    deepMinutes: p.deep,
+  }));
+  const activitySeries: TrendsActivityPoint[] = s.activity.per_day.map((p) => ({
+    day: p.day,
+    totalSteps: p.steps,
+  }));
+
+  const restingVals = hrSeries
+    .map((p) => p.restingBpm)
+    .filter((v): v is number => v !== null);
+  const minPercents = spo2Series
+    .map((p) => p.minPercent)
+    .filter((v): v is number => v !== null);
+
+  return {
+    series: {
+      bp: bpSeries,
+      hr: hrSeries,
+      spo2: spo2Series,
+      sleep: sleepSeries,
+      activity: activitySeries,
+    },
+    summary: {
+      bp: {
+        count: s.bp.count,
+        avgSys: s.bp.avg_sys,
+        avgDia: s.bp.avg_dia,
+        pctInRange:
+          bpSeries.length === 0
+            ? null
+            : bpSeries.filter(
+                (p) =>
+                  p.sys >= SYS_LOWER &&
+                  p.sys <= SYS_UPPER &&
+                  p.dia >= DIA_LOWER &&
+                  p.dia <= DIA_UPPER,
+              ).length / bpSeries.length,
+      },
+      hr: { count: s.hr.count, avgResting: mean(restingVals) },
+      spo2: { count: s.spo2.count, avgMinPercent: mean(minPercents) },
+      sleep: {
+        count: s.sleep.count,
+        avgTotalMinutes: mean(sleepSeries.map((p) => p.totalMinutes)),
+      },
+      activity: {
+        count: s.activity.count,
+        avgSteps: mean(activitySeries.map((p) => p.totalSteps)),
+      },
+    },
+  };
 }

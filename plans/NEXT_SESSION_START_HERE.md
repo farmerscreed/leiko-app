@@ -37,7 +37,15 @@ session**.
    into the public Downloads via the MediaStore. All device-verified
    (WhatsApp attachment delivered; file present in /sdcard/Download).
    Commits 1c64550, b55644c, 8fb31f2 (+ docs ee51561).
-3. **Four new stack pins** (founder-approved, in `docs/00-tech-stack.md`):
+3. **Trends rebuilt on exact data (A+B+C package, founder-approved):**
+   the screen had the SAME silent 1000-row truncation as the PDF (worse:
+   one combined query let HR starve sleep/activity out entirely) and UTC
+   day bucketing — the narrative was describing truncated data. Now: the
+   `trends_summary` RPC (0035) returns exact per-day aggregates for all
+   five vitals in the wearer's tz; a **focal-vital chip row** lets the
+   user switch the evidence chart to any vital; the expansion overlay was
+   already range-driven. ADR-0008 amendment notes it.
+4. **Four new stack pins** (founder-approved, in `docs/00-tech-stack.md`):
    expo-file-system 19.0.x, expo-sharing 14.0.x, react-native-pdf 7.0.x,
    react-native-blob-util 0.24.x. **Native modules → any build older than
    2026-06-05 must be rebuilt** (the dev client was; the release APK
@@ -56,7 +64,7 @@ screen for BP/SpO2/Sleep/Activity.
 
 ## Prod state (leiko-prod `kqnzxjrpnjnczhgdwdqg`)
 
-- Migrations **0029 → 0034** applied; `sync` + `generate-doctor-pdf`
+- Migrations **0029 → 0035** applied (0035 = trends_summary RPC); `sync` + `generate-doctor-pdf`
   edge functions deployed (all of 2026-06-03; nothing server-side changed
   on 06-05 — the delivery rework is client-side).
 - Access: `apps/mobile/.env.local` (URL + anon key); Supabase Management
@@ -66,7 +74,7 @@ screen for BP/SpO2/Sleep/Activity.
 
 ## Gates
 
-tsc 0 · jest **208 suites / 2468 tests** · eslint 0 errors · deno check
+tsc 0 · jest **208 suites / 2473 tests** · eslint 0 errors · deno check
 clean · deno tests 192 pass (2 pre-existing `resolve-routing` failures —
 mock fidelity, predate everything here).
 

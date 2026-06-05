@@ -132,6 +132,14 @@ hold. General rule going forward: **a value that drives user-facing
 judgment must be computed from measured data at the point of use, or not
 shown — placeholder fields are not display inputs.**
 
+**2026-06-05 (later):** the Trends screen was found violating D3 + D4 the
+same way the PDF had (raw-row fetch silently capped at max_rows=1000 — the
+combined query let dense HR rows starve sleep/activity out entirely — and
+UTC day bucketing). Fixed by the `trends_summary` RPC (migration 0035) +
+client mapper; the narrative ("The Letter") now derives from exact data.
+A focal-vital switcher also landed so every vital gets a range trend
+(founder-approved A+B+C package).
+
 Physical-testing outcomes for this ADR are recorded in
 `plans/PHYSICAL_TEST_PLAN_2026-06-03.md` (stages 1, 3–7 passed on device,
 2026-06-05). The report-delivery rework found in Stage 6 has its own
