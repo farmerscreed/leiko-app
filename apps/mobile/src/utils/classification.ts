@@ -351,6 +351,40 @@ export function computeSleepScore(input: SleepClassificationInput): number {
   return Math.round(totalScore + deepScore + continuityScore + efficiencyScore);
 }
 
+/**
+ * Score for a stored/synced session object — the display-side single
+ * source of truth (data-completeness fix, 2026-06-05 physical testing).
+ *
+ * Why: ingestion used to stamp `sleepScore: 0` ("computed by classifier
+ * downstream") but nothing downstream ever ran, so every consumer (hero
+ * copy, ring fill, sleep×BP correlation, home tiles) judged nights from a
+ * constant 0 — "a more restless night than your usual" fired for every
+ * night regardless of the data. Display consumers now RECOMPUTE from the
+ * session's real fields (works for historical rows too); ingestion also
+ * stores the computed score for server-side consumers.
+ *
+ * Note: with the synthesized in-bed window (= total) and awakeCount 0
+ * (the 0x07 reply exposes neither), the efficiency + continuity
+ * components are constant (+30); the score's variance comes from the
+ * measured duration + deep ratio. Comparisons across nights stay
+ * meaningful; the absolute floor is ~30.
+ */
+export function sleepScoreForSession(session: {
+  totalMinutes: number;
+  deepMinutes: number;
+  awakeCount: number;
+  sessionStartSec: number;
+  sessionEndSec: number;
+}): number {
+  return computeSleepScore({
+    totalMinutes: session.totalMinutes,
+    deepMinutes: session.deepMinutes,
+    awakeCount: session.awakeCount,
+    sessionStartSec: session.sessionStartSec,
+    sessionEndSec: session.sessionEndSec,
+  });
+}
+
 const SLEEP_SCORE_IN_PATTERN_FLOOR = 70;
 const SLEEP_SCORE_CALM_CONCERNED_FLOOR = 50;
 

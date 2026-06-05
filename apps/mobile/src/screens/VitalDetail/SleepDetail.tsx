@@ -50,6 +50,7 @@ import { useReadings } from '../../state/readings';
 import { useParentDailyPulseData } from '../../hooks/useParentDailyPulseData';
 import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { sleepFill } from '../../utils/vitalThemes';
+import { sleepScoreForSession } from '../../utils/classification';
 import { checkStaleness } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
 import { formatClockInTz, useUserTz } from '../../utils/userTz';
@@ -257,7 +258,8 @@ function buildSleepScoreSeries(
   sessions: ReadonlyArray<SleepSession>,
 ): { t: number; value: number }[] {
   return sessions
-    .map((s) => ({ t: s.sessionEndSec * 1000, value: s.sleepScore }))
+    // Recomputed — the stored field was a constant 0 placeholder.
+    .map((s) => ({ t: s.sessionEndSec * 1000, value: sleepScoreForSession(s) }))
     .sort((a, b) => a.t - b.t);
 }
 
@@ -405,7 +407,7 @@ export function SleepDetail({
   // "than your usual" / "than last week" phrasing only fires once the
   // user actually has a baseline (HISTORY_REFERENCE_NIGHTS = 7).
   const heroRange = hasLastNight
-    ? rangeCopyForSleepScore(session.sleepScore, allNights.length)
+    ? rangeCopyForSleepScore(sleepScoreForSession(session), allNights.length)
     : 'Wear the watch overnight to track your sleep.';
 
   // Sleep composition values for SleepStagesBar (replaces the
@@ -456,7 +458,7 @@ export function SleepDetail({
           secondary={hasLastNight ? 'hrs' : undefined}
           sub={heroSub}
           range={heroRange}
-          ringFill={hasLastNight ? sleepFill(session.sleepScore) : 0}
+          ringFill={hasLastNight ? sleepFill(sleepScoreForSession(session)) : 0}
           testID="sleep-detail-hero"
         />
       }

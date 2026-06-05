@@ -48,6 +48,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { sleepScoreForSession } from '../../utils/classification';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { useQueryClient } from '@tanstack/react-query';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -639,7 +640,7 @@ export function buildParentCorrelation(
   const cutoffSec = Math.floor(Date.now() / 1000) - SECONDS_PER_WEEK;
   const sleepPoints = sleepSessions
     .filter((s) => s.sessionEndSec >= cutoffSec)
-    .map((s) => ({ t: s.sessionEndSec, value: s.sleepScore }));
+    .map((s) => ({ t: s.sessionEndSec, value: sleepScoreForSession(s) }));
   const hrPoints = hrSamples
     .filter((h) => h.measuredAtSec >= cutoffSec && h.motionState === 'rest')
     .map((h) => ({ t: h.measuredAtSec, value: h.bpm }));
