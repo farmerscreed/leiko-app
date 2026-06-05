@@ -78,24 +78,22 @@ tsc 0 · jest **208 suites / 2473 tests** · eslint 0 errors · deno check
 clean · deno tests 192 pass (2 pre-existing `resolve-routing` failures —
 mock fidelity, predate everything here).
 
-## Merge status — HELD by founder instruction (2026-06-05)
+## Merge status — MERGING to main (founder green-lit)
 
-**Do NOT merge to main until the founder says so.** All work stays on
-`fix/vitals-data-completeness` (pushed). Physical testing: stages 1, 3–8
-PASSED; **Stage 2 (caregiver cross-tz) and the U16H connect regression
-were DEFERRED by founder decision** (accepted-risk notes in the test
-plan). Run them before/with the eventual merge.
+Founder green-lit the merge. The new commits since the PR-#9 boundary
+(`663ce75`) were **cherry-picked onto current `origin/main`** on branch
+`claude/vitals-followups` — cherry-pick, **not** `git merge` (main is
+squash-merged, so a merge would conflict everywhere). Gates re-run green
+on top of main: **tsc 0 · eslint 0 · jest 208 suites / 2474 tests**.
+Opened as a PR to main.
 
-When green-lit:
-1. **THE MERGE PATH (important discovery):** PR **#8 already
-   squash-merged** the consolidated-build work to main (2026-06-02), and
-   main's content is **byte-identical** to this branch's base commit
-   `836fc68` (verified: `git diff origin/main 836fc68` is empty). So do
-   NOT `git merge` (the squash would conflict everywhere) — **rebase this
-   branch's commits since 836fc68 onto origin/main** (applies clean), or
-   cherry-pick equivalently. Pushing main triggers `db-migrate.yml`
-   (`supabase db push`) — safe: versions 0030–0034 are already recorded
-   in `schema_migrations`, so it skips them.
+**Accepted-risk carried into the merge (founder decision):** Stage 2
+(caregiver cross-tz) and the U16H connect regression were **DEFERRED** —
+run them as a follow-up.
+
+**On merge:** pushing main triggers `db-migrate.yml` (`supabase db push`);
+migration **0035** is already applied + recorded in prod
+`schema_migrations` (0029→0035), so `db push` skips it. Confirm after.
 
 ## Backlog after the merge
 
