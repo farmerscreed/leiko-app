@@ -261,6 +261,12 @@ describe('Trends v2 — the letter narrative', () => {
     );
   });
 
+  it('header Back is present and tappable (screens must never be one-way)', async () => {
+    await renderAndAwaitNarrative();
+    expect(screen.getByTestId('trends-back')).toBeTruthy();
+    fireEvent.press(screen.getByTestId('trends-back')); // must not throw
+  });
+
   it('focal chips switch the evidence card to another vital (package B)', async () => {
     await renderAndAwaitNarrative();
     expect(screen.getByTestId('trends-focal-chips')).toBeTruthy();

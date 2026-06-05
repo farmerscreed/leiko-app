@@ -458,7 +458,7 @@ export function Trends() {
         }
         testID="trends-scroll"
       >
-        <Header title={headerTitle} />
+        <Header title={headerTitle} onBack={() => navigation.goBack()} />
 
         <TrendsRangeChipsRow
           accountType={accountType}
