@@ -4,6 +4,14 @@
 
 **A hardware-DTC + reservation-funnel field manual for paid acquisition on a lean budget, from Nigeria + diaspora into US mainstream.**
 
+> 🔒 **CONFIDENTIALITY — supplier identity is a trade secret.** Never publish the
+> manufacturer's name, the FDA establishment-registration / 510(k) numbers, any
+> EUDAMED/UDI identifier, or "verifiable links" to FDA/EUDAMED/ISO records — each one
+> resolves to the manufacturer in a public database. Reference regulatory standing
+> *generically only* ("FDA-listed Class II, cleared via the 510(k) process"; "EU MDR
+> Class IIa"; "ISO 13485 manufacturing"); "cleared", never "approved". Substantiation
+> is held privately by the founder and shared off the public record only on request.
+
 Built for: Leiko (com.leiko.app) | Maker: Lawrence O. (primethebrain@gmail.com)
 Last updated: May 2026 | Source: leiko-app/docs/marketing/leiko-ads-playbook.md
 What's new in v2: reframed around watch sales + reservations. App is the supporting cast, not the hero. Original v1 preserved at leiko-ads-playbook-v1.md.
@@ -58,7 +66,7 @@ The strategy that follows respects all four. Naming them upfront:
 
 **Constraint 3: Geography.** Watches are in Nigeria. Bulk capital is in the US. The diaspora bridges them.
 
-**Hidden asset: Regulatory pedigree.** FDA Establishment Registration, EU MDR Class IIa classification, ISO 13485 manufacturing. No mainstream "BP smartwatch" competitor has this. This is a marketing moat most product founders would kill for.
+**Hidden asset: Regulatory pedigree.** FDA-listed Class II clearance (510(k)), EU MDR Class IIa classification, ISO 13485 manufacturing. No mainstream "BP smartwatch" competitor has this. This is a marketing moat most product founders would kill for.
 
 ## The reservation funnel
 
@@ -178,7 +186,7 @@ In ad language:
 
 Three regulatory credentials that almost no other consumer BP watch has:
 
-- **FDA Establishment Registration #3011654863** — registered with the US Food and Drug Administration as a medical device manufacturing site
+- **FDA-listed Class II device** — listed with the US Food and Drug Administration as a non-invasive blood-pressure device, cleared through the 510(k) process *(state generically; never the registration/510(k) numbers or the maker)*
 - **EU MDR Class IIa** — classified in the European Medical Device Regulation framework alongside glucose meters and other home diagnostic devices
 - **ISO 13485** — built in a facility certified to the international standard for medical device quality management systems
 
@@ -684,7 +692,7 @@ Page structure:
    - "Reserve your Leiko for $50 today."
    - "The remaining $150 ($200 - $50) is due when your watch is ready to ship."
    - "$50 is fully refundable any time before your watch ships."
-2. Three trust badges — FDA Establishment Registration #3011654863, EU MDR Class IIa, ISO 13485 — small, prominent, linkable to verification sources.
+2. Three trust badges — FDA-listed Class II, EU MDR Class IIa, ISO 13485 — small, prominent. **Status claims only; do NOT link to FDA/EUDAMED/ISO records (they reveal the maker).**
 3. The 5 pillars in a single scroll: real cuff, 5 vitals, family-circle, doctor PDF, plain-language insights.
 4. A demand-signal counter: "X people have reserved their Leiko." (live count from Supabase)
 5. The reservation form:
@@ -736,8 +744,8 @@ The user should be able to **reach the form within one mobile scroll** from the 
 
 Most BP-watch ads fall down on trust. Leiko has more trust ammo than most. Use it.
 
-1. **FDA Establishment Registration #3011654863** — link to verifiable FDA database
-2. **EU MDR Class IIa** classification — link to verifiable EUDAMED entry when available
+1. **FDA-listed Class II device** — state the status only; **no link to the FDA database** (it reveals the manufacturer)
+2. **EU MDR Class IIa** classification — state the status only; **no link to EUDAMED** (it reveals the manufacturer)
 3. **ISO 13485 manufacturing facility certification** — link to verifiable certificate when available
 4. **Real cuff demonstration video** — 8-second loop of the actual cuff inflating on a real wrist
 5. **The team / about** — founder's face + name + bio (your real face, your real name)
@@ -1028,7 +1036,7 @@ Math: at $15 CPA per reservation and $50 deposit each, you net $35 per reservati
 
 1. **No outcome promises**. "Lower your BP" / "Cure hypertension" / "Live longer". All forbidden, all flagged by platforms.
 2. **No fear language**. "Silent killer" / "Before it's too late". Forbidden by Leiko's voice rules AND platform policy.
-3. **No medical claims about the app**. "Diagnose" / "Treat" / "Cure". The hardware has FDA Establishment Registration but that's manufacturing-site registration, not a treatment claim.
+3. **No medical claims about the app**. "Diagnose" / "Treat" / "Cure". The hardware is an FDA-listed Class II device, but that's a device classification, not a treatment claim — and never the app's.
 
 ## 15.2 The 10-box voice-rule check (run before publishing every ad)
 
@@ -1049,7 +1057,7 @@ Math: at $15 CPA per reservation and $50 deposit each, you net $35 per reservati
 
 **Can say**:
 - "FDA-listed"
-- "FDA Establishment Registration #3011654863"
+- "FDA-listed Class II device" *(never with the registration number)*
 - "EU MDR Class IIa"
 - "Built in an ISO 13485 facility"
 - "The same method as the cuff at your doctor's office" (factually true — oscillometric)
