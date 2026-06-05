@@ -6,6 +6,33 @@
 > build with all client fixes installed on `43230DLJH001YY` at 21:15.
 > Decision record: `docs/_adr/0008-vitals-data-correctness.md`.
 
+> ## RESULTS (testing sessions 2026-06-05)
+> - **Stage 1 BP — PASSED** (list/values/Lagos times, 7d stats, view-all
+>   counts, 0 dupes; fresh reading synced as exactly +1 in <2 min).
+>   U16H no-re-import box DEFERRED (watch not connected yet).
+> - **Stage 3 Sleep — PASSED** after a live-found fix: the stored
+>   sleep_score was a constant-0 placeholder ("more restless" fired for
+>   every night); display now derives the score from real session data
+>   (commit 02ec8bb). Hero shows duration-only ("7:29 slept") — no
+>   fabricated clock. One-row-per-night confirmed incl. new nights.
+> - **Stage 4 HR — PASSED** (pills genuinely differ: 7d 1,820 vs 30d
+>   5,745 samples; peak 158→172; "Latest reading" hero).
+> - **Stage 5 VitalHistory — PASSED** (true counts, Lagos day sections,
+>   pagination to the oldest row, all four vitals).
+> - **Stage 6 Doctor PDF — PASSED, artifact-verified** (assistant read the
+>   generated 7-page PDF: HR "5745 samples over 22 days" — truncation
+>   dead; every section matched prod SQL to the digit; distribution sums
+>   exactly; same-day test readings included). PLUS founder-driven
+>   upgrades landed mid-stage: share the actual FILE (WhatsApp attachment
+>   verified), in-app PdfPreview screen, and "Download to phone"
+>   (MediaStore; file verified in /sdcard/Download). Commits 1c64550,
+>   b55644c, 8fb31f2.
+> - **Stage 7 Back-button — PASSED** (rapid cancelled-dismiss torture;
+>   Back worked every time).
+> - REMAINING: Stage 2 (caregiver phone, Lima-tz), Stage 8 spot sweep,
+>   deferred U16H connect. Then the main merge per exit criteria.
+
+
 ## Setup
 
 | Thing | Value |
