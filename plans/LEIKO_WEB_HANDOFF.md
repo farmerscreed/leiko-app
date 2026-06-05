@@ -10,11 +10,14 @@
 > came from, *not* a file you can open. If you need the full original of a named file,
 > ask the founder to paste it. Do not assume you can read it.
 >
+> **⚠️ CONFIDENTIALITY — read §5a before writing any FDA/manufacturer copy.** The
+> device's manufacturer identity and its specific FDA numbers are a **trade secret**.
+> They are intentionally absent from this document and must never appear on the sites.
+>
 > **How to use it:** this is a *briefing + contract + roadmap*, **not** a build order
 > for a blank slate. The websites already exist and some work is already done. Your
 > **first job is a gap analysis** (Section 8): inventory what's there, confirm it
-> against this contract, keep what's already correct, and only change what's actually
-> wrong. Build against the gaps.
+> against this contract, keep what's already correct, and only change what's wrong.
 
 ---
 
@@ -22,14 +25,15 @@
 
 | | What it is | Domain | Regulatory footing |
 |---|---|---|---|
-| **The watch** | A wristwatch with a *real inflating BP cuff* (Urion U16 family). Hardware. | **leiko.health** — sells/reserves the watch | FDA-listed **Class II** device; clearance belongs to the **manufacturer (Urion)**. See §5. |
+| **The watch** | A wristwatch with a *real inflating BP cuff*. Hardware (OEM-built). | **leiko.health** — sells/reserves the watch | FDA-listed **Class II** device; clearance held by the **device manufacturer** (identity **confidential** — §5a). |
 | **The app** | Leiko — a companion app that displays/logs readings from the watch and keeps families connected. | **leiko.app** — app showcase + legal/technical anchor | Positioned as a **non-device companion**, *not* an independently-cleared medical device. |
 
-- **Legal entity / publisher:** **LawOne Cloud LLC** (the Google Play *Organization* account holder + D-U-N-S registrant). "Leiko" is the **brand**; LawOne Cloud LLC is the company. Urion is the **device manufacturer** (separate company).
-- **Go-to-market now:** cold ads → **leiko.health/reserve** → **$50 refundable deposit** (tiered pricing, §4). The app needn't be in users' hands for the reservation funnel to run.
+- **Legal entity / publisher:** **LawOne Cloud LLC** (the Google Play *Organization* account holder + D-U-N-S registrant). "Leiko" is the **brand**; LawOne Cloud LLC is the company.
+- **The manufacturer:** the watch is produced under a **confidential production contract**. The manufacturer's name is a **trade secret — never name them anywhere** (§5a).
+- **Go-to-market now:** cold ads → **leiko.health/reserve** → **$50 refundable deposit** (tiered pricing, §4).
 - **Status:** Google Play **identity verification pending** (async; blocks nothing on the web side). App is at **near-final 1.0**.
 
-**Why the two-site split is right (not cosmetic):** *regulatory containment.* `leiko.health` sells the regulated **hardware** and may reference the **device's** real FDA status. `leiko.app` is the **non-device app's** home and stays in the no-medical-claims voice (§5). Keep them linked but distinct.
+**Why the two-site split is right (not cosmetic):** *regulatory containment.* `leiko.health` sells the regulated **hardware** and may reference the **device's** FDA *status* (never its numbers/maker). `leiko.app` is the **non-device app's** home and stays in the no-medical-claims voice (§5). Keep them linked but distinct.
 
 ---
 
@@ -44,7 +48,7 @@ If the website doesn't match these, **deep links and install flows break**. The 
 | Custom URL scheme | `leiko://` |
 | App Link / Universal Link hosts | **`leiko.app`** and **`pair.leiko.app`** (Android `autoVerify`, iOS Associated Domains) |
 | App-store marketing URL | `https://leiko.app` |
-| App-store support URL | `https://leiko.app/support` (see §9 decision — redirects to leiko.health/support) |
+| App-store support URL | `https://leiko.app/support` (redirects to leiko.health/support — §9) |
 
 ### `.well-known` files the website MUST host on `leiko.app`
 
@@ -52,7 +56,7 @@ If the website doesn't match these, **deep links and install flows break**. The 
 - `https://leiko.app/.well-known/apple-app-site-association`
 - If `pair.leiko.app` must verify App Links, it needs its **own** copies on that subdomain.
 
-**`assetlinks.json` — host exactly this** (the upload-key fingerprint is real; the Play one is filled in after the first AAB upload — see §9):
+**`assetlinks.json` — host exactly this** (upload-key fingerprint is real; the Play one is filled after the first AAB upload — §9):
 
 ```json
 [
@@ -82,7 +86,6 @@ If the website doesn't match these, **deep links and install flows break**. The 
   }
 }
 ```
-*(Confirm the exact path list with the founder if needed; it must cover the deep-link paths in §3.)*
 
 ### Verify after hosting
 - Android: `https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://leiko.app&relation=delegate_permission/common.handle_all_urls`
@@ -92,7 +95,7 @@ If the website doesn't match these, **deep links and install flows break**. The 
 
 ## 3. The exact URL contract (paths the app already points users to)
 
-Each URL is referenced **in shipped app code**. The website must serve a sensible page at each — including deep-link paths, because a user *without* the app lands on the web URL and needs a graceful fallback ("Get Leiko" + context). **Never display health values to the public on these pages.**
+Each URL is referenced **in shipped app code**. The website must serve a sensible page at each — including deep-link paths, because a user *without* the app lands on the web URL and needs a graceful fallback. **Never display health values to the public on these pages.**
 
 | URL | Purpose | Page must do |
 |---|---|---|
@@ -104,7 +107,7 @@ Each URL is referenced **in shipped app code**. The website must serve a sensibl
 | `https://leiko.health/privacy` | App Settings → legal | **Privacy policy** (content in §6). |
 | `https://leiko.health/terms` | App Settings → legal | **Terms** (incl. reservation/deposit terms). |
 | `https://leiko.health/support` | App Settings → support | **Canonical support page** (§9). |
-| `https://pair.leiko.app/` and `…/family-…` | Watch-pairing handoff | Pairing flow entry (e.g. opening pairing on a parent's phone). |
+| `https://pair.leiko.app/` and `…/family-…` | Watch-pairing handoff | Pairing flow entry. |
 
 In-app `leiko://` deep-link routes (so web fallbacks mirror them): `home`, `weekly`, `reading/{id}`, `vital/{kind}`, `settings/devices`, `family`, `settings/subscription`.
 
@@ -112,138 +115,144 @@ In-app `leiko://` deep-link routes (so web fallbacks mirror them): `home`, `week
 
 ## 4. The reserve funnel + analytics rules
 
-**Funnel:** `leiko.health/reserve` captures a **$50 refundable deposit** with tiered pricing. Two variants: **Leiko** (base) and **Leiko Pro** (premium band, priority support). Pricing snapshot (from the reserve brief, dated 2026-06-02 — **confirm current numbers with the founder before publishing**):
+**Funnel:** `leiko.health/reserve` captures a **$50 refundable deposit** with tiered pricing. Two variants: **Leiko** (base) and **Leiko Pro** (premium). Pricing snapshot (dated 2026-06-02 — **confirm current numbers with the founder before publishing**):
 
-| Tier | Slots | Leiko price | Leiko Pro | Deposit | Balance at ship |
+| Tier | Slots | Leiko | Leiko Pro | Deposit | Balance at ship |
 |---|---|---|---|---|---|
 | Founders' Edition | first 30 | $149 | $199 | $50 | $99 / $149 |
 | Early Reservation | next 1,000 | $179 | $229 | $50 | $129 / $179 |
 | Reservation | thereafter | $200 | $250 | $50 | $150 / $200 |
 
-Same $50 deposit across tiers; only the balance-at-ship varies. The funnel must handle: deposit capture, refund logic, tier/slot tracking, confirmation email, and "balance at ship" billing.
+Funnel must handle: deposit capture, refund logic, tier/slot tracking, confirmation email, balance-at-ship billing.
 
-**Analytics = event names ONLY, never health/personal values** (hard project rule; tool is PostHog). For the funnel, emit names like `reserve_view`, `reserve_started`, `deposit_paid` — never a reading value, email, or other personal datum in a property.
+**Analytics = event names ONLY, never health/personal values** (hard rule; PostHog). Emit names like `reserve_view`, `reserve_started`, `deposit_paid` — never a reading value, email, or other personal datum in a property.
 
-**Closed-test funnel may be obsolete.** There exists a prior plan (`leiko-app:plans/beta-landing-funnel.md`) to recruit Play *closed testers*, which only matters because *individual* Play accounts created after Nov 2023 must run a 20-tester / 14-day closed test. **Organization accounts are generally exempt.** Confirm in Play Console (§9); if exempt, do **not** build a tester-recruitment funnel — point `leiko.app` at the production install path instead.
+**Closed-test funnel may be obsolete.** A prior plan recruited Play *closed testers* (needed only because *individual* Play accounts created after Nov 2023 must run a 20-tester/14-day closed test). **Organization accounts are generally exempt.** Confirm in Play Console (§9); if exempt, point `leiko.app` at the production install path instead.
 
 ---
 
 ## 5. Claims & voice law (governs EVERY word on both sites + all ad creative)
 
-The app enforces this in CI; the websites and ads are **not** exempt.
+### 5a. The watch's FDA status — and the CONFIDENTIALITY RULE (read before any FDA copy)
 
-### 5a. The watch's real FDA status (confirmed from the FDA Establishment Registration & Device Listing database)
+The watch is an **FDA-listed Class II** non-invasive blood-pressure measurement device, **cleared through the FDA 510(k) process**. That status is real and may be referenced — *generically*.
 
-- **Manufacturer:** SHENZHEN URION TECHNOLOGY CO., LTD. (China).
-- **FDA Establishment Registration #:** `3011654863` (current reg year 2025). Owner/Operator # `10049394`.
-- **Device listed:** "Wrist Watch Electronic Blood Pressure Monitor" — models **U16H, U16L, U16P, U16W** (and U19R/S/T).
-- **Classification:** *System, Measurement, Blood-Pressure, Non-Invasive* · **Product Code DXN** · **Device Class II** · Cardiovascular.
-- **510(k) Premarket Submission #:** **K141683**.
+> 🔒 **HARD CONFIDENTIALITY RULE.** The **manufacturer's name** and the **specific FDA
+> numbers** (establishment registration number, owner/operator number, 510(k) number)
+> are a **trade secret**. They are deliberately **not** in this document. They must
+> **NEVER** appear on the website, in ads, in the app, in metadata, or in any public
+> artifact — because **each one publicly resolves to the manufacturer's identity** in
+> the FDA database, exposing the founder's supplier. Make the FDA claim **generically**.
+> If an ad platform or regulator demands substantiation, the **founder supplies the
+> numbers privately**, never on the public record.
 
-**You MAY say (accurate, defensible):**
-- "An **FDA-listed Class II** blood-pressure device" / "built on the FDA-cleared Urion U16 platform."
-- "**510(k)-cleared** (K141683)" — *once K141683 is verified* (see cautions).
-- Mechanism claims: "a **real inflating cuff**," "a real number," "the same *kind* of measurement as the cuff at your doctor's office" (it's oscillometric, non-invasive — the same product class as clinical arm cuffs). The existing hero **"A real cuff. A real number."** is fine.
+**You MAY say (accurate + safe):**
+- "An **FDA-listed Class II** blood-pressure device" / "**cleared through the FDA 510(k) process**."
+- Mechanism claims: "a **real inflating cuff**," "a real number," "the same *kind* of measurement as the cuff at your doctor's office" (oscillometric, non-invasive). The existing hero **"A real cuff. A real number."** is fine.
 
-**You must NOT (hard rules):**
-- ❌ **"FDA approved."** Class II devices are **cleared** (510(k)), never "approved" (approval = Class III PMA). "Approved" here is false and an FTC/ad-policy violation.
-- ❌ Leading with just the **establishment registration number** as if it's a credential — registration ≠ clearance. Use "Class II, 510(k)-cleared (K141683)" as the credential instead.
-- ❌ Implying the **app** is FDA-cleared. The clearance is the **watch's** (Urion's). The app stays a non-device companion. Never let FDA language bleed onto the app.
-- ❌ Implying **LawOne Cloud LLC** holds an FDA clearance. It's the brand/reseller; Urion holds the registration/clearance. Truthful framing: "built on the FDA-cleared Urion device."
-- **Verify K141683** in the FDA 510(k) database (accessdata.fda.gov → 510(k)) for holder + scope before "510(k)-cleared" goes in paid ads. The listing referencing it is strong evidence; confirm it covers these models. Ad platforms may ask for substantiation.
+**You must NOT:**
+- ❌ Publish **any FDA number** or **the manufacturer's name** — anywhere (the whole point of this rule).
+- ❌ **"FDA approved."** Class II is **cleared** (510(k)), never "approved" (approval = Class III PMA). False + an FTC/ad-policy violation.
+- ❌ Imply the **app** is FDA-cleared. The clearance is the **watch's**; the app stays a non-device companion.
+- ❌ Imply **LawOne Cloud LLC** holds the clearance. Frame it as the device's status, not the company's.
+- ❌ Catalog/model specifics that narrow an FDA search — claim the **capability** ("measures BP with a real cuff"), not a registration.
 
-### 5b. Forbidden words/phrases (legal/regulatory risk — apply to ALL copy & ads)
+> **Honest limit (for the founder, not the site):** for a US-sold FDA device the
+> manufacturer's registration is inherently public and findable by product category.
+> Omitting the numbers/name raises the bar a lot, but isn't airtight. The durable
+> protection — own-label/importer registration so *your* entity is the visible record,
+> plus NDAs — is a separate regulatory/legal track (see chat notes).
+
+### 5b. Forbidden words/phrases (legal/regulatory risk — ALL copy & ads)
 
 - `diagnose / diagnosis / diagnostic`, `treat / treatment / cure`, `predict` / `prevent` (disease context), `medical advice`.
 - Fear language: `silent killer`, `ticking time bomb`, `before it's too late`, `dangerous level`, `critical level`.
-- Outcome promises: anything implying it *will* lower BP, prevent disease, or extend life.
+- Outcome promises (will lower BP / prevent disease / live longer).
 - `continuous blood pressure monitoring` (BP is on-demand), `medical-grade SpO2` / `clinical SpO2` (SpO2 is wellness-only here).
 - `replaces your doctor` → "supplement, never replace."
-- **Do NOT reuse Urion's original marketing** — `AI Pulse Diagnosis`, `TCM diagnosis`, etc. are outside the cleared use and forbidden.
-- `smartwatch` as the primary product noun → use "watch", "wristwatch", "the device", or just "Leiko."
+- **Do NOT reuse the manufacturer's original marketing** — e.g. `AI Pulse Diagnosis`, `TCM diagnosis` — outside the cleared use and forbidden.
+- `smartwatch` as primary product noun → "watch", "wristwatch", "the device", or "Leiko."
 - `patient` → "Mum" / "Dad" / "your parent" / "you". `loved one` → a specific relationship.
 
 ### 5c. Voice (every string)
-Warm · Calm · Proactive · Dignified. Lead with the answer; plain language before clinical terms; "Talk to your doctor" (not "consult a healthcare provider"); sentence case; personal pronouns ("you", "your"); verb-object CTAs ("Pair watch", "Reserve yours"). No `!!`, no ALL CAPS, no fear, no urgency-in-onboarding.
+Warm · Calm · Proactive · Dignified. Lead with the answer; plain language before clinical terms; "Talk to your doctor"; sentence case; personal pronouns; verb-object CTAs ("Pair watch", "Reserve yours"). No `!!`, no ALL CAPS, no fear, no urgency-in-onboarding.
 
-> Ad platforms (Meta, Google) apply **extra scrutiny to BP/health-device ads** regardless of claims, and restrict health-condition targeting. Get copy clean *before* spending or risk disapprovals and account strikes.
+> Ad platforms apply **extra scrutiny to BP/health-device ads** and restrict health-condition targeting. Get copy clean *before* spending.
 
 ---
 
 ## 6. Legal content (privacy / terms) — facts to base the pages on
 
-`leiko.health/privacy` must match what the app actually does. Ground truth (from a literal read of the app source):
+`leiko.health/privacy` must match what the app actually does:
 
-- **Collected:** email (sign-in/invites); optional display name; **health & fitness vitals** (BP, HR, SpO2, sleep, steps, active energy) from the Urion U16 watch; purchase history (RevenueCat + Google Play Billing); per-install device UUID; optional product-analytics events (no PHI); crash logs (PHI-scrubbed).
+- **Collected:** email (sign-in/invites); optional display name; **health & fitness vitals** (BP, HR, SpO2, sleep, steps, active energy) from the **Leiko watch**; purchase history (RevenueCat + Google Play Billing); per-install device UUID; optional product-analytics events (no PHI); crash logs (PHI-scrubbed).
 - **NOT collected:** location (a capped legacy BLE permission only, `maxSdkVersion=30`), microphone, camera, photos, contacts, calendar, messages.
 - **Encryption:** in transit (HTTPS to Supabase; BLE link is local-only) and at rest on device.
 - **Deletion:** Settings → Privacy and data → Delete my account.
-- **Third parties:** Supabase (backend, hosted on Hetzner), RevenueCat, Sentry, PostHog, Expo Push, Google Play Billing.
+- **Third parties:** Supabase (backend, on Hetzner), RevenueCat, Sentry, PostHog, Expo Push, Google Play Billing.
 - **Posture:** consumer/DTC, **not** a HIPAA covered entity; "patient" data is **not** collected.
 
-`leiko.health/terms` should also cover the reservation/deposit terms (refundability, balance-at-ship, tier conditions) — confirm with the founder.
-
-*(If you need the verbatim Play Data Safety mapping, ask the founder to paste `leiko-app:docs/release/play-console-data-safety.md`.)*
+`leiko.health/terms` should also cover reservation/deposit terms (refundability, balance-at-ship, tier conditions) — confirm with the founder.
 
 ---
 
 ## 7. Launch roadmap (sequence matters)
 
-**Phase 0 — Foundations (proceed now; Play verification not required):**
+**Phase 0 — Foundations (now; Play verification not required):**
 1. Gap analysis of both sites (§8).
-2. Claims/voice clean-up of all live copy + ad creative (§5) — *gates safe ad spend*.
+2. Claims/voice clean-up of all live copy + ad creative (§5) — *gates safe ad spend*; includes scrubbing any manufacturer name / FDA numbers already on the sites.
 3. Legal pages live + consistent: `leiko.health/privacy`, `/terms`, `/support` (§6).
 4. Reserve funnel verified end-to-end (deposit, refund, tiers, confirmation, analytics-events-only).
-5. `leiko.app`: app showcase + `/join`, `/reading/{id}`, `/vital/{kind}`, `/support` pages + host the two `.well-known` files (placeholders noted until fillable).
+5. `leiko.app`: app showcase + `/join`, `/reading/{id}`, `/vital/{kind}`, `/support` + host the two `.well-known` files (placeholders noted until fillable).
 
 **Phase 1 — Play publish (when verification clears):**
-6. First AAB upload → grab **Play App Signing SHA-256** → update `leiko.app/.well-known/assetlinks.json` → re-verify.
+6. First AAB upload → grab **Play App Signing SHA-256** → update `assetlinks.json` → re-verify.
 7. Org account likely skips closed testing (§9) → publish. Wire real Play listing URL (`store/apps/details?id=com.leiko.app`) into `leiko.app`.
 
-**Phase 2 — Demand on (when 0–1 solid):**
+**Phase 2 — Demand on:**
 8. Ads → `leiko.health/reserve`. Watch ad-account health + funnel conversion.
 
 ---
 
 ## 8. YOUR FIRST TASK — gap analysis (confirm what's done; change only what's wrong)
 
-The sites already exist and some work is done. Posture: **keep what's already correct; only recommend/make a change when something is actually wrong.** Method:
+Posture: **keep what's already correct; change only what's actually wrong.** Method:
 
-1. **Inventory** every page, route, and asset in the repo for *both* sites; note stack, hosting, deploy method.
-2. **Confirm against this contract** — mark ✅ correct / ⚠️ present-but-wrong / ❌ missing:
-   - [ ] `leiko.app/.well-known/assetlinks.json` + `apple-app-site-association` hosted (with placeholder status, §2)
+1. **Inventory** every page, route, and asset in both sites; note stack, hosting, deploy.
+2. **Confirm against this contract** — ✅ correct / ⚠️ present-but-wrong / ❌ missing:
+   - [ ] `leiko.app/.well-known/assetlinks.json` + `apple-app-site-association` hosted (placeholder status, §2)
    - [ ] `pair.leiko.app` App-Link assets (if it must verify)
    - [ ] Every §3 URL resolves to a sensible page (graceful no-app fallback; no public health values)
    - [ ] `leiko.health/privacy`, `/terms`, `/support` exist + match §6
    - [ ] `leiko.app/support` redirects to `leiko.health/support` (§9)
    - [ ] `leiko.health/reserve` funnel: deposit, tiers, refund, confirmation, analytics-events-only
-   - [ ] All copy + ad creative passes §5 (esp. FDA "cleared not approved", no forbidden verbs)
+   - [ ] **No manufacturer name or FDA numbers anywhere on either site** (§5a) — if present, remove
+   - [ ] All copy + ad creative passes §5 (FDA "cleared not approved"; no forbidden verbs)
    - [ ] `.health` ↔ `.app` cross-links present and correct
    - [ ] Analytics emits event names only, no PHI
-3. **Severity-rank** gaps (launch-blocking vs. nice-to-have).
-4. **Execute** against the gaps. For anything already shipped and acceptable, confirm and move on — don't rebuild it.
+3. **Severity-rank** gaps. 4. **Execute** against them; confirm-and-move-on for anything already correct.
 
 ---
 
-## 9. Decisions (already made — go with these) + externally-gated items
+## 9. Decisions (made — go with these) + externally-gated items
 
-**Decisions — resolved; implement as stated (these follow what's already shipped):**
-- **D1 — Legal/support page ownership → `leiko.health`.** The app already links privacy/terms/support to `leiko.health`. Keep that. The only mismatch is the app-store `supportUrl = leiko.app/support`; resolve it **website-side only** by making `leiko.app/support` **301-redirect to `leiko.health/support`** (or serve identical content). **No app change needed.** Net: `leiko.health` owns privacy/terms/support; `leiko.app` owns app showcase + `/join` + deep-link fallbacks + `.well-known` + a support redirect.
-- **D2 — FDA wording → use "FDA-listed Class II, 510(k)-cleared (K141683)", never "approved".** Per §5a. Treat K141683 verification (below) as the one open check.
+**Decisions — resolved; implement as stated (follow what's already shipped):**
+- **D1 — Legal/support pages → canonical on `leiko.health`.** The app already links privacy/terms/support there. Keep it. The only mismatch is the app-store `supportUrl = leiko.app/support`; fix **website-side only** by making `leiko.app/support` **301-redirect to `leiko.health/support`**. **No app change.**
+- **D2 — FDA wording → "FDA-listed Class II, cleared via the 510(k) process," never "approved," never with numbers or the manufacturer's name** (§5a).
 
-**Externally-gated — not blockers for Phase 0, resolve when available:**
-- **K141683 verification** — confirm holder/scope in the FDA 510(k) database before "510(k)-cleared" runs in paid ads.
+**Externally-gated — confirm when available (not Phase-0 blockers):**
+- **FDA substantiation** — the founder holds the registration/510(k) numbers privately and confirms scope before paid ads; these are **never** published.
 - **Play App Signing SHA-256** for `assetlinks.json` — exists only *after* the first AAB upload.
 - **Apple Team ID** for `apple-app-site-association`.
-- **Org-account closed-test exemption** — 5-min Play Console check; decides whether `leiko.app` needs any tester funnel (§4).
-- **App 1.0 freeze** — two fixes (sleep score; doctor-PDF file share + preview) still landing on the app side; don't announce the app as "shipped" until frozen + published. *Doesn't block web work.*
-- **Payment infrastructure** for the deposit (Stripe/Paystack + refund logic) — confirm it's actually live.
+- **Org-account closed-test exemption** — 5-min Play Console check (§4).
+- **App 1.0 freeze** — fixes still landing app-side; don't announce the app "shipped" until frozen + published.
+- **Payment infrastructure** for the deposit (Stripe/Paystack + refund logic) — confirm live.
 
 ---
 
 ## 10. Provenance map (these files live in `leiko-app` — you CANNOT open them)
 
-The essentials above are inlined, so you shouldn't need these. If you want a verbatim original, **ask the founder to paste it**:
+Essentials are inlined; if you need a verbatim original, **ask the founder to paste it** — and note the founder may redact the manufacturer name / FDA numbers first.
 
 | Topic | File in `farmerscreed/leiko-app` (provenance only) |
 |---|---|
@@ -260,4 +269,4 @@ The essentials above are inlined, so you shouldn't need these. If you want a ver
 
 ---
 
-*Self-contained handoff from `farmerscreed/leiko-app`. FDA facts confirmed against the FDA Establishment Registration & Device Listing database (Shenzhen Urion, reg 3011654863, product code DXN, Class II, 510(k) K141683). Decisions in §9 follow what the app already ships; change only what's actually wrong.*
+*Self-contained handoff from `farmerscreed/leiko-app`. The device's FDA status was confirmed privately by the founder against the FDA device-listing database; the specific identifiers and the manufacturer's name are a trade secret, intentionally excluded here, and must never appear on the public sites. Decisions in §9 follow what the app already ships; change only what's actually wrong.*
