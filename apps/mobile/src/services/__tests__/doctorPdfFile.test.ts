@@ -7,7 +7,7 @@ const mockExists = jest.fn();
 jest.mock('expo-file-system', () => ({
   Paths: { cache: { uri: 'file:///cache/' } },
   File: Object.assign(
-    jest.fn().mockImplementation((..._uris: unknown[]) => ({
+    jest.fn().mockImplementation(() => ({
       get exists() {
         return mockExists();
       },
