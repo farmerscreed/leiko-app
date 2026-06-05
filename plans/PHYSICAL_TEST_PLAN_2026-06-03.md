@@ -29,8 +29,15 @@
 >   b55644c, 8fb31f2.
 > - **Stage 7 Back-button — PASSED** (rapid cancelled-dismiss torture;
 >   Back worked every time).
-> - REMAINING: Stage 2 (caregiver phone, Lima-tz), Stage 8 spot sweep,
->   deferred U16H connect. Then the main merge per exit criteria.
+> - **Stage 8 sweep — PASSED** (2026-06-05): Trends renders w/ the new
+>   exact-data package (focal chips, ranges all correct) + the newly
+>   added header Back; Learn + Connect sheet fine. Note: Trends was
+>   REBUILT mid-testing (founder-approved A+B+C, ADR-0008 amendment,
+>   migration 0035) after a critical review found the same 1000-row
+>   truncation as the PDF + UTC bucketing; also gained a focal-vital
+>   switcher and an on-screen Back (commits f4ca2c0, a90b498).
+> - REMAINING: Stage 2 (caregiver phone, Lima-tz) and the deferred U16H
+>   connect. Then the main merge per exit criteria.
 
 
 ## Setup
