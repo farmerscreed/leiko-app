@@ -14,8 +14,10 @@ jest.mock('react-native-pdf', () => {
 });
 
 const mockShare = jest.fn();
+const mockSave = jest.fn();
 jest.mock('../../../services/doctorPdfFile', () => ({
   sharePdfFile: (...a: unknown[]) => mockShare(...a),
+  savePdfToDownloads: (...a: unknown[]) => mockSave(...a),
 }));
 
 import { PdfPreviewScreen } from '../PdfPreviewScreen';
@@ -49,7 +51,10 @@ function renderScreen(goBack: () => void = () => undefined) {
 }
 
 describe('PdfPreviewScreen', () => {
-  beforeEach(() => mockShare.mockClear());
+  beforeEach(() => {
+    mockShare.mockClear();
+    mockSave.mockClear();
+  });
 
   it('renders the title and the document', () => {
     renderScreen();
@@ -61,6 +66,26 @@ describe('PdfPreviewScreen', () => {
     renderScreen();
     fireEvent.press(screen.getByTestId('pdf-preview-share'));
     expect(mockShare).toHaveBeenCalledWith(PARAMS.fileUri);
+  });
+
+  it('Download saves to the phone and confirms calmly', async () => {
+    mockSave.mockResolvedValue({ status: 'ok' });
+    renderScreen();
+    fireEvent.press(screen.getByTestId('pdf-preview-download'));
+    expect(mockSave).toHaveBeenCalledWith(
+      PARAMS.fileUri,
+      'leiko_report_90d_1.pdf',
+    );
+    expect(
+      await screen.findByText("Saved to your phone's Downloads folder."),
+    ).toBeTruthy();
+  });
+
+  it('Download failure points at Share, never crashes', async () => {
+    mockSave.mockResolvedValue({ status: 'error', reason: 'x' });
+    renderScreen();
+    fireEvent.press(screen.getByTestId('pdf-preview-download'));
+    expect(await screen.findByTestId('pdf-preview-save-error')).toBeTruthy();
   });
 
   it('Back calls goBack', () => {

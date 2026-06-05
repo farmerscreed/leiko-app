@@ -23,10 +23,21 @@ jest.mock('expo-sharing', () => ({
   shareAsync: (...args: unknown[]) => mockShareAsync(...args),
 }));
 
+const mockCopyToMediaStore = jest.fn();
+jest.mock('react-native-blob-util', () => ({
+  __esModule: true,
+  default: {
+    MediaCollection: {
+      copyToMediaStore: (...a: unknown[]) => mockCopyToMediaStore(...a),
+    },
+  },
+}));
+
 import {
   doctorPdfFileName,
   downloadDoctorPdf,
   pdfFileExists,
+  savePdfToDownloads,
   sharePdfFile,
 } from '../doctorPdfFile';
 
@@ -85,5 +96,30 @@ describe('sharePdfFile', () => {
     mockIsAvailable.mockResolvedValue(false);
     expect(await sharePdfFile('file:///cache/a.pdf')).toBe(false);
     expect(mockShareAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe('savePdfToDownloads (android)', () => {
+  it('copies into the public Downloads via the MediaStore', async () => {
+    mockCopyToMediaStore.mockResolvedValue('content://downloads/1');
+    const res = await savePdfToDownloads(
+      'file:///cache/leiko_report_30d_1.pdf',
+      'leiko_report_30d_1.pdf',
+    );
+    expect(res).toEqual({ status: 'ok' });
+    expect(mockCopyToMediaStore).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'leiko_report_30d_1', // extension stripped — MediaStore re-adds it
+        mimeType: 'application/pdf',
+      }),
+      'Download',
+      '/cache/leiko_report_30d_1.pdf', // file:// prefix stripped
+    );
+  });
+
+  it('never throws — surfaces the failure reason', async () => {
+    mockCopyToMediaStore.mockRejectedValue(new Error('disk full'));
+    const res = await savePdfToDownloads('file:///cache/a.pdf', 'a.pdf');
+    expect(res).toEqual({ status: 'error', reason: 'disk full' });
   });
 });
