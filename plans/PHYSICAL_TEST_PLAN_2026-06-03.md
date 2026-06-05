@@ -36,8 +36,15 @@
 >   migration 0035) after a critical review found the same 1000-row
 >   truncation as the PDF + UTC bucketing; also gained a focal-vital
 >   switcher and an on-screen Back (commits f4ca2c0, a90b498).
-> - REMAINING: Stage 2 (caregiver phone, Lima-tz) and the deferred U16H
->   connect. Then the main merge per exit criteria.
+> - **Stage 2 + U16H connect: DEFERRED by founder decision (2026-06-05).**
+>   Accepted risk basis: the caregiver wearer-tz path is unit-tested
+>   across zones and shares the device-verified plumbing; the U16H
+>   re-import protection is the same unique-index mechanism already
+>   proven by live syncs. Run both before/with the eventual main merge.
+> - **MAIN MERGE: explicitly HELD by founder instruction (2026-06-05) —
+>   "do not merge into main; stick to the branch." All work lives on
+>   `fix/vitals-data-completeness` (pushed). When the founder green-lights
+>   it, follow the rebase path in NEXT_SESSION_START_HERE.md.**
 
 
 ## Setup
