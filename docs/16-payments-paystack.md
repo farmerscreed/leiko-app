@@ -167,7 +167,8 @@ Redeploys of this function must keep `verify_jwt = false` (pinned in
 
 ## 9. Follow-ups (deliberately not built)
 
-- USD/Stripe phase (international checkout; waitlist holds those leads).
+- USD/Stripe phase (international checkout; waitlist holds those leads) —
+  **ready-to-go build brief: `docs/17-payments-stripe-brief.md`**.
 - Refund initiation (dashboard or Refund API; `refund.processed` is consumed).
 - Fulfilment statuses beyond `paid` (e.g. shipped) — needs a schema
   decision; /admin currently tracks to `paid`/`refunded`.
