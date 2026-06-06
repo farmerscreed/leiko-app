@@ -84,6 +84,20 @@ Deno.test('expectedAmountKobo: reservation → ₦50,000 for either SKU', () => 
   assertEquals(expectedAmountKobo('reservation', 'u19m'), 5_000_000);
 });
 
+Deno.test('expectedAmountKobo: balance → price minus ₦50,000 deposit', () => {
+  assertEquals(expectedAmountKobo('balance', 'u16h'), 20_000_000); // ₦200,000
+  assertEquals(expectedAmountKobo('balance', 'u19m'), 25_000_000); // ₦250,000
+});
+
+Deno.test('expectedAmountKobo: balance with unknown sku → null', () => {
+  assertEquals(expectedAmountKobo('balance', 'undecided'), null);
+  assertEquals(expectedAmountKobo('balance', 'u99x'), null);
+});
+
+Deno.test('expectedAmountKobo: reservation passes with undecided sku', () => {
+  assertEquals(expectedAmountKobo('reservation', 'undecided'), 5_000_000);
+});
+
 Deno.test('expectedAmountKobo: unknown combinations → null', () => {
   assertEquals(expectedAmountKobo('full', 'u99x'), null);
   assertEquals(expectedAmountKobo('subscription', 'u16h'), null);
@@ -149,6 +163,34 @@ Deno.test('validateTransaction: undefined amount fails', () => {
 
 Deno.test('validateTransaction: unknown sku fails', () => {
   const r = validateTransaction({ ...GOOD, sku: 'u99x' });
+  assertEquals(r.ok, false);
+  assertEquals(r.reason?.includes('unrecognized'), true);
+});
+
+Deno.test('validateTransaction: clean balance payment passes', () => {
+  assertEquals(
+    validateTransaction({ ...GOOD, orderType: 'balance', amountKobo: 20_000_000 }).ok,
+    true,
+  );
+  assertEquals(
+    validateTransaction({ ...GOOD, orderType: 'balance', sku: 'u19m', amountKobo: 25_000_000 }).ok,
+    true,
+  );
+});
+
+Deno.test('validateTransaction: balance with deposit-sized amount fails', () => {
+  const r = validateTransaction({ ...GOOD, orderType: 'balance', amountKobo: 5_000_000 });
+  assertEquals(r.ok, false);
+  assertEquals(r.reason?.includes('amount'), true);
+});
+
+Deno.test('validateTransaction: balance with undecided sku fails', () => {
+  const r = validateTransaction({
+    ...GOOD,
+    orderType: 'balance',
+    sku: 'undecided',
+    amountKobo: 20_000_000,
+  });
   assertEquals(r.ok, false);
   assertEquals(r.reason?.includes('unrecognized'), true);
 });

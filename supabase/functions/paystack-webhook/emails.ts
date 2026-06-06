@@ -55,8 +55,13 @@ export interface BuyerEmailInput {
   reference: string;
   customerName: string | null;
   deliveryAddress: string | null;
-  /** Required for reservations; ignored for full payments. */
+  /** Known for decided reservations; null when the model is still open. */
   balanceDueNaira: number | null;
+  /**
+   * Link to /reserve/complete for this reservation. When present, the
+   * reservation email carries the Founder Edition invitation block.
+   */
+  completeUrl?: string | null;
 }
 
 /**
@@ -88,12 +93,26 @@ export function buyerConfirmationEmail(input: BuyerEmailInput): EmailContent {
     rows.push(detailRow('Delivery address', escapeHtml(input.deliveryAddress)));
   }
 
-  const reservationTerms =
-    isReservation && input.balanceDueNaira != null
-      ? `<p>Your ${formatNaira(DEPOSIT_DISPLAY_NAIRA)} deposit counts toward the total. ` +
-        `The remaining balance of ${formatNaira(input.balanceDueNaira)} is due when your ` +
-        `watch ships — we will be in touch well before then. If you change your mind ` +
-        `before your unit ships, your deposit is fully refundable.</p>`
+  const balanceLine =
+    input.balanceDueNaira != null
+      ? `The remaining balance of ${formatNaira(input.balanceDueNaira)} is due when your watch ships. `
+      : 'The remaining balance depends on which watch you choose, and is due when your watch ships. ';
+  const reservationTerms = isReservation
+    ? `<p>Your ${formatNaira(DEPOSIT_DISPLAY_NAIRA)} deposit counts toward the total. ` +
+      balanceLine +
+      `If you change your mind before your unit ships, your deposit is fully refundable.</p>`
+    : '';
+
+  // Founder Edition invitation — the deposit-ladder step 2. Only on
+  // reservations, only when the caller built a completion link.
+  const founderBlock =
+    isReservation && input.completeUrl
+      ? `<div style="margin: 20px 0; padding: 16px 18px; border: 1px solid #E0D8CC; border-radius: 12px;">` +
+        `<p style="margin: 0 0 8px;"><strong>Want yours sooner?</strong></p>` +
+        `<p style="margin: 0 0 14px;">The Founder Edition batch is in stock now. Choose your watch and settle the balance, and yours ships within days.</p>` +
+        `<a href="${escapeHtml(input.completeUrl)}" style="display: inline-block; background: #E8A063; color: #2B2722; padding: 12px 20px; border-radius: 10px; font-weight: bold; text-decoration: none;">Choose your watch &rarr;</a>` +
+        `<p style="margin: 14px 0 0; font-size: 13px; color: #857F7A;">Prefer to wait for the next batch? Nothing to do &mdash; your deposit already holds your place.</p>` +
+        `</div>`
       : '';
 
   const nextStep = isReservation
@@ -106,6 +125,7 @@ export function buyerConfirmationEmail(input: BuyerEmailInput): EmailContent {
     `<p style="font-size: 17px;"><strong>${lead}</strong></p>` +
     detailTable(rows) +
     reservationTerms +
+    founderBlock +
     nextStep +
     SIGN_OFF +
     WRAPPER_CLOSE;
@@ -173,6 +193,52 @@ export function internalAlertEmail(input: InternalAlertInput): EmailContent {
     `<p style="font-size: 17px;"><strong>${input.flagged ? 'Flagged payment received' : 'New order received'}</strong></p>` +
     flagBlock +
     detailTable(rows) +
+    WRAPPER_CLOSE;
+
+  return { subject, html };
+}
+
+export interface BalanceEmailInput {
+  skuName: string;
+  balancePaidNaira: number;
+  totalNaira: number | null;
+  reference: string;
+  customerName: string | null;
+  deliveryAddress: string | null;
+}
+
+/**
+ * Buyer confirmation for a balance payment — the reservation is now a
+ * complete order. Only ever sent for a fully verified, amount-matched
+ * balance against an existing reservation.
+ */
+export function buyerBalanceEmail(input: BalanceEmailInput): EmailContent {
+  const subject = 'Your LEIKO order is confirmed';
+  const name = input.customerName ? escapeHtml(input.customerName) : null;
+  const greeting = name ? `Hi ${name},` : 'Hello,';
+  const product = escapeHtml(input.skuName);
+
+  const rows = [
+    detailRow('Product', product),
+    detailRow('Balance paid', formatNaira(input.balancePaidNaira)),
+    detailRow('Deposit credited', formatNaira(DEPOSIT_DISPLAY_NAIRA)),
+  ];
+  if (input.totalNaira != null) {
+    rows.push(detailRow('Total', formatNaira(input.totalNaira)));
+  }
+  rows.push(detailRow('Order reference', escapeHtml(input.reference)));
+  if (input.deliveryAddress) {
+    rows.push(detailRow('Delivery address', escapeHtml(input.deliveryAddress)));
+  }
+
+  const html =
+    WRAPPER_OPEN +
+    `<p>${greeting}</p>` +
+    `<p style="font-size: 17px;"><strong>Your ${product} order is complete &mdash; thank you.</strong></p>` +
+    detailTable(rows) +
+    '<p>Your deposit and balance are both settled. We will email you as soon as your watch ships. ' +
+    'If anything about your delivery details changes, just reply to this email.</p>' +
+    SIGN_OFF +
     WRAPPER_CLOSE;
 
   return { subject, html };

@@ -2,10 +2,16 @@
 // Colocated tests: helpers.test.ts (run with `deno test`).
 //
 // Price source of truth (2026-06-06 finance kickoff, NGN-only phase):
-//   full + u16h (LEIKO Watch)     → ₦250,000 = 25,000,000 kobo
-//   full + u19m (LEIKO Watch Pro) → ₦300,000 = 30,000,000 kobo
-//   reservation (either SKU)      → ₦50,000  =  5,000,000 kobo
+//   full + u16h (LEIKO Watch)        → ₦250,000 = 25,000,000 kobo
+//   full + u19m (LEIKO Watch Pro)    → ₦300,000 = 30,000,000 kobo
+//   reservation (sku may be undecided) → ₦50,000 =  5,000,000 kobo
+//   balance + u16h (price − deposit) → ₦200,000 = 20,000,000 kobo
+//   balance + u19m (price − deposit) → ₦250,000 = 25,000,000 kobo
 // USD/Stripe is a later phase; this module is NGN/Paystack only.
+//
+// Deposit-ladder flow: 'reservation' inserts a new order (model can be
+// undecided); 'balance' is the second payment that completes an existing
+// reservation — it requires a concrete sku and UPDATES the original row.
 
 export const PRICE_NAIRA: Record<string, number> = {
   u16h: 250_000, // LEIKO Watch
@@ -30,6 +36,10 @@ export function expectedAmountKobo(orderType: string, sku: string): number | nul
   }
   if (orderType === 'reservation') {
     return DEPOSIT_NAIRA * 100;
+  }
+  if (orderType === 'balance') {
+    const price = PRICE_NAIRA[sku];
+    return price ? (price - DEPOSIT_NAIRA) * 100 : null;
   }
   return null;
 }

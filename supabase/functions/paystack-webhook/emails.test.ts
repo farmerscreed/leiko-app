@@ -8,6 +8,7 @@
 import { assertEquals, assertStringIncludes } from 'jsr:@std/assert@1';
 import { lintPushText } from '../_shared/voice-lint-push.ts';
 import {
+  buyerBalanceEmail,
   buyerConfirmationEmail,
   buyerRefundEmail,
   escapeHtml,
@@ -96,6 +97,62 @@ Deno.test('null customer name falls back to a neutral greeting', () => {
   assertStringIncludes(html, 'Hello,');
 });
 
+// ── Deposit-ladder: Founder Edition CTA + undecided model ──
+
+const COMPLETE_URL = 'https://leiko.health/reserve/complete?ref=LK-TEST-002&e=YW1ha2E';
+
+Deno.test('reservation with completeUrl carries the Founder Edition invitation', () => {
+  const { html } = buyerConfirmationEmail({ ...RESERVATION_INPUT, completeUrl: COMPLETE_URL });
+  assertStringIncludes(html, 'Founder Edition');
+  // The href is HTML-escaped by the builder (& → &amp;).
+  assertStringIncludes(html, escapeHtml(COMPLETE_URL));
+  assertStringIncludes(html, 'Choose your watch');
+  assertStringIncludes(html, 'your deposit already holds your place');
+});
+
+Deno.test('reservation without completeUrl has no Founder block', () => {
+  const { html } = buyerConfirmationEmail(RESERVATION_INPUT);
+  assertEquals(html.includes('Founder Edition'), false);
+});
+
+Deno.test('full payment never carries the Founder block', () => {
+  const { html } = buyerConfirmationEmail({ ...FULL_INPUT, completeUrl: COMPLETE_URL });
+  assertEquals(html.includes('Founder Edition'), false);
+});
+
+Deno.test('undecided reservation: terms still present, balance line adapts', () => {
+  const { html } = buyerConfirmationEmail({
+    ...RESERVATION_INPUT,
+    skuName: 'LEIKO Watch — model to be chosen',
+    balanceDueNaira: null,
+  });
+  assertStringIncludes(html, 'counts toward the total');
+  assertStringIncludes(html, 'depends on which watch you choose');
+  assertStringIncludes(html, 'fully refundable');
+});
+
+// ── Balance completion email ──
+
+const BALANCE_INPUT = {
+  skuName: 'LEIKO Watch',
+  balancePaidNaira: 200_000,
+  totalNaira: 250_000,
+  reference: 'LK-BAL-001',
+  customerName: 'Amaka O.',
+  deliveryAddress: '12 Awolowo Rd, Ikoyi, Lagos',
+};
+
+Deno.test('balance email: subject + body essentials', () => {
+  const mail = buyerBalanceEmail(BALANCE_INPUT);
+  assertEquals(mail.subject, 'Your LEIKO order is confirmed');
+  assertStringIncludes(mail.html, 'LEIKO Watch');
+  assertStringIncludes(mail.html, '₦200,000'); // balance paid
+  assertStringIncludes(mail.html, '₦50,000'); // deposit credited
+  assertStringIncludes(mail.html, '₦250,000'); // total
+  assertStringIncludes(mail.html, 'LK-BAL-001');
+  assertStringIncludes(mail.html, '12 Awolowo Rd, Ikoyi, Lagos');
+});
+
 // ── Internal alert ──
 
 Deno.test('internal alert subject per brief', () => {
@@ -182,6 +239,30 @@ const ALL_TEMPLATES: Array<[string, string]> = [
   [
     'refund',
     buyerRefundEmail({ skuName: 'LEIKO Watch', reference: 'r', customerName: null }).html,
+  ],
+  [
+    'reservation with founder CTA',
+    buyerConfirmationEmail({
+      orderType: 'reservation',
+      skuName: 'LEIKO Watch — model to be chosen',
+      amountPaidNaira: 50_000,
+      reference: 'r2',
+      customerName: null,
+      deliveryAddress: null,
+      balanceDueNaira: null,
+      completeUrl: 'https://leiko.health/reserve/complete?ref=r2&e=x',
+    }).html,
+  ],
+  [
+    'balance confirmation',
+    buyerBalanceEmail({
+      skuName: 'LEIKO Watch Pro',
+      balancePaidNaira: 250_000,
+      totalNaira: 300_000,
+      reference: 'r3',
+      customerName: null,
+      deliveryAddress: null,
+    }).html,
   ],
 ];
 

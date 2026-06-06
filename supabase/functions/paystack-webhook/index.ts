@@ -57,10 +57,23 @@ import {
   verifyPaystackSignature,
 } from './helpers.ts';
 import {
+  buyerBalanceEmail,
   buyerConfirmationEmail,
   buyerRefundEmail,
   internalAlertEmail,
 } from './emails.ts';
+
+// Where /reserve/complete lives. Override per environment if the site
+// ever moves; never carries secrets.
+const SITE_BASE_URL = Deno.env.get('SITE_BASE_URL') ?? 'https://leiko.health';
+
+function buildCompleteUrl(reference: string, email: string): string {
+  // e is a urlsafe-base64 of the buyer email; /api/reservation requires
+  // ref AND matching email so a bare reference can't be replayed to
+  // read someone else's name.
+  const e = btoa(email).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return `${SITE_BASE_URL}/reserve/complete?ref=${encodeURIComponent(reference)}&e=${e}`;
+}
 
 function json(body: unknown, status: number): Response {
   return new Response(JSON.stringify(body), {
@@ -150,6 +163,12 @@ Deno.serve(async (req: Request) => {
       ? (metadata as any).sku_name.trim()
       : SKU_NAMES[sku] ?? null;
 
+  // Deposit-ladder step 2: a balance payment completes an existing
+  // reservation instead of creating a new order.
+  if (orderType === 'balance') {
+    return await handleBalancePayment({ verifyData, metadata, reference });
+  }
+
   const check = validateTransaction({
     status: verifyData?.status,
     currency: verifyData?.currency,
@@ -224,12 +243,16 @@ Deno.serve(async (req: Request) => {
     if (buyerEmail) {
       const buyer = buyerConfirmationEmail({
         orderType: orderType as 'full' | 'reservation',
-        skuName: skuName ?? sku,
+        // Reservations may not have a model yet — show a friendly label,
+        // never the raw 'undecided' token.
+        skuName: skuName ?? (orderType === 'reservation' ? 'LEIKO Watch — model to be chosen' : sku),
         amountPaidNaira,
         reference,
         customerName,
         deliveryAddress,
         balanceDueNaira: balanceDue,
+        completeUrl:
+          orderType === 'reservation' ? buildCompleteUrl(reference, buyerEmail) : null,
       });
       await sendResendEmail(buyerEmail, buyer.subject, buyer.html, reference);
     } else {
@@ -263,6 +286,244 @@ Deno.serve(async (req: Request) => {
 });
 
 /**
+ * Deposit-ladder step 2 — order_type='balance'. The buyer already paid
+ * the ₦50,000 deposit; this transaction settles the remaining balance
+ * for the watch they chose on /reserve/complete. It UPDATES the original
+ * reservation row (never inserts a fresh order); orphan or invalid
+ * balance payments are preserved as their own flagged rows for review.
+ *
+ * Idempotency: balance_reference is UNIQUE and the update is conditional
+ * on balance_reference IS NULL + status='reserved' — a redelivered event
+ * matches zero rows and exits as a duplicate.
+ */
+async function handleBalancePayment(args: {
+  verifyData: any;
+  metadata: Record<string, unknown>;
+  reference: string;
+}): Promise<Response> {
+  const { verifyData, metadata, reference } = args;
+  const serviceClient = getServiceClient();
+
+  const sku = String((metadata as any)?.sku ?? 'unknown');
+  const skuName = SKU_NAMES[sku] ?? null;
+  const reservationRef =
+    typeof (metadata as any)?.reservation_reference === 'string'
+      ? ((metadata as any).reservation_reference as string)
+      : null;
+
+  const amountKobo: number = typeof verifyData?.amount === 'number' ? verifyData.amount : 0;
+  const amountPaidNaira = koboToNaira(amountKobo);
+  const buyerEmailFromVerify: string =
+    (typeof verifyData?.customer?.email === 'string' && verifyData.customer.email) || '';
+  const customerName = extractCustomField(metadata, ['full_name', 'name', 'customer_name']);
+  const customerPhone = extractCustomField(metadata, ['phone', 'phone_number', 'mobile']);
+  const deliveryAddress = extractCustomField(metadata, [
+    'delivery_address',
+    'address',
+    'shipping_address',
+  ]);
+
+  const check = validateTransaction({
+    status: verifyData?.status,
+    currency: verifyData?.currency,
+    amountKobo: typeof verifyData?.amount === 'number' ? verifyData.amount : undefined,
+    orderType: 'balance',
+    sku,
+  });
+
+  // Saves the payment as its own flagged row + internal alert, 200.
+  // Never silently drops a real payment, never emails the buyer.
+  const flagAndRespond = async (reason: string): Promise<Response> => {
+    const row = {
+      paystack_reference: reference,
+      email: buyerEmailFromVerify,
+      sku,
+      sku_name: skuName,
+      order_type: 'balance',
+      amount_paid_kobo: amountKobo,
+      full_price_naira: PRICE_NAIRA[sku] ?? null,
+      balance_due_naira: null,
+      refundable: false,
+      customer_name: customerName,
+      customer_phone: customerPhone,
+      delivery_address: deliveryAddress,
+      status: 'flagged',
+      raw_metadata: {
+        metadata,
+        verification: {
+          amount: verifyData?.amount ?? null,
+          currency: verifyData?.currency ?? null,
+          status: verifyData?.status ?? null,
+          paid_at: verifyData?.paid_at ?? null,
+          channel: verifyData?.channel ?? null,
+        },
+        flag_reason: reason,
+        reservation_reference: reservationRef,
+      },
+    };
+    const ins = await serviceClient
+      .from('orders')
+      .upsert(row, { onConflict: 'paystack_reference', ignoreDuplicates: true })
+      .select('id');
+    if (ins.error) {
+      console.error(`[paystack-webhook] balance_flag_insert_failed ref=${reference}`, ins.error.code);
+      return json({ error: 'order_insert_failed' }, 500);
+    }
+    if (!ins.data || ins.data.length === 0) {
+      return json({ ok: true, reference, duplicate: true }, 200);
+    }
+    const alertTo = Deno.env.get('ORDER_ALERT_EMAIL');
+    if (alertTo) {
+      const alert = internalAlertEmail({
+        orderType: 'balance',
+        sku,
+        skuName,
+        reference,
+        status: 'flagged',
+        amountPaidNaira,
+        balanceDueNaira: null,
+        customerName,
+        email: buyerEmailFromVerify,
+        phone: customerPhone,
+        deliveryAddress,
+        flagged: true,
+        flagReason: reason,
+      });
+      await sendResendEmail(alertTo, alert.subject, alert.html, reference);
+    }
+    return json({ ok: true, reference, status: 'flagged', duplicate: false }, 200);
+  };
+
+  if (!reservationRef) {
+    return await flagAndRespond('balance payment without reservation_reference in metadata');
+  }
+  if (!check.ok) {
+    return await flagAndRespond(check.reason ?? 'balance validation failed');
+  }
+
+  // Load the reservation this balance claims to complete.
+  const found = await serviceClient
+    .from('orders')
+    .select('id, status, balance_reference, amount_paid_kobo, email, customer_name, customer_phone, raw_metadata')
+    .eq('paystack_reference', reservationRef)
+    .maybeSingle();
+  if (found.error) {
+    console.error(`[paystack-webhook] balance_lookup_failed ref=${reference}`, found.error.code);
+    return json({ error: 'order_lookup_failed' }, 500);
+  }
+  const reservation = found.data;
+  if (!reservation) {
+    return await flagAndRespond(`no reservation found for reference "${reservationRef}"`);
+  }
+  if (reservation.balance_reference === reference) {
+    // Redelivered event for an already-applied balance — done.
+    return json({ ok: true, reference, duplicate: true }, 200);
+  }
+  if (reservation.status !== 'reserved' || reservation.balance_reference != null) {
+    return await flagAndRespond(
+      `reservation "${reservationRef}" is not open for a balance payment (status=${reservation.status})`,
+    );
+  }
+
+  const priceNaira = PRICE_NAIRA[sku];
+  const mergedMetadata = {
+    ...(reservation.raw_metadata && typeof reservation.raw_metadata === 'object'
+      ? (reservation.raw_metadata as Record<string, unknown>)
+      : {}),
+    balance: {
+      metadata,
+      verification: {
+        amount: verifyData?.amount ?? null,
+        currency: verifyData?.currency ?? null,
+        status: verifyData?.status ?? null,
+        paid_at: verifyData?.paid_at ?? null,
+        channel: verifyData?.channel ?? null,
+      },
+    },
+  };
+
+  const upd = await serviceClient
+    .from('orders')
+    .update({
+      status: 'paid',
+      sku,
+      sku_name: skuName,
+      full_price_naira: priceNaira,
+      balance_due_naira: 0,
+      refundable: false,
+      balance_reference: reference,
+      balance_paid_at: new Date().toISOString(),
+      amount_paid_kobo: (Number(reservation.amount_paid_kobo) || 0) + amountKobo,
+      customer_name: customerName ?? reservation.customer_name ?? null,
+      customer_phone: customerPhone ?? reservation.customer_phone ?? null,
+      delivery_address: deliveryAddress,
+      raw_metadata: mergedMetadata,
+    })
+    .eq('paystack_reference', reservationRef)
+    .eq('status', 'reserved')
+    .is('balance_reference', null)
+    .select('id');
+  if (upd.error) {
+    console.error(`[paystack-webhook] balance_update_failed ref=${reference}`, upd.error.code);
+    return json({ error: 'order_update_failed' }, 500);
+  }
+  if (!upd.data || upd.data.length === 0) {
+    // Lost a race with a concurrent delivery — check who won.
+    const recheck = await serviceClient
+      .from('orders')
+      .select('balance_reference')
+      .eq('paystack_reference', reservationRef)
+      .maybeSingle();
+    if (recheck.data?.balance_reference === reference) {
+      return json({ ok: true, reference, duplicate: true }, 200);
+    }
+    return await flagAndRespond(
+      `reservation "${reservationRef}" was completed by a different payment`,
+    );
+  }
+
+  // ── Emails — best-effort, never roll back the completed order ──
+  const buyerEmail = (reservation.email as string) || buyerEmailFromVerify;
+  if (buyerEmail) {
+    const mail = buyerBalanceEmail({
+      skuName: skuName ?? sku,
+      balancePaidNaira: amountPaidNaira,
+      totalNaira: priceNaira ?? null,
+      reference,
+      customerName: customerName ?? (reservation.customer_name as string) ?? null,
+      deliveryAddress,
+    });
+    await sendResendEmail(buyerEmail, mail.subject, mail.html, reference);
+  } else {
+    console.error(`[paystack-webhook] no_buyer_email ref=${reference}`);
+  }
+
+  const alertTo = Deno.env.get('ORDER_ALERT_EMAIL');
+  if (alertTo) {
+    const alert = internalAlertEmail({
+      orderType: 'balance',
+      sku,
+      skuName,
+      reference,
+      status: 'paid',
+      amountPaidNaira,
+      balanceDueNaira: 0,
+      customerName: customerName ?? (reservation.customer_name as string) ?? null,
+      email: buyerEmail,
+      phone: customerPhone ?? (reservation.customer_phone as string) ?? null,
+      deliveryAddress,
+      flagged: false,
+      flagReason: null,
+    });
+    await sendResendEmail(alertTo, alert.subject, alert.html, reference);
+  } else {
+    console.error(`[paystack-webhook] alert_email_not_configured ref=${reference}`);
+  }
+
+  return json({ ok: true, reference, status: 'paid', completed: true, duplicate: false }, 200);
+}
+
+/**
  * refund.processed (optional path per the build brief): mark the order
  * refunded and tell the buyer. Refund INITIATION is out of scope — it
  * happens in the Paystack dashboard or a future server-side task.
@@ -277,10 +538,12 @@ async function handleRefundProcessed(payload: any): Promise<Response> {
   }
 
   const serviceClient = getServiceClient();
+  // A refund can land against either transaction of the deposit-ladder —
+  // match the deposit reference or the balance reference.
   const upd = await serviceClient
     .from('orders')
     .update({ status: 'refunded' })
-    .eq('paystack_reference', reference)
+    .or(`paystack_reference.eq.${reference},balance_reference.eq.${reference}`)
     .neq('status', 'refunded')
     .select('email, sku_name, sku, customer_name');
   if (upd.error) {
