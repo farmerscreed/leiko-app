@@ -6,6 +6,7 @@
 import * as Notifications from 'expo-notifications';
 import * as Linking from 'expo-linking';
 import { handleDeepLink } from './deepLinks';
+import { isRemoteRefreshData, triggerRemoteRefresh } from './remoteRefreshTask';
 import { logger } from '../analytics/logger';
 
 export interface NotificationListenerHandles {
@@ -28,11 +29,17 @@ export function startNotificationListeners(): NotificationListenerHandles {
     }
   });
 
-  // 3. Foreground receive — for telemetry only; the display behaviour
-  //    is configured by setNotificationHandler.
+  // 3. Foreground receive — telemetry + the foreground remote-refresh
+  //    path. Display behaviour is configured by setNotificationHandler
+  //    (which suppresses the silent sync_refresh push so nothing shows).
   const receivedSub = Notifications.addNotificationReceivedListener((notif) => {
-    const data = notif.request.content.data as { category?: string } | undefined;
+    const data = notif.request.content.data as
+      | { category?: string; type?: string }
+      | undefined;
     logger.track('push_received', { category: data?.category ?? 'unknown' });
+    if (isRemoteRefreshData(data)) {
+      void triggerRemoteRefresh('foreground');
+    }
   });
 
   // 4. Cold-start path — fire only once.

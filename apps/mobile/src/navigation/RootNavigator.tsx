@@ -82,6 +82,10 @@ import {
   registerForPushNotifications,
 } from '../services/notifications';
 import { startNotificationListeners } from '../services/notifications/listeners';
+import {
+  defineRemoteRefreshTask,
+  registerRemoteRefreshTask,
+} from '../services/notifications/remoteRefreshTask';
 import { navigationRef } from './navigationRef';
 
 // Define the OS-scheduled background-sync task once at module load.
@@ -97,6 +101,13 @@ defineBackgroundSyncTask(async () => {
     return 'errored';
   }
 });
+
+// Define the remote-refresh notification task at module load too (same
+// TaskManager-no-redefinition reason). It fires when a silent
+// 'sync_refresh' push arrives while the app is backgrounded/killed and
+// triggers a watch sync. registerRemoteRefreshTask() (in the boot effect)
+// attaches it to expo-notifications.
+defineRemoteRefreshTask();
 
 // Wire postReading's device-meta provider once at app boot. The
 // pairing store can't be imported by postReading directly without
@@ -386,6 +397,9 @@ export function RootNavigator() {
     // tap → deep-link routing.
     void configureNotificationHandler();
     void registerForPushNotifications();
+    // Attach the remote-refresh background notification task (defined at
+    // module load above). No-ops without the native side / on iOS sandbox.
+    void registerRemoteRefreshTask();
     // Sprint 16.6 FUN-4 — learned-time reminder dispatcher. Reads
     // current readings + persona from the stores and schedules the
     // next one-shot reminder. The dispatcher cancel-and-reschedules,

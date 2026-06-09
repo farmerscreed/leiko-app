@@ -60,10 +60,16 @@ export type AnalyticsEvent =
   | { name: 'ble_cursor_reset'; props?: { deviceBleId: string; previousCursor: number; newCursor: number; gapSeconds: number } }
   // Sprint 7 — sync orchestrator. Counts + categories only; the reading
   // values themselves never appear in events (CLAUDE.md data rule).
-  | { name: 'sync_started'; props?: { trigger: 'cold_start' | 'app_foreground' | 'bt_ready' | 'manual_force' | 'live_notify' | 'background' } }
+  | { name: 'sync_started'; props?: { trigger: 'cold_start' | 'app_foreground' | 'bt_ready' | 'manual_force' | 'live_notify' | 'background' | 'remote_refresh' } }
   | { name: 'sync_completed'; props?: { trigger: string; batches: number; hitBatchCap: boolean; pulled: number } }
   | { name: 'sync_skipped'; props?: { trigger: string; reason: 'no_paired_device' | 'take_reading_active' | 'too_recent' | 'already_running' } }
   | { name: 'sync_failed'; props?: { trigger: string; reason: string } }
+  // Remote-refresh (silent push → background watch sync).
+  | { name: 'remote_refresh_received'; props?: { source: 'background' | 'foreground' } }
+  | { name: 'remote_refresh_failed'; props?: { reason: string } }
+  | { name: 'remote_refresh_task_error'; props?: { reason: string } }
+  | { name: 'remote_refresh_registered'; props?: Record<string, never> }
+  | { name: 'remote_refresh_register_failed'; props?: { reason: string } }
   | { name: 'reading_realtime_received'; props?: { familyId: string } }
   // Sprint 7.7b — multi-vital realtime path. Caregiver home invalidates
   // its query when any vitals_other row is INSERTed for a family the

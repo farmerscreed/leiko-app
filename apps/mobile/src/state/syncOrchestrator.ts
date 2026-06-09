@@ -65,7 +65,12 @@ export type SyncTrigger =
   // BGTaskScheduler / WorkManager. Promoted from v1.1 to v1.0 so the
   // app stays "always populated" even when users go a day or two
   // without opening it.
-  | 'background';
+  | 'background'
+  // Remote-refresh — a family member asked this (watch-owner's) phone to
+  // sync now via a silent push (send-push 'sync_refresh'). Delivered to a
+  // background notification task or the foreground received-listener.
+  // Bypasses the debounce like manual_force: it's an explicit request.
+  | 'remote_refresh';
 
 export type SyncStatus =
   | 'idle'
@@ -185,10 +190,12 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
       return 'skipped';
     }
     const last = get().lastSyncAt;
-    // Manual force-sync bypasses the debounce — the user explicitly
-    // asked, surface the latest data even if we synced 2s ago.
+    // Manual force-sync and remote-refresh bypass the debounce — both are
+    // explicit "sync now" requests; surface the latest even if we synced
+    // a moment ago. (The silent-push side has its own 30s coalesce.)
     if (
       trigger !== 'manual_force' &&
+      trigger !== 'remote_refresh' &&
       last !== null &&
       nowMs() - last < MIN_SYNC_INTERVAL_MS
     ) {

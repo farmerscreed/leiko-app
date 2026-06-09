@@ -69,14 +69,28 @@ export function getDeviceId(): string {
  */
 export async function configureNotificationHandler(): Promise<void> {
   Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-      // Expo SDK 50+: surface in banner + list.
-      shouldShowBanner: true,
-      shouldShowList: true,
-    }),
+    handleNotification: async (notification) => {
+      // Silent remote-refresh push: never render it — it only triggers a
+      // background sync (handled by the received-listener / bg task).
+      const data = notification.request.content.data as { type?: string } | undefined;
+      if (data?.type === 'sync_refresh') {
+        return {
+          shouldShowAlert: false,
+          shouldPlaySound: false,
+          shouldSetBadge: false,
+          shouldShowBanner: false,
+          shouldShowList: false,
+        };
+      }
+      return {
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        // Expo SDK 50+: surface in banner + list.
+        shouldShowBanner: true,
+        shouldShowList: true,
+      };
+    },
   });
 
   if (Platform.OS === 'android') {
