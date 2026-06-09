@@ -184,8 +184,12 @@
               "intent": [
                 {
                   "action": "VIEW",
-                  "category": ["BROWSABLE"],
-                  "data": { "scheme": "https" }
+                  "category": [
+                    "BROWSABLE"
+                  ],
+                  "data": {
+                    "scheme": "https"
+                  }
                 }
               ]
             }
@@ -194,7 +198,9 @@
       ]
     ],
     "extra": {
-      "eas": {}
+      "eas": {
+        "projectId": "84da2214-28a4-4605-941b-64662d72c1bc"
+      }
     }
   }
 }
