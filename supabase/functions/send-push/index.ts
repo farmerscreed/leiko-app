@@ -43,6 +43,7 @@ import {
   PUSH_BODY_MAX_ANDROID,
 } from '../_shared/voice-lint-push.ts';
 import { isWithinQuietWindow } from '../_shared/quiet-hours.ts';
+import { buildSilentSyncMessages } from '../_shared/silent-push.ts';
 import type {
   VitalKind,
   ClassificationTier,
@@ -56,7 +57,12 @@ type PushCategory =
   | 'family'
   | 'family_removed'
   | 'subscription'
-  | 'marketing';
+  | 'marketing'
+  // Silent, data-only push that wakes the watch-owner's phone to run a
+  // background BLE sync. No title/body, no PHI — invisible to the user.
+  // Triggered server-side only (request-sync / request-stale-syncs), never
+  // user-facing, so it skips render / voice-lint / quiet-hours.
+  | 'sync_refresh';
 
 interface BasePayload {
   category: PushCategory;
@@ -125,6 +131,12 @@ interface MarketingPayload extends BasePayload {
   deepLink?: string;
 }
 
+// Silent remote-refresh. `userId` is the watch-owner whose phone should
+// wake and sync. No display payload.
+interface SyncRefreshPayload extends BasePayload {
+  category: 'sync_refresh';
+}
+
 type SendPushRequest =
   | AnomalyPayload
   | DailyPayload
@@ -133,7 +145,8 @@ type SendPushRequest =
   | FamilyPayload
   | FamilyRemovedPayload
   | SubscriptionPayload
-  | MarketingPayload;
+  | MarketingPayload
+  | SyncRefreshPayload;
 
 interface SendPushResponse {
   outcome:
@@ -182,6 +195,13 @@ async function routePush(
   service: SupabaseClient,
   payload: SendPushRequest,
 ): Promise<SendPushResponse> {
+  // Silent remote-refresh: no recipient prefs / render / voice-lint /
+  // quiet-hours apply — it carries no user-facing content. Handled in a
+  // dedicated path with its own short rate-limit.
+  if (payload.category === 'sync_refresh') {
+    return routeSilentSync(service, payload);
+  }
+
   // Load recipient + prefs in parallel.
   const [userRes, prefsRes, tokensRes] = await Promise.all([
     service
@@ -265,6 +285,42 @@ async function routePush(
 }
 
 // ─────────────────────────────────────────────────────────────────────
+// Silent remote-refresh path.
+
+// Coalesce window: drop a second sync_refresh to the same owner inside
+// this window. A real BLE sync takes longer than this, and back-to-back
+// wakes only cost battery for no extra data. The button + the stale-cron
+// can both fire; this de-dupes them.
+const SYNC_REFRESH_COALESCE_MS = 30_000;
+
+async function routeSilentSync(
+  service: SupabaseClient,
+  payload: SyncRefreshPayload,
+): Promise<SendPushResponse> {
+  // Short coalesce window (vs the 24h/3 limit the visible categories use).
+  const since = new Date(Date.now() - SYNC_REFRESH_COALESCE_MS).toISOString();
+  const { count } = await service
+    .from('audit_log')
+    .select('id', { count: 'exact', head: true })
+    .eq('actor_user_id', payload.userId)
+    .eq('action', 'push.sent')
+    .gte('occurred_at', since)
+    .contains('metadata', { category: 'sync_refresh' });
+  if ((count ?? 0) >= 1) return { outcome: 'suppressed_rate_limit' };
+
+  const { data: tokenRows } = await service
+    .from('push_tokens')
+    .select('expo_token')
+    .eq('user_id', payload.userId);
+  const tokens = (tokenRows ?? []).map((t: { expo_token: string }) => t.expo_token);
+  if (tokens.length === 0) return { outcome: 'suppressed_no_token' };
+
+  const sent = await dispatchSilentToExpo(tokens);
+  if (!sent) return { outcome: 'failed', detail: 'expo_dispatch_failed' };
+  return { outcome: 'sent' };
+}
+
+// ─────────────────────────────────────────────────────────────────────
 // Per-category gates.
 
 const DEFAULT_PREFS = {
@@ -306,6 +362,9 @@ function checkOptOut(payload: SendPushRequest, prefs: typeof DEFAULT_PREFS): str
       return prefs.subscription_account ? null : 'subscription_off';
     case 'marketing':
       return prefs.marketing ? null : 'marketing_off';
+    case 'sync_refresh':
+      // Handled in routeSilentSync before this gate; inert here.
+      return null;
   }
 }
 
@@ -332,6 +391,9 @@ function renderPayload(payload: SendPushRequest, recipient: AccountType): Render
       return renderSubscriptionRenewing(recipient, payload);
     case 'marketing':
       return { title: payload.title, body: payload.body };
+    case 'sync_refresh':
+      // Silent — never rendered. Handled in routeSilentSync.
+      return null;
   }
 }
 
@@ -422,6 +484,9 @@ function computeDeepLink(payload: SendPushRequest): string {
       return 'leiko://settings/subscription';
     case 'marketing':
       return payload.deepLink ?? 'leiko://home';
+    case 'sync_refresh':
+      // Silent — no deep link. Handled in routeSilentSync.
+      return 'leiko://home';
   }
 }
 
@@ -434,8 +499,9 @@ function isUrgent(payload: SendPushRequest): boolean {
 
 interface ExpoPushMessage {
   to: string | string[];
-  title: string;
-  body: string;
+  // Optional so silent/data-only messages can omit them.
+  title?: string;
+  body?: string;
   data?: Record<string, unknown>;
   channelId?: string;
   priority?: 'default' | 'high';
@@ -447,6 +513,8 @@ interface ExpoPushMessage {
   badge?: number;
   // Expo accepts this for iOS time-sensitive.
   interruptionLevel?: 'passive' | 'active' | 'time-sensitive' | 'critical';
+  // Silent/background delivery: iOS content-available + Android data-only.
+  _contentAvailable?: boolean;
 }
 
 async function dispatchToExpo(
@@ -469,6 +537,35 @@ async function dispatchToExpo(
     sound: 'default',
     interruptionLevel: interruption,
   }));
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
+      body: JSON.stringify(messages),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Silent, data-only push that wakes the recipient's app to run a
+ * background sync. No title/body → nothing renders. `_contentAvailable`
+ * + `priority: 'high'` ask the OS to deliver promptly and hand the app a
+ * background window (iOS content-available; Android high-priority data).
+ * Carries only { type: 'sync_refresh' } — never any PHI.
+ */
+async function dispatchSilentToExpo(expoTokens: string[]): Promise<boolean> {
+  const url = Deno.env.get('EXPO_PUSH_URL') ?? 'https://exp.host/--/api/v2/push/send';
+  const accessToken = Deno.env.get('EXPO_ACCESS_TOKEN');
+
+  const messages: ExpoPushMessage[] = buildSilentSyncMessages(expoTokens);
 
   try {
     const res = await fetch(url, {
