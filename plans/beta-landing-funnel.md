@@ -20,9 +20,9 @@ So the page is a **3-step funnel**, not one button:
 ```
 [1] Join the testers   → join the Google Group (leiko-testers@googlegroups.com)
         ↓
-[2] Become a tester    → https://play.google.com/apps/testing/com.leiko.app
+[2] Become a tester    → https://play.google.com/apps/testing/com.leiko.care
         ↓
-[3] Get it on Google Play → https://play.google.com/store/apps/details?id=com.leiko.app
+[3] Get it on Google Play → https://play.google.com/store/apps/details?id=com.leiko.care
 ```
 
 Tell people to use the **same Google account** on all three steps, on the
@@ -86,5 +86,5 @@ per the analytics rule in CLAUDE.md / D7 §7.
 | Placeholder | Where it comes from |
 | --- | --- |
 | Google Group URL | the group you create (`…@googlegroups.com`) |
-| Opt-in URL | `https://play.google.com/apps/testing/com.leiko.app` |
-| Play listing URL | `https://play.google.com/store/apps/details?id=com.leiko.app` |
+| Opt-in URL | `https://play.google.com/apps/testing/com.leiko.care` |
+| Play listing URL | `https://play.google.com/store/apps/details?id=com.leiko.care` |

@@ -41,7 +41,7 @@ are resolved.**
 | **OPS-1** | Push DB migration `0019_vitals_dedupe_full_index.sql` to prod | Multi-vitals sync 500s at first SpO2 insert without this. HR/SpO2/sleep/activity invisible server-side. | Founder ops | 5 min |
 | **OPS-2** | Set `pg_cron` GUCs in prod Supabase: `app.settings.functions_base_url` + `app.settings.service_role_key` | Three crons silently failing (compute-correlations, weekly summary, monthly baseline, anomaly detection). Trends correlation cards stay empty. | Founder ops | 5 min |
 | **OPS-3** | Run `npx expo prebuild --platform ios` | `apps/mobile/ios/` doesn't exist. Cannot generate iOS build. | Founder + dev env | 10 min |
-| **OPS-4** | Apple Developer account: enable HealthKit entitlement on `com.leiko.app` | App.json declares plugin + usage strings, but the entitlement flag must be flipped on the Dev account before App Store review. | Founder | 10 min |
+| **OPS-4** | Apple Developer account: enable HealthKit entitlement on `com.leiko.care` | App.json declares plugin + usage strings, but the entitlement flag must be flipped on the Dev account before App Store review. | Founder | 10 min |
 | **OPS-5** | Generate Android release keystore + configure EAS signing | `android/app/build.gradle:113` still uses `debug.keystore`. Play Store rejects debug-signed releases. | Founder | 30 min |
 | **OPS-6** | Configure iOS distribution certificate + provisioning profile in EAS | `eas.json` production profile has no `ios.certificateSource` / team ID. EAS cannot sign without it. | Founder | 30 min |
 | **OPS-7** | Provision APNs `.p8` signing key + FCM service-account JSON | Sprint 15 anomaly push ships in "sandbox-only" mode until these are wired into Expo credentials. No real device will receive alerts. | Founder | 1 hr |
@@ -194,7 +194,7 @@ subsequent sprints. Verified against current code.
 - **Console / logger PHI leaks** — none found. Sync console.log statements are gated by `__DEV__` via `BLE_TRACE`.
 - **Data export + delete-account paths** — both implemented (export via OS share sheet; delete via `delete-account` EF with email confirmation + soft-delete).
 - **Permission flows** (Bluetooth, notifications, health platforms) — all gated by user consent with rationale strings.
-- **App identity consistency** — `com.leiko.app` bundle ID consistent across app.json, AndroidManifest, build.gradle. No leftover "kena" references.
+- **App identity consistency** — `com.leiko.care` bundle ID consistent across app.json, AndroidManifest, build.gradle. No leftover "kena" references.
 - **Permissions declared** — BLUETOOTH_SCAN/CONNECT, POST_NOTIFICATIONS, all Health Connect read/write, foreground service flags. All present.
 
 ---

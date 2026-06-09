@@ -51,7 +51,7 @@ apps/mobile/src/state/
 Path: `apps/mobile/android/app/src/main/java/com/leiko/app/ble/LeikoBleForegroundService.kt`
 
 ```kotlin
-package com.leiko.app.ble
+package com.leiko.care.ble
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -64,8 +64,8 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.leiko.app.MainActivity
-import com.leiko.app.R
+import com.leiko.care.MainActivity
+import com.leiko.care.R
 
 /**
  * Foreground service that keeps the BLE link to the Leiko watch alive
@@ -87,8 +87,8 @@ class LeikoBleForegroundService : Service() {
   companion object {
     const val CHANNEL_ID = "leiko_ble"
     const val NOTIFICATION_ID = 4242
-    const val ACTION_START = "com.leiko.app.ble.START"
-    const val ACTION_STOP  = "com.leiko.app.ble.STOP"
+    const val ACTION_START = "com.leiko.care.ble.START"
+    const val ACTION_STOP  = "com.leiko.care.ble.STOP"
 
     fun start(context: Context) {
       val intent = Intent(context, LeikoBleForegroundService::class.java).apply {
@@ -193,7 +193,7 @@ class LeikoBleForegroundService : Service() {
 Path: `apps/mobile/android/app/src/main/java/com/leiko/app/ble/LeikoBleForegroundServiceModule.kt`
 
 ```kotlin
-package com.leiko.app.ble
+package com.leiko.care.ble
 
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -231,7 +231,7 @@ class LeikoBleForegroundServiceModule(
 Path: `apps/mobile/android/app/src/main/java/com/leiko/app/ble/LeikoBleForegroundServicePackage.kt`
 
 ```kotlin
-package com.leiko.app.ble
+package com.leiko.care.ble
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule
@@ -256,7 +256,7 @@ In `apps/mobile/android/app/src/main/java/com/leiko/app/MainApplication.kt`, fin
 ```kotlin
 override fun getPackages(): List<ReactPackage> =
     PackageList(this).packages.apply {
-      add(com.leiko.app.ble.LeikoBleForegroundServicePackage())
+      add(com.leiko.care.ble.LeikoBleForegroundServicePackage())
     }
 ```
 
@@ -591,7 +591,7 @@ Verification video recorded against vc20 for Play Console:
 
 ## Notes for the implementer
 
-- The `MainActivity::class.java` reference in the notification tap-intent requires `import com.leiko.app.MainActivity` — already in the leiko app namespace.
+- The `MainActivity::class.java` reference in the notification tap-intent requires `import com.leiko.care.MainActivity` — already in the leiko app namespace.
 - `R.mipmap.ic_launcher` references the existing app icon — no new image assets needed.
 - `Build.VERSION_CODES.UPSIDE_DOWN_CAKE` is Android 14 (API 34). For older Android versions, the `startForeground` overload without the `foregroundServiceType` parameter is the right path — the conditional in step 1 handles both.
 - The new package import statement in `MainApplication.kt` needs to land OUTSIDE of any other `add()` block — keep `PackageList(this).packages.apply { ... }` structure intact.

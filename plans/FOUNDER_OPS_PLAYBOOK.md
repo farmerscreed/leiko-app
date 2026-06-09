@@ -67,12 +67,12 @@ on disk for 7 days as a rollback (per Sprint 18 SEC-1 design).
 ### 1.3 — Encryption-at-rest check (optional but recommended)
 
 ```powershell
-adb -s 43230DLJH001YY shell run-as com.leiko.app ls -la /data/data/com.leiko.app/files/mmkv
+adb -s 43230DLJH001YY shell run-as com.leiko.care ls -la /data/data/com.leiko.care/files/mmkv
 ```
 
 The file `mmkv.leiko-enc` should exist. Pull it locally:
 ```powershell
-adb -s 43230DLJH001YY shell run-as com.leiko.app cat /data/data/com.leiko.app/files/mmkv/mmkv.leiko-enc > leiko-enc.bin
+adb -s 43230DLJH001YY shell run-as com.leiko.care cat /data/data/com.leiko.care/files/mmkv/mmkv.leiko-enc > leiko-enc.bin
 ```
 Open in a text editor. Expected: an encrypted blob, **NOT** readable
 plain text. You should NOT see strings like "leiko.auth.session" or
@@ -234,7 +234,7 @@ once to confirm it builds locally (Cmd-B). Quit Xcode after.
 ### 2.6 — OPS-4: Apple Developer — enable HealthKit entitlement
 
 **What:** Apple Developer Console → Certificates, IDs & Profiles →
-Identifiers → `com.leiko.app` → check "HealthKit" → Save.
+Identifiers → `com.leiko.care` → check "HealthKit" → Save.
 
 **Why:** `app.json` declares the HealthKit plugin + usage strings, but
 the entitlement flag must be flipped on the Developer account itself.
@@ -242,7 +242,7 @@ App Store review will reject if the manifest claims HealthKit and the
 account hasn't enabled it.
 
 **How:** developer.apple.com → log in → Certificates, IDs & Profiles
-→ Identifiers → tap the `com.leiko.app` identifier → scroll to
+→ Identifiers → tap the `com.leiko.care` identifier → scroll to
 "Capabilities" → check **HealthKit** + **Background Modes** (BLE
 central + Background fetch) → Save.
 
@@ -352,12 +352,12 @@ a token and sending a test push from the Expo dashboard.)
 **How:**
 1. Sign up at app.revenuecat.com (free tier covers ≥10k MAU)
 2. Create a project called "Leiko"
-3. Add Android app (package: `com.leiko.app`)
-4. Add iOS app (bundle: `com.leiko.app`)
+3. Add Android app (package: `com.leiko.care`)
+4. Add iOS app (bundle: `com.leiko.care`)
 5. **IAP products** — create matching IDs in both:
    - **App Store Connect:** App → Features → In-App Purchases → +
-     - `com.leiko.app.plus.monthly` ($4.99/mo or your pricing)
-     - `com.leiko.app.plus.yearly` ($39.99/yr)
+     - `com.leiko.care.plus.monthly` ($4.99/mo or your pricing)
+     - `com.leiko.care.plus.yearly` ($39.99/yr)
    - **Play Console:** App → Monetize → Products → Subscriptions
      - Same IDs as above
    - **RevenueCat:** Add the product IDs to both apps → create one
@@ -417,7 +417,7 @@ with your Apple Developer Team ID):
 {
   "applinks": {
     "details": [{
-      "appIDs": ["TEAMID.com.leiko.app"],
+      "appIDs": ["TEAMID.com.leiko.care"],
       "components": [{ "/": "*" }]
     }]
   }
@@ -431,7 +431,7 @@ fingerprint of your release keystore — get it from `eas credentials`):
   "relation": ["delegate_permission/common.handle_all_urls"],
   "target": {
     "namespace": "android_app",
-    "package_name": "com.leiko.app",
+    "package_name": "com.leiko.care",
     "sha256_cert_fingerprints": ["SHA256_OF_RELEASE_KEYSTORE"]
   }
 }]

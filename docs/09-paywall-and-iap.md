@@ -137,8 +137,8 @@ Allowed values: `'free' | 'plus' | 'plus_trial' | 'plus_grace' | 'past_due'`.
 - Service-role key required (bypasses RLS by design).
 
 ### Product IDs (provisioned in App Store Connect + Google Play Console)
-- `com.leiko.app.plus.monthly` — $4.99 / month
-- `com.leiko.app.plus.annual` — $39.99 / year
+- `com.leiko.care.plus.monthly` — $4.99 / month
+- `com.leiko.care.plus.annual` — $39.99 / year
 
 > **Q11 (D7 §14)**: RevenueCat IAP product setup is an external-dependency block for Sprint 10. Founder-owned. Lead time 1–3 days. Track in `plans/backlog.md`.
 

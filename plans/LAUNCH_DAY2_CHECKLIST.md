@@ -165,7 +165,7 @@ NOT `.../functions/v1` — the helpers append the path themselves.
 - [ ] **WARNING:** This installs prod-pointing app over your dev install. The SEC-1 keychain migration will run on first boot — Phone 1 has months of BP history, this is the test case.
 - [ ] Uninstall the dev build first to avoid signing-mismatch:
   ```powershell
-  adb -s 43230DLJH001YY uninstall com.leiko.app
+  adb -s 43230DLJH001YY uninstall com.leiko.care
   ```
   ⚠️ This wipes local MMKV. **Server data is intact** — the migration is from "first launch on a phone with the encrypted-at-rest blob," not from an existing dev install.
 - [ ] Install the prod APK:
@@ -201,12 +201,12 @@ If any of the above breaks, STOP and triage. Don't proceed to Block 5 until read
 
 These don't block today's Android-first ship but they have multi-day external clocks. Start them now so they're done by the time you need them.
 
-- [ ] **developer.apple.com** → Certificates, IDs & Profiles → Identifiers → New `com.leiko.app` → enable **HealthKit** + **Background Modes** → Save
+- [ ] **developer.apple.com** → Certificates, IDs & Profiles → Identifiers → New `com.leiko.care` → enable **HealthKit** + **Background Modes** → Save
   - 24-72h Apple propagation clock starts now
-- [ ] **App Store Connect** → My Apps → New App → name "Leiko" → bundle `com.leiko.app` → Create
+- [ ] **App Store Connect** → My Apps → New App → name "Leiko" → bundle `com.leiko.care` → Create
   - Features → In-App Purchases → Create:
-    - `com.leiko.app.plus.monthly` ($4.99)
-    - `com.leiko.app.plus.yearly` ($39.99)
+    - `com.leiko.care.plus.monthly` ($4.99)
+    - `com.leiko.care.plus.yearly` ($39.99)
   - 1-3 day approval clock starts now
 - [ ] **Play Console** → Create app → name "Leiko" → Monetize → Subscriptions → Create:
   - Same product IDs as above

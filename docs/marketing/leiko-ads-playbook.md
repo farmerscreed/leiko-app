@@ -12,7 +12,7 @@
 > Class IIa"; "ISO 13485 manufacturing"); "cleared", never "approved". Substantiation
 > is held privately by the founder and shared off the public record only on request.
 
-Built for: Leiko (com.leiko.app) | Maker: Lawrence O. (primethebrain@gmail.com)
+Built for: Leiko (com.leiko.care) | Maker: Lawrence O. (primethebrain@gmail.com)
 Last updated: May 2026 | Source: leiko-app/docs/marketing/leiko-ads-playbook.md
 What's new in v2: reframed around watch sales + reservations. App is the supporting cast, not the hero. Original v1 preserved at leiko-ads-playbook-v1.md.
 
@@ -286,7 +286,7 @@ Three platforms matter for Phase 1, ranked by fit for Leiko's hardware-DTC + res
 Meta Business Manager (primethebrain@gmail.com)
 └── Ad Account: Leiko
     ├── Pixel: Leiko Web (on leiko.health) — primary conversion source
-    ├── App: com.leiko.app (linked via SDK, secondary)
+    ├── App: com.leiko.care (linked via SDK, secondary)
     └── Campaigns:
         ├── CAMP 1 — Sales — Nigeria reservations
         ├── CAMP 2 — Sales — US diaspora reservations
@@ -601,7 +601,7 @@ Sequenced for a Monday morning.
 4. **Create Ad Account** `Leiko Ads`, USD, Africa/Lagos
 5. Add a credit card
 6. **Install Pixel on leiko.health** under Events Manager → Web → Pixel name `Leiko Web` → paste the pixel code into the marketing site (give the snippet to the agent maintaining leiko.health, takes 5 minutes)
-7. **Add App** under Events Manager → App `com.leiko.app` → Android → links to Play Store listing (this is for the secondary App Install layer)
+7. **Add App** under Events Manager → App `com.leiko.care` → Android → links to Play Store listing (this is for the secondary App Install layer)
 8. **Verify domain** → add `leiko.health` and add the meta tag to the site
 9. **Create Custom Conversions**:
    - "Reservation Completed" — fires on /reserve/thank-you URL with value = $50

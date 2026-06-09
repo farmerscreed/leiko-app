@@ -59,7 +59,7 @@ Reviewers frequently push back on broad HealthKit grants. Leiko's scope is inten
 - We do NOT read any HealthKit type beyond the three named above (weight, height, blood glucose). Sleep / activity from the platform are NEVER pulled — Leiko writes those types and reading them back would round-trip our own data.
 - We do NOT read user identity (name, DOB, etc.) from HealthKit. Identity stays in our backend (Supabase Auth).
 - We do NOT auto-overwrite. Leiko writes its own samples only; if the user has BP data from another source on HealthKit, both coexist as separate samples.
-- We filter out our own bundle id (`com.leiko.app`) on the read side so Leiko-written samples never round-trip back into our database.
+- We filter out our own bundle id (`com.leiko.care`) on the read side so Leiko-written samples never round-trip back into our database.
 - We never log reading values to analytics or crash reporting (PostHog and Sentry both have PHI-stripping wrappers — see `docs/00-tech-stack.md` Compliance Posture).
 
 ---

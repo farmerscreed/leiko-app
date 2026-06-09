@@ -43,8 +43,8 @@ If the website doesn't match these, **deep links and install flows break**. The 
 
 | Thing | Value |
 |---|---|
-| Android package | `com.leiko.app` |
-| iOS bundle id | `com.leiko.app` |
+| Android package | `com.leiko.care` |
+| iOS bundle id | `com.leiko.care` |
 | Custom URL scheme | `leiko://` |
 | App Link / Universal Link hosts | **`leiko.app`** and **`pair.leiko.app`** (Android `autoVerify`, iOS Associated Domains) |
 | App-store marketing URL | `https://leiko.app` |
@@ -64,7 +64,7 @@ If the website doesn't match these, **deep links and install flows break**. The 
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
-      "package_name": "com.leiko.app",
+      "package_name": "com.leiko.care",
       "sha256_cert_fingerprints": [
         "REPLACE_WITH_PLAY_APP_SIGNING_SHA256",
         "84:13:9B:AF:8B:C0:4D:B4:25:91:F4:F3:2D:B2:81:F2:D0:2F:4C:74:04:F5:D5:21:22:1B:B6:72:FE:22:27:28"
@@ -81,7 +81,7 @@ If the website doesn't match these, **deep links and install flows break**. The 
   "applinks": {
     "apps": [],
     "details": [
-      { "appID": "TEAMID.com.leiko.app", "paths": ["/join", "/reading/*", "/vital/*", "/support"] }
+      { "appID": "TEAMID.com.leiko.care", "paths": ["/join", "/reading/*", "/vital/*", "/support"] }
     ]
   }
 }
@@ -207,7 +207,7 @@ Warm · Calm · Proactive · Dignified. Lead with the answer; plain language bef
 
 **Phase 1 — Play publish (when verification clears):**
 6. First AAB upload → grab **Play App Signing SHA-256** → update `assetlinks.json` → re-verify.
-7. Org account likely skips closed testing (§9) → publish. Wire real Play listing URL (`store/apps/details?id=com.leiko.app`) into `leiko.app`.
+7. Org account likely skips closed testing (§9) → publish. Wire real Play listing URL (`store/apps/details?id=com.leiko.care`) into `leiko.app`.
 
 **Phase 2 — Demand on:**
 8. Ads → `leiko.health/reserve`. Watch ad-account health + funnel conversion.

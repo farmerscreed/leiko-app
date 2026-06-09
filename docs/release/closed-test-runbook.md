@@ -66,7 +66,7 @@ You already have `leiko-release.jks`. Full steps in `android-release.md`.
 
 Under `primethebrain@gmail.com`:
 
-1. [ ] **Create app** — name "Leiko", package `com.leiko.app`, free, app
+1. [ ] **Create app** — name "Leiko", package `com.leiko.care`, free, app
    (not game).
 2. [ ] **Enable Play App Signing** (default). After the first upload, copy
    the **App signing key SHA-256** (Test & release → Setup → App signing) →
@@ -97,7 +97,7 @@ The individual-account rule needs **12 opted-in testers for 14 days**.
    request-to-join).
 2. [ ] In the closed track → **Testers** → add the Google Group.
 3. [ ] Copy the track's **opt-in URL**
-   (`https://play.google.com/apps/testing/com.leiko.app`).
+   (`https://play.google.com/apps/testing/com.leiko.care`).
 4. [ ] Wire the **leiko.app "Join the beta"** funnel (see
    `plans/beta-landing-funnel.md`): join group → opt-in URL → Play listing.
 5. [ ] Recruit ≥12 real testers and keep them in for 14 continuous days.
@@ -107,7 +107,7 @@ The individual-account rule needs **12 opted-in testers for 14 days**.
 Ship these as updates to the same closed track; testers auto-update.
 
 - [ ] **FCM (push)** — create a Firebase project, add Android app
-  `com.leiko.app`, download `google-services.json`, set
+  `com.leiko.care`, download `google-services.json`, set
   `app.json` → `android.googleServicesFile`. For Expo push, upload the FCM
   **v1 service-account key** to EAS credentials. Rebuild + upload.
 - [ ] **RevenueCat (Plus)** — create the Play app in RevenueCat, set

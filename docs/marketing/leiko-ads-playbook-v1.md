@@ -4,7 +4,7 @@
 
 **A field manual for launching paid acquisition on a lean budget, from Nigeria + diaspora into US mainstream**
 
-Built for: Leiko Android (com.leiko.app) | Maker: Lawrence O. (primethebrain@gmail.com)
+Built for: Leiko Android (com.leiko.care) | Maker: Lawrence O. (primethebrain@gmail.com)
 Last updated: May 2026 | Source: leiko-app/docs/marketing/leiko-ads-playbook.md
 
 ---
@@ -190,7 +190,7 @@ Four platforms matter for Phase 1, plus one regional channel. Ranked by your spe
 Meta Business Manager (primethebrain@gmail.com)
 └── Ad Account: Leiko
     ├── Pixel: Leiko Web (for the marketing site)
-    ├── App ID: com.leiko.app (linked via SDK)
+    ├── App ID: com.leiko.care (linked via SDK)
     └── Campaigns:
         ├── CAMP 1 — Nigeria, App Install objective
         ├── CAMP 2 — US Diaspora, App Install objective
@@ -668,7 +668,7 @@ Sequenced exactly the way you'd do it on a Monday morning, account by account.
    - Source: Website
    - Install: paste the pixel into the marketing site (the agent who built leiko.health can do this in 5 minutes)
 8. **Add App** under Events Manager:
-   - App ID: `com.leiko.app`
+   - App ID: `com.leiko.care`
    - Platform: Android (Google Play)
    - This connects to your Play Store listing
 9. **Create Domain** under Brand Safety:
@@ -716,7 +716,7 @@ Repeat for the **Caregiver_USDiaspora** campaign with:
 4. **Create campaign**:
    - Campaign type: **App promotion**
    - Goal: Install volume
-   - App: search for `com.leiko.app` (your Play Store app)
+   - App: search for `com.leiko.care` (your Play Store app)
    - Campaign name: `LK_Phase1_UAC_Nigeria`
 5. **Locations**: Nigeria
 6. **Languages**: English
@@ -1229,7 +1229,7 @@ Same as above, swap:
 ```
 Campaign type:         App promotion
 Goal:                  Install volume
-App:                   com.leiko.app
+App:                   com.leiko.care
 Campaign name:         LK_P1_UAC_NG
 Locations:             Nigeria
 Languages:             English
