@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "564785111745",
+    "project_id": "leiko-91016",
+    "storage_bucket": "leiko-91016.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:564785111745:android:7496f62598d66244732a40",
+        "android_client_info": {
+          "package_name": "com.leiko.care"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_aTTsXidPmkhkdmBJiCcM8eT5t5fm_iw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

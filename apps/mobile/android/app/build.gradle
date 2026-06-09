@@ -1,6 +1,11 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
+// FCM / Firebase — reads android/app/google-services.json (Firebase project
+// leiko-91016, package com.leiko.care) so expo-notifications can register for
+// an FCM push token. Paired with the google-services classpath in the root
+// build.gradle. `expo prebuild` stomps both — restore by hand if you prebuild.
+apply plugin: "com.google.gms.google-services"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 

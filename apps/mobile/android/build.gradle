@@ -19,6 +19,11 @@ buildscript {
     classpath('com.android.tools.build:gradle')
     classpath('com.facebook.react:react-native-gradle-plugin')
     classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
+    // FCM / Firebase: processes android/app/google-services.json so
+    // expo-notifications can obtain an FCM token (com.leiko.care, Firebase
+    // project leiko-91016). NOTE: `expo prebuild` stomps this block — restore
+    // it (and the apply line in app/build.gradle) by hand after any prebuild.
+    classpath('com.google.gms:google-services:4.4.2')
   }
 }
 
