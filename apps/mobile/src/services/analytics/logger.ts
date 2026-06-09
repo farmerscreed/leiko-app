@@ -70,6 +70,7 @@ export type AnalyticsEvent =
   | { name: 'remote_refresh_task_error'; props?: { reason: string } }
   | { name: 'remote_refresh_registered'; props?: Record<string, never> }
   | { name: 'remote_refresh_register_failed'; props?: { reason: string } }
+  | { name: 'remote_refresh_requested'; props?: { outcome: string } }
   | { name: 'reading_realtime_received'; props?: { familyId: string } }
   // Sprint 7.7b — multi-vital realtime path. Caregiver home invalidates
   // its query when any vitals_other row is INSERTed for a family the

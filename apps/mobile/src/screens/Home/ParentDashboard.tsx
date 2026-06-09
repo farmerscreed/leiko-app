@@ -73,6 +73,7 @@ import {
 } from '../../hooks/useParentDailyPulseData';
 import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { emptyDailyPulse } from '../../state/dailyPulse';
+import { requestRemoteRefresh } from '../../services/sync/requestRemoteRefresh';
 import { supabase } from '../../services/supabase';
 import { useTheme, type Theme } from '../../theme';
 import {
@@ -220,11 +221,15 @@ export function ParentDashboard() {
   );
 
   const handleRefresh = useCallback(async () => {
-    // Refresh both the family-readings list (for the parent's display
-    // info) AND the parent-pulse cache.
+    // Ask the watch-owner's phone to pull fresh data from the watch right
+    // now (silent push → background BLE sync). Fire-and-forget: the synced
+    // readings arrive here via the Realtime subscription above, not via
+    // this await. Then re-read what's already on the server so the pull-
+    // to-refresh feels responsive immediately.
+    void requestRemoteRefresh(familyId);
     void refreshFamily();
     await parentPulse.refresh();
-  }, [refreshFamily, parentPulse]);
+  }, [refreshFamily, parentPulse, familyId]);
 
   return (
     <SafeAreaView
