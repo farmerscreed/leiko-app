@@ -81,6 +81,15 @@ def enableMinifyInReleaseBuilds = (findProperty('android.enableMinifyInReleaseBu
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+// versionCode — single source of truth is the LEIKO_VERSION_CODE env var
+// (set in ~/secrets/leiko-release.ps1). Read via the provider API so it is
+// picked up per-invocation even under the Gradle daemon (System.getenv would
+// read the daemon's stale startup env). Honoured by BOTH
+// `npm run release:android:aab` (which builds with --no-daemon) and a direct
+// `gradlew bundleRelease`. Fallback 1 is for local/debug builds only — never
+// upload a Play build that fell back to 1.
+def leikoVersionCode = providers.environmentVariable("LEIKO_VERSION_CODE").getOrElse("1").toInteger()
+
 android {
     ndkVersion rootProject.ext.ndkVersion
 
@@ -92,7 +101,7 @@ android {
         applicationId 'com.leiko.care'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        versionCode leikoVersionCode
         versionName "1.0.0"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
