@@ -7,8 +7,8 @@
       "namespace": "android_app",
       "package_name": "com.leiko.care",
       "sha256_cert_fingerprints": [
-        "REPLACE_WITH_PLAY_APP_SIGNING_SHA256",
-        "84:13:9B:AF:8B:C0:4D:B4:25:91:F4:F3:2D:B2:81:F2:D0:2F:4C:74:04:F5:D5:21:22:1B:B6:72:FE:22:27:28"
+        "CF:65:9F:68:AA:C6:A8:EA:E0:06:8B:E0:2F:CA:47:83:9F:0E:23:53:72:D9:A5:7F:D3:64:E0:38:55:8A:78:65",
+        "CA:C6:B8:7E:CA:EE:84:CB:78:89:DA:E2:53:D9:A0:6B:19:F0:36:5E:73:1C:9F:DE:D3:10:F7:40:24:E8:D4:AE"
       ]
     }
   }
