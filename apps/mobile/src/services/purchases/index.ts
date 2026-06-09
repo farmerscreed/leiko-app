@@ -36,8 +36,8 @@ function getOs(): 'ios' | 'android' | 'other' {
 }
 
 export const PRODUCT_IDS = {
-  monthly: 'com.leiko.app.plus.monthly',
-  annual: 'com.leiko.app.plus.annual',
+  monthly: 'com.leiko.care.plus.monthly',
+  annual: 'com.leiko.care.plus.annual',
 } as const;
 
 export type PurchasePeriod = 'monthly' | 'annual';

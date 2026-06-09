@@ -35,7 +35,7 @@ export type ReadVitalKind = 'weight' | 'height' | 'blood_glucose';
  *  memory note. The read path filters samples whose source matches this
  *  value to prevent Leiko's own writes from round-tripping back into
  *  external_vitals. */
-export const LEIKO_BUNDLE_ID = 'com.leiko.app';
+export const LEIKO_BUNDLE_ID = 'com.leiko.care';
 
 export interface PermissionRequest {
   write: WriteVitalKind[];

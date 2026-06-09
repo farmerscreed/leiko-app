@@ -1,4 +1,4 @@
-package com.leiko.app.ble
+package com.leiko.care.ble
 
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext

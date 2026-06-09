@@ -1,4 +1,4 @@
-package com.leiko.app
+package com.leiko.care
 
 import android.app.Application
 import android.content.res.Configuration
@@ -25,7 +25,7 @@ class MainApplication : Application(), ReactApplication {
             PackageList(this).packages.apply {
               // Packages that cannot be autolinked yet can be added manually here, for example:
               // add(MyReactNativePackage())
-              add(com.leiko.app.ble.LeikoBleForegroundServicePackage())
+              add(com.leiko.care.ble.LeikoBleForegroundServicePackage())
             }
 
           override fun getJSMainModuleName(): String = ".expo/.virtual-metro-entry"

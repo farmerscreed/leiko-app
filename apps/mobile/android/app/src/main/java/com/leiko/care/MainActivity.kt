@@ -1,4 +1,4 @@
-package com.leiko.app
+package com.leiko.care
 
 import android.os.Build
 import android.os.Bundle

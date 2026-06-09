@@ -1,4 +1,4 @@
-package com.leiko.app.ble
+package com.leiko.care.ble
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -11,8 +11,8 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.leiko.app.MainActivity
-import com.leiko.app.R
+import com.leiko.care.MainActivity
+import com.leiko.care.R
 
 /**
  * Foreground service that keeps the BLE link to the Leiko watch alive
@@ -34,8 +34,8 @@ class LeikoBleForegroundService : Service() {
   companion object {
     const val CHANNEL_ID = "leiko_ble"
     const val NOTIFICATION_ID = 4242
-    const val ACTION_START = "com.leiko.app.ble.START"
-    const val ACTION_STOP  = "com.leiko.app.ble.STOP"
+    const val ACTION_START = "com.leiko.care.ble.START"
+    const val ACTION_STOP  = "com.leiko.care.ble.STOP"
 
     fun start(context: Context) {
       val intent = Intent(context, LeikoBleForegroundService::class.java).apply {

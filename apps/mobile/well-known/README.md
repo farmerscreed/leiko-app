@@ -9,7 +9,7 @@ Per `docs/11-push-notifications.md` §3.
 
 ## Before hosting
 
-- `apple-app-site-association`: replace `TEAMID` with the Apple Developer Team ID for `com.leiko.app`.
+- `apple-app-site-association`: replace `TEAMID` with the Apple Developer Team ID for `com.leiko.care`.
 - `assetlinks.json`:
   - ✅ **Upload-key fingerprint is filled in** (`84:13:9B:…:28`, from
     `keytool -list` on `leiko-release.jks`, 2026-06-02). This covers

@@ -10,7 +10,7 @@
 // adapter's read path strips samples whose sourceBundleId equals our
 // own bundle id (LEIKO_BUNDLE_ID) before calling this endpoint. We
 // still check the source_origin field server-side as a defence-in-depth
-// gate; a sample with origin == 'com.leiko.app' is rejected with code
+// gate; a sample with origin == 'com.leiko.care' is rejected with code
 // 'leiko_origin_rejected'.
 //
 // Per CLAUDE.md voice + data rules: this function does NOT log values.
@@ -20,7 +20,7 @@
 import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 
-const LEIKO_BUNDLE_ID = 'com.leiko.app';
+const LEIKO_BUNDLE_ID = 'com.leiko.care';
 
 const VITAL_TYPES = new Set(['weight', 'height', 'blood_glucose']);
 const PLATFORMS = new Set(['apple_health', 'health_connect']);

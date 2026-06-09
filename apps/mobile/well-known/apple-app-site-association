@@ -3,7 +3,7 @@
     "apps": [],
     "details": [
       {
-        "appIDs": ["TEAMID.com.leiko.app"],
+        "appIDs": ["TEAMID.com.leiko.care"],
         "components": [
           { "/": "/r/*", "comment": "Reading detail deep link" },
           { "/": "/v/*", "comment": "Vital detail deep link" },
@@ -19,6 +19,6 @@
     ]
   },
   "webcredentials": {
-    "apps": ["TEAMID.com.leiko.app"]
+    "apps": ["TEAMID.com.leiko.care"]
   }
 }

@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.leiko.app'
+    namespace 'com.leiko.care'
     defaultConfig {
-        applicationId 'com.leiko.app'
+        applicationId 'com.leiko.care'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

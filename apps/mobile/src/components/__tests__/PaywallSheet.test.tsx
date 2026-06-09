@@ -19,8 +19,8 @@ jest.mock('../../hooks/usePlusEntitlement', () => ({
 
 jest.mock('../../services/purchases', () => ({
   PRODUCT_IDS: {
-    monthly: 'com.leiko.app.plus.monthly',
-    annual: 'com.leiko.app.plus.annual',
+    monthly: 'com.leiko.care.plus.monthly',
+    annual: 'com.leiko.care.plus.annual',
   },
   fetchOfferings: jest.fn().mockResolvedValue({ monthly: null, annual: null }),
   // Default to isPlusActive: true so the existing purchase-success
@@ -148,7 +148,7 @@ describe('PaywallSheet — purchase + restore + dismiss', () => {
 
   it('triggers a purchase with the selected period and dismisses on success', async () => {
     (purchasePeriod as jest.Mock).mockResolvedValue({
-      productId: 'com.leiko.app.plus.annual',
+      productId: 'com.leiko.care.plus.annual',
       isPlusActive: true,
     });
     const onDismiss = jest.fn();
@@ -174,7 +174,7 @@ describe('PaywallSheet — purchase + restore + dismiss', () => {
 
   it('optimistically flips the cache to Plus when RC SDK reports active', async () => {
     (purchasePeriod as jest.Mock).mockResolvedValueOnce({
-      productId: 'com.leiko.app.plus.annual',
+      productId: 'com.leiko.care.plus.annual',
       isPlusActive: true,
     });
     render(
@@ -198,7 +198,7 @@ describe('PaywallSheet — purchase + restore + dismiss', () => {
 
   it('does NOT flip the cache when RC SDK reports no active entitlement', async () => {
     (purchasePeriod as jest.Mock).mockResolvedValueOnce({
-      productId: 'com.leiko.app.plus.annual',
+      productId: 'com.leiko.care.plus.annual',
       isPlusActive: false,
     });
     render(

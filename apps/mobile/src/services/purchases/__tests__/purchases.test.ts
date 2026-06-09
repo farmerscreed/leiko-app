@@ -47,7 +47,7 @@ describe('purchases adapter — env / configure', () => {
 
 describe('product IDs', () => {
   it('locks the App Store / Play product identifiers per docs/09 §4', () => {
-    expect(PRODUCT_IDS.monthly).toBe('com.leiko.app.plus.monthly');
-    expect(PRODUCT_IDS.annual).toBe('com.leiko.app.plus.annual');
+    expect(PRODUCT_IDS.monthly).toBe('com.leiko.care.plus.monthly');
+    expect(PRODUCT_IDS.annual).toBe('com.leiko.care.plus.annual');
   });
 });

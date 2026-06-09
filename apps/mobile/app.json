@@ -15,7 +15,7 @@
     "newArchEnabled": true,
     "icon": "./assets/icon.png",
     "ios": {
-      "bundleIdentifier": "com.leiko.app",
+      "bundleIdentifier": "com.leiko.care",
       "supportsTablet": false,
       "associatedDomains": [
         "applinks:leiko.app",
@@ -119,7 +119,7 @@
       }
     },
     "android": {
-      "package": "com.leiko.app",
+      "package": "com.leiko.care",
       "versionCode": 21,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon-foreground.png",
