@@ -154,17 +154,18 @@ if (process.env.LEIKO_RELEASE_ACK !== 'yes') {
 // ---------- 5) Patch build.gradle in place (restore on exit) -----------------
 step('Patching android/app/build.gradle versionName + versionCode');
 const original = fs.readFileSync(BUILD_GRADLE, 'utf8');
-let patched = original.replace(
-  /versionCode\s+\d+/,
-  `versionCode ${versionCode}`,
-);
-patched = patched.replace(
-  /versionName\s+"[^"]*"/,
-  `versionName "${versionName}"`,
-);
-if (patched === original) {
+// Guard on pattern PRESENCE, not on whether the result differs. When
+// LEIKO_VERSION_CODE already equals the value in build.gradle (e.g. a
+// fresh listing starting at versionCode 1), the replace is a legitimate
+// no-op — `patched === original` must NOT be treated as "pattern missing".
+const versionCodeRe = /versionCode\s+\d+/;
+const versionNameRe = /versionName\s+"[^"]*"/;
+if (!versionCodeRe.test(original) || !versionNameRe.test(original)) {
   fail('Could not find versionCode/versionName patterns in build.gradle');
 }
+const patched = original
+  .replace(versionCodeRe, `versionCode ${versionCode}`)
+  .replace(versionNameRe, `versionName "${versionName}"`);
 fs.writeFileSync(BUILD_GRADLE, patched);
 const restore = () => {
   try {
