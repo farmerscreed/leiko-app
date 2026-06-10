@@ -1,5 +1,12 @@
 # Start here — vitals correctness + physical testing + report delivery (2026-06-05)
 
+> **⏩ 2026-06-10 update (read first):** remote-refresh investigation +
+> fixes landed on `main` (pushed). Push-token registration and the
+> send-push `verify_jwt` hop are fixed (② deployed to prod); the silent
+> push **still isn't reaching the device** (likely the Expo FCM credential).
+> **To build v5:** `plans/V5_BUILD_HANDOFF_2026-06-10.md`.
+> Full record: `plans/REMOTE_REFRESH_FIX_2026-06-10.md` + `docs/_adr/0010-send-push-internal-auth.md`.
+
 Last touched: 2026-06-05. Branch `fix/vitals-data-completeness` (pushed,
 tracking origin). Supersedes the 2026-06-03 version of this file.
 
