@@ -109,25 +109,53 @@ already live.
 
 ---
 
-## ④ Remaining — confirm Expo→FCM→device delivery
+## ④ Device delivery + background wake — NOT CONFIRMED (inconsistent)
 
-The push is **sent and accepted by Expo** (`requested:1`, `push.sent`), but
-the wearer Pixel 8 showed **no FCM receipt** and `devices.last_sync_at`
-stayed null. Two possibilities, not yet distinguished:
+**Honest status after rigorous testing.** Server side is solid: every fire
+returns `{scanned:1, requested:1}` and writes `push.sent` (Expo accepts the
+message). But on-device **background wake is not reliably reproduced**:
 
-- **(a)** Expo accepts the ticket but **FCM doesn't deliver** — the Expo
-  project's FCM V1 credential for `com.leiko.care` is wrong/missing. Confirm
-  by checking the Expo push **receipt** (not just the ticket) for a
-  `DeviceNotRegistered` / `MismatchSenderId` / credential error, on the Expo
-  dashboard (`primethebrain`).
-- **(b)** It **is** delivered, but `runSync('remote_refresh')` has **no
-  connected watch** to pull from, so nothing syncs and `last_sync_at` never
-  updates. (Release builds don't log `logger.track` to logcat, so the JS-side
-  receipt is invisible there.)
+| Run | App state | Result |
+|---|---|---|
+| 71 | **foreground** | BLE sync activity +4s — ambiguous (foreground syncs anyway) |
+| 73 | backgrounded (unverified) | GC + `GATT_Register` +1s — looked like a wake |
+| 74 | **focus NOT verified** (founder had opened the app) | GC + full BLE connect/discover/notify +2s — looked like a wake, but app may have been foreground |
+| 75, A, B | backgrounded, **launcher-focus verified**, phone **ACTIVE (not Doze)**, clean baseline (≈quiet) | **NO wake** — 0 app activity within ~40–60s |
 
-**To close ④:** pair/connect the BP watch to the wearer phone, fire one
-refresh, and watch for `last_sync_at` to update + a new reading. If the watch
-is connected and it still doesn't deliver → it's (a), the Expo FCM credential.
+Three controlled tests with a verified quiet baseline showed **no** wake, so
+the earlier "wakes" (73/74) are most likely **foreground / coincidental
+orchestrator sync**, not the push. Net: **the silent push is not
+demonstrably waking the backgrounded phone.**
+
+This is the original "#1 unproven thing" (handoff §5.1) and it is **still
+unproven**. Leading hypothesis: **Expo accepts the ticket but FCM does not
+deliver it to the device** — i.e. the Expo project's **FCM V1 credential for
+`com.leiko.care` is wrong/missing**. No FCM-receive log line for `leiko` was
+ever observed across any capture, which is consistent with non-delivery.
+
+**To resolve (needs the Expo dashboard / `primethebrain`):**
+1. Check the Expo push **receipt** (not the ticket) for a recent send — look
+   for `DeviceNotRegistered`, `MismatchSenderId`, or an FCM-credential error.
+2. Verify the **FCM V1 service-account key** is uploaded + valid for
+   `com.leiko.care` in the Expo project's credentials.
+3. As a delivery sanity check, send a **visible** push to the wearer; if no
+   banner appears either, FCM delivery is broken project-wide (not just the
+   silent path).
+
+Only after FCM delivery is confirmed can the full chain (push → background
+wake → BLE pull → new reading) be proven. Use a **fresh unsynced reading on
+the watch** as the success signal (`devices.last_sync_at` is a dead field —
+see below).
+
+### Side-findings during ④
+- **`devices.last_sync_at` is a dead field** — 0 of 2 devices ever have it
+  set; the sync path never writes it. Do not use it as a signal; use new
+  `readings` rows instead. (Candidate cleanup: populate it on `/sync`, or drop it.)
+- **PostHog is 401'ing on device** — logcat shows `API key is not valid:
+  personal_api_key`. The build's `EXPO_PUBLIC_POSTHOG_API_KEY` is a *personal*
+  API key (wrong type) → all client analytics silently fail, which is also why
+  `logger.track` push events were never observable. Separate bug to fix
+  (correct project API key) on the next build.
 
 ---
 
