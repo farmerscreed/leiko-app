@@ -11,6 +11,7 @@
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
+import { withInternalHeader } from '../_shared/internal-auth.ts';
 
 function json(body: unknown, status: number): Response {
   return new Response(JSON.stringify(body), {
@@ -49,10 +50,10 @@ Deno.serve(async (req: Request) => {
     try {
       const res = await fetch(`${supabaseUrl}/functions/v1/send-push`, {
         method: 'POST',
-        headers: {
+        headers: withInternalHeader({
           'Content-Type': 'application/json',
           Authorization: `Bearer ${serviceKey}`,
-        },
+        }),
         body: JSON.stringify({ category: 'sync_refresh', userId: f.owner_id }),
       });
       const out = (await res.json()) as { outcome?: string };

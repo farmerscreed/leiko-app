@@ -26,6 +26,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
+import { withInternalHeader } from '../_shared/internal-auth.ts';
 import {
   classifyBP,
   classifyHR,
@@ -594,10 +595,10 @@ async function callSendPush(
   try {
     const res = await fetch(`${baseUrl}/functions/v1/send-push`, {
       method: 'POST',
-      headers: {
+      headers: withInternalHeader({
         'Content-Type': 'application/json',
         Authorization: `Bearer ${serviceKey}`,
-      },
+      }),
       body: JSON.stringify({
         category: 'anomaly',
         userId: payload.recipientUserId,

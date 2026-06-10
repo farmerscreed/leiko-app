@@ -26,6 +26,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
+import { isAuthorizedInternal } from '../_shared/internal-auth.ts';
 import {
   renderAnomalyNotification,
   renderDailySummary,
@@ -171,6 +172,11 @@ function json(body: unknown, status: number): Response {
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
+
+  // send-push is deployed verify_jwt=false (the platform's JWT gate 401s the
+  // new-format service key on function-to-function calls). The internal
+  // shared secret is what actually gates it — reject anything without it.
+  if (!isAuthorizedInternal(req)) return json({ error: 'forbidden' }, 403);
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;

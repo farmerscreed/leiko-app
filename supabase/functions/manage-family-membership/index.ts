@@ -38,6 +38,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
+import { withInternalHeader } from '../_shared/internal-auth.ts';
 
 type Action = 'remove' | 'leave';
 
@@ -228,6 +229,7 @@ Deno.serve(async (req: Request) => {
         removerName,
         circleLabel,
       },
+      headers: withInternalHeader(),
     });
     pushed = !pushResult.error;
   } catch {
