@@ -77,15 +77,13 @@ import { getOrCreateClientDeviceId, mmkv, STORAGE_KEYS } from '../services/stora
 import { inferModel, setDeviceMetaProvider } from '../services/sync/postReading';
 import { startBleForegroundService } from '../services/ble/foregroundService';
 import { scheduleNextLearnedTimeReminder } from '../services/reminders/dispatcher';
-import {
-  configureNotificationHandler,
-  registerForPushNotifications,
-} from '../services/notifications';
+import { configureNotificationHandler } from '../services/notifications';
 import { startNotificationListeners } from '../services/notifications/listeners';
 import {
   defineRemoteRefreshTask,
   registerRemoteRefreshTask,
 } from '../services/notifications/remoteRefreshTask';
+import { usePushRegistration } from '../hooks/usePushRegistration';
 import { navigationRef } from './navigationRef';
 
 // Define the OS-scheduled background-sync task once at module load.
@@ -392,11 +390,12 @@ export function RootNavigator() {
     // APK rebuild pulls them in.
     void startBackgroundSync();
     // Sprint 15 — push notifications. Configure the foreground display
-    // behaviour + Android channels first (idempotent), then register
-    // for a token once the auth session is hydrated. Listener handles
-    // tap → deep-link routing.
+    // behaviour + Android channels (idempotent). Token REGISTRATION is
+    // handled by the auth-driven effect below, not here: registering at
+    // mount raced auth hydration and returned no_user for anyone who
+    // signed in after this mounted, leaving push_tokens empty. Listener
+    // handles tap → deep-link routing.
     void configureNotificationHandler();
-    void registerForPushNotifications();
     // Attach the remote-refresh background notification task (defined at
     // module load above). No-ops without the native side / on iOS sandbox.
     void registerRemoteRefreshTask();
@@ -421,6 +420,11 @@ export function RootNavigator() {
     startOrchestrator,
     stopOrchestrator,
   ]);
+
+  // Push-token registration — auth-driven + on foreground (see hook).
+  // Replaces the Sprint 15 mount-only call that raced auth hydration and
+  // left public.push_tokens empty for users who signed in post-mount.
+  usePushRegistration(status === 'authenticated');
 
   let content: React.ReactNode;
   if (status === 'loading') {
