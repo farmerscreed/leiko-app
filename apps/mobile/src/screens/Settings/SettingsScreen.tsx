@@ -86,9 +86,10 @@ type ProfileField = 'yob' | 'gender' | 'height' | 'weight' | 'timezone';
 // Pre-Sprint-19 this was a hardcoded '0.0.0' that diverged from the
 // real version. expo-application / expo-constants aren't in the
 // dependency set, so the cheap path is a static JSON import; the
-// bundler inlines the literal. EAS bumps the native versionCode
-// independently (remote ledger); the user-facing versionName lives
-// in app.json:expo.version and matches what ships in the APK.
+// bundler inlines the literal. The native versionCode is driven by the
+// LEIKO_VERSION_CODE env var at build time (build.gradle), independent
+// of this string; the user-facing versionName lives in
+// app.json:expo.version and matches what ships in the APK.
 const APP_VERSION = appConfig.expo?.version ?? '0.0.0';
 
 const HYPERTENSION_LABEL: Record<HypertensionStatus, string> = {

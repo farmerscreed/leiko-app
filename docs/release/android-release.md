@@ -63,8 +63,16 @@ export LEIKO_RELEASE_STORE_PASSWORD=...
 export LEIKO_RELEASE_KEY_ALIAS=leiko
 export LEIKO_RELEASE_KEY_PASSWORD=...
 
-# Versioning (bump versionCode for every upload; versionName lives in app.json)
-export LEIKO_VERSION_CODE=8
+# Versioning — LEIKO_VERSION_CODE is the SINGLE source of truth for the
+# Android versionCode. build.gradle reads it for every local build
+# (`npm run release:android:aab` and a direct `gradlew bundleRelease`).
+# app.json's android.versionCode is NOT read by local builds — only by
+# `eas build`, which is not our release path; it is kept in sync only so an
+# accidental EAS build can't leap the ledger. Bump this for every Play
+# upload; it must be strictly greater than the highest versionCode already
+# on the com.leiko.care corporate track. The package rename reset the
+# ledger (vc2 live in open testing, vc4 current) — so the next upload is vc5.
+export LEIKO_VERSION_CODE=5
 
 # Required runtime env (app throws on boot without these)
 export EXPO_PUBLIC_SUPABASE_URL=https://kqnzxjrpnjnczhgdwdqg.supabase.co
@@ -97,7 +105,7 @@ $env:LEIKO_RELEASE_STORE_FILE     = 'C:\Users\admin\secrets\leiko-release.jks'
 $env:LEIKO_RELEASE_STORE_PASSWORD = 'your-keystore-password'
 $env:LEIKO_RELEASE_KEY_ALIAS      = 'leiko'
 $env:LEIKO_RELEASE_KEY_PASSWORD   = 'your-key-password'
-$env:LEIKO_VERSION_CODE           = '20'   # MUST be > your highest previous Play upload (was 19)
+$env:LEIKO_VERSION_CODE           = '5'    # SINGLE source of truth; MUST be > the highest versionCode on the com.leiko.care track (vc4 current → next is 5)
 
 # runtime — copy the exact value from apps/mobile/eas.json (build.production.env)
 $env:EXPO_PUBLIC_SUPABASE_URL      = 'https://kqnzxjrpnjnczhgdwdqg.supabase.co'

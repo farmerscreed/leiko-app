@@ -10,7 +10,74 @@ Update this log every time a new build artifact is produced.
 
 ---
 
-## Android
+> ⚠️ **PACKAGE MIGRATED — read before using any entry below.**
+> On 2026-06-09 (commit `777f26f`) the Android package was renamed
+> `com.leiko.app` → **`com.leiko.care`** and the listing moved from the old
+> personal `lawone-apps` Play account to the **corporate** Play account.
+> `com.leiko.app` is **burned** (can't be reused). The rename created a
+> brand-new Play listing, so the Android **versionCode ledger reset** to a
+> fresh sequence — corporate codes (2, 3, 4…) are unrelated to the legacy
+> `com.leiko.app` codes further down this file.
+>
+> versionCode is now **env-driven and single-source**: `build.gradle` reads
+> `LEIKO_VERSION_CODE` (commit `aea14ce`); `release-android.js` no longer
+> patches `build.gradle`. The release path is a local
+> `gradlew bundleRelease` / `npm run release:android:aab`, so corporate
+> builds have **no EAS artifact URL** — the signed `.aab` lands on the
+> founder's build machine. `app.json:android.versionCode` is decorative for
+> this path (kept in sync only so an accidental `eas build` can't leap the
+> ledger).
+
+## Android — corporate account (`com.leiko.care`) — CURRENT
+
+> Expo owner `primethebrain`, projectId `84da2214-28a4-4605-941b-64662d72c1bc`.
+> Signed with the corporate release keystore `~/secrets/leiko-release.jks`
+> (1Password "Leiko Android Release Keystore"). Target backend: prod
+> Supabase `kqnzxjrpnjnczhgdwdqg`.
+>
+> **Next upload:** bump `LEIKO_VERSION_CODE` to **5** before the next build.
+
+### v4 — `.aab` · versionCode 4 — remote-refresh silent push + corporate/FCM migration
+
+| Field | Value |
+|---|---|
+| **Artifact** | local build — `apps/mobile/android/app/build/outputs/bundle/release/app-release.aab` on the build machine (no EAS URL) |
+| **Package** | `com.leiko.care` |
+| **Build type** | `.aab` via `gradlew bundleRelease` (env-driven `LEIKO_VERSION_CODE=4`) |
+| **versionName / versionCode** | `1.0.0` / `4` |
+| **Built** | 2026-06-10 |
+| **Bundles** | Corporate/FCM migration (`777f26f` rename · `18d0ee5` FCM via google-services · `1f6789d` assetlinks fingerprints · `50364cf` Expo projectId link — the root-cause fix for empty `push_tokens`) + remote-refresh silent push (`a390af3`/`fa90c5c`/`d2b0f8d` phases 1-3 · `bc1b3a0` vault-based stale-sync cron + `pg_net`) |
+| **Installed** | Sideloaded on both bench phones, both reporting vc4: Pixel 8 `43230DLJH001YY` (`lawonecloud@gmail.com`, wearer) + OnePlus CPH2551 `c4f40da1` (`lawonecloud+caregiver@gmail.com`, caregiver) |
+| **Play status** | ⏳ **Unconfirmed** — was vc4 uploaded to the corporate track, or is vc2 still the live open-test build? (handoff §5.2) |
+| **Used for** | On-device validation of remote-refresh — the headline unproven path: does a silent push wake a backgrounded/killed wearer phone and trigger a BLE sync? |
+
+### v3 — versionCode 3 — superseded, do not ship
+
+| Field | Value |
+|---|---|
+| **Package** | `com.leiko.care` |
+| **versionCode** | `3` |
+| **Status** | **Superseded by vc4.** Built before the Expo projectId link (`50364cf`) and the remote-refresh receiver wiring, so push-token registration was broken (`push_tokens` was empty → a silent push could never reach a device). Never ship vc3. |
+
+### v2 — `.aab` · versionCode 2 — corporate open testing (live)
+
+| Field | Value |
+|---|---|
+| **Package** | `com.leiko.care` |
+| **versionName / versionCode** | `1.0.0` / `2` |
+| **Built** | 2026-06-09 |
+| **Play status** | Uploaded to the corporate **Open testing** track (live as of 2026-06-09). Presumed still the live build until vc4's upload is confirmed. |
+| **Note** | Predates the remote-refresh silent-push feature. |
+
+---
+
+## Android — legacy personal account (`com.leiko.app`) — HISTORICAL
+
+> ⚠️ These entries are the **OLD** personal `lawone-apps` account ledger for
+> the now-burned package `com.leiko.app`. Kept for history only. Their
+> versionCodes are **unrelated** to the corporate ledger above, and the EAS
+> `appVersionSource: remote` / autoIncrement model described here is no
+> longer in use.
 
 ### v1.0.0 (versionCode 2) — production `.aab` for Play Console
 
@@ -163,6 +230,6 @@ _No iOS builds yet — Block 6.1 Apple Developer entitlements + `expo prebuild -
 ## Notes
 
 - **AAB vs APK:** Play Store wants AAB (smaller install footprint, per-device APK splitting). adb wants APK (single-file install). Same keystore signs both — they're equivalent artifacts from a signing-identity perspective.
-- **Auto-increment behaviour:** `eas.json` has `cli.appVersionSource = remote` and `production.autoIncrement = true`. Every prod build bumps versionCode by 1 in EAS's remote ledger. Don't manually edit `android/app/build.gradle:96` versionName — `app.json:5` (currently `1.0.0`) is the source of truth and EAS propagates it.
+- **versionCode source of truth (current):** the `LEIKO_VERSION_CODE` env var, read directly by `build.gradle` at build time. `eas.json` is now `appVersionSource: local` with autoIncrement **dropped** — the old remote-ledger model below this line is historical. Bump `LEIKO_VERSION_CODE` for every Play upload (must exceed the highest code already on the `com.leiko.care` track). `versionName` (`1.0.0`) lives in `app.json:expo.version`; `app.json:android.versionCode` is decorative for the local-gradle path.
 - **Anon key in binary is fine:** `EXPO_PUBLIC_SUPABASE_ANON_KEY` ships in every APK; it's a public client key, RLS is the actual security boundary. Service role key, DB password, third-party API keys never enter the binary — they're in supabase secrets (server-side) + GitHub Actions secrets (CI).
-- **Keystore loss = nuclear:** If `Build Credentials 5ZIwDWM1fJ` is lost AND the 1Password backup is gone, the app can never be updated on Play Store again. Two layers of redundancy already (EAS Cloud + 1Password); a third on an encrypted external drive would not be overkill.
+- **Keystore loss = nuclear:** the corporate release keystore is the local `~/secrets/leiko-release.jks` (master copy in 1Password "Leiko Android Release Keystore"). Lose both the local file AND the 1Password backup and `com.leiko.care` can never be updated on the Play Store again. A third copy on an encrypted external drive would not be overkill. (The old EAS-managed `Build Credentials 5ZIwDWM1fJ` slot belonged to the burned `com.leiko.app` personal account.)
