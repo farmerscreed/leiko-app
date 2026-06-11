@@ -55,7 +55,7 @@ class LeikoPowerModule(
         promise.resolve(true)
         return
       }
-      val activity = currentActivity
+      val activity = context.currentActivity
       val direct = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
         data = Uri.parse("package:${context.packageName}")
         if (activity == null) addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
