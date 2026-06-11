@@ -57,15 +57,23 @@ API key (wrong type) → all client analytics silently fail. Set the correct
 PostHog **project** key (`phc_…`) in the release env before building v5, so
 analytics (and the push-registration telemetry) actually report.
 
-## ⚠️ v5 does NOT fix remote-refresh delivery
+## Remote-refresh status (updated 2026-06-11)
 
-The remote-refresh **server** path is fixed + live (proven). But the silent
-push is **not reliably reaching/​waking the device** — leading hypothesis is
-the Expo project's **FCM V1 credential for `com.leiko.care`** is wrong/missing
-(Expo accepts the ticket, FCM never delivers). This is an **Expo dashboard**
-fix (`primethebrain`), independent of the v5 build — see
-`REMOTE_REFRESH_FIX_2026-06-10.md` §④. Do that, then a backgrounded refresh
-should wake the phone.
+The whole **server→Expo→FCM** path is now **fixed and verified** (ticket +
+receipt both `ok`). The real fix was **`EXPO_ACCESS_TOKEN`** — the Expo project
+has Enhanced Push Security on, so sends require an access token; it's now set
+as a prod function secret. **FCM credential was fine.** (commit `e7f6469`.)
+
+What v5 does NOT change: **Android's best-effort delivery of silent data-only
+messages to a backgrounded app.** Even with ticket+receipt ok and the BLE
+foreground service alive, the backgrounded app wakes only sometimes — an
+Android platform limitation, not our code. Mitigations (battery-optimization
+exemption; visible/hybrid nudge) are future work. See
+`REMOTE_REFRESH_FIX_2026-06-10.md` §④.
+
+**New prod secret to know about:** `EXPO_ACCESS_TOKEN` is now required by the
+`send-push` function (set in Supabase → leiko-prod → Edge Functions → Secrets).
+Keep it valid; rotate like any secret.
 
 ## Post-build retest (with the watch connected)
 

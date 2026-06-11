@@ -127,25 +127,43 @@ the earlier "wakes" (73/74) are most likely **foreground / coincidental
 orchestrator sync**, not the push. Net: **the silent push is not
 demonstrably waking the backgrounded phone.**
 
-This is the original "#1 unproven thing" (handoff §5.1) and it is **still
-unproven**. Leading hypothesis: **Expo accepts the ticket but FCM does not
-deliver it to the device** — i.e. the Expo project's **FCM V1 credential for
-`com.leiko.care` is wrong/missing**. No FCM-receive log line for `leiko` was
-ever observed across any capture, which is consistent with non-delivery.
+### What we found (2026-06-11) — and the real fix
 
-**To resolve (needs the Expo dashboard / `primethebrain`):**
-1. Check the Expo push **receipt** (not the ticket) for a recent send — look
-   for `DeviceNotRegistered`, `MismatchSenderId`, or an FCM-credential error.
-2. Verify the **FCM V1 service-account key** is uploaded + valid for
-   `com.leiko.care` in the Expo project's credentials.
-3. As a delivery sanity check, send a **visible** push to the wearer; if no
-   banner appears either, FCM delivery is broken project-wide (not just the
-   silent path).
+The Expo project has **Enhanced Push Security** enabled, so **sends require an
+access token**. `send-push` was sending WITHOUT one: Expo returned HTTP 200
+but the message wasn't delivered, and `send-push` only checked `res.ok`, so it
+reported `sent` while nothing went out. **Fix: set `EXPO_ACCESS_TOKEN` as a
+prod function secret** (commit `e7f6469`), and `dispatchSilentToExpo` now
+inspects the **ticket status** (not just HTTP) and surfaces the ticket id.
 
-Only after FCM delivery is confirmed can the full chain (push → background
-wake → BLE pull → new reading) be proven. Use a **fresh unsynced reading on
-the watch** as the success signal (`devices.last_sync_at` is a dead field —
-see below).
+With the token set, verified end to end:
+- **Expo ticket** → `status:"ok"` (no `DeviceNotRegistered` / `MismatchSenderId`).
+- **Expo receipt** (queried via `pg_net` → `exp.host/--/api/v2/push/getReceipts`)
+  → `{"status":"ok"}`. So **Expo accepted AND handed the message to FCM
+  successfully.** The FCM V1 credential is **fine** — the earlier "wrong
+  credential" hypothesis was wrong; the missing **access token** was the issue.
+
+### What remains — Android best-effort delivery of silent data messages
+
+Even with ticket+receipt "ok", the backgrounded app does **not reliably wake**:
+`ExpoFirebaseMessagingService.onMessageReceived` was **never observed** firing
+on the no-wake runs, despite the app being in **App-Standby bucket 10 (ACTIVE)**
+with the **BLE foreground service running**. An Expo receipt of "ok" only
+confirms the **Expo→FCM handoff**, *not* device delivery — and Android does
+**not guarantee delivery of data-only FCM messages to backgrounded apps**, even
+high-priority ones with a live foreground service. This matches the observed
+inconsistency (woke sometimes, not others). **This is an Android platform
+limitation, not a bug in our code, and a v5 build will not change it.**
+
+Mitigations to consider (future work, not blocking):
+- Request **battery-optimization exemption** (`REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`)
+  — the app is currently NOT whitelisted; this improves background data delivery.
+- Consider a **visible/notification-style** nudge (system delivers those
+  reliably) or a hybrid, instead of a pure silent data message.
+- Foreground / recently-active delivery works; fully-idle is best-effort.
+
+Success signal for a future full-chain test: a **fresh unsynced reading on the
+watch** appearing server-side (`devices.last_sync_at` is a dead field — below).
 
 ### Side-findings during ④
 - **`devices.last_sync_at` is a dead field** — 0 of 2 devices ever have it
