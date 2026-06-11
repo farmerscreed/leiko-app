@@ -322,8 +322,8 @@ async function routeSilentSync(
   if (tokens.length === 0) return { outcome: 'suppressed_no_token' };
 
   const sent = await dispatchSilentToExpo(tokens);
-  if (!sent) return { outcome: 'failed', detail: 'expo_dispatch_failed' };
-  return { outcome: 'sent' };
+  if (!sent.ok) return { outcome: 'failed', detail: sent.detail ?? 'expo_dispatch_failed' };
+  return { outcome: 'sent', detail: sent.detail };
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -567,7 +567,9 @@ async function dispatchToExpo(
  * background window (iOS content-available; Android high-priority data).
  * Carries only { type: 'sync_refresh' } — never any PHI.
  */
-async function dispatchSilentToExpo(expoTokens: string[]): Promise<boolean> {
+async function dispatchSilentToExpo(
+  expoTokens: string[],
+): Promise<{ ok: boolean; detail?: string }> {
   const url = Deno.env.get('EXPO_PUSH_URL') ?? 'https://exp.host/--/api/v2/push/send';
   const accessToken = Deno.env.get('EXPO_ACCESS_TOKEN');
 
@@ -583,9 +585,22 @@ async function dispatchSilentToExpo(expoTokens: string[]): Promise<boolean> {
       },
       body: JSON.stringify(messages),
     });
-    return res.ok;
-  } catch {
-    return false;
+    if (!res.ok) return { ok: false, detail: `http_${res.status}` };
+    // Expo returns 200 even when individual tickets error (e.g. missing
+    // access token under push security, bad FCM credentials). Inspect the
+    // ticket status — not just the HTTP code — so failures surface.
+    const body = (await res.json()) as {
+      data?: Array<{ status?: string; message?: string; details?: { error?: string }; id?: string }>;
+    };
+    const tickets = body.data ?? [];
+    const errored = tickets.find((t) => t.status === 'error');
+    if (errored) {
+      return { ok: false, detail: `ticket_error:${errored.details?.error ?? errored.message ?? 'unknown'}` };
+    }
+    if (tickets.length === 0) return { ok: false, detail: 'no_tickets' };
+    return { ok: true, detail: tickets[0]?.id };
+  } catch (e) {
+    return { ok: false, detail: `fetch_failed:${String(e)}` };
   }
 }
 
