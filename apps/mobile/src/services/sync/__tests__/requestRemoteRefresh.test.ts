@@ -11,10 +11,20 @@ const invoke = supabase.functions.invoke as jest.Mock;
 describe('requestRemoteRefresh', () => {
   beforeEach(() => invoke.mockReset());
 
-  it('invokes request-sync with the familyId', async () => {
+  it('invokes request-sync silently by default (escalate=false)', async () => {
     invoke.mockResolvedValue({ data: { outcome: 'requested' }, error: null });
     await requestRemoteRefresh('fam-123');
-    expect(invoke).toHaveBeenCalledWith('request-sync', { body: { familyId: 'fam-123' } });
+    expect(invoke).toHaveBeenCalledWith('request-sync', {
+      body: { familyId: 'fam-123', escalate: false },
+    });
+  });
+
+  it('escalates to the visible nudge when asked', async () => {
+    invoke.mockResolvedValue({ data: { outcome: 'requested' }, error: null });
+    await requestRemoteRefresh('fam-123', { escalate: true });
+    expect(invoke).toHaveBeenCalledWith('request-sync', {
+      body: { familyId: 'fam-123', escalate: true },
+    });
   });
 
   it('returns the server outcome on success', async () => {

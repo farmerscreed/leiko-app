@@ -155,12 +155,30 @@ high-priority ones with a live foreground service. This matches the observed
 inconsistency (woke sometimes, not others). **This is an Android platform
 limitation, not a bug in our code, and a v5 build will not change it.**
 
-Mitigations to consider (future work, not blocking):
-- Request **battery-optimization exemption** (`REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`)
-  — the app is currently NOT whitelisted; this improves background data delivery.
-- Consider a **visible/notification-style** nudge (system delivers those
-  reliably) or a hybrid, instead of a pure silent data message.
-- Foreground / recently-active delivery works; fully-idle is best-effort.
+Mitigations:
+- ✅ **Battery-optimization exemption** (`REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`)
+  — shipped (post-pairing prompt + native `LeikoPower` module, commits
+  `156a9f3`/`3211c87`). Improves background data delivery; not a guarantee.
+- ✅ **Silent-first + human-confirmed visible nudge** — IMPLEMENTED
+  (2026-06-11). Remote refresh is now SILENT-FIRST: a caregiver's
+  pull-to-refresh sends the silent `sync_refresh` (invisible). The caregiver
+  screen (`ParentDashboard` + `useRemoteRefreshNudge`) watches its Realtime
+  feed; if no fresh data lands within ~20s, it offers the caregiver a calm
+  "Send a reminder" row. ONLY that deliberate tap escalates to the VISIBLE,
+  tappable `sync_nudge` ("{name} would love to see your latest reading. Tap
+  to sync your watch."), which the OS delivers reliably even in Doze; the
+  tap runs the BLE sync. So the wearer is invisible-synced when possible and
+  never false-nagged (e.g. when they simply hadn't taken a new reading).
+  Why not auto-escalate? Reliably detecting a background *wake* needs a
+  server-written ack (`devices.last_sync_at` is RLS-gated to the family
+  *owner*, not the wearer, and is a dead field) — out of scope; the
+  human-confirmed path is correct + far lower risk.
+  New module `_shared/sync-nudge.ts`; `request-sync` takes `escalate?`
+  (silent default, visible on escalate); client orchestration in
+  `useRemoteRefreshNudge` + tap-handler in `notifications/listeners.ts`.
+  **Ships in v5 (client) + needs `send-push` & `request-sync` redeployed.**
+- Foreground / recently-active delivery works silently; fully-idle silent is
+  best-effort — which is exactly what the human-confirmed nudge backstops.
 
 Success signal for a future full-chain test: a **fresh unsynced reading on the
 watch** appearing server-side (`devices.last_sync_at` is a dead field — below).

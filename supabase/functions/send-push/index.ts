@@ -45,6 +45,7 @@ import {
 } from '../_shared/voice-lint-push.ts';
 import { isWithinQuietWindow } from '../_shared/quiet-hours.ts';
 import { buildSilentSyncMessages } from '../_shared/silent-push.ts';
+import { renderSyncNudge, buildSyncNudgeMessages } from '../_shared/sync-nudge.ts';
 import type {
   VitalKind,
   ClassificationTier,
@@ -61,9 +62,16 @@ type PushCategory =
   | 'marketing'
   // Silent, data-only push that wakes the watch-owner's phone to run a
   // background BLE sync. No title/body, no PHI — invisible to the user.
-  // Triggered server-side only (request-sync / request-stale-syncs), never
+  // Triggered server-side only (request-stale-syncs cron), never
   // user-facing, so it skips render / voice-lint / quiet-hours.
-  | 'sync_refresh';
+  | 'sync_refresh'
+  // VISIBLE remote-refresh nudge — the reliable fallback for an EXPLICIT
+  // caregiver pull-to-refresh. Android drops silent pushes in Doze, so the
+  // wearer gets a tappable notification instead. Goes through the full
+  // visible pipeline (opt-out / render / voice-lint / quiet-hours / rate
+  // limit). Carries data { type: 'sync_refresh' } so the client's existing
+  // foreground + tap handlers run the sync.
+  | 'sync_nudge';
 
 interface BasePayload {
   category: PushCategory;
@@ -138,6 +146,13 @@ interface SyncRefreshPayload extends BasePayload {
   category: 'sync_refresh';
 }
 
+// Visible remote-refresh nudge. `userId` is the watch-owner; `requesterName`
+// is the family member who asked (the wearer sees their name in the body).
+interface SyncNudgePayload extends BasePayload {
+  category: 'sync_nudge';
+  requesterName?: string;
+}
+
 type SendPushRequest =
   | AnomalyPayload
   | DailyPayload
@@ -147,7 +162,8 @@ type SendPushRequest =
   | FamilyRemovedPayload
   | SubscriptionPayload
   | MarketingPayload
-  | SyncRefreshPayload;
+  | SyncRefreshPayload
+  | SyncNudgePayload;
 
 interface SendPushResponse {
   outcome:
@@ -277,15 +293,19 @@ async function routePush(
     return { outcome: 'suppressed_no_token' };
   }
 
-  // 7. Dispatch.
-  const deepLink = computeDeepLink(payload);
-  const interruption = isUrgent(payload) ? 'time-sensitive' : 'active';
-  const sent = await dispatchToExpo(
-    tokens.map((t) => t.expo_token),
-    rendered,
-    deepLink,
-    interruption,
-  );
+  // 7. Dispatch. The visible sync-nudge carries data { type:'sync_refresh' }
+  //    so the client's foreground + tap handlers run the BLE sync; every
+  //    other category is a plain deep-linked notification.
+  const expoTokens = tokens.map((t) => t.expo_token);
+  const sent =
+    payload.category === 'sync_nudge'
+      ? await dispatchNudgeToExpo(expoTokens, rendered)
+      : await dispatchToExpo(
+          expoTokens,
+          rendered,
+          computeDeepLink(payload),
+          isUrgent(payload) ? 'time-sensitive' : 'active',
+        );
   if (!sent.ok) return { outcome: 'failed', detail: sent.detail ?? 'expo_dispatch_failed' };
   return { outcome: 'sent' };
 }
@@ -368,6 +388,9 @@ function checkOptOut(payload: SendPushRequest, prefs: typeof DEFAULT_PREFS): str
       return prefs.subscription_account ? null : 'subscription_off';
     case 'marketing':
       return prefs.marketing ? null : 'marketing_off';
+    case 'sync_nudge':
+      // The wearer can mute family-driven nudges via the family umbrella.
+      return prefs.family_activity ? null : 'family_off';
     case 'sync_refresh':
       // Handled in routeSilentSync before this gate; inert here.
       return null;
@@ -397,6 +420,8 @@ function renderPayload(payload: SendPushRequest, recipient: AccountType): Render
       return renderSubscriptionRenewing(recipient, payload);
     case 'marketing':
       return { title: payload.title, body: payload.body };
+    case 'sync_nudge':
+      return renderSyncNudge(payload.requesterName);
     case 'sync_refresh':
       // Silent — never rendered. Handled in routeSilentSync.
       return null;
@@ -490,6 +515,10 @@ function computeDeepLink(payload: SendPushRequest): string {
       return 'leiko://settings/subscription';
     case 'marketing':
       return payload.deepLink ?? 'leiko://home';
+    case 'sync_nudge':
+      // The tap is handled by the sync_refresh data handler (runs the BLE
+      // sync), not by deep-link routing. Home is the inert landing fallback.
+      return 'leiko://home';
     case 'sync_refresh':
       // Silent — no deep link. Handled in routeSilentSync.
       return 'leiko://home';
@@ -602,6 +631,48 @@ async function dispatchSilentToExpo(
     // Expo returns 200 even when individual tickets error (e.g. missing
     // access token under push security, bad FCM credentials). Inspect the
     // ticket status — not just the HTTP code — so failures surface.
+    const body = (await res.json()) as {
+      data?: Array<{ status?: string; message?: string; details?: { error?: string }; id?: string }>;
+    };
+    const tickets = body.data ?? [];
+    const errored = tickets.find((t) => t.status === 'error');
+    if (errored) {
+      return { ok: false, detail: `ticket_error:${errored.details?.error ?? errored.message ?? 'unknown'}` };
+    }
+    if (tickets.length === 0) return { ok: false, detail: 'no_tickets' };
+    return { ok: true, detail: tickets[0]?.id };
+  } catch (e) {
+    return { ok: false, detail: `fetch_failed:${String(e)}` };
+  }
+}
+
+/**
+ * Visible sync-nudge dispatch — the reliable remote-refresh fallback. A
+ * normal notification (title/body, 'family' channel) that also carries
+ * data { type: 'sync_refresh' } so the client runs a BLE sync on
+ * foreground-receive or tap. See _shared/sync-nudge.ts.
+ */
+async function dispatchNudgeToExpo(
+  expoTokens: string[],
+  rendered: RenderedNotification,
+): Promise<{ ok: boolean; detail?: string }> {
+  const url = Deno.env.get('EXPO_PUSH_URL') ?? 'https://exp.host/--/api/v2/push/send';
+  const accessToken = Deno.env.get('EXPO_ACCESS_TOKEN');
+
+  const messages = buildSyncNudgeMessages(expoTokens, rendered);
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      },
+      body: JSON.stringify(messages),
+    });
+    if (!res.ok) return { ok: false, detail: `http_${res.status}` };
+    // Expo returns 200 even when individual tickets error — inspect status.
     const body = (await res.json()) as {
       data?: Array<{ status?: string; message?: string; details?: { error?: string }; id?: string }>;
     };

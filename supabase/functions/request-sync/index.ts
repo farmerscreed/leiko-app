@@ -1,9 +1,18 @@
 // /request-sync — remote-refresh trigger (Leiko Studio-era addition).
 //
-// A family member (typically a remote caregiver) asks the watch-owner's
-// phone to sync NOW, without the owner opening the app. The owner's phone
-// receives a silent push (send-push 'sync_refresh') and runs a background
-// BLE pull.
+// A family member (typically a remote caregiver) asks the watch-owner to
+// sync their watch NOW. SILENT-FIRST with a human-confirmed visible fallback:
+//
+//   - Default (escalate=false): sends the SILENT 'sync_refresh' push. The
+//     owner's phone syncs invisibly when it can (foreground, or backgrounded
+//     while battery-opt-exempt). The wearer is never interrupted.
+//   - Escalated (escalate=true): the silent attempt didn't surface fresh
+//     data and the caregiver chose "send a reminder", so we send the VISIBLE
+//     'sync_nudge' — a tappable notification Android delivers reliably even
+//     in Doze. The wearer taps it to sync.
+//
+// (The automatic 3-hourly cron, request-stale-syncs, always uses the silent
+// path — it must never nag.)
 //
 // This is the AUTHENTICATED, client-facing entry point. It does NOT talk
 // to Expo directly — per the hard rule, send-push is the only Expo egress.
@@ -11,14 +20,16 @@
 //   1. Authenticate the caller via their JWT.
 //   2. Verify the caller is a member of the target family.
 //   3. Resolve the watch-owner = active device's paired_by_user_id.
-//   4. Delegate to send-push with { category: 'sync_refresh', userId }.
+//   4. escalate ? VISIBLE 'sync_nudge' (+ requester display_name)
+//               : SILENT 'sync_refresh'.
 //
-// Input:  { familyId: string }
+// Input:  { familyId: string, escalate?: boolean }
 // Output: { outcome: 'requested' | 'no_owner' | 'not_a_member'
+//           | 'suppressed_opt_out' | 'suppressed_quiet_hours'
 //           | 'suppressed_rate_limit' | 'suppressed_no_token' | 'failed' }
 //
-// Per CLAUDE.md: carries no PHI. The silent push payload is just
-// { type: 'sync_refresh' }.
+// Per CLAUDE.md: carries no PHI. The nudge body names only the requester;
+// the data payload is just { type: 'sync_refresh' }.
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
@@ -51,8 +62,11 @@ Deno.serve(async (req: Request) => {
   if (userErr || !callerId) return json({ error: 'unauthorized' }, 401);
 
   let familyId: string | undefined;
+  let escalate = false;
   try {
-    ({ familyId } = (await req.json()) as { familyId?: string });
+    const body = (await req.json()) as { familyId?: string; escalate?: boolean };
+    familyId = body.familyId;
+    escalate = body.escalate === true;
   } catch {
     return json({ error: 'invalid_json' }, 400);
   }
@@ -82,7 +96,26 @@ Deno.serve(async (req: Request) => {
   const ownerId = device?.paired_by_user_id as string | undefined;
   if (!ownerId) return json({ outcome: 'no_owner' }, 200);
 
-  // 3. Delegate to send-push (the single Expo egress) for the silent push.
+  // 3. Build the send-push payload. Default = SILENT 'sync_refresh' (the
+  //    phone syncs invisibly when it can). Only when the caller escalates —
+  //    i.e. the silent attempt didn't surface fresh data and the caregiver
+  //    chose to send a reminder — do we send the VISIBLE 'sync_nudge', which
+  //    Android delivers reliably even in Doze. The nudge names the requester,
+  //    so resolve their display name on that path only.
+  let pushBody: Record<string, unknown>;
+  if (escalate) {
+    const { data: requester } = await service
+      .from('users')
+      .select('display_name')
+      .eq('id', callerId)
+      .maybeSingle();
+    const requesterName = (requester?.display_name as string | undefined) ?? undefined;
+    pushBody = { category: 'sync_nudge', userId: ownerId, requesterName };
+  } else {
+    pushBody = { category: 'sync_refresh', userId: ownerId };
+  }
+
+  // 4. Delegate to send-push (the single Expo egress).
   try {
     const res = await fetch(`${supabaseUrl}/functions/v1/send-push`, {
       method: 'POST',
@@ -90,7 +123,7 @@ Deno.serve(async (req: Request) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${serviceKey}`,
       }),
-      body: JSON.stringify({ category: 'sync_refresh', userId: ownerId }),
+      body: JSON.stringify(pushBody),
     });
     const out = (await res.json()) as { outcome?: string };
     // Map send-push outcomes to this endpoint's vocabulary.
