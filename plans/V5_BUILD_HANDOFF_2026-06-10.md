@@ -74,9 +74,27 @@ as a prod function secret. **FCM credential was fine.** (commit `e7f6469`.)
 What v5 does NOT change: **Android's best-effort delivery of silent data-only
 messages to a backgrounded app.** Even with ticket+receipt ok and the BLE
 foreground service alive, the backgrounded app wakes only sometimes — an
-Android platform limitation, not our code. Mitigations (battery-optimization
-exemption; visible/hybrid nudge) are future work. See
+Android platform limitation, not our code. See
 `REMOTE_REFRESH_FIX_2026-06-10.md` §④.
+
+> **2026-06-11 — silent-first remote refresh + visible fallback, now in v5.**
+> A caregiver's pull-to-refresh stays SILENT (invisible to the wearer). If
+> fresh data doesn't land within ~20s, the caregiver screen offers a calm
+> "Send a reminder" row; only that deliberate tap sends a VISIBLE, tappable
+> notification ("{name} would love to see your latest reading. Tap to sync
+> your watch.") that the OS delivers reliably even in Doze. **So the wearer
+> is invisible-synced when possible, reliably reachable when not, and never
+> false-nagged.** Ships in the v5 client AND requires redeploying two edge
+> functions to prod (deploy separately — the two keep different JWT
+> settings):
+> ```
+> SUPABASE_ACCESS_TOKEN=<PAT> npx supabase functions deploy send-push \
+>   --project-ref kqnzxjrpnjnczhgdwdqg --use-api --no-verify-jwt
+> SUPABASE_ACCESS_TOKEN=<PAT> npx supabase functions deploy request-sync \
+>   --project-ref kqnzxjrpnjnczhgdwdqg --use-api
+> ```
+> (`send-push` stays `verify_jwt=false` + internal-secret gated; `request-sync`
+> keeps `verify_jwt=true`.) See `REMOTE_REFRESH_FIX_2026-06-10.md` §④.
 
 **New prod secret to know about:** `EXPO_ACCESS_TOKEN` is now required by the
 `send-push` function (set in Supabase → leiko-prod → Edge Functions → Secrets).

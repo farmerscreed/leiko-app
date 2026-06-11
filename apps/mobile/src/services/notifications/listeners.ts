@@ -24,6 +24,12 @@ export function startNotificationListeners(): NotificationListenerHandles {
     const data = response.notification.request.content.data as
       | { url?: string; category?: string }
       | undefined;
+    // A tapped sync-nudge (the visible remote-refresh fallback) carries
+    // { type: 'sync_refresh' } and no url — run the BLE sync, don't route.
+    if (isRemoteRefreshData(data)) {
+      void triggerRemoteRefresh('tap');
+      return;
+    }
     if (data?.url) {
       handleDeepLink(data.url, data.category);
     }
@@ -52,7 +58,11 @@ export function startNotificationListeners(): NotificationListenerHandles {
       const data = last?.notification.request.content.data as
         | { url?: string; category?: string }
         | undefined;
-      if (data?.url) handleDeepLink(data.url, data.category);
+      if (isRemoteRefreshData(data)) {
+        void triggerRemoteRefresh('tap');
+      } else if (data?.url) {
+        handleDeepLink(data.url, data.category);
+      }
     } catch {
       // best-effort
     }

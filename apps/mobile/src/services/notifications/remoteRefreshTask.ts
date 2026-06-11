@@ -83,7 +83,7 @@ export function isRemoteRefreshData(taskData: unknown): boolean {
  * hydrate yet) then run the watch sync. Safe to call from either path.
  */
 export async function triggerRemoteRefresh(
-  source: 'background' | 'foreground',
+  source: 'background' | 'foreground' | 'tap',
 ): Promise<void> {
   logger.track('remote_refresh_received', { source });
   try {

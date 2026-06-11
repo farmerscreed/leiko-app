@@ -68,13 +68,14 @@ export type AnalyticsEvent =
   | { name: 'sync_completed'; props?: { trigger: string; batches: number; hitBatchCap: boolean; pulled: number } }
   | { name: 'sync_skipped'; props?: { trigger: string; reason: 'no_paired_device' | 'take_reading_active' | 'too_recent' | 'already_running' } }
   | { name: 'sync_failed'; props?: { trigger: string; reason: string } }
-  // Remote-refresh (silent push → background watch sync).
-  | { name: 'remote_refresh_received'; props?: { source: 'background' | 'foreground' } }
+  // Remote-refresh (silent push → background watch sync; or a tapped
+  // visible sync-nudge → foreground sync).
+  | { name: 'remote_refresh_received'; props?: { source: 'background' | 'foreground' | 'tap' } }
   | { name: 'remote_refresh_failed'; props?: { reason: string } }
   | { name: 'remote_refresh_task_error'; props?: { reason: string } }
   | { name: 'remote_refresh_registered'; props?: Record<string, never> }
   | { name: 'remote_refresh_register_failed'; props?: { reason: string } }
-  | { name: 'remote_refresh_requested'; props?: { outcome: string } }
+  | { name: 'remote_refresh_requested'; props?: { outcome: string; escalated?: boolean } }
   | { name: 'reading_realtime_received'; props?: { familyId: string } }
   // Sprint 7.7b — multi-vital realtime path. Caregiver home invalidates
   // its query when any vitals_other row is INSERTed for a family the

@@ -38,7 +38,7 @@
 // / "silent killer". The hardcoded "her" pronoun trap from the 16.5
 // retro is avoided by using `parentDisplayName` directly.
 
-import { useCallback, useEffect, useId, useMemo } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import {
   Pressable,
   RefreshControl,
@@ -74,6 +74,10 @@ import {
 import { useParentVitalsRecent } from '../../hooks/useParentVitalsRecent';
 import { emptyDailyPulse } from '../../state/dailyPulse';
 import { requestRemoteRefresh } from '../../services/sync/requestRemoteRefresh';
+import {
+  useRemoteRefreshNudge,
+  type RemoteRefreshNudgeState,
+} from './useRemoteRefreshNudge';
 import { supabase } from '../../services/supabase';
 import { useTheme, type Theme } from '../../theme';
 import {
@@ -125,6 +129,11 @@ export function ParentDashboard() {
     parentPulse.data === null;
   const loadError = parentPulse.error ?? parentRecent.error ?? null;
 
+  // Fresh-data signal — bumped on every readings / vitals_other INSERT for
+  // this family. The remote-refresh nudge hook watches it to tell whether a
+  // silent sync actually surfaced new data (see useRemoteRefreshNudge).
+  const [freshDataSignal, setFreshDataSignal] = useState(0);
+
   // Realtime — one subscription per (table, family). INSERTs invalidate
   // the parent-pulse cache key; TanStack Query re-fetches on the next
   // observer tick. `useId()` gives a stable per-instance channel suffix
@@ -149,6 +158,7 @@ export function ParentDashboard() {
             void queryClient.invalidateQueries({
               queryKey: parentPulseQueryKey(familyId),
             });
+            setFreshDataSignal((n) => n + 1);
           },
         )
         .subscribe(),
@@ -168,6 +178,7 @@ export function ParentDashboard() {
             void queryClient.invalidateQueries({
               queryKey: parentPulseQueryKey(familyId),
             });
+            setFreshDataSignal((n) => n + 1);
           },
         )
         .subscribe(),
@@ -220,16 +231,23 @@ export function ParentDashboard() {
     [handleVitalPress],
   );
 
+  // Silent-first remote refresh + human-confirmed visible fallback. If the
+  // silent sync below doesn't surface fresh data within the wait window, the
+  // hook flips to 'offer' and we show the caregiver a calm "Send a reminder"
+  // row (the only path that ever interrupts the wearer).
+  const nudge = useRemoteRefreshNudge({ familyId, freshDataSignal });
+
   const handleRefresh = useCallback(async () => {
     // Ask the watch-owner's phone to pull fresh data from the watch right
-    // now (silent push → background BLE sync). Fire-and-forget: the synced
+    // now (SILENT push → background BLE sync). Fire-and-forget: the synced
     // readings arrive here via the Realtime subscription above, not via
-    // this await. Then re-read what's already on the server so the pull-
-    // to-refresh feels responsive immediately.
+    // this await. `beginWaiting()` starts watching for them. Then re-read
+    // what's already on the server so the pull feels responsive immediately.
     void requestRemoteRefresh(familyId);
+    nudge.beginWaiting();
     void refreshFamily();
     await parentPulse.refresh();
-  }, [refreshFamily, parentPulse, familyId]);
+  }, [refreshFamily, parentPulse, familyId, nudge]);
 
   return (
     <SafeAreaView
@@ -258,6 +276,15 @@ export function ParentDashboard() {
         />
 
         <SyncReassuranceBanner testID="parent-dashboard-sync-reassurance" />
+
+        {/* Silent-first remote refresh: only shown if a silent sync didn't
+            surface fresh data — the caregiver chooses whether to nudge. */}
+        <RemoteRefreshNudgeRow
+          theme={theme}
+          parentName={headerText.parentName}
+          state={nudge.state}
+          onSend={nudge.sendReminder}
+        />
 
         {/* Sprint 18 — distinguish loading + error from "truly empty"
             so the caregiver isn't told their parent has no data while
@@ -554,6 +581,85 @@ function PulseHeader({ theme, eyebrow, parentName, onBack }: PulseHeaderProps) {
           .
         </Text>
       </View>
+    </View>
+  );
+}
+
+interface RemoteRefreshNudgeRowProps {
+  theme: Theme;
+  parentName: string;
+  state: RemoteRefreshNudgeState;
+  onSend: () => void;
+}
+
+// Silent-first remote-refresh fallback. Renders nothing until a silent
+// sync has gone quiet ('offer'); the caregiver's tap sends the visible
+// nudge and we acknowledge it ('sent'). Voice: calm, specific, no fear.
+function RemoteRefreshNudgeRow({
+  theme,
+  parentName,
+  state,
+  onSend,
+}: RemoteRefreshNudgeRowProps) {
+  if (state !== 'offer' && state !== 'sent') return null;
+  const bodyStyle = theme.type('bodyM');
+  const labelStyle = theme.type('label');
+  return (
+    <View
+      style={{
+        marginHorizontal: theme.spacing.l,
+        marginTop: theme.spacing.l,
+        padding: theme.spacing.l,
+        borderRadius: theme.radii.l,
+        backgroundColor: theme.colors.surface.warmSubtle,
+        borderWidth: 0.5,
+        borderColor: theme.colors.border.rim,
+      }}
+      testID="parent-dashboard-refresh-nudge"
+    >
+      <Text
+        style={{
+          fontFamily: bodyStyle.family,
+          fontSize: bodyStyle.size,
+          lineHeight: bodyStyle.lineHeight,
+          color: theme.colors.text.primary,
+        }}
+      >
+        {state === 'sent'
+          ? `Reminder sent to ${parentName}.`
+          : `Haven't heard back from ${parentName}'s phone yet.`}
+      </Text>
+      {state === 'offer' ? (
+        <Pressable
+          onPress={onSend}
+          accessibilityRole="button"
+          accessibilityLabel={`Send ${parentName} a reminder to sync`}
+          hitSlop={8}
+          testID="parent-dashboard-refresh-nudge-send"
+          style={({ pressed }) => ({
+            alignSelf: 'flex-start',
+            marginTop: theme.spacing.m,
+            paddingVertical: theme.spacing.s,
+            paddingHorizontal: theme.spacing.l,
+            borderRadius: 99,
+            borderWidth: 1,
+            borderColor: theme.colors.brand.coral,
+            backgroundColor: theme.colors.surface.warmElevated,
+            opacity: pressed ? 0.7 : 1,
+          })}
+        >
+          <Text
+            allowFontScaling={false}
+            style={{
+              fontFamily: labelStyle.family,
+              fontSize: labelStyle.size,
+              color: theme.colors.brand.coral,
+            }}
+          >
+            Send a reminder
+          </Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
