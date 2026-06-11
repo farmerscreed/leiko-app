@@ -286,7 +286,7 @@ async function routePush(
     deepLink,
     interruption,
   );
-  if (!sent) return { outcome: 'failed', detail: 'expo_dispatch_failed' };
+  if (!sent.ok) return { outcome: 'failed', detail: sent.detail ?? 'expo_dispatch_failed' };
   return { outcome: 'sent' };
 }
 
@@ -528,7 +528,7 @@ async function dispatchToExpo(
   rendered: RenderedNotification,
   deepLink: string,
   interruption: 'active' | 'time-sensitive',
-): Promise<boolean> {
+): Promise<{ ok: boolean; detail?: string }> {
   // Honour the Expo sandbox flag when configured. Production credentials
   // are wired later; the sandbox endpoint accepts the same payload.
   const url = Deno.env.get('EXPO_PUSH_URL') ?? 'https://exp.host/--/api/v2/push/send';
@@ -554,9 +554,22 @@ async function dispatchToExpo(
       },
       body: JSON.stringify(messages),
     });
-    return res.ok;
-  } catch {
-    return false;
+    if (!res.ok) return { ok: false, detail: `http_${res.status}` };
+    // Expo returns 200 even when individual tickets error (missing access
+    // token under push security, bad FCM credentials, DeviceNotRegistered).
+    // Inspect the ticket status, not just the HTTP code.
+    const body = (await res.json()) as {
+      data?: Array<{ status?: string; message?: string; details?: { error?: string } }>;
+    };
+    const tickets = body.data ?? [];
+    const errored = tickets.find((t) => t.status === 'error');
+    if (errored) {
+      return { ok: false, detail: `ticket_error:${errored.details?.error ?? errored.message ?? 'unknown'}` };
+    }
+    if (tickets.length === 0) return { ok: false, detail: 'no_tickets' };
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, detail: `fetch_failed:${String(e)}` };
   }
 }
 
