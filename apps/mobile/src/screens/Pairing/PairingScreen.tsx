@@ -26,6 +26,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '../../components/Button';
 import { Card } from '../../components/Card';
+import { BatteryOptimizationPrompt } from '../../components/BatteryOptimizationPrompt';
 import { useTheme } from '../../theme';
 import { usePairing, supportsWebBluetoothHandoff } from '../../state/pairing';
 import { useOnboarding } from '../../state/onboarding';
@@ -98,6 +99,11 @@ export function PairingScreen({ navigation }: Props) {
       >
         {body}
       </ScrollView>
+      {/* Post-pairing: once the watch is connected, offer to exempt Leiko
+          from battery optimization so remote-refresh can wake the phone in
+          the background. Self-gates (no-op if already exempt / dismissed /
+          not Android). */}
+      {phase === 'success' && <BatteryOptimizationPrompt />}
     </SafeAreaView>
   );
 }

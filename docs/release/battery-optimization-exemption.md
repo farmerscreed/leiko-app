@@ -26,16 +26,17 @@ phone that **has a paired watch** (the device that actually syncs — a remote
 caregiver never sees it), when **not already exempt**, and **until dismissed
 once** (persisted in MMKV); it re-checks status on every app foreground.
 
-## ⚠️ Decisions for the founder before merge
+## Wired in: post-pairing (founder-chosen 2026-06-11)
 
-1. **Where to mount `<BatteryOptimizationPrompt />`.** It self-gates, so it's a
-   one-line drop-in. Two natural spots:
-   - **SelfBuyerHome** (the wearer's home), next to `HealthPlatformPermissionPrompt`.
-     ⚠️ Both are BottomSheets — **sequence them** so two sheets don't open at
-     once (e.g. show battery-opt only after the health-platform prompt closes).
-   - **Right after pairing succeeds** (PairingScreen) — the moment background
-     sync becomes relevant; avoids the home-sheet collision. Recommended.
-2. **Play Console declaration.** `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` is a
+`<BatteryOptimizationPrompt />` is rendered on the **`success` phase of
+`PairingScreen`** — the moment the watch connects and background sync starts to
+matter. It self-gates (no-op if already exempt / dismissed / not Android), and
+this placement avoids colliding with the home-screen
+`HealthPlatformPermissionPrompt` BottomSheet.
+
+## ⚠️ Remaining decision for the founder before merge
+
+1. **Play Console declaration.** `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` is a
    flagged permission. Leiko qualifies under the **"app needs to keep a
    persistent connection to a companion device"** acceptable-use case (it
    already declares `FOREGROUND_SERVICE_CONNECTED_DEVICE` for the BP watch).
