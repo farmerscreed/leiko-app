@@ -49,13 +49,20 @@ adb install -r app-release.apk
 versionCode (`docs/release/android-release.md`); `app.json:android.versionCode`
 is decorative for local builds.
 
-## ⚠️ Fix BEFORE/IN the v5 build — PostHog key
+## PostHog key — FIXED (2026-06-11)
 
-On-device logcat shows `PostHog … 401 … API key is not valid:
-personal_api_key`. The build's `EXPO_PUBLIC_POSTHOG_API_KEY` is a **personal**
-API key (wrong type) → all client analytics silently fail. Set the correct
-PostHog **project** key (`phc_…`) in the release env before building v5, so
-analytics (and the push-registration telemetry) actually report.
+The old build used a **personal** API key (`phx_…` / "personal_api_key") → 401,
+all client analytics silently failed. The correct **project** key
+(`phc_CEDLsB…`, public/write-only) + host are now in **`eas.json`** production
+env (`EXPO_PUBLIC_POSTHOG_API_KEY` / `EXPO_PUBLIC_POSTHOG_HOST`).
+
+⚠️ **Local gradle builds read the SHELL env, not `eas.json`** — so for
+`npm run release:android:apk`, also export them in your release env:
+```
+EXPO_PUBLIC_POSTHOG_API_KEY=phc_CEDLsBokrpgqiHYvWyzaHioSXnB5VvPDCfTjma9edPRe
+EXPO_PUBLIC_POSTHOG_HOST=https://us.posthog.com
+```
+(EAS cloud builds pick them up from `eas.json` automatically.)
 
 ## Remote-refresh status (updated 2026-06-11)
 
