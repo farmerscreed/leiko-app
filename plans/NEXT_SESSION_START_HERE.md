@@ -1,5 +1,14 @@
 # Start here — vitals correctness + physical testing + report delivery (2026-06-05)
 
+> **⏩ 2026-06-11 update (read first):** remote refresh is now **silent-first
+> with a human-confirmed visible fallback** — caregiver pull-to-refresh stays
+> silent; if no fresh data lands in ~20s the caregiver gets a "Send a reminder"
+> row that escalates to a visible `sync_nudge` the wearer taps to sync. Server
+> is **deployed** (`send-push` v20, `request-sync` v5); client orchestration
+> ships in **v5**. Decision: `docs/_adr/0011-silent-first-remote-refresh.md`;
+> spec: `docs/11-push-notifications.md` §10; **v5 retest checklist** +
+> deploy/state: `plans/V5_BUILD_HANDOFF_2026-06-10.md`.
+>
 > **⏩ 2026-06-10 update (read first):** remote-refresh investigation +
 > fixes landed on `main` (pushed). Push-token registration and the
 > send-push `verify_jwt` hop are fixed (② deployed to prod); the silent

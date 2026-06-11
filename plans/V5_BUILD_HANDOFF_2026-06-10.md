@@ -95,6 +95,12 @@ Android platform limitation, not our code. See
 > ```
 > (`send-push` stays `verify_jwt=false` + internal-secret gated; `request-sync`
 > keeps `verify_jwt=true`.) See `REMOTE_REFRESH_FIX_2026-06-10.md` §④.
+>
+> **✅ DEPLOYED 2026-06-11** — `send-push` **v20** (`verify_jwt=false`) +
+> `request-sync` **v5** (`verify_jwt=true`) are live in prod (verified via the
+> Management API). The server is ready; the client orchestration ships in v5.
+> Design record: `docs/_adr/0011-silent-first-remote-refresh.md`; spec:
+> `docs/11-push-notifications.md` §10.
 
 **New prod secret to know about:** `EXPO_ACCESS_TOKEN` is now required by the
 `send-push` function (set in Supabase → leiko-prod → Edge Functions → Secrets).
@@ -102,19 +108,65 @@ Keep it valid; rotate like any secret.
 
 ## Post-build retest (with the watch connected)
 
-1. `adb install -r` v5 on both phones.
-2. Confirm ① auto-registers: sign in → prod `push_tokens` gets a row for the
-   wearer with no relaunch hack (verify via `tools/prod-sql.py`, see
-   `docs/release/prod-db-access.md`).
-3. After the Expo FCM fix: take a fresh reading on the watch, background the
-   app, fire a refresh → a new `readings` row should appear (don't rely on
-   `devices.last_sync_at` — it's a dead field).
+Two phones: **W** = wearer (watch owner), **C** = caregiver. `adb install -r`
+v5 on both (upgrade-install — preserves state + the registered token; do NOT
+uninstall). Verify DB facts via `tools/prod-sql.py` (`docs/release/prod-db-access.md`).
+
+### A. Push-token registration (commit ①)
+1. On **W**, sign in. Without any relaunch hack, prod `push_tokens` gets a row
+   for the wearer (`select user_id, platform, last_seen_at from push_tokens`).
+2. On **C**, grant notifications when prompted; confirm a row for the caregiver
+   too (needed for anomaly/family pushes, not for remote refresh).
+
+### B. Remote refresh — SILENT path (the hoped-for invisible case)
+This is the experiment never run before v5: token registration +
+`EXPO_ACCESS_TOKEN` + battery-opt exemption now coexist.
+3. On **W**, grant the battery-optimization exemption at the post-pairing
+   prompt (or Settings → Battery → unrestricted). Connect the watch; take a
+   fresh reading so there's something new to sync.
+4. **Background W** (go to launcher — verify it's not foreground; ideally let
+   it sit so it's idle). Phone awake, not airplane mode.
+5. On **C**, open the wearer's ParentDashboard → pull-to-refresh.
+6. **Success (silent):** within ~20s a new `readings` row appears server-side
+   and **C**'s dashboard updates via Realtime — and **W showed nothing**. If
+   this happens consistently, silent is good enough on this device; the nudge
+   never appears.
+   - Audit trail: `audit_log` has `push.sent` with `metadata.category='sync_refresh'`.
+
+### C. Remote refresh — VISIBLE fallback (when silent doesn't surface data)
+7. If §B does not produce fresh data within ~20s, **C**'s dashboard shows a
+   calm **"Haven't heard back from {name}'s phone yet." + "Send a reminder"**
+   row (`testID=parent-dashboard-refresh-nudge`).
+8. Tap **Send a reminder** on **C**. Expect:
+   - `audit_log` `push.sent` with `metadata.category='sync_nudge'`.
+   - On **W**, a visible notification: *"{caregiverName} would love to see your
+     latest reading. Tap to sync your watch."*
+   - **C** shows "Reminder sent to {name}."
+9. On **W**, tap the notification → app opens → BLE sync runs → a new
+   `readings` row appears → **C**'s dashboard updates (and its nudge row clears).
+
+### D. Edge / regression checks
+10. **Quiet hours:** repeat §C inside the wearer's quiet window → `sync_nudge`
+    is held (`push.suppressed`, `outcome='suppressed_quiet_hours'`); the silent
+    `sync_refresh` still fires.
+11. **No false-nag:** with no new watch data, the silent attempt produces no
+    fresh data and the reminder is *offered* but never auto-sent — confirm **W**
+    gets nothing unless **C** taps.
+12. **Cron untouched:** `request-stale-syncs` (3-hourly) still sends only the
+    silent `sync_refresh` — no visible notification ever from the cron.
+
+(`devices.last_sync_at` is a dead field — do NOT use it as a signal; use new
+`readings` rows + `audit_log` instead.)
 
 ## State snapshot
 
-- `origin/main` @ `5409eed` — clean, everything pushed.
-- Prod edge functions deployed: `send-push` v13 (`verify_jwt=false`),
-  `request-sync`/`request-stale-syncs` v3, `detect-anomaly`/`manage-family-membership` v12.
-- Function secret `LEIKO_INTERNAL_PUSH_SECRET` set in prod.
+- `origin/main` @ `4dd3dfc` — clean, everything pushed (silent-first remote
+  refresh merged 2026-06-11).
+- Prod edge functions: **`send-push` v20** (`verify_jwt=false`),
+  **`request-sync` v5** (`verify_jwt=true`), `request-stale-syncs` v6,
+  `detect-anomaly`/`manage-family-membership` v13.
+- Function secrets in prod: `LEIKO_INTERNAL_PUSH_SECRET`, `EXPO_ACCESS_TOKEN`.
 - Corporate Play ledger: vc2 (open test, live) · vc3 (superseded) · vc4
   (current) → **next upload is vc5.**
+- Docs: `docs/_adr/0011-silent-first-remote-refresh.md`,
+  `docs/11-push-notifications.md` §10, `REMOTE_REFRESH_FIX_2026-06-10.md` §④.

@@ -19,6 +19,10 @@ Single egress: every push from Leiko goes through the `send-push` Edge Function.
 | Family activity | On | Suppressed |
 | Subscription / account | On | Suppressed |
 | Marketing | **Off by default** | Suppressed |
+| Remote refresh — silent (`sync_refresh`) | System (not user-toggled) | n/a — invisible, data-only |
+| Remote refresh — nudge (`sync_nudge`) | Gated by Family activity | Suppressed (held) |
+
+The two remote-refresh categories implement caregiver "sync now" — see §10. `sync_refresh` is a silent data-only push (no title/body, no opt-out, no quiet-hours — nothing renders). `sync_nudge` is the visible, human-confirmed fallback and runs the full visible pipeline; it is muted by the **Family activity** umbrella and held during the wearer's quiet hours.
 
 The umbrella `anomaly_notifications` toggle is a kill-switch — when off, the three per-vital toggles have no effect.
 
@@ -49,6 +53,7 @@ Per-category 24h rate limit: 3 max for non-urgent. Confirmed-urgent bypasses the
 | Family activity | `leiko://family` | Family Members |
 | Subscription | `leiko://settings/subscription` | Settings (subscription section) |
 | Marketing | `leiko://home` | Home (no targeted deep link to avoid abuse) |
+| Remote refresh nudge | — (no deep link) | Tapping runs a BLE sync via the `sync_refresh` data handler; the app opens to Home |
 
 ### Universal Links / App Links (REQUIRED)
 - Apple's `apple-app-site-association` template at `apps/mobile/well-known/apple-app-site-association`.
@@ -149,3 +154,43 @@ Per `docs/13-testing-standard.md`:
 - Snooze-for-1-hour affordance on anomaly notifications — defer.
 - Apple Live Activities for in-progress reading — defer to v1.2.
 - APNs `.p8` + FCM service account credentials — founder action; sandbox-only until provided.
+
+---
+
+## 10. Remote refresh (silent-first) — ADR-0011
+
+Caregiver "sync now": a remote caregiver pulls-to-refresh on the parent's
+dashboard and the parent's phone syncs the watch over BLE. **Silent-first
+with a human-confirmed visible fallback** (full rationale: `docs/_adr/0011`).
+
+Flow (caregiver-triggered, via `request-sync`):
+
+1. **Silent attempt** — `request-sync` (default, `escalate=false`) → `send-push`
+   `sync_refresh` → a data-only push (`{ type: 'sync_refresh' }`, no title/body,
+   `_contentAvailable`, `priority: high`). A foreground / battery-opt-exempt
+   phone runs the BLE sync invisibly. **Nothing is shown to the wearer.**
+2. **Watch for fresh data** — the caregiver screen (`useRemoteRefreshNudge`)
+   watches its Realtime `readings` / `vitals_other` feed. If new data lands
+   within ~20s, the sync worked silently — done.
+3. **Offer a reminder** — if no fresh data arrives, the screen shows the
+   *caregiver* a calm "Send a reminder" row (never auto-sent).
+4. **Escalate (caregiver tap)** — that tap calls `request-sync` with
+   `escalate=true` → `send-push` `sync_nudge` → a **visible** notification
+   ("{name} would love to see your latest reading. Tap to sync your watch.")
+   the OS delivers reliably even in Doze. It carries `data.type='sync_refresh'`
+   so the wearer's tap (or a foreground receive) runs the same BLE sync.
+
+Properties:
+- **`sync_refresh` (silent)**: skips render / opt-out / quiet-hours / voice-lint;
+  carries no title, body, or PHI. Coalesced (30s) server-side. Used by both the
+  caregiver silent attempt and the automatic 3-hourly `request-stale-syncs` cron.
+- **`sync_nudge` (visible)**: full pipeline — opt-out under **Family activity**,
+  voice-lint (fail-closed), quiet-hours hold, 24h/3 rate limit. Copy + message
+  builder in `_shared/sync-nudge.ts`. Routed through the Android `family` channel.
+- The automatic cron is **always silent** — it must never nag.
+- Client orchestration ships in the **v5 build**; old clients that omit
+  `escalate` get the silent push (backward compatible).
+
+Why not auto-escalate: reliably detecting a background *wake* needs a
+server-written ack; "no new reading" conflates *didn't wake* with *nothing to
+sync* and would false-nag. See ADR-0011.
