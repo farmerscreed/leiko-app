@@ -42,6 +42,10 @@ export type AnalyticsEvent =
   | { name: 'ble_fg_unavailable'; props?: { reason: string } }
   | { name: 'ble_fg_start_failed'; props?: { reason: string } }
   | { name: 'ble_fg_stop_failed'; props?: { reason: string } }
+  // Battery-optimization (Doze) exemption prompt. No PHI — just whether the
+  // system dialog was opened, so we can see how many wearers enable it.
+  | { name: 'battery_opt_prompt_shown' }
+  | { name: 'battery_opt_prompt_failed'; props?: { reason: string } }
   // Sprint 6 — reading capture lifecycle. Per CLAUDE.md data rule,
   // event payloads NEVER include sys/dia/pulse values, only counts +
   // categories.
