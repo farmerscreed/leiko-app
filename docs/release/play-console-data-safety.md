@@ -6,6 +6,14 @@ form. Every claim here was derived from a literal read of the
 that collects something new, update this doc *before* the next release
 so the form doesn't drift from reality.
 
+> **✅ Re-verified current for the v5 release (2026-06-12).** The v5 work
+> (silent-first remote refresh, battery-optimization exemption, push-token
+> registration lifecycle, PostHog `phc_` project key) introduces **no new data
+> type**: the push token + per-install Device ID and PHI-free analytics are
+> already covered below, and the battery-opt exemption is a permission, not a
+> data collection. These answers stand as-is. Store-listing copy lives in
+> `docs/release/play-store-listing.md`.
+
 ## Section 1 — Data collection and security (the upfront questions)
 
 | Question | Answer |
