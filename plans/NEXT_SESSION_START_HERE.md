@@ -1,6 +1,14 @@
 # Start here — vitals correctness + physical testing + report delivery (2026-06-05)
 
-> **⏩ 2026-06-11 update (read first):** remote refresh is now **silent-first
+> **⏩ 2026-06-12 update (read first):** vc5 **built, signed, and validated on
+> two real phones** — silent-first remote refresh works end-to-end (silent
+> doesn't wake a backgrounded Pixel; the visible "Send a reminder" nudge
+> delivers reliably). The **AAB is built** for Google Play. Full results,
+> upload steps, and the **upload-key check you must do first**:
+> **`plans/V5_RELEASE_2026-06-12.md`**. Next: confirm the upload key →
+> upload AAB to Play Internal testing.
+>
+> **⏩ 2026-06-11 update:** remote refresh is now **silent-first
 > with a human-confirmed visible fallback** — caregiver pull-to-refresh stays
 > silent; if no fresh data lands in ~20s the caregiver gets a "Send a reminder"
 > row that escalates to a visible `sync_nudge` the wearer taps to sync. Server

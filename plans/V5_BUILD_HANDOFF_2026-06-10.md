@@ -108,6 +108,15 @@ Keep it valid; rotate like any secret.
 
 ## Post-build retest (with the watch connected)
 
+> **✅ PASSED on device 2026-06-12.** vc5 built (Linux, JDK 17, signed),
+> installed on wearer Pixel `43230DLJH001YY` + caregiver OPPO `c4f40da1`.
+> Push-token registration, silent dispatch, the §④ no-wake on a backgrounded
+> Pixel, the "Send a reminder" fallback, the visible `sync_nudge` delivery, and
+> the caregiver acknowledgement ALL verified. Full results + the Play upload
+> steps + signing-key check: **`plans/V5_RELEASE_2026-06-12.md`**. (Note: vc5
+> signature differs from the Play-installed vc4 → had to uninstall to sideload;
+> consistent with Play App Signing — confirm the upload key before uploading.)
+
 Two phones: **W** = wearer (watch owner), **C** = caregiver. `adb install -r`
 v5 on both (upgrade-install — preserves state + the registered token; do NOT
 uninstall). Verify DB facts via `tools/prod-sql.py` (`docs/release/prod-db-access.md`).
