@@ -22,13 +22,14 @@
 // react-native-reanimated@4.1.7 (see ADR-0004). The translateY is a shared
 // value driven on the UI thread so drag stays at 60fps.
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Dimensions,
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -36,6 +37,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
@@ -90,7 +92,11 @@ const EASE_ACCELERATE = Easing.bezier(0.3, 0, 1, 1);
 function sizeToDimension(size: BottomSheetSize): { height?: number; maxHeight?: number } {
   switch (size) {
     case 'compact':
-      return { maxHeight: SCREEN_HEIGHT * 0.5 };
+      // Content-sized, capped. Was 0.5 with overflow hidden, which cut
+      // off the CTAs of any compact sheet taller than half the screen
+      // (the battery-optimization prompt on a Pixel 8, 2026-10-27).
+      // Content past the cap now scrolls instead of clipping.
+      return { maxHeight: SCREEN_HEIGHT * 0.85 };
     case 'default':
       return { height: SCREEN_HEIGHT * 0.6 };
     case 'tall':
@@ -113,7 +119,11 @@ export function BottomSheet({
   testID,
 }: BottomSheetProps) {
   const theme = useTheme();
+  // Context read (not useSafeAreaInsets) so a sheet rendered outside a
+  // SafeAreaProvider degrades to no inset instead of throwing.
+  const bottomInset = useContext(SafeAreaInsetsContext)?.bottom ?? 0;
   const dimension = sizeToDimension(size);
+  const contentSized = dimension.height === undefined;
   const sheetHeight = dimension.height ?? SCREEN_HEIGHT * 0.5;
 
   const [mounted, setMounted] = useState(false);
@@ -247,7 +257,11 @@ export function BottomSheet({
   const contentPaddingStyle: ViewStyle = {
     paddingHorizontal: theme.spacing.xxl,
     paddingTop: theme.spacing.s,
-    paddingBottom: theme.spacing.xxl,
+    // statusBarTranslucent + Android edge-to-edge (targetSdk 35+) draw
+    // the gesture/nav bar over the sheet's bottom edge; keep the last
+    // CTA clear of it.
+    paddingBottom: theme.spacing.xxl + bottomInset,
+    ...(contentSized ? { flexShrink: 1 } : {}),
   };
 
   const titleStyle = theme.type('title');
@@ -349,7 +363,19 @@ export function BottomSheet({
                       ) : null}
                     </View>
                   ) : null}
-                  {children}
+                  {contentSized ? (
+                    <ScrollView
+                      style={styles.contentScroll}
+                      bounces={false}
+                      showsVerticalScrollIndicator={false}
+                      keyboardShouldPersistTaps="handled"
+                      testID={testID ? `${testID}-scroll` : 'bottomsheet-scroll'}
+                    >
+                      {children}
+                    </ScrollView>
+                  ) : (
+                    children
+                  )}
                 </View>
               </View>
             </Animated.View>
@@ -363,6 +389,7 @@ export function BottomSheet({
 const styles = StyleSheet.create({
   kbAvoid: { flex: 1, justifyContent: 'flex-end' },
   sheetWrapper: { width: '100%' },
+  contentScroll: { flexGrow: 0 },
   dragHandle: {
     alignSelf: 'center',
     width: 32,
