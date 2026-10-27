@@ -19,6 +19,7 @@
 // for the cross-phone case. Sprint 8 (self-buyer home) reuses the
 // same hook with a different consumer shape.
 
+import { perfStep } from '../utils/perfTrace';
 import { useEffect, useId, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../services/supabase';
@@ -58,7 +59,7 @@ export function useFamilyReadings(): UseFamilyReadingsResult {
     enabled: userId !== null,
     queryFn: () => {
       if (!userId) return Promise.resolve<ParentSummary[]>([]);
-      return fetchParentSummaries(supabase, userId);
+      return perfStep('home.fetchParentSummaries', () => fetchParentSummaries(supabase, userId));
     },
   });
 

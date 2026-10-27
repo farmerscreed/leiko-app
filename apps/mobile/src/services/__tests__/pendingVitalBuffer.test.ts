@@ -96,3 +96,41 @@ describe('pendingVitalBuffer', () => {
     expect(mmkv.contains(STORAGE_KEY)).toBe(false);
   });
 });
+
+
+describe('pendingVitalBuffer.removeByKeys', () => {
+  test('drops every listed key in one write and keeps the rest', () => {
+    const buffer = make();
+    for (let i = 0; i < 5; i++) buffer.append({ id: 'a', measuredAtSec: i, bpm: 60 + i });
+    const setSpy = jest.spyOn(mmkv, 'set');
+
+    buffer.removeByKeys(['a:1', 'a:3', 'a:99']);
+
+    expect(buffer.readAll().map((s) => s.measuredAtSec)).toEqual([0, 2, 4]);
+    expect(setSpy).toHaveBeenCalledTimes(1);
+    setSpy.mockRestore();
+  });
+
+  test('is a no-op for an empty key list', () => {
+    const buffer = make();
+    buffer.append({ id: 'a', measuredAtSec: 1, bpm: 60 });
+    const setSpy = jest.spyOn(mmkv, 'set');
+    buffer.removeByKeys([]);
+    expect(setSpy).not.toHaveBeenCalled();
+    setSpy.mockRestore();
+  });
+
+  test('stays fast on a large backlog (one pass, not one pass per key)', () => {
+    const buffer = make();
+    const samples = Array.from({ length: 3000 }, (_, i) => ({ id: 'a', measuredAtSec: i, bpm: 70 }));
+    buffer.replace(samples);
+    const keys = samples.slice(0, 2900).map((s) => `a:${s.measuredAtSec}`);
+    const parseSpy = jest.spyOn(JSON, 'parse');
+
+    buffer.removeByKeys(keys);
+
+    expect(parseSpy).toHaveBeenCalledTimes(1);
+    expect(buffer.readAll()).toHaveLength(100);
+    parseSpy.mockRestore();
+  });
+});

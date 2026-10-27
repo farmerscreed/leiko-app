@@ -76,6 +76,7 @@ import {
 } from './syncFailureTracker';
 import { forwardMultiVitalsToPlatform } from '../health-platform/syncBridge';
 import { useHR } from '../../state/hr';
+import { perfLog, perfStep, perfSync } from '../../utils/perfTrace';
 import { useSpO2 } from '../../state/spo2';
 import { useSleep } from '../../state/sleep';
 import { computeSleepScore } from '../../utils/classification';
@@ -751,8 +752,8 @@ async function postMultiVitalsChunked(
     totalInserted = addCounts(totalInserted, response.inserted);
     totalRejected = addCounts(totalRejected, response.rejected);
     totalDuplicates = addCounts(totalDuplicates, response.duplicates);
-    useHR.getState().acceptSyncResult(
-      hrSlice.map((s) => String(s.measuredAtSec)),
+    perfSync('mv.hrAcceptChunk', () =>
+      useHR.getState().acceptSyncResult(hrSlice.map((s) => String(s.measuredAtSec))),
     );
   }
 
@@ -815,14 +816,14 @@ export async function syncMultiVitals(
   // failure counter.
   const hrPromise: Promise<number | null> = hrBackedOff
     ? Promise.resolve(null)
-    : syncHRStep(device, deviceBleId, nowSec, options);
+    : perfStep('mv.hrRead', () => syncHRStep(device, deviceBleId, nowSec, options));
   const spo2Promise: Promise<number | null> = spo2BackedOff
     ? Promise.resolve(null)
-    : syncSpO2Step(device, deviceBleId, nowSec, options);
+    : perfStep('mv.spo2Read', () => syncSpO2Step(device, deviceBleId, nowSec, options));
   const dayInfoPromise: Promise<{ sleep: number; activity: number } | null> =
     dayInfoBackedOff
       ? Promise.resolve(null)
-      : syncDayInfoStep(device, deviceBleId, nowSec, options);
+      : perfStep('mv.dayInfoRead', () => syncDayInfoStep(device, deviceBleId, nowSec, options));
 
   const [hrR, spo2R, dayInfoR] = await Promise.allSettled([
     hrPromise,
@@ -916,14 +917,15 @@ export async function syncMultiVitals(
   // Subsequent chunks run only if the previous one succeeded; first
   // failure aborts the rest (preserves pending for retry next sync).
   try {
-    const response = await postMultiVitalsChunked(
+    perfLog(`mv.upload pending hr=${hrPending.length}`);
+    const response = await perfStep('mv.upload', () => postMultiVitalsChunked(
       payload,
       hrPending,
       spo2Pending,
       sleepPending,
       stepsPending,
       caloriesPending,
-    );
+    ));
     logger.track('vital_sync_accepted', {
       vital_type: 'hr',
       count: response.inserted.hr,

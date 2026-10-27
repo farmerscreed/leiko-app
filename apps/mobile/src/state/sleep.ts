@@ -125,7 +125,7 @@ export const useSleep = create<SleepState>((set, get) => ({
     const remainingPending = currentPending.filter(
       (s) => !keySet.has(String(s.sessionStartSec)),
     );
-    for (const k of acceptedKeys) buffer.removeByKey(k);
+    buffer.removeByKeys(acceptedKeys);
     const merged = dedupRecent(
       [...movedRows, ...get().recent].sort(
         (a, b) => b.sessionStartSec - a.sessionStartSec,

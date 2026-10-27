@@ -139,7 +139,7 @@ export const useSpO2 = create<SpO2State>((set, get) => ({
     const remainingPending = currentPending.filter(
       (s) => !keySet.has(String(s.measuredAtSec)),
     );
-    for (const k of acceptedKeys) buffer.removeByKey(k);
+    buffer.removeByKeys(acceptedKeys);
     const merged = dedupRecent(
       [...movedRows, ...get().recent].sort(
         (a, b) => b.measuredAtSec - a.measuredAtSec,

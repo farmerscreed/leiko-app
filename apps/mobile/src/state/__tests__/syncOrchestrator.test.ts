@@ -28,6 +28,12 @@ jest.mock('react-native', () => ({
     currentState: 'active',
     addEventListener: jest.fn(() => ({ remove: jest.fn() })),
   },
+  InteractionManager: {
+    runAfterInteractions: (cb: () => void) => {
+      cb();
+      return { cancel: jest.fn() };
+    },
+  },
 }));
 
 jest.mock('../../services/ble/bleManager', () => ({
@@ -75,7 +81,7 @@ jest.mock('../takeReading', () => ({
   },
 }));
 
-import { useSyncOrchestrator } from '../syncOrchestrator';
+import { useSyncOrchestrator, COLD_START_SYNC_DELAY_MS } from '../syncOrchestrator';
 
 function fakeDevice(): unknown {
   return {
@@ -226,5 +232,34 @@ describe('useSyncOrchestrator.runSync', () => {
     // Idle timer fired: disconnect was called.
     expect((device as { disconnect: jest.Mock }).disconnect).toHaveBeenCalled();
     expect(useSyncOrchestrator.getState().status).toBe('idle');
+  });
+});
+
+
+describe('useSyncOrchestrator.start — cold-start deferral (2026-10-27)', () => {
+  afterEach(() => {
+    useSyncOrchestrator.getState().stop();
+  });
+
+  it('does not touch the watch at mount; syncs after the first screen settles', async () => {
+    useSyncOrchestrator.getState().start();
+
+    // Mount: nothing competes with Home for the JS thread yet.
+    expect(mockUseReadingsSync).not.toHaveBeenCalled();
+    expect(mockConnectToUrion).not.toHaveBeenCalled();
+
+    await jest.advanceTimersByTimeAsync(COLD_START_SYNC_DELAY_MS + 10);
+
+    expect(mockUseReadingsSync).toHaveBeenCalled();
+    expect(mockConnectToUrion).toHaveBeenCalled();
+  });
+
+  it('a stop() before the delay cancels the deferred cold-start sync', async () => {
+    useSyncOrchestrator.getState().start();
+    useSyncOrchestrator.getState().stop();
+
+    await jest.advanceTimersByTimeAsync(COLD_START_SYNC_DELAY_MS + 10);
+
+    expect(mockConnectToUrion).not.toHaveBeenCalled();
   });
 });

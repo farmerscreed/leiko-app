@@ -36,6 +36,9 @@ export interface PendingVitalBuffer<T> {
   /** Drop a sample by its dedup key (caller-supplied key extractor).
    *  No-op if no match. */
   removeByKey: (key: string) => void;
+  /** Drop many samples in a single read + write. Prefer this over
+   *  looping removeByKey. */
+  removeByKeys: (keys: readonly string[]) => void;
   /** Test/utility: clear the pending buffer. Does NOT clear MMKV when
    *  called from a slice's reset() — only this helper's view of it. */
   clear: () => void;
@@ -91,6 +94,17 @@ export function createPendingVitalBuffer<T>(
     removeByKey(key) {
       const current = readAll();
       const next = current.filter((s) => getKey(s) !== key);
+      if (next.length !== current.length) write(next);
+    },
+    // One read + one write for any number of keys. Callers used to loop
+    // removeByKey over every accepted key — a full JSON parse/filter/
+    // stringify of the buffer PER key, O(keys × buffer) — which stalled
+    // the JS thread for minutes after a large HR upload (2026-10-27).
+    removeByKeys(keys) {
+      if (keys.length === 0) return;
+      const drop = new Set(keys);
+      const current = readAll();
+      const next = current.filter((s) => !drop.has(getKey(s)));
       if (next.length !== current.length) write(next);
     },
     clear() {
