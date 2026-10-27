@@ -41,6 +41,10 @@ export function isMmkvEncrypted(): boolean {
 
 export const STORAGE_KEYS = {
   pendingAccountType: 'leiko.onboarding.pendingAccountType',
+  // Last successfully fetched public.users row for the signed-in user
+  // (JSON). Lets the app open offline instead of hanging on launch.
+  // Lives in the encrypted MMKV instance; cleared on sign-out.
+  cachedProfile: 'leiko.profile.cached',
   authStorePrefix: 'leiko.auth.',
   // Set true at the end of caregiver onboarding (FamilyWatch "I have the
   // watch with me"). The navigator reads this to decide whether to render

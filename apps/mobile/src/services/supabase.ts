@@ -16,6 +16,7 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { secureSupabaseStorage } from './secureStorage';
+import { fetchWithTimeout } from './fetchWithTimeout';
 import type { Database } from '../types/database';
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
@@ -39,4 +40,7 @@ export const supabase: SupabaseClient<Database> = createClient<Database>(url, an
     // session via URL, so disable URL parsing.
     detectSessionInUrl: false,
   },
+  // RN's Android HTTP stack never times out on its own — a stalled
+  // network hung every request (and the launch spinner) forever.
+  global: { fetch: fetchWithTimeout },
 });
