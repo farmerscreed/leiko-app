@@ -10,6 +10,8 @@ jest.mock('react-native', () => ({
     LeikoBleForegroundService: {
       start: jest.fn().mockResolvedValue(true),
       stop: jest.fn().mockResolvedValue(true),
+      holdJsTimers: jest.fn().mockResolvedValue(1),
+      releaseJsTimers: jest.fn().mockResolvedValue(true),
     },
   },
 }));
@@ -34,12 +36,16 @@ import {
 
 const mockStart = NativeModules.LeikoBleForegroundService.start as jest.Mock;
 const mockStop = NativeModules.LeikoBleForegroundService.stop as jest.Mock;
+const mockHold = NativeModules.LeikoBleForegroundService.holdJsTimers as jest.Mock;
+const mockRelease = NativeModules.LeikoBleForegroundService.releaseJsTimers as jest.Mock;
 
 beforeEach(() => {
   _resetBleForegroundServiceForTests();
   _resetBleForegroundServiceHoldsForTests();
   mockStart.mockClear();
   mockStop.mockClear();
+  mockHold.mockClear();
+  mockRelease.mockClear();
 });
 
 describe('ble foreground service wrapper', () => {
@@ -157,5 +163,31 @@ describe('withBleForegroundService', () => {
     expect(mockStart).toHaveBeenCalledTimes(1);
     expect(mockStop).toHaveBeenCalledTimes(1);
     expect(isBleForegroundServiceRunning()).toBe(false);
+  });
+});
+
+
+// 2026-10-29 — RN pauses JS timers in the background unless a headless
+// task is active; that froze supabase-js's token refresh and every
+// background upload behind it. The BLE service holds a keep-alive task.
+describe('JS-timer keep-alive', () => {
+  it('holds JS timers when the service starts', async () => {
+    await startBleForegroundService();
+    expect(mockHold).toHaveBeenCalledTimes(1);
+  });
+
+  it('releases JS timers before the service stops', async () => {
+    await startBleForegroundService();
+    await stopBleForegroundService();
+    expect(mockRelease).toHaveBeenCalledTimes(1);
+    expect(mockRelease.mock.invocationCallOrder[0]).toBeLessThan(
+      mockStop.mock.invocationCallOrder[0],
+    );
+  });
+
+  it('a failed hold does not stop the service from running', async () => {
+    mockHold.mockRejectedValueOnce(new Error('no react context'));
+    await startBleForegroundService();
+    expect(isBleForegroundServiceRunning()).toBe(true);
   });
 });

@@ -10,7 +10,7 @@ Companion doc for the first fix: `plans/STARTUP_HANG_FIX_2026-10-27.md`.
 |---|---|---|
 | 1 | Launch spinner could hang forever (no request timeout, no failure branch in `auth.hydrate`) | **Fixed** (commit 1) |
 | 2 | Real-world "keeps loading": JS thread pegged ~100% for ~2.5 min after every cold start while the watch syncs; Home shows only its skeleton | **Mitigated + instrumented** (commit 2) — root hot spot still to confirm from `[leiko-perf]` logs |
-| 3 | Background sync never uploads: app holds the watch link in the background but `/sync` is only called while the app is foreground | **Open — top priority** |
+| 3 | Background sync never uploads: app holds the watch link in the background but `/sync` is only called while the app is foreground | **Root-caused + fixed 2026-10-29** (commit 4) — verify on device |
 | 4 | Battery-optimization prompt's buttons clipped after pairing | **Fixed** (commit 3) |
 | 5 | `compute-correlations` edge function returns 500 every hour | **Open** |
 | 6 | Installed build on the Pixel was signed by an unknown key | **Resolved for testing** (reinstalled) — release signing still to sort |
@@ -146,3 +146,59 @@ close the window to stop it.
 4. `compute-correlations` 500s.
 5. Release signing: get upload-key passwords, build an AAB, Play Internal
    testing; bump versionCode above 20 and versionName (1.1.0?).
+
+
+## 2026-10-29 — background upload root-caused and fixed
+
+On-device (wireless adb, same Pixel, build from 10-27):
+
+- Background fetch IS registered now (4 alarms) and runs every ~15 min
+  (GATT sessions 06:31, 06:46, 06:58, 07:13, 07:26 PDT, ~35 s each).
+- Every background run logged `[leiko-perf] mv.upload took 30007ms` →
+  `sync done trigger=background total=33104ms`: the upload hit
+  `SYNC_UPLOAD_TIMEOUT_MS` (30 s, native delay) every time.
+- Edge logs: **zero** requests from the phone (`okhttp`) for 4.5 h — not even
+  `/auth/v1/token`. Battery-exempt, standby bucket ACTIVE, background data
+  allowed, device not in doze: the OS was not blocking network.
+- Foregrounding at 07:30:11 PDT: the stall detector logged
+  `JS stall 56446781ms` (15.7 h — no JS timer fired in the background), and
+  the FIRST request out was `/auth/v1/token`, then ~40 `/sync` uploads in
+  20 s.
+
+Root cause: React Native pauses every JS timer when the activity pauses
+unless a headless JS task is active (`JavaTimerManager`: `isPaused &&
+!isRunningTasks`). Leiko's process stays alive in the background (BLE
+foreground service), so syncs run — but supabase-js's token-refresh retry
+uses `helpers.sleep` (`setTimeout`) while holding the auth lock. Once a
+refresh attempt fails in the background, that sleep never ends, the lock is
+never released, and every `functions.invoke('sync')` waits on
+`getSession()` forever. (The 60 s fetch abort added on 10-27 is also a JS
+timer, so it couldn't break the hang.)
+
+Fix (commit 4):
+
+- Native: `LeikoBleForegroundServiceModule.holdJsTimers()` starts one no-op
+  headless task (`leiko.keepJsTimersAlive`, no timeout, allowed in
+  foreground); `releaseJsTimers()` finishes it. While it is active RN keeps
+  the JS timer pump running in the background.
+- JS: the task is registered in `registerHeadlessTasks` (promise never
+  settles — native owns its lifetime); `foregroundService` holds on start,
+  releases before stop; failures never block the service.
+- Supabase's documented RN setup: `startAutoRefresh()` on AppState
+  `active`, `stopAutoRefresh()` otherwise (RootNavigator), so a background
+  ticker never races the sync for the auth lock.
+- The 250 ms stall detector is parked while backgrounded (timers now run
+  there, and it would wake the JS thread 4×/s).
+- New analytics: `js_timers_held`, `js_timers_hold_failed`.
+
+Needs a native rebuild (`$env:EXPO_NO_METRO_WORKSPACE_ROOT = "1";
+.\gradlew assembleRelease`) and an install over the 10-27 test build (same
+debug key → `adb install -r`, data kept).
+
+**Verify on device:** background the app for 30+ min with the watch on;
+expect `/functions/v1/sync` in function logs every ~15 min with the app
+closed, and no `mv.upload took 300xxms` lines.
+
+**Watch for:** battery drain while backgrounded (JS timers now fire; the
+known intervals are the 30 s auth ticker — now stopped in background — and
+`useSyncReassurance`'s poll).

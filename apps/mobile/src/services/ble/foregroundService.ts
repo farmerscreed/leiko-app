@@ -17,6 +17,33 @@ import { logger } from '../analytics/logger';
 interface NativeApi {
   start(): Promise<boolean>;
   stop(): Promise<boolean>;
+  /** Present from the 2026-10-29 native build. Older binaries lack it. */
+  holdJsTimers?: () => Promise<number>;
+  releaseJsTimers?: () => Promise<boolean>;
+}
+
+/** Keep JS timers alive for as long as the BLE service runs. Without this
+ *  RN pauses every setTimeout while backgrounded, which froze supabase-js's
+ *  token refresh (and every upload behind its auth lock) on device. */
+async function holdTimers(): Promise<void> {
+  if (!native?.holdJsTimers) return;
+  try {
+    await native.holdJsTimers();
+    logger.track('js_timers_held');
+  } catch (e) {
+    logger.track('js_timers_hold_failed', {
+      reason: e instanceof Error ? e.message : 'unknown',
+    });
+  }
+}
+
+async function releaseTimers(): Promise<void> {
+  if (!native?.releaseJsTimers) return;
+  try {
+    await native.releaseJsTimers();
+  } catch {
+    /* best-effort */
+  }
 }
 
 const native: NativeApi | undefined =
@@ -37,6 +64,7 @@ export async function startBleForegroundService(): Promise<void> {
   try {
     await native.start();
     running = true;
+    await holdTimers();
     logger.track('ble_fg_started');
   } catch (e) {
     logger.track('ble_fg_start_failed', {
@@ -50,6 +78,7 @@ export async function stopBleForegroundService(): Promise<void> {
   if (!running) return;
   if (!native) return;
   try {
+    await releaseTimers();
     await native.stop();
     running = false;
     logger.track('ble_fg_stopped');

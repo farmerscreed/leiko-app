@@ -169,6 +169,11 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
     const appStateSub = AppState.addEventListener('change', (next: AppStateStatus) => {
       const prev = get()._lastAppState;
       set({ _lastAppState: next });
+      // The stall detector is a 250ms interval. JS timers now keep running
+      // in the background (native keep-alive), so park it there — it only
+      // diagnoses UI freezes and would otherwise wake the JS thread 4x/s.
+      if (next === 'active') startStallDetector();
+      else stopStallDetector();
       if (next === 'active' && prev !== null && prev !== 'active') {
         void get().runSync('app_foreground');
       }

@@ -13,7 +13,7 @@
 // Sprint 5 covers the parent-pairing handoff.
 
 import { useEffect, useMemo } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -74,6 +74,7 @@ import {
   stopBackgroundSync,
 } from '../services/sync/backgroundSync';
 import { mmkv, STORAGE_KEYS } from '../services/storage';
+import { supabase } from '../services/supabase';
 import { wireDeviceMetaProvider } from '../state/wireDeviceMetaProvider';
 import { startBleForegroundService } from '../services/ble/foregroundService';
 import { scheduleNextLearnedTimeReminder } from '../services/reminders/dispatcher';
@@ -415,7 +416,16 @@ export function RootNavigator() {
     // own re-fire) keeps the schedule fresh as readings come in.
     void scheduleLearnedTimeFromCurrentState();
     const notifListeners = startNotificationListeners();
+    // Supabase's documented React Native setup: run the token auto-refresh
+    // ticker only while the app is on screen. Background syncs refresh on
+    // demand (ensureSessionForHeadlessRun) instead of a ticker racing them
+    // for the auth lock.
+    const authRefreshSub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void supabase.auth.startAutoRefresh();
+      else void supabase.auth.stopAutoRefresh();
+    });
     return () => {
+      authRefreshSub.remove();
       stopOrchestrator();
       stopHealthPlatformBackgroundFetch();
       void stopBackgroundSync();
