@@ -69,6 +69,39 @@ export const ALLOWLIST: AllowlistEntry[] = [
       "Metro's CSS pipeline at build time. The APK never invokes a postcss codepath (per the Sprint 16.6 decision).",
     reviewBy: '2026-11-30',
   },
+  // Added 2026-10-29 (PR #30): five advisories published after the
+  // gate went green on 2026-08-19. All five resolve only under Expo's
+  // build toolchain (`npm ls`): none is bundled into the APK.
+  {
+    package: '@xmldom/xmldom',
+    reason:
+      'Plist parsing in @expo/cli (@expo/plist) and @expo/config-plugins (xcode -> simple-plist). Prebuild/build-time only; parses our own Info.plist, never user input, never ships.',
+    reviewBy: '2026-11-30',
+  },
+  {
+    package: 'browserslist',
+    reason:
+      'Target resolution inside @expo/metro-config and Babel (core-js-compat). Build-time only; queries come from our own config.',
+    reviewBy: '2026-11-30',
+  },
+  {
+    package: 'compression',
+    reason:
+      'HTTP middleware in the @expo/cli dev server. Development only — no server runs in a release build.',
+    reviewBy: '2026-11-30',
+  },
+  {
+    package: 'node-forge',
+    reason:
+      'Used by @expo/code-signing-certificates inside @expo/cli for EAS Update signing tooling. Build-time only; the app does no RSA verification with it.',
+    reviewBy: '2026-11-30',
+  },
+  {
+    package: 'source-map-js',
+    reason:
+      "Source-map handling in postcss under @expo/metro-config. Build-time only; maps are our bundler's own output.",
+    reviewBy: '2026-11-30',
+  },
   {
     package: 'shell-quote',
     reason:
