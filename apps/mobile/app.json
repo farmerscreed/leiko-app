@@ -3,7 +3,7 @@
     "name": "Leiko",
     "slug": "leiko",
     "owner": "primethebrain",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Track blood pressure, heart rate, sleep, and activity for yourself or someone you care for. Leiko pairs with your watch and helps families stay close, even when they're far apart.",
     "privacy": "public",
     "supportUrl": "https://leiko.app/support",
