@@ -557,7 +557,11 @@ export function ConstellationField({
               fontWeight: '500',
               color: youLabelColor,
               textTransform: 'uppercase',
-              marginTop: 4,
+              // 2026-10-30 release audit: PersonOrb hangs its name label
+              // absolutely below the orb, so "You" placed under the orb
+              // printed on top of the name. It now sits above the orb.
+              position: 'absolute',
+              top: -16,
             }}
           >
             You

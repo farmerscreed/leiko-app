@@ -778,7 +778,10 @@ function buildHrContext(args: {
 }): ClinicalContext {
   const paragraphs: string[] = [];
   if (args.avgResting === null) return { paragraphs };
-  const restingLine = `Resting heart rate averaged ${Math.round(args.avgResting)} bpm across ${args.sampleCount} samples over ${args.days} day${args.days === 1 ? '' : 's'}.`;
+  // 2026-10-30: this is the mean of each day's MEDIAN heart rate across
+  // all samples (day and night) — not a resting value. Labelled as such
+  // so a clinician doesn't read it as resting HR.
+  const restingLine = `Daily median heart rate averaged ${Math.round(args.avgResting)} bpm across ${args.sampleCount} samples over ${args.days} day${args.days === 1 ? '' : 's'}.`;
   const rangeBits: string[] = [];
   if (args.minObserved !== null && args.maxObserved !== null) {
     rangeBits.push(`Observed range ${args.minObserved}–${args.maxObserved} bpm.`);
@@ -883,7 +886,7 @@ function buildExecutiveSummary(args: {
   })();
 
   const hrHeadline = args.hr.avgResting !== null
-    ? `Resting ${Math.round(args.hr.avgResting)} bpm${args.hr.minObserved !== null && args.hr.maxObserved !== null ? ` · range ${args.hr.minObserved}–${args.hr.maxObserved}` : ''}`
+    ? `Daily median ${Math.round(args.hr.avgResting)} bpm${args.hr.minObserved !== null && args.hr.maxObserved !== null ? ` · range ${args.hr.minObserved}–${args.hr.maxObserved}` : ''}`
     : 'No samples';
 
   const spo2Headline = (() => {

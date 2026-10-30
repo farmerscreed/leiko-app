@@ -142,8 +142,8 @@ Deno.test('scanLayer2: cosine just below threshold passes; just above fails', as
   // We construct a query that is a linear combination of cluster axis 0
   // and a "safe" axis, with a tunable knob. cos(theta) between
   // (alpha, beta, 0,0,...) and (1, 0, 0,...) is alpha / sqrt(alpha^2 + beta^2).
-  // To get cosine = 0.74, pick alpha=0.74, beta=sqrt(1-0.74^2) ≈ 0.6726
-  // Then maxCosine should be 0.74 (passes since < threshold 0.75).
+  // To get cosine = 0.875, pick alpha=0.875, beta=sqrt(1-0.875^2).
+  // Then maxCosine should be 0.875 (passes since < threshold 0.885).
   const tuneVec = (cosineTarget: number): number[] => {
     const alpha = cosineTarget;
     const beta = Math.sqrt(1 - cosineTarget * cosineTarget);
@@ -153,8 +153,8 @@ Deno.test('scanLayer2: cosine just below threshold passes; just above fails', as
     return v;
   };
 
-  // Below threshold (0.74): passes
-  let queryAxis: number[] = tuneVec(0.74);
+  // Below threshold (0.875): passes
+  let queryAxis: number[] = tuneVec(0.875);
   let embedder = makeAxisStubEmbedder({
     dim,
     mapToAxis: (text) => {
@@ -165,11 +165,11 @@ Deno.test('scanLayer2: cosine just below threshold passes; just above fails', as
   });
   let result = await scanLayer2('borderline-low response', embedder);
   assertEquals(result.passes, true);
-  assertAlmostEquals(result.maxCosine, 0.74, 1e-6);
+  assertAlmostEquals(result.maxCosine, 0.875, 1e-6);
 
-  // Above threshold (0.76): fails. Reset cache because the embedder changed.
+  // Above threshold (0.895): fails. Reset cache because the embedder changed.
   _resetClusterCacheForTest();
-  queryAxis = tuneVec(0.76);
+  queryAxis = tuneVec(0.895);
   embedder = makeAxisStubEmbedder({
     dim,
     mapToAxis: (text) => {
@@ -180,7 +180,7 @@ Deno.test('scanLayer2: cosine just below threshold passes; just above fails', as
   });
   result = await scanLayer2('borderline-high response', embedder);
   assertEquals(result.passes, false);
-  assertAlmostEquals(result.maxCosine, 0.76, 1e-6);
+  assertAlmostEquals(result.maxCosine, 0.895, 1e-6);
 });
 
 Deno.test('scanLayer2: durationMs is recorded and non-negative', async () => {
@@ -218,8 +218,16 @@ Deno.test('scanLayer2: caches cluster embeddings across invocations in same isol
 
 // ── Threshold + retry augment ─────────────────────────────────────────
 
-Deno.test('LAYER2_THRESHOLD matches D14 §12.2 specification', () => {
-  assertEquals(LAYER2_THRESHOLD, 0.75);
+Deno.test('LAYER2_THRESHOLD is the 2026-10-30 calibrated value', () => {
+  assertEquals(LAYER2_THRESHOLD, 0.885);
+});
+
+Deno.test('LAYER2_THRESHOLD separates the calibration set', async () => {
+  const cal = JSON.parse(
+    await Deno.readTextFile(new URL('../../../../tools/guard-embeddings/guard-calibration.json', import.meta.url)),
+  ) as { benign: { max: number }[]; diagnostic: { max: number }[] };
+  for (const b of cal.benign) assertEquals(b.max < LAYER2_THRESHOLD, true);
+  for (const d of cal.diagnostic) assertEquals(d.max >= LAYER2_THRESHOLD, true);
 });
 
 Deno.test('scanLayer2: custom threshold overrides default', async () => {
@@ -240,7 +248,7 @@ Deno.test('scanLayer2: custom threshold overrides default', async () => {
       return queryAxis;
     },
   });
-  // Default 0.75 → 0.5 passes
+  // Default 0.885 → 0.5 passes
   let r = await scanLayer2('q', embedder);
   assertEquals(r.passes, true);
   // Custom 0.4 → 0.5 fails
