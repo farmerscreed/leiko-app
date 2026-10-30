@@ -102,6 +102,21 @@ export const ALLOWLIST: AllowlistEntry[] = [
       "Source-map handling in postcss under @expo/metro-config. Build-time only; maps are our bundler's own output.",
     reviewBy: '2026-11-30',
   },
+  // Added 2026-10-30 (GHSA-qr28-fpjm-wq7f, published that day). Unlike the
+  // build-time entries this one IS bundled: @react-navigation/core ->
+  // query-string@7 -> decode-uri-component@0.2.2. It is reached only via
+  // getStateFromPath/getPathFromState, which run only when
+  // NavigationContainer has a `linking` config — Leiko's does not
+  // (navigation/RootNavigator.tsx); incoming URLs go through our own
+  // services/notifications/deepLinkParser. The fixed 0.5.1 is ESM-only and
+  // query-string@7 require()s it, so an override would break link parsing.
+  // If a `linking` prop is ever added, this entry is WRONG — remove it.
+  {
+    package: 'decode-uri-component',
+    reason:
+      'Bundled via @react-navigation/core -> query-string, but only reachable through NavigationContainer `linking`, which Leiko does not configure; deep links use our own parser. DoS-only. Fixed version is ESM-only and cannot be overridden under query-string@7.',
+    reviewBy: '2026-11-30',
+  },
   {
     package: 'shell-quote',
     reason:
