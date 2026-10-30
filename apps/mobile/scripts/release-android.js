@@ -109,7 +109,6 @@ const runtimeRequired = [
 const runtimeOptional = [
   'EXPO_PUBLIC_SENTRY_DSN',
   'EXPO_PUBLIC_POSTHOG_API_KEY',
-  'EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY',
 ];
 for (const k of runtimeRequired) {
   if (!process.env[k]) {
@@ -120,6 +119,30 @@ for (const k of runtimeRequired) {
 for (const k of runtimeOptional) {
   if (process.env[k]) ok(`${k}: set`);
   else console.log(`  ⚠ ${k}: NOT set (feature will silently no-op in this build)`);
+}
+// RevenueCat is REQUIRED for a store build: without it the paywall still
+// renders (fallback prices) but cannot complete a purchase. The app reads
+// EXPO_PUBLIC_RC_API_KEY_ANDROID, falling back to the older documented
+// name EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY (services/purchases). This
+// check used to look only at the old name — and the app only at the new
+// one — so "✓ set" shipped builds with purchases switched off.
+{
+  const rcName = process.env.EXPO_PUBLIC_RC_API_KEY_ANDROID
+    ? 'EXPO_PUBLIC_RC_API_KEY_ANDROID'
+    : process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY
+      ? 'EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY'
+      : null;
+  if (!rcName) {
+    fail(
+      'RevenueCat Android key is not set (EXPO_PUBLIC_RC_API_KEY_ANDROID). ' +
+        'The paywall would show but could not take payment.',
+    );
+  }
+  const rcKey = process.env[rcName] || '';
+  if (!rcKey.startsWith('goog_')) {
+    fail(`${rcName} must be the RevenueCat Google public key (goog_...), got "${rcKey.slice(0, 5)}...".`);
+  }
+  ok(`${rcName}: set (goog_…)`);
 }
 // PostHog accepts only project keys (phc_...) for ingest. A personal
 // key (phx_...) initialises the client fine and then 401s on every
