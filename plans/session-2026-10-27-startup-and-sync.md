@@ -202,3 +202,36 @@ closed, and no `mv.upload took 300xxms` lines.
 **Watch for:** battery drain while backgrounded (JS timers now fire; the
 known intervals are the 30 s auth ticker — now stopped in background — and
 `useSyncReassurance`'s poll).
+
+## 2026-10-30 — on-device verification round (build from 88ebcab)
+
+- Fresh data end to end: watch back on at ~10:04 PDT; background syncs at
+  10:10, 10:14, 10:19, 10:21 each inserted new `vitals_other` rows (201).
+  The 10:10 run: `mv.upload pending hr=2`, total 23.8 s, app closed. The
+  overnight "syncs but nothing new" (17:00–17:04 UTC 10-29 → 10-30) was the
+  watch being off-wrist, not a bug.
+- `compute-correlations`: every hourly run 200 since the founder's deploy
+  (10-29 16:00 UTC onward).
+- Settings "Last sync" fixed (commit 88ebcab): now the wall clock of the
+  last successful watch sync — reads "Just now" on device (was "31 d ago",
+  the BP cuff cursor).
+- 53 s splash did not recur: after `install -r` the root view appeared
+  immediately (the 10-29 delay was first-launch-after-update).
+- Doze: background syncs paused 07:45–09:53 PDT with the phone idle —
+  inexact alarms are deferred in Doze. Data is not lost (next sync uploads
+  it). Follow-up: exact-while-idle alarm or FGS-driven wake for tighter
+  cadence.
+
+Follow-ups (not blocking the 1.1.0 release):
+1. Cold-start deferral is bypassed: an `app_foreground` sync fires at launch
+   (AppState edge), so the watch drain still overlaps Home's first fetch
+   (stall 2.9 s, Home fetch 7.4 s on 10-30). Ignore the first active edge
+   within the deferral window.
+2. `mv.hrAcceptChunk` took 1.2 s for 2 samples — the local HR `recent` /
+   pending arrays have grown large; cap/trim them.
+3. Doze cadence (above).
+4. The founder's profile timezone is `Africa/Lagos` while he is in the US —
+   correlations' 03:00 local run and sleep windows are computed in Lagos
+   time. Product question: follow the device timezone automatically?
+5. The test APK reports versionName 1.0.0 because build.gradle hardcodes it;
+   `npm run release:android:*` injects app.json's 1.1.0 — verify on the AAB.
