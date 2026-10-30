@@ -191,12 +191,15 @@ async function processUser(
   // Cache check.
   const { data: existing } = await serviceClient
     .from('ai_narration_cache')
-    .select('body')
+    .select('body, model')
     .eq('user_id', userId)
     .eq('surface', 'weekly_summary')
     .eq('scope_key', weekLabel)
     .maybeSingle();
-  if (existing) {
+  // A cached placeholder is not a summary: once Tier-C is on, generate
+  // the real one instead of serving the placeholder all week (2026-10-30).
+  const cachedIsPlaceholder = (existing as { model?: string } | null)?.model === 'placeholder';
+  if (existing && !(cachedIsPlaceholder && opts.tierCEnabled)) {
     return { status: 'cached', weekLabel, body: existing.body as string };
   }
 
@@ -205,7 +208,7 @@ async function processUser(
   // surface (Trends weekly card) still has SOMETHING to render and
   // the per-user audit row fires.
   if (!opts.tierCEnabled) {
-    const placeholder = 'Weekly summary not yet available — Tier-C is gated in this environment.';
+    const placeholder = "Your weekly summary will appear here once it's ready.";
     await serviceClient.from('ai_narration_cache').upsert({
       user_id: userId,
       family_id: familyId,

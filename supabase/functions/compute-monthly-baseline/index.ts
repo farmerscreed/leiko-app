@@ -151,13 +151,18 @@ async function processUser(
   const monthLabel = utcMonthLabel();
 
   const { data: existing } = await serviceClient
-    .from('ai_narration_cache').select('body')
+    .from('ai_narration_cache').select('body, model')
     .eq('user_id', userId).eq('surface', 'monthly_baseline').eq('scope_key', monthLabel)
     .maybeSingle();
-  if (existing) return { status: 'cached', monthLabel, body: existing.body as string };
+  // A cached placeholder is not a baseline: once Tier-C is on, generate
+  // the real one instead of serving the placeholder all month (2026-10-30).
+  const cachedIsPlaceholder = (existing as { model?: string } | null)?.model === 'placeholder';
+  if (existing && !(cachedIsPlaceholder && opts.tierCEnabled)) {
+    return { status: 'cached', monthLabel, body: existing.body as string };
+  }
 
   if (!opts.tierCEnabled) {
-    const placeholder = 'Monthly baseline not yet available — Tier-C is gated in this environment.';
+    const placeholder = "Your monthly summary will appear here once it's ready.";
     await serviceClient.from('ai_narration_cache').upsert({
       user_id: userId, family_id: familyId,
       surface: 'monthly_baseline', scope_key: monthLabel,
