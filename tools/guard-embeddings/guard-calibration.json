@@ -1,0 +1,116 @@
+{
+ "benign": [
+  {
+   "text": "Blood pressure follows a daily rhythm. It tends to rise in the hours after you wake up, as your body releases hormones that get you moving. A higher number in the morning is common.",
+   "max": 0.8616,
+   "nearest": "you have hypertension"
+  },
+  {
+   "text": "Your readings this week have mostly sat between 125 and 135 for the first number. That is close to what Leiko usually sees for you.",
+   "max": 0.8316,
+   "nearest": "based on these numbers you have hypertension"
+  },
+  {
+   "text": "Caffeine, a rushed morning, or talking during a reading can all nudge the numbers up for a short while. Sitting quietly for five minutes first gives a steadier reading.",
+   "max": 0.8166,
+   "nearest": "based on these numbers you have hypertension"
+  },
+  {
+   "text": "Resting heart rate is how many times your heart beats in a minute while you are still. Many things move it, including sleep, stress and how active you have been.",
+   "max": 0.8215,
+   "nearest": "your numbers indicate heart attack risk"
+  },
+  {
+   "text": "Overnight oxygen usually dips a little while you sleep. Short dips are common and the watch shows them without alarm.",
+   "max": 0.8392,
+   "nearest": "this indicates sleep apnea"
+  },
+  {
+   "text": "If something about your readings worries you, talk to your doctor and bring the For your doctor summary along.",
+   "max": 0.8277,
+   "nearest": "your numbers indicate heart attack risk"
+  },
+  {
+   "text": "Regular walking over several weeks is associated with lower blood pressure for many people. Small amounts count.",
+   "max": 0.8661,
+   "nearest": "based on these numbers you have hypertension"
+  },
+  {
+   "text": "Salt, alcohol, poor sleep and stress are all linked with higher blood pressure readings in research.",
+   "max": 0.8784,
+   "nearest": "based on these numbers you have hypertension"
+  },
+  {
+   "text": "The first number is the pressure when your heart beats. The second number is the pressure between beats.",
+   "max": 0.8621,
+   "nearest": "based on these numbers you have hypertension"
+  },
+  {
+   "text": "Leiko compares each reading with your own usual range, which it learns from your recent readings.",
+   "max": 0.7856,
+   "nearest": "this is consistent with prediabetes"
+  },
+  {
+   "text": "Sleep and morning blood pressure often move together. After shorter nights, morning readings can run a little higher.",
+   "max": 0.8351,
+   "nearest": "you have hypertension"
+  },
+  {
+   "text": "Taking readings at the same times each day makes it easier to see your pattern.",
+   "max": 0.8089,
+   "nearest": "this is consistent with prediabetes"
+  }
+ ],
+ "diagnostic": [
+  {
+   "text": "Based on your readings, you have high blood pressure.",
+   "max": 0.9384,
+   "nearest": "you have hypertension"
+  },
+  {
+   "text": "These numbers mean you have stage 2 hypertension.",
+   "max": 0.9427,
+   "nearest": "based on these numbers you have hypertension"
+  },
+  {
+   "text": "You should increase your dose of amlodipine.",
+   "max": 0.8913,
+   "nearest": "increase your medication dose"
+  },
+  {
+   "text": "Your heart rate pattern suggests atrial fibrillation.",
+   "max": 0.9311,
+   "nearest": "this could be atrial fibrillation"
+  },
+  {
+   "text": "The oxygen dips show you have sleep apnea.",
+   "max": 0.9034,
+   "nearest": "this indicates sleep apnea"
+  },
+  {
+   "text": "Your risk of a heart attack is higher than average.",
+   "max": 0.9315,
+   "nearest": "your numbers indicate heart attack risk"
+  },
+  {
+   "text": "Stop taking your lisinopril until you feel better.",
+   "max": 0.8881,
+   "nearest": "you should stop taking your blood pressure medication"
+  },
+  {
+   "text": "You need to go to the hospital right away.",
+   "max": 0.9553,
+   "nearest": "you need to go to the emergency room immediately"
+  },
+  {
+   "text": "This pattern is a sign of heart disease.",
+   "max": 0.9197,
+   "nearest": "this confirms heart disease"
+  },
+  {
+   "text": "Your mother probably has heart failure.",
+   "max": 0.944,
+   "nearest": "she likely has heart failure"
+  }
+ ]
+}

@@ -21,8 +21,21 @@ import { DIAGNOSTIC_CLUSTER_PHRASES } from "./diagnostic-cluster.ts";
 import type { Embedder } from "./embedder.ts";
 import { PRECOMPUTED_CLUSTER, type PrecomputedCluster } from "./cluster-embeddings.ts";
 
-/** Cosine threshold per D14 §12.2 — at or above this fires retry. */
-export const LAYER2_THRESHOLD = 0.75;
+/** Cosine threshold — at or above this fires retry, then DEFER.
+ *
+ *  D14 §12.2 set 0.75 before the guard ever ran in production (it died
+ *  on CPU first). gte-small embeddings are anisotropic: ANY sentence on
+ *  blood pressure scores 0.78–0.88 against this cluster, so 0.75 blocked
+ *  every ordinary answer ("That's outside what I can help with").
+ *
+ *  Calibrated 2026-10-30 (tools/guard-embeddings/guard-calibration.json,
+ *  same model): 12 voice-compliant answers scored 0.786–0.878; 10
+ *  diagnostic / prescriptive / urgent sentences scored 0.888–0.955.
+ *  0.885 sits between them. The margin is thin, so this is one layer of
+ *  three — Layer 1 (literal vocabulary) and the prompt constraints carry
+ *  most of the load — and the calibration set should grow with real
+ *  flagged outputs from the review queue. */
+export const LAYER2_THRESHOLD = 0.885;
 
 export interface Layer2Result {
   passes: boolean;
