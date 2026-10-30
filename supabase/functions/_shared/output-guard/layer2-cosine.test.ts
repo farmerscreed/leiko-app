@@ -17,9 +17,15 @@ import {
   buildLayer2RetryAugment,
   LAYER2_THRESHOLD,
   _resetClusterCacheForTest,
+  _setPrecomputedForTest,
+  precomputedMatches,
 } from './layer2-cosine.ts';
 import { DIAGNOSTIC_CLUSTER_PHRASES } from './diagnostic-cluster.ts';
 import type { Embedder } from './embedder.ts';
+
+// The stub-embedder tests below exercise the runtime path, so they run
+// with the generated vectors switched off.
+_setPrecomputedForTest(null);
 
 // ── Cosine math ───────────────────────────────────────────────────────
 
@@ -276,4 +282,44 @@ Deno.test('Diagnostic cluster does NOT contain the permitted "talk to your docto
       throw new Error('cluster must not contain "talk to your doctor"');
     }
   }
+});
+
+// ── Precomputed cluster (2026-10-30 CPU-budget fix) ──────────────────
+
+Deno.test('precomputed: matches only the exact current cluster', () => {
+  const phrases = [...DIAGNOSTIC_CLUSTER_PHRASES];
+  const vectors = phrases.map(() => [1, 0]);
+  assertEquals(precomputedMatches({ model: 'm', phrases, vectors }), true);
+  assertEquals(precomputedMatches(null), false);
+  assertEquals(
+    precomputedMatches({ model: 'm', phrases: phrases.slice(1), vectors: vectors.slice(1) }),
+    false,
+  );
+  const edited = [...phrases];
+  edited[0] = edited[0] + ' (edited)';
+  assertEquals(precomputedMatches({ model: 'm', phrases: edited, vectors }), false);
+});
+
+Deno.test('precomputed: a scan embeds only the response text', async () => {
+  const dim = DIAGNOSTIC_CLUSTER_PHRASES.length;
+  const vectors = DIAGNOSTIC_CLUSTER_PHRASES.map((_, i) => {
+    const v = new Array(dim).fill(0);
+    v[i] = 1;
+    return v;
+  });
+  _setPrecomputedForTest({ model: 'm', phrases: [...DIAGNOSTIC_CLUSTER_PHRASES], vectors });
+  let calls = 0;
+  const embedder: Embedder = {
+    embed(_text: string) {
+      calls++;
+      const v = new Array(dim).fill(0);
+      v[0] = 1; // identical to cluster phrase 0
+      return Promise.resolve(v);
+    },
+  };
+  const r = await scanLayer2('anything', embedder);
+  assertEquals(calls, 1);
+  assertEquals(r.passes, false);
+  assertEquals(r.matchedPhrase, DIAGNOSTIC_CLUSTER_PHRASES[0]);
+  _setPrecomputedForTest(null);
 });

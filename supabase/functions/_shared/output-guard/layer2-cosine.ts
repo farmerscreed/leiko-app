@@ -19,6 +19,7 @@
 
 import { DIAGNOSTIC_CLUSTER_PHRASES } from "./diagnostic-cluster.ts";
 import type { Embedder } from "./embedder.ts";
+import { PRECOMPUTED_CLUSTER, type PrecomputedCluster } from "./cluster-embeddings.ts";
 
 /** Cosine threshold per D14 §12.2 — at or above this fires retry. */
 export const LAYER2_THRESHOLD = 0.75;
@@ -59,8 +60,31 @@ export function cosine(a: number[], b: number[]): number {
 
 let clusterEmbeddingsCache: number[][] | null = null;
 
+/** True when the generated vectors were built from exactly the current
+ *  cluster (same phrases, same order). Exported for tests. */
+export function precomputedMatches(
+  pre: PrecomputedCluster | null,
+  phrases: ReadonlyArray<string> = DIAGNOSTIC_CLUSTER_PHRASES,
+): pre is PrecomputedCluster {
+  return (
+    pre !== null &&
+    pre.phrases.length === phrases.length &&
+    pre.vectors.length === phrases.length &&
+    pre.phrases.every((p, i) => p === phrases[i])
+  );
+}
+
+let precomputedSource: PrecomputedCluster | null = PRECOMPUTED_CLUSTER;
+
 async function getClusterEmbeddings(embedder: Embedder): Promise<number[][]> {
   if (clusterEmbeddingsCache) return clusterEmbeddingsCache;
+  // 2026-10-30: embedding all phrases at runtime blew the Edge Function
+  // CPU budget on cold starts (546 "CPU Time exceeded"). Use the
+  // generated vectors when they match the cluster; else fall back.
+  if (precomputedMatches(precomputedSource)) {
+    clusterEmbeddingsCache = precomputedSource.vectors.map((v) => [...v]);
+    return clusterEmbeddingsCache;
+  }
   const matrix = await Promise.all(
     DIAGNOSTIC_CLUSTER_PHRASES.map((phrase) => embedder.embed(phrase)),
   );
@@ -129,6 +153,11 @@ export function buildLayer2RetryAugment(matchedPhrase: string | null): string {
  * code should never call this — the cache is a per-isolate optimisation
  * and unit tests need to start clean for each scenario.
  */
+export function _setPrecomputedForTest(pre: PrecomputedCluster | null): void {
+  precomputedSource = pre;
+  clusterEmbeddingsCache = null;
+}
+
 export function _resetClusterCacheForTest(): void {
   clusterEmbeddingsCache = null;
 }

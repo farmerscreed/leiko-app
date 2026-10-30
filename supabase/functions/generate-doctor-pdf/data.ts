@@ -928,10 +928,10 @@ function buildExecutiveSummary(args: {
 
   // Data-completeness warnings so the doctor doesn't over-read sparse data.
   if (args.sleep.sufficiency.level === 'insufficient') {
-    keyFindings.push(`Sleep data incomplete — ${args.sleep.points.length} of 7 night${args.sleep.points.length === 1 ? '' : 's'} observed.`);
+    keyFindings.push(`Sleep data incomplete — only ${args.sleep.points.length} night${args.sleep.points.length === 1 ? '' : 's'} observed in this period.`);
   }
   if (args.activity.sufficiency.level === 'insufficient') {
-    keyFindings.push(`Activity data incomplete — ${args.activity.points.length} of 7 day${args.activity.points.length === 1 ? '' : 's'} observed.`);
+    keyFindings.push(`Activity data incomplete — only ${args.activity.points.length} day${args.activity.points.length === 1 ? '' : 's'} observed in this period.`);
   }
 
   return {

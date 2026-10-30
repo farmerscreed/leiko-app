@@ -82,6 +82,7 @@ import { configureNotificationHandler } from '../services/notifications';
 import { startNotificationListeners } from '../services/notifications/listeners';
 import { registerRemoteRefreshTask } from '../services/notifications/remoteRefreshTask';
 import { usePushRegistration } from '../hooks/usePushRegistration';
+import { useTimezoneFollowsDevice } from '../hooks/useTimezoneFollowsDevice';
 import { navigationRef } from './navigationRef';
 
 // Define the OS-scheduled background-sync task once at module load.
@@ -444,6 +445,8 @@ export function RootNavigator() {
   // Replaces the Sprint 15 mount-only call that raced auth hydration and
   // left public.push_tokens empty for users who signed in post-mount.
   usePushRegistration(status === 'authenticated');
+  // 2026-10-30 — the profile timezone follows the phone (travel).
+  useTimezoneFollowsDevice(status === 'authenticated');
 
   let content: React.ReactNode;
   if (status === 'loading') {

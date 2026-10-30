@@ -9,33 +9,33 @@ describe('formatStalenessCaption', () => {
 
   it('renders minutes for ages under one hour', () => {
     expect(formatStalenessCaption(now - 28 * 60, now)).toBe(
-      'Last sync 28m ago',
+      'Last reading 28m ago',
     );
   });
 
   it('renders hours for ages between 1h and 48h', () => {
     expect(formatStalenessCaption(now - 4 * 3600, now)).toBe(
-      'Last sync 4h ago',
+      'Last reading 4h ago',
     );
     expect(formatStalenessCaption(now - 26 * 3600, now)).toBe(
-      'Last sync 26h ago',
+      'Last reading 26h ago',
     );
   });
 
   it('renders days for ages between 48h and 7d', () => {
     expect(formatStalenessCaption(now - 3 * 24 * 3600, now)).toBe(
-      'Last sync 3d ago',
+      'Last reading 3d ago',
     );
   });
 
-  it('renders weekday for ages beyond a week', () => {
+  it('renders the date for ages beyond a week', () => {
     const out = formatStalenessCaption(now - 10 * 24 * 3600, now);
-    expect(out).toMatch(/^Last sync /);
-    // Don't pin the locale — just confirm it's not the day-form.
+    expect(out).toMatch(/^Last reading /);
+    expect(out).toMatch(/May/);
     expect(out).not.toMatch(/ago$/);
   });
 
   it("handles the 'just now' boundary safely", () => {
-    expect(formatStalenessCaption(now - 5, now)).toBe('Last sync just now');
+    expect(formatStalenessCaption(now - 5, now)).toBe('Last reading just now');
   });
 });

@@ -1,0 +1,21 @@
+<!doctype html><meta charset="utf-8"><title>guard-embeddings</title>
+<h2>Leiko guard embeddings</h2><pre id="out">Working… this takes about a minute. Keep this tab open.</pre><a id="dl" style="display:none;font-size:20px" download="cluster-embeddings.json">Save cluster-embeddings.json</a>
+<script type="module">
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6';
+const phrases = ["this indicates sleep apnea", "you have hypertension", "this is consistent with prediabetes", "this could be atrial fibrillation", "she likely has heart failure", "this confirms heart disease", "she is showing signs of dementia", "your risk of stroke is elevated", "your numbers indicate heart attack risk", "based on these numbers you have hypertension", "increase your medication dose", "this medication will lower your blood pressure", "switch to a different beta blocker", "you should stop taking your blood pressure medication", "you need to go to the emergency room immediately"];
+const out = document.getElementById('out');
+try {
+  const extract = await pipeline('feature-extraction', 'Supabase/gte-small', { device: 'wasm', dtype: 'fp32' });
+  const vectors = [];
+  for (const p of phrases) {
+    const r = await extract(p, { pooling: 'mean', normalize: true });
+    vectors.push(Array.from(r.data).map((x) => Number(x.toFixed(6))));
+  }
+  window.__result = JSON.stringify({ model: 'Supabase/gte-small', phrases, vectors });
+  out.textContent = 'DONE ' + vectors.length + ' x ' + vectors[0].length + ' — the file has been saved (or click the link below).';
+  const a = document.getElementById('dl');
+  a.href = URL.createObjectURL(new Blob([window.__result], { type: 'application/json' }));
+  a.style.display = 'block';
+  a.click();
+} catch (e) { out.textContent = 'ERROR ' + e; }
+</script>

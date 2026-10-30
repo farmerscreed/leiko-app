@@ -361,7 +361,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
           }
         >
           <View
-            accessibilityLabel="Last sync Thu. 7:42hrs. A quieter night by the numbers"
+            accessibilityLabel="Last reading May 9. 7:42hrs. A quieter night by the numbers"
             accessibilityRole="text"
             accessible={true}
             style={
@@ -676,7 +676,7 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
                   }
                   testID="sleep-detail-hero-sub"
                 >
-                  Last sync Thu
+                  Last reading May 9
                 </Text>
                 <View
                   style={
@@ -1738,6 +1738,8 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
               [
                 {
                   "family": "Inter_400Regular",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 12,
                   "lineHeight": 16,
                   "size": 12,
                   "weight": "400",

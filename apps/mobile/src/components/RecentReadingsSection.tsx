@@ -58,6 +58,8 @@ export interface RecentReadingsSectionProps {
   /** Override the count options shown in the picker. Defaults to
    *  [5, 20, 50, 100, 'all']. */
   options?: readonly CountOption[];
+  /** Passed to the list's empty state. */
+  emptyText?: string;
   testID?: string;
   style?: StyleProp<ViewStyle>;
 }
@@ -78,6 +80,7 @@ export function RecentReadingsSection({
   onSelect,
   defaultCount = 5,
   options = DEFAULT_OPTIONS,
+  emptyText,
   testID,
   style,
 }: RecentReadingsSectionProps) {
@@ -128,6 +131,7 @@ export function RecentReadingsSection({
       <RecentReadingsList
         vital={vital}
         readings={visibleReadings}
+        emptyText={emptyText}
         onSelect={onSelect}
         testID={testID ? `${testID}-list` : undefined}
       />

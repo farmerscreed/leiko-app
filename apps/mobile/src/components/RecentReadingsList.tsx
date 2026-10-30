@@ -42,6 +42,9 @@ export interface RecentReadingsListProps {
   vital: VitalType;
   readings: RecentReading[];
   onSelect?: (reading: RecentReading) => void;
+  /** Empty-state line. Defaults to "Recent readings will land here as
+   *  they come in." — callers whose range hides older readings say so. */
+  emptyText?: string;
   testID?: string;
   style?: StyleProp<ViewStyle>;
 }
@@ -50,6 +53,7 @@ export function RecentReadingsList({
   vital,
   readings,
   onSelect,
+  emptyText = 'Recent readings will land here as they come in.',
   testID,
   style,
 }: RecentReadingsListProps) {
@@ -85,7 +89,7 @@ export function RecentReadingsList({
             textAlign: 'center',
           }}
         >
-          Recent readings will land here as they come in.
+          {emptyText}
         </Text>
       </View>
     );

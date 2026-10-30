@@ -12,6 +12,7 @@ import {
   type ColorMode,
   type DurationToken,
   type TypeMode,
+  type ResolvedTypeStyle,
   type TypeStyle,
   type TypeToken,
   duration as durationMap,
@@ -103,7 +104,7 @@ export function buildTheme(
     fontFamilies,
     fontFamily, // compat shim
 
-    type(token: TypeToken): TypeStyle {
+    type(token: TypeToken): ResolvedTypeStyle {
       return getTypeStyle(typeMode, token);
     },
 

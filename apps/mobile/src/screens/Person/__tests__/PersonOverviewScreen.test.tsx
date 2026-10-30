@@ -88,3 +88,19 @@ describe('voice', () => {
     expect(rendered).not.toMatch(/in pattern|ALL CLEAR|within your range|loved one|patient/i);
   });
 });
+
+describe('loading (2026-10-30 release audit)', () => {
+  it('shows a loading state, not "No readings yet", while the data loads', () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const mod = require('../../../hooks/useParentDailyPulseData');
+    (mod.useParentDailyPulseData as jest.Mock).mockReturnValueOnce({
+      data: null,
+      isLoading: true,
+      error: null,
+      wearerTimeZone: 'Africa/Lagos',
+    });
+    mount({ familyId: 'fam-1', personName: 'Marian Okeke' });
+    expect(screen.getByTestId('person-overview-loading')).toBeTruthy();
+    expect(screen.queryByText('No readings yet')).toBeNull();
+  });
+});

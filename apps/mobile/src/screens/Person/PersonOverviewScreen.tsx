@@ -35,7 +35,8 @@ import {
   SELF_SUBJECT,
   type Subject,
 } from '../../services/voice/tierVocabulary';
-import { timeInZone } from '../../utils/timeInZone';
+import { monthDayInZone, timeInZone } from '../../utils/timeInZone';
+import { LoadingState } from '../../components/LoadingState';
 import { LEARNING_COPY } from '../../utils/calibration';
 import { mmkv, STORAGE_KEYS } from '../../services/storage';
 import { MedicationSection } from '../../components/MedicationSection';
@@ -71,8 +72,31 @@ function tierFor(
   const verdict = classifyVital({ vital, value }, row);
   return {
     tier: verdict.tier,
-    bandLabel: `usual ${Math.round(row.p10)}–${Math.round(row.p90)}`,
+    bandLabel: bandLabelFor(row.p10, row.p90),
   };
+}
+
+/**
+ * "usual 60–70". When the low end rounds to 0 (step counts include days
+ * the watch was off) "usual 0–7763" reads as broken, so it becomes
+ * "usual up to 7,763" (2026-10-30 release audit).
+ */
+export function bandLabelFor(p10: number, p90: number): string {
+  const lo = Math.round(p10);
+  const hi = Math.round(p90);
+  if (lo <= 0) return `usual up to ${hi.toLocaleString()}`;
+  return `usual ${lo.toLocaleString()}–${hi.toLocaleString()}`;
+}
+
+/**
+ * Time under the hero reading. Within 24h: "8:54 PM". Older: "Sep 28,
+ * 8:54 PM" — a time alone made a month-old reading look like today's
+ * (2026-10-30 release audit). Same rule as BPDetail.formatHeroTime.
+ */
+export function heroStamp(ms: number, timeZone: string, nowMs: number = Date.now()): string {
+  const time = timeInZone(ms, timeZone);
+  if (nowMs - ms < 24 * 3_600_000) return time;
+  return `${monthDayInZone(ms, timeZone)}, ${time}`;
 }
 
 export function PersonOverviewScreen({
@@ -113,6 +137,11 @@ export function PersonOverviewScreen({
       return isSelf
         ? LEARNING_COPY.monitorAllLearning.body
         : `${LEARNING_COPY.monitorAllLearning.headline(subject.label)}. ${LEARNING_COPY.monitorAllLearning.body}`;
+    }
+    // "Your latest reading is still learning…" read as if the reading
+    // were doing the learning (2026-10-30 audit).
+    if (bpTier === 'learning') {
+      return `Leiko is still learning what's usual for ${subject.label}.`;
     }
     const lead = isSelf ? 'Your latest reading' : `${subject.label}'s latest reading`;
     return `${lead} ${sentenceFragmentForTier(bpTier, subject)}.`;
@@ -186,6 +215,19 @@ export function PersonOverviewScreen({
   const heroType = theme.type('numericHero');
   const voice = theme.fontFamilies.editorial;
 
+  // 2026-10-30 release audit: while the person's data was still loading
+  // this screen rendered the empty state ("No readings yet", every row
+  // "—") for several seconds before the real numbers arrived.
+  if (isCaregiverScoped && !parentPulse.data && parentPulse.isLoading) {
+    return (
+      <View
+        style={{ flex: 1, backgroundColor: theme.colors.surface.warmBase, justifyContent: 'center' }}
+        testID={testID}
+      >
+        <LoadingState testID={`${testID}-loading`} />
+      </View>
+    );
+  }
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.surface.warmBase }} testID={testID}>
       <CanvasGradient />
@@ -275,7 +317,7 @@ export function PersonOverviewScreen({
                 marginTop: 2,
               }}
             >
-              {`MMHG · ${timeInZone(data.bp.latestSampleSec * 1000, tz || 'UTC')}`}
+              {`MMHG · ${heroStamp(data.bp.latestSampleSec * 1000, tz || 'UTC')}`}
             </Text>
           ) : null}
           {bpTier ? (

@@ -75,6 +75,7 @@ describe('buildTierATrendsNarrative', () => {
       correlations: [],
       range: '30d',
       accountType: 'self_buyer',
+      baselines: { bp: { sysLow: 110, sysHigh: 135, diaLow: 70, diaHigh: 88, sampleCount: 20 } },
     });
     expect(out).not.toBeNull();
     expect(out).toContain('You are _in your usual range_ this month');
@@ -100,6 +101,7 @@ describe('buildTierATrendsNarrative', () => {
       range: '30d',
       accountType: 'caregiver',
       parentLabel: 'Mum',
+      baselines: { bp: { sysLow: 110, sysHigh: 135, diaLow: 70, diaHigh: 88, sampleCount: 20 } },
     });
     expect(out).toContain('Mum is _in ');
     expect(out).toContain("Mum's mornings averaged");
@@ -121,6 +123,7 @@ describe('buildTierATrendsNarrative', () => {
         correlations: [],
         range,
         accountType: 'self_buyer',
+        baselines: { bp: { sysLow: 110, sysHigh: 135, diaLow: 70, diaHigh: 88, sampleCount: 20 } },
       });
       expect(out).toContain(expected);
     }
@@ -165,6 +168,7 @@ describe('generateTrendsNarrative', () => {
       correlations: [],
       range: '30d',
       accountType: 'self_buyer',
+      baselines: { bp: { sysLow: 110, sysHigh: 135, diaLow: 70, diaHigh: 88, sampleCount: 20 } },
     });
     // Sprint 16.5g — Tier-C is the new lead engine; Tier-A reads as
     // a backup. The body still contains the usual-range emphasis
@@ -186,5 +190,23 @@ describe('generateTrendsNarrative', () => {
 
   it('deterministic copy passes voice-lint', () => {
     expect(lintVoiceText(DETERMINISTIC_COPY.trends_narrative).passes).toBe(true);
+  });
+});
+
+describe('usual-range claim is only made when true (2026-10-30)', () => {
+  it('does not claim usual range without a band', () => {
+    const out = buildTierATrendsNarrative({ data: makeTrends(), correlations: [], range: '7d', accountType: 'self_buyer' });
+    expect(out).not.toContain('usual range');
+    expect(lintVoiceText(out!).passes).toBe(true);
+  });
+  it('does not claim usual range when the average is above the band', () => {
+    const out = buildTierATrendsNarrative({
+      data: makeTrends(),
+      correlations: [],
+      range: '7d',
+      accountType: 'self_buyer',
+      baselines: { bp: { sysLow: 100, sysHigh: 115, diaLow: 60, diaHigh: 75, sampleCount: 20 } },
+    });
+    expect(out).not.toContain('usual range');
   });
 });

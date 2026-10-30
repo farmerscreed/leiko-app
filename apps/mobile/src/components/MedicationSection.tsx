@@ -218,7 +218,7 @@ export function MedicationSection({
             placeholder="Name"
             placeholderTextColor={theme.colors.text.tertiary}
             maxLength={80}
-            accessibilityLabel="Name of what they take"
+            accessibilityLabel="Name of the medication"
             style={[
               bodyM,
               {
