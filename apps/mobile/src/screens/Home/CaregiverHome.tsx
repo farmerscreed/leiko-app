@@ -51,6 +51,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AnomalyBanner } from '../../components/AnomalyBanner';
 import { bannerCopyFor } from '../../utils/anomalyBannerCopy';
 import { timeOfDayGreeting } from '../../utils/greeting';
+import { formatPersonFooter } from '../../utils/personFooter';
 import { CanvasGradient } from '../../components/CanvasGradient';
 import { ScreenAnomalyBanner } from '../../components/ScreenAnomalyBanner';
 import { SyncReassuranceBanner } from '../../components/SyncReassuranceBanner';
@@ -339,7 +340,15 @@ export function CaregiverHome() {
       mergedPeople.map((p) => {
         const parentRow = merged.find((row) => row.familyId === p.id);
         const measuredAt = parentRow?.latestReading?.measuredAt;
-        const footerLeftLabel = formatFooterLabel(measuredAt, Date.now());
+        const footerLeftLabel = formatPersonFooter(
+          measuredAt,
+          [
+            parentRow?.latestHr?.measuredAt,
+            parentRow?.latestSpo2?.measuredAt,
+            parentRow?.latestSleep?.measuredAt,
+          ],
+          Date.now(),
+        );
         return {
           id: p.id,
           accent: theme.colors.person[p.accentIndex],
@@ -1066,33 +1075,7 @@ function formatHeaderDate(d: Date): string {
   return `${dayName} · ${monthName} ${d.getDate()}`;
 }
 
-// Footer label for a PersonCard. Matches the design's "Read · 6:42 am"
-// when the reading is recent, "Last reading · 13 hr ago" when stale,
-// "No readings yet" when null. Calm, factual, voice-rule clean.
-const FOOTER_STALE_THRESHOLD_MS = 12 * 60 * 60 * 1000;
-function formatFooterLabel(measuredAtIso: string | undefined, nowMs: number): string {
-  if (!measuredAtIso) return 'No readings yet';
-  const measuredAtMs = Date.parse(measuredAtIso);
-  if (Number.isNaN(measuredAtMs)) return 'No readings yet';
-  const ageMs = Math.max(0, nowMs - measuredAtMs);
-  if (ageMs > FOOTER_STALE_THRESHOLD_MS) {
-    return `Last reading · ${humanizeFooterAge(ageMs)} ago`;
-  }
-  const time = new Date(measuredAtMs).toLocaleTimeString(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-  return `Read · ${time}`;
-}
-
-function humanizeFooterAge(ms: number): string {
-  const minutes = Math.floor(ms / 60_000);
-  if (minutes < 60) return `${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} hr`;
-  const days = Math.floor(hours / 24);
-  return `${days} day${days === 1 ? '' : 's'}`;
-}
+// PersonCard footer label → utils/personFooter (formatPersonFooter).
 
 // -----------------------------------------------------------------------------
 // Bird's-eye + detailed background canopies. Translates the design's

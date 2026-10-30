@@ -9,6 +9,11 @@
 //   attention ← classifyReading(latest BP) → 'calm_concerned'
 //   urgent    ← classifyReading(latest BP) → 'confirmed_urgent'
 //   offline   ← latest BP measured > 12h ago (D13 §6 stale threshold for BP)
+//               AND no other vital (HR / SpO2 / sleep) in the last 12h
+//   bp_due    ← latest BP > 12h ago (or none) BUT another vital arrived in
+//               the last 12h — the watch is syncing, only the cuff is due
+//               (2026-10-30: the card said "watch may be off the wrist"
+//               while HR synced every 15 min)
 //   watch     ← Sprint 15 deferral (3-day BP trend up). v1 treats as `clear`;
 //               type space is preserved so 7.7b/15 can flip without code
 //               surgery elsewhere.
@@ -100,14 +105,32 @@ export function caregiverPersonFromParent(
   let headline = 'No readings yet';
   let sentence = 'No readings yet. The watch will sync once it pairs.';
 
+  // Freshest non-BP vital: proves the watch is on and syncing even when
+  // the cuff hasn't been used.
+  const otherVitalTimes = [parent.latestHr, parent.latestSpo2, parent.latestSleep]
+    .map((v) => (v ? Date.parse(v.measuredAt) : NaN))
+    .filter((t) => Number.isFinite(t));
+  const freshestOtherMs = otherVitalTimes.length > 0 ? Math.max(...otherVitalTimes) : null;
+  const watchSyncingRecently =
+    freshestOtherMs !== null && nowMs - freshestOtherMs <= BP_STALE_THRESHOLD_MS;
+
   const r = parent.latestReading;
+  if (!r && watchSyncingRecently) {
+    status = 'bp_due';
+    headline = 'No BP reading yet';
+    sentence = 'The watch is syncing. Take a cuff reading to add blood pressure.';
+  }
   if (r) {
     const measuredAtMs = Date.parse(r.measuredAt);
     const ageMs = Math.max(0, nowMs - measuredAtMs);
     const ageLabel = humanizeAge(ageMs);
     bpLabel = `${r.systolic}/${r.diastolic}`;
 
-    if (ageMs > BP_STALE_THRESHOLD_MS) {
+    if (ageMs > BP_STALE_THRESHOLD_MS && watchSyncingRecently) {
+      status = 'bp_due';
+      headline = `Last BP ${ageLabel} ago`;
+      sentence = 'The watch is syncing. Take a cuff reading to update blood pressure.';
+    } else if (ageMs > BP_STALE_THRESHOLD_MS) {
       status = 'offline';
       headline = `Last reading ${ageLabel} ago`;
       sentence = `No reading in the last ${ageLabel}. The watch may be off the wrist.`;
@@ -177,7 +200,9 @@ export function caregiverPersonFromParent(
     accentIndex,
     status,
     bpLabel,
-    lastReadingAgeMs: r ? Math.max(0, nowMs - Date.parse(r.measuredAt)) : null,
+    // Silence rank (constellationOrder) is about whether ANYTHING is
+    // arriving, so a syncing watch with a stale cuff isn't "silent".
+    lastReadingAgeMs: lastAnyReadingAgeMs(r ? Date.parse(r.measuredAt) : null, freshestOtherMs, nowMs),
     headline,
     sentence,
     // Sprint 19 Block 5 — prefer the per-caregiver label when the
@@ -188,6 +213,16 @@ export function caregiverPersonFromParent(
     vitalStrip: formatVitalStrip(bpLabel, parent.latestHr, parent.latestSpo2, parent.latestSleep),
     age,
   };
+}
+
+function lastAnyReadingAgeMs(
+  bpMs: number | null,
+  otherMs: number | null,
+  nowMs: number,
+): number | null {
+  const times = [bpMs, otherMs].filter((t): t is number => t !== null && Number.isFinite(t));
+  if (times.length === 0) return null;
+  return Math.max(0, nowMs - Math.max(...times));
 }
 
 /** Sprint 19 Block 5 — resolution order for the eyebrow relationship:

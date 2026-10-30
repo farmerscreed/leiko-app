@@ -123,6 +123,10 @@ export const paletteDark = {
     // verdict claimed. Same muted family as offline (grey is the
     // point); the PR-5 colour fork gives it its own token pair.
     learning: '#948D86',
+    // 2026-10-30 — "BP reading due": other vitals are syncing, the cuff
+    // hasn't been used in 12h+. The same grey as offline — a prompt,
+    // never a verdict.
+    bp_due: '#918B84',
     // D13 PR-5 — lightened from #7B67CC (4.09:1, failed the §5.1
     // contrast floor) and decoupled from person.3.
     sleeping: '#8F7FD4',
@@ -243,6 +247,7 @@ export interface SemanticColors {
     offline: string;
     sleeping: string;
     learning: string;
+    bp_due: string;
   };
   focus: { ring: string };
 }
@@ -306,6 +311,7 @@ export const semanticColorsDark: SemanticColors = {
     offline: paletteDark.status.offline,
     learning: paletteDark.status.learning,
     sleeping: paletteDark.status.sleeping,
+    bp_due: paletteDark.status.bp_due,
   },
   focus: { ring: paletteDark.amber[500] },
 };
@@ -382,6 +388,7 @@ export const semanticColorsLight: SemanticColors = {
     offline: paletteDark.status.offline,
     learning: paletteDark.status.learning,
     sleeping: paletteDark.status.sleeping,
+    bp_due: paletteDark.status.bp_due,
   },
   focus: { ring: paletteLight.amber[500] },
 };

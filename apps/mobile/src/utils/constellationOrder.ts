@@ -39,6 +39,8 @@ const STATUS_URGENCY: Record<Status, number> = {
   offline: 3,
   watch: 2,
   learning: 1,
+  // Watch syncing, cuff reading due — calm, below "worth a look".
+  bp_due: 1,
   clear: 0,
   sleeping: 0,
 };

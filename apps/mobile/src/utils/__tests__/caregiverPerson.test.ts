@@ -567,3 +567,67 @@ describe('resolveRelation — Sprint 19 Block 5 per-caregiver label preference',
     expect(out.relation).toBe('father');
   });
 });
+
+// 2026-10-30 — the founder's card said "No recent reading … The watch may
+// be off the wrist" while his watch synced heart rate every 15 minutes:
+// staleness only looked at the BP cuff.
+describe('caregiverPersonFromParent — BP due while the watch syncs', () => {
+  const DAY = 24 * HOUR;
+
+  it('stale BP + fresh HR → bp_due, not offline', () => {
+    const p = caregiverPersonFromParent(
+      summary({
+        latestReading: reading({ measuredAt: new Date(NOW - 31 * DAY).toISOString() }),
+        latestHr: { measuredAt: new Date(NOW - HOUR / 4).toISOString(), bpm: 72 },
+      }),
+      0,
+      NOW,
+    );
+    expect(p.status).toBe('bp_due');
+    expect(p.headline).toBe('Last BP 31 days ago');
+    expect(p.sentence).toBe('The watch is syncing. Take a cuff reading to update blood pressure.');
+    expect(p.sentence).not.toMatch(/off the wrist/);
+  });
+
+  it('a syncing watch is not "silent" for the attention sort', () => {
+    const p = caregiverPersonFromParent(
+      summary({
+        latestReading: reading({ measuredAt: new Date(NOW - 31 * DAY).toISOString() }),
+        latestSpo2: { measuredAt: new Date(NOW - HOUR).toISOString(), percent: 97 },
+      }),
+      0,
+      NOW,
+    );
+    expect(p.lastReadingAgeMs).toBe(HOUR);
+  });
+
+  it('no BP ever + fresh sleep → bp_due with "No BP reading yet"', () => {
+    const p = caregiverPersonFromParent(
+      summary({
+        latestSleep: {
+          measuredAt: new Date(NOW - 2 * HOUR).toISOString(),
+          totalMinutes: 400,
+          deepMinutes: 80,
+          lightMinutes: 300,
+        },
+      }),
+      0,
+      NOW,
+    );
+    expect(p.status).toBe('bp_due');
+    expect(p.headline).toBe('No BP reading yet');
+  });
+
+  it('stale BP and nothing else recent → still offline (unchanged)', () => {
+    const p = caregiverPersonFromParent(
+      summary({
+        latestReading: reading({ measuredAt: new Date(NOW - 31 * DAY).toISOString() }),
+        latestHr: { measuredAt: new Date(NOW - 2 * DAY).toISOString(), bpm: 70 },
+      }),
+      0,
+      NOW,
+    );
+    expect(p.status).toBe('offline');
+    expect(p.sentence).toMatch(/off the wrist/);
+  });
+});

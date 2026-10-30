@@ -22,7 +22,7 @@ import {
   type ChapterAnchorEvent,
 } from '../services/story/chapters';
 import { BandRiver } from './BandRiver';
-import { storyCopy } from '../services/voice/storyCopy';
+import { letterBodyForDisplay, storyCopy } from '../services/voice/storyCopy';
 
 export interface StorySectionProps {
   familyId: string | null;
@@ -35,6 +35,7 @@ interface LetterRow {
   body: string;
   surface: string;
   generated_at: string;
+  model?: string | null;
 }
 
 export function StorySection({ familyId, userId, testID = 'story-section' }: StorySectionProps) {
@@ -72,13 +73,14 @@ export function StorySection({ familyId, userId, testID = 'story-section' }: Sto
     queryFn: async () => {
       const res = await supabase
         .from('ai_narration_cache')
-        .select('body, surface, generated_at')
+        .select('body, surface, generated_at, model')
         .eq('user_id', userId as string)
         .in('surface', ['weekly_summary', 'monthly_baseline'])
         .eq('flagged', false)
         .order('generated_at', { ascending: false })
         .limit(1);
-      return ((res.data ?? []) as LetterRow[])[0] ?? null;
+      const row = ((res.data ?? []) as LetterRow[])[0] ?? null;
+      return row ? { ...row, body: letterBodyForDisplay(row) } : null;
     },
   });
 
