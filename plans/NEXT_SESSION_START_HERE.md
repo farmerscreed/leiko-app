@@ -1,5 +1,13 @@
 # Start here — vitals correctness + physical testing + report delivery (2026-06-05)
 
+> **⏩ 2026-10-30 release audit (read FIRST):** v1.1.0 audited end-to-end on
+> the founder's Pixel 8. Every founder-reported issue is fixed and merged
+> (PRs #30–#33); migration 0059 applied. **Before Play upload:** founder
+> deploys six edge functions (PR #33), then builds AAB versionCode 23 and
+> it gets verified. Security-advisor findings are still OPEN. Full record,
+> deploy state and release steps: **`plans/RELEASE_AUDIT_2026-10-30.md`**;
+> AI guard decision: **`docs/_adr/0013-output-guard-layer2-precompute-and-calibration.md`**.
+
 > **⏩ 2026-10-27 update (read FIRST):** on-device round on the founder's
 > Pixel 8. Launch-spinner hang fixed; the real "keeps loading" was the JS
 > thread pegged ~2.5 min by the cold-start watch sync (mitigated +

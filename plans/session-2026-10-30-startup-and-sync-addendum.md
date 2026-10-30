@@ -18,3 +18,6 @@ Ready for: merge PR #30 → `npm run release:android:aab` with the upload
 key (LEIKO_VERSION_CODE=21) → verify signer + versionName 1.1.0 → Play
 Internal testing. Follow-ups listed in
 `plans/session-2026-10-27-startup-and-sync.md` (2026-10-30 section).
+
+**Superseded later the same day** by the full release audit —
+`plans/RELEASE_AUDIT_2026-10-30.md` (PRs #31–#33, versionCode 23).
