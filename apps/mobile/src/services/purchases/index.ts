@@ -122,9 +122,28 @@ function loadNative(): PurchasesModule | null {
 function getApiKey(): string | null {
   // EAS build pipelines set these per-env. Local dev without keys
   // returns null and the adapter no-ops.
+  //
+  // 2026-10-30 — .env.example and scripts/release-android.js named these
+  // EXPO_PUBLIC_REVENUECAT_*_API_KEY while this read EXPO_PUBLIC_RC_API_KEY_*,
+  // so a key set under the documented name never reached the app and the
+  // release build shipped a paywall that could not purchase. Accept both.
+  // Each read must stay a static `process.env.EXPO_PUBLIC_*` member access
+  // so Expo inlines it at build time.
   const os = getOs();
-  if (os === 'ios') return process.env.EXPO_PUBLIC_RC_API_KEY_IOS ?? null;
-  if (os === 'android') return process.env.EXPO_PUBLIC_RC_API_KEY_ANDROID ?? null;
+  if (os === 'ios') {
+    return (
+      process.env.EXPO_PUBLIC_RC_API_KEY_IOS ??
+      process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY ??
+      null
+    );
+  }
+  if (os === 'android') {
+    return (
+      process.env.EXPO_PUBLIC_RC_API_KEY_ANDROID ??
+      process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY ??
+      null
+    );
+  }
   return null;
 }
 
