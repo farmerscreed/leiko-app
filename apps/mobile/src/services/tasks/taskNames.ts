@@ -10,3 +10,8 @@
 
 export const BACKGROUND_SYNC_TASK = 'leiko.sync.backgroundFetch';
 export const REMOTE_REFRESH_TASK = 'leiko.notifications.remoteRefresh';
+
+/** Native-held no-op headless task that keeps RN's JS timers running while
+ *  the BLE foreground service is up. Must match KEEP_TIMERS_TASK in
+ *  android/.../ble/LeikoBleForegroundServiceModule.kt. */
+export const KEEP_TIMERS_TASK = 'leiko.keepJsTimersAlive';

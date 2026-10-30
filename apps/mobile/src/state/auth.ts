@@ -31,9 +31,57 @@ import { useOnboarding } from './onboarding';
 import { linkSentryToUser } from '../services/sentry';
 import { linkPosthogToUser } from '../services/analytics/posthog';
 import { stopBleForegroundService } from '../services/ble/foregroundService';
+import { secureSupabaseStorage } from '../services/secureStorage';
+import { withTimeout } from '../utils/withTimeout';
 import type { AccountType, UserRow } from '../types/database';
 
-type Status = 'loading' | 'unauthenticated' | 'authenticated';
+// 'offline' — launch could not reach the server AND there is no saved
+// profile on this device to open with. RootNavigator shows a calm
+// "Try again" screen instead of the endless spinner this used to be.
+type Status = 'loading' | 'unauthenticated' | 'authenticated' | 'offline';
+
+/** Deadline for each network step on the launch path. RN's Android HTTP
+ *  stack has no timeout of its own, so without this a stalled network
+ *  (airport Wi-Fi, weak 3G) left the app on the spinner forever.
+ *  Exported for tests. */
+export const STARTUP_TIMEOUT_MS = 10_000;
+
+/** Must match `storageKey` in services/supabase.ts. */
+const SUPABASE_SESSION_KEY = 'leiko.auth.session';
+
+function readCachedProfile(): UserRow | null {
+  const raw = mmkv.getString(STORAGE_KEYS.cachedProfile);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as UserRow;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedProfile(profile: UserRow | null): void {
+  if (profile) mmkv.set(STORAGE_KEYS.cachedProfile, JSON.stringify(profile));
+  else mmkv.remove(STORAGE_KEYS.cachedProfile);
+}
+
+/** The session supabase-js persisted last time, read straight from
+ *  secure storage with no network. Used only when the live
+ *  getSession() (which may need a network token refresh) misses the
+ *  launch deadline. supabase-js keeps refreshing in the background and
+ *  onAuthStateChange swaps in the fresh session when it lands. */
+async function readStoredSession(): Promise<Session | null> {
+  try {
+    const raw = await secureSupabaseStorage.getItem(SUPABASE_SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Session | { currentSession?: Session };
+    const session = 'currentSession' in parsed ? parsed.currentSession : parsed;
+    return session && (session as Session).user?.id ? (session as Session) : null;
+  } catch {
+    return null;
+  }
+}
+
+let authListenerRegistered = false;
 
 interface AuthState {
   status: Status;
@@ -93,13 +141,44 @@ export const useAuth = create<AuthState>((set, get) => ({
   lastOtpEmail: null,
 
   async hydrate() {
-    const { data, error } = await supabase.auth.getSession();
-    if (error) throw error;
-    await get()._setSession(data.session);
+    // Retry (from the offline screen) re-enters here: show the spinner
+    // again, but never stack a second auth listener.
+    if (get().status === 'offline') set({ status: 'loading' });
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      void get()._setSession(session);
-    });
+    // Register first so a session refresh that lands AFTER the launch
+    // deadline still flips the app into the right state on its own.
+    if (!authListenerRegistered) {
+      authListenerRegistered = true;
+      supabase.auth.onAuthStateChange((_event, session) => {
+        void get()._setSession(session);
+      });
+    }
+
+    const live = supabase.auth.getSession();
+    try {
+      const { data, error } = await withTimeout(live, STARTUP_TIMEOUT_MS, 'getSession');
+      if (error) throw error;
+      await get()._setSession(data.session);
+    } catch {
+      // Network stalled or failed. Open from what this device already
+      // has rather than waiting on the network.
+      const stored = await readStoredSession();
+      if (!stored) {
+        // Nothing stored means nobody is signed in on this device —
+        // that needs no network to know.
+        set({ session: null, profile: null, status: 'unauthenticated' });
+        return;
+      }
+      await get()._setSession(stored);
+      // If the live call eventually succeeds, adopt its fresh session.
+      live
+        .then(({ data }) => {
+          if (data.session) void get()._setSession(data.session);
+        })
+        .catch(() => {
+          /* still offline — onAuthStateChange covers later recovery */
+        });
+    }
   },
 
   setPendingAccountType(kind) {
@@ -185,6 +264,7 @@ export const useAuth = create<AuthState>((set, get) => ({
     // Best-effort: clear the RevenueCat subscriber so a different user
     // signing in on the same device doesn't inherit entitlements.
     void logoutPurchaser();
+    writeCachedProfile(null);
     set({ session: null, profile: null, status: 'unauthenticated' });
   },
 
@@ -192,10 +272,32 @@ export const useAuth = create<AuthState>((set, get) => ({
     if (!session) {
       linkSentryToUser(null);
       linkPosthogToUser(null);
+      writeCachedProfile(null);
       set({ session: null, profile: null, status: 'unauthenticated' });
       return;
     }
-    const profile = await fetchProfile(session.user.id);
+    let profile: UserRow | null;
+    try {
+      profile = await withTimeout(fetchProfile(session.user.id), STARTUP_TIMEOUT_MS, 'fetchProfile');
+      writeCachedProfile(profile);
+    } catch {
+      // Offline or slow: open with the profile saved on this device.
+      // A later _setSession (token refresh, retry) replaces it.
+      const cached = readCachedProfile();
+      if (cached && cached.id === session.user.id) {
+        set({ session, profile: cached, status: 'authenticated' });
+        linkSentryToUser(session.user.id);
+        return;
+      }
+      // Already showing a signed-in app for this user (e.g. a
+      // background refresh failed mid-session): keep it as is.
+      const current = get();
+      if (current.status === 'authenticated' && current.profile?.id === session.user.id) {
+        return;
+      }
+      set({ session, profile: null, status: 'offline' });
+      return;
+    }
     // Sprint 19 Block 8 — derive onboarding-complete from server
     // state. Without this, a returning user on a fresh install (or
     // post-MMKV-wipe) signs in cleanly but the navigator sends them
@@ -208,7 +310,11 @@ export const useAuth = create<AuthState>((set, get) => ({
     // MMKV state alone (next session retries).
     if (profile) {
       try {
-        const { hasOnboarded, primaryFamilyId } = await checkOnboardingState(profile.id);
+        const { hasOnboarded, primaryFamilyId } = await withTimeout(
+          checkOnboardingState(profile.id),
+          STARTUP_TIMEOUT_MS,
+          'checkOnboardingState',
+        );
         if (hasOnboarded) {
           if (profile.account_type === 'caregiver') {
             mmkv.set(STORAGE_KEYS.caregiverOnboardingComplete, true);

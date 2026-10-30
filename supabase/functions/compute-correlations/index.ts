@@ -229,7 +229,10 @@ async function pickFamiliesAtLocalHour(
   // acceptable per query at ~hourly cadence.
   const { data, error } = await supabase
     .from('family_members')
-    .select('family_id, user_id, users:users!inner(timezone)')
+    // Disambiguated (2026-10-29): family_members has TWO FKs to users
+    // (user_id and invited_by), so a bare `users!inner` embed is ambiguous
+    // (PGRST201) and the hourly cron 500'd every run.
+    .select('family_id, user_id, users:users!family_members_user_id_fkey!inner(timezone)')
     .is('removed_at', null);
   if (error) throw error;
   const rows = (data ?? []) as unknown as { family_id: string; user_id: string; users: { timezone: string } }[];

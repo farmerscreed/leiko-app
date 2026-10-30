@@ -34,7 +34,10 @@ export type Status =
   | 'sleeping'
   // D13 PR-4 (§4.3) — data still accumulating; below the sufficiency
   // gate a person renders grey, never a coloured verdict.
-  | 'learning';
+  | 'learning'
+  // 2026-10-30 — the watch is syncing other vitals but no cuff reading
+  // in 12h+. Calm grey like 'offline'; never a verdict.
+  | 'bp_due';
 
 export interface StatusPillProps {
   status: Status;
@@ -53,6 +56,7 @@ const STATUS_LABEL: Record<Status, string> = {
   attention: 'Needs attention',
   urgent: 'Urgent',
   offline: 'No recent reading',
+  bp_due: 'BP reading due',
   sleeping: 'Sleeping',
 };
 

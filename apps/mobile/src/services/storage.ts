@@ -41,6 +41,10 @@ export function isMmkvEncrypted(): boolean {
 
 export const STORAGE_KEYS = {
   pendingAccountType: 'leiko.onboarding.pendingAccountType',
+  // Last successfully fetched public.users row for the signed-in user
+  // (JSON). Lets the app open offline instead of hanging on launch.
+  // Lives in the encrypted MMKV instance; cleared on sign-out.
+  cachedProfile: 'leiko.profile.cached',
   authStorePrefix: 'leiko.auth.',
   // Set true at the end of caregiver onboarding (FamilyWatch "I have the
   // watch with me"). The navigator reads this to decide whether to render
@@ -99,6 +103,9 @@ export const STORAGE_KEYS = {
   // the unit that buffers; pairing a different watch resets that
   // device's cursor naturally on first sync.
   lastSyncByDevice: 'leiko.sync.lastSyncByDevice',
+  // Wall-clock ms of the last successful watch sync (any trigger).
+  // Shown as Settings → Watch → "Last sync". 2026-10-30.
+  lastWatchSyncAtMs: 'leiko.sync.lastWatchSyncAtMs',
   // D12 visual mode — Sprint 1.5. ColorModeOverride: 'system' | 'dark' | 'light'.
   // Default 'system' (follow OS appearance). User-facing toggle ships in
   // Sprint 10 Settings; ThemeProvider reads/writes this key directly.

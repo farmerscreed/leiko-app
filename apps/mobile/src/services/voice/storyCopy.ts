@@ -41,3 +41,25 @@ export const storyCopy = {
 export function subjectAwareDoctorLine(subject: Subject): string {
   return storyCopy.doctor(subject.possessive);
 }
+
+
+// 2026-10-30 — while the AI summary step is off, the server caches a
+// placeholder row (model 'placeholder'). Older rows carry developer text
+// ("Tier-C is gated in this environment") that reached users on Trends.
+// Show founder-approved copy instead of any placeholder body.
+export const PENDING_LETTER_COPY = {
+  weekly_summary: "Your weekly summary will appear here once it's ready.",
+  monthly_baseline: "Your monthly summary will appear here once it's ready.",
+} as const;
+
+export function letterBodyForDisplay(row: {
+  body: string;
+  surface: string;
+  model?: string | null;
+}): string {
+  const isPlaceholder = row.model === 'placeholder' || /tier-c/i.test(row.body);
+  if (!isPlaceholder) return row.body;
+  return row.surface === 'monthly_baseline'
+    ? PENDING_LETTER_COPY.monthly_baseline
+    : PENDING_LETTER_COPY.weekly_summary;
+}

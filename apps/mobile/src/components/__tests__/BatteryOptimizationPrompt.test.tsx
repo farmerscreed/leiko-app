@@ -71,3 +71,16 @@ it('every visible string passes the voice rules', () => {
     expect(rendered).not.toContain(word);
   }
 });
+
+// 2026-10-27 — on a Pixel 8 the CTAs were clipped below the compact
+// sheet's old 50% cap. Both actions must render inside the sheet's
+// scrollable content so they are reachable on any screen / font scale.
+describe('BatteryOptimizationPrompt — CTAs stay reachable', () => {
+  it('renders both actions inside the sheet scroll container', () => {
+    const { getByTestId } = render(withProviders(<BatteryOptimizationPrompt visibleOverride />));
+    const scroll = getByTestId('battery-opt-prompt-scroll');
+    expect(scroll).toBeTruthy();
+    expect(getByTestId('battery-opt-allow')).toBeTruthy();
+    expect(getByTestId('battery-opt-dismiss')).toBeTruthy();
+  });
+});

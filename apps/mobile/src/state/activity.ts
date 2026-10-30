@@ -146,7 +146,7 @@ export const useActivity = create<ActivityState>((set, get) => ({
     const currentPending = get().pendingSteps;
     const movedRows = currentPending.filter((d) => keySet.has(d.dayLocal));
     const remainingPending = currentPending.filter((d) => !keySet.has(d.dayLocal));
-    for (const k of acceptedKeys) stepsBuffer.removeByKey(k);
+    stepsBuffer.removeByKeys(acceptedKeys);
     const merged = dedupBy(
       [...movedRows, ...get().recentSteps].sort((a, b) =>
         b.dayLocal.localeCompare(a.dayLocal),
@@ -167,7 +167,7 @@ export const useActivity = create<ActivityState>((set, get) => ({
     const currentPending = get().pendingCalories;
     const movedRows = currentPending.filter((d) => keySet.has(d.dayLocal));
     const remainingPending = currentPending.filter((d) => !keySet.has(d.dayLocal));
-    for (const k of acceptedKeys) caloriesBuffer.removeByKey(k);
+    caloriesBuffer.removeByKeys(acceptedKeys);
     const merged = dedupBy(
       [...movedRows, ...get().recentCalories].sort((a, b) =>
         b.dayLocal.localeCompare(a.dayLocal),

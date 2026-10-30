@@ -112,6 +112,8 @@ export function BatteryOptimizationPrompt({
 }
 
 const styles = StyleSheet.create({
-  body: { flex: 1 },
+  // No flex: 1 — inside a content-sized sheet it collapsed the body and
+  // pushed the buttons out of view.
+  body: {},
   actions: {},
 });

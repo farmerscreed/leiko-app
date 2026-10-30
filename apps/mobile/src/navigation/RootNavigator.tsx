@@ -13,7 +13,7 @@
 // Sprint 5 covers the parent-pairing handoff.
 
 import { useEffect, useMemo } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -56,6 +56,7 @@ import { ArticleScreen } from '../screens/Learn/ArticleScreen';
 import { AskLeikoScreen } from '../screens/AskLeiko/AskLeikoScreen';
 import { DebugLauncher } from '../dev/DebugLauncher';
 import { OfflineBanner } from '../components/OfflineBanner';
+import { ErrorState } from '../components/ErrorState';
 import { useEnforceVisibility } from '../hooks/useEnforceVisibility';
 import { useTheme } from '../theme';
 import { useAuth } from '../state/auth';
@@ -73,6 +74,7 @@ import {
   stopBackgroundSync,
 } from '../services/sync/backgroundSync';
 import { mmkv, STORAGE_KEYS } from '../services/storage';
+import { supabase } from '../services/supabase';
 import { wireDeviceMetaProvider } from '../state/wireDeviceMetaProvider';
 import { startBleForegroundService } from '../services/ble/foregroundService';
 import { scheduleNextLearnedTimeReminder } from '../services/reminders/dispatcher';
@@ -294,6 +296,27 @@ function HydratingFallback() {
 }
 
 /**
+ * Launch could not reach the server and this device has no saved
+ * profile to open with (first launch after an update, or a fresh
+ * install that has a stored session). Before 2026-10-27 this case was
+ * an endless spinner. Retry re-runs hydrate(); a session refresh that
+ * lands on its own also moves the app on without a tap.
+ */
+function StartupOfflineFallback({ onRetry }: { onRetry: () => void }) {
+  const theme = useTheme();
+  return (
+    <View style={[styles.center, { backgroundColor: theme.colors.surface.base }]}>
+      <ErrorState
+        testID="startup-offline"
+        title="We can't reach Leiko right now."
+        body="Check your internet connection, then try again. Your readings are safe on this phone."
+        onRetry={onRetry}
+      />
+    </View>
+  );
+}
+
+/**
  * Sprint 16.6 FUN-4 — wire the learned-time reminder dispatcher to
  * current app state. Pure-ish: reads the store snapshots directly so
  * it does not depend on React rendering. Self-buyer fires "you"
@@ -393,7 +416,16 @@ export function RootNavigator() {
     // own re-fire) keeps the schedule fresh as readings come in.
     void scheduleLearnedTimeFromCurrentState();
     const notifListeners = startNotificationListeners();
+    // Supabase's documented React Native setup: run the token auto-refresh
+    // ticker only while the app is on screen. Background syncs refresh on
+    // demand (ensureSessionForHeadlessRun) instead of a ticker racing them
+    // for the auth lock.
+    const authRefreshSub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void supabase.auth.startAutoRefresh();
+      else void supabase.auth.stopAutoRefresh();
+    });
     return () => {
+      authRefreshSub.remove();
       stopOrchestrator();
       stopHealthPlatformBackgroundFetch();
       void stopBackgroundSync();
@@ -416,6 +448,8 @@ export function RootNavigator() {
   let content: React.ReactNode;
   if (status === 'loading') {
     content = <HydratingFallback />;
+  } else if (status === 'offline') {
+    content = <StartupOfflineFallback onRetry={() => void hydrate()} />;
   } else if (status === 'unauthenticated') {
     content = <AuthNavigator />;
   } else if (accountType === 'self_buyer') {

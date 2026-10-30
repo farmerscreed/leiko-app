@@ -24,7 +24,30 @@
 // orchestrator only emits counts + outcomes.
 
 import { create } from 'zustand';
-import { AppState, type AppStateStatus, type NativeEventSubscription } from 'react-native';
+import {
+  AppState,
+  InteractionManager,
+  type AppStateStatus,
+  type NativeEventSubscription,
+} from 'react-native';
+import {
+  perfLog,
+  perfStep,
+  setPerfPhase,
+  startStallDetector,
+  stopStallDetector,
+} from '../utils/perfTrace';
+
+/** Cold-start watch sync waits this long after the first screen has
+ *  settled. The sync's BLE + parse work runs on the JS thread; firing it
+ *  at mount meant Home's own data could not render until the drain
+ *  finished (~2.5 min on a Pixel 8 with a backlog, 2026-10-27). The
+ *  server data Home needs lands in ~2–6s, so it gets the thread first. */
+export const COLD_START_SYNC_DELAY_MS = 6_000;
+
+/** The §9 heartbeat refreshes the run's claim at most this often.
+ *  It used to call set() on EVERY BLE packet — thousands per drain. */
+const HEARTBEAT_MIN_INTERVAL_MS = 1_000;
 import type { State as BluetoothState, Subscription } from 'react-native-ble-plx';
 import { connectToUrion, observeBluetoothState } from '../services/ble/bleManager';
 import { subscribeToNotifications } from '../services/ble/notify';
@@ -32,6 +55,7 @@ import { syncBacklogToCompletion } from '../services/sync/syncBacklogToCompletio
 import { syncMultiVitals } from '../services/sync/syncMultiVitals';
 import { applyDeviceConfig } from '../services/sync/applyDeviceConfig';
 import { inferModel } from '../services/sync/postReading';
+import { recordWatchSync } from '../services/sync/lastWatchSync';
 import {
   clearSyncFailure,
   markSyncFailure,
@@ -146,6 +170,11 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
     const appStateSub = AppState.addEventListener('change', (next: AppStateStatus) => {
       const prev = get()._lastAppState;
       set({ _lastAppState: next });
+      // The stall detector is a 250ms interval. JS timers now keep running
+      // in the background (native keep-alive), so park it there — it only
+      // diagnoses UI freezes and would otherwise wake the JS thread 4x/s.
+      if (next === 'active') startStallDetector();
+      else stopStallDetector();
       if (next === 'active' && prev !== null && prev !== 'active') {
         void get().runSync('app_foreground');
       }
@@ -166,12 +195,20 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
       _btStateSub: btStateSub,
       _lastAppState: AppState.currentState,
     });
-    // Cold-start sync. Fire-and-forget; UI doesn't wait on this.
-    void get().runSync('cold_start');
+    // Cold-start sync. Fire-and-forget; deferred so the first screen
+    // renders before the watch drain competes for the JS thread.
+    startStallDetector();
+    InteractionManager.runAfterInteractions(() => {
+      setTimeout(() => {
+        if (!get()._started) return;
+        void get().runSync('cold_start');
+      }, COLD_START_SYNC_DELAY_MS);
+    });
   },
 
   stop: () => {
     const { _appStateSub, _btStateSub, _idleTimer, _unsubNotify, _device } = get();
+    stopStallDetector();
     if (_appStateSub) _appStateSub.remove();
     if (_btStateSub) _btStateSub.remove();
     if (_idleTimer) clearTimeout(_idleTimer);
@@ -244,7 +281,9 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
 
     // Always flush local pending writes first — these don't need the
     // watch and have nothing to do with the rest of the run. Cheap.
+    const pendingT0 = nowMs();
     await useReadings.getState().syncPending();
+    perfLog(`sync.pendingReadings took ${nowMs() - pendingT0}ms`);
 
     const paired = usePairing.getState().pairedDevice;
     if (!paired) {
@@ -258,11 +297,15 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
     }
 
     logger.track('sync_started', { trigger });
+    perfLog(`sync start trigger=${trigger}`);
+    const syncT0 = nowMs();
     set({ status: 'connecting', lastError: null, _runStartedAt: nowMs() });
     let device: UrionDevice | null = null;
     let unsubHeartbeat: (() => void) | null = null;
     try {
+      const connectT0 = nowMs();
       device = await connectToUrion(paired.bleId);
+      perfLog(`sync.connect took ${nowMs() - connectT0}ms`);
       set({ status: 'syncing', _device: device });
 
       // §9 heartbeat — every packet from the watch refreshes the run's
@@ -271,8 +314,13 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
       // vitals) keeps itself alive; a run whose device went quiet is
       // reaped on the next trigger. Guarded on _runStartedAt so a
       // live-window packet after the run ends can't resurrect a claim.
+      let lastBeat = 0;
       unsubHeartbeat = device.onNotify(() => {
-        if (get()._runStartedAt !== null) set({ _runStartedAt: nowMs() });
+        if (get()._runStartedAt === null) return;
+        const t = nowMs();
+        if (t - lastBeat < HEARTBEAT_MIN_INTERVAL_MS) return;
+        lastBeat = t;
+        set({ _runStartedAt: t });
       });
 
       // Sprint 10b.2 — flush user-facing Settings to the watch BEFORE
@@ -281,7 +329,8 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
       // false. Failures are non-fatal: dirty stays true and the next
       // sync retries; data sync continues regardless.
       try {
-        const cfgResult = await applyDeviceConfig(device);
+        const dev = device;
+        const cfgResult = await perfStep('sync.deviceConfig', () => applyDeviceConfig(dev));
         if (cfgResult.error) {
           logger.track('sync_failed', {
             trigger,
@@ -295,7 +344,10 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
         });
       }
 
-      const result = await syncBacklogToCompletion(device, paired.bleId);
+      const bpDevice = device;
+      const result = await perfStep('sync.bpBacklog', () =>
+        syncBacklogToCompletion(bpDevice, paired.bleId),
+      );
       logger.track('sync_completed', {
         trigger,
         batches: result.batches,
@@ -318,7 +370,10 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
           name: paired.name,
           model: inferModel(paired.name),
         };
-        const mvResult = await syncMultiVitals(device, paired.bleId, meta);
+        const mvDevice = device;
+        const mvResult = await perfStep('sync.multiVitals', () =>
+          syncMultiVitals(mvDevice, paired.bleId, meta),
+        );
         if (!mvResult.ok) {
           // syncMultiVitals already emitted multi_vitals_sync_failed
           // with details; this is a top-level rollup so trigger-level
@@ -340,6 +395,9 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
       // Sprint 16: a successful sync clears the failure streak that
       // drives the 24h reassurance banner.
       clearSyncFailure();
+      recordWatchSync(nowMs());
+      perfLog(`sync done trigger=${trigger} total=${nowMs() - syncT0}ms`);
+      setPerfPhase('idle');
 
       // An OS-woken run has no user watching, so the live window buys
       // nothing — and it costs. Its 45s disconnect is a JS timer, which

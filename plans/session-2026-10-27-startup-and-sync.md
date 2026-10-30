@@ -1,0 +1,237 @@
+# Session 2026-10-27 — "the app keeps loading", background sync, on-device round
+
+Branch: `fix/startup-never-hangs` (off `main` @ 30d3e0e). Founder present,
+testing on the Pixel 8 (`43230DLJH001YY`) from DEN airport Wi-Fi.
+Companion doc for the first fix: `plans/STARTUP_HANG_FIX_2026-10-27.md`.
+
+## TL;DR
+
+| # | Finding | Status |
+|---|---|---|
+| 1 | Launch spinner could hang forever (no request timeout, no failure branch in `auth.hydrate`) | **Fixed** (commit 1) |
+| 2 | Real-world "keeps loading": JS thread pegged ~100% for ~2.5 min after every cold start while the watch syncs; Home shows only its skeleton | **Mitigated + instrumented** (commit 2) — root hot spot still to confirm from `[leiko-perf]` logs |
+| 3 | Background sync never uploads: app holds the watch link in the background but `/sync` is only called while the app is foreground | **Root-caused + fixed 2026-10-29** (commit 4) — verify on device |
+| 4 | Battery-optimization prompt's buttons clipped after pairing | **Fixed** (commit 3) |
+| 5 | `compute-correlations` edge function returns 500 every hour | **Open** |
+| 6 | Installed build on the Pixel was signed by an unknown key | **Resolved for testing** (reinstalled) — release signing still to sort |
+
+## 1. Launch spinner hang — fixed
+
+See `plans/STARTUP_HANG_FIX_2026-10-27.md`. Global 60 s fetch timeout on the
+Supabase client, 10 s deadline per launch step, profile cached in encrypted
+MMKV (`leiko.profile.cached`), new `'offline'` auth status rendered as a calm
+"Try again" screen. 9 regression tests fail on the old `auth.ts`.
+
+## 2. JS thread pegged during the cold-start watch drain
+
+Evidence (release build v20, 2026-10-27 12:14–12:17 MDT):
+
+- Supabase edge logs: every Home request (token → users → onboarding RPC →
+  family_members → readings → vitals_other) returned 200 within 6 s of launch.
+- Screen at 16 s and 60 s: header only, Home skeleton (`isLoading` stuck true).
+- `top -H`: `mqt_v_js` at 100–129% CPU; 1m23s CPU in the first ~90 s; 12m48s
+  by 12:58. ART log: ~200 MB Java heap churn every few seconds throughout.
+- Home rendered the moment the BLE GATT session ended (~2.5 min after launch).
+
+Changes (commit 2):
+
+- Cold-start sync deferred: `InteractionManager.runAfterInteractions` + 6 s
+  (`COLD_START_SYNC_DELAY_MS`), cancelled by `stop()`.
+- `pendingVitalBuffer.removeByKeys` — one read/write for N keys. Previously
+  hr/spo2/sleep/activity `acceptSyncResult` looped `removeByKey`, a full JSON
+  parse/filter/stringify of the buffer PER key (O(keys × buffer)).
+- §9 heartbeat `set()` throttled from every BLE packet to ≤ 1/s.
+- `utils/perfTrace.ts`: `[leiko-perf]` logcat lines time each sync step
+  (`sync.*`, `mv.*`, `home.fetchParentSummaries`) and a 250 ms JS stall
+  detector logs `JS stall Nms during phase=<step>`.
+
+**Next:** with the new build on the phone, `adb logcat -s ReactNativeJS` and
+read the `[leiko-perf]` lines over one cold start. The stall lines name the
+step that burns the thread. Other suspects noted while reading:
+`fetchParentSummaries` reads ALL readings with no limit (keeps 30/family);
+`rollingMinAverage` is O(n²) over HR samples; `useSeededLearnCard` selector
+returns a fresh array each render.
+
+## 3. Background sync does not upload — open, top priority
+
+Evidence:
+
+- Bluetooth GATT client history: Leiko connected to the watch at 11:01,
+  11:18, 11:30, 11:43, 11:58 MDT (app not on screen), and held one link
+  12:33:59–12:54:36 while backgrounded (founder's watch on wrist).
+- Supabase function logs: `/functions/v1/sync` calls 16:03–16:43 UTC (app in
+  use), then **none** 16:43–18:15 UTC, and none 18:38–18:53 UTC while
+  backgrounded. On foreground at 18:53 UTC the backlog flushed (~10 new BP
+  readings → `detect-anomaly`, plus HR chunks) until ~19:10 UTC.
+- `dumpsys jobscheduler` / `dumpsys alarm`: **no Leiko job or alarm
+  registered** (checked after a `force-stop` at 12:14, which clears alarms —
+  but launches since did not restore it).
+- `startBackgroundSync()` only calls `registerTaskAsync` when
+  `isTaskRegisteredAsync` is false; TaskManager's persisted flag can say
+  "registered" after the OS dropped the alarm, so it is never re-armed.
+  Suspected; verify.
+- The app is battery-whitelisted, standby bucket ACTIVE, FGS
+  `LeikoBleForegroundService` running.
+
+Hypothesis: while backgrounded the JS runtime is alive (FGS holds the
+process) and the live-window link stays open, but the upload leg never runs —
+either it waits on a JS timer that Android pauses for backgrounded RN apps
+(cf. §9 in `BACKGROUND_SYNC_INVESTIGATION_2026-08-14.md`), or the pegged JS
+thread starves it. Plan: one background cycle on the new build with
+`[leiko-perf]` logging, then fix; always (re)register the background task on
+launch.
+
+## 4. Battery-optimization prompt — CTAs clipped (fixed)
+
+Founder report after pairing: "Keep readings arriving…" sheet, button hidden.
+Cause: `BottomSheet` `size="compact"` capped at 50% height with
+`overflow: hidden`, no bottom safe-area inset under Android edge-to-edge
+(targetSdk 36), and the prompt body had `flex: 1`. Fix in the shared
+component (13 compact sheets): cap 85%, content scrolls past the cap, bottom
+inset added (context read so it never throws outside a provider); prompt body
+no longer `flex: 1`. Test asserts both CTAs render inside the sheet scroll.
+
+## 5. `compute-correlations` — 500 every hour
+
+Function logs show `POST | 500 | /functions/v1/compute-correlations` on every
+hourly cron today (14:00–18:00 UTC). Personal findings / correlation matrix
+will be stale. Not investigated yet — read its function logs next.
+
+## 6. Signing, builds, install (Windows founder machine)
+
+- The Pixel had v20 (`installerPackageName=null`, single base APK, no Play
+  stamp) signed by cert SHA-256 `CF:65:9F:68:…:78:65` — matches neither the
+  upload key in `apps/mobile/@lawone-apps__leiko.jks`
+  (`84:13:9B:AF:…:27:28`, alias `c86e5bf811807360e52e3918eea1ed58`) nor the
+  repo debug key (`FA:C6:17:45:…`). Probably built on another machine. A
+  differently-signed build cannot update it.
+- Founder approved uninstall. Before it, the old app was foregrounded and
+  allowed to flush its pending uploads (verified in function logs).
+- Test build installed 2026-10-27 13:38 MDT: `assembleRelease` without
+  `LEIKO_RELEASE_*` → signed with the repo debug key, versionCode 1. Fine for
+  sideload testing; **not** uploadable to Play. A Play build needs the upload
+  key + passwords (`npx eas-cli credentials` → Android → production).
+- Windows build recipe (PowerShell, `apps\mobile\android`):
+  ```powershell
+  $env:EXPO_NO_METRO_WORKSPACE_ROOT = "1"   # else Metro can't resolve ..\..\index.js
+  .\gradlew assembleRelease
+  ```
+  `npm run release:android:apk` sets that var itself but requires the four
+  `LEIKO_RELEASE_*` vars; PowerShell can't `source .env.release` (none exists).
+- Local checkout note: the founder's Windows git uses `core.autocrlf=true`;
+  from the Cowork Linux shell run git with `-c core.autocrlf=true` or every
+  file shows as modified.
+
+## On-device tooling used (founder's PC)
+
+`D:\APP\tools\` (outside the repo): scrcpy 3.3.1 (official release, SHA-256
+verified, includes adb) and `adb-bridge.bat`, which runs only adb commands
+dropped into `tools\bridge\cmd.txt` and writes `out.txt`. Founder starts it;
+close the window to stop it.
+
+## Verification
+
+- Jest: 246 suites / 2846 tests green. `tsc --noEmit` clean. eslint clean on
+  touched files. copy-lint 0 hard.
+- On device: new build launches to the welcome screen in < 8 s; sign-in and
+  pairing done by the founder. Perf-log capture and background check pending.
+
+## Next session, in order
+
+1. Capture `[leiko-perf]` over a cold start on the Pixel; fix the named hot step.
+2. Background upload (§3): one background cycle with logs, fix, verify the
+   server receives `/sync` while the app is closed.
+3. Always re-register the background fetch task on launch; confirm with
+   `dumpsys jobscheduler` / `dumpsys alarm`.
+4. `compute-correlations` 500s.
+5. Release signing: get upload-key passwords, build an AAB, Play Internal
+   testing; bump versionCode above 20 and versionName (1.1.0?).
+
+
+## 2026-10-29 — background upload root-caused and fixed
+
+On-device (wireless adb, same Pixel, build from 10-27):
+
+- Background fetch IS registered now (4 alarms) and runs every ~15 min
+  (GATT sessions 06:31, 06:46, 06:58, 07:13, 07:26 PDT, ~35 s each).
+- Every background run logged `[leiko-perf] mv.upload took 30007ms` →
+  `sync done trigger=background total=33104ms`: the upload hit
+  `SYNC_UPLOAD_TIMEOUT_MS` (30 s, native delay) every time.
+- Edge logs: **zero** requests from the phone (`okhttp`) for 4.5 h — not even
+  `/auth/v1/token`. Battery-exempt, standby bucket ACTIVE, background data
+  allowed, device not in doze: the OS was not blocking network.
+- Foregrounding at 07:30:11 PDT: the stall detector logged
+  `JS stall 56446781ms` (15.7 h — no JS timer fired in the background), and
+  the FIRST request out was `/auth/v1/token`, then ~40 `/sync` uploads in
+  20 s.
+
+Root cause: React Native pauses every JS timer when the activity pauses
+unless a headless JS task is active (`JavaTimerManager`: `isPaused &&
+!isRunningTasks`). Leiko's process stays alive in the background (BLE
+foreground service), so syncs run — but supabase-js's token-refresh retry
+uses `helpers.sleep` (`setTimeout`) while holding the auth lock. Once a
+refresh attempt fails in the background, that sleep never ends, the lock is
+never released, and every `functions.invoke('sync')` waits on
+`getSession()` forever. (The 60 s fetch abort added on 10-27 is also a JS
+timer, so it couldn't break the hang.)
+
+Fix (commit 4):
+
+- Native: `LeikoBleForegroundServiceModule.holdJsTimers()` starts one no-op
+  headless task (`leiko.keepJsTimersAlive`, no timeout, allowed in
+  foreground); `releaseJsTimers()` finishes it. While it is active RN keeps
+  the JS timer pump running in the background.
+- JS: the task is registered in `registerHeadlessTasks` (promise never
+  settles — native owns its lifetime); `foregroundService` holds on start,
+  releases before stop; failures never block the service.
+- Supabase's documented RN setup: `startAutoRefresh()` on AppState
+  `active`, `stopAutoRefresh()` otherwise (RootNavigator), so a background
+  ticker never races the sync for the auth lock.
+- The 250 ms stall detector is parked while backgrounded (timers now run
+  there, and it would wake the JS thread 4×/s).
+- New analytics: `js_timers_held`, `js_timers_hold_failed`.
+
+Needs a native rebuild (`$env:EXPO_NO_METRO_WORKSPACE_ROOT = "1";
+.\gradlew assembleRelease`) and an install over the 10-27 test build (same
+debug key → `adb install -r`, data kept).
+
+**Verify on device:** background the app for 30+ min with the watch on;
+expect `/functions/v1/sync` in function logs every ~15 min with the app
+closed, and no `mv.upload took 300xxms` lines.
+
+**Watch for:** battery drain while backgrounded (JS timers now fire; the
+known intervals are the 30 s auth ticker — now stopped in background — and
+`useSyncReassurance`'s poll).
+
+## 2026-10-30 — on-device verification round (build from 88ebcab)
+
+- Fresh data end to end: watch back on at ~10:04 PDT; background syncs at
+  10:10, 10:14, 10:19, 10:21 each inserted new `vitals_other` rows (201).
+  The 10:10 run: `mv.upload pending hr=2`, total 23.8 s, app closed. The
+  overnight "syncs but nothing new" (17:00–17:04 UTC 10-29 → 10-30) was the
+  watch being off-wrist, not a bug.
+- `compute-correlations`: every hourly run 200 since the founder's deploy
+  (10-29 16:00 UTC onward).
+- Settings "Last sync" fixed (commit 88ebcab): now the wall clock of the
+  last successful watch sync — reads "Just now" on device (was "31 d ago",
+  the BP cuff cursor).
+- 53 s splash did not recur: after `install -r` the root view appeared
+  immediately (the 10-29 delay was first-launch-after-update).
+- Doze: background syncs paused 07:45–09:53 PDT with the phone idle —
+  inexact alarms are deferred in Doze. Data is not lost (next sync uploads
+  it). Follow-up: exact-while-idle alarm or FGS-driven wake for tighter
+  cadence.
+
+Follow-ups (not blocking the 1.1.0 release):
+1. Cold-start deferral is bypassed: an `app_foreground` sync fires at launch
+   (AppState edge), so the watch drain still overlaps Home's first fetch
+   (stall 2.9 s, Home fetch 7.4 s on 10-30). Ignore the first active edge
+   within the deferral window.
+2. `mv.hrAcceptChunk` took 1.2 s for 2 samples — the local HR `recent` /
+   pending arrays have grown large; cap/trim them.
+3. Doze cadence (above).
+4. The founder's profile timezone is `Africa/Lagos` while he is in the US —
+   correlations' 03:00 local run and sleep windows are computed in Lagos
+   time. Product question: follow the device timezone automatically?
+5. The test APK reports versionName 1.0.0 because build.gradle hardcodes it;
+   `npm run release:android:*` injects app.json's 1.1.0 — verify on the AAB.

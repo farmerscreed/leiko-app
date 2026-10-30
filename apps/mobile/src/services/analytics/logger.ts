@@ -261,7 +261,10 @@ export type AnalyticsEvent =
   // the problem" without reproducing the whole investigation.
   | { name: 'headless_session_missing'; props?: { reason: string } }
   | { name: 'headless_session_refreshed' }
-  | { name: 'headless_session_refresh_failed'; props?: { reason: string } };
+  | { name: 'headless_session_refresh_failed'; props?: { reason: string } }
+  // 2026-10-29 — native keep-alive that lets JS timers run in background.
+  | { name: 'js_timers_held' }
+  | { name: 'js_timers_hold_failed'; props?: { reason: string } };
 
 type EventName = AnalyticsEvent['name'];
 

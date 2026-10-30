@@ -1,5 +1,13 @@
 # Start here — vitals correctness + physical testing + report delivery (2026-06-05)
 
+> **⏩ 2026-10-27 update (read FIRST):** on-device round on the founder's
+> Pixel 8. Launch-spinner hang fixed; the real "keeps loading" was the JS
+> thread pegged ~2.5 min by the cold-start watch sync (mitigated +
+> `[leiko-perf]` instrumentation); **background sync connects to the watch but
+> never uploads** (open, top priority); `compute-correlations` 500s hourly;
+> battery prompt CTAs fixed. Branch `fix/startup-never-hangs`. Full record +
+> next steps: **`plans/session-2026-10-27-startup-and-sync.md`**.
+
 > **⏩ 2026-08-14 update (read FIRST):** the Connect/invite system was
 > simplified end-to-end (Phases A–C, ADR-0012). Prod DB is fully
 > migrated (0051 + 0052) and the four legacy invite functions are

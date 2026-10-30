@@ -210,7 +210,7 @@ export const useHR = create<HRState>((set, get) => ({
     const remainingPending = currentPending.filter(
       (s) => !keySet.has(String(s.measuredAtSec)),
     );
-    for (const k of acceptedKeys) buffer.removeByKey(k);
+    buffer.removeByKeys(acceptedKeys);
     // Freshest first (sort by measuredAtSec desc), dedup against existing
     // recent, cap.
     const merged = dedupRecent(

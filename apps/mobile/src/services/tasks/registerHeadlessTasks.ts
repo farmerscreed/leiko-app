@@ -29,7 +29,8 @@
 // A pending migration is left alone: we skip the run rather than operate
 // on a half-migrated store, and the next app open completes it.
 
-import { BACKGROUND_SYNC_TASK, REMOTE_REFRESH_TASK } from './taskNames';
+import { AppRegistry, Platform } from 'react-native';
+import { BACKGROUND_SYNC_TASK, KEEP_TIMERS_TASK, REMOTE_REFRESH_TASK } from './taskNames';
 
 type TaskResult = 'ran' | 'skipped' | 'errored';
 
@@ -111,6 +112,21 @@ let registered = false;
 export function registerHeadlessTasks(): void {
   if (registered) return;
   registered = true;
+
+  // Keep-alive for JS timers (2026-10-29). The native BLE service starts
+  // this task and finishes it on stop; while it is active React Native
+  // keeps firing setTimeout/setInterval even with the app backgrounded.
+  // The promise deliberately never settles — native owns its lifetime.
+  // Guarded: a failure here must never stop the OS tasks below from
+  // being defined.
+  if (Platform?.OS === 'android' && typeof AppRegistry?.registerHeadlessTask === 'function') {
+    try {
+      AppRegistry.registerHeadlessTask(KEEP_TIMERS_TASK, () => () => new Promise<void>(() => {}));
+    } catch {
+      /* already registered (fast refresh) or unavailable */
+    }
+  }
+
   const { tm, bg } = load();
   if (!tm || !bg) return;
 
