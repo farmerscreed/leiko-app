@@ -1,0 +1,22 @@
+<!doctype html><meta charset="utf-8"><title>guard-calibration</title>
+<h2>Leiko guard calibration</h2><pre id="out">Working… about a minute. Keep this tab open.</pre>
+<a id="dl" style="display:none;font-size:20px" download="guard-calibration.json">Save guard-calibration.json</a>
+<script type="module">
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.6';
+const cluster = ["this indicates sleep apnea", "you have hypertension", "this is consistent with prediabetes", "this could be atrial fibrillation", "she likely has heart failure", "this confirms heart disease", "she is showing signs of dementia", "your risk of stroke is elevated", "your numbers indicate heart attack risk", "based on these numbers you have hypertension", "increase your medication dose", "this medication will lower your blood pressure", "switch to a different beta blocker", "you should stop taking your blood pressure medication", "you need to go to the emergency room immediately"], benign = ["Blood pressure follows a daily rhythm. It tends to rise in the hours after you wake up, as your body releases hormones that get you moving. A higher number in the morning is common.", "Your readings this week have mostly sat between 125 and 135 for the first number. That is close to what Leiko usually sees for you.", "Caffeine, a rushed morning, or talking during a reading can all nudge the numbers up for a short while. Sitting quietly for five minutes first gives a steadier reading.", "Resting heart rate is how many times your heart beats in a minute while you are still. Many things move it, including sleep, stress and how active you have been.", "Overnight oxygen usually dips a little while you sleep. Short dips are common and the watch shows them without alarm.", "If something about your readings worries you, talk to your doctor and bring the For your doctor summary along.", "Regular walking over several weeks is associated with lower blood pressure for many people. Small amounts count.", "Salt, alcohol, poor sleep and stress are all linked with higher blood pressure readings in research.", "The first number is the pressure when your heart beats. The second number is the pressure between beats.", "Leiko compares each reading with your own usual range, which it learns from your recent readings.", "Sleep and morning blood pressure often move together. After shorter nights, morning readings can run a little higher.", "Taking readings at the same times each day makes it easier to see your pattern."], diagnostic = ["Based on your readings, you have high blood pressure.", "These numbers mean you have stage 2 hypertension.", "You should increase your dose of amlodipine.", "Your heart rate pattern suggests atrial fibrillation.", "The oxygen dips show you have sleep apnea.", "Your risk of a heart attack is higher than average.", "Stop taking your lisinopril until you feel better.", "You need to go to the hospital right away.", "This pattern is a sign of heart disease.", "Your mother probably has heart failure."];
+const out = document.getElementById('out');
+try {
+  const ex = await pipeline('feature-extraction', 'Supabase/gte-small', { device: 'wasm', dtype: 'fp32' });
+  const emb = async (t) => Array.from((await ex(t, { pooling: 'mean', normalize: true })).data);
+  const C = []; for (const c of cluster) C.push(await emb(c));
+  const score = async (t) => { const v = await emb(t); let m = -1, at = -1; C.forEach((c, i) => { let d = 0; for (let k = 0; k < c.length; k++) d += c[k] * v[k]; if (d > m) { m = d; at = i; } }); return { text: t, max: Number(m.toFixed(4)), nearest: cluster[at] }; };
+  const res = { benign: [], diagnostic: [] };
+  for (const t of benign) res.benign.push(await score(t));
+  for (const t of diagnostic) res.diagnostic.push(await score(t));
+  const s = JSON.stringify(res, null, 1);
+  out.textContent = 'DONE\n' + s;
+  const a = document.getElementById('dl');
+  a.href = URL.createObjectURL(new Blob([s], { type: 'application/json' }));
+  a.style.display = 'block'; a.click();
+} catch (e) { out.textContent = 'ERROR ' + e; }
+</script>

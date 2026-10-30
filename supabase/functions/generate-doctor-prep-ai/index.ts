@@ -25,6 +25,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
+import { bpPromptLine } from './prompt.ts';
 import { assembleAiContext } from '../_shared/vitals-context-assembler.ts';
 import {
   buildSystemPrompt,
@@ -82,9 +83,7 @@ export function buildCoverPrompt(
   // formal label but still avoid "patient".
   lines.push(`Subject label: ${context.parentLabel}`);
   lines.push(`Date range: ${startDate} to ${endDate}`);
-  if (context.bp) {
-    lines.push(`BP — latest ${context.bp.latestSystolic}/${context.bp.latestDiastolic}, week avg ${context.bp.weekAverageSystolic ?? '?'}/${context.bp.weekAverageDiastolic ?? '?'}, state ${context.bp.state}`);
-  }
+  lines.push(bpPromptLine(context, startDate));
   if (context.hr) lines.push(`HR — resting baseline ${context.hr.baseline ?? '?'}`);
   if (context.spo2) lines.push(`SpO2 — overnight low ${context.spo2.overnightLow ?? '?'}, latest ${context.spo2.latest ?? '?'}`);
   if (context.sleep) lines.push(`Sleep — latest total ${context.sleep.lastNightTotalMinutes ?? '?'}min`);
@@ -95,6 +94,7 @@ export function buildCoverPrompt(
   lines.push('- Clinical but not pathologising. Factual.');
   lines.push('- Audience is a clinician — clinical terms (systolic, diastolic, etc.) are permitted.');
   lines.push('- Do NOT diagnose. Describe data only.');
+  lines.push('- Describe only data inside the date range. Use the numbers exactly as given, with their labels.');
   lines.push('- Do NOT prescribe or recommend changes.');
   lines.push(`- Use "${context.parentLabel}" — never "patient".`);
   lines.push('- Sentence-case. No exclamation points.');
@@ -111,7 +111,7 @@ export function buildObservationsPrompt(
   lines.push('');
   lines.push(`Subject label: ${context.parentLabel}`);
   lines.push(`Date range: ${startDate} to ${endDate}`);
-  if (context.bp) lines.push(`BP context: ${context.bp.state}, week avg ${context.bp.weekAverageSystolic ?? '?'}/${context.bp.weekAverageDiastolic ?? '?'}`);
+  lines.push(bpPromptLine(context, startDate));
   if (context.hr) lines.push(`HR context: resting baseline ${context.hr.baseline ?? '?'}`);
   if (context.sleep) lines.push(`Sleep context: latest ${context.sleep.lastNightTotalMinutes ?? '?'}min`);
   if (context.correlations && context.correlations.length > 0) {
@@ -124,6 +124,7 @@ export function buildObservationsPrompt(
   lines.push('Constraints:');
   lines.push('- 1 to 2 short paragraphs.');
   lines.push('- Clinical-tone permitted; no diagnosis.');
+  lines.push('- Describe only data inside the date range. Use the numbers exactly as given, with their labels.');
   lines.push('- Describe cross-vital patterns the clinician may want to investigate.');
   lines.push('- Never prescribe; never claim outcomes.');
   return `<user_query>\n${lines.join('\n')}\n</user_query>`;

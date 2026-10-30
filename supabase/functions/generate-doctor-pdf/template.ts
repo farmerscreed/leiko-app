@@ -354,7 +354,7 @@ function renderHR(data: ReportData): string {
     ${renderClinicalContext(data.hr.clinicalContext)}
     ${renderHrTrendChart(points)}
     <div class="stat-row">
-      <div class="stat"><span class="stat-label">Average resting</span><span class="stat-value">${formatBpm(avgResting)} <span class="unit">bpm</span></span></div>
+      <div class="stat"><span class="stat-label">Average daily median</span><span class="stat-value">${formatBpm(avgResting)} <span class="unit">bpm</span></span></div>
       ${rangeTile}
       <div class="stat"><span class="stat-label">Days observed</span><span class="stat-value">${points.length}</span></div>
       <div class="stat"><span class="stat-label">Samples</span><span class="stat-value">${count}</span></div>

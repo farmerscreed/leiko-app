@@ -28,7 +28,7 @@ function fixture(overrides: Partial<ReportData> = {}): ReportData {
     generatedAtIso: '2026-05-08T12:00:00Z',
     executiveSummary: {
       bpHeadline: '124/80 mmHg avg · 12% Stage 1+',
-      hrHeadline: 'Resting 64 bpm · range 56–88',
+      hrHeadline: 'Daily median 64 bpm · range 56–88',
       spo2Headline: 'Avg overnight low 94% · nadir 92%',
       sleepHeadline: '7h 00m avg · 28 nights',
       activityHeadline: '6.8k steps/day · 18/28 at target',
@@ -79,7 +79,7 @@ function fixture(overrides: Partial<ReportData> = {}): ReportData {
       count: 120,
       sufficiency: { level: 'sufficient', label: '120 samples over 28 days.' },
       clinicalContext: {
-        paragraphs: ['Resting heart rate averaged 64 bpm across 120 samples over 28 days. Observed range 56–88 bpm.'],
+        paragraphs: ['Daily median heart rate averaged 64 bpm across 120 samples over 28 days. Observed range 56–88 bpm.'],
       },
     },
     spo2: {
@@ -226,7 +226,7 @@ Deno.test('renderReport — Executive Summary renders all five vital headlines o
   const html = renderReport(fixture());
   assertStringIncludes(html, 'At a glance');
   assertStringIncludes(html, '124/80 mmHg avg');
-  assertStringIncludes(html, 'Resting 64 bpm');
+  assertStringIncludes(html, 'Daily median 64 bpm');
   assertStringIncludes(html, 'Avg overnight low 94%');
   assertStringIncludes(html, '7h 00m avg');
   assertStringIncludes(html, '6.8k steps/day');
@@ -235,7 +235,7 @@ Deno.test('renderReport — Executive Summary renders all five vital headlines o
 Deno.test('renderReport — clinical-context paragraphs render under each section header', () => {
   const html = renderReport(fixture());
   assertStringIncludes(html, 'Average 124/80 mmHg across 25 readings');
-  assertStringIncludes(html, 'Resting heart rate averaged 64 bpm');
+  assertStringIncludes(html, 'Daily median heart rate averaged 64 bpm');
   assertStringIncludes(html, 'Single lowest observation 92%');
 });
 
