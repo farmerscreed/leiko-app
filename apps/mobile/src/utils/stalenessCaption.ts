@@ -1,24 +1,30 @@
 // utils/stalenessCaption — Sprint 16.
 //
-// Pure formatter for the "Last sync 4h ago" caption that every vital
+// Pure formatter for the "Last reading 4h ago" caption that every vital
 // detail screen + Daily Pulse tile renders when its underlying vital
 // crosses the D13 §6.6 staleness threshold.
 //
 // Voice rules (D11 §3): the caption is calm and factual. Never
-// "Outdated" or "Old" — those imply concern. "Last sync …" mirrors
+// "Outdated" or "Old" — those imply concern. "Last reading …" mirrors
 // the on-screen vocabulary the rest of the app uses for sync state.
 
-export const STALENESS_PREFIX = 'Last sync';
+// 2026-10-30 release audit: this caption describes when the vital's
+// newest SAMPLE was taken, not when the app last synced. With background
+// sync working, "Last sync Mon" on a screen the phone had just synced
+// was false — and for a month-old reading "Mon" hid that it was a month
+// old. Now "Last reading …", and anything older than a week shows the
+// date ("Last reading Sep 28").
+export const STALENESS_PREFIX = 'Last reading';
 
 /**
  * Build the caption for a stale vital. `lastSampleAtSec` and `nowSec`
  * are Unix seconds. The output is one of:
- *   "Last sync 4h ago"    — at least 1h difference, hours mode
- *   "Last sync 28m ago"   — under 1h, minutes mode
- *   "Last sync just now"  — under 60s (a guard, since the caller is
+ *   "Last reading 4h ago"    — at least 1h difference, hours mode
+ *   "Last reading 28m ago"   — under 1h, minutes mode
+ *   "Last reading just now"  — under 60s (a guard, since the caller is
  *                            only meant to call this for `stale` vitals)
- *   "Last sync 2d ago"    — 48h+
- *   "Last sync Mon"       — 7d+ — fall back to weekday for older
+ *   "Last reading 2d ago"    — 48h+
+ *   "Last reading Sep 28" — 7d+ — the date, so a month-old reading looks it
  *
  * Returns null when `lastSampleAtSec` is null — consumers should
  * render a `no-data` empty state instead.
@@ -43,8 +49,8 @@ export function formatStalenessCaption(
     return `${STALENESS_PREFIX} ${days}d ago`;
   }
   const d = new Date(lastSampleAtSec * 1000);
-  const weekday = d.toLocaleDateString(undefined, { weekday: 'short' });
-  return `${STALENESS_PREFIX} ${weekday}`;
+  const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  return `${STALENESS_PREFIX} ${date}`;
 }
 
 /**

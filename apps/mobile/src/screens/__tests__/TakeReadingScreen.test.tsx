@@ -266,3 +266,14 @@ describe('TakeReadingScreen — no paired device', () => {
     expect(screen.getByText(/Pair the watch first/i)).toBeTruthy();
   });
 });
+
+describe('TakeReadingScreen — connecting can be cancelled (2026-10-30)', () => {
+  it('shows Cancel while still reaching the watch and goes back', async () => {
+    // Connection never settles — the case where the watch misbehaves.
+    mockConnectToUrion.mockImplementation(() => new Promise(() => undefined));
+    render(withProviders(<TakeReadingScreen navigation={nav} />));
+    await waitFor(() => screen.getByTestId('take-reading-connecting'));
+    fireEvent.press(screen.getByTestId('take-reading-connecting-cancel'));
+    expect(goBack).toHaveBeenCalled();
+  });
+});

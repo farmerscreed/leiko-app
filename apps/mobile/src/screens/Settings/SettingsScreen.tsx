@@ -1009,7 +1009,7 @@ export function SettingsScreen({ navigation }: Props) {
           />
           <ListRow
             variant="navigation"
-            title="Follow my phone\u2019s text size"
+            title="Follow my phone’s text size"
             subtitle="Let Leiko decide from your phone settings."
             onPress={() => largeText.setPreference('auto')}
             showDivider={false}

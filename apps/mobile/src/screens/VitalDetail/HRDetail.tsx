@@ -76,9 +76,11 @@ import { hrFill } from '../../utils/vitalThemes';
 import {
   canonicalTierForLegacy,
   checkStaleness,
+  classifyVital,
   vitalRangeCopyForTier,
 } from '../../utils/classification';
 import { formatStalenessCaption } from '../../utils/stalenessCaption';
+import { SELF_SUBJECT, sentenceFragmentForTier } from '../../services/voice/tierVocabulary';
 import type { HRSample, SleepSession } from '../../types/vitals';
 
 const SECONDS_PER_DAY = 24 * 60 * 60;
@@ -668,12 +670,26 @@ export function HRDetail({
       : null;
   }, [summaryFamilyId]);
 
+  // 2026-10-30 release audit: the person overview judged 72 bpm against
+  // the server band (60–70) as "Worth a look" while this screen's legacy
+  // classifier called the same number "In your usual range". Both now use
+  // the truth layer (classifyVital against the server row); the legacy
+  // tier is only the fallback when there is no resting value to judge.
+  const hrCanonical = useMemo(() => {
+    const row = getServerBaseline(summaryFamilyId ?? '', 'resting_hr');
+    if (!row || !row.isSufficient) return null;
+    if (restingToday !== null) {
+      return classifyVital({ vital: 'resting_hr', value: restingToday }, row).tier;
+    }
+    return null;
+  }, [summaryFamilyId, restingToday]);
   const hrChipTier = useMemo(() => {
     const row = getServerBaseline(summaryFamilyId ?? '', 'resting_hr');
     if (!row || !row.isSufficient) return 'learning' as const;
+    if (hrCanonical) return hrCanonical;
     const legacy = data.hr.classification?.tier;
     return legacy ? canonicalTierForLegacy(legacy) : ('learning' as const);
-  }, [summaryFamilyId, data.hr.classification]);
+  }, [summaryFamilyId, hrCanonical, data.hr.classification]);
   const heroSub =
     staleCaption ??
     (hasHero ? (isLive ? 'Latest reading' : 'Now · resting') : 'Heart rate');
@@ -688,9 +704,11 @@ export function HRDetail({
   const heroRange = hasHero
     ? isLive
       ? 'bpm · latest'
-      : hrChipTier !== 'learning' && hrTier !== null
-        ? vitalRangeCopyForTier('bpm', hrTier)
-        : 'bpm · resting'
+      : hrCanonical && hrCanonical !== 'learning'
+        ? `bpm · ${sentenceFragmentForTier(hrCanonical, SELF_SUBJECT).replace(/^is /, '')}`
+        : hrChipTier !== 'learning' && hrTier !== null
+          ? vitalRangeCopyForTier('bpm', hrTier)
+          : 'bpm · resting'
     : 'Wear the watch to start tracking your heart rate.';
 
   return (

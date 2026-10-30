@@ -1,0 +1,8 @@
+{
+  "name": "leiko-guard-embeddings",
+  "private": true,
+  "description": "Generates supabase/functions/_shared/output-guard/cluster-embeddings.ts (run on a machine that can reach huggingface.co).",
+  "type": "module",
+  "scripts": { "gen": "node gen.mjs" },
+  "dependencies": { "@huggingface/transformers": "3.7.6" }
+}

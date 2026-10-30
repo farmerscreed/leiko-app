@@ -409,7 +409,16 @@ export function BPDetail({
           ? formatHeroTime(data.bp.latestSampleSec, timeZone)
           : 'Latest')
       }
-      range={rangeCopyForTier(tier)}
+      // 2026-10-30 release audit: the legacy tier said "in your usual
+      // range" while the chip beside it said "Learning" and the card below
+      // said "0 of 10 readings". While the band is still learning there is
+      // no usual range to be in, so the line is just the unit.
+      range={
+        data.bp.classification &&
+        canonicalTierFor(data.bp.classification) === 'learning'
+          ? 'mmHg'
+          : rangeCopyForTier(tier)
+      }
       // D13 PR-7 (§6.2/P1-5) — the verdict chip is mandatory on the
       // hero; ring goes learning-grey until the §4.3 gate is met.
       tier={data.bp.classification ? canonicalTierFor(data.bp.classification) : null}

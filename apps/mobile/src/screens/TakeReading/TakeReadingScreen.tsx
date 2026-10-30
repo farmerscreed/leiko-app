@@ -103,7 +103,7 @@ export function TakeReadingScreen({ navigation }: Props) {
   switch (phase) {
     case 'idle':
     case 'connecting':
-      body = <ConnectingView />;
+      body = <ConnectingView onCancel={onClose} />;
       break;
     case 'waiting_for_watch':
       body = (
@@ -218,11 +218,15 @@ const A11Y_WAITING =
 const A11Y_RECONNECTING = 'One moment. Picking up the new reading from your watch.';
 const A11Y_FETCHING = 'Reading complete. Saving it now.';
 
-function ConnectingView() {
+// 2026-10-30 release audit: connecting also runs the watch config push
+// and backlog sync, which can take a while when the watch misbehaves.
+// This view had no way out but the system back gesture.
+function ConnectingView({ onCancel }: { onCancel: () => void }) {
   const theme = useTheme();
   // Audit P1-7.
   useAnnounceOnChange(A11Y_CONNECTING);
   return (
+    <>
     <View accessible={true}
       testID="take-reading-connecting"
       accessibilityLiveRegion="polite"
@@ -234,6 +238,16 @@ function ConnectingView() {
         <ActivityIndicator size="large" color={theme.colors.brand.primary} />
       </View>
     </View>
+    <Button
+      variant="ghost"
+      onPress={onCancel}
+      accessibilityLabel="Cancel"
+      testID="take-reading-connecting-cancel"
+      style={{ marginTop: theme.spacing.s }}
+    >
+      Cancel
+    </Button>
+    </>
   );
 }
 
