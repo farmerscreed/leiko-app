@@ -104,7 +104,7 @@ describe('§7.7 copy — verbatim', () => {
   it('vital detail learning body', () => {
     expect(LEARNING_COPY.vitalDetail.headline).toBe('Still learning');
     expect(LEARNING_COPY.vitalDetail.body(2, 10, 'Mum')).toBe(
-      "We have 2 of the 10 readings we need before we can tell you what's usual for Mum.",
+      "We have 2 of the 10 recent readings we need before we can tell you what's usual for Mum.",
     );
   });
 

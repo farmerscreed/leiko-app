@@ -59,7 +59,6 @@ import { ForYourDoctorRangeChipsRow } from './ForYourDoctorRangeChipsRow';
 import {
   generateDoctorPdf,
   pdfRangeFromTrendsRange,
-  projectedPageCount,
   type DoctorPdfRange,
   type DoctorPdfResult,
 } from '../../services/doctorPdf';
@@ -297,22 +296,10 @@ export function ForYourDoctorScreen(props: Nav) {
     [trends.data],
   );
 
-  // Sprint 16.5h — projected page count from real vital counts.
-  // Pre-fix the screen showed a literal "8 pages" regardless.
-  const pageCount = useMemo(() => {
-    if (!summary) return 2;
-    return projectedPageCount(
-      {
-        bp: summary.bp.count,
-        hr: summary.hr.count,
-        spo2: summary.spo2.count,
-        sleep: summary.sleep.count,
-        activity: summary.activity.count,
-      },
-      false, // hasCorrelations — wire correlations hook in a later pass
-    );
-  }, [summary]);
-  const pagesPdfLabel = `${pageCount} pages · PDF`;
+  // 2026-10-30 release audit: the projected count said "6 pages" for a
+  // PDF that came out at 4 — the server flows light sections inline. No
+  // number is better than a wrong one.
+  const pagesPdfLabel = 'PDF';
 
   // Sprint 16.5h — baseline reference for the BP band shown on the
   // preview + threaded into the PDF eventually. Local-readings-slice

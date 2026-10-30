@@ -1834,6 +1834,8 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 [
                   {
                     "family": "Inter_600SemiBold",
+                    "fontFamily": "Inter_600SemiBold",
+                    "fontSize": 18,
                     "lineHeight": 24,
                     "size": 18,
                     "weight": "600",
@@ -1852,6 +1854,8 @@ exports[`HRDetail — dark-mode snapshot matches snapshot with full data in dark
                 [
                   {
                     "family": "Inter_400Regular",
+                    "fontFamily": "Inter_400Regular",
+                    "fontSize": 15,
                     "lineHeight": 22,
                     "size": 15,
                     "weight": "400",

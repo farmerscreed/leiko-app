@@ -17,6 +17,7 @@ export {
   fontFamilies,
   typeScale,
   getTypeStyle,
+  type ResolvedTypeStyle,
   type TypeStyle,
   type TypeToken,
   type TypeMode,

@@ -900,6 +900,13 @@ export function BPDetail({
               vital="bp"
               eyebrow="Recent readings"
               readings={recentRows}
+              // There ARE readings (isEmpty is false) — just none in this
+              // range. Say so instead of "will land here" (2026-10-30).
+              emptyText={
+                range === '90d'
+                  ? 'No readings in the last 90 days.'
+                  : `No readings in the last ${RANGE_TO_DAYS[range]} days. Tap 90d to see older ones.`
+              }
               onSelect={
                 onSelectReading ? (r) => onSelectReading(r.id) : undefined
               }

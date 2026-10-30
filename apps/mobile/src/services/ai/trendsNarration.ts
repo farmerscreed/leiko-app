@@ -25,6 +25,7 @@ import type { TrendsData, TrendsRange } from '../../utils/trends-aggregate';
 import type { CorrelationRow } from '../../types/database';
 import {
   buildTrendsLetter,
+  leadLine,
   type BuildTrendsLetterInput,
   type TrendsLetter,
 } from './trendsTierC';
@@ -117,15 +118,11 @@ export function buildTierATrendsNarrative(
 
   const pieces: string[] = [];
 
-  // Lead clause — pattern + emphasis.
+  // Lead clause — the usual-range claim only when the average is in
+  // the band (same rule as the Tier-C letter, 2026-10-30).
+  pieces.push(leadLine(data, input.baselines?.bp ?? null, { subject, verb, possessive, windowLabel }));
   if (avg) {
-    pieces.push(
-      `${subject} ${verb} _in ${possessive} usual range_ this ${windowLabel}. ${capitalize(
-        possessive,
-      )} mornings averaged ${avg}.`,
-    );
-  } else {
-    pieces.push(`${subject} ${verb} _in ${possessive} usual range_ this ${windowLabel}.`);
+    pieces.push(`${capitalize(possessive)} mornings averaged ${avg}.`);
   }
 
   // Correlation clause — append the strongest meaningful one.

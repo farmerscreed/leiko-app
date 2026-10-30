@@ -1738,6 +1738,8 @@ exports[`SleepDetail — snapshot matches the dark-mode snapshot with a session 
               [
                 {
                   "family": "Inter_400Regular",
+                  "fontFamily": "Inter_400Regular",
+                  "fontSize": 12,
                   "lineHeight": 16,
                   "size": 12,
                   "weight": "400",

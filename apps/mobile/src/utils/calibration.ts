@@ -107,12 +107,14 @@ export function unlockedCapabilities(
 }
 
 // ── §7.7 learning copy — verbatim, one definition site ───────────────
+// 2026-10-30: "recent" added to vitalDetail.body — with only older
+// readings the card said "0 of 10" beside a 90-day average of dozens.
 
 export const LEARNING_COPY = {
   vitalDetail: {
     headline: 'Still learning',
     body: (n: number, required: number, name: string): string =>
-      `We have ${n} of the ${required} readings we need before we can tell you what's usual for ${name}.`,
+      `We have ${n} of the ${required} recent readings we need before we can tell you what's usual for ${name}.`,
   },
   monitorAllLearning: {
     headline: (name: string): string => `Getting to know ${name}`,

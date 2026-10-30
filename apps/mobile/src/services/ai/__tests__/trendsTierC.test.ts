@@ -190,6 +190,7 @@ describe('buildTrendsLetter', () => {
       correlations: [],
       range: '30d',
       accountType: 'self_buyer',
+      baselines: { bp: { sysLow: 110, sysHigh: 135, diaLow: 70, diaHigh: 88, sampleCount: 20 } },
     });
     expect(letter).not.toBeNull();
     expect(letter!.body).toContain('usual range');
@@ -280,5 +281,22 @@ describe('buildWeeklySummary', () => {
     });
     expect(ws).not.toBeNull();
     expect(ws!.body).toMatch(/7,400/);
+  });
+});
+
+describe('leadLine (2026-10-30)', () => {
+  it('says plainly when there are too few BP readings', () => {
+    const letter = buildTrendsLetter({
+      data: makeTrends({
+        bp: { count: 0, avgSys: null, avgDia: null, pctInRange: null },
+        hr: { count: 7, avgResting: 70 },
+      }),
+      correlations: [],
+      range: '7d',
+      accountType: 'self_buyer',
+    });
+    expect(letter).not.toBeNull();
+    expect(letter!.body).not.toContain('usual range');
+    expect(letter!.body).toContain('Not enough blood pressure readings this week');
   });
 });

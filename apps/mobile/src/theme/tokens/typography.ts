@@ -127,10 +127,38 @@ export type TypeToken = keyof typeof caregiver;
 
 export type TypeMode = 'caregiver' | 'parent';
 
-export function getTypeStyle(mode: TypeMode, token: TypeToken): TypeStyle {
+/**
+ * A token as returned by `theme.type()`. Carries the design keys
+ * (`size`, `family`, …) AND the React Native keys (`fontSize`,
+ * `fontFamily`) so it works when passed straight into `style`.
+ *
+ * 2026-10-30 release audit: 60+ call sites did `style={[caption, …]}`.
+ * RN ignores `size`/`family`, so that text rendered in the system font
+ * at 14sp with the token's (smaller) lineHeight — wrong font, wrong
+ * size, and on Android the last line could be clipped ("Steady is a
+ * finding" lost "too." on Trends). Adding the RN keys fixes every such
+ * site at once. `fontWeight` is deliberately NOT added: the weight lives
+ * in the family name (Inter_600SemiBold) and a separate fontWeight makes
+ * Android fall back to the system font.
+ */
+export type ResolvedTypeStyle = TypeStyle & { fontSize: number; fontFamily: string };
+
+const resolvedCache = new Map<string, ResolvedTypeStyle>();
+
+export function getTypeStyle(mode: TypeMode, token: TypeToken): ResolvedTypeStyle {
+  const key = `${mode}:${token}`;
+  const hit = resolvedCache.get(key);
+  if (hit) return hit;
+  let base: TypeStyle = caregiver[token];
   if (mode === 'parent') {
     const override = (parent as Partial<Record<TypeToken, TypeStyle>>)[token];
-    if (override) return override;
+    if (override) base = override;
   }
-  return caregiver[token];
+  const resolved: ResolvedTypeStyle = Object.freeze({
+    ...base,
+    fontSize: base.size,
+    fontFamily: base.family,
+  }) as ResolvedTypeStyle;
+  resolvedCache.set(key, resolved);
+  return resolved;
 }

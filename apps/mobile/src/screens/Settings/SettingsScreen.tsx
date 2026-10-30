@@ -19,6 +19,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   Linking,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -632,7 +633,7 @@ export function SettingsScreen({ navigation }: Props) {
         {/* Apple Health / Health Connect ------------------------------ */}
         {showHealthPlatform ? (
           <SettingsSection
-            title="Apple Health & Health Connect"
+            title={Platform.OS === 'ios' ? 'Apple Health' : 'Health Connect'}
             testID="settings-section-health-platform"
           >
             <ListRow
@@ -1899,7 +1900,8 @@ function TimezoneBody({
         }}
       >
         Your timezone controls when "today" starts for your trends. Right
-        now it&apos;s set to {initial ?? 'not set'}.
+        now it&apos;s set to {initial ?? 'not set'}. Leiko follows your
+        phone&apos;s time zone, so it updates on its own when you travel.
       </Text>
       <Button
         variant="primary"

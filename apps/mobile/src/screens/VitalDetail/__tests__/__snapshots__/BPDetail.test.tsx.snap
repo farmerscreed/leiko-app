@@ -1074,7 +1074,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
           }
         >
           <View
-            accessibilityLabel="Still learning: 0 of 10, We have 0 of the 10 readings we need before we can tell you what's usual for you."
+            accessibilityLabel="Still learning: 0 of 10, We have 0 of the 10 recent readings we need before we can tell you what's usual for you."
             accessibilityRole="text"
             accessible={true}
             style={
@@ -1131,7 +1131,7 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                 }
               }
             >
-              We have 0 of the 10 readings we need before we can tell you what's usual for you.
+              We have 0 of the 10 recent readings we need before we can tell you what's usual for you.
             </Text>
           </View>
           <View
@@ -1398,6 +1398,8 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                   [
                     {
                       "family": "Inter_400Regular",
+                      "fontFamily": "Inter_400Regular",
+                      "fontSize": 12,
                       "lineHeight": 16,
                       "size": 12,
                       "weight": "400",
@@ -1474,6 +1476,8 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       [
                         {
                           "family": "Inter_500Medium",
+                          "fontFamily": "Inter_500Medium",
+                          "fontSize": 13,
                           "lineHeight": 16,
                           "size": 13,
                           "weight": "500",
@@ -1542,6 +1546,8 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       [
                         {
                           "family": "Inter_500Medium",
+                          "fontFamily": "Inter_500Medium",
+                          "fontSize": 13,
                           "lineHeight": 16,
                           "size": 13,
                           "weight": "500",
@@ -1610,6 +1616,8 @@ exports[`BPDetail — snapshot matches snapshot in dark mode with a populated re
                       [
                         {
                           "family": "Inter_500Medium",
+                          "fontFamily": "Inter_500Medium",
+                          "fontSize": 13,
                           "lineHeight": 16,
                           "size": 13,
                           "weight": "500",

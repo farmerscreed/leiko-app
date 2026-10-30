@@ -242,6 +242,28 @@ function watchLine(
   return 'Numbers are sitting on the quieter side.';
 }
 
+/**
+ * The letter's first sentence. Exported for tests.
+ *  - ≥3 BP readings, average inside the usual band → "in your usual range"
+ *  - ≥3 BP readings otherwise (no band yet, or outside it) → neutral
+ *  - fewer than 3 BP readings → says so, plainly
+ */
+export function leadLine(
+  data: TrendsData,
+  baseline: BPBaseline | null | undefined,
+  p: { subject: string; verb: string; possessive: string; windowLabel: string },
+): string {
+  const bp = data.summary.bp;
+  if (bp.count < 3 || bp.avgSys === null) {
+    return `Not enough blood pressure readings this ${p.windowLabel} to compare — the other numbers are below.`;
+  }
+  const avgSys = Math.round(bp.avgSys);
+  if (baseline && avgSys >= Math.round(baseline.sysLow) && avgSys <= Math.round(baseline.sysHigh)) {
+    return `${p.subject} ${p.verb} _in ${p.possessive} usual range_ this ${p.windowLabel}.`;
+  }
+  return `Here is how ${p.possessive} ${p.windowLabel} looked.`;
+}
+
 function capitalize(s: string): string {
   return s.length > 0 ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 }
@@ -279,8 +301,11 @@ export function buildTrendsLetter(
   // Compose the letter. 3-4 short sentences, never more.
   const pieces: string[] = [];
 
-  // 1. Lead — pattern declaration.
-  pieces.push(`${subject} ${verb} _in ${possessive} usual range_ this ${windowLabel}.`);
+  // 1. Lead — pattern declaration. 2026-10-30 release audit: this used
+  // to claim "in your usual range" unconditionally — including weeks
+  // with no BP readings at all and weeks above the band. The claim is
+  // now made only when the window's average sits inside the band.
+  pieces.push(leadLine(data, baseline, { subject, verb, possessive, windowLabel }));
 
   // 2. BP comparison — uses baseline when available.
   if (summary.bp.count >= 3) {

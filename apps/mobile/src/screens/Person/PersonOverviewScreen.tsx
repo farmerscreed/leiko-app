@@ -36,6 +36,7 @@ import {
   type Subject,
 } from '../../services/voice/tierVocabulary';
 import { monthDayInZone, timeInZone } from '../../utils/timeInZone';
+import { LoadingState } from '../../components/LoadingState';
 import { LEARNING_COPY } from '../../utils/calibration';
 import { mmkv, STORAGE_KEYS } from '../../services/storage';
 import { MedicationSection } from '../../components/MedicationSection';
@@ -137,6 +138,11 @@ export function PersonOverviewScreen({
         ? LEARNING_COPY.monitorAllLearning.body
         : `${LEARNING_COPY.monitorAllLearning.headline(subject.label)}. ${LEARNING_COPY.monitorAllLearning.body}`;
     }
+    // "Your latest reading is still learning…" read as if the reading
+    // were doing the learning (2026-10-30 audit).
+    if (bpTier === 'learning') {
+      return `Leiko is still learning what's usual for ${subject.label}.`;
+    }
     const lead = isSelf ? 'Your latest reading' : `${subject.label}'s latest reading`;
     return `${lead} ${sentenceFragmentForTier(bpTier, subject)}.`;
   }, [latest, bpTier, isSelf, subject]);
@@ -209,6 +215,19 @@ export function PersonOverviewScreen({
   const heroType = theme.type('numericHero');
   const voice = theme.fontFamilies.editorial;
 
+  // 2026-10-30 release audit: while the person's data was still loading
+  // this screen rendered the empty state ("No readings yet", every row
+  // "—") for several seconds before the real numbers arrived.
+  if (isCaregiverScoped && !parentPulse.data && parentPulse.isLoading) {
+    return (
+      <View
+        style={{ flex: 1, backgroundColor: theme.colors.surface.warmBase, justifyContent: 'center' }}
+        testID={testID}
+      >
+        <LoadingState testID={`${testID}-loading`} />
+      </View>
+    );
+  }
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.surface.warmBase }} testID={testID}>
       <CanvasGradient />
