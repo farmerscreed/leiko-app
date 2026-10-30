@@ -55,6 +55,7 @@ import { syncBacklogToCompletion } from '../services/sync/syncBacklogToCompletio
 import { syncMultiVitals } from '../services/sync/syncMultiVitals';
 import { applyDeviceConfig } from '../services/sync/applyDeviceConfig';
 import { inferModel } from '../services/sync/postReading';
+import { recordWatchSync } from '../services/sync/lastWatchSync';
 import {
   clearSyncFailure,
   markSyncFailure,
@@ -394,6 +395,7 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
       // Sprint 16: a successful sync clears the failure streak that
       // drives the 24h reassurance banner.
       clearSyncFailure();
+      recordWatchSync(nowMs());
       perfLog(`sync done trigger=${trigger} total=${nowMs() - syncT0}ms`);
       setPerfPhase('idle');
 

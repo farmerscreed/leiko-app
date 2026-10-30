@@ -263,3 +263,15 @@ describe('useSyncOrchestrator.start — cold-start deferral (2026-10-27)', () =>
     expect(mockConnectToUrion).not.toHaveBeenCalled();
   });
 });
+
+
+describe('useSyncOrchestrator — last watch sync (2026-10-30)', () => {
+  it('records the wall-clock time of a successful watch sync', async () => {
+    const { getLastWatchSyncMs } = jest.requireActual('../../services/sync/lastWatchSync');
+    const before = Date.now();
+    await useSyncOrchestrator.getState().runSync('background');
+    const at = getLastWatchSyncMs();
+    expect(at).not.toBeNull();
+    expect(at as number).toBeGreaterThanOrEqual(before - 1000);
+  });
+});

@@ -70,10 +70,7 @@ import {
 } from '../../services/ai/quotaCounter';
 import { usePlusEntitlement } from '../../hooks/usePlusEntitlement';
 import { useBatteryOptimizationStatus } from '../../hooks/useBatteryOptimizationStatus';
-import {
-  getLastSyncSec,
-  watchTimestampToUtcSec,
-} from '../../services/sync/syncBacklog';
+import { formatLastWatchSync, getLastWatchSyncMs } from '../../services/sync/lastWatchSync';
 import { useTheme } from '../../theme';
 import type { CaregiverScreenProps } from '../../navigation/types';
 import type { Gender, HypertensionStatus, UserRow, UserUpdate } from '../../types/database';
@@ -2169,24 +2166,10 @@ function FieldHeader({
 
 function useLastSyncDisplay(bleId: string | null): string {
   if (!bleId) return '—';
-  // Pre-Sprint 7.5 the cursor map was Record<string, number> (Unix sec);
-  // Sprint 7.5 widened entries to a VitalSyncCursor object. The previous
-  // implementation here multiplied the raw object by 1000, yielding NaN
-  // and "NaN d ago". `getLastSyncSec` normalises both shapes and returns
-  // the BP cursor in RAW watch seconds; convert to actual UTC via
-  // watchTimestampToUtcSec so the "ago" math doesn't drift by the
-  // China-firmware offset.
-  const rawWatchSec = getLastSyncSec(bleId);
-  if (!rawWatchSec) return 'Not yet synced';
-  const utcMs = watchTimestampToUtcSec(rawWatchSec) * 1000;
-  const minutesAgo = Math.floor((Date.now() - utcMs) / 60_000);
-  if (minutesAgo < 0) return 'Just now';
-  if (minutesAgo < 1) return 'Just now';
-  if (minutesAgo < 60) return `${minutesAgo} min ago`;
-  const hours = Math.floor(minutesAgo / 60);
-  if (hours < 24) return `${hours} h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days} d ago`;
+  // 2026-10-30 — was the BP history cursor (newest CUFF reading), which
+  // read "31 d ago" while the app synced every 15 min. Now the wall
+  // clock of the last successful watch sync, any trigger.
+  return formatLastWatchSync(getLastWatchSyncMs());
 }
 
 const styles = StyleSheet.create({
