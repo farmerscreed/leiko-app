@@ -28,9 +28,11 @@ interface NativeApi {
 async function holdTimers(): Promise<void> {
   if (!native?.holdJsTimers) return;
   try {
-    await native.holdJsTimers();
+    const id = await native.holdJsTimers();
+    console.log(`[leiko-bg] js timers held (task ${id})`);
     logger.track('js_timers_held');
   } catch (e) {
+    console.log(`[leiko-bg] js timers hold FAILED ${e instanceof Error ? e.message : ''}`);
     logger.track('js_timers_hold_failed', {
       reason: e instanceof Error ? e.message : 'unknown',
     });
@@ -40,6 +42,7 @@ async function holdTimers(): Promise<void> {
 async function releaseTimers(): Promise<void> {
   if (!native?.releaseJsTimers) return;
   try {
+    console.log('[leiko-bg] js timers released');
     await native.releaseJsTimers();
   } catch {
     /* best-effort */
@@ -87,6 +90,17 @@ export async function stopBleForegroundService(): Promise<void> {
       reason: e instanceof Error ? e.message : 'unknown',
     });
   }
+}
+
+/**
+ * Re-assert the JS-timer hold while the service runs. Native is idempotent
+ * (returns the live task id if one is still running). Called at the start
+ * of every background run: if the hold was ever dropped, a background run
+ * would otherwise freeze on its first JS timer (2026-10-30 release audit).
+ */
+export async function ensureJsTimersHeld(): Promise<void> {
+  if (Platform.OS !== 'android' || !running) return;
+  await holdTimers();
 }
 
 export function isBleForegroundServiceRunning(): boolean {
