@@ -18,3 +18,29 @@ export function bpPromptLine(context: ScrubbedAiContext, startDate: string): str
   return `BP — latest ${context.bp.latestSystolic}/${context.bp.latestDiastolic} on ${day}, week avg ${context.bp.weekAverageSystolic ?? '?'}/${context.bp.weekAverageDiastolic ?? '?'}, state ${context.bp.state}`;
 }
 
+
+/**
+ * HR / SpO2 / sleep / activity lines for the cover prompt. 2026-10-30
+ * release audit: with bare labels ("recent steps 293") the model wrote
+ * "step count in the same period was 293" — a single day's steps
+ * presented as the 30-day figure. Every line now names its time frame.
+ */
+export function otherVitalPromptLines(context: ScrubbedAiContext): string[] {
+  const lines: string[] = [];
+  if (context.hr && context.hr.baseline !== null) {
+    lines.push(`HR — resting heart-rate baseline ${context.hr.baseline} bpm (the person's usual resting value)`);
+  }
+  if (context.spo2) {
+    if (context.spo2.overnightLow !== null) {
+      lines.push(`SpO2 — most recent night's low ${context.spo2.overnightLow}%`);
+    }
+    if (context.spo2.latest !== null) lines.push(`SpO2 — most recent reading ${context.spo2.latest}%`);
+  }
+  if (context.sleep && context.sleep.lastNightTotalMinutes !== null) {
+    lines.push(`Sleep — most recent night ${context.sleep.lastNightTotalMinutes} minutes`);
+  }
+  if (context.activity && context.activity.todaySteps !== null) {
+    lines.push(`Activity — most recent day so far ${context.activity.todaySteps} steps (a partial day, not a period total)`);
+  }
+  return lines;
+}

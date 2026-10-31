@@ -346,6 +346,7 @@ function shape(
     range: req.range,
     rangeLabel: RANGE_LABEL[req.range],
     generatedAtIso: new Date().toISOString(),
+    timeZone: tz,
     executiveSummary,
     bp,
     hr,

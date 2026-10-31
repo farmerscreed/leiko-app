@@ -159,6 +159,9 @@ export interface ReportData {
   range: Range;
   rangeLabel: string;
   generatedAtIso: string;
+  /** Wearer's IANA timezone — the generated date is shown in it
+   *  (a 6:52 pm Los Angeles report said "October 31" in UTC). */
+  timeZone?: string;
   /** Sprint 19 PDF v2 — always populated. */
   executiveSummary: ExecutiveSummary;
   bp: {

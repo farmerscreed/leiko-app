@@ -170,7 +170,7 @@ function renderCover(data: ReportData): string {
       ${renderClinicalFields(data)}
       ${note}
       <p class="cover-line">${escape(coverLine(data.user.accountType, data.user.displayName))}</p>
-      <p class="generated-at">Generated ${escape(formatDate(data.generatedAtIso))}</p>
+      <p class="generated-at">Generated ${escape(formatDate(data.generatedAtIso, data.timeZone))}</p>
     </header>
   `;
 }
@@ -516,13 +516,14 @@ function escape(s: string): string {
     .replace(/'/g, '&#39;');
 }
 
-function formatDate(iso: string): string {
+export function formatDate(iso: string, timeZone?: string): string {
   const d = new Date(iso);
-  return d.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const opts: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+  try {
+    return d.toLocaleDateString('en-US', timeZone ? { ...opts, timeZone } : opts);
+  } catch {
+    return d.toLocaleDateString('en-US', opts);
+  }
 }
 
 function formatBP(sys: number | null, dia: number | null): string {
