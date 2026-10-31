@@ -72,14 +72,17 @@ async function runWatchSync(): Promise<TaskResult> {
     '../../state/hydrateForHeadlessRun'
   );
   const { useSyncOrchestrator } = await import('../../state/syncOrchestrator');
-  const { withBleForegroundService } = await import('../ble/foregroundService');
+  const { withBleForegroundService, ensureJsTimersHeld } = await import('../ble/foregroundService');
   hydrateForHeadlessRun();
+  await ensureJsTimersHeld();
+  const t0 = Date.now();
   // Awaited BEFORE the run so uploads have a live token. A cold headless
   // process has not finished recovering its session from secure storage,
   // and nothing refreshes an expired one — every upload 401s while the
   // watch reads succeed, which is exactly what 2026-08-15 looked like.
   // Best-effort: a false here still lets the run pull and persist.
-  await ensureSessionForHeadlessRun();
+  const sessionOk = await ensureSessionForHeadlessRun();
+  bgLog(`session ok=${sessionOk} in ${Date.now() - t0}ms`);
   try {
     // Hold the foreground service for the run: the cached-app freezer
     // otherwise stops this process 9–18 s after the wake, which starves
@@ -89,8 +92,30 @@ async function runWatchSync(): Promise<TaskResult> {
       useSyncOrchestrator.getState().runSync('background'),
     );
     return result === 'ran' ? 'ran' : 'skipped';
-  } catch {
+  } catch (e) {
+    bgLog(`run threw ${e instanceof Error ? e.message.slice(0, 80) : 'unknown'}`);
     return 'errored';
+  }
+}
+
+function bgLog(message: string): void {
+  if (typeof process !== 'undefined' && process.env?.JEST_WORKER_ID) return;
+  console.log(`[leiko-bg] ${message}`);
+}
+
+/** Does a JS timer fire in this context? Races a 1 s setTimeout against a
+ *  3 s native (OS-driven) delay. "paused" means every JS timer — auth
+ *  refresh back-off, fetch abort — is frozen here. */
+async function probeJsTimers(): Promise<void> {
+  try {
+    const { headlessDelay } = await import('../ble/headlessDelay');
+    const fired = await Promise.race([
+      new Promise<boolean>((resolve) => setTimeout(() => resolve(true), 1000)),
+      headlessDelay(3000).then(() => false),
+    ]);
+    bgLog(`js timers ${fired ? 'running' : 'PAUSED'}`);
+  } catch {
+    /* diagnostics only */
   }
 }
 
@@ -132,9 +157,19 @@ export function registerHeadlessTasks(): void {
 
   if (!tm.isTaskDefined(BACKGROUND_SYNC_TASK)) {
     tm.defineTask(BACKGROUND_SYNC_TASK, async () => {
+      // 2026-10-30 release audit: background runs on a fresh install read
+      // the watch but never uploaded, and release builds had no way to say
+      // why. These breadcrumbs (labels and timings only) reach logcat as
+      // ReactNativeJS "[leiko-bg]" lines.
+      bgLog('task fired');
+      void probeJsTimers();
       try {
-        if (!(await storageReady())) return bg.BackgroundFetchResult.NoData;
+        if (!(await storageReady())) {
+          bgLog('storage not ready — skipped');
+          return bg.BackgroundFetchResult.NoData;
+        }
         const result = await runWatchSync();
+        bgLog(`task result=${result}`);
         await track(result);
         if (result === 'ran') return bg.BackgroundFetchResult.NewData;
         if (result === 'errored') return bg.BackgroundFetchResult.Failed;

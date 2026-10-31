@@ -235,6 +235,7 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
     const takePhase = useTakeReading.getState().phase;
     if (takePhase !== 'idle' && takePhase !== 'success' && takePhase !== 'failure') {
       logger.track('sync_skipped', { trigger, reason: 'take_reading_active' });
+      perfLog(`sync skipped trigger=${trigger} reason=take_reading_active`);
       return 'skipped';
     }
     if (get().status === 'connecting' || get().status === 'syncing') {
@@ -242,12 +243,14 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
       const stuckForMs = startedAt === null ? null : nowMs() - startedAt;
       if (stuckForMs === null || stuckForMs < STALE_RUN_RESET_MS) {
         logger.track('sync_skipped', { trigger, reason: 'already_running' });
+      perfLog(`sync skipped trigger=${trigger} reason=already_running`);
         return 'skipped';
       }
       // The claimed run is past the stale deadline — presume it dead,
       // release its resources, and let this trigger proceed. If it was
       // somehow still alive its device handle is disconnected here, so
       // it fails fast rather than fighting the new run for the GATT link.
+      perfLog(`sync stale reset trigger=${trigger} status=${get().status} stuckMs=${stuckForMs}`);
       logger.track('sync_stale_reset', {
         trigger,
         stuckStatus: get().status,
@@ -276,6 +279,7 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
       nowMs() - last < MIN_SYNC_INTERVAL_MS
     ) {
       logger.track('sync_skipped', { trigger, reason: 'too_recent' });
+      perfLog(`sync skipped trigger=${trigger} reason=too_recent`);
       return 'skipped';
     }
 
@@ -288,6 +292,7 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
     const paired = usePairing.getState().pairedDevice;
     if (!paired) {
       logger.track('sync_skipped', { trigger, reason: 'no_paired_device' });
+      perfLog(`sync skipped trigger=${trigger} reason=no_paired_device`);
       // Still mark a successful "run" — local pending was flushed.
       // Clears the 24h reassurance banner since the local-pending leg
       // succeeded.
@@ -451,6 +456,7 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
       return 'ran';
     } catch (e) {
       const reason = e instanceof Error ? e.message : 'unknown';
+      perfLog(`sync failed trigger=${trigger} reason=${reason.slice(0, 80)}`);
       logger.track('sync_failed', { trigger, reason });
       // Sprint 16: mark the first failure in the streak so the 24h
       // reassurance banner can fire after a day of repeated misses.
