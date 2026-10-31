@@ -503,3 +503,10 @@ Deno.test('renderReport — escapes HTML in user-provided strings', () => {
   assertStringIncludes(html, '&lt;script&gt;');
   assertStringIncludes(html, '&lt;img onerror=');
 });
+
+Deno.test('formatDate uses the wearer timezone (2026-10-30)', async () => {
+  const { formatDate } = await import('./template.ts');
+  // 01:52 UTC on Oct 31 is still Oct 30 in Los Angeles.
+  assertStringIncludes(formatDate('2026-10-31T01:52:00Z', 'America/Los_Angeles'), 'October 30');
+  assertStringIncludes(formatDate('2026-10-31T01:52:00Z', 'UTC'), 'October 31');
+});

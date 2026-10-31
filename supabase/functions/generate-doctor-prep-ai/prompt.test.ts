@@ -1,5 +1,5 @@
 import { assert, assertStringIncludes } from 'jsr:@std/assert@1';
-import { bpPromptLine } from './prompt.ts';
+import { bpPromptLine, otherVitalPromptLines } from './prompt.ts';
 import type { ScrubbedAiContext } from '../_shared/phi-scrub.ts';
 
 const base: ScrubbedAiContext = {
@@ -31,4 +31,18 @@ Deno.test('bpPromptLine dates a reading inside the range', () => {
 
 Deno.test('bpPromptLine with no BP at all', () => {
   assertStringIncludes(bpPromptLine(base, '2026-10-01'), 'no readings');
+});
+
+Deno.test('otherVitalPromptLines names the time frame of every value', () => {
+  const lines = otherVitalPromptLines({
+    ...base,
+    hr: { restingToday: null, baseline: 84, state: 'in_range' as never },
+    spo2: { latest: 98, overnightLow: 94, state: 'in_range' as never },
+    sleep: { lastNightTotalMinutes: 314, score: null, state: 'in_range' as never },
+    activity: { todaySteps: 293, targetSteps: 6000, state: 'in_range' as never },
+  }).join('\n');
+  assertStringIncludes(lines, "most recent night's low 94%");
+  assertStringIncludes(lines, 'most recent day so far 293 steps (a partial day, not a period total)');
+  assertStringIncludes(lines, 'resting heart-rate baseline 84 bpm');
+  assert(!lines.includes('?'));
 });
