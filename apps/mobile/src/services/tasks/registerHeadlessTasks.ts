@@ -61,9 +61,17 @@ function load(): { tm: TaskManagerModule | null; bg: BackgroundFetchModule | nul
  * skipped entirely.
  */
 async function storageReady(): Promise<boolean> {
-  const { acquireMmkvKey } = await import('../secureBoot');
-  const boot = await acquireMmkvKey();
-  return boot.migrationStatus !== 'pending';
+  const { acquireMmkvKey, getCachedStatus } = await import('../secureBoot');
+  await acquireMmkvKey();
+  // Read the LIVE status, not the one captured in acquireMmkvKey's
+  // memoised result. 2026-10-31 release audit: on a fresh install the
+  // first acquire (app launch) resolves 'pending'; App.tsx then runs the
+  // migration and markMigrationComplete() flips the cached status — but
+  // the memoised promise still says 'pending', so every background run
+  // in that process logged "storage not ready — skipped" until the app
+  // was restarted. That is the fresh-install "background sync stops"
+  // bug seen on 10-30 and again on the Play build.
+  return getCachedStatus() !== 'pending';
 }
 
 /** Run the watch sync. Every import here is deferred past storageReady(). */

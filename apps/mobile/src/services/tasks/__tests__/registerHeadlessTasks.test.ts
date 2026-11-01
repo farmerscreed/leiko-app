@@ -41,10 +41,39 @@ describe('registerHeadlessTasks', () => {
     // finish the migration than to read/write across both stores.
     jest.doMock('../../secureBoot', () => ({
       acquireMmkvKey: jest.fn(async () => ({ migrationStatus: 'pending' })),
+      getCachedStatus: jest.fn(() => 'pending'),
     }));
     const runner = defineTask.mock.calls.find(
       (c) => c[0] === BACKGROUND_SYNC_TASK,
     )?.[1] as () => Promise<number>;
     await expect(runner()).resolves.toBe(1); // NoData
+  });
+
+  it('runs once the migration finished later in the same process (2026-10-31)', async () => {
+    // Fresh install: the memoised acquire result still says 'pending',
+    // but App.tsx has since completed the migration. The gate must read
+    // the live status, or background sync skips until the app restarts.
+    jest.resetModules();
+    const runWatch = jest.fn(async () => 'ran');
+    jest.doMock('../../secureBoot', () => ({
+      acquireMmkvKey: jest.fn(async () => ({ migrationStatus: 'pending' })),
+      getCachedStatus: jest.fn(() => 'completed'),
+    }));
+    jest.doMock('../../../state/hydrateForHeadlessRun', () => ({
+      hydrateForHeadlessRun: jest.fn(),
+      ensureSessionForHeadlessRun: jest.fn(async () => true),
+    }));
+    jest.doMock('../../../state/syncOrchestrator', () => ({
+      useSyncOrchestrator: { getState: () => ({ runSync: runWatch }) },
+    }));
+    jest.doMock('../../ble/foregroundService', () => ({
+      withBleForegroundService: (fn: () => Promise<unknown>) => fn(),
+      ensureJsTimersHeld: jest.fn(async () => undefined),
+    }));
+    const runner = defineTask.mock.calls.find(
+      (c) => c[0] === BACKGROUND_SYNC_TASK,
+    )?.[1] as () => Promise<number>;
+    await expect(runner()).resolves.toBe(2); // NewData
+    expect(runWatch).toHaveBeenCalledWith('background');
   });
 });
