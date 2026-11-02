@@ -12,7 +12,22 @@
 // across platforms so call sites don't need Platform checks.
 
 import { NativeModules, Platform } from 'react-native';
-import { logger } from '../analytics/logger';
+import { getCachedStatus } from '../secureBoot';
+import type { logger as Logger } from '../analytics/logger';
+
+// No static logger import: logger imports services/storage, which reads the
+// MMKV key at module evaluation. A background wake now imports this module
+// BEFORE the key is acquired (the service must start within the freezer's
+// ~10 s budget — 2026-11-02, Play build 25), so telemetry is loaded lazily
+// and only once the store is usable. Dropped events are diagnostics only.
+type TrackName = Parameters<typeof Logger.track>[0];
+function track<N extends TrackName>(...args: Parameters<typeof Logger.track<N>>): void {
+  const status = getCachedStatus();
+  if (status === 'unknown' || status === 'pending') return;
+  import('../analytics/logger')
+    .then(({ logger }) => logger.track(...args))
+    .catch(() => undefined);
+}
 
 interface NativeApi {
   start(): Promise<boolean>;
@@ -30,10 +45,10 @@ async function holdTimers(): Promise<void> {
   try {
     const id = await native.holdJsTimers();
     console.log(`[leiko-bg] js timers held (task ${id})`);
-    logger.track('js_timers_held');
+    track('js_timers_held');
   } catch (e) {
     console.log(`[leiko-bg] js timers hold FAILED ${e instanceof Error ? e.message : ''}`);
-    logger.track('js_timers_hold_failed', {
+    track('js_timers_hold_failed', {
       reason: e instanceof Error ? e.message : 'unknown',
     });
   }
@@ -61,16 +76,16 @@ export async function startBleForegroundService(): Promise<void> {
   if (Platform.OS !== 'android') return;
   if (running) return;
   if (!native) {
-    logger.track('ble_fg_unavailable', { reason: 'native_module_missing' });
+    track('ble_fg_unavailable', { reason: 'native_module_missing' });
     return;
   }
   try {
     await native.start();
     running = true;
     await holdTimers();
-    logger.track('ble_fg_started');
+    track('ble_fg_started');
   } catch (e) {
-    logger.track('ble_fg_start_failed', {
+    track('ble_fg_start_failed', {
       reason: e instanceof Error ? e.message : 'unknown',
     });
   }
@@ -84,9 +99,9 @@ export async function stopBleForegroundService(): Promise<void> {
     await releaseTimers();
     await native.stop();
     running = false;
-    logger.track('ble_fg_stopped');
+    track('ble_fg_stopped');
   } catch (e) {
-    logger.track('ble_fg_stop_failed', {
+    track('ble_fg_stop_failed', {
       reason: e instanceof Error ? e.message : 'unknown',
     });
   }
