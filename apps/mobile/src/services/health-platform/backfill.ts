@@ -40,7 +40,8 @@ import {
   mapServerRowToCaloriesDay,
   type ServerActivityRow,
 } from '../../hooks/useHydrateActivityFromServer';
-import type { BPReading } from '../../types/vitals';
+import type { BPReading, HRSample } from '../../types/vitals';
+import { computeRestingHRByNight } from '../../utils/vitalAggregators';
 import type { ReadingRow, VitalType } from '../../types/database';
 import { write } from './index';
 import { canWriteOwnData } from './syncBridge';
@@ -51,6 +52,14 @@ const PAGE = 1000;
 const DAY_SEC = 86_400;
 export const HISTORY_DAYS = 730;
 export const HR_HISTORY_DAYS = 30;
+
+function deviceTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+}
 
 export type BackfillStatus = 'idle' | 'running' | 'done' | 'failed';
 
@@ -119,7 +128,7 @@ function toBPReading(row: Pick<ReadingRow, 'measured_at' | 'systolic' | 'diastol
   };
 }
 
-type VitalsKind = Exclude<WriteVitalKind, 'bp'>;
+type VitalsKind = Exclude<WriteVitalKind, 'bp' | 'resting_hr'>;
 const SERVER_TYPE: Record<VitalsKind, NonNullable<VitalType>> = {
   hr: 'hr',
   spo2: 'spo2',
@@ -156,10 +165,15 @@ export async function backfillHealthPlatform(nowMs: number = Date.now()): Promis
   const userId = useAuth.getState().profile?.id;
   if (!userId) return;
 
-  const kinds = (['bp', 'hr', 'spo2', 'sleep', 'steps', 'calories'] as WriteVitalKind[]).filter(
-    isWriteEnabled,
-  );
-  if (kinds.length === 0) return;
+  const restingOn = isWriteEnabled('resting_hr');
+  const enabled = (['bp', 'hr', 'spo2', 'sleep', 'steps', 'calories'] as const).filter(isWriteEnabled);
+  if (enabled.length === 0 && !restingOn) return;
+  // Resting HR is derived from the HR history, so HR is read whenever
+  // either is on (and only written as HR when "Share heart rate" is on).
+  const kinds: (typeof enabled)[number][] =
+    restingOn && !enabled.includes('hr') ? [...enabled, 'hr'] : [...enabled];
+  const writeHr = enabled.includes('hr');
+  const hrForResting: HRSample[] = [];
 
   useHealthBackfill.setState({ status: 'running', copied: 0 });
   const caregiver = useAuth.getState().profile?.account_type === 'caregiver';
@@ -221,9 +235,18 @@ export async function backfillHealthPlatform(nowMs: number = Date.now()): Promis
             .range(from, to),
         async (rows) => {
           rowsByKind[kind] = (rowsByKind[kind] ?? 0) + rows.length;
-          await writeBatch(toBatch(kind, rows));
+          const batch = toBatch(kind, rows);
+          if (kind === 'hr' && restingOn) hrForResting.push(...(batch.hr ?? []));
+          if (kind !== 'hr' || writeHr) await writeBatch(batch);
         },
       );
+    }
+
+    if (restingOn && hrForResting.length > 0) {
+      const tz = useAuth.getState().profile?.timezone || deviceTimeZone();
+      const nights = computeRestingHRByNight(hrForResting, Math.floor(nowMs / 1000), tz);
+      rowsByKind.resting_hr = nights.length;
+      if (nights.length) await writeBatch({ restingHr: nights });
     }
     // Release-build diagnostics: rows found per vital (counts only).
     console.log(

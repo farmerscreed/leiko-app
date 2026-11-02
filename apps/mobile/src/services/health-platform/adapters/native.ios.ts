@@ -52,6 +52,7 @@ const WRITE_QUANTITY_IDENTIFIERS: Partial<
   spo2: ['HKQuantityTypeIdentifierOxygenSaturation'],
   steps: ['HKQuantityTypeIdentifierStepCount'],
   calories: ['HKQuantityTypeIdentifierActiveEnergyBurned'],
+  resting_hr: ['HKQuantityTypeIdentifierRestingHeartRate'],
 };
 
 const BP_QUANTITY_IDENTIFIERS = [
@@ -277,6 +278,16 @@ export const nativeAdapter: HealthPlatformAdapter = {
         startSec: d.measuredAtSec,
         endSec: d.measuredAtSec + 86_400,
       })),
+    );
+  },
+
+  // Untested on device until the iOS build exists (US plan §4). Like the
+  // other HealthKit writes here, no sync identifier yet.
+  writeRestingHR(nights) {
+    return saveQuantityList(
+      'HKQuantityTypeIdentifierRestingHeartRate' as never,
+      'count/min',
+      nights.map((n) => ({ value: n.bpm, startSec: n.measuredAtSec, endSec: n.measuredAtSec })),
     );
   },
 

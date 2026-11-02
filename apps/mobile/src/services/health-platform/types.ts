@@ -25,7 +25,21 @@ export type WriteVitalKind =
   | 'spo2'
   | 'sleep'
   | 'steps'
-  | 'calories';
+  | 'calories'
+  | 'resting_hr';
+
+/** One night's resting heart rate — the lowest 10-minute average HR in
+ *  the 22:00–06:00 window (utils/vitalAggregators.ts), the same figure
+ *  the app shows. Derived from HR samples, not read off the watch. */
+export interface RestingHRNight {
+  /** 'YYYY-MM-DD' of the morning the night belongs to. */
+  nightKey: string;
+  /** unix sec UTC — end of the lowest 10-minute window. */
+  measuredAtSec: number;
+  bpm: number;
+  /** HR samples in that night's window (version for upserts). */
+  sampleCount: number;
+}
 
 /** Vitals Leiko reads from the platform store. v1.0 surface per
  *  D13 §12.3 + the external_vitals enum in 0006_external_vitals.sql. */
@@ -73,6 +87,7 @@ export interface WriteResult {
   sleep: WriteResultPerVital;
   steps: WriteResultPerVital;
   calories: WriteResultPerVital;
+  resting_hr: WriteResultPerVital;
 }
 
 /** Wire shape the future /sync-external-vitals Edge Function (Task 7)
@@ -114,6 +129,7 @@ export interface WriteBatch {
   sleep?: SleepSession[];
   steps?: ActivityDay[];
   calories?: CaloriesDay[];
+  restingHr?: RestingHRNight[];
 }
 
 /** The internal contract every platform adapter satisfies. The public
@@ -131,6 +147,7 @@ export interface HealthPlatformAdapter {
   writeSleep(sessions: SleepSession[]): Promise<WriteResultPerVital>;
   writeSteps(days: ActivityDay[]): Promise<WriteResultPerVital>;
   writeCalories(days: CaloriesDay[]): Promise<WriteResultPerVital>;
+  writeRestingHR(nights: RestingHRNight[]): Promise<WriteResultPerVital>;
 
   readExternalSince(opts: ReadOptions): Promise<ExternalVitalSample[]>;
 }
@@ -144,6 +161,7 @@ export const ALL_WRITE_KINDS: WriteVitalKind[] = [
   'sleep',
   'steps',
   'calories',
+  'resting_hr',
 ];
 
 export const ALL_READ_KINDS: ReadVitalKind[] = [

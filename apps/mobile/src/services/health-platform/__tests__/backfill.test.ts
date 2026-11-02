@@ -210,3 +210,31 @@ it('includes rows whose hidden flag is unset (null), not only false', async () =
   const q = queries.find((x) => x.table === 'vitals_other');
   expect(q?.filters).toContainEqual(['or', 'hidden.is.null,hidden.eq.false', undefined]);
 });
+
+it('resting heart rate alone reads HR history but writes only resting values', async () => {
+  signIn('self_buyer');
+  setMaster(true);
+  setWriteVital('resting_hr', true);
+  const night = ['2026-10-31T03:00:00Z', '2026-10-31T03:05:00Z', '2026-10-31T04:00:00Z'].map(
+    (iso, i) => ({
+      id: `h${i}`,
+      family_id: 'fam-own',
+      device_id: null,
+      vital_type: 'hr',
+      measured_at: iso,
+      value_int: 55 + i,
+      value_jsonb: { sample_window_sec: 300 },
+    }),
+  );
+  tables['vitals_other:hr'] = night;
+  useAuth.setState({
+    profile: { id: 'user-1', account_type: 'self_buyer', timezone: 'UTC' } as unknown as UserRow,
+  } as never);
+
+  await backfillHealthPlatform(NOW);
+
+  expect(__getWritten().hr).toHaveLength(0);
+  expect(__getWritten().restingHr).toEqual([
+    expect.objectContaining({ nightKey: '2026-10-31', bpm: 56, sampleCount: 3 }),
+  ]);
+});

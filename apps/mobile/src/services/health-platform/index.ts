@@ -68,7 +68,7 @@ export async function requestPermissions(
  *  counts — Task 5's caller treats this as fire-and-forget telemetry,
  *  not a blocking gate. */
 export async function write(batch: WriteBatch): Promise<WriteResult> {
-  const [bp, hr, spo2, sleep, steps, calories] = await Promise.all([
+  const [bp, hr, spo2, sleep, steps, calories, resting_hr] = await Promise.all([
     batch.bp?.length ? _adapter.writeBP(batch.bp) : Promise.resolve(EMPTY_RESULT),
     batch.hr?.length ? _adapter.writeHR(batch.hr) : Promise.resolve(EMPTY_RESULT),
     batch.spo2?.length ? _adapter.writeSpO2(batch.spo2) : Promise.resolve(EMPTY_RESULT),
@@ -77,8 +77,11 @@ export async function write(batch: WriteBatch): Promise<WriteResult> {
     batch.calories?.length
       ? _adapter.writeCalories(batch.calories)
       : Promise.resolve(EMPTY_RESULT),
+    batch.restingHr?.length
+      ? _adapter.writeRestingHR(batch.restingHr)
+      : Promise.resolve(EMPTY_RESULT),
   ]);
-  return { bp, hr, spo2, sleep, steps, calories };
+  return { bp, hr, spo2, sleep, steps, calories, resting_hr };
 }
 
 export async function readExternalSince(opts: ReadOptions) {

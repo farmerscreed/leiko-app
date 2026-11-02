@@ -32,6 +32,7 @@ import {
   type PermissionGrant,
   type PermissionRequest,
   type ReadOptions,
+  type RestingHRNight,
   type WriteResultPerVital,
 } from '../types';
 
@@ -45,6 +46,7 @@ interface MockState {
   sleep: SleepSession[];
   steps: ActivityDay[];
   calories: CaloriesDay[];
+  restingHr: RestingHRNight[];
   external: ExternalVitalSample[];
 }
 
@@ -58,6 +60,7 @@ const state: MockState = {
   sleep: [],
   steps: [],
   calories: [],
+  restingHr: [],
   external: [],
 };
 
@@ -112,6 +115,10 @@ export const mockAdapter: HealthPlatformAdapter = {
     state.calories.push(...days);
     return counted(days);
   },
+  async writeRestingHR(nights) {
+    state.restingHr.push(...nights);
+    return counted(nights);
+  },
 
   async readExternalSince(opts: ReadOptions) {
     const wanted = opts.vitals;
@@ -137,6 +144,7 @@ export function __reset(): void {
   state.sleep = [];
   state.steps = [];
   state.calories = [];
+  state.restingHr = [];
   state.external = [];
 }
 
@@ -155,6 +163,7 @@ export function __getWritten(): {
   sleep: SleepSession[];
   steps: ActivityDay[];
   calories: CaloriesDay[];
+  restingHr: RestingHRNight[];
 } {
   return {
     bp: [...state.bp],
@@ -163,6 +172,7 @@ export function __getWritten(): {
     sleep: [...state.sleep],
     steps: [...state.steps],
     calories: [...state.calories],
+    restingHr: [...state.restingHr],
   };
 }
 

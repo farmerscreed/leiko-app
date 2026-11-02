@@ -48,6 +48,7 @@ import {
   caloriesRecords,
   heartRateRecords,
   oxygenRecords,
+  restingHeartRateRecords,
   sleepRecords,
   stepsRecords,
 } from './hcRecords';
@@ -59,6 +60,7 @@ const WRITE_RECORD_TYPES: Record<WriteVitalKind, RecordType> = {
   sleep: 'SleepSession',
   steps: 'Steps',
   calories: 'ActiveCaloriesBurned',
+  resting_hr: 'RestingHeartRate',
 };
 
 const READ_RECORD_TYPES: Record<ReadVitalKind, RecordType> = {
@@ -207,6 +209,10 @@ export const nativeAdapter: HealthPlatformAdapter = {
 
   async writeCalories(days) {
     return insertSafely(caloriesRecords(days, Math.floor(Date.now() / 1000)));
+  },
+
+  async writeRestingHR(nights) {
+    return insertSafely(restingHeartRateRecords(nights));
   },
 
   async readExternalSince(opts: ReadOptions) {

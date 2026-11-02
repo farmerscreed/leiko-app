@@ -280,3 +280,61 @@ export function computeActivityToday(
   }
   return best;
 }
+
+// ----- Resting heart rate per night (Health Connect, 2026-11-02) ------
+
+export interface RestingHRByNight {
+  /** 'YYYY-MM-DD' of the morning the night belongs to. */
+  nightKey: string;
+  bpm: number;
+  /** End of the lowest 10-minute window. */
+  measuredAtSec: number;
+  sampleCount: number;
+}
+
+/** Same rule as computeHRRestingToday (lowest 10-min rolling average in
+ *  the 22:00–06:00 window), one value per COMPLETED night — a night still
+ *  in progress is left out so a half-night never becomes the day's value. */
+export function computeRestingHRByNight(
+  samples: HRSample[],
+  nowSec: number,
+  timeZone: string,
+): RestingHRByNight[] {
+  const byNight = new Map<string, HRSample[]>();
+  for (const s of samples) {
+    if (!inHRSleepWindow(s.measuredAtSec, timeZone)) continue;
+    const key = nightDateKey(s.measuredAtSec, HR_SLEEP_WINDOW_START_HOUR, timeZone);
+    const arr = byNight.get(key);
+    if (arr) arr.push(s);
+    else byNight.set(key, [s]);
+  }
+  const nowKey = nightDateKey(nowSec, HR_SLEEP_WINDOW_START_HOUR, timeZone);
+  const nowInWindow = inHRSleepWindow(nowSec, timeZone);
+  const out: RestingHRByNight[] = [];
+  for (const [nightKey, list] of byNight) {
+    const inProgress = nightKey > nowKey || (nightKey === nowKey && nowInWindow);
+    if (inProgress || list.length < 2) continue;
+    const sorted = [...list].sort((a, b) => a.measuredAtSec - b.measuredAtSec);
+    let lo = Infinity;
+    let at = 0;
+    for (let i = 0; i < sorted.length; i++) {
+      const windowEnd = sorted[i].measuredAtSec;
+      const windowStart = windowEnd - HR_ROLLING_WINDOW_SEC;
+      let sum = 0;
+      let n = 0;
+      for (let j = i; j >= 0; j--) {
+        if (sorted[j].measuredAtSec < windowStart) break;
+        sum += sorted[j].bpm;
+        n += 1;
+      }
+      if (n >= 2 && sum / n < lo) {
+        lo = sum / n;
+        at = windowEnd;
+      }
+    }
+    if (Number.isFinite(lo)) {
+      out.push({ nightKey, bpm: Math.round(lo), measuredAtSec: at, sampleCount: list.length });
+    }
+  }
+  return out.sort((a, b) => a.nightKey.localeCompare(b.nightKey));
+}

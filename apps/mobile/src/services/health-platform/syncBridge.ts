@@ -22,6 +22,8 @@
 
 import { useAuth } from '../../state/auth';
 import { mmkv, STORAGE_KEYS } from '../storage';
+import { useHR } from '../../state/hr';
+import { computeRestingHRByNight } from '../../utils/vitalAggregators';
 import { logger } from '../analytics/logger';
 import type {
   ActivityDay,
@@ -34,7 +36,7 @@ import type {
 } from '../../types/vitals';
 import { write } from './index';
 import { isWriteEnabled } from './toggles';
-import type { WriteBatch, WriteResult, WriteVitalKind } from './types';
+import type { RestingHRNight, WriteBatch, WriteResult, WriteVitalKind } from './types';
 
 /** True when this phone has a Leiko watch paired. A watch only ever
  *  syncs from its wearer's own phone (supabase/functions/sync
@@ -74,6 +76,26 @@ function trackWrite(vital: WriteVitalKind, written: number, rejected: number): v
     written,
     rejected,
   });
+}
+
+/** Resting HR for the last few completed nights, computed over every HR
+ *  sample this phone holds (the watch hands a night over in pieces across
+ *  syncs, so the new samples alone are not enough). Re-sending a night is
+ *  harmless: same id, and the version only rises with more samples. */
+const RESTING_LOOKBACK_SEC = 3 * 86_400;
+
+function recentRestingNights(newSamples: HRSample[]): RestingHRNight[] {
+  const nowSec = Math.floor(Date.now() / 1000);
+  const tz =
+    useAuth.getState().profile?.timezone ||
+    Intl.DateTimeFormat().resolvedOptions().timeZone ||
+    'UTC';
+  const { recent, pending } = useHR.getState();
+  const bySec = new Map<number, HRSample>();
+  for (const s of [...recent, ...pending, ...newSamples]) {
+    if (s.measuredAtSec >= nowSec - RESTING_LOOKBACK_SEC) bySec.set(s.measuredAtSec, s);
+  }
+  return computeRestingHRByNight([...bySec.values()], nowSec, tz);
 }
 
 /** Forward a single freshly-synced BP row. Used by the readings store
@@ -128,6 +150,10 @@ export async function forwardMultiVitalsToPlatform(
   if (payload.sleepSessions && isWriteEnabled('sleep')) batch.sleep = payload.sleepSessions;
   if (payload.activityDays && isWriteEnabled('steps')) batch.steps = payload.activityDays;
   if (payload.caloriesDays && isWriteEnabled('calories')) batch.calories = payload.caloriesDays;
+  if (payload.hrSamples?.length && isWriteEnabled('resting_hr')) {
+    const nights = recentRestingNights(payload.hrSamples);
+    if (nights.length) batch.restingHr = nights;
+  }
 
   // Nothing to write — no toggles enabled for any included vital.
   if (Object.keys(batch).length === 0) return null;
@@ -140,6 +166,7 @@ export async function forwardMultiVitalsToPlatform(
     if (batch.sleep) trackWrite('sleep', result.sleep.written, result.sleep.rejected);
     if (batch.steps) trackWrite('steps', result.steps.written, result.steps.rejected);
     if (batch.calories) trackWrite('calories', result.calories.written, result.calories.rejected);
+    if (batch.restingHr) trackWrite('resting_hr', result.resting_hr.written, result.resting_hr.rejected);
     return result;
   } catch (err) {
     logger.track('health_platform_write_failed', {
