@@ -1,5 +1,12 @@
 # Start here — vitals correctness + physical testing + report delivery (2026-06-05)
 
+> **⏩ 2026-11-02 (read FIRST):** Android 1.1.0 is on Play Internal
+> testing (build 25); build 26 (PR #40, background-sync freezer fix) is
+> next — status, verification steps, Health Connect gaps and every open
+> item: **`plans/ANDROID_CLOSEOUT_2026-11-02.md`**. The **US launch +
+> iPhone app** is planned for a fresh session:
+> **`plans/US_LAUNCH_PLAN_2026-11-02.md`**.
+
 > **⏩ 2026-10-30 release audit (read FIRST):** v1.1.0 audited end-to-end on
 > the founder's Pixel 8. Every founder-reported issue is fixed and merged
 > (PRs #30–#33); migration 0059 applied. **Before Play upload:** founder
