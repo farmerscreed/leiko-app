@@ -24,7 +24,7 @@ import type { ActivityDay, CaloriesDay } from '../types/vitals';
 
 const FETCH_LIMIT = 90;
 
-interface ServerActivityRow {
+export interface ServerActivityRow {
   id: string;
   family_id: string;
   device_id: string | null;
@@ -46,7 +46,7 @@ function dayLocalFromMeasuredAt(measuredAt: string): string {
   return new Date(measuredAt).toISOString().slice(0, 10);
 }
 
-function mapServerRowToActivityDay(row: ServerActivityRow): ActivityDay {
+export function mapServerRowToActivityDay(row: ServerActivityRow): ActivityDay {
   const measuredAtSec = Math.floor(new Date(row.measured_at).getTime() / 1000);
   const jsonb = row.value_jsonb ?? {};
   const dayLocal = jsonb.day_local ?? dayLocalFromMeasuredAt(row.measured_at);
@@ -66,7 +66,7 @@ function mapServerRowToActivityDay(row: ServerActivityRow): ActivityDay {
   };
 }
 
-function mapServerRowToCaloriesDay(row: ServerActivityRow): CaloriesDay {
+export function mapServerRowToCaloriesDay(row: ServerActivityRow): CaloriesDay {
   const measuredAtSec = Math.floor(new Date(row.measured_at).getTime() / 1000);
   const jsonb = row.value_jsonb ?? {};
   const dayLocal = jsonb.day_local ?? dayLocalFromMeasuredAt(row.measured_at);

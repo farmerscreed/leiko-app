@@ -8,6 +8,7 @@ import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
 import com.facebook.react.defaults.DefaultReactActivityDelegate
 
+import dev.matinzd.healthconnect.permissions.HealthConnectPermissionDelegate
 import expo.modules.ReactActivityDelegateWrapper
 
 class MainActivity : ReactActivity() {
@@ -17,6 +18,11 @@ class MainActivity : ReactActivity() {
     // This is required for expo-splash-screen.
     setTheme(R.style.AppTheme);
     super.onCreate(null)
+    // react-native-health-connect registers its permission-result launcher
+    // here. Without it, requestPermission() hits an uninitialised launcher
+    // and Health Connect can never be granted (2026-11-02). Must run in
+    // onCreate — Activity Result launchers can't be registered later.
+    HealthConnectPermissionDelegate.setPermissionDelegate(this)
   }
 
   /**

@@ -21,6 +21,7 @@ import {
   setWriteVital,
 } from '../toggles';
 import { useAuth } from '../../../state/auth';
+import { mmkv, STORAGE_KEYS } from '../../storage';
 import type { UserRow, AccountType } from '../../../types/database';
 import type { MultiVitalsPayload } from '../../../types/vitals';
 
@@ -54,6 +55,7 @@ beforeEach(() => {
   resetMockAdapter();
   __setAdapterForTest(mockAdapter);
   resetToggles();
+  mmkv.remove(STORAGE_KEYS.pairedDevice);
   clearAuth();
 });
 
@@ -76,11 +78,29 @@ describe('forwardReadingToPlatform — gating', () => {
     expect(__getWritten().bp).toHaveLength(0);
   });
 
-  it('no-ops for caregiver account_type (D13 §12.6)', async () => {
+  it('no-ops for a caregiver with no watch on this phone (D13 §12.6)', async () => {
     setAccountType('caregiver');
     setMaster(true);
     setWriteVital('bp', true);
     await forwardReadingToPlatform(SAMPLE_BP);
+    expect(__getWritten().bp).toHaveLength(0);
+  });
+
+  it('writes a caregiver\'s OWN watch reading when their watch is paired here', async () => {
+    setAccountType('caregiver');
+    mmkv.set(STORAGE_KEYS.pairedDevice, JSON.stringify({ bleId: 'AA:BB' }));
+    setMaster(true);
+    setWriteVital('bp', true);
+    await forwardReadingToPlatform(SAMPLE_BP);
+    expect(__getWritten().bp).toHaveLength(1);
+  });
+
+  it('never writes a caregiver\'s manual reading (could be for someone else)', async () => {
+    setAccountType('caregiver');
+    mmkv.set(STORAGE_KEYS.pairedDevice, JSON.stringify({ bleId: 'AA:BB' }));
+    setMaster(true);
+    setWriteVital('bp', true);
+    await forwardReadingToPlatform({ ...SAMPLE_BP, source: 'manual' });
     expect(__getWritten().bp).toHaveLength(0);
   });
 
@@ -160,7 +180,17 @@ describe('forwardMultiVitalsToPlatform — per-vital filtering', () => {
     clientAppVersion: '0.0.1',
   };
 
-  it('returns null and writes nothing for caregiver', async () => {
+  it('writes a hybrid caregiver\'s own watch sync', async () => {
+    setAccountType('caregiver');
+    mmkv.set(STORAGE_KEYS.pairedDevice, JSON.stringify({ bleId: 'AA:BB' }));
+    setMaster(true);
+    setWriteVital('hr', true);
+    const result = await forwardMultiVitalsToPlatform(PAYLOAD);
+    expect(result).not.toBeNull();
+    expect(__getWritten().hr.length).toBeGreaterThan(0);
+  });
+
+  it('returns null and writes nothing for a caregiver without a watch', async () => {
     setAccountType('caregiver');
     setMaster(true);
     setWriteVital('bp', true);

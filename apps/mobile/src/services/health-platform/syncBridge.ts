@@ -4,11 +4,11 @@
 // Apple Health / Health Connect via the unified write() surface, gated
 // on:
 //
-//   1. The user's account_type. Per D13 §12.6: "we don't sync Leiko
-//      data to Apple Health for the caregiver's view of their parent's
-//      data." A caregiver's HK store is THEIR personal store, not Mum's
-//      — so the caregiver path short-circuits to no-op. Self-buyer and
-//      parent (own phone) paths proceed.
+//   1. Whose data it is. D13 §12.6: a caregiver's view of their parent
+//      never goes into the caregiver's own Health store. Every forward
+//      here follows an upload from THIS phone's own watch, so it is the
+//      phone owner's data; see canWriteOwnData() (amended 2026-11-02 so
+//      a caregiver who also wears a watch can share their own readings).
 //
 //   2. The master toggle (Sprint 9.5 / Task 4). Master OFF → no-op.
 //
@@ -21,6 +21,7 @@
 // per CLAUDE.md.
 
 import { useAuth } from '../../state/auth';
+import { mmkv, STORAGE_KEYS } from '../storage';
 import { logger } from '../analytics/logger';
 import type {
   ActivityDay,
@@ -35,15 +36,36 @@ import { write } from './index';
 import { isWriteEnabled } from './toggles';
 import type { WriteBatch, WriteResult, WriteVitalKind } from './types';
 
-/** True if the current user's account_type allows platform writes.
- *  Caregivers are excluded (D13 §12.6). Returns false when no profile
- *  is loaded yet (defensive — never write before we know who we are). */
-export function isAccountTypeAllowed(): boolean {
+/** True when this phone has a Leiko watch paired. A watch only ever
+ *  syncs from its wearer's own phone (supabase/functions/sync
+ *  resolveOwnCircle), so data coming off THIS phone's watch is the phone
+ *  owner's own data — whatever their account_type. */
+export function hasOwnWatchPaired(): boolean {
+  try {
+    return !!mmkv.getString(STORAGE_KEYS.pairedDevice);
+  } catch {
+    return false;
+  }
+}
+
+/** True if this user may write their own readings to the platform store.
+ *
+ *  D13 §12.6 keeps a caregiver's view of their parent OUT of the
+ *  caregiver's own Health store. Every forward in this file runs only
+ *  after THIS phone uploaded data from ITS paired watch, i.e. the
+ *  wearer's own readings — so a caregiver who also wears a watch
+ *  (2026-11-02, "hybrid" accounts) may write those. A caregiver without
+ *  a watch never reaches a forward. Returns false when no profile is
+ *  loaded yet (never write before we know who we are). */
+export function canWriteOwnData(): boolean {
   const profile = useAuth.getState().profile;
   if (!profile) return false;
-  if (profile.account_type === 'caregiver') return false;
-  return true; // self_buyer and parent (own phone) both proceed
+  if (profile.account_type !== 'caregiver') return true;
+  return hasOwnWatchPaired();
 }
+
+/** @deprecated kept for existing imports; use canWriteOwnData. */
+export const isAccountTypeAllowed = canWriteOwnData;
 
 function trackWrite(vital: WriteVitalKind, written: number, rejected: number): void {
   // PostHog event — counts only, no values. Per CLAUDE.md analytics rule.
@@ -63,7 +85,12 @@ export async function forwardReadingToPlatform(reading: {
   pulse: number | null;
   source: BPReading['source'];
 }): Promise<void> {
-  if (!isAccountTypeAllowed()) return;
+  if (!canWriteOwnData()) return;
+  // A caregiver can type in a reading taken for someone else (e.g. Mum's
+  // home cuff). Only watch readings are certainly the caregiver's own.
+  if (useAuth.getState().profile?.account_type === 'caregiver' && reading.source !== 'watch') {
+    return;
+  }
   if (!isWriteEnabled('bp')) return;
   try {
     const result = await write({
@@ -93,7 +120,7 @@ export async function forwardReadingToPlatform(reading: {
 export async function forwardMultiVitalsToPlatform(
   payload: MultiVitalsPayload,
 ): Promise<WriteResult | null> {
-  if (!isAccountTypeAllowed()) return null;
+  if (!canWriteOwnData()) return null;
   const batch: WriteBatch = {};
   if (payload.bpReadings && isWriteEnabled('bp')) batch.bp = payload.bpReadings;
   if (payload.hrSamples && isWriteEnabled('hr')) batch.hr = payload.hrSamples;

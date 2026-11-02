@@ -23,16 +23,7 @@ import { Platform, StyleSheet, Text, View } from 'react-native';
 import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
 import { useTheme } from '../theme';
-import {
-  ALL_READ_KINDS,
-  ALL_WRITE_KINDS,
-  requestPermissions,
-} from '../services/health-platform';
-import {
-  setMaster,
-  setReadVital,
-  setWriteVital,
-} from '../services/health-platform/toggles';
+import { connectHealthPlatform } from '../services/health-platform/connect';
 import {
   markPrompted,
   useHealthPlatformPermissionPrompt,
@@ -74,39 +65,9 @@ export function HealthPlatformPermissionPrompt({
   const handleConnect = async () => {
     if (busy) return;
     setBusy(true);
-    try {
-      const grant = await requestPermissions({
-        write: ALL_WRITE_KINDS,
-        read: ALL_READ_KINDS,
-      });
-      if (grant.userPrompted) {
-        // Master on; per-vital reflects what was actually granted.
-        setMaster(true);
-        for (const k of ALL_WRITE_KINDS) {
-          setWriteVital(k, grant.write[k] === true);
-        }
-        for (const k of ALL_READ_KINDS) {
-          setReadVital(k, grant.read[k] === true);
-        }
-        logger.track('health_platform_permission_granted', {
-          platform: Platform.OS,
-        });
-      } else {
-        // OS didn't prompt (HK/HC unavailable, simulator, etc). Still
-        // mark prompted so we don't loop on every render.
-        logger.track('health_platform_permission_skipped', {
-          platform: Platform.OS,
-          reason: 'os_unavailable',
-        });
-      }
-    } catch {
-      // Errors are non-fatal — mark prompted and move on. Settings
-      // gives the user a second chance.
-      logger.track('health_platform_permission_skipped', {
-        platform: Platform.OS,
-        reason: 'request_failed',
-      });
-    }
+    // Shared with Settings: asks the OS, mirrors the grant into the
+    // toggles, then copies past readings over (connect.ts).
+    await connectHealthPlatform();
     markPrompted();
     setBusy(false);
     onClose?.();

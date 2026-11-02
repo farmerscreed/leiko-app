@@ -19,7 +19,7 @@ import type { HRSample, HRMotionState } from '../types/vitals';
 
 const FETCH_LIMIT = 200;
 
-interface ServerHRRow {
+export interface ServerHRRow {
   id: string;
   family_id: string;
   device_id: string | null;
@@ -33,7 +33,7 @@ interface ServerHRRow {
   } | null;
 }
 
-function mapServerRowToHRSample(row: ServerHRRow): HRSample {
+export function mapServerRowToHRSample(row: ServerHRRow): HRSample {
   const measuredAtSec = Math.floor(new Date(row.measured_at).getTime() / 1000);
   const jsonb = row.value_jsonb ?? {};
   return {
