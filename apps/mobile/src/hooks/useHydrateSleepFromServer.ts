@@ -27,7 +27,7 @@ import type { SleepSession, SleepStage } from '../types/vitals';
 
 const FETCH_LIMIT = 90;
 
-interface ServerSleepRow {
+export interface ServerSleepRow {
   id: string;
   family_id: string;
   device_id: string | null;
@@ -51,7 +51,7 @@ interface ServerSleepRow {
   } | null;
 }
 
-function mapServerRowToSession(row: ServerSleepRow): SleepSession {
+export function mapServerRowToSession(row: ServerSleepRow): SleepSession {
   const sessionStartSec = Math.floor(new Date(row.measured_at).getTime() / 1000);
   const totalMinutes = row.value_int;
   const deepMinutes = row.value_int_2 ?? 0;

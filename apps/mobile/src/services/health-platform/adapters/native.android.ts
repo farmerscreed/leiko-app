@@ -43,7 +43,14 @@ import {
   type WriteResultPerVital,
   type WriteVitalKind,
 } from '../types';
-import { buildHCSleepStages } from '../sleep-stages';
+import {
+  bloodPressureRecords,
+  caloriesRecords,
+  heartRateRecords,
+  oxygenRecords,
+  sleepRecords,
+  stepsRecords,
+} from './hcRecords';
 
 const WRITE_RECORD_TYPES: Record<WriteVitalKind, RecordType> = {
   bp: 'BloodPressure',
@@ -110,17 +117,42 @@ async function insertSafely(
   if (!(await ensureReady())) {
     return { written: 0, rejected: records.length, firstError: 'hc-unavailable' };
   }
-  try {
-    const ids = await insertRecords(records);
-    return { written: ids.length, rejected: records.length - ids.length };
-  } catch (err) {
-    return {
-      written: 0,
-      rejected: records.length,
-      firstError: (err as Error).message,
-    };
+  // Chunked: the history copy can hand over thousands of rows, and one
+  // oversized insert fails as a whole. Each chunk succeeds or fails on
+  // its own; ids make a retry of a failed chunk harmless.
+  let written = 0;
+  let rejected = 0;
+  let firstError: string | undefined;
+  for (let i = 0; i < records.length; i += INSERT_CHUNK) {
+    const chunk = records.slice(i, i + INSERT_CHUNK);
+    try {
+      const ids = await insertRecords(chunk);
+      written += ids.length;
+      rejected += chunk.length - ids.length;
+    } catch (err) {
+      firstError ??= (err as Error).message;
+      // One invalid record fails the whole call. Salvage the rest one by
+      // one so a single bad day can't hide a whole history.
+      for (const record of chunk) {
+        try {
+          written += (await insertRecords([record])).length;
+        } catch {
+          rejected += 1;
+        }
+      }
+    }
   }
+  if (rejected > 0) {
+    // Diagnostics for release builds: record type + counts + the first
+    // platform error. Never values (CLAUDE.md data rule).
+    console.log(
+      `[leiko-hc] ${records[0]?.recordType} written=${written} rejected=${rejected} ${firstError ?? ''}`.slice(0, 300),
+    );
+  }
+  return firstError ? { written, rejected, firstError } : { written, rejected };
 }
+
+const INSERT_CHUNK = 500;
 
 export const nativeAdapter: HealthPlatformAdapter = {
   platform: 'health_connect',
@@ -151,85 +183,30 @@ export const nativeAdapter: HealthPlatformAdapter = {
     return grantsFromHC(req, granted, prompted);
   },
 
+  // Record shapes + metadata (stable clientRecordId so re-sent rows
+  // update in place) live in hcRecords.ts, where they are unit-tested.
   async writeBP(samples) {
-    const records: HealthConnectRecord[] = samples.map((s) => ({
-      recordType: 'BloodPressure',
-      time: isoFromSec(s.measuredAtSec),
-      systolic: { value: s.systolic, unit: 'millimetersOfMercury' },
-      diastolic: { value: s.diastolic, unit: 'millimetersOfMercury' },
-      bodyPosition: 0,
-      measurementLocation: 0,
-    }));
-    return insertSafely(records);
+    return insertSafely(bloodPressureRecords(samples));
   },
 
   async writeHR(samples) {
-    if (samples.length === 0) return EMPTY_RESULT;
-    // HR is an IntervalRecord that batches samples. Collapse our flat
-    // HRSample[] into a single HC record per sample-window grouping —
-    // the simplest invariant is one HC record per sample, since each
-    // HRSample carries its own measuredAtSec + sampleWindowSec.
-    const records: HealthConnectRecord[] = samples.map((s) => {
-      const start = s.measuredAtSec;
-      const end = start + Math.max(s.sampleWindowSec, 1);
-      return {
-        recordType: 'HeartRate',
-        startTime: isoFromSec(start),
-        endTime: isoFromSec(end),
-        samples: [
-          {
-            time: isoFromSec(start),
-            beatsPerMinute: s.bpm,
-          },
-        ],
-      };
-    });
-    return insertSafely(records);
+    return insertSafely(heartRateRecords(samples));
   },
 
   async writeSpO2(samples) {
-    const records: HealthConnectRecord[] = samples.map((s) => ({
-      recordType: 'OxygenSaturation',
-      time: isoFromSec(s.measuredAtSec),
-      // HC OxygenSaturationRecord percentage is 0-100 (not 0-1 like HK).
-      percentage: s.percent,
-    }));
-    return insertSafely(records);
+    return insertSafely(oxygenRecords(samples));
   },
 
   async writeSleep(sessions) {
-    if (sessions.length === 0) return EMPTY_RESULT;
-    const records: HealthConnectRecord[] = sessions.map((session) => ({
-      recordType: 'SleepSession',
-      startTime: isoFromSec(session.sessionStartSec),
-      endTime: isoFromSec(session.sessionEndSec),
-      stages: buildHCSleepStages(session).map((b) => ({
-        startTime: isoFromSec(b.startTimeSec),
-        endTime: isoFromSec(b.endTimeSec),
-        stage: b.stage,
-      })),
-    }));
-    return insertSafely(records);
+    return insertSafely(sleepRecords(sessions));
   },
 
   async writeSteps(days) {
-    const records: HealthConnectRecord[] = days.map((d) => ({
-      recordType: 'Steps',
-      startTime: isoFromSec(d.measuredAtSec),
-      endTime: isoFromSec(d.measuredAtSec + 86_400),
-      count: d.totalSteps,
-    }));
-    return insertSafely(records);
+    return insertSafely(stepsRecords(days, Math.floor(Date.now() / 1000)));
   },
 
   async writeCalories(days) {
-    const records: HealthConnectRecord[] = days.map((d) => ({
-      recordType: 'ActiveCaloriesBurned',
-      startTime: isoFromSec(d.measuredAtSec),
-      endTime: isoFromSec(d.measuredAtSec + 86_400),
-      energy: { value: d.activityKcal, unit: 'kilocalories' },
-    }));
-    return insertSafely(records);
+    return insertSafely(caloriesRecords(days, Math.floor(Date.now() / 1000)));
   },
 
   async readExternalSince(opts: ReadOptions) {

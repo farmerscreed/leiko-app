@@ -162,6 +162,10 @@ export const STORAGE_KEYS = {
   // regardless of whether they accepted or dismissed. We never re-show
   // automatically — Settings UI in Sprint 10 is the second-chance path.
   healthPlatformPermissionPrompted: 'leiko.health-platform.permissionPrompted',
+  // One-time copy of past Leiko readings into Health Connect (2026-11-02,
+  // health-platform/backfill.ts). Wall-clock ms of the last completed
+  // copy; unset = never copied.
+  healthPlatformBackfillAt: 'leiko.health-platform.backfillAtMs',
   // Notification preferences — Sprint 10b.3. JSON mirror of the
   // public.notification_preferences row for the signed-in user. MMKV
   // is the offline source of truth; supabase write is best-effort.

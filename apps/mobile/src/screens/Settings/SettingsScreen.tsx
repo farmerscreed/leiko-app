@@ -59,6 +59,9 @@ import {
   useVitalSetup,
 } from '../../state/vitalSetup';
 import { useHealthPlatformToggles } from '../../services/health-platform/toggles';
+import { backfillHealthPlatform, useHealthBackfill } from '../../services/health-platform/backfill';
+import { backfillCaption } from '../../services/health-platform/backfillCaption';
+import { connectHealthPlatform, enableWriteVital } from '../../services/health-platform/connect';
 import {
   ALL_READ_KINDS,
   ALL_WRITE_KINDS,
@@ -310,11 +313,32 @@ export function SettingsScreen({ navigation }: Props) {
   const [picker, setPicker] = useState<'steps' | 'sleep' | null>(null);
 
   const isSelfBuyer = profile?.account_type === 'self_buyer';
-  // Caregivers do not write OR read external vitals (D13 §12.5 + §12.6).
-  // The Apple Health / Health Connect section is therefore self-buyer
-  // only. Parent (own phone) reuses the same surface; self-buyer is the
-  // primary case in this codebase.
-  const showHealthPlatform = profile?.account_type !== 'caregiver';
+  // D13 §12.5/§12.6: a caregiver's view of someone else never goes into
+  // the caregiver's own health store. A caregiver who also wears a watch
+  // on this phone shares only their OWN readings (2026-11-02; enforced in
+  // health-platform/syncBridge.ts + backfill.ts), so the section shows
+  // for them too.
+  const hasOwnWatch = usePairing((s) => s.pairedDevice !== null);
+  const isCaregiver = profile?.account_type === 'caregiver';
+  const showHealthPlatform = !isCaregiver || hasOwnWatch;
+  const backfill = useHealthBackfill();
+  const [hpConnecting, setHpConnecting] = useState(false);
+  const onHpMaster = (on: boolean) => {
+    if (!on) {
+      setHpMaster(false);
+      return;
+    }
+    if (hpConnecting) return;
+    setHpConnecting(true);
+    void connectHealthPlatform().finally(() => setHpConnecting(false));
+  };
+  const onHpWrite = (kind: WriteVitalKind, on: boolean) => {
+    if (!on) {
+      setHpWrite(kind, false);
+      return;
+    }
+    void enableWriteVital(kind);
+  };
 
   // Hybrid-mode caregiver visibility row gate (D13 §13.2). Self-buyer
   // only; only shown when at least one caregiver is in the family
@@ -639,9 +663,13 @@ export function SettingsScreen({ navigation }: Props) {
             <ListRow
               variant="toggle"
               title="Connect to your phone's health app"
-              subtitle="Keeps your numbers in one place across apps."
+              subtitle={
+                isCaregiver
+                  ? 'Shares readings from your own watch only.'
+                  : 'Keeps your numbers in one place across apps.'
+              }
               switchValue={hpMaster}
-              onSwitchChange={setHpMaster}
+              onSwitchChange={onHpMaster}
               showDivider={hpMaster}
               testID="settings-hp-master"
             />
@@ -653,10 +681,21 @@ export function SettingsScreen({ navigation }: Props) {
                     variant="toggle"
                     title={`Share ${WRITE_VITAL_LABEL[kind].toLowerCase()}`}
                     switchValue={hpWrite[kind] ?? false}
-                    onSwitchChange={(v) => setHpWrite(kind, v)}
+                    onSwitchChange={(v) => onHpWrite(kind, v)}
                     testID={`settings-hp-write-${kind}`}
                   />
                 ))}
+                {Platform.OS === 'android' ? (
+                  <ListRow
+                    variant="action"
+                    title="Copy past readings"
+                    subtitle={backfillCaption(backfill.status, backfill.copied, backfill.lastCompletedAt)}
+                    onPress={() => {
+                      if (backfill.status !== 'running') void backfillHealthPlatform();
+                    }}
+                    testID="settings-hp-backfill"
+                  />
+                ) : null}
                 {ALL_READ_KINDS.map((kind, idx) => (
                   <ListRow
                     key={`read-${kind}`}

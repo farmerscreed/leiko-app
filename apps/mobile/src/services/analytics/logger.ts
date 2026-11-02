@@ -101,6 +101,7 @@ export type AnalyticsEvent =
   // never values. Per D13 §13.4 + CLAUDE.md analytics rule.
   | { name: 'health_platform_write'; props?: { vital_type: 'bp' | 'hr' | 'spo2' | 'sleep' | 'steps' | 'calories'; written: number; rejected: number } }
   | { name: 'health_platform_write_failed'; props?: { vital_type: string; reason: string } }
+  | { name: 'health_platform_backfill'; props?: { result: 'done' | 'failed'; written: number; rejected: number } }
   | { name: 'health_platform_read_completed'; props?: { inserted: number; duplicates: number; rejected: number } }
   | { name: 'health_platform_read_failed'; props?: { stage: 'platform_read' | 'sync_post'; reason: string } }
   | { name: 'health_platform_read_skipped'; props?: { trigger: 'foreground' | 'manual' | 'background'; reason: string } }

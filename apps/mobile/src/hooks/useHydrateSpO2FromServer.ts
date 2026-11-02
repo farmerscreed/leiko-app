@@ -13,7 +13,7 @@ import type { SpO2Sample } from '../types/vitals';
 
 const FETCH_LIMIT = 200;
 
-interface ServerSpO2Row {
+export interface ServerSpO2Row {
   id: string;
   family_id: string;
   device_id: string | null;
@@ -32,7 +32,7 @@ interface ServerSpO2Row {
   } | null;
 }
 
-function mapServerRowToSpO2Sample(row: ServerSpO2Row): SpO2Sample {
+export function mapServerRowToSpO2Sample(row: ServerSpO2Row): SpO2Sample {
   const measuredAtSec = Math.floor(new Date(row.measured_at).getTime() / 1000);
   const jsonb = row.value_jsonb ?? {};
   return {

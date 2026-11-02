@@ -61,13 +61,30 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="leiko"/>
       </intent-filter>
-      <intent-filter>
-        <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE"/>
-      </intent-filter>
+    </activity>
+    <!-- Health Connect's "why does Leiko need this" link → privacy policy.
+         Android 13 and below use the rationale action; Android 14+ uses
+         the VIEW_PERMISSION_USAGE alias. Required by Play's Health Connect
+         review (2026-11-02). -->
+    <activity
+        android:name=".health.HealthPermissionsRationaleActivity"
+        android:exported="true"
+        android:theme="@android:style/Theme.Translucent.NoTitleBar"
+        android:excludeFromRecents="true">
       <intent-filter>
         <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE"/>
       </intent-filter>
     </activity>
+    <activity-alias
+        android:name="ViewPermissionUsageActivity"
+        android:exported="true"
+        android:targetActivity=".health.HealthPermissionsRationaleActivity"
+        android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW_PERMISSION_USAGE"/>
+        <category android:name="android.intent.category.HEALTH_PERMISSIONS"/>
+      </intent-filter>
+    </activity-alias>
     <service
         android:name=".ble.LeikoBleForegroundService"
         android:exported="false"
