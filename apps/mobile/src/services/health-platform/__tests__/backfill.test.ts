@@ -27,6 +27,7 @@ function builder(table: string) {
     eq: chain('eq'),
     is: chain('is'),
     gte: chain('gte'),
+    or: chain('or'),
     order: () => self,
     limit: () => self,
     maybeSingle: async () => ({
@@ -199,4 +200,13 @@ it('is Android-only for now (HealthKit writes have no sync ids yet)', async () =
   setWriteVital('bp', true);
   await backfillHealthPlatform(NOW);
   expect(queries).toHaveLength(0);
+});
+
+it('includes rows whose hidden flag is unset (null), not only false', async () => {
+  signIn('self_buyer');
+  setMaster(true);
+  setWriteVital('steps', true);
+  await backfillHealthPlatform(NOW);
+  const q = queries.find((x) => x.table === 'vitals_other');
+  expect(q?.filters).toContainEqual(['or', 'hidden.is.null,hidden.eq.false', undefined]);
 });

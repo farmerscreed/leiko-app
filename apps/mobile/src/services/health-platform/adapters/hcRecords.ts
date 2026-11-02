@@ -131,7 +131,7 @@ export function oxygenRecords(samples: SpO2Sample[]): HealthConnectRecord[] {
 }
 
 export function sleepRecords(sessions: SleepSession[]): HealthConnectRecord[] {
-  return sessions.map(
+  return sessions.filter((s) => s.sessionEndSec > s.sessionStartSec).map(
     (session) =>
       ({
         recordType: 'SleepSession',
@@ -153,14 +153,20 @@ export function sleepRecords(sessions: SleepSession[]): HealthConnectRecord[] {
   );
 }
 
+/** Health Connect's StepsRecord requires 1 ≤ count ≤ 1,000,000; a 0-step
+ *  day (watch not worn) throws, and one throw fails the whole insert
+ *  (seen on device 2026-11-02: no Leiko steps at all after the history
+ *  copy). A day with no steps has nothing to record, so it is skipped. */
+const MAX_STEPS = 1_000_000;
+
 export function stepsRecords(days: ActivityDay[], nowSec: number): HealthConnectRecord[] {
-  return days.map(
+  return days.filter((d) => d.totalSteps >= 1).map(
     (d) =>
       ({
         recordType: 'Steps',
         startTime: iso(d.measuredAtSec),
         endTime: iso(dayEndSec(d.measuredAtSec, nowSec)),
-        count: d.totalSteps,
+        count: Math.min(Math.round(d.totalSteps), MAX_STEPS),
         // Today's total only grows; the newest sync replaces the old one.
         metadata: metadata(
           clientRecordId('steps', d.measuredAtSec),
@@ -172,7 +178,7 @@ export function stepsRecords(days: ActivityDay[], nowSec: number): HealthConnect
 }
 
 export function caloriesRecords(days: CaloriesDay[], nowSec: number): HealthConnectRecord[] {
-  return days.map(
+  return days.filter((d) => Number.isFinite(d.activityKcal) && d.activityKcal > 0).map(
     (d) =>
       ({
         recordType: 'ActiveCaloriesBurned',

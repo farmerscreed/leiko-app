@@ -130,9 +130,24 @@ async function insertSafely(
       written += ids.length;
       rejected += chunk.length - ids.length;
     } catch (err) {
-      rejected += chunk.length;
       firstError ??= (err as Error).message;
+      // One invalid record fails the whole call. Salvage the rest one by
+      // one so a single bad day can't hide a whole history.
+      for (const record of chunk) {
+        try {
+          written += (await insertRecords([record])).length;
+        } catch {
+          rejected += 1;
+        }
+      }
     }
+  }
+  if (rejected > 0) {
+    // Diagnostics for release builds: record type + counts + the first
+    // platform error. Never values (CLAUDE.md data rule).
+    console.log(
+      `[leiko-hc] ${records[0]?.recordType} written=${written} rejected=${rejected} ${firstError ?? ''}`.slice(0, 300),
+    );
   }
   return firstError ? { written, rejected, firstError } : { written, rejected };
 }

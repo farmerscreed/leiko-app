@@ -67,8 +67,8 @@ describe('steps — the overcount bug', () => {
     expect(field<string>(r, 'endTime')).toBe(new Date((DAY + 86_400) * 1000).toISOString());
   });
 
-  it('zero steps still gets a positive version', () => {
-    const [r] = stepsRecords([stepsDay(0)], NOW);
+  it('one step still gets a positive version', () => {
+    const [r] = stepsRecords([stepsDay(1)], NOW);
     expect(meta(r).clientRecordVersion).toBeGreaterThanOrEqual(1);
   });
 });
@@ -156,5 +156,41 @@ describe('sleep', () => {
     const [b] = sleepRecords([night(420, 15)]);
     expect(meta(a).clientRecordId).toBe(meta(b).clientRecordId);
     expect(meta(b).clientRecordVersion).toBeGreaterThan(meta(a).clientRecordVersion);
+  });
+});
+
+describe('records Health Connect would reject (2026-11-02 device test)', () => {
+  it('skips 0-step days — StepsRecord requires count >= 1', () => {
+    expect(stepsRecords([stepsDay(0), stepsDay(12)], NOW)).toHaveLength(1);
+  });
+
+  it('skips days with no active calories', () => {
+    const day = (kcal: number): CaloriesDay => ({
+      dayLocal: '2025-11-02',
+      measuredAtSec: DAY,
+      totalKcal: 1500,
+      activityKcal: kcal,
+      bmrKcal: 1500,
+      targetKcal: null,
+    });
+    expect(caloriesRecords([day(0), day(Number.NaN), day(5)], NOW)).toHaveLength(1);
+  });
+
+  it('skips a night whose end is not after its start', () => {
+    const bad = {
+      sessionStartSec: DAY,
+      sessionEndSec: DAY,
+      sessionStartLocal: '',
+      sessionEndLocal: '',
+      totalMinutes: 0,
+      deepMinutes: 0,
+      remMinutes: 0,
+      lightMinutes: 0,
+      awakeMinutes: 0,
+      awakeCount: 0,
+      transitions: [],
+      sleepScore: 0,
+    } as SleepSession;
+    expect(sleepRecords([bad])).toHaveLength(0);
   });
 });

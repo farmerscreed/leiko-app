@@ -165,6 +165,7 @@ export async function backfillHealthPlatform(nowMs: number = Date.now()): Promis
   const caregiver = useAuth.getState().profile?.account_type === 'caregiver';
   let copied = 0;
   let rejected = 0;
+  const rowsByKind: Partial<Record<WriteVitalKind, number>> = {};
 
   const writeBatch = async (batch: WriteBatch): Promise<void> => {
     const r = await write(batch);
@@ -190,13 +191,14 @@ export async function backfillHealthPlatform(nowMs: number = Date.now()): Promis
               .from('readings')
               .select('measured_at, systolic, diastolic, pulse, source')
               .eq('family_id', familyId)
-              .eq('hidden', false)
+              .or('hidden.is.null,hidden.eq.false')
               .gte('measured_at', sinceIso(HISTORY_DAYS, nowMs))
               .order('measured_at', { ascending: true })
               .range(from, to),
           async (rows) => {
             // A caregiver's own circle can hold readings they typed in
             // for someone else; only watch readings are certainly theirs.
+            rowsByKind.bp = (rowsByKind.bp ?? 0) + rows.length;
             const own = caregiver ? rows.filter((r) => r.source === 'watch') : rows;
             if (own.length) await writeBatch({ bp: own.map(toBPReading) });
           },
@@ -213,13 +215,22 @@ export async function backfillHealthPlatform(nowMs: number = Date.now()): Promis
             )
             .eq('family_id', familyId)
             .eq('vital_type', SERVER_TYPE[kind])
-            .eq('hidden', false)
+            .or('hidden.is.null,hidden.eq.false')
             .gte('measured_at', sinceIso(days, nowMs))
             .order('measured_at', { ascending: true })
             .range(from, to),
-        (rows) => writeBatch(toBatch(kind, rows)),
+        async (rows) => {
+          rowsByKind[kind] = (rowsByKind[kind] ?? 0) + rows.length;
+          await writeBatch(toBatch(kind, rows));
+        },
       );
     }
+    // Release-build diagnostics: rows found per vital (counts only).
+    console.log(
+      `[leiko-hc] backfill rows ${Object.entries(rowsByKind)
+        .map(([k, n]) => `${k}=${n}`)
+        .join(' ')} written=${copied} rejected=${rejected}`,
+    );
 
     mmkv.set(STORAGE_KEYS.healthPlatformBackfillAt, nowMs);
     useHealthBackfill.setState({ status: 'done', copied, lastCompletedAt: nowMs });
