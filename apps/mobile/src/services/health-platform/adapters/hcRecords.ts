@@ -68,12 +68,68 @@ export function clientRecordId(kind: string, startSec: number): string {
   return `leiko-${kind}-${Math.floor(startSec)}`;
 }
 
-/** End of a day-long record, never later than now — HC rejects records
- *  that end in the future, and today's row is still growing. */
-export function dayEndSec(dayStartSec: number, nowSec: number): number {
-  const fullDay = dayStartSec + 86_400;
-  return Math.max(dayStartSec + 1, Math.min(fullDay, nowSec));
+/** Offset (sec) of `timeZone` from UTC at instant `atSec`. */
+function tzOffsetSec(atSec: number, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hourCycle: 'h23',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).formatToParts(new Date(atSec * 1000));
+  const get = (t: string) => Number(parts.find((p) => p.type === t)?.value ?? 0);
+  const asUtc = Date.UTC(get('year'), get('month') - 1, get('day'), get('hour'), get('minute'), get('second'));
+  return Math.round(asUtc / 1000 - atSec);
 }
+
+/**
+ * Real start instant of a calendar day in `timeZone`.
+ *
+ * Leiko keys day rows (steps_day / calories_day) by 'YYYY-MM-DD' stored
+ * as that date at 00:00 UTC — a day KEY, not the day's start
+ * (syncMultiVitals unixSecFromDayLocal). Writing the key as the start
+ * put every day 6 h early in Chicago (6 PM → 6 PM), so totals landed on
+ * the wrong date in Health Connect (device test 2026-11-02).
+ */
+export function localDayStartSec(dayLocal: string, timeZone: string): number {
+  const [y, m, d] = dayLocal.split('-').map(Number);
+  const utcMidnight = Date.UTC(y, m - 1, d) / 1000;
+  // Two passes settle DST: the offset at local midnight can differ from
+  // the offset at UTC midnight.
+  let start = utcMidnight - tzOffsetSec(utcMidnight, timeZone);
+  start = utcMidnight - tzOffsetSec(start, timeZone);
+  return start;
+}
+
+function deviceTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+}
+
+/** [start, end) of a day record, never ending later than now — HC
+ *  rejects records that end in the future, and today's row still grows.
+ *  End is the next local midnight, so 23 h / 25 h DST days are right. */
+export function dayWindowSec(
+  dayLocal: string,
+  nowSec: number,
+  timeZone: string,
+): { start: number; end: number } {
+  const start = localDayStartSec(dayLocal, timeZone);
+  const [y, m, d] = dayLocal.split('-').map(Number);
+  const next = new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
+  const fullEnd = localDayStartSec(next, timeZone);
+  return { start, end: Math.max(start + 1, Math.min(fullEnd, nowSec)) };
+}
+
+/** Day records written before 2026-11-02 used the wrong window. A higher
+ *  version makes Health Connect replace them in place (same id). */
+const DAY_RECORD_SCHEMA = 1_000_000_000;
 
 export function bloodPressureRecords(samples: BPReading[]): HealthConnectRecord[] {
   return samples.map((s) => {
@@ -159,39 +215,49 @@ export function sleepRecords(sessions: SleepSession[]): HealthConnectRecord[] {
  *  copy). A day with no steps has nothing to record, so it is skipped. */
 const MAX_STEPS = 1_000_000;
 
-export function stepsRecords(days: ActivityDay[], nowSec: number): HealthConnectRecord[] {
-  return days.filter((d) => d.totalSteps >= 1).map(
-    (d) =>
-      ({
+export function stepsRecords(
+  days: ActivityDay[],
+  nowSec: number,
+  timeZone: string = deviceTimeZone(),
+): HealthConnectRecord[] {
+  return days.filter((d) => d.totalSteps >= 1).map((d) => {
+    const w = dayWindowSec(d.dayLocal, nowSec, timeZone);
+    return {
         recordType: 'Steps',
-        startTime: iso(d.measuredAtSec),
-        endTime: iso(dayEndSec(d.measuredAtSec, nowSec)),
+        startTime: iso(w.start),
+        endTime: iso(w.end),
         count: Math.min(Math.round(d.totalSteps), MAX_STEPS),
         // Today's total only grows; the newest sync replaces the old one.
+        // Id stays on the day key (stable across time zones and the
+        // window fix). Today's total only grows, so the newest wins.
         metadata: metadata(
           clientRecordId('steps', d.measuredAtSec),
-          d.totalSteps + 1,
+          DAY_RECORD_SCHEMA + d.totalSteps + 1,
           RECORDING_AUTOMATIC,
         ),
-      }) as HealthConnectRecord,
-  );
+      } as HealthConnectRecord;
+  });
 }
 
-export function caloriesRecords(days: CaloriesDay[], nowSec: number): HealthConnectRecord[] {
-  return days.filter((d) => Number.isFinite(d.activityKcal) && d.activityKcal > 0).map(
-    (d) =>
-      ({
+export function caloriesRecords(
+  days: CaloriesDay[],
+  nowSec: number,
+  timeZone: string = deviceTimeZone(),
+): HealthConnectRecord[] {
+  return days.filter((d) => Number.isFinite(d.activityKcal) && d.activityKcal > 0).map((d) => {
+    const w = dayWindowSec(d.dayLocal, nowSec, timeZone);
+    return {
         recordType: 'ActiveCaloriesBurned',
-        startTime: iso(d.measuredAtSec),
-        endTime: iso(dayEndSec(d.measuredAtSec, nowSec)),
+        startTime: iso(w.start),
+        endTime: iso(w.end),
         energy: { value: d.activityKcal, unit: 'kilocalories' },
         // kcal can be fractional; scale so small increases still bump the
         // version.
         metadata: metadata(
           clientRecordId('kcal', d.measuredAtSec),
-          Math.round(d.activityKcal * 10) + 1,
+          DAY_RECORD_SCHEMA + Math.round(d.activityKcal * 10) + 1,
           RECORDING_AUTOMATIC,
         ),
-      }) as HealthConnectRecord,
-  );
+      } as HealthConnectRecord;
+  });
 }

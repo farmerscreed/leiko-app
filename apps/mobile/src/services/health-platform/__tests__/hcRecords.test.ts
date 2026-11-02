@@ -6,7 +6,8 @@ import {
   bloodPressureRecords,
   caloriesRecords,
   clientRecordId,
-  dayEndSec,
+  dayWindowSec,
+  localDayStartSec,
   heartRateRecords,
   LEIKO_HC_DEVICE,
   oxygenRecords,
@@ -50,20 +51,20 @@ describe('clientRecordId', () => {
 
 describe('steps — the overcount bug', () => {
   it('two syncs of the same day share one id, and the bigger total wins', () => {
-    const [morning] = stepsRecords([stepsDay(1200)], NOW);
-    const [later] = stepsRecords([stepsDay(4000)], NOW + 3600);
+    const [morning] = stepsRecords([stepsDay(1200)], NOW, 'UTC');
+    const [later] = stepsRecords([stepsDay(4000)], NOW + 3600, 'UTC');
     expect(meta(morning).clientRecordId).toBe(meta(later).clientRecordId);
     expect(meta(later).clientRecordVersion).toBeGreaterThan(meta(morning).clientRecordVersion);
     expect(field<number>(later, 'count')).toBe(4000);
   });
 
   it("today's record never ends in the future", () => {
-    const [r] = stepsRecords([stepsDay(1200)], NOW);
+    const [r] = stepsRecords([stepsDay(1200)], NOW, 'UTC');
     expect(field<string>(r, 'endTime')).toBe(new Date(NOW * 1000).toISOString());
   });
 
   it('a finished day spans the whole day', () => {
-    const [r] = stepsRecords([stepsDay(9000)], DAY + 3 * 86_400);
+    const [r] = stepsRecords([stepsDay(9000)], DAY + 3 * 86_400, 'UTC');
     expect(field<string>(r, 'endTime')).toBe(new Date((DAY + 86_400) * 1000).toISOString());
   });
 
@@ -90,9 +91,39 @@ describe('calories', () => {
   });
 });
 
-describe('dayEndSec', () => {
-  it('is at least one second after the start', () => {
-    expect(dayEndSec(DAY, DAY - 50)).toBe(DAY + 1);
+describe('day windows — local midnight, not the UTC day key (2026-11-02)', () => {
+  it('Chicago day starts at 06:00 UTC in winter, 05:00 UTC in summer', () => {
+    expect(new Date(localDayStartSec('2026-11-02', 'America/Chicago') * 1000).toISOString()).toBe(
+      '2026-11-02T06:00:00.000Z',
+    );
+    expect(new Date(localDayStartSec('2026-07-01', 'America/Chicago') * 1000).toISOString()).toBe(
+      '2026-07-01T05:00:00.000Z',
+    );
+    expect(new Date(localDayStartSec('2026-11-02', 'Africa/Lagos') * 1000).toISOString()).toBe(
+      '2026-11-01T23:00:00.000Z',
+    );
+  });
+
+  it('the day DST ends is 25 hours long', () => {
+    const w = dayWindowSec('2026-11-01', Date.UTC(2026, 11, 1) / 1000, 'America/Chicago');
+    expect(w.end - w.start).toBe(25 * 3600);
+  });
+
+  it('a Chicago steps record spans local midnight to local midnight', () => {
+    const day: ActivityDay = { ...stepsDay(5000), dayLocal: '2026-10-31', measuredAtSec: Date.UTC(2026, 9, 31) / 1000 };
+    const [r] = stepsRecords([day], Date.UTC(2026, 10, 2) / 1000, 'America/Chicago');
+    expect(field<string>(r, 'startTime')).toBe('2026-10-31T05:00:00.000Z');
+    expect(field<string>(r, 'endTime')).toBe('2026-11-01T05:00:00.000Z');
+  });
+
+  it('never ends before it starts', () => {
+    const w = dayWindowSec('2026-11-02', 0, 'UTC');
+    expect(w.end).toBe(w.start + 1);
+  });
+
+  it('re-written day records outrank the ones written with the old window', () => {
+    const [r] = stepsRecords([stepsDay(1)], NOW, 'UTC');
+    expect(meta(r).clientRecordVersion).toBeGreaterThan(1_000_000);
   });
 });
 
