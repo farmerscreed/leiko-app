@@ -10,7 +10,10 @@ audit itself; this file records what happened after it and what is left.
 | 23 | — | PRs #30–#35 | Rejected by Play: Billing Library 7.1.1 (Play requires ≥ 8) |
 | 24 | Internal | + PR #38 (react-native-purchases 9.15.3, Billing 8.0.0) | Installed from Play 2026-10-31. **Background sync dead on fresh install**: `[leiko-bg] storage not ready — skipped` every wake (memoised migration status) |
 | 25 | Internal | + PR #39 (live migration status in `storageReady`) | Installed from Play 2026-11-02 11:03 CST. Task fires, but the **freezer stops the process ~10 s after every wake** before the foreground service starts → no upload (see below) |
-| 26 | — (to build) | + PR #40 (hold foreground service first) | Build, upload to Internal, verify, then promote to Production |
+| 26 | Internal | + PR #40 (hold foreground service first) | **Background sync verified** 13:49 CST: wake → FGS allowed → timers held → session ok → watch read → HR uploaded, no freeze |
+| 27 | Internal | + PR #42 (Health Connect) | Permission screen works (delegate fix); history copy: BP/HR/SpO2 in HC, steps/calories/sleep missing |
+| 28 | Internal | + skip invalid records, salvage batches, hidden=null rows | Copy 5,637 written / 0 rejected; day records 6 PM→6 PM (UTC day key) |
+| 29 | Internal → **promote to Production** | + local-midnight day windows | Copy 5,648 / 0 rejected; steps & calories on the right dates; privacy link → leiko.health/privacy ✅ |
 
 Verified in 25's AAB: Play upload-key signer `CF:65:9F…78:65`, PostHog
 `phc_` only (no `phx_`), RevenueCat `goog_` key, prod Supabase ref,
@@ -60,7 +63,21 @@ reconnect loop, a JS interval kept alive by the timer hold, Home polling.
    testing). Fail → read the breadcrumbs; next suspect is a denied
    background FGS start (`ble_fg_start_failed`).
 
-## Health Connect — state and gaps
+## Health Connect — DONE in build 29 (PR #42)
+
+Verified on device: all 9 permissions granted via the in-app flow;
+history copy (2 y, HR 30 d); BP/HR/SpO2/steps/calories from Leiko at the
+right times; re-copy replaces, never duplicates; privacy-policy link
+works (Android 14 VIEW_PERMISSION_USAGE alias). Diagnostics:
+`[leiko-hc] backfill rows …` in logcat.
+
+Known limitation: Leiko writes ONE steps record per day (the watch's
+hourly split isn't read yet), so Health Connect's cross-app dedup can
+double count against phone/Fitbit minute data. Users fix it by putting
+Leiko first in Data sources and priority → Steps, or turning off "Share
+steps". Follow-up: read the watch's hourly steps and write hourly records.
+
+## Health Connect — original gaps (2026-11-02 morning, now fixed)
 
 Already built (Sprint 9.5, ADR-0005, `src/services/health-platform/`):
 writes BP, HR, SpO2, sleep (with stages), steps, active calories after
@@ -84,6 +101,18 @@ Gaps for "everything in one central place":
    App permissions → Leiko; data → Blood pressure → source Leiko).
 
 ## Still open (Android)
+
+- **Play Console: create subscriptions `com.leiko.app.plus.monthly` and
+  `com.leiko.app.plus.annual` for com.leiko.care** — RevenueCat logs
+  PRODUCT_NOT_FOUND; the paywall is empty for new users. Release blocker
+  for revenue.
+- Play Console Health Connect declaration (`docs/release/play-health-connect-declaration.md`);
+  confirm leiko.health/privacy covers Health Connect.
+- Server BP duplicates: the same reading stored ~3× one hour apart
+  (time-zone shift while travelling) — needs a read-only prod count, then
+  a dedupe migration + a client fix.
+- Background flush of saved readings uploads one by one (122 s for a
+  backlog on 11-02) — batch it.
 
 - PR #37 security migration — founder confirms content machine uses the
   service_role key, then "merge 37".
