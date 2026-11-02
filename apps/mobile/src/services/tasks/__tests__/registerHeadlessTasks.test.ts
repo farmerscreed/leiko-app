@@ -76,4 +76,69 @@ describe('registerHeadlessTasks', () => {
     await expect(runner()).resolves.toBe(2); // NewData
     expect(runWatch).toHaveBeenCalledWith('background');
   });
+
+  it('holds the foreground service before the storage gate (2026-11-02)', async () => {
+    // Play build 25: the freezer stopped every cold wake ~10 s in, while
+    // the run was still booting JS and reading the keystore — before the
+    // service started — so nothing uploaded. The hold must come first.
+    jest.resetModules();
+    const order: string[] = [];
+    jest.doMock('../../secureBoot', () => ({
+      acquireMmkvKey: jest.fn(async () => {
+        order.push('acquire');
+        return { migrationStatus: 'completed' };
+      }),
+      getCachedStatus: jest.fn(() => 'completed'),
+    }));
+    jest.doMock('../../../state/hydrateForHeadlessRun', () => ({
+      hydrateForHeadlessRun: jest.fn(),
+      ensureSessionForHeadlessRun: jest.fn(async () => true),
+    }));
+    jest.doMock('../../../state/syncOrchestrator', () => ({
+      useSyncOrchestrator: {
+        getState: () => ({ runSync: jest.fn(async () => (order.push('sync'), 'ran')) }),
+      },
+    }));
+    jest.doMock('../../ble/foregroundService', () => ({
+      withBleForegroundService: async (fn: () => Promise<unknown>) => {
+        order.push('hold');
+        try {
+          return await fn();
+        } finally {
+          order.push('release');
+        }
+      },
+      ensureJsTimersHeld: jest.fn(async () => undefined),
+    }));
+    const runner = defineTask.mock.calls.find(
+      (c) => c[0] === BACKGROUND_SYNC_TASK,
+    )?.[1] as () => Promise<number>;
+    await expect(runner()).resolves.toBe(2); // NewData
+    expect(order[0]).toBe('hold');
+    expect(order.indexOf('acquire')).toBeGreaterThan(0);
+    expect(order[order.length - 1]).toBe('release');
+  });
+
+  it('releases the hold when storage is not ready', async () => {
+    jest.resetModules();
+    const released = jest.fn();
+    jest.doMock('../../secureBoot', () => ({
+      acquireMmkvKey: jest.fn(async () => ({ migrationStatus: 'pending' })),
+      getCachedStatus: jest.fn(() => 'pending'),
+    }));
+    jest.doMock('../../ble/foregroundService', () => ({
+      withBleForegroundService: async (fn: () => Promise<unknown>) => {
+        try {
+          return await fn();
+        } finally {
+          released();
+        }
+      },
+    }));
+    const runner = defineTask.mock.calls.find(
+      (c) => c[0] === BACKGROUND_SYNC_TASK,
+    )?.[1] as () => Promise<number>;
+    await expect(runner()).resolves.toBe(1); // NoData
+    expect(released).toHaveBeenCalledTimes(1);
+  });
 });

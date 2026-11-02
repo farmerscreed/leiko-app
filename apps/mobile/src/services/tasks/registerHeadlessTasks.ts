@@ -24,7 +24,9 @@
 // This module keeps its static imports to task names plus the two Expo
 // packages, and pulls everything else in with dynamic import INSIDE the
 // task body, after the key is acquired — the same contract App.tsx
-// follows, stated explicitly rather than implied by file placement.
+// follows, stated explicitly rather than implied by file placement. The
+// one exception is ble/foregroundService, which imports nothing
+// storage-dependent and must start before the key read (see the task).
 //
 // A pending migration is left alone: we skip the run rather than operate
 // on a half-migrated store, and the next app open completes it.
@@ -92,10 +94,10 @@ async function runWatchSync(): Promise<TaskResult> {
   const sessionOk = await ensureSessionForHeadlessRun();
   bgLog(`session ok=${sessionOk} in ${Date.now() - t0}ms`);
   try {
-    // Hold the foreground service for the run: the cached-app freezer
-    // otherwise stops this process 9–18 s after the wake, which starves
-    // the vitals leg (see withBleForegroundService). A denied start
-    // degrades to today's behaviour; it never throws.
+    // The task body already holds the service (see defineTask below); this
+    // nested hold only bumps the hold count and keeps runWatchSync safe to
+    // call on its own. A denied start degrades to the freezer budget; it
+    // never throws.
     const result = await withBleForegroundService(() =>
       useSyncOrchestrator.getState().runSync('background'),
     );
@@ -170,13 +172,25 @@ export function registerHeadlessTasks(): void {
       // why. These breadcrumbs (labels and timings only) reach logcat as
       // ReactNativeJS "[leiko-bg]" lines.
       bgLog('task fired');
-      void probeJsTimers();
       try {
-        if (!(await storageReady())) {
+        // Start the foreground service FIRST, before anything else awaits.
+        // 2026-11-02 (Play build 25, Pixel 8): the freezer stopped the
+        // process ~10 s after every wake, and a cold wake spends ~3 s just
+        // booting JS plus several seconds of keystore reads in
+        // storageReady() — so the run never reached the service start in
+        // runWatchSync and nothing uploaded. foregroundService is safe to
+        // import before the MMKV key (it loads analytics lazily). The
+        // service also keeps JS timers running for the whole run.
+        const { withBleForegroundService } = await import('../ble/foregroundService');
+        const result = await withBleForegroundService(async (): Promise<TaskResult | 'not-ready'> => {
+          void probeJsTimers();
+          if (!(await storageReady())) return 'not-ready';
+          return runWatchSync();
+        });
+        if (result === 'not-ready') {
           bgLog('storage not ready — skipped');
           return bg.BackgroundFetchResult.NoData;
         }
-        const result = await runWatchSync();
         bgLog(`task result=${result}`);
         await track(result);
         if (result === 'ran') return bg.BackgroundFetchResult.NewData;
