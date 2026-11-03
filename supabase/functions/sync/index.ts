@@ -48,6 +48,12 @@ import {
   mapCaloriesDays,
   type VitalsOtherRow,
 } from '../_shared/vital-row-mappers.ts';
+import {
+  splitShiftedTwins,
+  twinSearchWindow,
+  type BPTwinCandidate,
+  type StoredBP,
+} from '../_shared/bp-shift-dedupe.ts';
 
 interface LegacyResponse {
   readingId: string;
@@ -354,6 +360,17 @@ async function handleLegacy(
   }
   const r = accepted[0];
   const measuredAt = new Date(r.measuredAtSec * 1000).toISOString();
+  // 2026-11-03 — the same watch reading re-pulled from another time zone
+  // arrives shifted by whole hours; return the stored row as a duplicate.
+  if (r.source === 'watch') {
+    const candidate = { measured_at: measuredAt, systolic: r.systolic, diastolic: r.diastolic, pulse: r.pulse };
+    const stored = await loadStoredWatchBP(serviceClient, familyId, [candidate]);
+    const { twins } = splitShiftedTwins([candidate], stored);
+    if (twins.length > 0 && twins[0].existingId) {
+      const resp: LegacyResponse = { readingId: twins[0].existingId, deviceId, duplicate: true };
+      return json(resp, 200);
+    }
+  }
   const insertReading = await serviceClient
     .from('readings')
     .insert({
@@ -441,13 +458,22 @@ async function handleMultiVitals(
     counts.rejected.bp = rejected.length;
     await logRejected(serviceClient, familyId, userId, 'bp', rejected);
     if (accepted.length > 0) {
-      const rows = mapBPReadings(accepted, familyId, deviceId);
-      const result = await insertReadings(serviceClient, rows);
+      const mapped = mapBPReadings(accepted, familyId, deviceId);
+      // 2026-11-03 — drop time-shifted copies of stored watch readings
+      // (see _shared/bp-shift-dedupe.ts) before the unique-index upsert.
+      const watchRows = mapped.filter((row) => row.source === 'watch');
+      const stored = await loadStoredWatchBP(serviceClient, familyId, watchRows);
+      const { twins } = splitShiftedTwins(watchRows, stored);
+      const twinSet = new Set(twins.map((t) => t.row));
+      const rows = mapped.filter((row) => !twinSet.has(row));
+      const result = rows.length > 0
+        ? await insertReadings(serviceClient, rows)
+        : { inserted: 0, duplicates: 0, errored: null, insertedReadingIds: [] as string[] };
       if (result.errored) {
         return json({ error: 'bp_insert_failed', detail: result.errored }, 500);
       }
       counts.inserted.bp = result.inserted;
-      counts.duplicates.bp = result.duplicates;
+      counts.duplicates.bp = result.duplicates + twins.length;
       if (result.insertedReadingIds) newBpReadingIds.push(...result.insertedReadingIds);
     }
   }
@@ -588,6 +614,29 @@ interface InsertSummary {
   duplicates: number;
   errored: string | null;
   insertedReadingIds?: string[];
+}
+
+/** Stored, visible watch BP rows near a batch — for the time-shift guard.
+ *  On a lookup error, return none: the guard is best-effort and must
+ *  never block an upload. */
+async function loadStoredWatchBP(
+  serviceClient: SupabaseClient,
+  familyId: string,
+  rows: BPTwinCandidate[],
+): Promise<StoredBP[]> {
+  const window = twinSearchWindow(rows);
+  if (!window) return [];
+  const { data, error } = await serviceClient
+    .from('readings')
+    .select('id, measured_at, systolic, diastolic, pulse')
+    .eq('family_id', familyId)
+    .eq('source', 'watch')
+    .or('hidden.is.null,hidden.eq.false')
+    .gte('measured_at', window.fromIso)
+    .lte('measured_at', window.toIso)
+    .limit(2000);
+  if (error || !data) return [];
+  return data as StoredBP[];
 }
 
 async function insertReadings(
