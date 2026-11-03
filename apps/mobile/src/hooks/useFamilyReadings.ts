@@ -28,6 +28,7 @@ import { useAuth } from '../state/auth';
 import { useSyncOrchestrator } from '../state/syncOrchestrator';
 import { logger } from '../services/analytics/logger';
 import { announceForAccessibility } from './useAnnounce';
+import { createRealtimeBatcher } from '../utils/realtimeBatch';
 
 const QUERY_KEY = ['family-readings'] as const;
 
@@ -83,6 +84,25 @@ export function useFamilyReadings(): UseFamilyReadingsResult {
     // channel per (table, filter) tuple. Sprint 7.7b shipped this as
     // a single dual-listener channel and the runtime error was caught
     // during on-device review (2026-05-08).
+    // 2026-11-03: a watch sync inserts hundreds of vitals_other rows;
+    // each used to refetch + log on its own, even in the background.
+    // One flush per burst, only while the app is on screen.
+    const bpFamilies = new Set<string>();
+    const vitalFamilies = new Set<string>();
+    const batcher = createRealtimeBatcher(() => {
+      for (const familyId of bpFamilies) logger.track('reading_realtime_received', { familyId });
+      for (const familyId of vitalFamilies) {
+        logger.track('vitals_other_realtime_received', { familyId });
+      }
+      // D13 PR-9 (§9.1) — the insert used to re-render silently;
+      // a screen-reader user was never told a reading arrived.
+      // No values in the announcement (data rules), just the
+      // event; the surfaces speak the verdict themselves.
+      if (bpFamilies.size > 0) announceForAccessibility('A new reading just came in.');
+      bpFamilies.clear();
+      vitalFamilies.clear();
+      void queryClient.invalidateQueries({ queryKey });
+    });
     const channels = familyIds.flatMap((familyId) => {
       const readingsChannel = supabase
         .channel(`family-readings:readings:${familyId}:${subscriberId}`)
@@ -95,13 +115,8 @@ export function useFamilyReadings(): UseFamilyReadingsResult {
             filter: `family_id=eq.${familyId}`,
           },
           () => {
-            logger.track('reading_realtime_received', { familyId });
-            // D13 PR-9 (§9.1) — the insert used to re-render silently;
-            // a screen-reader user was never told a reading arrived.
-            // No values in the announcement (data rules), just the
-            // event; the surfaces speak the verdict themselves.
-            announceForAccessibility('A new reading just came in.');
-            void queryClient.invalidateQueries({ queryKey });
+            bpFamilies.add(familyId);
+            batcher.notify();
           },
         )
         .subscribe();
@@ -116,14 +131,15 @@ export function useFamilyReadings(): UseFamilyReadingsResult {
             filter: `family_id=eq.${familyId}`,
           },
           () => {
-            logger.track('vitals_other_realtime_received', { familyId });
-            void queryClient.invalidateQueries({ queryKey });
+            vitalFamilies.add(familyId);
+            batcher.notify();
           },
         )
         .subscribe();
       return [readingsChannel, vitalsChannel];
     });
     return () => {
+      batcher.dispose();
       for (const channel of channels) {
         void supabase.removeChannel(channel);
       }

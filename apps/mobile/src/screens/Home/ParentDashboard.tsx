@@ -79,6 +79,7 @@ import {
   type RemoteRefreshNudgeState,
 } from './useRemoteRefreshNudge';
 import { supabase } from '../../services/supabase';
+import { createRealtimeBatcher } from '../../utils/realtimeBatch';
 import { useTheme, type Theme } from '../../theme';
 import {
   buildHeroVitals,
@@ -143,6 +144,14 @@ export function ParentDashboard() {
   const queryClient = useQueryClient();
   const subscriberId = useId();
   useEffect(() => {
+    // 2026-11-03: one refetch per burst of inserts (a watch sync is
+    // hundreds of rows), and none while the app is in the background.
+    const batcher = createRealtimeBatcher(() => {
+      void queryClient.invalidateQueries({
+        queryKey: parentPulseQueryKey(familyId),
+      });
+      setFreshDataSignal((n) => n + 1);
+    });
     const channels = [
       supabase
         .channel(
@@ -156,12 +165,7 @@ export function ParentDashboard() {
             table: 'readings',
             filter: `family_id=eq.${familyId}`,
           },
-          () => {
-            void queryClient.invalidateQueries({
-              queryKey: parentPulseQueryKey(familyId),
-            });
-            setFreshDataSignal((n) => n + 1);
-          },
+          () => batcher.notify(),
         )
         .subscribe(),
       supabase
@@ -176,16 +180,12 @@ export function ParentDashboard() {
             table: 'vitals_other',
             filter: `family_id=eq.${familyId}`,
           },
-          () => {
-            void queryClient.invalidateQueries({
-              queryKey: parentPulseQueryKey(familyId),
-            });
-            setFreshDataSignal((n) => n + 1);
-          },
+          () => batcher.notify(),
         )
         .subscribe(),
     ];
     return () => {
+      batcher.dispose();
       for (const ch of channels) void supabase.removeChannel(ch);
     };
   }, [familyId, subscriberId, queryClient]);
