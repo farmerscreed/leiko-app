@@ -26,6 +26,8 @@ import { postReading } from '../services/sync/postReading';
 import { forwardReadingToPlatform } from '../services/health-platform/syncBridge';
 
 const RECENT_READINGS_CAP = 30;
+/** Parallel /sync uploads when flushing a backlog (first row goes alone). */
+export const UPLOAD_CONCURRENCY = 4;
 
 export type ReadingSource = 'watch' | 'manual';
 
@@ -251,7 +253,7 @@ export const useReadings = create<ReadingsState>((set, get) => ({
         );
         if (snapshot.length === 0) break;
         let bailOnError = false;
-        for (const row of snapshot) {
+        const uploadOne = async (row: LocalReading): Promise<boolean> => {
           try {
             const res = await postReading(row);
             syncedIds.add(row.localId);
@@ -270,12 +272,24 @@ export const useReadings = create<ReadingsState>((set, get) => ({
                 source: row.source,
               });
             }
+            return true;
           } catch (e) {
             lastError = e instanceof Error ? e.message : 'sync failed';
             logger.track('reading_sync_failed', { reason: lastError });
-            // Treat the first failure as a network outage signal —
-            // stop trying further rows; they'll be retried on the
-            // next sync trigger. Avoids hammering an offline backend.
+            return false;
+          }
+        };
+        // 2026-11-03: a 60-reading backlog took ~122 s one request at a
+        // time. The first row still goes alone — on a fresh install it
+        // creates the server's device row, and parallel first requests
+        // would race that insert. The rest go UPLOAD_CONCURRENCY at a
+        // time. Treat a failure as a network outage signal: finish the
+        // current group, then stop; the rest retry on the next trigger.
+        if (!(await uploadOne(snapshot[0]))) break;
+        for (let i = 1; i < snapshot.length; i += UPLOAD_CONCURRENCY) {
+          const group = snapshot.slice(i, i + UPLOAD_CONCURRENCY);
+          const ok = await Promise.all(group.map(uploadOne));
+          if (ok.includes(false)) {
             bailOnError = true;
             break;
           }
