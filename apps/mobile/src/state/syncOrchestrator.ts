@@ -197,7 +197,9 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
     });
     // Cold-start sync. Fire-and-forget; deferred so the first screen
     // renders before the watch drain competes for the JS thread.
-    startStallDetector();
+    // Only on screen — a launch into the background (e.g. a notification
+    // tap racing the OS) would otherwise tick 4x/s until the next change.
+    if (AppState.currentState === 'active') startStallDetector();
     InteractionManager.runAfterInteractions(() => {
       setTimeout(() => {
         if (!get()._started) return;
