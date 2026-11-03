@@ -67,7 +67,7 @@ export function renderReport(
   const runningHeader = renderRunningHeader(data);
   const body = `
 ${section('cover', renderCover(data))}
-${section('bp', runningHeader + renderBP(data))}
+${section('bp', runningHeader + renderCoverContext(data) + renderBP(data))}
 ${section('hr', runningHeader + renderHR(data))}
 ${section('spo2', runningHeader + renderSpO2(data))}
 ${section('sleep', runningHeader + renderSleep(data))}
@@ -155,24 +155,45 @@ function renderCover(data: ReportData): string {
   const aiCover = data.aiSections?.cover
     ? `<p class="cover-ai">${escape(data.aiSections.cover)}</p>`
     : '';
-  const note =
-    data.coverNote && data.coverNote.trim().length > 0
-      ? `<div class="cover-note"><p class="cover-note-eyebrow">From ${escape(data.user.displayName)}</p><p class="cover-note-body">${escape(data.coverNote.trim())}</p></div>`
-      : '';
+  // The generated date rides on the meta line (2026-11-03): as its own
+  // last paragraph it was the first thing to spill onto an otherwise
+  // blank page 2 whenever the cover ran a few mm long.
+  const meta = [
+    data.rangeLabel,
+    ageLine,
+    `Generated ${formatDate(data.generatedAtIso, data.timeZone)}`,
+  ]
+    .filter((s) => s.length > 0)
+    .map(escape)
+    .join(' · ');
   return `
     <header class="cover">
       <div class="cover-mark">${haloEmberMark(72)}</div>
       <p class="brand-eyebrow">Leiko · Pulse report</p>
       <h1 class="cover-headline">${escape(data.user.displayName)}</h1>
-      <p class="cover-meta">${escape(data.rangeLabel)}${ageLine ? ' · ' + escape(ageLine) : ''}</p>
+      <p class="cover-meta generated-at">${meta}</p>
       ${aiCover}
       ${renderExecutiveSummary(data.executiveSummary)}
-      ${renderClinicalFields(data)}
-      ${note}
       <p class="cover-line">${escape(coverLine(data.user.accountType, data.user.displayName))}</p>
-      <p class="generated-at">Generated ${escape(formatDate(data.generatedAtIso, data.timeZone))}</p>
     </header>
   `;
+}
+
+/**
+ * The user's own note and the clinical-context fields (2026-11-03).
+ * These used to sit on the cover, which pushed a full cover (AI summary
+ * + tiles + clinical fields + note) to ~340 mm on a 243 mm page — the
+ * overflow landed alone on page 2, then BP started on page 3. They now
+ * open page 2, directly above the BP section.
+ */
+function renderCoverContext(data: ReportData): string {
+  const note =
+    data.coverNote && data.coverNote.trim().length > 0
+      ? `<div class="cover-note"><p class="cover-note-eyebrow">From ${escape(data.user.displayName)}</p><p class="cover-note-body">${escape(data.coverNote.trim())}</p></div>`
+      : '';
+  const clinical = renderClinicalFields(data);
+  if (!note && !clinical) return '';
+  return `<div class="report-context">${note}${clinical}</div>`;
 }
 
 function renderExecutiveSummary(summary: ExecutiveSummary): string {
@@ -598,7 +619,7 @@ body {
    Activity / Cross-vital) flow inline so a sparse report doesn't
    bloat to 8 mostly-empty pages. */
 section { padding: 8mm 0 6mm; page-break-inside: avoid; }
-section.report-cover { padding: 18mm 0 12mm; text-align: center; page-break-after: always; }
+section.report-cover { padding: 10mm 0 0; text-align: center; page-break-after: always; }
 section.report-bp { page-break-before: always; }
 section.report-notes { page-break-before: avoid; }
 
@@ -773,6 +794,12 @@ section.report-notes { page-break-before: avoid; }
   font-weight: 500;
 }
 .clinical-row { margin-bottom: 2.5mm; }
+
+/* Note + clinical context open page 2, above BP (2026-11-03). */
+.report-context { margin: 0 0 2mm; page-break-inside: avoid; }
+.report-context .cover-note,
+.report-context .clinical-fields { max-width: none; margin: 0 0 4mm; }
+.report-context section.clinical-fields { padding: 5mm 6mm; }
 .clinical-row:last-child { margin-bottom: 0; }
 .clinical-label {
   font-size: 8.5pt;

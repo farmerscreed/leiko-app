@@ -510,3 +510,43 @@ Deno.test('formatDate uses the wearer timezone (2026-10-30)', async () => {
   assertStringIncludes(formatDate('2026-10-31T01:52:00Z', 'America/Los_Angeles'), 'October 30');
   assertStringIncludes(formatDate('2026-10-31T01:52:00Z', 'UTC'), 'October 31');
 });
+
+// ─── 2026-11-03 — cover overflow ───────────────────────────────────────
+// A full cover (AI summary + tiles + clinical fields + note) ran ~340 mm
+// on a 243 mm page; the spill landed alone on page 2. The cover now holds
+// the summary only, with the date on the meta line; the note + clinical
+// context open the BP page.
+
+function coverOf(html: string): string {
+  const start = html.indexOf('<section id="report-cover"');
+  return html.slice(start, html.indexOf('<section id="report-bp"'));
+}
+
+Deno.test('renderReport — generated date sits on the cover meta line', () => {
+  const html = renderReport(fixture());
+  const cover = coverOf(html);
+  assertStringIncludes(cover, 'class="cover-meta generated-at"');
+  assertStringIncludes(cover, 'Past 30 days · ');
+  assertStringIncludes(cover, ' · Generated May 8, 2026');
+});
+
+Deno.test('renderReport — note + clinical context open page 2, not the cover', () => {
+  const html = renderReport(
+    fixture({
+      coverNote: 'Readings taken before breakfast.',
+      clinicalFields: { medications: 'Amlodipine 5 mg' },
+    }),
+  );
+  const cover = coverOf(html);
+  assert(!cover.includes('cover-note'));
+  assert(!cover.includes('clinical-fields'));
+  const bp = html.slice(html.indexOf('<section id="report-bp"'));
+  const ctx = bp.indexOf('class="report-context"');
+  assert(ctx > 0 && ctx < bp.indexOf('Blood pressure'));
+  assertStringIncludes(bp, 'Readings taken before breakfast.');
+  assertStringIncludes(bp, 'Amlodipine 5 mg');
+});
+
+Deno.test('renderReport — no context block when there is no note or clinical field', () => {
+  assert(!renderReport(fixture()).includes('class="report-context"'));
+});
