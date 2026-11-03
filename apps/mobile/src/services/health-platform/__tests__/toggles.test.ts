@@ -91,6 +91,7 @@ describe('health-platform toggles', () => {
         sleep: false,
         steps: false,
         calories: false,
+        resting_hr: false,
       },
       perVitalRead: { weight: true, height: false, blood_glucose: false },
     });

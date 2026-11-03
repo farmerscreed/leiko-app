@@ -17,6 +17,7 @@
 // so the id is unique within a kind. Days use the day's start instant.
 
 import type { HealthConnectRecord } from 'react-native-health-connect';
+import type { RestingHRNight } from '../types';
 import type {
   ActivityDay,
   BPReading,
@@ -260,4 +261,25 @@ export function caloriesRecords(
         ),
       } as HealthConnectRecord;
   });
+}
+
+/** One RestingHeartRate record per night. Version = samples in the
+ *  night's window, so a later sync that brings more of the night replaces
+ *  the earlier, thinner estimate. */
+export function restingHeartRateRecords(nights: RestingHRNight[]): HealthConnectRecord[] {
+  return nights
+    .filter((n) => Number.isFinite(n.bpm) && n.bpm >= 25 && n.bpm <= 200)
+    .map(
+      (n) =>
+        ({
+          recordType: 'RestingHeartRate',
+          time: iso(n.measuredAtSec),
+          beatsPerMinute: Math.round(n.bpm),
+          metadata: metadata(
+            `leiko-rhr-${n.nightKey}`,
+            n.sampleCount,
+            RECORDING_AUTOMATIC,
+          ),
+        }) as HealthConnectRecord,
+    );
 }

@@ -122,6 +122,7 @@ const WRITE_VITAL_LABEL: Record<WriteVitalKind, string> = {
   sleep: 'Sleep',
   steps: 'Steps',
   calories: 'Calories',
+  resting_hr: 'Resting heart rate',
 };
 
 const READ_VITAL_LABEL: Record<ReadVitalKind, string> = {

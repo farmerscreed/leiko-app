@@ -14,7 +14,7 @@ delegate").
 
 > Leiko pairs with the Leiko blood-pressure watch (a wrist monitor with an
 > inflating cuff). It records blood pressure, heart rate, blood oxygen,
-> sleep and activity from the watch, shows trends, lets the wearer share
+> sleep and activity from the watch (and a nightly resting heart rate derived from it), shows trends, lets the wearer share
 > readings with family members they choose, and produces a report to take
 > to their doctor. Health Connect is optional and off by default: when the
 > user turns it on in Settings → Health Connect, Leiko writes the readings
@@ -31,6 +31,7 @@ delegate").
 | WRITE_SLEEP | Write | Save sleep sessions (with sleep stages) recorded by the user's Leiko watch to Health Connect. |
 | WRITE_STEPS | Write | Save the daily step count recorded by the user's Leiko watch to Health Connect. |
 | WRITE_ACTIVE_CALORIES_BURNED | Write | Save daily active calories estimated by the user's Leiko watch to Health Connect. |
+| WRITE_RESTING_HEART_RATE | Write | Save one resting heart rate per night — the lowest 10-minute average heart rate the user's Leiko watch recorded overnight — so it appears in Health Connect and the user's other health apps. |
 | READ_WEIGHT | Read | Show the user's weight next to their blood-pressure trends and include it in the doctor report, when the user turns on "Read weight". |
 | READ_HEIGHT | Read | Used with weight for context in trends and the doctor report, when the user turns on "Read height". |
 | READ_BLOOD_GLUCOSE | Read | Show blood-glucose entries the user already keeps in another app next to their blood-pressure trends, when the user turns on "Read blood glucose". |

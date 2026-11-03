@@ -99,7 +99,7 @@ export type AnalyticsEvent =
   | { name: 'multi_vitals_sync_failed'; props?: { reason: string; hr_pending: number; spo2_pending: number; sleep_pending: number; steps_pending: number; calories_pending: number } }
   // Sprint 9.5 — Apple Health / Health Connect bridge. Counts only,
   // never values. Per D13 §13.4 + CLAUDE.md analytics rule.
-  | { name: 'health_platform_write'; props?: { vital_type: 'bp' | 'hr' | 'spo2' | 'sleep' | 'steps' | 'calories'; written: number; rejected: number } }
+  | { name: 'health_platform_write'; props?: { vital_type: 'bp' | 'hr' | 'spo2' | 'sleep' | 'steps' | 'calories' | 'resting_hr'; written: number; rejected: number } }
   | { name: 'health_platform_write_failed'; props?: { vital_type: string; reason: string } }
   | { name: 'health_platform_backfill'; props?: { result: 'done' | 'failed'; written: number; rejected: number } }
   | { name: 'health_platform_read_completed'; props?: { inserted: number; duplicates: number; rejected: number } }

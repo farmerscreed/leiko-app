@@ -146,7 +146,8 @@
         "android.permission.health.WRITE_OXYGEN_SATURATION",
         "android.permission.health.WRITE_SLEEP",
         "android.permission.health.WRITE_STEPS",
-        "android.permission.health.WRITE_ACTIVE_CALORIES_BURNED"
+        "android.permission.health.WRITE_ACTIVE_CALORIES_BURNED",
+        "android.permission.health.WRITE_RESTING_HEART_RATE"
       ],
       "intentFilters": [
         {
