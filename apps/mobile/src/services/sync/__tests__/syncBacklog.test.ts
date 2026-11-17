@@ -27,6 +27,7 @@ import {
   setVitalCursor,
   syncBacklog,
   watchTimestampToUtcSec,
+  watchVitalTimestampToUtcSec,
 } from '../syncBacklog';
 import { STORAGE_KEYS } from '../../storage';
 import { useReadings } from '../../../state/readings';
@@ -60,42 +61,31 @@ describe('watchTimestampToUtcSec — China-firmware offset correction', () => {
   //   true UTC = 08:03 (= 09:03 Lagos − 1h offset).
   //   Expected shift = +7h (8h China − 1h Lagos).
   //
-  // The Date.getTimezoneOffset value depends on the test runner's
-  // host TZ. Asserting an exact result requires pinning TZ; instead
-  // we assert the relationship: shifted minus raw == (8h − local offset).
+  // The zone is now explicit (see services/ble/watchClock.ts), so each
+  // case pins it instead of mocking Date.getTimezoneOffset.
   it('shifts a raw watch second by (China offset − local offset) seconds', () => {
     const raw = 1745053380; // arbitrary recent second
-    const shifted = watchTimestampToUtcSec(raw);
-    const localOffsetSec = -new Date(raw * 1000).getTimezoneOffset() * 60;
+    const shifted = watchTimestampToUtcSec(raw, 'UTC');
+    const localOffsetSec = 0;
     const expectedShift = 8 * 3600 - localOffsetSec;
     expect(shifted - raw).toBe(expectedShift);
   });
 
-  it('round-trips when the host TZ is China (UTC+8) — no shift', () => {
-    // Mock getTimezoneOffset to return -480 (China) for this test.
-    const orig = Date.prototype.getTimezoneOffset;
-    Date.prototype.getTimezoneOffset = function () {
-      return -480;
-    };
-    try {
-      const raw = 1745053380;
-      expect(watchTimestampToUtcSec(raw)).toBe(raw);
-    } finally {
-      Date.prototype.getTimezoneOffset = orig;
-    }
+  it('round-trips when the watch zone is China (UTC+8) — no shift', () => {
+    const raw = 1745053380;
+    expect(watchTimestampToUtcSec(raw, 'Asia/Shanghai')).toBe(raw);
   });
 
-  it('shifts by exactly +7h for a Lagos client (UTC+1)', () => {
-    const orig = Date.prototype.getTimezoneOffset;
-    Date.prototype.getTimezoneOffset = function () {
-      return -60;
-    };
-    try {
-      const raw = 1745053380;
-      expect(watchTimestampToUtcSec(raw) - raw).toBe(7 * 3600);
-    } finally {
-      Date.prototype.getTimezoneOffset = orig;
-    }
+  it('shifts by exactly +7h for a Lagos watch clock (UTC+1)', () => {
+    const raw = 1745053380;
+    expect(watchTimestampToUtcSec(raw, 'Africa/Lagos') - raw).toBe(7 * 3600);
+  });
+
+  it('decodes in the zone passed, not the JS engine zone (2026-11-17 travel bug)', () => {
+    // Watch set to Los Angeles wall clock (PST, UTC-8 in November):
+    // shift = 8h China − (−8h) = +16h.
+    const raw = 1763000000; // 2025-11-13, PST in effect
+    expect(watchTimestampToUtcSec(raw, 'America/Los_Angeles') - raw).toBe(16 * 3600);
   });
 });
 
@@ -428,5 +418,13 @@ describe('syncBacklog — Option C: long-stale cursor + empty watch response', (
     const result = await promise;
     expect(result.pulled).toBe(0);
     expect(getLastSyncSec(dev)).toBe(yesterday);
+  });
+});
+
+describe('watchVitalTimestampToUtcSec — HR/SpO2 wall-clock-as-UTC', () => {
+  it('subtracts the watch zone offset', () => {
+    const raw = 1778630400; // 2026-05-13T00:00 wall clock
+    expect(watchVitalTimestampToUtcSec(raw, 'Africa/Lagos')).toBe(raw - 3600);
+    expect(watchVitalTimestampToUtcSec(raw, 'UTC')).toBe(raw);
   });
 });
