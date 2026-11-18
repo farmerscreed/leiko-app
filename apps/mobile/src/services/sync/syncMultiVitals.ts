@@ -84,6 +84,7 @@ import { useActivity } from '../../state/activity';
 import { logger } from '../analytics/logger';
 import { userTz } from '../../utils/userTz';
 import { inferWakeFromHR } from '../sleep/inferWakeFromHR';
+import { getWatchClockTz } from '../ble/watchClock';
 import type {
   HRSample,
   SpO2Sample,
@@ -257,6 +258,8 @@ async function syncHRStep(
   const { firstSyncDays, maxBackfillDays } = resolveBackfillOptions(options);
   const todayLocal = dayLocalFromNow(nowSec);
   const cursor = getVitalCursor(deviceBleId);
+  // Zone the watch clock is in — see ../ble/watchClock.ts.
+  const clockTz = getWatchClockTz(deviceBleId);
 
   // Sprint 16.5c — `cursor.hr` holds the watch's raw timestamp for the
   // newest HR sample we've ingested. HR/SpO2 use a DIFFERENT firmware
@@ -267,7 +270,7 @@ async function syncHRStep(
   // `watchVitalTimestampToUtcSec`. (The BP +8h "Beijing wall clock"
   // shift `watchTimestampToUtcSec` is wrong here — that one is for the
   // 0x14 packet's TS field only.)
-  const cursorDayLocal = cursor.hr > 0 ? dayLocalFromNow(watchVitalTimestampToUtcSec(cursor.hr)) : '';
+  const cursorDayLocal = cursor.hr > 0 ? dayLocalFromNow(watchVitalTimestampToUtcSec(cursor.hr, clockTz)) : '';
 
   const days = computeBackfillDayList(cursorDayLocal, todayLocal, {
     firstSyncDays,
@@ -331,7 +334,7 @@ async function syncHRStep(
         // +7h Beijing shift `watchTimestampToUtcSec` was wrong here
         // (pushed samples 7 h into the future on Lagos clients) and
         // applying NO shift was also wrong (left them 1 h ahead).
-        measuredAtSec: watchVitalTimestampToUtcSec(s.timestampSec),
+        measuredAtSec: watchVitalTimestampToUtcSec(s.timestampSec, clockTz),
         bpm: s.bpm,
         sampleWindowSec,
         // The 0x15 history packet does not expose motion-state per sample.
@@ -367,6 +370,8 @@ async function syncSpO2Step(
   const { firstSyncDays, maxBackfillDays } = resolveBackfillOptions(options);
   const todayLocal = dayLocalFromNow(nowSec);
   const cursor = getVitalCursor(deviceBleId);
+  // Zone the watch clock is in — see ../ble/watchClock.ts.
+  const clockTz = getWatchClockTz(deviceBleId);
 
   const days = computeBackfillDayList(cursor.spo2, todayLocal, {
     firstSyncDays,
@@ -394,7 +399,7 @@ async function syncSpO2Step(
       );
     }
     for (const s of samples) {
-      const measuredAtSec = watchVitalTimestampToUtcSec(s.timestampSec);
+      const measuredAtSec = watchVitalTimestampToUtcSec(s.timestampSec, clockTz);
       if (BLE_TRACE) {
         const isoLocal = new Date(measuredAtSec * 1000).toISOString();
         const hourLocal = new Date(measuredAtSec * 1000).getHours();
