@@ -8,6 +8,7 @@ import {
   mapActivityDays,
   mapCaloriesDays,
   mapBPReadings,
+  mapRestPeriods,
 } from './vital-row-mappers.ts';
 
 const FAMILY = '11111111-1111-1111-1111-111111111111';
@@ -180,4 +181,18 @@ Deno.test('mapSleepSessions stores the HR-inferred bed/wake times when sane (202
   );
   assertEquals(bogus.value_jsonb.inferred_start, undefined);
   assertEquals(bogus.value_jsonb.wake_source, undefined);
+});
+
+Deno.test('mapRestPeriods writes rest_period rows keyed on the start (2026-11-18)', () => {
+  const [row] = mapRestPeriods(
+    [{ startSec: NOW, endSec: NOW + 3600, durationMinutes: 60, avgBpm: 61.4, baselineBpm: 58, confidence: 'hr_only', dayLocal: '2026-11-18' }],
+    FAMILY,
+    DEVICE,
+  );
+  assertEquals(row.vital_type, 'rest_period');
+  assertEquals(row.measured_at, NOW_ISO);
+  assertEquals(row.value_int, 60);
+  assertEquals(row.value_int_2, 61);
+  assertEquals(row.value_jsonb.confidence, 'hr_only');
+  assertEquals(row.value_jsonb.end, new Date((NOW + 3600) * 1000).toISOString());
 });

@@ -81,6 +81,18 @@ export interface SleepSession {
   wakeSource?: 'hr_inferred' | 'fallback';
 }
 
+/** Daytime rest / nap ESTIMATE from heart rate + the step timeline
+ *  (2026-11-18, migration 0061). */
+export interface RestPeriod {
+  startSec: number;
+  endSec: number;
+  durationMinutes: number;
+  avgBpm: number;
+  baselineBpm: number;
+  confidence: 'hr_and_steps' | 'hr_only';
+  dayLocal: string;
+}
+
 export interface ActivityDay {
   dayLocal: string;
   measuredAtSec: number;
@@ -107,6 +119,7 @@ export interface MultiVitalsPayload {
   sleepSessions?: SleepSession[];
   activityDays?: ActivityDay[];
   caloriesDays?: CaloriesDay[];
+  restPeriods?: RestPeriod[];
   clientSyncedAtSec: number;
   clientAppVersion: string;
 }

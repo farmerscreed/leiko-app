@@ -138,6 +138,7 @@ export const STORAGE_KEYS = {
   pendingHR: 'leiko.vitals.pending.hr',
   pendingSpO2: 'leiko.vitals.pending.spo2',
   pendingSleep: 'leiko.vitals.pending.sleep',
+  pendingRestPeriods: 'leiko.vitals.pending.restPeriods',
   pendingActivity: 'leiko.vitals.pending.activity',
   pendingCalories: 'leiko.vitals.pending.calories',
   // Apple Health / Health Connect toggle state — Sprint 9.5. JSON
@@ -200,6 +201,9 @@ export const STORAGE_KEYS = {
   recentHR: 'leiko.vitals.recent.hr',
   recentSpO2: 'leiko.vitals.recent.spo2',
   recentSleep: 'leiko.vitals.recent.sleep',
+  recentRestPeriods: 'leiko.vitals.recent.restPeriods',
+  // { [deviceBleId]: 'YYYY-MM-DD' } last day scanned for rest periods.
+  restPeriodsScannedDay: 'leiko.vitals.restPeriods.scannedDay',
   recentActivity: 'leiko.vitals.recent.activity',
   recentCalories: 'leiko.vitals.recent.calories',
   // Learn home-card seed tracking — Sprint 14. JSON map keyed by

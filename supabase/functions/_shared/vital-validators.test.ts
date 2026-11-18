@@ -13,6 +13,7 @@ import {
   validateSleepSessions,
   validateActivityDays,
   validateCaloriesDays,
+  validateRestPeriods,
 } from './vital-validators.ts';
 import type {
   BPReading,
@@ -175,4 +176,17 @@ Deno.test('validateCaloriesDays rejects negative and over 10k', () => {
   assertEquals(accepted.length, 1);
   assertEquals(rejected.length, 2);
   assertEquals(rejected[0].reason, 'kcal_out_of_range');
+});
+
+Deno.test('validateRestPeriods accepts a sane estimate and rejects bad ones (2026-11-18)', () => {
+  const ok = { startSec: 1_763_470_800, endSec: 1_763_474_400, durationMinutes: 60, avgBpm: 61, baselineBpm: 58, confidence: 'hr_and_steps' as const, dayLocal: '2026-11-18' };
+  const { accepted, rejected } = validateRestPeriods([
+    ok,
+    { ...ok, endSec: ok.startSec + 5 * 60 },
+    { ...ok, endSec: ok.startSec - 1 },
+    { ...ok, avgBpm: 10 },
+    { ...ok, confidence: 'guess' as unknown as 'hr_only' },
+  ]);
+  assertEquals(accepted.length, 1);
+  assertEquals(rejected.map((r) => r.reason), ['duration_out_of_range', 'invalid_end', 'bpm_out_of_range', 'bad_confidence']);
 });

@@ -23,6 +23,7 @@ import type {
   SleepSession,
   ActivityDay,
   CaloriesDay,
+  RestPeriod,
 } from './vital-types.ts';
 
 export interface RejectedSample {
@@ -151,6 +152,42 @@ export function validateSleepSessions(sessions: SleepSession[]): ValidationResul
       return;
     }
     accepted.push(s);
+  });
+  return { accepted, rejected };
+}
+
+// ────────────────────────────────────────────────────────────────────
+// Rest periods (2026-11-18) — daytime rest / nap estimates.
+
+const REST_MIN_MINUTES = 20;
+const REST_MAX_MINUTES = 6 * 60;
+
+export function validateRestPeriods(periods: RestPeriod[]): ValidationResult<RestPeriod> {
+  const accepted: RestPeriod[] = [];
+  const rejected: RejectedSample[] = [];
+  periods.forEach((p, idx) => {
+    if (typeof p.startSec !== 'number' || p.startSec <= 0) {
+      rejected.push({ idx, reason: 'missing_start' });
+      return;
+    }
+    if (typeof p.endSec !== 'number' || p.endSec <= p.startSec) {
+      rejected.push({ idx, reason: 'invalid_end' });
+      return;
+    }
+    const minutes = (p.endSec - p.startSec) / 60;
+    if (minutes < REST_MIN_MINUTES || minutes > REST_MAX_MINUTES) {
+      rejected.push({ idx, reason: 'duration_out_of_range' });
+      return;
+    }
+    if (typeof p.avgBpm !== 'number' || p.avgBpm < 30 || p.avgBpm > 240) {
+      rejected.push({ idx, reason: 'bpm_out_of_range' });
+      return;
+    }
+    if (p.confidence !== 'hr_and_steps' && p.confidence !== 'hr_only') {
+      rejected.push({ idx, reason: 'bad_confidence' });
+      return;
+    }
+    accepted.push(p);
   });
   return { accepted, rejected };
 }

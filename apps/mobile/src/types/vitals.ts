@@ -161,6 +161,8 @@ export interface MultiVitalsPayload {
   sleepSessions?: SleepSession[];
   activityDays?: ActivityDay[];
   caloriesDays?: CaloriesDay[];
+  /** Daytime rest / nap estimates (2026-11-18). */
+  restPeriods?: RestPeriod[];
   /** unix sec UTC at which the client packed this payload. */
   clientSyncedAtSec: number;
   clientAppVersion: string;
@@ -194,3 +196,15 @@ export interface VitalSyncCursor {
 }
 
 export type VitalKind = 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity' | 'calories';
+
+/** Daytime rest / nap ESTIMATE from heart rate + step timeline
+ *  (services/sleep/detectRestPeriods.ts). */
+export interface RestPeriod {
+  startSec: number;
+  endSec: number;
+  durationMinutes: number;
+  avgBpm: number;
+  baselineBpm: number;
+  confidence: 'hr_and_steps' | 'hr_only';
+  dayLocal: string;
+}

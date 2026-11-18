@@ -37,6 +37,7 @@ import {
   validateSleepSessions,
   validateActivityDays,
   validateCaloriesDays,
+  validateRestPeriods,
   type RejectedSample,
 } from '../_shared/vital-validators.ts';
 import {
@@ -46,6 +47,7 @@ import {
   mapSleepSessions,
   mapActivityDays,
   mapCaloriesDays,
+  mapRestPeriods,
   type VitalsOtherRow,
 } from '../_shared/vital-row-mappers.ts';
 import {
@@ -68,6 +70,7 @@ interface MultiVitalsCounts {
   sleep: number;
   steps: number;
   calories: number;
+  rest: number;
 }
 
 interface MultiVitalsResponse {
@@ -444,9 +447,9 @@ async function handleMultiVitals(
   payload: MultiVitalsPayload,
 ): Promise<Response> {
   const counts: { inserted: MultiVitalsCounts; rejected: MultiVitalsCounts; duplicates: MultiVitalsCounts } = {
-    inserted: { bp: 0, hr: 0, spo2: 0, sleep: 0, steps: 0, calories: 0 },
-    rejected: { bp: 0, hr: 0, spo2: 0, sleep: 0, steps: 0, calories: 0 },
-    duplicates: { bp: 0, hr: 0, spo2: 0, sleep: 0, steps: 0, calories: 0 },
+    inserted: { bp: 0, hr: 0, spo2: 0, sleep: 0, steps: 0, calories: 0, rest: 0 },
+    rejected: { bp: 0, hr: 0, spo2: 0, sleep: 0, steps: 0, calories: 0, rest: 0 },
+    duplicates: { bp: 0, hr: 0, spo2: 0, sleep: 0, steps: 0, calories: 0, rest: 0 },
   };
 
   // BP — different table (readings), but follows the same accept-then-
@@ -531,6 +534,21 @@ async function handleMultiVitals(
       if (errored) return json({ error: 'sleep_insert_failed', detail: errored }, 500);
       counts.inserted.sleep = inserted;
       counts.duplicates.sleep = duplicates;
+    }
+  }
+
+  // 2026-11-18 — daytime rest / nap estimates (migration 0061).
+  // Immutable points: a re-send is a duplicate, ignored.
+  if (payload.restPeriods?.length) {
+    const { accepted, rejected } = validateRestPeriods(payload.restPeriods);
+    counts.rejected.rest = rejected.length;
+    await logRejected(serviceClient, familyId, userId, 'rest_period', rejected);
+    if (accepted.length > 0) {
+      const rows = mapRestPeriods(accepted, familyId, deviceId);
+      const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows);
+      if (errored) return json({ error: 'rest_insert_failed', detail: errored }, 500);
+      counts.inserted.rest = inserted;
+      counts.duplicates.rest = duplicates;
     }
   }
 
@@ -787,7 +805,7 @@ async function logRejected(
   serviceClient: SupabaseClient,
   familyId: string,
   userId: string,
-  vitalType: 'bp' | 'hr' | 'spo2' | 'sleep_session' | 'steps_day' | 'calories_day',
+  vitalType: 'bp' | 'hr' | 'spo2' | 'sleep_session' | 'steps_day' | 'calories_day' | 'rest_period',
   rejected: RejectedSample[],
 ): Promise<void> {
   if (rejected.length === 0) return;

@@ -18,12 +18,13 @@ import type {
   SleepSession,
   ActivityDay,
   CaloriesDay,
+  RestPeriod,
 } from './vital-types.ts';
 
 export interface VitalsOtherRow {
   family_id: string;
   device_id: string;
-  vital_type: 'hr' | 'spo2' | 'sleep_session' | 'steps_day' | 'calories_day';
+  vital_type: 'hr' | 'spo2' | 'sleep_session' | 'steps_day' | 'calories_day' | 'rest_period';
   measured_at: string;
   value_int: number | null;
   value_int_2: number | null;
@@ -150,6 +151,30 @@ export function inferredSleepTimes(s: SleepSession): Record<string, string> {
     out.wake_source = s.wakeSource;
   }
   return out;
+}
+
+/** Rest periods → vitals_other 'rest_period' rows (migration 0061).
+ *  measured_at = start (immutable point, dedupe with device_id). */
+export function mapRestPeriods(
+  periods: RestPeriod[],
+  familyId: string,
+  deviceId: string,
+): VitalsOtherRow[] {
+  return periods.map((p) => ({
+    family_id: familyId,
+    device_id: deviceId,
+    vital_type: 'rest_period',
+    measured_at: toIso(p.startSec),
+    value_int: Math.round((p.endSec - p.startSec) / 60),
+    value_int_2: Math.round(p.avgBpm),
+    value_int_3: null,
+    value_jsonb: {
+      end: toIso(p.endSec),
+      confidence: p.confidence,
+      baseline_bpm: p.baselineBpm,
+      day_local: p.dayLocal,
+    },
+  }));
 }
 
 export function mapActivityDays(

@@ -85,6 +85,8 @@ import { useActivity } from '../../state/activity';
 import { logger } from '../analytics/logger';
 import { userTz } from '../../utils/userTz';
 import { recordStepTotal } from '../activity/stepTimeline';
+import { scanRestPeriods } from '../sleep/restPeriodScan';
+import { useRestPeriods } from '../../state/restPeriods';
 import { inferWakeFromHR } from '../sleep/inferWakeFromHR';
 import { getWatchClockTz } from '../ble/watchClock';
 import type {
@@ -705,11 +707,13 @@ async function postMultiVitalsChunked(
   // Phase 1 — the "small vitals" POST. SpO2 (~120/day) + Sleep (~7-10
   // entries) + Activity (~10 days) + Calories (~10 days). NO HR samples.
   // Bounded enough to fit comfortably under the Edge Function CPU budget.
+  const restPending = useRestPeriods.getState().pending;
   if (
     spo2Pending.length > 0 ||
     sleepPending.length > 0 ||
     stepsPending.length > 0 ||
-    caloriesPending.length > 0
+    caloriesPending.length > 0 ||
+    restPending.length > 0
   ) {
     const smallVitalsPayload: MultiVitalsPayload = {
       ...basePayload,
@@ -718,6 +722,7 @@ async function postMultiVitalsChunked(
       sleepSessions: sleepPending.length ? sleepPending : undefined,
       activityDays: stepsPending.length ? stepsPending : undefined,
       caloriesDays: caloriesPending.length ? caloriesPending : undefined,
+      restPeriods: restPending.length ? restPending : undefined,
     };
     const response = await postMultiVitals(smallVitalsPayload);
     deviceId = response.deviceId;
@@ -745,6 +750,11 @@ async function postMultiVitalsChunked(
         caloriesPending.map((d) => d.dayLocal),
       );
     }
+    if (restPending.length) {
+      useRestPeriods.getState().acceptSyncResult(
+        restPending.map((r) => String(r.startSec)),
+      );
+    }
   }
 
   // Phase 2 — HR-only chunks. Each chunk has MULTIVITALS_HR_CHUNK_SIZE
@@ -761,6 +771,7 @@ async function postMultiVitalsChunked(
       sleepSessions: undefined,
       activityDays: undefined,
       caloriesDays: undefined,
+      restPeriods: undefined,
     };
     const response = await postMultiVitals(hrChunkPayload);
     deviceId = deviceId || response.deviceId;
@@ -890,6 +901,12 @@ export async function syncMultiVitals(
     bumpVitalFailure('activity', nowMs);
   }
 
+  // 2026-11-18 — daytime rest / nap estimates for finished days, now
+  // that this run's heart rate is in (services/sleep/restPeriodScan.ts).
+  if (hrR.status === 'fulfilled' && hrR.value !== null) {
+    scanRestPeriods(deviceBleId, nowSec, userTz());
+  }
+
   // Build the batched payload from the slices' pending arrays.
   const hrPending = useHR.getState().pending;
   const spo2Pending = useSpO2.getState().pending;
@@ -904,6 +921,9 @@ export async function syncMultiVitals(
     sleepSessions: sleepPending.length ? sleepPending : undefined,
     activityDays: stepsPending.length ? stepsPending : undefined,
     caloriesDays: caloriesPending.length ? caloriesPending : undefined,
+    restPeriods: useRestPeriods.getState().pending.length
+      ? useRestPeriods.getState().pending
+      : undefined,
     clientSyncedAtSec: nowSec,
     clientAppVersion: APP_VERSION,
   };
