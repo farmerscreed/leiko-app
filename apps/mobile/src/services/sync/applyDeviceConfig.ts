@@ -32,6 +32,7 @@ import { setAutoHR } from '../ble/commands/setAutoHR';
 import { setAutoSpO2 } from '../ble/commands/setAutoSpO2';
 import { setGoals } from '../ble/commands/setGoals';
 import { setUserParams } from '../ble/commands/setUserParams';
+import { strideFromHeightCm } from '../ble/commands/_userParamsPacket';
 import type { UrionDevice } from '../ble/UrionDevice';
 import { logger } from '../analytics/logger';
 import { getVitalSetup, useVitalSetup } from '../../state/vitalSetup';
@@ -160,7 +161,7 @@ export async function applyDeviceConfig(
         ageYears: profile.year_of_birth ? Math.max(1, CURRENT_YEAR - profile.year_of_birth) : 30,
         heightCm: profile.height_cm ?? 170,
         weightKg: profile.weight_kg !== null ? Math.round(profile.weight_kg) : 70,
-        strapSizeMm: 0,
+        strideCm: strideFromHeightCm(profile.height_cm ?? 170),
         hrAlarmBpm: 0,
       });
       steps.push('userParams');

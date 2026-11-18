@@ -15,7 +15,11 @@
 //   byte 5 (EE)     age (years)
 //   byte 6 (FF)     height (cm)
 //   byte 7 (GG)     weight (kg)
-//   byte 8 (HH)     strap size (0 if unknown)
+//   byte 8 (HH)     stride length (cm). The vendor PDF calls this
+//                   "strap size"; Urion's own app (Alphamed Health
+//                   1.0.23, setUserConfig) sends stride here, default 70.
+//                   Leiko sent 0 until 2026-11-18, which zeroes the
+//                   watch's distance estimate. See strideFromHeightCm.
 //   byte 9 (II)     heart rate alarm (bpm; 0 = disabled)
 
 import { expectByte0 } from '../io';
@@ -28,8 +32,14 @@ export interface UrionUserParams {
   ageYears: number; // 1..120
   heightCm: number; // 50..250
   weightKg: number; // 20..200
-  strapSizeMm: number; // 0..255 (0 = unknown)
+  strideCm: number; // 0..255
   hrAlarmBpm: number; // 0..255 (0 = disabled)
+}
+
+/** Walking stride from height — the usual 0.415 × height rule of thumb,
+ *  kept to a sane range. 183 cm → 76 cm. */
+export function strideFromHeightCm(heightCm: number): number {
+  return Math.min(120, Math.max(40, Math.round(heightCm * 0.415)));
 }
 
 export function buildUserParamsPayload(params: UrionUserParams): Uint8Array {
@@ -41,7 +51,7 @@ export function buildUserParamsPayload(params: UrionUserParams): Uint8Array {
   payload[4] = params.ageYears & 0xff;
   payload[5] = params.heightCm & 0xff;
   payload[6] = params.weightKg & 0xff;
-  payload[7] = params.strapSizeMm & 0xff;
+  payload[7] = params.strideCm & 0xff;
   payload[8] = params.hrAlarmBpm & 0xff;
   // bytes 9..13 are reserved/zero
   return payload;

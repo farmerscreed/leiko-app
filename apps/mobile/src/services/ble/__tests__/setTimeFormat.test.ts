@@ -21,7 +21,7 @@ describe('commands.setTimeFormat', () => {
       ageYears: 35,
       heightCm: 180,
       weightKg: 80,
-      strapSizeMm: 0,
+      strideCm: 0,
       hrAlarmBpm: 0,
     });
     await new Promise((r) => setImmediate(r));
@@ -45,7 +45,7 @@ describe('commands.setTimeFormat', () => {
       ageYears: 50,
       heightCm: 165,
       weightKg: 65,
-      strapSizeMm: 22,
+      strideCm: 22,
       hrAlarmBpm: 0,
     });
     await new Promise((r) => setImmediate(r));
