@@ -201,6 +201,24 @@ describe('TakeReadingScreen — happy path (watch flow)', () => {
   });
 });
 
+describe('TakeReadingScreen — remote start (0x32, 2026-11-18)', () => {
+  it('shows "Measuring now" instead of the button prompt when the watch accepts the start command', async () => {
+    const fakeDevice = {
+      ...makeFakeDevice(),
+      sendCommand: jest.fn().mockResolvedValue({ command: 0x32, payload: new Uint8Array(14) }),
+    };
+    mockConnectToUrion.mockResolvedValue(fakeDevice);
+    mockSubscribeToNotifications.mockImplementation(() => jest.fn());
+
+    render(withProviders(<TakeReadingScreen navigation={nav} />));
+
+    expect(await screen.findByTestId('take-reading-measuring')).toBeTruthy();
+    expect(screen.getByText('Measuring now')).toBeTruthy();
+    expect(screen.queryByText('Press the BP button on your watch')).toBeNull();
+    expect(fakeDevice.sendCommand).toHaveBeenCalledWith(0x32, undefined, expect.any(Function), 3000);
+  });
+});
+
 describe('TakeReadingScreen — manual entry (D6 US-26)', () => {
   it('writes a manual reading without touching the watch', async () => {
     // No connect needed — manual path bypasses the BLE layer.

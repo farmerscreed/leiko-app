@@ -138,6 +138,8 @@ Fourteen commands wired in v1.0. Each has a TypeScript wrapper in `apps/mobile/s
 | Find watch (vibrate) | `0x50` | `findWatch(device)` | D6 US-84 helper |
 | Watch-pushed notification | `0x73` | (subscribed via Notify char) | Live trigger (D6 §5.11) |
 | Factory reset | `0xFF` | `factoryReset(device, confirm)` | D6 US-84 unpair |
+| **Start BP measurement** | `0x32` | `startMeasurement(device)` | Take a reading (2026-11-18) — see §3.2 |
+| Measurement complete (watch → app) | `0x33` | `onBPMeasureComplete` in `notify.ts` | Take a reading — see §3.2 |
 
 ### Wrapper template
 All wrappers follow this shape: build packet, write, await response, validate.
@@ -186,6 +188,18 @@ const fresh = lastSync > 0
 - See `memory/sprint_16_5a_close_out.md` and `memory/urion_dir1_protocol_semantics.md` for the full investigation context and trace evidence.
 
 ---
+
+### 3.2 Commands missing from the vendor PDF — found 2026-11-18
+
+Source: Urion's own companion app, Alphamed Health 1.0.23 (`com.urion.alphamedhealth`), whose watch logic ships as plain JavaScript (`utils/bluetoothManagement.js`). Its watch protocol ("futureMedical") is the same 16-byte, sum-CRC protocol on service `6E40FFF0`.
+
+- **`0x32` start BP measurement** — `0x32 00×14 CRC`. Verified on two U19M watches: the watch echoes `0x32 00×14 0x32` and starts the cuff. `0xB2` would be the rejection. Leiko sends this from Take a reading and falls back to "press the BP button" if it is rejected.
+- **`0x33` measurement complete** — pushed by the watch when an app-started measurement finishes. Unverified on a successful reading (both test watches failed with "wristband pressure too high"). **A failed measurement sends nothing over BLE**; the reason appears only on the watch screen (in Chinese on current firmware), so the app times out with `measure_incomplete`.
+- **`0x0A` byte HH is stride length (cm), not strap size.** Alphamed sends `[readWrite, timeFormat, language, gender, age, height, weight, stride=70, hrZone=120]`.
+- **`0x03` reply** carries battery, and in Alphamed's parser firmware `V{b2}.{b3}.{b4}` / hardware `V{b5}.{b6}` — but the U19M we tested returned zeros for those bytes.
+- **`0x73` kinds** per Alphamed: 1 HR, 2 BP, 3 SpO2, 4 steps, 5 pulse diagnosis, 6 sleep (marked unused), 7 exercise record, 8 alarm (unused), 9 DND, 10 RRI (beat-to-beat) update, 11 12/24h, 12 battery.
+- **Sleep:** Alphamed reads only the daily totals from `0x07` for the watch and uploads empty bed/wake times. Bed/wake times exist only for Urion's separate sleep-monitor device (`AA A1` frames on `FFF0`).
+- **BP error codes** (Urion arm-cuff family, `FD FD FD` frames — not sent by the watch): E-1 weak pulse or sudden pressure drop, E-2 noise, E-3 inflation too long, E-5 abnormal result, E-B low battery.
 
 ## 4. Reconnection strategy
 
