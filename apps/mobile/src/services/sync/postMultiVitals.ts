@@ -91,6 +91,7 @@ export function isPayloadEmpty(payload: MultiVitalsPayload): boolean {
     !payload.spo2Samples?.length &&
     !payload.sleepSessions?.length &&
     !payload.activityDays?.length &&
-    !payload.caloriesDays?.length
+    !payload.caloriesDays?.length &&
+    !payload.restPeriods?.length
   );
 }

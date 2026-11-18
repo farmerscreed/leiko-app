@@ -34,6 +34,8 @@ import { VitalHero } from '../../components/VitalHero';
 import { type RecentReading } from '../../components/RecentReadingsList';
 import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { VitalInsightCard } from '../../components/VitalInsightCard';
+import { RestPeriodsCard } from '../../components/RestPeriodsCard';
+import { useRestPeriods } from '../../state/restPeriods';
 import { VitalExplainerAnchor } from '../../components/VitalExplainerAnchor';
 import {
   CorrelationStrip,
@@ -319,6 +321,17 @@ export function SleepDetail({
   const tz = resolveTimeZone(
     scopedFamilyId ? parentPulse.wearerTimeZone ?? ownTz : ownTz,
   );
+  // 2026-11-18 — daytime rest / nap estimates for the last 7 days.
+  // Own device only for now: the caregiver view doesn't fetch them yet.
+  const restPending = useRestPeriods((s) => s.pending);
+  const restRecent = useRestPeriods((s) => s.recent);
+  const restPeriods = useMemo(() => {
+    if (scopedFamilyId) return [];
+    const since = Math.floor(Date.now() / 1000) - 7 * 24 * 3600;
+    return [...restPending, ...restRecent]
+      .filter((r) => r.startSec >= since)
+      .sort((a, b) => b.startSec - a.startSec);
+  }, [restPending, restRecent, scopedFamilyId]);
   // Family the full-window history is scoped to (ADR-0008 follow-up).
   const ownFamilyId = useOnboarding((s) => s.familyId);
   const historyFamilyId = scopedFamilyId ?? ownFamilyId;
@@ -509,6 +522,15 @@ export function SleepDetail({
               subjectNoun="nights"
               testID="sleep-detail-table"
               style={styles.correlationWrap}
+            />
+          ) : null}
+
+          {restPeriods.length > 0 ? (
+            <RestPeriodsCard
+              periods={restPeriods}
+              timeZone={tz}
+              style={styles.correlationWrap}
+              testID="sleep-detail-rest-periods"
             />
           ) : null}
 

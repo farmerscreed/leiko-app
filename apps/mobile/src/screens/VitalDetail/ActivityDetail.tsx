@@ -59,6 +59,7 @@ import { type RecentReading } from '../../components/RecentReadingsList';
 import { RecentReadingsSection } from '../../components/RecentReadingsSection';
 import { ActivityRingsHero } from '../../components/ActivityRingsHero';
 import { ActivityWeeklyBars } from '../../components/ActivityWeeklyBars';
+import { ActivityHourlyBars } from '../../components/ActivityHourlyBars';
 import { ActivityGoalSheet } from '../../components/ActivityGoalSheet';
 import type { TrendRange } from '../../components/TimeRangePills';
 import { useDailyPulseData, emptyDailyPulse } from '../../state/dailyPulse';
@@ -240,6 +241,21 @@ export function ActivityDetail({
   const stepsToday = data.activity.stepsToday;
   const targetSteps = data.activity.targetSteps;
 
+  // 2026-11-18 — today's steps hour by hour (stepTimeline.ts). Shown
+  // only once at least one hour has steps placed in it.
+  const todayHourly = useMemo(() => {
+    const nowMs = Date.now();
+    const todayKey = dayKeyInZone(nowMs, displayTimeZone);
+    const row = [...pendingStepsRows, ...recentStepsRows].find((d) => d.dayLocal === todayKey);
+    if (!row || !Array.isArray(row.hourly) || row.hourly.length !== 24) return null;
+    if (!row.hourly.some((h) => h > 0)) return null;
+    return {
+      hourly: row.hourly,
+      totalSteps: row.totalSteps,
+      currentHour: hourInZone(nowMs, displayTimeZone),
+    };
+  }, [pendingStepsRows, recentStepsRows, displayTimeZone]);
+
   // Sprint 16.5e — DetailShell's TimeRangePills are wired here. The
   // DetailShell still owns the internal state for the pills' appearance;
   // we mirror it so the screen's data selectors react to the choice.
@@ -416,6 +432,16 @@ export function ActivityDetail({
                 unit: 'days at goal',
               },
             ]}
+          />
+        ) : null}
+
+        {!isEmpty && todayHourly ? (
+          <ActivityHourlyBars
+            hourly={todayHourly.hourly}
+            totalSteps={todayHourly.totalSteps}
+            currentHour={todayHourly.currentHour}
+            style={{ marginBottom: 16 }}
+            testID="activity-detail-hourly-bars"
           />
         ) : null}
 

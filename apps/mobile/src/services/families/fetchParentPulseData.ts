@@ -57,6 +57,7 @@ import type {
   ActivityDay,
   CaloriesDay,
 } from '../../types/vitals';
+import { inferredSleepFromJsonb } from '../../utils/inferredSleepFromJsonb';
 
 // Caps mirror the per-slice RECENT_*_CAP values so a caregiver gets
 // at most the same history depth a self-buyer would have locally.
@@ -225,6 +226,7 @@ function mapSleep(row: VitalsOtherRow): SleepSession {
     awakeCount,
     transitions,
     sleepScore,
+    ...inferredSleepFromJsonb(row.value_jsonb),
   };
 }
 

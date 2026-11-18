@@ -31,6 +31,7 @@
 import type { ParsedPacket } from './io';
 import type { UrionDevice } from './UrionDevice';
 import { useCaptureStats } from '../../dev/captureStats';
+import { MEASUREMENT_COMPLETE_CMD } from './commands/startMeasurement';
 
 // BLE_TRACE — Sprint 16.5a Phase A forensic-capture instrumentation.
 // See apps/mobile/src/services/ble/UrionDevice.ts for the convention.
@@ -59,6 +60,9 @@ export interface NotificationHandlers {
    *  PostHog 'ble_notify_kind_observed' on first call so we can
    *  empirically confirm the byte during the Sprint 7.5 soak test. */
   onSleepSessionComplete?: () => void;
+  /** 0x33 — a measurement started from the app (0x32) has finished.
+   *  Not in the vendor PDF; see commands/startMeasurement.ts. */
+  onBPMeasureComplete?: () => void;
   onUnknown?: (kindByte: number) => void;
 }
 
@@ -88,6 +92,10 @@ export function subscribeToNotifications(
   handlers: NotificationHandlers,
 ): () => void {
   return device.onNotify((packet) => {
+    if (packet.command === MEASUREMENT_COMPLETE_CMD) {
+      handlers.onBPMeasureComplete?.();
+      return;
+    }
     if (packet.command !== 0x73) return;
     const kind = classifyNotification(packet);
     if (BLE_TRACE) {

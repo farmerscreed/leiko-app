@@ -21,7 +21,7 @@ describe('commands.setUserParams', () => {
       ageYears: 64,
       heightCm: 168,
       weightKg: 71,
-      strapSizeMm: 0,
+      strideCm: 0,
       hrAlarmBpm: 130,
     });
     await new Promise((r) => setImmediate(r));
@@ -54,7 +54,7 @@ describe('commands.setUserParams', () => {
       ageYears: 30,
       heightCm: 175,
       weightKg: 75,
-      strapSizeMm: 0,
+      strideCm: 0,
       hrAlarmBpm: 0,
     });
     await new Promise((r) => setImmediate(r));
@@ -62,5 +62,22 @@ describe('commands.setUserParams', () => {
     await promise;
     const sent = parsePacket(base64ToBytes(device.__writes[0]));
     expect(Array.from(sent.payload.slice(0, 4))).toEqual([0x02, 0x00, 0x00, 0x00]);
+  });
+});
+
+describe('strideFromHeightCm (0x0A byte HH = stride, 2026-11-18)', () => {
+  const { strideFromHeightCm, buildUserParamsPayload } = require('../commands/_userParamsPacket');
+  it('derives stride from height and clamps it', () => {
+    expect(strideFromHeightCm(183)).toBe(76);
+    expect(strideFromHeightCm(170)).toBe(71);
+    expect(strideFromHeightCm(60)).toBe(40);
+    expect(strideFromHeightCm(260)).toBe(108);
+  });
+  it('writes stride into byte HH', () => {
+    const p = buildUserParamsPayload({
+      hourFormat: '24h', units: 'metric', gender: 'male', ageYears: 42,
+      heightCm: 183, weightKg: 115, strideCm: 76, hrAlarmBpm: 0,
+    });
+    expect(p[7]).toBe(76);
   });
 });

@@ -95,7 +95,8 @@ export interface SleepSession {
   /** Sprint 18 — HR-derived inferred bedtime (epoch sec UTC). When
    *  present, this is what display layers SHOULD show; falls back to
    *  sessionStartSec. Computed at ingest or by the reconcile hook
-   *  once HR samples are available. Never sent over the wire. */
+   *  once HR samples are available. Sent to the server since 2026-11-18
+   *  (value_jsonb.inferred_start/_end, wake_source). */
   inferredSessionStartSec?: number;
   /** Sprint 18 — HR-derived inferred wake time (epoch sec UTC). When
    *  present, this is what display layers SHOULD show; falls back to
@@ -160,6 +161,8 @@ export interface MultiVitalsPayload {
   sleepSessions?: SleepSession[];
   activityDays?: ActivityDay[];
   caloriesDays?: CaloriesDay[];
+  /** Daytime rest / nap estimates (2026-11-18). */
+  restPeriods?: RestPeriod[];
   /** unix sec UTC at which the client packed this payload. */
   clientSyncedAtSec: number;
   clientAppVersion: string;
@@ -193,3 +196,15 @@ export interface VitalSyncCursor {
 }
 
 export type VitalKind = 'bp' | 'hr' | 'spo2' | 'sleep' | 'activity' | 'calories';
+
+/** Daytime rest / nap ESTIMATE from heart rate + step timeline
+ *  (services/sleep/detectRestPeriods.ts). */
+export interface RestPeriod {
+  startSec: number;
+  endSec: number;
+  durationMinutes: number;
+  avgBpm: number;
+  baselineBpm: number;
+  confidence: 'hr_and_steps' | 'hr_only';
+  dayLocal: string;
+}

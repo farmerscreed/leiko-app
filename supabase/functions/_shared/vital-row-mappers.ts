@@ -18,12 +18,13 @@ import type {
   SleepSession,
   ActivityDay,
   CaloriesDay,
+  RestPeriod,
 } from './vital-types.ts';
 
 export interface VitalsOtherRow {
   family_id: string;
   device_id: string;
-  vital_type: 'hr' | 'spo2' | 'sleep_session' | 'steps_day' | 'calories_day';
+  vital_type: 'hr' | 'spo2' | 'sleep_session' | 'steps_day' | 'calories_day' | 'rest_period';
   measured_at: string;
   value_int: number | null;
   value_int_2: number | null;
@@ -121,6 +122,57 @@ export function mapSleepSessions(
       awake_count: s.awakeCount,
       transitions: s.transitions,
       sleep_score: s.sleepScore,
+      ...inferredSleepTimes(s),
+    },
+  }));
+}
+
+/** Longest plausible inferred session; anything longer is dropped. */
+const MAX_INFERRED_SESSION_SEC = 20 * 3600;
+
+/** The phone's heart-rate-inferred bed / wake times, when present and
+ *  sane. Added 2026-11-18 — before this they never left the phone, so
+ *  the doctor report, family view and AI only saw the synthetic 08:00. */
+export function inferredSleepTimes(s: SleepSession): Record<string, string> {
+  const start = s.inferredSessionStartSec;
+  const end = s.inferredSessionEndSec;
+  if (
+    typeof start !== 'number' || typeof end !== 'number' ||
+    !Number.isFinite(start) || !Number.isFinite(end) ||
+    start <= 0 || end <= start || end - start > MAX_INFERRED_SESSION_SEC
+  ) {
+    return {};
+  }
+  const out: Record<string, string> = {
+    inferred_start: toIso(start),
+    inferred_end: toIso(end),
+  };
+  if (s.wakeSource === 'hr_inferred' || s.wakeSource === 'fallback') {
+    out.wake_source = s.wakeSource;
+  }
+  return out;
+}
+
+/** Rest periods → vitals_other 'rest_period' rows (migration 0061).
+ *  measured_at = start (immutable point, dedupe with device_id). */
+export function mapRestPeriods(
+  periods: RestPeriod[],
+  familyId: string,
+  deviceId: string,
+): VitalsOtherRow[] {
+  return periods.map((p) => ({
+    family_id: familyId,
+    device_id: deviceId,
+    vital_type: 'rest_period',
+    measured_at: toIso(p.startSec),
+    value_int: Math.round((p.endSec - p.startSec) / 60),
+    value_int_2: Math.round(p.avgBpm),
+    value_int_3: null,
+    value_jsonb: {
+      end: toIso(p.endSec),
+      confidence: p.confidence,
+      baseline_bpm: p.baselineBpm,
+      day_local: p.dayLocal,
     },
   }));
 }

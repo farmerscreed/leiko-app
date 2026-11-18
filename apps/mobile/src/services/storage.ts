@@ -106,6 +106,9 @@ export const STORAGE_KEYS = {
   // Wall-clock ms of the last successful watch sync (any trigger).
   // Shown as Settings → Watch → "Last sync". 2026-10-30.
   lastWatchSyncAtMs: 'leiko.sync.lastWatchSyncAtMs',
+  // { [deviceBleId]: IANA tz } — the zone each watch's clock was last set
+  // in. Readings are decoded in this zone. See services/ble/watchClock.ts.
+  watchClockTzByDevice: 'leiko.sync.watchClockTzByDevice',
   // D12 visual mode — Sprint 1.5. ColorModeOverride: 'system' | 'dark' | 'light'.
   // Default 'system' (follow OS appearance). User-facing toggle ships in
   // Sprint 10 Settings; ThemeProvider reads/writes this key directly.
@@ -135,6 +138,9 @@ export const STORAGE_KEYS = {
   pendingHR: 'leiko.vitals.pending.hr',
   pendingSpO2: 'leiko.vitals.pending.spo2',
   pendingSleep: 'leiko.vitals.pending.sleep',
+  pendingRestPeriods: 'leiko.vitals.pending.restPeriods',
+  pendingWeights: 'leiko.vitals.pending.weights',
+  recentWeights: 'leiko.vitals.recent.weights',
   pendingActivity: 'leiko.vitals.pending.activity',
   pendingCalories: 'leiko.vitals.pending.calories',
   // Apple Health / Health Connect toggle state — Sprint 9.5. JSON
@@ -197,6 +203,9 @@ export const STORAGE_KEYS = {
   recentHR: 'leiko.vitals.recent.hr',
   recentSpO2: 'leiko.vitals.recent.spo2',
   recentSleep: 'leiko.vitals.recent.sleep',
+  recentRestPeriods: 'leiko.vitals.recent.restPeriods',
+  // { [deviceBleId]: 'YYYY-MM-DD' } last day scanned for rest periods.
+  restPeriodsScannedDay: 'leiko.vitals.restPeriods.scannedDay',
   recentActivity: 'leiko.vitals.recent.activity',
   recentCalories: 'leiko.vitals.recent.calories',
   // Learn home-card seed tracking — Sprint 14. JSON map keyed by

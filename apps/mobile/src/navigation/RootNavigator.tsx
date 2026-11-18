@@ -38,6 +38,7 @@ import { SelfBuyerHome } from '../screens/Home/SelfBuyerHome';
 import { SelfBuyerHomePlaceholder } from '../screens/Placeholders/SelfBuyerHomePlaceholder';
 import { VitalDetailRouter } from '../screens/VitalDetail/VitalDetailRouter';
 import { VitalHistoryScreen } from '../screens/VitalHistory/VitalHistoryScreen';
+import { WeightScreen } from '../screens/Weight/WeightScreen';
 import { PdfPreviewScreen } from '../screens/PdfPreview/PdfPreviewScreen';
 import { PairingScreen } from '../screens/Pairing/PairingScreen';
 import { SettingsScreen } from '../screens/Settings/SettingsScreen';
@@ -257,6 +258,7 @@ function SelfBuyerHomeNavigator() {
       <SelfBuyerStack.Screen name="ReadingDetail" component={ReadingDetailScreen} />
       <SelfBuyerStack.Screen name="VitalDetail" component={VitalDetailRouter} />
       <SelfBuyerStack.Screen name="VitalHistory" component={VitalHistoryScreen} />
+      <SelfBuyerStack.Screen name="Weight" component={WeightScreen} />
       <SelfBuyerStack.Screen name="PdfPreview" component={PdfPreviewScreen} />
       <SelfBuyerStack.Screen name="Trends" component={Trends} />
       <SelfBuyerStack.Screen name="PersonOverview" component={PersonOverviewRoute} />

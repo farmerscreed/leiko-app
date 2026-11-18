@@ -50,9 +50,10 @@
 //     sessionStart = sessionEnd - totalMinutes. Score's efficiency
 //     component is therefore 1.0 on real-watch data — flagged in D13
 //     §15.4 Q-D13-3.
-//   • Activity hourly[24] = zeros. Per-hour distribution requires a
-//     different ingest path (raw step samples via 0x73 0x04 notify) —
-//     to be wired by a later sprint.
+//   • Activity hourly[24] is built from the difference between
+//     successive reads of the day's running total (2026-11-18,
+//     services/activity/stepTimeline.ts) — the watch has no per-hour
+//     step command.
 //   • setUserParams + setGoals dirty-checks always return false for
 //     now; the dirty-tracker hooks into Settings UI when it lands.
 //
@@ -83,7 +84,11 @@ import { computeSleepScore } from '../../utils/classification';
 import { useActivity } from '../../state/activity';
 import { logger } from '../analytics/logger';
 import { userTz } from '../../utils/userTz';
+import { recordStepTotal } from '../activity/stepTimeline';
+import { scanRestPeriods } from '../sleep/restPeriodScan';
+import { useRestPeriods } from '../../state/restPeriods';
 import { inferWakeFromHR } from '../sleep/inferWakeFromHR';
+import { getWatchClockTz } from '../ble/watchClock';
 import type {
   HRSample,
   SpO2Sample,
@@ -257,6 +262,8 @@ async function syncHRStep(
   const { firstSyncDays, maxBackfillDays } = resolveBackfillOptions(options);
   const todayLocal = dayLocalFromNow(nowSec);
   const cursor = getVitalCursor(deviceBleId);
+  // Zone the watch clock is in — see ../ble/watchClock.ts.
+  const clockTz = getWatchClockTz(deviceBleId);
 
   // Sprint 16.5c — `cursor.hr` holds the watch's raw timestamp for the
   // newest HR sample we've ingested. HR/SpO2 use a DIFFERENT firmware
@@ -267,7 +274,7 @@ async function syncHRStep(
   // `watchVitalTimestampToUtcSec`. (The BP +8h "Beijing wall clock"
   // shift `watchTimestampToUtcSec` is wrong here — that one is for the
   // 0x14 packet's TS field only.)
-  const cursorDayLocal = cursor.hr > 0 ? dayLocalFromNow(watchVitalTimestampToUtcSec(cursor.hr)) : '';
+  const cursorDayLocal = cursor.hr > 0 ? dayLocalFromNow(watchVitalTimestampToUtcSec(cursor.hr, clockTz)) : '';
 
   const days = computeBackfillDayList(cursorDayLocal, todayLocal, {
     firstSyncDays,
@@ -331,7 +338,7 @@ async function syncHRStep(
         // +7h Beijing shift `watchTimestampToUtcSec` was wrong here
         // (pushed samples 7 h into the future on Lagos clients) and
         // applying NO shift was also wrong (left them 1 h ahead).
-        measuredAtSec: watchVitalTimestampToUtcSec(s.timestampSec),
+        measuredAtSec: watchVitalTimestampToUtcSec(s.timestampSec, clockTz),
         bpm: s.bpm,
         sampleWindowSec,
         // The 0x15 history packet does not expose motion-state per sample.
@@ -367,6 +374,8 @@ async function syncSpO2Step(
   const { firstSyncDays, maxBackfillDays } = resolveBackfillOptions(options);
   const todayLocal = dayLocalFromNow(nowSec);
   const cursor = getVitalCursor(deviceBleId);
+  // Zone the watch clock is in — see ../ble/watchClock.ts.
+  const clockTz = getWatchClockTz(deviceBleId);
 
   const days = computeBackfillDayList(cursor.spo2, todayLocal, {
     firstSyncDays,
@@ -394,7 +403,7 @@ async function syncSpO2Step(
       );
     }
     for (const s of samples) {
-      const measuredAtSec = watchVitalTimestampToUtcSec(s.timestampSec);
+      const measuredAtSec = watchVitalTimestampToUtcSec(s.timestampSec, clockTz);
       if (BLE_TRACE) {
         const isoLocal = new Date(measuredAtSec * 1000).toISOString();
         const hourLocal = new Date(measuredAtSec * 1000).getHours();
@@ -585,9 +594,17 @@ async function syncDayInfoStep(
           totalSteps: info.activity.totalSteps,
           targetSteps: 6000, // D13 §15.4 Q-D13-1 default; orchestrator overrides when Settings UI ships
           lastSampleAtSec: dayStart + 23 * 3600 + 59 * 60,
-          // Per-hour distribution comes from the 0x73 0x04 step-event notify
-          // path, not 0x07. Filled with zeros until that path is wired.
-          hourly: new Array<number>(24).fill(0),
+          // Steps per hour from the difference between successive reads
+          // of the running total (services/activity/stepTimeline.ts).
+          // Steps before the day's first read stay unplaced, so hourly
+          // can sum to less than totalSteps.
+          hourly: recordStepTotal(
+            deviceBleId,
+            dayLocal,
+            info.activity.totalSteps,
+            nowSec,
+            userTz(),
+          ).hourly,
         };
         const caloriesDay: CaloriesDay = {
           dayLocal,
@@ -690,11 +707,13 @@ async function postMultiVitalsChunked(
   // Phase 1 — the "small vitals" POST. SpO2 (~120/day) + Sleep (~7-10
   // entries) + Activity (~10 days) + Calories (~10 days). NO HR samples.
   // Bounded enough to fit comfortably under the Edge Function CPU budget.
+  const restPending = useRestPeriods.getState().pending;
   if (
     spo2Pending.length > 0 ||
     sleepPending.length > 0 ||
     stepsPending.length > 0 ||
-    caloriesPending.length > 0
+    caloriesPending.length > 0 ||
+    restPending.length > 0
   ) {
     const smallVitalsPayload: MultiVitalsPayload = {
       ...basePayload,
@@ -703,6 +722,7 @@ async function postMultiVitalsChunked(
       sleepSessions: sleepPending.length ? sleepPending : undefined,
       activityDays: stepsPending.length ? stepsPending : undefined,
       caloriesDays: caloriesPending.length ? caloriesPending : undefined,
+      restPeriods: restPending.length ? restPending : undefined,
     };
     const response = await postMultiVitals(smallVitalsPayload);
     deviceId = response.deviceId;
@@ -730,6 +750,11 @@ async function postMultiVitalsChunked(
         caloriesPending.map((d) => d.dayLocal),
       );
     }
+    if (restPending.length) {
+      useRestPeriods.getState().acceptSyncResult(
+        restPending.map((r) => String(r.startSec)),
+      );
+    }
   }
 
   // Phase 2 — HR-only chunks. Each chunk has MULTIVITALS_HR_CHUNK_SIZE
@@ -746,6 +771,7 @@ async function postMultiVitalsChunked(
       sleepSessions: undefined,
       activityDays: undefined,
       caloriesDays: undefined,
+      restPeriods: undefined,
     };
     const response = await postMultiVitals(hrChunkPayload);
     deviceId = deviceId || response.deviceId;
@@ -875,6 +901,12 @@ export async function syncMultiVitals(
     bumpVitalFailure('activity', nowMs);
   }
 
+  // 2026-11-18 — daytime rest / nap estimates for finished days, now
+  // that this run's heart rate is in (services/sleep/restPeriodScan.ts).
+  if (hrR.status === 'fulfilled' && hrR.value !== null) {
+    scanRestPeriods(deviceBleId, nowSec, userTz());
+  }
+
   // Build the batched payload from the slices' pending arrays.
   const hrPending = useHR.getState().pending;
   const spo2Pending = useSpO2.getState().pending;
@@ -889,6 +921,9 @@ export async function syncMultiVitals(
     sleepSessions: sleepPending.length ? sleepPending : undefined,
     activityDays: stepsPending.length ? stepsPending : undefined,
     caloriesDays: caloriesPending.length ? caloriesPending : undefined,
+    restPeriods: useRestPeriods.getState().pending.length
+      ? useRestPeriods.getState().pending
+      : undefined,
     clientSyncedAtSec: nowSec,
     clientAppVersion: APP_VERSION,
   };

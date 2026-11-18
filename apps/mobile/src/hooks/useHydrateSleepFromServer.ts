@@ -24,6 +24,7 @@ import { useAuth } from '../state/auth';
 import { useSleep } from '../state/sleep';
 import { supabase } from '../services/supabase';
 import type { SleepSession, SleepStage } from '../types/vitals';
+import { inferredSleepFromJsonb } from '../utils/inferredSleepFromJsonb';
 
 const FETCH_LIMIT = 90;
 
@@ -52,7 +53,6 @@ export interface ServerSleepRow {
 }
 
 export function mapServerRowToSession(row: ServerSleepRow): SleepSession {
-  const sessionStartSec = Math.floor(new Date(row.measured_at).getTime() / 1000);
   const totalMinutes = row.value_int;
   const deepMinutes = row.value_int_2 ?? 0;
   const remMinutes = row.value_int_3 ?? 0;
@@ -62,11 +62,16 @@ export function mapServerRowToSession(row: ServerSleepRow): SleepSession {
   const awakeCount = jsonb.awake_count ?? 0;
   const transitions = jsonb.transitions ?? [];
   const sleepScore = jsonb.sleep_score ?? 0;
-  // sessionEndSec — if the server has a local-end string we round-trip
-  // through Date, otherwise derive from start + totalMinutes.
-  const sessionEndSec = jsonb.session_end_local
-    ? Math.floor(new Date(jsonb.session_end_local).getTime() / 1000)
-    : sessionStartSec + totalMinutes * 60;
+  // measured_at is the session END — the constant per-night key written
+  // by mapSleepSessions (server, since 2026-06-04). This mapper used to
+  // read it as the START, so every hydrated night came back with
+  // start === end: zero-length sessions in Health Connect backfill and
+  // dedup keys that never matched the locally-ingested copy of the same
+  // night. Mirrors services/families/fetchParentPulseData.ts mapSleep.
+  const sessionEndSec = Math.floor(new Date(row.measured_at).getTime() / 1000);
+  const sessionStartSec = jsonb.session_start_local
+    ? Math.floor(new Date(jsonb.session_start_local).getTime() / 1000)
+    : sessionEndSec - totalMinutes * 60;
   const sessionStartLocal = jsonb.session_start_local
     ?? new Date(sessionStartSec * 1000).toISOString();
   const sessionEndLocal = jsonb.session_end_local
@@ -84,6 +89,7 @@ export function mapServerRowToSession(row: ServerSleepRow): SleepSession {
     awakeCount,
     transitions,
     sleepScore,
+    ...inferredSleepFromJsonb(row.value_jsonb),
   };
 }
 

@@ -525,6 +525,19 @@ export function SettingsScreen({ navigation }: Props) {
           {isSelfBuyer ? (
             <ListRow
               variant="select"
+              title="Weight log & target"
+              value={
+                profile?.weight_target_kg != null
+                  ? `Target ${profile.weight_target_kg} kg`
+                  : 'Log your weight'
+              }
+              onPress={() => stackNavigation.navigate('Weight' as never)}
+              testID="settings-profile-weight-log"
+            />
+          ) : null}
+          {isSelfBuyer ? (
+            <ListRow
+              variant="select"
               title="Diagnosed with hypertension?"
               value={
                 profile?.hypertension_status

@@ -47,6 +47,8 @@ export type UserRow = {
   gender: Gender | null;
   height_cm: number | null;
   weight_kg: number | null;
+  /** 2026-11-18 (migration 0062) — weight the wearer is working towards. */
+  weight_target_kg?: number | null;
   hypertension_status: HypertensionStatus | null;
   deleted_at: string | null;
   created_at: string;
@@ -63,6 +65,7 @@ export type UserUpdate = {
   gender?: Gender | null;
   height_cm?: number | null;
   weight_kg?: number | null;
+  weight_target_kg?: number | null;
   hypertension_status?: HypertensionStatus | null;
 };
 

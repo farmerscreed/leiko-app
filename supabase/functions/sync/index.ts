@@ -37,6 +37,7 @@ import {
   validateSleepSessions,
   validateActivityDays,
   validateCaloriesDays,
+  validateRestPeriods,
   type RejectedSample,
 } from '../_shared/vital-validators.ts';
 import {
@@ -46,6 +47,7 @@ import {
   mapSleepSessions,
   mapActivityDays,
   mapCaloriesDays,
+  mapRestPeriods,
   type VitalsOtherRow,
 } from '../_shared/vital-row-mappers.ts';
 import {
@@ -68,6 +70,7 @@ interface MultiVitalsCounts {
   sleep: number;
   steps: number;
   calories: number;
+  rest: number;
 }
 
 interface MultiVitalsResponse {
@@ -444,9 +447,9 @@ async function handleMultiVitals(
   payload: MultiVitalsPayload,
 ): Promise<Response> {
   const counts: { inserted: MultiVitalsCounts; rejected: MultiVitalsCounts; duplicates: MultiVitalsCounts } = {
-    inserted: { bp: 0, hr: 0, spo2: 0, sleep: 0, steps: 0, calories: 0 },
-    rejected: { bp: 0, hr: 0, spo2: 0, sleep: 0, steps: 0, calories: 0 },
-    duplicates: { bp: 0, hr: 0, spo2: 0, sleep: 0, steps: 0, calories: 0 },
+    inserted: { bp: 0, hr: 0, spo2: 0, sleep: 0, steps: 0, calories: 0, rest: 0 },
+    rejected: { bp: 0, hr: 0, spo2: 0, sleep: 0, steps: 0, calories: 0, rest: 0 },
+    duplicates: { bp: 0, hr: 0, spo2: 0, sleep: 0, steps: 0, calories: 0, rest: 0 },
   };
 
   // BP — different table (readings), but follows the same accept-then-
@@ -520,11 +523,32 @@ async function handleMultiVitals(
       // a night. Mirrors the steps/calories monotonic guard; mutable upsert
       // then reconciles the surviving (fullest) row.
       const collapsed = collapseToMaxByMeasuredAt(mapped);
-      const rows = await dropNonIncreasingDailyRows(serviceClient, collapsed);
+      // Same total but newly HR-inferred bed/wake times is still an
+      // improvement worth storing (the phone re-sends a night once
+      // enough heart rate has arrived to place it).
+      const rows = await dropNonIncreasingDailyRows(serviceClient, collapsed, {
+        allowEqual: (incoming, stored) =>
+          incoming?.wake_source === 'hr_inferred' && stored?.wake_source !== 'hr_inferred',
+      });
       const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows, { mutable: true });
       if (errored) return json({ error: 'sleep_insert_failed', detail: errored }, 500);
       counts.inserted.sleep = inserted;
       counts.duplicates.sleep = duplicates;
+    }
+  }
+
+  // 2026-11-18 — daytime rest / nap estimates (migration 0061).
+  // Immutable points: a re-send is a duplicate, ignored.
+  if (payload.restPeriods?.length) {
+    const { accepted, rejected } = validateRestPeriods(payload.restPeriods);
+    counts.rejected.rest = rejected.length;
+    await logRejected(serviceClient, familyId, userId, 'rest_period', rejected);
+    if (accepted.length > 0) {
+      const rows = mapRestPeriods(accepted, familyId, deviceId);
+      const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows);
+      if (errored) return json({ error: 'rest_insert_failed', detail: errored }, 500);
+      counts.inserted.rest = inserted;
+      counts.duplicates.rest = duplicates;
     }
   }
 
@@ -689,28 +713,44 @@ function collapseToMaxByMeasuredAt(rows: VitalsOtherRow[]): VitalsOtherRow[] {
   return [...best.values()];
 }
 
+type JsonbRecord = Record<string, unknown> | null | undefined;
+
 async function dropNonIncreasingDailyRows(
   serviceClient: SupabaseClient,
   rows: VitalsOtherRow[],
+  options: {
+    /** Keep a row whose value equals the stored one when this says the
+     *  incoming jsonb is still an improvement. */
+    allowEqual?: (incoming: JsonbRecord, stored: JsonbRecord) => boolean;
+  } = {},
 ): Promise<VitalsOtherRow[]> {
   if (rows.length === 0) return rows;
   const deviceId = rows[0].device_id;
   const vitalType = rows[0].vital_type;
   const { data: existing } = await serviceClient
     .from('vitals_other')
-    .select('measured_at, value_int')
+    .select('measured_at, value_int, value_jsonb')
     .eq('device_id', deviceId)
     .eq('vital_type', vitalType)
     .in('measured_at', rows.map((r) => r.measured_at));
-  const storedByAt = new Map<string, number>(
+  const storedByAt = new Map<string, { value: number; jsonb: JsonbRecord }>(
     (existing ?? []).map((e) => [
       new Date(e.measured_at as string).toISOString(),
-      (e.value_int as number | null) ?? 0,
+      {
+        value: (e.value_int as number | null) ?? 0,
+        jsonb: e.value_jsonb as JsonbRecord,
+      },
     ]),
   );
   return rows.filter((r) => {
     const stored = storedByAt.get(new Date(r.measured_at).toISOString());
-    return stored === undefined || (r.value_int ?? 0) > stored;
+    if (stored === undefined) return true;
+    const incoming = r.value_int ?? 0;
+    if (incoming > stored.value) return true;
+    return (
+      incoming === stored.value &&
+      options.allowEqual?.(r.value_jsonb as JsonbRecord, stored.jsonb) === true
+    );
   });
 }
 
@@ -765,7 +805,7 @@ async function logRejected(
   serviceClient: SupabaseClient,
   familyId: string,
   userId: string,
-  vitalType: 'bp' | 'hr' | 'spo2' | 'sleep_session' | 'steps_day' | 'calories_day',
+  vitalType: 'bp' | 'hr' | 'spo2' | 'sleep_session' | 'steps_day' | 'calories_day' | 'rest_period',
   rejected: RejectedSample[],
 ): Promise<void> {
   if (rejected.length === 0) return;

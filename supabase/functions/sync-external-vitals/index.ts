@@ -23,7 +23,12 @@ import { corsHeaders } from '../_shared/cors.ts';
 const LEIKO_BUNDLE_ID = 'com.leiko.care';
 
 const VITAL_TYPES = new Set(['weight', 'height', 'blood_glucose']);
-const PLATFORMS = new Set(['apple_health', 'health_connect']);
+const PLATFORMS = new Set(['apple_health', 'health_connect', 'leiko_manual']);
+// 2026-11-18 — weight typed into Leiko's own Weight screen (migration
+// 0062). Only weight, only kg, only this origin, plausible range.
+const MANUAL_ORIGIN = 'com.leiko.care.manual';
+const MANUAL_WEIGHT_MIN_KG = 20;
+const MANUAL_WEIGHT_MAX_KG = 400;
 const UNITS = new Set(['kg', 'lb', 'm', 'cm', 'in', 'mg/dL', 'mmol/L']);
 
 interface ExternalVitalSample {
@@ -36,7 +41,7 @@ interface ExternalVitalSample {
 
 interface RequestBody {
   samples: ExternalVitalSample[];
-  sourcePlatform: 'apple_health' | 'health_connect';
+  sourcePlatform: 'apple_health' | 'health_connect' | 'leiko_manual';
 }
 
 interface RejectedSample {
@@ -57,7 +62,11 @@ function json(body: unknown, status: number): Response {
   });
 }
 
-function validateSample(s: unknown, idx: number): RejectedSample | null {
+function validateSample(
+  s: unknown,
+  idx: number,
+  platform: RequestBody['sourcePlatform'],
+): RejectedSample | null {
   if (!s || typeof s !== 'object') return { index: idx, reason: 'not_object' };
   const v = s as Partial<ExternalVitalSample>;
   if (!v.vitalType || !VITAL_TYPES.has(v.vitalType)) {
@@ -75,7 +84,16 @@ function validateSample(s: unknown, idx: number): RejectedSample | null {
   if (typeof v.sourceOrigin !== 'string' || v.sourceOrigin.length === 0) {
     return { index: idx, reason: 'invalid_source_origin' };
   }
-  if (v.sourceOrigin === LEIKO_BUNDLE_ID) {
+  if (platform === 'leiko_manual') {
+    if (v.sourceOrigin !== MANUAL_ORIGIN) return { index: idx, reason: 'manual_origin_mismatch' };
+    if (v.vitalType !== 'weight') return { index: idx, reason: 'manual_weight_only' };
+    if (v.valueUnit !== 'kg') return { index: idx, reason: 'manual_unit_kg_only' };
+    if (v.valueNumeric < MANUAL_WEIGHT_MIN_KG || v.valueNumeric > MANUAL_WEIGHT_MAX_KG) {
+      return { index: idx, reason: 'manual_weight_out_of_range' };
+    }
+    return null;
+  }
+  if (v.sourceOrigin === LEIKO_BUNDLE_ID || v.sourceOrigin === MANUAL_ORIGIN) {
     return { index: idx, reason: 'leiko_origin_rejected' };
   }
   return null;
@@ -158,7 +176,7 @@ Deno.serve(async (req: Request) => {
   const rejected: RejectedSample[] = [];
   const validRows: Array<Record<string, unknown>> = [];
   for (let i = 0; i < body.samples.length; i += 1) {
-    const reason = validateSample(body.samples[i], i);
+    const reason = validateSample(body.samples[i], i, body.sourcePlatform);
     if (reason) {
       rejected.push(reason);
       continue;
