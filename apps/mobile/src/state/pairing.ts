@@ -40,6 +40,7 @@ import {
 } from '../services/ble/bleManager';
 import { setTime } from '../services/ble/commands/setTime';
 import { rememberWatchClockTz } from '../services/ble/watchClock';
+import { deviceTz } from '../utils/userTz';
 import { findWatch } from '../services/ble/commands/findWatch';
 import {
   startBleForegroundService,
@@ -288,8 +289,10 @@ export const usePairing = create<PairingState>((set, get) => ({
     try {
       const device = _activeDevice ?? (await connectToUrion(selectedBleId));
       try {
-        const { timeZone } = await setTime(device, { language: 'en' });
-        rememberWatchClockTz(selectedBleId, timeZone);
+        const clock = await setTime(device, { language: 'en' });
+        // Remembering the zone must never turn a good pair into a
+        // failure — fall back to the phone's zone if it's missing.
+        rememberWatchClockTz(selectedBleId, clock?.timeZone ?? deviceTz());
       } catch {
         logger.track('ble_pair_failed', { macSuffix, reason: 'set_time' });
         await device.disconnect();

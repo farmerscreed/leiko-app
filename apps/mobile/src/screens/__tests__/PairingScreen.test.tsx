@@ -95,7 +95,7 @@ describe('PairingScreen — happy path', () => {
       disconnect: jest.fn().mockResolvedValue(undefined),
     };
     mockConnectToUrion.mockResolvedValue(fakeDevice);
-    mockSetTime.mockResolvedValue(undefined);
+    mockSetTime.mockResolvedValue({ timeZone: 'Africa/Lagos' });
 
     render(withProviders(<PairingScreen navigation={nav} />));
 
