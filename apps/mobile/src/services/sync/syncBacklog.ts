@@ -43,6 +43,12 @@
 import { mmkv, STORAGE_KEYS } from '../storage';
 import { readBPHistory } from '../ble/commands/readBPHistory';
 import { setTime } from '../ble/commands/setTime';
+import {
+  getWatchClockTz,
+  rememberWatchClockTz,
+  tzOffsetSecAt,
+} from '../ble/watchClock';
+import { deviceTz } from '../../utils/userTz';
 import type { UrionDevice } from '../ble/UrionDevice';
 import { useReadings } from '../../state/readings';
 import { logger } from '../analytics/logger';
@@ -85,10 +91,21 @@ const CURSOR_STALENESS_THRESHOLD_SEC = 180 * 24 * 60 * 60;
 // IANA TZ; for Sprint 6 we resolve at the device.
 const WATCH_FIRMWARE_OFFSET_SEC = 8 * 60 * 60;
 
-export function watchTimestampToUtcSec(rawWatchSec: number): number {
-  const phoneOffsetSec =
-    -new Date(rawWatchSec * 1000).getTimezoneOffset() * 60;
-  return rawWatchSec + WATCH_FIRMWARE_OFFSET_SEC - phoneOffsetSec;
+//
+// 2026-11-17: the user's offset now comes from Intl for an explicit zone
+// (the zone the watch clock was set in — see ../ble/watchClock.ts), not
+// Date.getTimezoneOffset(), which stays pinned to the zone the app process
+// started in.
+export function watchTimestampToUtcSec(
+  rawWatchSec: number,
+  timeZone: string = deviceTz(),
+): number {
+  // The raw value is "wall clock as Beijing"; shift to "wall clock as
+  // UTC" first, then measure the zone's offset at (approximately) that
+  // instant. Approximation error only matters inside a DST transition hour.
+  const wallAsUtcSec = rawWatchSec + WATCH_FIRMWARE_OFFSET_SEC;
+  const offsetSec = tzOffsetSecAt(new Date(wallAsUtcSec * 1000), timeZone);
+  return wallAsUtcSec - offsetSec;
 }
 
 // Sprint 16.5c — HR + SpO2 path uses a DIFFERENT firmware encoding than
@@ -108,10 +125,11 @@ export function watchTimestampToUtcSec(rawWatchSec: number): number {
 // So for HR/SpO2 the correct correction to TRUE UTC subtracts the
 // user's local-offset (Lagos +1 → subtract 3600 s). Equivalent to the
 // general formula with WATCH_FIRMWARE_OFFSET_SEC=0.
-export function watchVitalTimestampToUtcSec(rawWatchSec: number): number {
-  const phoneOffsetSec =
-    -new Date(rawWatchSec * 1000).getTimezoneOffset() * 60;
-  return rawWatchSec - phoneOffsetSec;
+export function watchVitalTimestampToUtcSec(
+  rawWatchSec: number,
+  timeZone: string = deviceTz(),
+): number {
+  return rawWatchSec - tzOffsetSecAt(new Date(rawWatchSec * 1000), timeZone);
 }
 
 // Per-device, per-vital sync cursor — Sprint 7.5 / D13 §3.4.
@@ -297,7 +315,7 @@ export async function backfillBPHistoryOlderThan(
   let oldest = readings[0].timestampSec;
   for (const r of readings) {
     addPending({
-      measuredAtSec: watchTimestampToUtcSec(r.timestampSec),
+      measuredAtSec: watchTimestampToUtcSec(r.timestampSec, getWatchClockTz(deviceBleId)),
       systolic: r.systolic,
       diastolic: r.diastolic,
       pulse: r.pulse,
@@ -320,9 +338,15 @@ export async function syncBacklog(
   // drifted timestamp which then breaks latest() ordering. Failure
   // here is non-fatal — the read still works, the timestamps may
   // just be off.
+  // Everything already stored on the watch was stamped while its clock
+  // was in the zone we last set — capture that BEFORE re-setting the
+  // clock, so a reading taken in New York and synced in Lagos is decoded
+  // as New York wall-clock time.
+  const decodeTz = getWatchClockTz(deviceBleId);
   if (!options.skipSetTime) {
     try {
-      await setTime(device, { language: 'en' });
+      const { timeZone } = await setTime(device, { language: 'en' });
+      rememberWatchClockTz(deviceBleId, timeZone);
     } catch {
       // best-effort; clock will be wrong but reads still work
     }
@@ -403,7 +427,7 @@ export async function syncBacklog(
   const addPending = useReadings.getState().addPendingReading;
   for (const r of fresh) {
     addPending({
-      measuredAtSec: watchTimestampToUtcSec(r.timestampSec),
+      measuredAtSec: watchTimestampToUtcSec(r.timestampSec, decodeTz),
       systolic: r.systolic,
       diastolic: r.diastolic,
       pulse: r.pulse,

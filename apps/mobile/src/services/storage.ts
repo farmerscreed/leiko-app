@@ -106,6 +106,9 @@ export const STORAGE_KEYS = {
   // Wall-clock ms of the last successful watch sync (any trigger).
   // Shown as Settings → Watch → "Last sync". 2026-10-30.
   lastWatchSyncAtMs: 'leiko.sync.lastWatchSyncAtMs',
+  // { [deviceBleId]: IANA tz } — the zone each watch's clock was last set
+  // in. Readings are decoded in this zone. See services/ble/watchClock.ts.
+  watchClockTzByDevice: 'leiko.sync.watchClockTzByDevice',
   // D12 visual mode — Sprint 1.5. ColorModeOverride: 'system' | 'dark' | 'light'.
   // Default 'system' (follow OS appearance). User-facing toggle ships in
   // Sprint 10 Settings; ThemeProvider reads/writes this key directly.
