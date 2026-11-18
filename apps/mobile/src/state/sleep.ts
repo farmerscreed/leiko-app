@@ -64,6 +64,10 @@ interface SleepState {
   reset: () => void;
 }
 
+/** Re-send nights upgraded to HR-inferred times if they ended within
+ *  this window. */
+const REQUEUE_WINDOW_SEC = 14 * 24 * 3600;
+
 const buffer = createPendingVitalBuffer<SleepSession>({
   storageKey: STORAGE_KEYS.pendingSleep,
   getKey: (s) => String(s.sessionStartSec),
@@ -259,11 +263,29 @@ export const useSleep = create<SleepState>((set, get) => ({
       return r.session;
     });
     const oldRecent = get().recent;
-    const newRecent = oldRecent.map((s) => {
+    // 2026-11-18 — the server now stores the inferred bed/wake times
+    // (value_jsonb.inferred_start/_end). A night that was already
+    // uploaded and has only now been placed by heart rate goes back into
+    // pending so the next sync re-sends it; the server accepts an
+    // equal-total row when it newly carries 'hr_inferred'. Limited to
+    // recent nights — older ones aren't worth the upload.
+    const requeueAfterSec = Math.floor(Date.now() / 1000) - REQUEUE_WINDOW_SEC;
+    const requeue: SleepSession[] = [];
+    const newRecent: SleepSession[] = [];
+    for (const s of oldRecent) {
       const r = upgrade(s);
       if (r.upgraded) upgradedCount += 1;
-      return r.session;
-    });
+      if (
+        r.upgraded &&
+        r.session.wakeSource === 'hr_inferred' &&
+        r.session.sessionEndSec >= requeueAfterSec
+      ) {
+        requeue.push(r.session);
+      } else {
+        newRecent.push(r.session);
+      }
+    }
+    for (const s of requeue) buffer.append(s);
     if (upgradedCount === 0) return 0;
     // Pending lives in MMKV via the buffer; rewrite each entry by
     // remove + append so the buffer's storage reflects the upgrade.

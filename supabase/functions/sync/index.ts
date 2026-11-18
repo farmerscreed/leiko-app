@@ -520,7 +520,13 @@ async function handleMultiVitals(
       // a night. Mirrors the steps/calories monotonic guard; mutable upsert
       // then reconciles the surviving (fullest) row.
       const collapsed = collapseToMaxByMeasuredAt(mapped);
-      const rows = await dropNonIncreasingDailyRows(serviceClient, collapsed);
+      // Same total but newly HR-inferred bed/wake times is still an
+      // improvement worth storing (the phone re-sends a night once
+      // enough heart rate has arrived to place it).
+      const rows = await dropNonIncreasingDailyRows(serviceClient, collapsed, {
+        allowEqual: (incoming, stored) =>
+          incoming?.wake_source === 'hr_inferred' && stored?.wake_source !== 'hr_inferred',
+      });
       const { inserted, duplicates, errored } = await insertVitalRows(serviceClient, rows, { mutable: true });
       if (errored) return json({ error: 'sleep_insert_failed', detail: errored }, 500);
       counts.inserted.sleep = inserted;
@@ -689,28 +695,44 @@ function collapseToMaxByMeasuredAt(rows: VitalsOtherRow[]): VitalsOtherRow[] {
   return [...best.values()];
 }
 
+type JsonbRecord = Record<string, unknown> | null | undefined;
+
 async function dropNonIncreasingDailyRows(
   serviceClient: SupabaseClient,
   rows: VitalsOtherRow[],
+  options: {
+    /** Keep a row whose value equals the stored one when this says the
+     *  incoming jsonb is still an improvement. */
+    allowEqual?: (incoming: JsonbRecord, stored: JsonbRecord) => boolean;
+  } = {},
 ): Promise<VitalsOtherRow[]> {
   if (rows.length === 0) return rows;
   const deviceId = rows[0].device_id;
   const vitalType = rows[0].vital_type;
   const { data: existing } = await serviceClient
     .from('vitals_other')
-    .select('measured_at, value_int')
+    .select('measured_at, value_int, value_jsonb')
     .eq('device_id', deviceId)
     .eq('vital_type', vitalType)
     .in('measured_at', rows.map((r) => r.measured_at));
-  const storedByAt = new Map<string, number>(
+  const storedByAt = new Map<string, { value: number; jsonb: JsonbRecord }>(
     (existing ?? []).map((e) => [
       new Date(e.measured_at as string).toISOString(),
-      (e.value_int as number | null) ?? 0,
+      {
+        value: (e.value_int as number | null) ?? 0,
+        jsonb: e.value_jsonb as JsonbRecord,
+      },
     ]),
   );
   return rows.filter((r) => {
     const stored = storedByAt.get(new Date(r.measured_at).toISOString());
-    return stored === undefined || (r.value_int ?? 0) > stored;
+    if (stored === undefined) return true;
+    const incoming = r.value_int ?? 0;
+    if (incoming > stored.value) return true;
+    return (
+      incoming === stored.value &&
+      options.allowEqual?.(r.value_jsonb as JsonbRecord, stored.jsonb) === true
+    );
   });
 }
 

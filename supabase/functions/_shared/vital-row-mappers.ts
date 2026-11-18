@@ -121,8 +121,35 @@ export function mapSleepSessions(
       awake_count: s.awakeCount,
       transitions: s.transitions,
       sleep_score: s.sleepScore,
+      ...inferredSleepTimes(s),
     },
   }));
+}
+
+/** Longest plausible inferred session; anything longer is dropped. */
+const MAX_INFERRED_SESSION_SEC = 20 * 3600;
+
+/** The phone's heart-rate-inferred bed / wake times, when present and
+ *  sane. Added 2026-11-18 — before this they never left the phone, so
+ *  the doctor report, family view and AI only saw the synthetic 08:00. */
+export function inferredSleepTimes(s: SleepSession): Record<string, string> {
+  const start = s.inferredSessionStartSec;
+  const end = s.inferredSessionEndSec;
+  if (
+    typeof start !== 'number' || typeof end !== 'number' ||
+    !Number.isFinite(start) || !Number.isFinite(end) ||
+    start <= 0 || end <= start || end - start > MAX_INFERRED_SESSION_SEC
+  ) {
+    return {};
+  }
+  const out: Record<string, string> = {
+    inferred_start: toIso(start),
+    inferred_end: toIso(end),
+  };
+  if (s.wakeSource === 'hr_inferred' || s.wakeSource === 'fallback') {
+    out.wake_source = s.wakeSource;
+  }
+  return out;
 }
 
 export function mapActivityDays(

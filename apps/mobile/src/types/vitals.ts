@@ -95,7 +95,8 @@ export interface SleepSession {
   /** Sprint 18 — HR-derived inferred bedtime (epoch sec UTC). When
    *  present, this is what display layers SHOULD show; falls back to
    *  sessionStartSec. Computed at ingest or by the reconcile hook
-   *  once HR samples are available. Never sent over the wire. */
+   *  once HR samples are available. Sent to the server since 2026-11-18
+   *  (value_jsonb.inferred_start/_end, wake_source). */
   inferredSessionStartSec?: number;
   /** Sprint 18 — HR-derived inferred wake time (epoch sec UTC). When
    *  present, this is what display layers SHOULD show; falls back to

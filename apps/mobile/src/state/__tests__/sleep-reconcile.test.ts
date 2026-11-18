@@ -141,4 +141,39 @@ describe('reconcileWakeSources', () => {
     useSleep.getState().addPending(legacySession(dayLocal, 420));
     expect(useSleep.getState().reconcileWakeSources([], '')).toBe(0);
   });
+
+  it('re-queues an uploaded recent night once heart rate places it, so the server gets the times (2026-11-18)', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-05-25T12:00:00Z'));
+    try {
+      const dayLocal = '2026-05-22';
+      const session = legacySession(dayLocal, 420);
+      useSleep.getState().addPending(session);
+      useSleep.getState().acceptSyncResult([String(session.sessionStartSec)]);
+      expect(useSleep.getState().pending).toHaveLength(0);
+      expect(useSleep.getState().recent).toHaveLength(1);
+
+      const upgraded = useSleep.getState().reconcileWakeSources(buildHRForWake(dayLocal, 58, 78, 6.5), TZ);
+      expect(upgraded).toBe(1);
+      expect(useSleep.getState().pending).toHaveLength(1);
+      expect(useSleep.getState().pending[0].wakeSource).toBe('hr_inferred');
+      expect(useSleep.getState().recent).toHaveLength(0);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('leaves an old uploaded night in recent (outside the re-send window)', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-07-25T12:00:00Z'));
+    try {
+      const dayLocal = '2026-05-22';
+      const session = legacySession(dayLocal, 420);
+      useSleep.getState().addPending(session);
+      useSleep.getState().acceptSyncResult([String(session.sessionStartSec)]);
+      useSleep.getState().reconcileWakeSources(buildHRForWake(dayLocal, 58, 78, 6.5), TZ);
+      expect(useSleep.getState().pending).toHaveLength(0);
+      expect(useSleep.getState().recent[0].wakeSource).toBe('hr_inferred');
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });

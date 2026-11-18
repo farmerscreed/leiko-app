@@ -24,6 +24,7 @@ import { useAuth } from '../state/auth';
 import { useSleep } from '../state/sleep';
 import { supabase } from '../services/supabase';
 import type { SleepSession, SleepStage } from '../types/vitals';
+import { inferredSleepFromJsonb } from '../utils/inferredSleepFromJsonb';
 
 const FETCH_LIMIT = 90;
 
@@ -88,6 +89,7 @@ export function mapServerRowToSession(row: ServerSleepRow): SleepSession {
     awakeCount,
     transitions,
     sleepScore,
+    ...inferredSleepFromJsonb(row.value_jsonb),
   };
 }
 

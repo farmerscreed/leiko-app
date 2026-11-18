@@ -71,6 +71,14 @@ export interface SleepSession {
   awakeCount: number;
   transitions: SleepTransition[];
   sleepScore: number;
+  /** Bed / wake time inferred on the phone from heart rate (the watch's
+   *  0x07 reply has durations only). Optional — older clients don't send
+   *  them. Stored in value_jsonb.inferred_start / inferred_end (ISO UTC). */
+  inferredSessionStartSec?: number;
+  inferredSessionEndSec?: number;
+  /** 'hr_inferred' = found the morning heart-rate rise; 'fallback' =
+   *  07:00 local estimate. */
+  wakeSource?: 'hr_inferred' | 'fallback';
 }
 
 export interface ActivityDay {

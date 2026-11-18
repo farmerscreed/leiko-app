@@ -142,3 +142,42 @@ Deno.test('mapBPReadings keeps Sprint-6 shape; measured_at_local is NULL (no mis
   // data. It is NULL until a properly tz-wired implementation exists.
   assertEquals(rows[0].measured_at_local, null);
 });
+
+Deno.test('mapSleepSessions stores the HR-inferred bed/wake times when sane (2026-11-18)', () => {
+  const start = NOW - 8 * 3600;
+  const base = {
+    sessionStartSec: start,
+    sessionEndSec: NOW,
+    sessionStartLocal: new Date(start * 1000).toISOString(),
+    sessionEndLocal: NOW_ISO,
+    totalMinutes: 444,
+    deepMinutes: 100,
+    remMinutes: 0,
+    lightMinutes: 344,
+    awakeMinutes: 0,
+    awakeCount: 0,
+    transitions: [],
+    sleepScore: 78,
+  };
+  const [ok] = mapSleepSessions(
+    [{ ...base, inferredSessionStartSec: start - 1800, inferredSessionEndSec: NOW - 1800, wakeSource: 'hr_inferred' as const }],
+    FAMILY,
+    DEVICE,
+  );
+  assertEquals(ok.value_jsonb.inferred_start, new Date((start - 1800) * 1000).toISOString());
+  assertEquals(ok.value_jsonb.inferred_end, new Date((NOW - 1800) * 1000).toISOString());
+  assertEquals(ok.value_jsonb.wake_source, 'hr_inferred');
+  // measured_at stays the constant night key.
+  assertEquals(ok.measured_at, NOW_ISO);
+
+  const [absent] = mapSleepSessions([base], FAMILY, DEVICE);
+  assertEquals(absent.value_jsonb.inferred_start, undefined);
+
+  const [bogus] = mapSleepSessions(
+    [{ ...base, inferredSessionStartSec: NOW, inferredSessionEndSec: NOW - 60, wakeSource: 'hr_inferred' as const }],
+    FAMILY,
+    DEVICE,
+  );
+  assertEquals(bogus.value_jsonb.inferred_start, undefined);
+  assertEquals(bogus.value_jsonb.wake_source, undefined);
+});
