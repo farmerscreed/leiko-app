@@ -50,9 +50,10 @@
 //     sessionStart = sessionEnd - totalMinutes. Score's efficiency
 //     component is therefore 1.0 on real-watch data — flagged in D13
 //     §15.4 Q-D13-3.
-//   • Activity hourly[24] = zeros. Per-hour distribution requires a
-//     different ingest path (raw step samples via 0x73 0x04 notify) —
-//     to be wired by a later sprint.
+//   • Activity hourly[24] is built from the difference between
+//     successive reads of the day's running total (2026-11-18,
+//     services/activity/stepTimeline.ts) — the watch has no per-hour
+//     step command.
 //   • setUserParams + setGoals dirty-checks always return false for
 //     now; the dirty-tracker hooks into Settings UI when it lands.
 //
@@ -83,6 +84,7 @@ import { computeSleepScore } from '../../utils/classification';
 import { useActivity } from '../../state/activity';
 import { logger } from '../analytics/logger';
 import { userTz } from '../../utils/userTz';
+import { recordStepTotal } from '../activity/stepTimeline';
 import { inferWakeFromHR } from '../sleep/inferWakeFromHR';
 import { getWatchClockTz } from '../ble/watchClock';
 import type {
@@ -590,9 +592,17 @@ async function syncDayInfoStep(
           totalSteps: info.activity.totalSteps,
           targetSteps: 6000, // D13 §15.4 Q-D13-1 default; orchestrator overrides when Settings UI ships
           lastSampleAtSec: dayStart + 23 * 3600 + 59 * 60,
-          // Per-hour distribution comes from the 0x73 0x04 step-event notify
-          // path, not 0x07. Filled with zeros until that path is wired.
-          hourly: new Array<number>(24).fill(0),
+          // Steps per hour from the difference between successive reads
+          // of the running total (services/activity/stepTimeline.ts).
+          // Steps before the day's first read stay unplaced, so hourly
+          // can sum to less than totalSteps.
+          hourly: recordStepTotal(
+            deviceBleId,
+            dayLocal,
+            info.activity.totalSteps,
+            nowSec,
+            userTz(),
+          ).hourly,
         };
         const caloriesDay: CaloriesDay = {
           dayLocal,
