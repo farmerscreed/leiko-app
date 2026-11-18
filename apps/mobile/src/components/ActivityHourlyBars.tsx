@@ -73,7 +73,6 @@ export function ActivityHourlyBars({
       accessibilityLabel={composeHourlyAccessibilityLabel(hourly, totalSteps, title)}
     >
       <Text
-        allowFontScaling={false}
         style={{
           fontFamily: labelStyle.family,
           fontSize: labelStyle.size,
@@ -129,7 +128,6 @@ export function ActivityHourlyBars({
           {LABEL_HOURS.map((h) => (
             <Text
               key={h}
-              allowFontScaling={false}
               style={{
                 fontFamily: theme.fontFamilies.numeric,
                 fontSize: labelStyle.size,

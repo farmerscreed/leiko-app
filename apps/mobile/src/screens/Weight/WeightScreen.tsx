@@ -182,7 +182,7 @@ export function WeightScreen({ navigation }: Props) {
         )}
 
         {trend.length >= 2 ? (
-          <View style={{ marginTop: theme.spacing.l }} accessibilityLabel={`Weight trend over your last ${trend.length} entries`}>
+          <View style={{ marginTop: theme.spacing.l }} accessible accessibilityLabel={`Weight trend over your last ${trend.length} entries`}>
             <Sparkline values={trend} width={width - theme.spacing.xl * 2} height={56} color={theme.colors.brand.primary} testID="weight-trend" />
           </View>
         ) : null}

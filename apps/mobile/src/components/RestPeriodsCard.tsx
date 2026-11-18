@@ -46,7 +46,6 @@ export function RestPeriodsCard({ periods, timeZone, style, testID }: RestPeriod
   return (
     <View style={style} testID={testID}>
       <Text
-        allowFontScaling={false}
         style={{
           fontFamily: label.family,
           fontSize: label.size,
