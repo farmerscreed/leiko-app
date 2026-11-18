@@ -8,7 +8,7 @@
 // the pure jest project (no react-native runtime needed).
 
 type DisconnectCallback = () => void;
-type NotifyHandlers = { onBP?: () => void };
+type NotifyHandlers = { onBP?: () => void; onBPMeasureComplete?: () => void };
 
 const mockConnectToUrion: jest.Mock = jest.fn();
 const mockSyncBacklog: jest.Mock = jest.fn();
@@ -29,6 +29,11 @@ jest.mock('../../services/ble/notify', () => ({
     notifyHandlers.push(handlers);
     return mockSubscribeToNotifications(device, handlers);
   },
+}));
+
+const mockStartMeasurement: jest.Mock = jest.fn();
+jest.mock('../../services/ble/commands/startMeasurement', () => ({
+  startMeasurement: (device: unknown) => mockStartMeasurement(device),
 }));
 
 jest.mock('../../services/sync/syncBacklog', () => ({
@@ -84,6 +89,9 @@ beforeEach(() => {
   mockSyncBacklog.mockResolvedValue({ pulled: 0, latestTimestampSec: null });
   mockApplyDeviceConfig.mockResolvedValue({ ran: true, steps: ['autoHr', 'autoSpo2', 'goals'] });
   mockUseReadingsLatest.mockReturnValue(null);
+  // Default: the watch rejects remote start, i.e. the Sprint 6
+  // press-the-button flow the older tests describe.
+  mockStartMeasurement.mockResolvedValue(false);
 });
 
 afterEach(() => {
@@ -213,5 +221,77 @@ describe('mid-measurement disconnect (Sprint 12.5.1)', () => {
 
     expect(useTakeReading.getState().phase).toBe('failure');
     expect(useTakeReading.getState().error?.code).toBe('no_reading');
+  });
+});
+
+describe('remote start (0x32, 2026-11-18)', () => {
+  async function beginAndSettle(): Promise<void> {
+    const p = useTakeReading.getState().begin();
+    for (let i = 0; i < 6; i++) await Promise.resolve();
+    await p;
+  }
+
+  it('starts the cuff from the app and flags remoteStarted when the watch accepts', async () => {
+    mockStartMeasurement.mockResolvedValueOnce(true);
+    await beginAndSettle();
+    expect(mockStartMeasurement).toHaveBeenCalledTimes(1);
+    expect(useTakeReading.getState().phase).toBe('waiting_for_watch');
+    expect(useTakeReading.getState().remoteStarted).toBe(true);
+  });
+
+  it('falls back to the press-the-button flow when the watch rejects 0x32', async () => {
+    mockStartMeasurement.mockResolvedValueOnce(false);
+    await beginAndSettle();
+    expect(useTakeReading.getState().phase).toBe('waiting_for_watch');
+    expect(useTakeReading.getState().remoteStarted).toBe(false);
+  });
+
+  it('pulls the reading when the watch signals 0x33 measurement complete', async () => {
+    mockStartMeasurement.mockResolvedValueOnce(true);
+    await beginAndSettle();
+    const reading = { localId: 'r-new' };
+    mockSyncBacklog.mockResolvedValueOnce({ pulled: 1, latestTimestampSec: 1 });
+    mockUseReadingsLatest.mockReturnValueOnce(null).mockReturnValue(reading);
+    notifyHandlers[0].onBPMeasureComplete?.();
+    await jest.advanceTimersByTimeAsync(500);
+    expect(useTakeReading.getState().phase).toBe('success');
+    expect(useTakeReading.getState().lastReadingId).toBe('r-new');
+  });
+
+  it('pulls only once when 0x33 and 0x73 0x02 both arrive', async () => {
+    mockStartMeasurement.mockResolvedValueOnce(true);
+    await beginAndSettle();
+    const callsBefore = mockSyncBacklog.mock.calls.length;
+    mockSyncBacklog.mockResolvedValue({ pulled: 1, latestTimestampSec: 1 });
+    notifyHandlers[0].onBPMeasureComplete?.();
+    notifyHandlers[0].onBP?.();
+    await jest.advanceTimersByTimeAsync(500);
+    expect(mockSyncBacklog.mock.calls.length - callsBefore).toBe(1);
+  });
+
+  it('finds the reading with the safety-net check when no completion signal arrives', async () => {
+    mockStartMeasurement.mockResolvedValueOnce(true);
+    await beginAndSettle();
+    mockSyncBacklog.mockResolvedValueOnce({ pulled: 1, latestTimestampSec: 1 });
+    mockUseReadingsLatest.mockReturnValueOnce(null).mockReturnValue({ localId: 'r-poll' });
+    await jest.advanceTimersByTimeAsync(56_000);
+    expect(useTakeReading.getState().phase).toBe('success');
+    expect(useTakeReading.getState().lastReadingId).toBe('r-poll');
+  });
+
+  it('ends with measure_incomplete when the watch never finishes (e.g. cuff error on the watch screen)', async () => {
+    mockStartMeasurement.mockResolvedValueOnce(true);
+    await beginAndSettle();
+    await jest.advanceTimersByTimeAsync(91_000);
+    const st = useTakeReading.getState();
+    expect(st.phase).toBe('failure');
+    expect(st.error?.code).toBe('measure_incomplete');
+    expect(st.error?.friendly).toMatch(/Check the watch screen/);
+  });
+
+  it('keeps the original watch_timeout message when the button flow times out', async () => {
+    await beginAndSettle();
+    await jest.advanceTimersByTimeAsync(91_000);
+    expect(useTakeReading.getState().error?.code).toBe('watch_timeout');
   });
 });

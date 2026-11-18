@@ -58,6 +58,10 @@ export type AnalyticsEvent =
   // backlog. Distinct from `watch` to measure how often this path fires.
   | { name: 'take_reading_received'; props?: { source: 'watch' | 'manual' | 'watch_post_disconnect' } }
   | { name: 'take_reading_failed'; props?: { reason: string } }
+  // 2026-11-18 — the app asked the watch to start the cuff (0x32).
+  // `accepted` false = the watch rejected it or didn't answer, and the
+  // flow fell back to "press the BP button on the watch".
+  | { name: 'take_reading_remote_start'; props?: { accepted: boolean } }
   // Sprint 12.5.1 — stale BP cursor recovery in syncBacklog. Fired when
   // the watch's newest stored BP is older than our cursor (firmware
   // ring-buffer eviction, watch clock change, manual delete on watch).

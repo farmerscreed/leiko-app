@@ -62,6 +62,7 @@ export function TakeReadingScreen({ navigation }: Props) {
   const phase = useTakeReading((s) => s.phase);
   const error = useTakeReading((s) => s.error);
   const lastReadingId = useTakeReading((s) => s.lastReadingId);
+  const remoteStarted = useTakeReading((s) => s.remoteStarted);
   const begin = useTakeReading((s) => s.begin);
   const cancel = useTakeReading((s) => s.cancel);
   const retry = useTakeReading((s) => s.retry);
@@ -108,6 +109,7 @@ export function TakeReadingScreen({ navigation }: Props) {
     case 'waiting_for_watch':
       body = (
         <WaitingForWatchView
+          remoteStarted={remoteStarted}
           onCancel={onClose}
           onManualEntry={() => setManualOpen(true)}
         />
@@ -215,6 +217,10 @@ const A11Y_CONNECTING =
   'Reaching the watch. This usually takes a couple of seconds.';
 const A11Y_WAITING =
   "Press the BP button on your watch. Sit still while it takes the reading — we'll catch the result here.";
+// 2026-11-18 — the app started the cuff itself (0x32), so there is no
+// button to press.
+const A11Y_MEASURING =
+  "Measuring now. Rest your arm with your wrist at heart level and keep still — we'll catch the result here.";
 const A11Y_RECONNECTING = 'One moment. Picking up the new reading from your watch.';
 const A11Y_FETCHING = 'Reading complete. Saving it now.';
 
@@ -252,26 +258,44 @@ function ConnectingView({ onCancel }: { onCancel: () => void }) {
 }
 
 function WaitingForWatchView({
+  remoteStarted,
   onCancel,
   onManualEntry,
 }: {
+  remoteStarted: boolean;
   onCancel: () => void;
   onManualEntry: () => void;
 }) {
   const theme = useTheme();
+  const a11y = remoteStarted ? A11Y_MEASURING : A11Y_WAITING;
   // Audit P1-7.
-  useAnnounceOnChange(A11Y_WAITING);
+  useAnnounceOnChange(a11y);
   return (
     <View accessible={true}
-      testID="take-reading-waiting"
+      testID={remoteStarted ? 'take-reading-measuring' : 'take-reading-waiting'}
       accessibilityLiveRegion="polite"
-      accessibilityLabel={A11Y_WAITING}
+      accessibilityLabel={a11y}
     >
-      <Headline>Press the BP button on your watch</Headline>
-      <Body>
-        Sit still while the watch inflates and takes the reading. We'll catch the
-        result here.
-      </Body>
+      {remoteStarted ? (
+        <>
+          <Headline>Measuring now</Headline>
+          <Body>
+            The watch is inflating. Rest your arm with your wrist at heart level
+            and keep still. We'll catch the result here.
+          </Body>
+          <View style={{ alignItems: 'center', marginVertical: theme.spacing.l }}>
+            <ActivityIndicator size="large" color={theme.colors.brand.primary} />
+          </View>
+        </>
+      ) : (
+        <>
+          <Headline>Press the BP button on your watch</Headline>
+          <Body>
+            Sit still while the watch inflates and takes the reading. We'll catch the
+            result here.
+          </Body>
+        </>
+      )}
       <Button
         variant="ghost"
         onPress={onManualEntry}

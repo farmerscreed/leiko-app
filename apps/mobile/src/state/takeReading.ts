@@ -1,18 +1,27 @@
-// Take-Reading store — Sprint 6.
+// Take-Reading store — Sprint 6, remote start added 2026-11-18.
 //
-// Drives the in-app "Take a reading" flow per Option 1 of the Sprint 6
-// proposal: the U16PRO protocol has no remote-trigger BP command, so
-// the app cannot tell the watch to inflate. Flow:
+// Drives the in-app "Take a reading" flow. Sprint 6 assumed the U16PRO
+// protocol had no remote-trigger BP command; the vendor PDF omits it,
+// but Urion's own app uses 0x32 and it works on U19M watches
+// (services/ble/commands/startMeasurement.ts). Flow:
 //
 //   1. User taps the "Take a reading" FAB → begin().
 //   2. begin() reconnects to the persisted device, subscribes to 0x73
-//      notifications, waits for the 0x73 0x02 (BP-ready) signal.
-//   3. Parent presses the BP button on the watch → watch inflates,
-//      measures, fires 0x73 0x02.
-//   4. Notify handler runs readLatestBP via 0x14, builds a
-//      LocalReading, writes to the readings store (which classifies +
-//      persists to MMKV synchronously + best-effort syncs to /sync).
+//      and 0x33 notifications, then sends 0x32 to start the cuff.
+//      If the watch rejects 0x32, the screen asks for the BP button
+//      instead (the Sprint 6 flow, unchanged).
+//   3. The watch inflates, measures, and fires 0x33 (measurement
+//      complete) and/or 0x73 0x02 (BP ready). If the watch drops BLE
+//      mid-cuff we reconnect and poll (_reconnectAndPull); if the link
+//      stays up but nothing arrives, _checkForRemoteReading polls once.
+//   4. The handler runs readBPHistory via 0x14, builds a LocalReading,
+//      writes to the readings store (which classifies + persists to
+//      MMKV synchronously + best-effort syncs to /sync).
 //   5. UI renders success view; user taps Done → exit().
+//
+//   A failed measurement ("wristband pressure too high") is shown only
+//   on the watch screen — no BLE signal — so it surfaces here as the
+//   measure_incomplete timeout.
 //
 // Manual entry skips the watch entirely: addManualReading() validates
 // + writes directly to the readings store.
@@ -30,6 +39,7 @@ import { syncBacklog } from '../services/sync/syncBacklog';
 import { applyDeviceConfig } from '../services/sync/applyDeviceConfig';
 import { logger } from '../services/analytics/logger';
 import { usePairing } from './pairing';
+import { startMeasurement } from '../services/ble/commands/startMeasurement';
 import { useReadings, type LocalReading } from './readings';
 
 export type TakeReadingPhase =
@@ -52,7 +62,8 @@ export type TakeReadingError =
   | { code: 'connect_failed'; friendly: string }
   | { code: 'no_reading'; friendly: string }
   | { code: 'fetch_failed'; friendly: string }
-  | { code: 'watch_timeout'; friendly: string };
+  | { code: 'watch_timeout'; friendly: string }
+  | { code: 'measure_incomplete'; friendly: string };
 
 const FRIENDLY: Record<TakeReadingError['code'], string> = {
   no_paired_device: 'Pair the watch first, then take a reading.',
@@ -64,9 +75,19 @@ const FRIENDLY: Record<TakeReadingError['code'], string> = {
     "We couldn't read from the watch. Bring the phone closer and try again.",
   watch_timeout:
     "We didn't see a reading. Press the BP button on the watch when you're ready.",
+  // The app started the cuff (0x32) but no result came back. When the
+  // watch can't finish a measurement it shows the reason on its own
+  // screen and sends nothing over Bluetooth.
+  measure_incomplete:
+    "The reading didn't finish. Check the watch screen, make sure the strap is snug over the inside of your wrist, then try again.",
 };
 
 const WATCH_TIMEOUT_MS = 90_000;
+
+// When the app started the cuff itself (0x32), check the watch for a
+// stored reading this long after the start, in case neither 0x33 nor
+// 0x73 0x02 arrives. A full cuff cycle is ~30–45s.
+const REMOTE_CHECK_AFTER_MS = 55_000;
 const FETCH_TIMEOUT_MS = 10_000;
 
 // Sprint 16.6 QUA-1 — BP value mismatch mitigation.
@@ -105,10 +126,15 @@ interface TakeReadingState {
   error: TakeReadingError | null;
   /** localId of the just-captured reading; set on success. */
   lastReadingId: string | null;
+  /** True once the watch accepted our start command (0x32) and the
+   *  cuff is inflating — the UI says "measuring now" instead of
+   *  "press the BP button". */
+  remoteStarted: boolean;
 
   _device: UrionDevice | null;
   _unsubscribeNotify: (() => void) | null;
   _watchTimer: ReturnType<typeof setTimeout> | null;
+  _checkTimer: ReturnType<typeof setTimeout> | null;
 
   begin: () => Promise<void>;
   addManualReading: (input: {
@@ -126,6 +152,7 @@ interface TakeReadingState {
   _onBPReady: () => Promise<void>;
   _teardownDevice: () => Promise<void>;
   _reconnectAndPull: () => Promise<void>;
+  _checkForRemoteReading: () => Promise<void>;
 }
 
 function nowSec(): number {
@@ -136,9 +163,11 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
   phase: 'idle',
   error: null,
   lastReadingId: null,
+  remoteStarted: false,
   _device: null,
   _unsubscribeNotify: null,
   _watchTimer: null,
+  _checkTimer: null,
 
   begin: async () => {
     const paired = usePairing.getState().pairedDevice;
@@ -151,7 +180,7 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
       return;
     }
     console.log('[take-reading] begin: connecting to', paired.bleId);
-    set({ phase: 'connecting', error: null, lastReadingId: null });
+    set({ phase: 'connecting', error: null, lastReadingId: null, remoteStarted: false });
     logger.track('take_reading_started', { trigger: 'fab' });
 
     try {
@@ -206,6 +235,10 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
           console.log('[take-reading] 0x73 0x02 BP-ready notification received');
           void get()._onBPReady();
         },
+        onBPMeasureComplete: () => {
+          console.log('[take-reading] 0x33 measurement-complete received');
+          void get()._onBPReady();
+        },
       });
       // If the GATT link drops while we're still waiting, it's almost
       // always because the watch's cuff is now inflating and the
@@ -219,6 +252,7 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
           '[take-reading] device disconnected mid-wait — assuming BP measurement in progress',
         );
         if (get()._watchTimer) clearTimeout(get()._watchTimer!);
+        if (get()._checkTimer) clearTimeout(get()._checkTimer!);
         // The listener subscriptions are bound to the now-dead device.
         // Drop them; _reconnectAndPull will create fresh ones if needed.
         const u = get()._unsubscribeNotify;
@@ -229,6 +263,7 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
           _device: null,
           _unsubscribeNotify: null,
           _watchTimer: null,
+          _checkTimer: null,
         });
         void get()._reconnectAndPull();
       });
@@ -240,20 +275,38 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
       const timer = setTimeout(() => {
         if (get().phase === 'waiting_for_watch') {
           console.log('[take-reading] watch timeout — no BP-ready in 90s');
-          logger.track('take_reading_failed', { reason: 'watch_timeout' });
+          const code = get().remoteStarted ? 'measure_incomplete' : 'watch_timeout';
+          logger.track('take_reading_failed', { reason: code });
           set({
             phase: 'failure',
-            error: { code: 'watch_timeout', friendly: FRIENDLY.watch_timeout },
+            error: { code, friendly: FRIENDLY[code] },
           });
-          void get().cancel();
+          // Release the link but keep the failure on screen. This used
+          // to call cancel(), which reset phase to 'idle' and error to
+          // null straight after — the timeout message never showed and
+          // the sheet fell back to "Reaching the watch".
+          void get()._teardownDevice();
         }
       }, WATCH_TIMEOUT_MS);
-      console.log('[take-reading] phase: waiting_for_watch (press the BP button)');
       set({
         phase: 'waiting_for_watch',
         _unsubscribeNotify: wrappedUnsub,
         _watchTimer: timer,
       });
+      // 2026-11-18 — start the cuff from the app (0x32). If the watch
+      // rejects it or doesn't answer, nothing changes: the screen keeps
+      // asking for the BP button, exactly as before.
+      const accepted = await startMeasurement(device);
+      logger.track('take_reading_remote_start', { accepted });
+      if (accepted && get().phase === 'waiting_for_watch') {
+        console.log('[take-reading] watch accepted 0x32 — cuff inflating');
+        const checkTimer = setTimeout(() => {
+          void get()._checkForRemoteReading();
+        }, REMOTE_CHECK_AFTER_MS);
+        set({ remoteStarted: true, _checkTimer: checkTimer });
+      } else {
+        console.log('[take-reading] phase: waiting_for_watch (press the BP button)');
+      }
     } catch (e) {
       const reason = e instanceof Error ? e.message : 'unknown';
       console.log('[take-reading] connect failed:', reason);
@@ -272,12 +325,16 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
   // the newest (highest timestampSec); we surface it as the success
   // view's hero numeric via useReadings.latest().
   _onBPReady: async () => {
-    const { _device, _watchTimer } = get();
+    const { _device, _watchTimer, _checkTimer } = get();
     if (!_device) return;
+    // 0x33 and 0x73 0x02 can both fire for one measurement; only the
+    // first one pulls.
+    if (get().phase !== 'waiting_for_watch') return;
     const paired = usePairing.getState().pairedDevice;
     if (!paired) return;
     if (_watchTimer) clearTimeout(_watchTimer);
-    set({ phase: 'fetching', _watchTimer: null });
+    if (_checkTimer) clearTimeout(_checkTimer);
+    set({ phase: 'fetching', _watchTimer: null, _checkTimer: null });
     try {
       const before = useReadings.getState().latest();
       // QUA-1 settling delay — see BP_SETTLING_DELAY_MS docstring above.
@@ -334,7 +391,7 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
 
   retry: async () => {
     void get()._teardownDevice();
-    set({ phase: 'idle', error: null, lastReadingId: null });
+    set({ phase: 'idle', error: null, lastReadingId: null, remoteStarted: false });
     await get().begin();
   },
 
@@ -345,17 +402,48 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
 
   reset: () => {
     void get()._teardownDevice();
-    set({ phase: 'idle', error: null, lastReadingId: null });
+    set({ phase: 'idle', error: null, lastReadingId: null, remoteStarted: false });
   },
 
   _teardownDevice: async () => {
-    const { _unsubscribeNotify, _watchTimer, _device } = get();
+    const { _unsubscribeNotify, _watchTimer, _checkTimer, _device } = get();
     if (_watchTimer) clearTimeout(_watchTimer);
+    if (_checkTimer) clearTimeout(_checkTimer);
     if (_unsubscribeNotify) _unsubscribeNotify();
     if (_device) {
       try { await _device.disconnect(); } catch { /* already gone */ }
     }
-    set({ _device: null, _unsubscribeNotify: null, _watchTimer: null });
+    set({ _device: null, _unsubscribeNotify: null, _watchTimer: null, _checkTimer: null });
+  },
+
+  // INTERNAL — safety net for app-started measurements: neither 0x33
+  // nor 0x73 0x02 arrived, the link is still up, so look for a stored
+  // reading directly. Finding none is not a failure yet — the overall
+  // WATCH_TIMEOUT_MS decides that.
+  _checkForRemoteReading: async () => {
+    const { _device } = get();
+    set({ _checkTimer: null });
+    if (!_device || get().phase !== 'waiting_for_watch') return;
+    const paired = usePairing.getState().pairedDevice;
+    if (!paired) return;
+    try {
+      const before = useReadings.getState().latest();
+      const result = await syncBacklog(_device, paired.bleId, {
+        timeoutMs: FETCH_TIMEOUT_MS,
+        skipSetTime: true,
+      });
+      if (result.pulled > 0 && get().phase === 'waiting_for_watch') {
+        const { _watchTimer } = get();
+        if (_watchTimer) clearTimeout(_watchTimer);
+        const after = useReadings.getState().latest();
+        const newest = after && after !== before ? after : before;
+        logger.track('take_reading_received', { source: 'watch' });
+        set({ phase: 'success', lastReadingId: newest?.localId ?? null, _watchTimer: null });
+        void get()._teardownDevice();
+      }
+    } catch (e) {
+      console.log('[take-reading] remote check failed:', e);
+    }
   },
 
   // INTERNAL — fired from the mid-wait onDisconnected handler when we
@@ -480,9 +568,10 @@ export const useTakeReading = create<TakeReadingState>((set, get) => ({
     // (it's the closest match — the connection itself was fine).
     logger.track('take_reading_failed', { reason: 'reconnect_poll_exhausted' });
     if (get().phase === 'reconnecting' || get().phase === 'fetching') {
+      const code = get().remoteStarted ? 'measure_incomplete' : 'no_reading';
       set({
         phase: 'failure',
-        error: { code: 'no_reading', friendly: FRIENDLY.no_reading },
+        error: { code, friendly: FRIENDLY[code] },
       });
     }
     await teardownLocal();
@@ -497,6 +586,8 @@ export type PublicTakeReadingState = Omit<
   | '_device'
   | '_unsubscribeNotify'
   | '_watchTimer'
+  | '_checkTimer'
+  | '_checkForRemoteReading'
   | '_onBPReady'
   | '_teardownDevice'
   | '_reconnectAndPull'
