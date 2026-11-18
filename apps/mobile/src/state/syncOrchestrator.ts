@@ -424,14 +424,22 @@ export const useSyncOrchestrator = create<SyncOrchestratorState>((set, get) => (
         return 'ran';
       }
 
-      // Stay live for the idle window: if the user takes a fresh
-      // reading on the watch right now, we catch it via 0x73 0x02
-      // and pull immediately instead of waiting for the next trigger.
+      // Stay live for the idle window: whenever the watch announces new
+      // data (0x73), pull it now instead of waiting for the next
+      // trigger. Originally BP only; since 2026-11-18 also heart rate,
+      // blood oxygen, steps and exercise records — the watch tells us
+      // exactly when something changed (kinds per Urion's own app, see
+      // docs/06-ble-protocol.md §3.2). Bursts collapse into one run via
+      // the MIN_SYNC_INTERVAL_MS debounce and the already-running guard.
+      const pull = () => {
+        void get().runSync('live_notify');
+      };
       const unsub = subscribeToNotifications(device, {
-        onBP: () => {
-          // Reset the idle timer; pull again.
-          void get().runSync('live_notify');
-        },
+        onBP: pull,
+        onHR: pull,
+        onSpO2: pull,
+        onSteps: pull,
+        onSports: pull,
       });
       const idleTimer = setTimeout(() => {
         void get()

@@ -128,6 +128,14 @@ describe('useSyncOrchestrator.runSync', () => {
     expect(useSyncOrchestrator.getState().lastError).toBeNull();
   });
 
+  it('listens for every data kind the watch announces during the live window', async () => {
+    await useSyncOrchestrator.getState().runSync('cold_start');
+    const handlers = (mockSubscribeToNotifications.mock.calls[0] as unknown[])[1] as Record<string, unknown>;
+    for (const k of ['onBP', 'onHR', 'onSpO2', 'onSteps', 'onSports']) {
+      expect(typeof handlers[k]).toBe('function');
+    }
+  });
+
   it('skips when take-reading is mid-flow (mutex)', async () => {
     mockTakeReadingPhase.current = 'waiting_for_watch';
     const result = await useSyncOrchestrator.getState().runSync('app_foreground');
