@@ -139,6 +139,8 @@ export const STORAGE_KEYS = {
   pendingSpO2: 'leiko.vitals.pending.spo2',
   pendingSleep: 'leiko.vitals.pending.sleep',
   pendingRestPeriods: 'leiko.vitals.pending.restPeriods',
+  pendingWeights: 'leiko.vitals.pending.weights',
+  recentWeights: 'leiko.vitals.recent.weights',
   pendingActivity: 'leiko.vitals.pending.activity',
   pendingCalories: 'leiko.vitals.pending.calories',
   // Apple Health / Health Connect toggle state — Sprint 9.5. JSON

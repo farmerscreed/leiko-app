@@ -149,6 +149,8 @@ export type SelfBuyerStackParamList = {
   Pairing: undefined;
   // Connect — optional invite param so a tapped join-link can deep-link
   // into Settings and auto-open the Enter-a-code sheet, prefilled.
+  // 2026-11-18 — weight log + target (state/weight.ts).
+  Weight: undefined;
   Settings: { inviteCode?: string } | undefined;
   TakeReading: undefined;
   ReadingDetail: { readingLocalId: string };
